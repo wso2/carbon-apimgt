@@ -238,7 +238,7 @@ const suggestions = {
             route: 'business info',
         },
     ],
-    apiOnly: [  
+    apiOnly: [
         {
             label: 'API Gateways',
             route: 'environments',

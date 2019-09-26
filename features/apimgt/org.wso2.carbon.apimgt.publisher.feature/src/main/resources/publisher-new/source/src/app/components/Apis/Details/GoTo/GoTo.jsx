@@ -15,6 +15,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/* eslint object-shorthand: 0 */
+/* eslint jsx-a11y/click-events-have-key-events: 0 */
+
+/* eslint no-unused-expressions: 0 */
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -57,16 +61,15 @@ renderInput.propTypes = {
     /**
      * Override or extend the styles applied to the component.
      */
-    classes: PropTypes.object.isRequired,
-    InputProps: PropTypes.object,
+    classes: PropTypes.shape({}).isRequired,
+    InputProps: PropTypes.shape({}).isRequired,
 };
 
 function renderSuggestion(suggestionProps) {
     const {
-        suggestion, index, itemProps, highlightedIndex, selectedItem, api, isAPIProduct, handleClickAway,
+        suggestion, index, itemProps, highlightedIndex, api, isAPIProduct, handleClickAway,
     } = suggestionProps;
     const isHighlighted = highlightedIndex === index;
-    const isSelected = (selectedItem || '').indexOf(suggestion.label) > -1;
     const route = isAPIProduct ? `/api-products/${api.id}/${suggestion.route}` : `/apis/${api.id}/${suggestion.route}`;
     return (
         <ListItem
@@ -88,7 +91,7 @@ function renderSuggestion(suggestionProps) {
 renderSuggestion.propTypes = {
     highlightedIndex: PropTypes.oneOfType([PropTypes.oneOf([null]), PropTypes.number]).isRequired,
     index: PropTypes.number.isRequired,
-    itemProps: PropTypes.object.isRequired,
+    itemProps: PropTypes.shape({}).isRequired,
     selectedItem: PropTypes.string.isRequired,
     suggestion: PropTypes.shape({
         label: PropTypes.string.isRequired,
@@ -99,11 +102,9 @@ function getSuggestions(value, isAPIProduct, { showEmpty = false } = {}) {
     const inputValue = deburr(value.trim()).toLowerCase();
     const inputLength = inputValue.length;
     let count = 0;
-    let newSuggestions = [];
+    const newSuggestions = [];
     newSuggestions.push(...suggestions.common);
-    isAPIProduct
-        ? newSuggestions.push(...suggestions.productOnly)
-        : newSuggestions.push(...suggestions.apiOnly);
+    isAPIProduct ? newSuggestions.push(...suggestions.productOnly) : newSuggestions.push(...suggestions.apiOnly);
     return inputLength === 0 && !showEmpty
         ? []
         : newSuggestions.filter((suggestion) => {

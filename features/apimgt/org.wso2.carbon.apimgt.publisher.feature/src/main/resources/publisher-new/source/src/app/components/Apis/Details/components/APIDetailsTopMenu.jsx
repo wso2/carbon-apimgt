@@ -12,9 +12,9 @@ import moment from 'moment';
 
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
+import GoTo from 'AppComponents/Apis/Details/GoTo/GoTo';
 import DeleteApiButton from './DeleteApiButton';
 import CreateNewVersionButton from './CreateNewVersionButton';
-import GoTo from 'AppComponents/Apis/Details/GoTo/GoTo';
 
 const styles = theme => ({
     root: {
@@ -50,7 +50,7 @@ const styles = theme => ({
     },
     dateWrapper: {
         flex: 1,
-    }
+    },
 });
 
 const APIDetailsTopMenu = (props) => {
@@ -83,15 +83,13 @@ const APIDetailsTopMenu = (props) => {
             </div>
             <VerticalDivider height={70} />
             <div className={classes.infoItem}>
-                <Typography variant='subtitle1'>
-                    {isAPIProduct ? api.state : api.lifeCycleStatus}
-                </Typography>
+                <Typography variant='subtitle1'>{isAPIProduct ? api.state : api.lifeCycleStatus}</Typography>
                 <Typography variant='caption' align='left'>
                     State
                 </Typography>
             </div>
             <VerticalDivider height={70} />
-            {isVisibleInStore &&
+            {isVisibleInStore && (
                 <a
                     target='_blank'
                     rel='noopener noreferrer'
@@ -108,18 +106,18 @@ const APIDetailsTopMenu = (props) => {
                         />
                     </Typography>
                 </a>
-            }
+            )}
             {isVisibleInStore && <VerticalDivider height={70} />}
             <div className={classes.dateWrapper}>
-            <Tooltip title={moment(api.lastUpdatedTime).calendar()} aria-label='add'>
-                <Typography variant='caption' display='block'>
-                    <FormattedMessage
-                        id='Apis.Details.components.APIDetailsTopMenu.last.updated.time'
-                        defaultMessage='Last updated:'
-                    />{' '}
-                    {moment(api.lastUpdatedTime).fromNow()}
-                </Typography>
-            </Tooltip>
+                <Tooltip title={moment(api.lastUpdatedTime).calendar()} aria-label='add'>
+                    <Typography variant='caption' display='block'>
+                        <FormattedMessage
+                            id='Apis.Details.components.APIDetailsTopMenu.last.updated.time'
+                            defaultMessage='Last updated:'
+                        />{' '}
+                        {moment(api.lastUpdatedTime).fromNow()}
+                    </Typography>
+                </Tooltip>
             </div>
             <VerticalDivider height={70} />
             <GoTo api={api} isAPIProduct={isAPIProduct} />
