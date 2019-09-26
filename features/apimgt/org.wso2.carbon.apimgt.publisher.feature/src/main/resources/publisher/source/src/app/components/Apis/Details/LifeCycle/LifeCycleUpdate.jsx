@@ -27,11 +27,11 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import { FormattedMessage, injectIntl } from 'react-intl';
-
 import API from 'AppData/api';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import LifeCycleImage from './LifeCycleImage';
+import Conditions from './Conditions';
 
 const styles = theme => ({
     buttonsWrapper: {
@@ -39,6 +39,19 @@ const styles = theme => ({
     },
     stateButton: {
         marginRight: theme.spacing.unit,
+    },
+    paperCenter: {
+        padding: theme.spacing(2),
+        display: 'flex',
+        alignItems: 'left',
+        justifyContent: 'left',
+    },
+    subHeading: {
+        fontSize: '1rem',
+        fontWeight: 400,
+        margin: 0,
+        display: 'inline-flex',
+        lineHeight: '38px',
     },
 });
 
@@ -121,6 +134,7 @@ class LifeCycleUpdate extends Component {
         } = this.props;
         const { newState } = this.state;
         const isWorkflowPending = api.workflowStatus && api.workflowStatus.toLowerCase() === 'pending';
+        const isPrototype = (api.endpointConfig.implementation_status === 'prototyped');
         const lcMap = new Map();
         lcMap.set('Published', 'Publish');
         lcMap.set('Prototyped', 'Deploy as a prototype');
@@ -150,7 +164,16 @@ class LifeCycleUpdate extends Component {
                         {theme.custom.lifeCycleImage ? (
                             <img src={theme.custom.lifeCycleImage} alt='life cycles' />
                         ) : (
-                            <LifeCycleImage lifeCycleStatus={newState || api.lifeCycleStatus} />
+                            <Grid container spacing={3}>
+                                <Grid item xs={8}>
+                                    <LifeCycleImage lifeCycleStatus={newState || api.lifeCycleStatus} />
+                                </Grid>
+                                {(api.lifeCycleStatus === 'CREATED' || api.lifeCycleStatus === 'PUBLISHED') && (
+                                    <Grid item xs={4}>
+                                        <Conditions api={api} />
+                                    </Grid>
+                                )}
+                            </Grid>
                         )}
                     </Grid>
                 )}
@@ -173,6 +196,7 @@ class LifeCycleUpdate extends Component {
                         </FormGroup>
                     )}
                     <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
+
                         <div className={classes.buttonsWrapper}>
                             {isWorkflowPending ? (
                                 <div className='btn-group' role='group'>
@@ -184,19 +208,32 @@ class LifeCycleUpdate extends Component {
                                 </div>
                             ) : (
                                 lcState.availableTransitions.map(transitionState =>
-                                    transitionState.event !== lcMap.get(lcState.state) && (
-                                        <Button
-                                            variant='outlined'
-                                            className={classes.stateButton}
-                                            key={transitionState.event}
-                                            data-value={transitionState.event}
-                                            onClick={this.updateLifeCycleState}
-                                        >
-                                            {transitionState.event}
-                                        </Button>
-                                    ))
-                                /* Skip when transitions available for current state ,
-                            this occurs in states where have allowed re-publishing in prototype and published sates */
+                                    (transitionState.event !== lcMap.get(lcState.state) &&
+                                        transitionState.event === 'Deploy as a Prototype' ? (
+                                            <Button
+                                                disabled={!isPrototype || api.endpointConfig == null}
+                                                variant='outlined'
+                                                className={classes.stateButton}
+                                                key={transitionState.event}
+                                                data-value={transitionState.event}
+                                                onClick={this.updateLifeCycleState}
+                                            >
+                                                {transitionState.event}
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                disabled={api.endpointConfig == null || api.policies.length === 0}
+                                                variant='outlined'
+                                                className={classes.stateButton}
+                                                key={transitionState.event}
+                                                data-value={transitionState.event}
+                                                onClick={this.updateLifeCycleState}
+                                            >
+                                                {transitionState.event}
+                                            </Button>
+                                        )))
+                            /* Skip when transitions available for current state ,this occurs in states where have
+                            allowed re-publishing in prototype and published states */
                             )}
                         </div>
                     </ScopeValidation>
