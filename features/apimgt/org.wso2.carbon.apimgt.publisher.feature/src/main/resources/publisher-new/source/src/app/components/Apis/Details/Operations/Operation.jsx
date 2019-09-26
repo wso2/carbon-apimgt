@@ -194,7 +194,7 @@ class Operation extends React.Component {
      */
     render() {
         const {
-            operation, theme, classes, apiPolicies, scopes,
+            operation, theme, classes, apiPolicies, scopes, isOperationRateLimiting,
         } = this.props;
         const { isSecurity } = this.state;
         let chipColor = theme.custom.operationChipColor ?
@@ -227,7 +227,8 @@ class Operation extends React.Component {
                 <TableCell>
                     <Select
                         className={classes.dropDown}
-                        value={operation.throttlingPolicy}
+                        value={isOperationRateLimiting ? operation.throttlingPolicy : ''}
+                        disabled={!isOperationRateLimiting}
                         onChange={this.handlePolicyChange}
                         fieldName='Throttling Policy'
                     >
@@ -289,6 +290,8 @@ Operation.propTypes = {
         auth: PropTypes.string,
     }).isRequired,
     apiPolicies: PropTypes.shape({
+    }).isRequired,
+    isOperationRateLimiting: PropTypes.shape({
     }).isRequired,
     scopes: PropTypes.shape({
     }).isRequired,
