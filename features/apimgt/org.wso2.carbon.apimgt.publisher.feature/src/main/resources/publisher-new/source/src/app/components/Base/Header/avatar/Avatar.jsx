@@ -62,10 +62,12 @@ class Avatar extends Component {
      * @memberof Avatar
      */
     toggleMenu(event) {
-        this.setState({
-            openMenu: !this.state.openMenu,
-            profileIcon: event.currentTarget,
-        });
+        if (event.currentTarget.type === 'button') {
+            this.setState({
+                openMenu: !this.state.openMenu,
+                profileIcon: event.currentTarget,
+            });
+        }
     }
 
     /**
