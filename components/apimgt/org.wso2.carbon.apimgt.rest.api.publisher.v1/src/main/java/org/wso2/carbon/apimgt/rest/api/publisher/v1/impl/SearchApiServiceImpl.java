@@ -51,7 +51,6 @@ public class SearchApiServiceImpl implements SearchApiService {
 
     public Response searchGet(Integer limit, Integer offset, String query, String ifNoneMatch,
                               MessageContext messageContext) {
-
         SearchResultListDTO resultListDTO = new SearchResultListDTO();
         List<SearchResultDTO> allmatchedResults = new ArrayList<>();
 
