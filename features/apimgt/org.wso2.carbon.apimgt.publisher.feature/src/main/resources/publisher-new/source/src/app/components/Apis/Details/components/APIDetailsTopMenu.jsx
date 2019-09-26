@@ -14,6 +14,7 @@ import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import DeleteApiButton from './DeleteApiButton';
 import CreateNewVersionButton from './CreateNewVersionButton';
+import GoTo from 'AppComponents/Apis/Details/GoTo/GoTo';
 
 const styles = theme => ({
     root: {
@@ -47,6 +48,9 @@ const styles = theme => ({
     linkText: {
         fontSize: theme.typography.fontSize,
     },
+    dateWrapper: {
+        flex: 1,
+    }
 });
 
 const APIDetailsTopMenu = (props) => {
@@ -106,6 +110,7 @@ const APIDetailsTopMenu = (props) => {
                 </a>
             }
             {isVisibleInStore && <VerticalDivider height={70} />}
+            <div className={classes.dateWrapper}>
             <Tooltip title={moment(api.lastUpdatedTime).calendar()} aria-label='add'>
                 <Typography variant='caption' display='block'>
                     <FormattedMessage
@@ -115,6 +120,9 @@ const APIDetailsTopMenu = (props) => {
                     {moment(api.lastUpdatedTime).fromNow()}
                 </Typography>
             </Tooltip>
+            </div>
+            <VerticalDivider height={70} />
+            <GoTo api={api} isAPIProduct={isAPIProduct} />
             {isAPIProduct ? null : <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />}
             <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />
         </div>
