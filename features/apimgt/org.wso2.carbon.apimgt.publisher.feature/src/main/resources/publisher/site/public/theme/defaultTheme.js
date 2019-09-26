@@ -1,5 +1,5 @@
 const APP_CONTEXT = '/publisher';
-const STORE_APP_CONTEXT = '/store';
+const STORE_APP_CONTEXT = '/devportal';
 const Configurations = {
     themes: {
         light: {
