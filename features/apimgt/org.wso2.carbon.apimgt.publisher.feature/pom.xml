@@ -221,7 +221,7 @@
                                     true
                                 </PUPPETEER_SKIP_CHROMIUM_DOWNLOAD>
                             </environmentVariables>
-                            <workingDirectory>${basedir}/src/main/resources/publisher-new</workingDirectory>
+                            <workingDirectory>src/main/resources/publisher</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>ci</argument>
@@ -236,7 +236,7 @@
                         </goals>
                         <phase>compile</phase>
                         <configuration>
-                            <workingDirectory>${basedir}/src/main/resources/publisher-new</workingDirectory>
+                            <workingDirectory>src/main/resources/publisher</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>run</argument>
@@ -252,7 +252,7 @@
                         <phase>test</phase>
                         <configuration>
                             <skip>${maven.test.skip}</skip>
-                            <workingDirectory>${basedir}/src/main/resources/publisher-new</workingDirectory>
+                            <workingDirectory>src/main/resources/publisher</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>run</argument>
@@ -270,14 +270,14 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <include>publisher-new/site/**</include>
-                    <include>publisher-new/services/**</include>
-                    <include>publisher-new/jaggery.conf</include>
+                    <include>publisher/site/**</include>
+                    <include>publisher/services/**</include>
+                    <include>publisher/jaggery.conf</include>
                     <include>lifecycles/APILifeCycle.xml</include>
                     <include>p2.inf</include>
                     <include>apipublisher/**</include>
                     <include>customTheme/**</include>
-                    <include>publisher/**</include>
+                    <include>publisher-old/**</include>
                 </includes>
             </resource>
         </resources>
