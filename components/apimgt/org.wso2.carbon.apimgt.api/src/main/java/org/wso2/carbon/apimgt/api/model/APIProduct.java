@@ -36,6 +36,7 @@ public class APIProduct {
     private String context;
     private String description;
     private Set<Tier> availableTiers = new LinkedHashSet<Tier>();
+    private String productLevelPolicy;
     private Set<String> tags = new LinkedHashSet<String>();
     private String contextTemplate;
     private String visibility;
@@ -443,5 +444,13 @@ public class APIProduct {
 
     public void setRating(String rating) {
         this.rating = rating;
+    }
+
+    public String getProductLevelPolicy() {
+        return productLevelPolicy;
+    }
+
+    public void setProductLevelPolicy(String productLevelPolicy) {
+        this.productLevelPolicy = productLevelPolicy;
     }
 }

@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.impl.utils;
 import com.google.gson.Gson;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.om.impl.traverse.OMChildElementIterator;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
@@ -145,7 +144,6 @@ import org.wso2.carbon.core.commons.stub.loggeduserinfo.LoggedUserInfoAdminStub;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
-import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.endpoints.EndpointManager;
@@ -156,7 +154,6 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
-import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -8821,16 +8818,13 @@ public final class APIUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String productName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String productVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, productName, productVersion);
-            int apiProductId = ApiMgtDAO.getInstance().getAPIProductID(apiProductIdentifier, null);
-
-            if (apiProductId == -1) {
-                return null;
-            }
-
+            APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, productName,
+                    productVersion);
             apiProduct = new APIProduct(apiProductIdentifier);
+            ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
+
             setResourceProperties(apiProduct, registry, artifactPath);
-            apiProduct.setProductId(apiProductId);
+
             //set uuid
             apiProduct.setUuid(artifact.getId());
             apiProduct.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
