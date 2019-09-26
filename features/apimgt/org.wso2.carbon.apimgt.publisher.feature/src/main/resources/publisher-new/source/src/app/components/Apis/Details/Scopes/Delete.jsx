@@ -25,6 +25,7 @@ import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
 import ConfirmDialog from 'AppComponents/Shared/ConfirmDialog';
 import { isRestricted } from 'AppData/AuthManager';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = {
     appBar: {
@@ -52,8 +53,8 @@ const styles = {
 };
 
 function Delete(props) {
-    // const { api } = useContext(APIContext);
-    const { intl, api } = props;
+    const [api, updateAPI] = useAPI();
+    const { intl } = props;
     const [open, setOpen] = useState(false);
     const toggleOpen = () => {
         setOpen(!open);
@@ -73,7 +74,7 @@ function Delete(props) {
         });
         const updateProperties = { scopes, operations };
         const setOpenLocal = setOpen; // Need to copy this to access inside the promise.then
-        const promisedUpdate = api.update(updateProperties);
+        const promisedUpdate = updateAPI(updateProperties);
         promisedUpdate
             .then(() => {
                 Alert.info(intl.formatMessage({
@@ -138,7 +139,6 @@ Delete.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     scopeName: PropTypes.string.isRequired,
     intl: PropTypes.shape({}).isRequired,
-    api: PropTypes.instanceOf(Object).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Delete));
