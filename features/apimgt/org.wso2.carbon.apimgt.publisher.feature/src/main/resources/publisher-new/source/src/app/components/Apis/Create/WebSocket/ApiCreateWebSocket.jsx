@@ -16,7 +16,7 @@
 import React from 'react';
 import APICreateDefault from 'AppComponents/Apis/Create/Default/APICreateDefault';
 
-const ApiCreateWebSocket = (props) => {
+const ApiCreateWebSocket = () => {
     return (<APICreateDefault isWebSocket />);
 };
 export default ApiCreateWebSocket;

@@ -118,7 +118,7 @@ function APICreateDefault(props) {
         }
         apiData.gatewayEnvironments = settings.environment.map(env => env.name);
         if (isWebSocket) {
-            apiData.type = "WS";
+            apiData.type = 'WS';
         }
         if (isAPIProduct) {
             const newAPIProduct = new APIProduct(apiData);
@@ -213,7 +213,7 @@ function APICreateDefault(props) {
                     />
                 </Typography>
             </React.Fragment>
-        )
+        );
     }
 
     return (
@@ -263,7 +263,7 @@ function APICreateDefault(props) {
 APICreateDefault.defaultProps = {
     isWebSocket: false,
     isAPIProduct: false,
-}
+};
 APICreateDefault.propTypes = {
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
     isAPIProduct: PropTypes.shape({}),
