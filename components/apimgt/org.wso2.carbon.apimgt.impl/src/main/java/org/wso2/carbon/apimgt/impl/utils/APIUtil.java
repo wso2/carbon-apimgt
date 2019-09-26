@@ -8087,9 +8087,11 @@ public final class APIUtil {
      */
     public static String constructApisGetQuery(String query) throws APIManagementException {
         String newSearchQuery = constructQueryWithProvidedCriterias(query.trim());
-        String typeCriteria = APIConstants.TYPE_SEARCH_TYPE_KEY + APIUtil.getORBasedSearchCriteria
-                (APIConstants.API_SUPPORTED_TYPE_LIST);
-        newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
+        if (!query.contains(APIConstants.TYPE)) {
+            String typeCriteria = APIConstants.TYPE_SEARCH_TYPE_KEY + APIUtil.getORBasedSearchCriteria
+                    (APIConstants.API_SUPPORTED_TYPE_LIST);
+            newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
+        }
         return newSearchQuery;
     }
 
@@ -8105,7 +8107,7 @@ public final class APIUtil {
         if (inputSearchQuery != null && inputSearchQuery.contains(" ") && !inputSearchQuery
                 .contains(APIConstants.TAG_COLON_SEARCH_TYPE_PREFIX) && (!inputSearchQuery
                 .contains(APIConstants.CONTENT_SEARCH_TYPE_PREFIX) || inputSearchQuery.split(":").length > 2)) {
-            if (inputSearchQuery.split(" ").length > 1) {
+            if (inputSearchQuery.split(" ").length > 1) { // name=*a*&type=HTTP
                 String[] searchCriterias = inputSearchQuery.split(" ");
                 for (int i = 0; i < searchCriterias.length; i++) {
                     if (searchCriterias[i].contains(":") && searchCriterias[i].split(":").length > 1) {

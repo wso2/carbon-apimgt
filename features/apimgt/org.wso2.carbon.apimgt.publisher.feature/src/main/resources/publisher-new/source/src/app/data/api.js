@@ -1527,9 +1527,12 @@ class API extends Resource {
     static all(params) {
         let query = '';
         if (params && 'query' in params) {
-            for (const [key, value] of Object.entries(params.query)) {
-                query += `${key}:${value},`;
-            }
+            Object.entries(params.query).forEach(([key, value], index) => {
+                query = `${key}:${value}`;
+                if (Object.entries(params.query).length !== index+1) {
+                    query += ','
+                }
+            });
             params.query = query;
         }
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
