@@ -1920,6 +1920,10 @@ public class SQLConstants {
             "SELECT API_PRODUCT_ID AS API_ID FROM AM_API_PRODUCT WHERE API_PRODUCT_PROVIDER = ? AND API_PRODUCT_NAME = ? "
                     + "AND API_PRODUCT_VERSION = ?";
 
+    public static final String GET_API_PRODUCT_SQL =
+            "SELECT API_PRODUCT_ID, API_PRODUCT_TIER FROM AM_API_PRODUCT WHERE API_PRODUCT_PROVIDER = ? " +
+                    "AND API_PRODUCT_NAME = ? AND API_PRODUCT_VERSION = ?";
+
     public static final String ADD_API_LIFECYCLE_EVENT_SQL =
             " INSERT INTO AM_API_LC_EVENT (API_ID, PREVIOUS_STATE, NEW_STATE, USER_ID, TENANT_ID, EVENT_DATE)" +
             " VALUES (?,?,?,?,?,?)";
