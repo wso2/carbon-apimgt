@@ -17,7 +17,11 @@
  */
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyListDTO;
@@ -126,6 +130,21 @@ public class ThrottlingPolicyMappingUtil {
             }
             dto.setAttributes(additionalProperties);
         }
+        MonetizationInfoDTO monetizationInfoDTO = new MonetizationInfoDTO();
+        Map<String, String> monetizationAttributeMap = throttlingPolicy.getMonetizationAttributes();
+        if (MapUtils.isNotEmpty(monetizationAttributeMap)) {
+            monetizationInfoDTO.setBillingCycle(monetizationAttributeMap.get(APIConstants.Monetization.BILLING_CYCLE));
+            monetizationInfoDTO.setCurrencyType(monetizationAttributeMap.get(APIConstants.Monetization.CURRENCY));
+            if (StringUtils.isNotBlank(monetizationAttributeMap.get(APIConstants.Monetization.FIXED_PRICE))) {
+                monetizationInfoDTO.setFixedPrice(monetizationAttributeMap.get(APIConstants.Monetization.FIXED_PRICE));
+                monetizationInfoDTO.setBillingType(MonetizationInfoDTO.BillingTypeEnum.FIXEDPRICE);
+            } else {
+                monetizationInfoDTO.setPricePerRequest(monetizationAttributeMap.
+                        get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                monetizationInfoDTO.setBillingType(MonetizationInfoDTO.BillingTypeEnum.DYNAMICRATE);
+            }
+        }
+        dto.setMonetizationAttributes(monetizationInfoDTO);
         return dto;
     }
 

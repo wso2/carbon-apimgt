@@ -173,7 +173,7 @@ export default function ApiCreateWSDL(props) {
                 </React.Fragment>
             }
         >
-            <Paper elevation={1}>
+            <Paper>
                 <Stepper activeStep={0}>
                     <Step>
                         <StepLabel>Provide WSDL</StepLabel>

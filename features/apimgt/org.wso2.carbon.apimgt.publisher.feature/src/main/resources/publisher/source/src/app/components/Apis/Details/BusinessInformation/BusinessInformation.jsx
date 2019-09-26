@@ -136,7 +136,7 @@ class BusinessInformation extends React.Component {
                 </div>
                 <Grid container spacing={7}>
                     <Grid item xs={12}>
-                        <Paper className={classes.paperRoot} elevation={1}>
+                        <Paper className={classes.paperRoot} >
                             <FormControl margin='normal' className={classes.FormControlOdd}>
                                 <TextField
                                     disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}

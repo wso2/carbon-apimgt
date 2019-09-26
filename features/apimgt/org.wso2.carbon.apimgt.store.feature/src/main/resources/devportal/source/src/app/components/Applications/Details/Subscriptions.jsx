@@ -285,7 +285,7 @@ class Subscriptions extends React.Component {
                     </Typography>
 
                     <Grid container className='tab-grid' spacing={2}>
-                        <Grid item xs={6} className={classes.cardGrid}>
+                        <Grid item xs={5} className={classes.cardGrid}>
                             <APIList
                                 apisNotFound={apisNotFound}
                                 unsubscribedAPIList={unsubscribedAPIList}
@@ -293,7 +293,7 @@ class Subscriptions extends React.Component {
                                 handleSubscribe={(app, api, policy) => this.handleSubscribe(app, api, policy)}
                             />
                         </Grid>
-                        <Grid item xs={6} xl={10}>
+                        <Grid item xs={7} xl={10}>
                             <Card className={classes.card}>
                                 <CardActions>
                                     <Typography variant='h6' gutterBottom className={classes.cardTitle}>
@@ -335,6 +335,12 @@ class Subscriptions extends React.Component {
                                                                 <FormattedMessage
                                                                     id='Applications.Details.Subscriptions.action'
                                                                     defaultMessage='Action'
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <FormattedMessage
+                                                                    id='Applications.Details.Subscriptions.invoice'
+                                                                    defaultMessage='Invoice'
                                                                 />
                                                             </TableCell>
                                                         </TableRow>

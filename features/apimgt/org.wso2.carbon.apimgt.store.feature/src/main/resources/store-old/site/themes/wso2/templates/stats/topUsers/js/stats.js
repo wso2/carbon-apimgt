@@ -105,7 +105,7 @@ var drawTopUsersGraph = function(from,to){
                 $('#topUsersView').empty();
                 if (length > 0) {
                 for(var k=0 ; k<length ;k++){
-                     $('#topUsersView').append($(' <h4>'+i18n.t("Application Name: ")+ json.usage[k].appName+'</h4><div class="col-md-12" ><div class="col-md-6" ><div id="userChart'+(k+1)+'" ><svg style="height:400px;"></svg></div> </div> <div class="col-md-6"> <table class="table table-striped table-bordered" id="userTable'+(k+1)+'" class="userTable display" cellspacing="0" width="100%"><thead><tr> <th>'+i18n.t("User")+'</th><th>'+i18n.t("Number of API Calls")+'</th></tr></thead> </table> </div> </div>'));
+                     $('#topUsersView').append($(' <h4>'+i18n.t("Application Name")+": "+ json.usage[k].appName+'</h4><div class="col-md-12" ><div class="col-md-6" ><div id="userChart'+(k+1)+'" ><svg style="height:400px;"></svg></div> </div> <div class="col-md-6"> <table class="table table-striped table-bordered" id="userTable'+(k+1)+'" class="userTable display" cellspacing="0" width="100%"><thead><tr> <th>'+i18n.t("User")+'</th><th>'+i18n.t("Number of API Calls")+'</th></tr></thead> </table> </div> </div>'));
 
                     var dataLength = json.usage[k].userCountArray.length,data = [];
                     $('#userTable'+(k+1)).find("tr:gt(0)").remove();
@@ -284,7 +284,7 @@ var drawRegisteredUserCountByApplications = function(from,to){
                                .style("font-size", "14px").style("font-weight", "10px")
                                .style("z-index", "19")
                                .style("text-anchor", "middle")
-                               .text(usersCount + " User(s)");
+                               .text(usersCount + i18n.t(" User(s)"));
 
                         //GROUP FOR ARCS/PATHS
                         var arc_group = vis.append("svg:g")

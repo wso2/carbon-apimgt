@@ -69,17 +69,31 @@ public class APIImportExportManager {
             throws APIImportExportException {
 
         APIIdentifier apiIdentifier = apiToReturn.getId();
-        //create temp location for storing API data to generate archive
-        File exportFolder = CommonUtil.createTempDirectory();
-        String archiveBasePath = exportFolder.toString();
-
-        //Retrieve the API and related artifacts and populate the archive folder in the temp location
-        APIExportUtil.retrieveApiToExport(archiveBasePath, apiToReturn, apiProvider, loggedInUsername, isStatusPreserved,
-                exportFormat);
+        String archiveBasePath = exportAPIArtifacts(apiToReturn, isStatusPreserved, exportFormat);
         CommonUtil.archiveDirectory(archiveBasePath);
         log.info("API" + apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion() + " exported successfully");
-        FileUtils.deleteQuietly(exportFolder);
+        FileUtils.deleteQuietly(new File(archiveBasePath));
         return new File(archiveBasePath + APIConstants.ZIP_FILE_EXTENSION);
+    }
+
+    /**
+     * This method is used to export the given API artifacts to the temp location.
+     *
+     * @param apiToReturn       Requested API to export
+     * @param isStatusPreserved Is API status preserved or not
+     * @param exportFormat      Export file format of the API
+     * @return tmp location for the exported API artifacts
+     */
+    public String exportAPIArtifacts(API apiToReturn, boolean isStatusPreserved, ExportFormat exportFormat)
+            throws APIImportExportException {
+
+        //create temp location for storing API data
+        File exportFolder = CommonUtil.createTempDirectory();
+        String exportAPIBasePath = exportFolder.toString();
+        //Retrieve the API and related artifacts and populate the api folder in the temp location
+        APIExportUtil.retrieveApiToExport(exportAPIBasePath, apiToReturn, apiProvider, loggedInUsername,
+                isStatusPreserved, exportFormat);
+        return exportAPIBasePath;
     }
 
     /**

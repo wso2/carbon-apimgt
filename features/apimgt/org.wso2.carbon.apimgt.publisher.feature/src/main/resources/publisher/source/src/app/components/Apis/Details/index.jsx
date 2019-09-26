@@ -470,15 +470,16 @@ class Details extends Component {
                             />
                         )}
                         {this.getLeftMenuItemForAPIType(api.type)}
-                        {(!isAPIProduct && !isRestricted(['apim:api_publish'], api))
-                            && (<LeftMenuItem
+                        {!isAPIProduct && !isRestricted(['apim:api_publish'], api) && (
+                            <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.lifecycle',
                                     defaultMessage: 'lifecycle',
                                 })}
                                 to={pathPrefix + 'lifecycle'}
                                 Icon={<LifeCycleIcon />}
-                            />)}
+                            />
+                        )}
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.left.menu.scope',
@@ -522,23 +523,23 @@ class Details extends Component {
 
                         <LeftMenuItem
                             text={intl.formatMessage({
-                                id: 'Apis.Details.index.left.menu.mediation.policy',
-                                defaultMessage: 'Mediation Policies',
+                                id: 'Apis.Details.index.left.menu.mediation.policies',
+                                defaultMessage: 'mediation policies',
                             })}
                             to={pathPrefix + 'mediation policies'}
                             Icon={<ScopesIcon />}
                         />
-                        {(!isAPIProduct && !isRestricted(['apim:api_publish'], api))
-                            && (
-                                <LeftMenuItem
-                                    text={intl.formatMessage({
-                                        id: 'Apis.Details.index.monetization',
-                                        defaultMessage: 'monetization',
-                                    })}
-                                    to={pathPrefix + 'monetization'}
-                                    Icon={<MonetizationIcon />}
-                                />)}
-                        {settingsContext.externalStoresEnabled &&
+                        {!isAPIProduct && !isRestricted(['apim:api_publish'], api) && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.monetization',
+                                    defaultMessage: 'monetization',
+                                })}
+                                to={pathPrefix + 'monetization'}
+                                Icon={<MonetizationIcon />}
+                            />
+                        )}
+                        {settingsContext.externalStoresEnabled && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.external-stores',
@@ -547,7 +548,7 @@ class Details extends Component {
                                 to={pathPrefix + 'external-stores'}
                                 Icon={<StoreIcon />}
                             />
-                        }
+                        )}
                     </div>
                     <div className={classes.content}>
                         <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} />
@@ -610,11 +611,7 @@ class Details extends Component {
                                 />
 
                                 <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
-                                <Route
-                                    path={Details.subPaths.SCOPES_PRODUCT}
-                                    component={() =>
-                                        <Scope api={api} />}
-                                />
+                                <Route path={Details.subPaths.SCOPES_PRODUCT} component={() => <Scope api={api} />} />
                                 <Route path={Details.subPaths.DOCUMENTS} component={() => <Documents api={api} />} />
                                 <Route
                                     path={Details.subPaths.DOCUMENTS_PRODUCT}
@@ -645,13 +642,14 @@ class Details extends Component {
                                     path={Details.subPaths.MONETIZATION}
                                     component={() => <Monetization api={api} />}
                                 />
-                                <Route
-                                    path={Details.subPaths.EXTERNAL_STORES}
-                                    component={ExternalStores}
-                                />
+                                <Route path={Details.subPaths.EXTERNAL_STORES} component={ExternalStores} />
                                 <Route
                                     path={Details.subPaths.MEDIATION_POLICIES}
-                                    component={() => <MediationPoliciesOverview api={api} />}
+                                    component={MediationPoliciesOverview}
+                                />
+                                <Route
+                                    path={Details.subPaths.MEDIATION_POLICIES_PRODUCT}
+                                    component={MediationPoliciesOverview}
                                 />
                             </Switch>
                         </div>
@@ -685,6 +683,7 @@ Details.subPaths = {
     RESOURCES_PRODUCT_EDIT: '/api-products/:apiprod_uuid/resources/edit',
     SCOPES: '/apis/:api_uuid/scopes',
     SCOPES_PRODUCT: '/api-products/:apiprod_uuid/scopes',
+    MEDIATION_POLICIES_PRODUCT: '/api-products/:apiprod_uuid/mediation policies',
     DOCUMENTS: '/apis/:api_uuid/documents',
     DOCUMENTS_PRODUCT: '/api-products/:apiprod_uuid/documents',
     SUBSCRIPTIONS: '/apis/:api_uuid/subscriptions',
@@ -696,7 +695,7 @@ Details.subPaths = {
     PROPERTIES_PRODUCT: '/api-products/:apiprod_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
     MONETIZATION: '/apis/:api_uuid/monetization',
-    MEDIATION_POLICIES: '/apis/:api_uuid/Mediation Policies',
+    MEDIATION_POLICIES: '/apis/:api_uuid/mediation policies',
     EXTERNAL_STORES: '/apis/:api_uuid/external-stores',
 };
 

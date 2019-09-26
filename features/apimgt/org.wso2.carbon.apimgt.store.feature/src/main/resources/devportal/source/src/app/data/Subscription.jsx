@@ -46,6 +46,19 @@ export default class Subscription extends Resource {
     }
 
     /**
+     * Get a single subscription
+     * @param subscriptionUUID subscription UUID
+     */
+    getSubscription(subscriptionUUID) {
+        var promised_subscription = this.client.then((client) => {
+            return client.apis["Subscriptions"].get_subscriptions__subscriptionId_(
+                { subscriptionId: subscriptionUUID });
+        }
+        );
+        return promised_subscription;
+    }
+
+    /**
     * Delete subscription
     * @param subscriptionId id of the subscription
     * @returns {promise} With 200 OK.

@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React, { useState, Fragment, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Radio from '@material-ui/core/Radio';
 import Button from '@material-ui/core/Button';
@@ -38,6 +38,7 @@ const RateLimitingLevels = {
     API: 'api',
     RESOURCE: 'resource',
 };
+
 /**
  *
  * Handles the resource level and API level throttling UI switch
@@ -47,13 +48,37 @@ const RateLimitingLevels = {
  */
 export default function APIRateLimiting(props) {
     const {
-        api, updateAPI, operationRateLimits, disabledAction,
+        updateAPI, operationRateLimits, onChange, value: currentApiThrottlingPolicy, isAPIProduct,
     } = props;
-    const [apiThrottlingPolicy, setApiThrottlingPolicy] = useState(api.apiThrottlingPolicy);
-    const isResourceLevel = apiThrottlingPolicy === null;
-    const rateLimitingLevel = isResourceLevel ? RateLimitingLevels.RESOURCE : RateLimitingLevels.API;
+    const [apiThrottlingPolicy, setApiThrottlingPolicy] = useState(currentApiThrottlingPolicy);
     const [isSaving, setIsSaving] = useState(false);
 
+    const isResourceLevel = apiThrottlingPolicy === null;
+    const rateLimitingLevel = isResourceLevel ? RateLimitingLevels.RESOURCE : RateLimitingLevels.API;
+
+    // Following effect is used to handle the controlled component case, If user provide onChange handler to
+    // control this component, Then we accept the props as the valid input and update the current state value from props
+    useEffect(() => {
+        if (onChange) {
+            setApiThrottlingPolicy(currentApiThrottlingPolicy);
+        }
+    }, [onChange, currentApiThrottlingPolicy]); // Do not expect to change the onChange during the runtime
+
+    /**
+     *
+     *
+     * @param {*} event
+     */
+    function updateRateLimitingPolicy(event) {
+        // If the selected option is resource, we set the api level rate limiting to null
+        const userSelection = event.target.value === RateLimitingLevels.RESOURCE ? null : '';
+        if (onChange) {
+            // Assumed controlled component
+            onChange(userSelection);
+        } else {
+            setApiThrottlingPolicy(userSelection);
+        }
+    }
     /**
      *
      *
@@ -68,7 +93,27 @@ export default function APIRateLimiting(props) {
      *
      */
     function resetChanges() {
-        setApiThrottlingPolicy(api.apiThrottlingPolicy);
+        setApiThrottlingPolicy(currentApiThrottlingPolicy);
+    }
+
+    let operationRateLimitMessage = (
+        <Typography variant='body1' gutterBottom>
+            You may change the rate limiting policies per operation
+            <Typography variant='caption' display='block' gutterBottom>
+                Expand an operation below to select a rate limiting policy for an operation
+            </Typography>
+        </Typography>
+    );
+    if (isAPIProduct) {
+        operationRateLimitMessage = (
+            <Typography variant='body1' gutterBottom>
+                Rate limiting polices of the source operation will be applied
+                <Typography variant='caption' display='block' gutterBottom>
+                    Rate limiting policy of an individual operation will be govern by the policy specified in the source
+                    operation
+                </Typography>
+            </Typography>
+        );
     }
     return (
         <Paper>
@@ -76,7 +121,7 @@ export default function APIRateLimiting(props) {
                 <Grid item md={12}>
                     <Box ml={1}>
                         <Typography variant='subtitle1' gutterBottom>
-                            Resources Configuration
+                            Operations Configuration
                             <Tooltip
                                 fontSize='small'
                                 title='Configurations that affects on all the resources'
@@ -97,10 +142,7 @@ export default function APIRateLimiting(props) {
                         <RadioGroup
                             aria-label='Apply rate limiting in'
                             value={rateLimitingLevel}
-                            onChange={(event) => {
-                                // If the selected option is resource, we set the api level rate limiting to null
-                                setApiThrottlingPolicy(event.target.value === RateLimitingLevels.RESOURCE ? null : '');
-                            }}
+                            onChange={updateRateLimitingPolicy}
                             row
                         >
                             <FormControlLabel
@@ -121,19 +163,16 @@ export default function APIRateLimiting(props) {
                 <Grid item md={8}>
                     <Box minHeight={70} borderLeft={1} pl={10}>
                         {isResourceLevel ? (
-                            <Typography variant='body1' gutterBottom>
-                                You may change the rate limiting policies per operation
-                                <Typography variant='caption' display='block' gutterBottom>
-                                    Expand an operation below to select a rate limiting policy for an operation
-                                </Typography>
-                            </Typography>
+                            operationRateLimitMessage
                         ) : (
                             <TextField
                                 id='operation_throttling_policy'
                                 select
                                 label='Rate limiting policies'
                                 value={apiThrottlingPolicy}
-                                onChange={({ target: { value } }) => setApiThrottlingPolicy(value)}
+                                onChange={({ target: { value } }) =>
+                                    (onChange ? onChange(value) : setApiThrottlingPolicy(value))
+                                }
                                 helperText='Selected rate limiting policy will be applied to whole API'
                                 margin='dense'
                                 variant='outlined'
@@ -147,30 +186,45 @@ export default function APIRateLimiting(props) {
                         )}
                     </Box>
                 </Grid>
-                <Grid item md={12}>
-                    <Divider />
-                </Grid>
-                { disabledAction === false &&
-                <Grid item>
-                    <Box ml={1}>
-                        <Button onClick={saveChanges} disabled={false} variant='outlined' size='small' color='primary'>
-                            Save
-                            {isSaving && <CircularProgress size={24} />}
-                        </Button>
-                        <Button size='small' onClick={resetChanges}>
-                            Reset
-                        </Button>
-                    </Box>
-                </Grid>
-                }
+                {/* If onChange handler is provided we assume that component is getting controlled by its parent
+                so that, hide the save cancel action */}
+                {!onChange && (
+                    <Fragment>
+                        <Grid item md={12}>
+                            <Divider />
+                        </Grid>
+                        <Grid item>
+                            <Box ml={1}>
+                                <Button
+                                    onClick={saveChanges}
+                                    disabled={false}
+                                    variant='outlined'
+                                    size='small'
+                                    color='primary'
+                                >
+                                    Save
+                                    {isSaving && <CircularProgress size={24} />}
+                                </Button>
+                                <Button size='small' onClick={resetChanges}>
+                                    Reset
+                                </Button>
+                            </Box>
+                        </Grid>
+                    </Fragment>
+                )}
             </Grid>
         </Paper>
     );
 }
-APIRateLimiting.defaultProps = {};
+APIRateLimiting.defaultProps = {
+    onChange: null,
+    isAPIProduct: false,
+};
 APIRateLimiting.propTypes = {
-    api: PropTypes.shape({ id: PropTypes.string }).isRequired,
     updateAPI: PropTypes.func.isRequired,
+    onChange: PropTypes.oneOf([null, PropTypes.func]),
     operationRateLimits: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
     disabledAction: PropTypes.shape({}).isRequired,
+    value: PropTypes.string.isRequired,
+    isAPIProduct: PropTypes.bool,
 };

@@ -69,6 +69,10 @@
         "Roles": "admin"
       },
       {
+        "Name": "apim:api_import_export",
+        "Roles": "admin"
+      },
+      {
         "Name": "apim:label_manage",
         "Roles": "admin"
       },
@@ -121,6 +125,10 @@
         "Roles": "admin,Internal/creator,Internal/publisher"
       },
       {
+        "Name": "apim:store_settings",
+        "Roles": "admin,Internal/subscriber"
+      },
+      {
         "Name": "apim:client_certificates_view",
         "Roles": "admin,Internal/creator"
       },
@@ -139,6 +147,10 @@
       {
         "Name": "apim:ep_certificates_view",
         "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:api_key",
+        "Roles": "admin,Internal/subscriber"
       },
       {
         "Name": "apim_analytics:admin",
@@ -175,6 +187,14 @@
       {
         "Name": "apim_analytics:everyone",
         "Roles": "Internal/everyone"
+      },
+      {
+        "Name": "apim:pub_alert_manage",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:sub_alert_manage",
+        "Roles": "admin,Internal/creator"
       }
     ]
   },
@@ -201,17 +221,5 @@
     "SubscriberRole" : {
       "CreateOnTenantLoad" : true
     }
-  },
-  "AuthorizationHeader":"TENANT_AUTH",
-  "ApplicationConfigs": {
-    "Attributes" : [
-      {
-        "Attribute" : "External Reference Number",
-        "Required" : true
-      },
-      {
-        "Attribute" : "Tenant Billing tier"
-      }
-    ]
   }
 }

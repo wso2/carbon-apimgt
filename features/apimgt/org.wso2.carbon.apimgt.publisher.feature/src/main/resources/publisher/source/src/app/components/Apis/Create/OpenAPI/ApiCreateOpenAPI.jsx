@@ -178,7 +178,7 @@ export default function ApiCreateOpenAPI(props) {
                 </React.Fragment>
             }
         >
-            <Paper elevation={1}>
+            <Paper>
                 <Stepper activeStep={0}>
                     <Step>
                         <StepLabel>

@@ -112,6 +112,12 @@ class DeleteApiButton extends React.Component {
                 const redirectURL = '/api-products';
                 Alert.success('API Product ' + api.name + ' was deleted successfully!');
                 history.push(redirectURL);
+            }).catch((error) => {
+                if (error.status === 409) {
+                    Alert.error('Cannot remove the API Product as active subscriptions exist.');
+                } else {
+                    Alert.error('Something went wrong while deleting the API Product!');
+                }
             });
         } else {
             api.delete().then((response) => {
@@ -123,6 +129,12 @@ class DeleteApiButton extends React.Component {
                 const redirectURL = '/apis';
                 Alert.success('API ' + api.name + ' was deleted successfully!');
                 history.push(redirectURL);
+            }).catch((error) => {
+                if (error.status === 409) {
+                    Alert.error('Cannot remove the API as active subscriptions exist.');
+                } else {
+                    Alert.error('Something went wrong while deleting the API!');
+                }
             });
         }
     }
@@ -184,14 +196,13 @@ class DeleteApiButton extends React.Component {
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.handleRequestClose} color='primary'>
+                        <Button dense onClick={this.handleRequestClose}>
                             <FormattedMessage
                                 id='Apis.Details.components.DeleteApiButton.button.cancel'
                                 defaultMessage='Cancel'
                             />
                         </Button>
                         <Button
-                            color='primary'
                             onClick={() => {
                                 deleteHandler();
                                 this.handleRequestClose();

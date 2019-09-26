@@ -196,7 +196,7 @@ export default function ApiCreateGraphQL(props) {
                 </React.Fragment>
             }
         >
-            <Paper elevation={1}>
+            <Paper>
                 {wizardStep === 0 && (
                     <Stepper activeStep={0}>
                         <Step>

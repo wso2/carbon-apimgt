@@ -18,6 +18,7 @@
 
 import React, { useReducer, useEffect, useState } from 'react';
 import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import cloneDeep from 'lodash.clonedeep';
 import Swagger from 'swagger-client';
@@ -26,6 +27,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
+
 import Operation from './components/Operation';
 import GroupOfOperations from './components/GroupOfOperations';
 import SpecErrors from './components/SpecErrors';
@@ -33,6 +35,7 @@ import AddOperation from './components/AddOperation';
 import GoToDefinitionLink from './components/GoToDefinitionLink';
 import APIRateLimiting from './components/APIRateLimiting';
 import { getTaggedOperations } from './operationUtils';
+import OperationsSelector from './components/OperationsSelector';
 
 /**
  * This component handles the Resource page in API details though it's written in a sharable way
@@ -43,7 +46,11 @@ import { getTaggedOperations } from './operationUtils';
  */
 export default function Resources(props) {
     const {
-        disableAddOperation, operationProps, disableRateLimiting, hideAPIDefinitionLink,
+        disableAddOperation,
+        operationProps,
+        disableRateLimiting,
+        hideAPIDefinitionLink,
+        disableMultiSelect,
     } = props;
     /**
      *
@@ -65,8 +72,25 @@ export default function Resources(props) {
     const [api, updateAPI] = useAPI();
     const [operationRateLimits, setOperationRateLimits] = useState([]);
     const [specErrors, setSpecErrors] = useState([]);
+    const [selectedOperations, setSelectedOperation] = useState({});
+    const [taggedOperations, setTaggedOperations] = useState([]);
     const [openAPI, openAPIActionsDispatcher] = useReducer(openAPIActionsReducer, {});
 
+    /**
+     *
+     *
+     * @param {*} operation
+     * @param {*} checked
+     */
+    function onOperationSelect(operation, checked) {
+        const { target, verb } = operation;
+        const nextSelectedOperations = cloneDeep(selectedOperations);
+        if (!nextSelectedOperations[target]) {
+            nextSelectedOperations[target] = {};
+        }
+        nextSelectedOperations[target][verb.toLowerCase()] = checked;
+        setSelectedOperation(nextSelectedOperations);
+    }
     /**
      *
      *
@@ -150,6 +174,18 @@ export default function Resources(props) {
                     delete copyOfOpenAPI.paths[data.target];
                 }
                 return updateSwagger(data, copyOfOpenAPI);
+            case 'deleteAll':
+                for (const [target, verbs] of Object.entries(selectedOperations)) {
+                    for (const [verb, info] of Object.entries(verbs)) {
+                        if (info) {
+                            delete copyOfOpenAPI.paths[target][verb.toLowerCase()];
+                        }
+                    }
+                    if (isEmpty(verbs)) {
+                        delete copyOfOpenAPI.paths[target];
+                    }
+                }
+                return updateSwagger(data, copyOfOpenAPI);
             default:
                 break;
         }
@@ -169,10 +205,18 @@ export default function Resources(props) {
         // TODO: need to handle the error cases through catch ~tmkb
     }, [api]);
 
+    useEffect(() => {
+        if (!isEmpty(openAPI)) {
+            const newTaggedOperations = getTaggedOperations(api, openAPI);
+            setTaggedOperations(newTaggedOperations);
+        }
+    }, [api, openAPI]);
+
+    // Note: Make sure not to use any hooks after/within this condition , because it returns conditionally
+    // If you do so, You will probably get `Rendered more hooks than during the previous render.` exception
     if (isEmpty(openAPI)) {
         return <CircularProgress />;
     }
-    const taggedOperations = getTaggedOperations(api, openAPI);
 
     return (
         <Grid container direction='row' justify='flex-start' spacing={2} alignItems='stretch'>
@@ -180,9 +224,9 @@ export default function Resources(props) {
                 <Grid item md={12}>
                     <APIRateLimiting
                         operationRateLimits={operationRateLimits}
-                        api={api}
+                        value={api.apiThrottlingPolicy}
                         updateAPI={updateAPI}
-                        disabledAction={false}
+                        isAPIProduct={api.isAPIProduct()}
                     />
                 </Grid>
             )}
@@ -193,34 +237,50 @@ export default function Resources(props) {
             )}
             {specErrors.length > 0 && <SpecErrors specErrors={specErrors} />}
             <Grid item md={12}>
-                {Object.entries(taggedOperations).map(([tag, operations]) =>
-                    !!operations.length && (
-                        <Grid key={tag} item md={12}>
-                            <GroupOfOperations updateOpenAPI={updateOpenAPI} openAPI={openAPI} tag={tag}>
-                                <Grid
-                                    container
-                                    direction='column'
-                                    justify='flex-start'
-                                    spacing={1}
-                                    alignItems='stretch'
-                                >
-                                    {operations.map(operation => (
-                                        <Grid key={`${operation.target}/${operation.verb}`} item>
-                                            <Operation
-                                                highlight
-                                                updateOpenAPI={updateOpenAPI}
-                                                openAPI={openAPI}
-                                                operation={operation}
-                                                operationRateLimits={operationRateLimits}
-                                                api={api}
-                                                {...operationProps}
-                                            />
-                                        </Grid>
-                                    ))}
-                                </Grid>
-                            </GroupOfOperations>
-                        </Grid>
-                    ))}
+                <Paper>
+                    {!disableMultiSelect && (
+                        <OperationsSelector
+                            openAPI={openAPI}
+                            selectedOperations={selectedOperations}
+                            setSelectedOperation={setSelectedOperation}
+                            updateOpenAPI={updateOpenAPI}
+                        />
+                    )}
+                    {Object.entries(taggedOperations).map(([tag, operations]) =>
+                        !!operations.length && (
+                            <Grid key={tag} item md={12}>
+                                <GroupOfOperations updateOpenAPI={updateOpenAPI} openAPI={openAPI} tag={tag}>
+                                    <Grid
+                                        container
+                                        direction='column'
+                                        justify='flex-start'
+                                        spacing={1}
+                                        alignItems='stretch'
+                                    >
+                                        {operations.map((operation) => {
+                                            const { target, verb } = operation;
+                                            return (
+                                                <Grid key={`${target}/${verb}`} item>
+                                                    <Operation
+                                                        highlight
+                                                        updateOpenAPI={updateOpenAPI}
+                                                        openAPI={openAPI}
+                                                        operation={operation}
+                                                        operationRateLimits={operationRateLimits}
+                                                        api={api}
+                                                        selected={Boolean(selectedOperations[target] &&
+                                                                    selectedOperations[target][verb.toLowerCase()])}
+                                                        onOperationSelect={onOperationSelect}
+                                                        {...{ ...operationProps, disableMultiSelect }}
+                                                    />
+                                                </Grid>
+                                            );
+                                        })}
+                                    </Grid>
+                                </GroupOfOperations>
+                            </Grid>
+                        ))}
+                </Paper>
             </Grid>
 
             {!hideAPIDefinitionLink && <GoToDefinitionLink api={api} />}
@@ -231,6 +291,7 @@ export default function Resources(props) {
 Resources.defaultProps = {
     operationProps: { disableUpdate: false, disableDelete: false },
     disableRateLimiting: false,
+    disableMultiSelect: false,
     hideAPIDefinitionLink: false,
     disableAddOperation: false,
 };
@@ -239,6 +300,7 @@ Resources.propTypes = {
     disableRateLimiting: PropTypes.bool,
     hideAPIDefinitionLink: PropTypes.bool,
     disableAddOperation: PropTypes.bool,
+    disableMultiSelect: PropTypes.bool,
     operationProps: PropTypes.shape({
         disableUpdate: PropTypes.bool,
         disableDelete: PropTypes.bool,

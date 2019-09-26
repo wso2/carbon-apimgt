@@ -51,6 +51,7 @@ class Sdk extends React.Component {
         this.getSdkForApi = this.getSdkForApi.bind(this);
         this.handleClick = this.handleClick.bind(this);
         this.handleChange = this.handleChange.bind(this);
+        this.addDefaultSrc = this.addDefaultSrc.bind(this);
     }
 
     /**
@@ -143,6 +144,13 @@ class Sdk extends React.Component {
     };
 
     /**
+     * Handle sdk image not found issue. Point to a default image
+     */
+    addDefaultSrc = (ev) => {
+        ev.target.src = '/store-new/site/public/images/sdks/default.svg';
+    };
+
+    /**
      *
      *
      * @returns
@@ -165,11 +173,13 @@ class Sdk extends React.Component {
                                         <img
                                             alt={language}
                                             src={
-                                                '/store/site/public/images/sdks/'
+                                                '/store-new/site/public/images/sdks/'
                                                     + new String(language)
                                                     + '.svg'
                                             }
-                                            style={{ width: 80, height: 80, margin: 15 }}
+                                            style={{
+                                                width: 80, height: 80, margin: 10,
+                                            }}
                                         />
                                     </a>
                                 </Grid>
@@ -183,7 +193,7 @@ class Sdk extends React.Component {
             <Grid container className='tab-grid' spacing={0}>
                 <Grid item xs={12} sm={6} md={9} lg={9} xl={10}>
                     {this.state.sdkLanguages.length >= this.filter_threshold && (
-                        <Grid item style={{ textAlign: 'center' }}>
+                        <Grid item style={{ textAlign: 'left', margin: '14px' }}>
                             <TextField
                                 id='search'
                                 label={intl.formatMessage({
@@ -200,22 +210,21 @@ class Sdk extends React.Component {
                     <Grid container justify='flex-start' spacing={Number(24)}>
                         {language_list.map((language, index) => (
                             <Grid key={index} item>
-                                <div style={{ width: 'auto', textAlign: 'center' }}>
+                                <div style={{ width: 'auto', textAlign: 'center', margin: '10px' }}>
                                     <Card>
                                         <div>{language.toString().toUpperCase()}</div>
                                         <Divider />
                                         <CardMedia
                                             title={language.toString().toUpperCase()}
-                                            src={'/store/site/public/images/sdks/' + new String(language) + '.svg'}
+                                            src={'/store-new/site/public/images/sdks/' + new String(language) + '.svg'}
                                         >
                                             <img
                                                 alt={language}
+                                                onError={this.addDefaultSrc}
                                                 src={
-                                                    '/store/site/public/images/sdks/'
-                                                    + new String(language)
-                                                    + '.svg'
+                                                    `/store-new/site/public/images/sdks/${language}.svg`
                                                 }
-                                                style={{ width: '100px', height: '100px', margin: '15px' }}
+                                                style={{ width: '100px', height: '100px', margin: '30px' }}
                                             />
                                         </CardMedia>
                                         <CardActions>

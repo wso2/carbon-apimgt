@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyPermissionInfoDTO;
 import javax.validation.constraints.*;
 
@@ -93,6 +94,7 @@ public enum TierPlanEnum {
 
     private TierPlanEnum tierPlan = null;
     private Boolean stopOnQuotaReach = null;
+    private MonetizationInfoDTO monetizationAttributes = null;
     private ThrottlingPolicyPermissionInfoDTO throttlingPolicyPermissions = null;
 
   /**
@@ -242,6 +244,23 @@ public enum TierPlanEnum {
 
   /**
    **/
+  public ThrottlingPolicyDTO monetizationAttributes(MonetizationInfoDTO monetizationAttributes) {
+    this.monetizationAttributes = monetizationAttributes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("monetizationAttributes")
+  public MonetizationInfoDTO getMonetizationAttributes() {
+    return monetizationAttributes;
+  }
+  public void setMonetizationAttributes(MonetizationInfoDTO monetizationAttributes) {
+    this.monetizationAttributes = monetizationAttributes;
+  }
+
+  /**
+   **/
   public ThrottlingPolicyDTO throttlingPolicyPermissions(ThrottlingPolicyPermissionInfoDTO throttlingPolicyPermissions) {
     this.throttlingPolicyPermissions = throttlingPolicyPermissions;
     return this;
@@ -275,12 +294,13 @@ public enum TierPlanEnum {
         Objects.equals(unitTime, throttlingPolicy.unitTime) &&
         Objects.equals(tierPlan, throttlingPolicy.tierPlan) &&
         Objects.equals(stopOnQuotaReach, throttlingPolicy.stopOnQuotaReach) &&
+        Objects.equals(monetizationAttributes, throttlingPolicy.monetizationAttributes) &&
         Objects.equals(throttlingPolicyPermissions, throttlingPolicy.throttlingPolicyPermissions);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, description, policyLevel, attributes, requestCount, unitTime, tierPlan, stopOnQuotaReach, throttlingPolicyPermissions);
+    return Objects.hash(name, description, policyLevel, attributes, requestCount, unitTime, tierPlan, stopOnQuotaReach, monetizationAttributes, throttlingPolicyPermissions);
   }
 
   @Override
@@ -296,6 +316,7 @@ public enum TierPlanEnum {
     sb.append("    unitTime: ").append(toIndentedString(unitTime)).append("\n");
     sb.append("    tierPlan: ").append(toIndentedString(tierPlan)).append("\n");
     sb.append("    stopOnQuotaReach: ").append(toIndentedString(stopOnQuotaReach)).append("\n");
+    sb.append("    monetizationAttributes: ").append(toIndentedString(monetizationAttributes)).append("\n");
     sb.append("    throttlingPolicyPermissions: ").append(toIndentedString(throttlingPolicyPermissions)).append("\n");
     sb.append("}");
     return sb.toString();

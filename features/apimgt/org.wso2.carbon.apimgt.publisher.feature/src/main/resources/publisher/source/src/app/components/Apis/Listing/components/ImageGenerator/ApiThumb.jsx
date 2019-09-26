@@ -92,6 +92,14 @@ class APIThumb extends Component {
                 updateData(id);
                 Alert.info(`API Product ${name} deleted Successfully`);
                 this.setState({ loading: false });
+            }).catch((error) => {
+                if (error.status === 409) {
+                    Alert.error('Cannot remove the API Product as active subscriptions exist.');
+                    this.setState({ loading: false });
+                } else {
+                    Alert.error('Something went wrong while deleting the API Product!');
+                    this.setState({ loading: false });
+                }
             });
         } else {
             const promisedDelete = API.delete(id);
@@ -103,6 +111,14 @@ class APIThumb extends Component {
                 updateData(id);
                 Alert.info(`API ${name} deleted Successfully`);
                 this.setState({ loading: false });
+            }).catch((error) => {
+                if (error.status === 409) {
+                    Alert.error('Cannot remove the API as active subscriptions exist.');
+                    this.setState({ loading: false });
+                } else {
+                    Alert.error('Something went wrong while deleting the API!');
+                    this.setState({ loading: false });
+                }
             });
         }
     }

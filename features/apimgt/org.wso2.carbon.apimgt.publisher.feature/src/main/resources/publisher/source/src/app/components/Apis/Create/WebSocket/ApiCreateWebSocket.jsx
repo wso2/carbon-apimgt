@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 import React from 'react';
-import APICreateWrapper from 'AppComponents/Apis/Create/Default/APICreateWrapper';
+import APICreateDefault from 'AppComponents/Apis/Create/Default/APICreateDefault';
 
 const ApiCreateWebSocket = (props) => {
-    return (<APICreateWrapper {...props} type='ws' />);
+    return (<APICreateDefault isWebSocket />);
 };
 export default ApiCreateWebSocket;

@@ -22,7 +22,6 @@ import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
@@ -40,7 +39,6 @@ import { red } from '@material-ui/core/colors/';
 import Divider from '@material-ui/core/Divider';
 import Alert from 'AppComponents/Shared/Alert';
 import Api from 'AppData/api';
-import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = theme => ({
     root: {
@@ -145,7 +143,7 @@ class CreateScope extends React.Component {
      */
     addScope() {
         const {
-            intl, api, history, isAPIProduct,
+            intl, api, history, isAPIProduct, updateAPI,
         } = this.props;
         const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
         if (this.validateScopeName('name', this.state.apiScope.name)) {
@@ -162,7 +160,7 @@ class CreateScope extends React.Component {
         });
         scopes.push(scope);
         const updateProperties = { scopes };
-        const promisedApiUpdate = api.update(updateProperties);
+        const promisedApiUpdate = updateAPI(updateProperties);
         promisedApiUpdate.then(() => {
             Alert.info(intl.formatMessage({
                 id: 'Apis.Details.Scopes.CreateScope.scope.added.successfully',
@@ -453,10 +451,11 @@ CreateScope.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
+    updateAPI: PropTypes.func.isRequired,
 };
 
 CreateScope.defaultProps = {
     match: { params: {} },
 };
 
-export default withAPI(injectIntl(withRouter(withStyles(styles)(CreateScope))));
+export default injectIntl(withStyles(styles)(CreateScope));

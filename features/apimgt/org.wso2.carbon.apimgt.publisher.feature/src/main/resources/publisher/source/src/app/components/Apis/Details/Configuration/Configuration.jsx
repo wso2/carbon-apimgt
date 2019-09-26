@@ -183,8 +183,10 @@ export default function Configuration() {
                 return { ...copyAPIConfig(state), [action]: value };
             case 'securityScheme':
                 // If event came from mandatory selector of either Application level or Transport level
-                if ([API_SECURITY_MUTUAL_SSL_MANDATORY,
-                    API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY].includes(event.name)) {
+                if (
+                    [API_SECURITY_MUTUAL_SSL_MANDATORY, API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY]
+                        .includes(event.name)
+                ) {
                     // If user select not mandatory (optional) , Remove the respective schema, else add it
                     if (event.value === 'optional') {
                         return {
@@ -297,13 +299,7 @@ export default function Configuration() {
                 // Move design configurations to a sub page
             }
             <div className={classes.contentWrapper}>
-                <Grid
-                    container
-                    direction='row'
-                    justify='space-around'
-                    alignItems='flex-start'
-                    spacing={8}
-                >
+                <Grid container direction='row' justify='space-around' alignItems='flex-start' spacing={8}>
                     <Grid item xs={4}>
                         <Typography className={classes.heading} variant='h6'>
                             <FormattedMessage
@@ -327,27 +323,20 @@ export default function Configuration() {
                                     <Description api={apiConfig} configDispatcher={configDispatcher} />
                                 </Grid>
                             </Grid>
+                            {/* TODO: Use MUI <Box /> with `p` property to add padding to individual elements,
+                             instead of custom class ~tmkb */}
                             <div className={classes.itemPadding}>
-                                <AccessControl
-                                    api={apiConfig}
-                                    configDispatcher={configDispatcher}
-                                />
+                                <AccessControl api={apiConfig} configDispatcher={configDispatcher} />
                             </div>
                             <div className={classes.itemPadding}>
-                                <StoreVisibility
-                                    api={apiConfig}
-                                    configDispatcher={configDispatcher}
-                                />
+                                <StoreVisibility api={apiConfig} configDispatcher={configDispatcher} />
                             </div>
                             <div className={classes.itemPadding}>
                                 <Tags api={apiConfig} configDispatcher={configDispatcher} />
                             </div>
-                            { api.apiType !== 'APIProduct' && (
+                            {api.apiType !== 'APIProduct' && (
                                 <div className={classes.itemPadding}>
-                                    <Grid
-                                        container
-                                        direction='row'
-                                    >
+                                    <Grid container direction='row'>
                                         <Grid item xs={12} md={6}>
                                             <DefaultVersion api={apiConfig} configDispatcher={configDispatcher} />
                                         </Grid>
@@ -412,7 +401,9 @@ export default function Configuration() {
                         >
                             <Grid item xs={12} style={{ marginBottom: 30, position: 'relative' }}>
                                 <Paper className={classes.paper} style={{ minHeight: paperHeight }}>
-                                    <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
+                                    {!api.isAPIProduct() && (
+                                        <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
+                                    )}
                                     <Link to={'/apis/' + api.id + '/endpoints'}>
                                         <Typography
                                             className={classes.subHeading}
@@ -459,19 +450,19 @@ export default function Configuration() {
                                 </Button>
                             </Link>
                         </Grid>
-                        {(isRestricted(['apim:api_create'], api))
-                            && (
-                                <Grid item>
-                                    <Typography variant='body2' color='primary'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Configuration.Configuration.update.not.allowed'
-                                            defaultMessage={'* You are not authorized to update particular fields of' +
-                                            ' the API due to insufficient permissions'}
-                                        />
-                                    </Typography>
-                                </Grid>
-                            )
-                        }
+                        {isRestricted(['apim:api_create'], api) && (
+                            <Grid item>
+                                <Typography variant='body2' color='primary'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Configuration.Configuration.update.not.allowed'
+                                        defaultMessage={
+                                            '* You are not authorized to update particular fields of' +
+                                            ' the API due to insufficient permissions'
+                                        }
+                                    />
+                                </Typography>
+                            </Grid>
+                        )}
                     </Grid>
                 </Grid>
             </div>

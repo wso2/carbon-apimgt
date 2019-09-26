@@ -40,6 +40,7 @@ import APIProduct from 'AppData/APIProduct';
  * @returns
  */
 function APICreateDefault(props) {
+    const { isWebSocket, isAPIProduct, history } = props;
     const { settings } = useAppContext();
     /**
      *
@@ -116,13 +117,16 @@ function APICreateDefault(props) {
             };
         }
         apiData.gatewayEnvironments = settings.environment.map(env => env.name);
-        if (props.isAPIProduct) {
+        if (isWebSocket) {
+            apiData.type = "WS";
+        }
+        if (isAPIProduct) {
             const newAPIProduct = new APIProduct(apiData);
             newAPIProduct
                 .saveProduct(apiData)
                 .then((apiProduct) => {
                     Alert.info('API Product created successfully');
-                    props.history.push(`/api-products/${apiProduct.id}/overview`);
+                    history.push(`/api-products/${apiProduct.id}/overview`);
                 })
                 .catch((error) => {
                     if (error.response) {
@@ -138,7 +142,7 @@ function APICreateDefault(props) {
                 .save()
                 .then((api) => {
                     Alert.info('API created successfully');
-                    props.history.push(`/apis/${api.id}/overview`);
+                    history.push(`/apis/${api.id}/overview`);
                 })
                 .catch((error) => {
                     if (error.response) {
@@ -151,48 +155,70 @@ function APICreateDefault(props) {
                 .finally(() => setCreating(false));
         }
     }
+    let pageTitle = (
+        <React.Fragment>
+            <Typography variant='h5'>
+                <FormattedMessage
+                    id='Apis.Create.Default.APICreateDefault.api.heading'
+                    defaultMessage='Create an API'
+                />
+            </Typography>
+            <Typography variant='caption'>
+                <FormattedMessage
+                    id='Apis.Create.Default.APICreateDefault.api.sub.heading'
+                    defaultMessage={
+                        'Create an API providing Name, Version and Context parameters' +
+                        ' and optionally backend endpoint and business plans'
+                    }
+                />
+            </Typography>
+        </React.Fragment>
+    );
+    if (isAPIProduct) {
+        pageTitle = (
+            <React.Fragment>
+                <Typography variant='h5'>
+                    <FormattedMessage
+                        id='Apis.Create.Default.APICreateDefault.apiProduct.heading'
+                        defaultMessage='Create an API Product'
+                    />
+                </Typography>
+                <Typography variant='caption'>
+                    <FormattedMessage
+                        id='Apis.Create.Default.APICreateDefault.apiProduct.sub.heading'
+                        defaultMessage={
+                            'Create an API Product providing Name, Context parameters' +
+                            ' and optionally business plans'
+                        }
+                    />
+                </Typography>
+            </React.Fragment>
+        );
+    } else if (isWebSocket) {
+        pageTitle = (
+            <React.Fragment>
+                <Typography variant='h5'>
+                    <FormattedMessage
+                        id='Apis.Create.Default.APICreateDefault.webSocket.heading'
+                        defaultMessage='Create a WebSocket API'
+                    />
+                </Typography>
+                <Typography variant='caption'>
+                    <FormattedMessage
+                        id='Apis.Create.Default.APICreateDefault.webSocket.sub.heading'
+                        defaultMessage={
+                            'Create a WebSocket API providing Name, Context parameters' +
+                            ' and optionally business plans'
+                        }
+                    />
+                </Typography>
+            </React.Fragment>
+        )
+    }
 
     return (
         <APICreateBase
-            title={
-                props.isAPIProduct ? (
-                    <React.Fragment>
-                        <Typography variant='h5'>
-                            <FormattedMessage
-                                id='Apis.Create.Default.APICreateDefault.apiProduct.heading'
-                                defaultMessage='Create an API Product'
-                            />
-                        </Typography>
-                        <Typography variant='caption'>
-                            <FormattedMessage
-                                id='Apis.Create.Default.APICreateDefault.apiProduct.sub.heading'
-                                defaultMessage={
-                                    'Create an API Product providing Name, Context parameters' +
-                                    ' and optionally bushiness plans'
-                                }
-                            />
-                        </Typography>
-                    </React.Fragment>
-                ) : (
-                    <React.Fragment>
-                        <Typography variant='h5'>
-                            <FormattedMessage
-                                id='Apis.Create.Default.APICreateDefault.api.heading'
-                                defaultMessage='Create an API'
-                            />
-                        </Typography>
-                        <Typography variant='caption'>
-                            <FormattedMessage
-                                id='Apis.Create.Default.APICreateDefault.api.sub.heading'
-                                defaultMessage={
-                                    'Create an API providing Name, Version and Context parameters' +
-                                    ' and optionally backend endpoint and bushiness plans'
-                                }
-                            />
-                        </Typography>
-                    </React.Fragment>
-                )
-            }
+            title={pageTitle}
         >
             <Grid container spacing={3}>
                 <Grid item md={12} />
@@ -202,7 +228,7 @@ function APICreateDefault(props) {
                         onValidate={handleOnValidate}
                         onChange={handleOnChange}
                         api={apiInputs}
-                        isAPIProduct={props.isAPIProduct}
+                        isAPIProduct={isAPIProduct}
                     />
                 </Grid>
                 <Grid item md={1} />
@@ -234,8 +260,13 @@ function APICreateDefault(props) {
         </APICreateBase>
     );
 }
+APICreateDefault.defaultProps = {
+    isWebSocket: false,
+    isAPIProduct: false,
+}
 APICreateDefault.propTypes = {
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
-    isAPIProduct: PropTypes.shape({}).isRequired,
+    isAPIProduct: PropTypes.shape({}),
+    isWebSocket: PropTypes.shape({}),
 };
 export default withRouter(APICreateDefault);
