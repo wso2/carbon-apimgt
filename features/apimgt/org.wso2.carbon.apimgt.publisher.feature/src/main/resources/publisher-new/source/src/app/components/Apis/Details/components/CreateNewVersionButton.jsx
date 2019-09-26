@@ -52,7 +52,6 @@ const styles = theme => ({
         fontFamily: theme.typography.fontFamily,
     },
     createNewVersionWrapper: {
-        flex: 1,
         display: 'flex',
         justifyContent: 'flex-end',
         paddingRight: theme.spacing.unit * 2,
