@@ -81,7 +81,7 @@
                             <id>org.wso2.carbon.apimgt</id>
                             <propertiesFile>../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:4.5.0</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:4.5.1</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>
