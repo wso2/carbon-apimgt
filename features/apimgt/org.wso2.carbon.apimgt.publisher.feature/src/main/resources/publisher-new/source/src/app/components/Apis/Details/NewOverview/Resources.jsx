@@ -21,6 +21,7 @@ import { withStyles, withTheme } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
 import { FormattedMessage } from 'react-intl';
+import Box from '@material-ui/core/Box';
 
 import Typography from '@material-ui/core/Typography';
 import Api from 'AppData/api';
@@ -119,7 +120,7 @@ class Resources extends React.Component {
         const { classes, parentClasses, api } = this.props;
         return (
             <React.Fragment>
-                <div className={parentClasses.titleWrapper} style={{ margin: '20px 0 10px' }}>
+                <div className={parentClasses.titleWrapper}>
                     { api.type === 'GraphQL' ? (
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
                             <FormattedMessage
@@ -136,24 +137,26 @@ class Resources extends React.Component {
                             </Typography>
                         )}
                 </div>
-                <div className={classes.root}>
-                    <div className={classes.contentWrapper}>
-                        {Object.keys(paths).map((key) => {
-                            const path = paths[key];
-                            return (
-                                <div className={classes.root}>
-                                    <Typography className={classes.heading} variant='body1'>
-                                        {key}
-                                    </Typography>
-                                    {Object.keys(path).map((innerKey) => {
-                                        return CONSTS.HTTP_METHODS.includes(innerKey) ?
-                                            <RenderMethod method={innerKey} /> : null;
-                                    })}
-                                </div>
-                            );
-                        })}
+                <Box p={1}>
+                    <div className={classes.root}>
+                        <div className={classes.contentWrapper}>
+                            {Object.keys(paths).map((key) => {
+                                const path = paths[key];
+                                return (
+                                    <div className={classes.root}>
+                                        <Typography className={classes.heading} variant='body1'>
+                                            {key}
+                                        </Typography>
+                                        {Object.keys(path).map((innerKey) => {
+                                            return CONSTS.HTTP_METHODS.includes(innerKey) ?
+                                                <RenderMethod method={innerKey} /> : null;
+                                        })}
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
-                </div>
+                </Box>
             </React.Fragment>
         );
     }
