@@ -53,7 +53,7 @@ const styles = theme => ({
         margin: 'auto',
         'margin-top': '100px',
         padding: `${theme.spacing.unit * 3}px ${theme.spacing.unit * 2}px`,
-        overflow: scroll,
+        overflow: 'scroll',
     },
     listItem: {
         margin: 'auto',
