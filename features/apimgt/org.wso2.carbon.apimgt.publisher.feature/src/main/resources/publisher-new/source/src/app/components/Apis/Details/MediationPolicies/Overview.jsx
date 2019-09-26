@@ -76,6 +76,7 @@ const styles = theme => ({
     },
     diagramDown: {
         marginTop: 80,
+        textAlign: 'center',
     },
 });
 /**
