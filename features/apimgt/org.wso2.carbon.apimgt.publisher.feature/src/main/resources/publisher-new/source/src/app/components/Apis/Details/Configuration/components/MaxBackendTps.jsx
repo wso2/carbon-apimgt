@@ -39,10 +39,9 @@ import { Collapse } from '@material-ui/core';
 import { FormattedMessage } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
 
-
 const useStyles = makeStyles(theme => ({
     expansionPanel: {
-        marginBottom: theme.spacing(1),
+        marginBottom: theme.spacing(1), // TODO: replace with <Box /> element `mb`
     },
     expansionPanelDetails: {
         flexDirection: 'column',

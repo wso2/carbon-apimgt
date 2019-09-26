@@ -154,7 +154,7 @@ function Overview(props) {
                 </Typography>
             </div>
             <div className={classes.contentWrapper}>
-                <Paper className={classes.root} elevation={1}>
+                <Paper className={classes.root}>
                     <Grid container spacing={24}>
                         <Grid item xs={12} md={12} lg={12} className={classes.leftSideWrapper}>
                             <Configuration parentClasses={classes} />

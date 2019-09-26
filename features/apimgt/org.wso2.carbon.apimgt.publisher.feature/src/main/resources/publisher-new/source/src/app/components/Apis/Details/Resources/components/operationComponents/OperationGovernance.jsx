@@ -61,7 +61,7 @@ export default function OperationGovernance(props) {
                     <FormControlLabel
                         control={
                             <Switch
-                                checked={operation.authType.toLowerCase() !== 'none'}
+                                checked={operation.authType && operation.authType.toLowerCase() !== 'none'}
                                 onChange={({ target: { checked } }) =>
                                     operationActionsDispatcher({
                                         action: 'authType',
@@ -163,12 +163,14 @@ export default function OperationGovernance(props) {
                         </MenuItem>
                     ))}
                 </TextField>
-                <Link to={`/apis/${api.id}/scopes/create`} target='_blank'>
-                    <Typography style={{ marginLeft: '10px' }} color='primary' display='inline' variant='caption'>
-                        Create new scope
-                        <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
-                    </Typography>
-                </Link>
+                {!disableUpdate && (
+                    <Link to={`/apis/${api.id}/scopes/create`} target='_blank'>
+                        <Typography style={{ marginLeft: '10px' }} color='primary' display='inline' variant='caption'>
+                            Create new scope
+                            <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
+                        </Typography>
+                    </Link>
+                )}
             </Grid>
         </Fragment>
     );

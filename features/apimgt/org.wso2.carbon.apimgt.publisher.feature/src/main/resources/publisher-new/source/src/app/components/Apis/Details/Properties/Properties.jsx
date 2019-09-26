@@ -360,7 +360,7 @@ function Properties(props) {
             {(!isEmpty(additionalProperties) || showAddProperty) && (
                 <Grid container spacing={7}>
                     <Grid item xs={12}>
-                        <Paper className={classes.paperRoot} elevation={1}>
+                        <Paper className={classes.paperRoot}>
                             <Table className={classes.table}>
                                 <TableHead>
                                     <TableRow>

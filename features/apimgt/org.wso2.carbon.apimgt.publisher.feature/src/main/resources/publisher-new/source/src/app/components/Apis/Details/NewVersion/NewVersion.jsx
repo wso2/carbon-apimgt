@@ -186,7 +186,7 @@ class CreateNewVersion extends React.Component {
                 </div>
                 <Grid container spacing={7}>
                     <Grid item xs={12}>
-                        <Paper className={classes.root} elevation={1}>
+                        <Paper className={classes.root}>
                             <FormControl margin='normal' className={classes.FormControlOdd}>
                                 <TextField
                                     fullWidth

@@ -36,7 +36,7 @@ class InlineMessage extends React.Component {
     render() {
         const { classes, height, type } = this.props;
         return (
-            <Paper className={classes.root} elevation={1} {...this.props}>
+            <Paper className={classes.root} {...this.props}>
                 {type === 'info' && <Icon>{type}</Icon>}
                 <VerticalDivider height={height} />
                 <div className={classes.content}>{this.props.children}</div>
