@@ -27,7 +27,7 @@ import Message from './Message';
 const theme = createMuiTheme(Configurations.themes.light);
 
 /**
- * Common alerting/message displaying component for Store application, Pre-set vertical: 'top',
+ * Common alerting/message displaying component for Dev Portal, Pre-set vertical: 'top',
  horizontal: 'center' and close action for consistent UX through out the app.
  */
 class Alert {

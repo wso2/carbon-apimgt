@@ -182,7 +182,7 @@ class Layout extends React.Component {
      */
     doOIDCLogout = (e) => {
         e.preventDefault();
-        window.location = '/store/services/logout';
+        window.location = '/devportal/services/logout';
     };
 
     handleClickButton = (key) => {
@@ -290,7 +290,7 @@ class Layout extends React.Component {
                                         <Icon>public</Icon>
                                         <FormattedMessage
                                             id='Base.index.go.to.public.store'
-                                            defaultMessage='Go to public store'
+                                            defaultMessage='Go to public Dev Portal'
                                         />
                                     </Button>
                                 </Link>
@@ -385,7 +385,7 @@ class Layout extends React.Component {
                                      <HowToReg /> sign-up
                                      </Button>
                                      </Link> */}
-                                    <a href='/store/services/configs'>
+                                    <a href='/devportal/services/configs'>
                                         <Button className={classes.userLink}>
                                             <Icon>person</Icon>
                                             <FormattedMessage id='Base.index.sign.in' defaultMessage=' Sign-in' />

@@ -200,7 +200,7 @@ class SignUp extends React.Component {
                     this.authManager.logout();
                     Alert.info(
                         intl.formatMessage({
-                            defaultMessage: 'User added successfully. You can now sign into the API store.',
+                            defaultMessage: 'User added successfully. You can now sign into the API Developer Portal.',
                             id: 'AnonymousView.SignUp.added.success',
                         }),
                     );
@@ -331,7 +331,7 @@ class SignUp extends React.Component {
                                     <Grid item>
                                         <img
                                             className='brand'
-                                            src='/store/site/public/images/logo.svg'
+                                            src='/devportal/site/public/images/logo.svg'
                                             alt='wso2-logo'
                                         />
                                     </Grid>
@@ -339,7 +339,7 @@ class SignUp extends React.Component {
                                         <Typography variant='subtitle1' align='right' gutterBottom>
                                             <FormattedMessage
                                                 id='AnonymousView.SignUp.api.store'
-                                                defaultMessage='API STORE'
+                                                defaultMessage='API Dev Portal'
                                             />
                                         </Typography>
                                     </Grid>
@@ -557,7 +557,7 @@ class SignUp extends React.Component {
                                                     <Button variant='raised' className={classes.buttonAlignment}>
                                                         <FormattedMessage
                                                             id='AnonymousView.SignUp.btn.back.to'
-                                                            defaultMessage='Back to Store'
+                                                            defaultMessage='Back to Dev Portal'
                                                         />
                                                     </Button>
                                                 </Link>

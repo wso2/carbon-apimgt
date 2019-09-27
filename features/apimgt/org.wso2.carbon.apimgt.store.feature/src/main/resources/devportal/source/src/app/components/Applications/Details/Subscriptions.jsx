@@ -265,7 +265,7 @@ class Subscriptions extends React.Component {
         const { isAuthorize } = this.state;
 
         if (!isAuthorize) {
-            window.location = '/store/services/configs';
+            window.location = '/devportal/services/configs';
         }
 
         const {

@@ -1,6 +1,6 @@
 {
-  "AnonymousView.SignUp.api.store": "API STORE",
-  "AnonymousView.SignUp.btn.back.to": "Back to Store",
+  "AnonymousView.SignUp.api.store": "API Dev Portal",
+  "AnonymousView.SignUp.btn.back.to": "Back to Dev Portal",
   "AnonymousView.SignUp.btn.signup": "Sign up",
   "AnonymousView.SignUp.create.your.account": "Create your account",
   "AnonymousView.SignUp.policy.section.cookie.policy": "Cookie Policy",
@@ -174,7 +174,7 @@
   "Base.index.my.account": "My account",
   "Base.index.profile": "Profile",
   "Base.index.sign.in": "Sign-in",
-  "Login.LoginBase.api.store": "API Store",
+  "Login.LoginBase.api.store": "API Dev Portal",
   "Login.LoginForm.dont.have.account": "Don't have an account?",
   "Login.LoginForm.forgot.password": "Forgot Password",
   "Login.LoginForm.register.now": "Register Now",
