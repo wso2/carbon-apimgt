@@ -104,7 +104,7 @@ class AuthManager {
         if (!partialToken) {
             return new Promise((resolve, reject) => reject(new Error('No partial token found')));
         }
-        const promisedResponse = fetch('/store/services/auth/introspect', { credentials: 'same-origin' });
+        const promisedResponse = fetch('/devportal/services/auth/introspect', { credentials: 'same-origin' });
         return promisedResponse
             .then(response => response.json())
             .then((data) => {
