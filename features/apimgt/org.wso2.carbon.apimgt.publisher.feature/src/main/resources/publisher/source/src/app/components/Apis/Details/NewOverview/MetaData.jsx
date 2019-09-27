@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useContext } from 'react';
+import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
@@ -24,7 +24,7 @@ import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Tooltip from '@material-ui/core/Tooltip';
 import API from 'AppData/api';
-import APIContext from '../components/ApiContext';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import BusinessInformation from './BusinessInformation';
 
 /**
@@ -35,7 +35,7 @@ import BusinessInformation from './BusinessInformation';
  */
 function MetaData(props) {
     const { parentClasses } = props;
-    const { api } = useContext(APIContext);
+    const [api] = useAPI();
 
     return (
         <React.Fragment>
