@@ -88,7 +88,7 @@ const APIDetailsTopMenu = (props) => {
                     State
                 </Typography>
             </div>
-            {isVisibleInStore && <VerticalDivider height={70} />}
+            <VerticalDivider height={70} />
             <div className={classes.dateWrapper}>
                 <Tooltip title={moment(api.lastUpdatedTime).calendar()} aria-label='add'>
                     <Typography variant='caption' display='block'>
@@ -102,7 +102,7 @@ const APIDetailsTopMenu = (props) => {
             </div>
             <VerticalDivider height={70} />
             <GoTo api={api} isAPIProduct={isAPIProduct} />
-            <VerticalDivider height={70} />
+            {isVisibleInStore && <VerticalDivider height={70} />}
             {isVisibleInStore && (
                 <a
                     target='_blank'
