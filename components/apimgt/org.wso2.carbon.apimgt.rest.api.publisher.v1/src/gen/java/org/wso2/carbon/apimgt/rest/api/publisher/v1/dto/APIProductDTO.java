@@ -139,6 +139,7 @@ public enum AccessControlEnum {
     private List<String> transport = new ArrayList<>();
     private List<String> tags = new ArrayList<>();
     private List<String> policies = new ArrayList<>();
+    private String apiThrottlingPolicy = null;
     private String authorizationHeader = null;
     private List<String> securityScheme = new ArrayList<>();
 
@@ -488,6 +489,24 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   /**
+   * The API level throttling policy selected for the particular API Product
+   **/
+  public APIProductDTO apiThrottlingPolicy(String apiThrottlingPolicy) {
+    this.apiThrottlingPolicy = apiThrottlingPolicy;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Unlimited", value = "The API level throttling policy selected for the particular API Product")
+  @JsonProperty("apiThrottlingPolicy")
+  public String getApiThrottlingPolicy() {
+    return apiThrottlingPolicy;
+  }
+  public void setApiThrottlingPolicy(String apiThrottlingPolicy) {
+    this.apiThrottlingPolicy = apiThrottlingPolicy;
+  }
+
+  /**
    * Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. 
    **/
   public APIProductDTO authorizationHeader(String authorizationHeader) {
@@ -706,6 +725,7 @@ public enum SubscriptionAvailabilityEnum {
         Objects.equals(transport, apIProduct.transport) &&
         Objects.equals(tags, apIProduct.tags) &&
         Objects.equals(policies, apIProduct.policies) &&
+        Objects.equals(apiThrottlingPolicy, apIProduct.apiThrottlingPolicy) &&
         Objects.equals(authorizationHeader, apIProduct.authorizationHeader) &&
         Objects.equals(securityScheme, apIProduct.securityScheme) &&
         Objects.equals(subscriptionAvailability, apIProduct.subscriptionAvailability) &&
@@ -721,7 +741,7 @@ public enum SubscriptionAvailabilityEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes);
+    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes);
   }
 
   @Override
@@ -746,6 +766,7 @@ public enum SubscriptionAvailabilityEnum {
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
+    sb.append("    apiThrottlingPolicy: ").append(toIndentedString(apiThrottlingPolicy)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");

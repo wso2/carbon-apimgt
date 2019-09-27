@@ -1,0 +1,364 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Comments /> rendering renders correctly 1`] = `
+ShallowWrapper {
+  Symbol(enzyme.__root__): [Circular],
+  Symbol(enzyme.__unrendered__): <Comments
+    api={
+      Object {
+        "id": "6e770272-212b-404e-ab9c-333fdba02f2f",
+        "isDefaultVersion": true,
+        "lastUpdatedTime": "2018-11-27T03:08:22.569Z",
+        "lifeCycleStatus": "Published",
+        "name": "Swagger Petstore",
+      }
+    }
+    apiId="6e770272-212b-404e-ab9c-333fdba02f2f"
+    classes={Object {}}
+    theme={
+      Object {
+        "custom": Object {
+          "commentsLimit": 5,
+        },
+      }
+    }
+  />,
+  Symbol(enzyme.__renderer__): Object {
+    "batchedUpdates": [Function],
+    "getNode": [Function],
+    "render": [Function],
+    "simulateError": [Function],
+    "simulateEvent": [Function],
+    "unmount": [Function],
+  },
+  Symbol(enzyme.__node__): Object {
+    "instance": null,
+    "key": undefined,
+    "nodeType": "host",
+    "props": Object {
+      "children": Array [
+        <div>
+          <pure(ArrowDropDownCircleOutlined)
+            aria-expanded={true}
+            onClick={[Function]}
+          />
+          <WithStyles(Typography)
+            onClick={[Function]}
+            variant="display1"
+          >
+            Comments
+          </WithStyles(Typography)>
+        </div>,
+        <WithStyles(Collapse)
+          in={true}
+          timeout="auto"
+          unmountOnExit={true}
+        >
+          <WithStyles(CommentAdd)
+            allComments={Array []}
+            apiId="6e770272-212b-404e-ab9c-333fdba02f2f"
+            cancelButton={false}
+            commentsUpdate={[Function]}
+            parentCommentId={null}
+          />
+          <WithStyles(Comment)
+            allComments={Array []}
+            apiId="6e770272-212b-404e-ab9c-333fdba02f2f"
+            comments={Array []}
+            commentsUpdate={[Function]}
+          />
+        </WithStyles(Collapse)>,
+      ],
+      "className": undefined,
+    },
+    "ref": null,
+    "rendered": Array [
+      Object {
+        "instance": null,
+        "key": undefined,
+        "nodeType": "host",
+        "props": Object {
+          "children": Array [
+            <pure(ArrowDropDownCircleOutlined)
+              aria-expanded={true}
+              onClick={[Function]}
+            />,
+            <WithStyles(Typography)
+              onClick={[Function]}
+              variant="display1"
+            >
+              Comments
+            </WithStyles(Typography)>,
+          ],
+          "className": undefined,
+        },
+        "ref": null,
+        "rendered": Array [
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "class",
+            "props": Object {
+              "aria-expanded": true,
+              "onClick": [Function],
+            },
+            "ref": null,
+            "rendered": null,
+            "type": [Function],
+          },
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "class",
+            "props": Object {
+              "children": "Comments",
+              "className": undefined,
+              "onClick": [Function],
+              "variant": "display1",
+            },
+            "ref": null,
+            "rendered": "Comments",
+            "type": [Function],
+          },
+        ],
+        "type": "div",
+      },
+      Object {
+        "instance": null,
+        "key": undefined,
+        "nodeType": "class",
+        "props": Object {
+          "children": Array [
+            <WithStyles(CommentAdd)
+              allComments={Array []}
+              apiId="6e770272-212b-404e-ab9c-333fdba02f2f"
+              cancelButton={false}
+              commentsUpdate={[Function]}
+              parentCommentId={null}
+            />,
+            <WithStyles(Comment)
+              allComments={Array []}
+              apiId="6e770272-212b-404e-ab9c-333fdba02f2f"
+              comments={Array []}
+              commentsUpdate={[Function]}
+            />,
+            false,
+          ],
+          "in": true,
+          "timeout": "auto",
+          "unmountOnExit": true,
+        },
+        "ref": null,
+        "rendered": Array [
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "class",
+            "props": Object {
+              "allComments": Array [],
+              "apiId": "6e770272-212b-404e-ab9c-333fdba02f2f",
+              "cancelButton": false,
+              "commentsUpdate": [Function],
+              "parentCommentId": null,
+            },
+            "ref": null,
+            "rendered": null,
+            "type": [Function],
+          },
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "class",
+            "props": Object {
+              "allComments": Array [],
+              "apiId": "6e770272-212b-404e-ab9c-333fdba02f2f",
+              "comments": Array [],
+              "commentsUpdate": [Function],
+            },
+            "ref": null,
+            "rendered": null,
+            "type": [Function],
+          },
+          false,
+        ],
+        "type": [Function],
+      },
+    ],
+    "type": "div",
+  },
+  Symbol(enzyme.__nodes__): Array [
+    Object {
+      "instance": null,
+      "key": undefined,
+      "nodeType": "host",
+      "props": Object {
+        "children": Array [
+          <div>
+            <pure(ArrowDropDownCircleOutlined)
+              aria-expanded={true}
+              onClick={[Function]}
+            />
+            <WithStyles(Typography)
+              onClick={[Function]}
+              variant="display1"
+            >
+              Comments
+            </WithStyles(Typography)>
+          </div>,
+          <WithStyles(Collapse)
+            in={true}
+            timeout="auto"
+            unmountOnExit={true}
+          >
+            <WithStyles(CommentAdd)
+              allComments={Array []}
+              apiId="6e770272-212b-404e-ab9c-333fdba02f2f"
+              cancelButton={false}
+              commentsUpdate={[Function]}
+              parentCommentId={null}
+            />
+            <WithStyles(Comment)
+              allComments={Array []}
+              apiId="6e770272-212b-404e-ab9c-333fdba02f2f"
+              comments={Array []}
+              commentsUpdate={[Function]}
+            />
+          </WithStyles(Collapse)>,
+        ],
+        "className": undefined,
+      },
+      "ref": null,
+      "rendered": Array [
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": Array [
+              <pure(ArrowDropDownCircleOutlined)
+                aria-expanded={true}
+                onClick={[Function]}
+              />,
+              <WithStyles(Typography)
+                onClick={[Function]}
+                variant="display1"
+              >
+                Comments
+              </WithStyles(Typography)>,
+            ],
+            "className": undefined,
+          },
+          "ref": null,
+          "rendered": Array [
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "class",
+              "props": Object {
+                "aria-expanded": true,
+                "onClick": [Function],
+              },
+              "ref": null,
+              "rendered": null,
+              "type": [Function],
+            },
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "class",
+              "props": Object {
+                "children": "Comments",
+                "className": undefined,
+                "onClick": [Function],
+                "variant": "display1",
+              },
+              "ref": null,
+              "rendered": "Comments",
+              "type": [Function],
+            },
+          ],
+          "type": "div",
+        },
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "class",
+          "props": Object {
+            "children": Array [
+              <WithStyles(CommentAdd)
+                allComments={Array []}
+                apiId="6e770272-212b-404e-ab9c-333fdba02f2f"
+                cancelButton={false}
+                commentsUpdate={[Function]}
+                parentCommentId={null}
+              />,
+              <WithStyles(Comment)
+                allComments={Array []}
+                apiId="6e770272-212b-404e-ab9c-333fdba02f2f"
+                comments={Array []}
+                commentsUpdate={[Function]}
+              />,
+              false,
+            ],
+            "in": true,
+            "timeout": "auto",
+            "unmountOnExit": true,
+          },
+          "ref": null,
+          "rendered": Array [
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "class",
+              "props": Object {
+                "allComments": Array [],
+                "apiId": "6e770272-212b-404e-ab9c-333fdba02f2f",
+                "cancelButton": false,
+                "commentsUpdate": [Function],
+                "parentCommentId": null,
+              },
+              "ref": null,
+              "rendered": null,
+              "type": [Function],
+            },
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "class",
+              "props": Object {
+                "allComments": Array [],
+                "apiId": "6e770272-212b-404e-ab9c-333fdba02f2f",
+                "comments": Array [],
+                "commentsUpdate": [Function],
+              },
+              "ref": null,
+              "rendered": null,
+              "type": [Function],
+            },
+            false,
+          ],
+          "type": [Function],
+        },
+      ],
+      "type": "div",
+    },
+  ],
+  Symbol(enzyme.__options__): Object {
+    "adapter": ReactSixteenAdapter {
+      "options": Object {
+        "enableComponentDidUpdateOnSetState": true,
+        "lifecycles": Object {
+          "componentDidUpdate": Object {
+            "onSetState": true,
+          },
+          "getDerivedStateFromProps": true,
+          "getSnapshotBeforeUpdate": true,
+          "setState": Object {
+            "skipsComponentDidUpdateOnNullish": true,
+          },
+        },
+      },
+    },
+  },
+}
+`;

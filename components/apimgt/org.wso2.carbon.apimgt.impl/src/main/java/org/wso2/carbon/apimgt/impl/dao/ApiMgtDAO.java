@@ -7112,53 +7112,34 @@ public class ApiMgtDAO {
     
     /**
      * Get product Id from the product name and the provider. 
-     * @param identifier product identifier
-     * @param connection db connection
-     * @return product id 
+     * @param product product identifier
      * @throws APIManagementException exception
      */
-    public int getAPIProductID(APIProductIdentifier identifier, Connection connection)
+    public void setAPIProductFromDB(APIProduct product)
             throws APIManagementException {
-        boolean created = false;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
+        APIProductIdentifier apiProductIdentifier = product.getId();
 
-        int id = -1;
-        String getAPIQuery = SQLConstants.GET_API_PRODUCT_ID_SQL;
-
-        try {
-            if (connection == null) {
-
-                // If connection is not provided a new one will be created.
-                connection = APIMgtDBUtil.getConnection();
-                created = true;
-            }
-
-            prepStmt = connection.prepareStatement(getAPIQuery);
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            prepStmt.setString(2, identifier.getName());
-            prepStmt.setString(3, identifier.getVersion());
-            rs = prepStmt.executeQuery();
-            if (rs.next()) {
-                id = rs.getInt("API_ID");
-            }
-            if (id == -1) {
-                String msg = "Unable to find the API Product : " + identifier.getName() + "-" +
-                        APIUtil.replaceEmailDomainBack(identifier.getProviderName()) + "-" + identifier.getVersion() + " in the database";
-                log.error(msg);
-                throw new APIManagementException(msg);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_API_PRODUCT_SQL)) {
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName()));
+            prepStmt.setString(2, apiProductIdentifier.getName());
+            prepStmt.setString(3, apiProductIdentifier.getVersion());
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    product.setProductId(rs.getInt("API_PRODUCT_ID"));
+                    product.setProductLevelPolicy(rs.getString("API_PRODUCT_TIER"));
+                } else {
+                    String msg = "Unable to find the API Product : " + apiProductIdentifier.getName() + "-" +
+                            APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName()) + "-" +
+                            apiProductIdentifier.getVersion() + " in the database";
+                    throw new APIManagementException(msg);
+                }
             }
         } catch (SQLException e) {
-            handleException("Error while locating API Product: " + identifier.getName() + "-" + APIUtil.replaceEmailDomainBack(identifier.getProviderName())
-                    + "-" + identifier.getVersion() + " from the database", e);
-        } finally {
-            if (created) {
-                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-            } else {
-                APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
-            }
+            handleException("Error while locating API Product: " + apiProductIdentifier.getName() + "-" +
+                    APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName())
+                    + "-" + apiProductIdentifier.getVersion() + " from the database", e);
         }
-        return id;
     }
 
     /**
@@ -13752,15 +13733,15 @@ public class ApiMgtDAO {
         return resourcePathList;
     }
 
-    public void addAPIProduct(APIProduct apiproduct, String tenantDomain) throws APIManagementException {
+    public void addAPIProduct(APIProduct apiProduct, String tenantDomain) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmtAddAPIProduct = null;
         PreparedStatement prepStmtAddScopeEntry = null;
 
         if(log.isDebugEnabled()) {
-            log.debug("addAPIProduct() : " + apiproduct.toString() + " for tenant " + tenantDomain);
+            log.debug("addAPIProduct() : " + apiProduct.toString() + " for tenant " + tenantDomain);
         }
-        APIProductIdentifier identifier = apiproduct.getId();
+        APIProductIdentifier identifier = apiProduct.getId();
         ResultSet rs = null;
         int productId = 0;
         int scopeId = 0;
@@ -13772,13 +13753,8 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmtAddAPIProduct.setString(2, identifier.getName());
             prepStmtAddAPIProduct.setString(3, identifier.getVersion());
-            prepStmtAddAPIProduct.setString(4, apiproduct.getContext());
-            List<String> tierList = new ArrayList<String>();
-            Set<Tier> tiers = apiproduct.getAvailableTiers();
-            for (Tier tier : tiers) {
-                tierList.add(tier.getName());
-            }
-            prepStmtAddAPIProduct.setString(5, StringUtils.join(tierList,","));
+            prepStmtAddAPIProduct.setString(4, apiProduct.getContext());
+            prepStmtAddAPIProduct.setString(5, apiProduct.getProductLevelPolicy());
             prepStmtAddAPIProduct.setString(6, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmtAddAPIProduct.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
 
@@ -13791,10 +13767,10 @@ public class ApiMgtDAO {
             }
             //breaks the flow if product is not added to the db correctly
             if(productId == 0) {
-                throw new APIManagementException("Error while adding API product " + apiproduct.getUuid());
+                throw new APIManagementException("Error while adding API product " + apiProduct.getUuid());
             }
 
-            addAPIProductResourceMappings(apiproduct.getProductResources(), connection);
+            addAPIProductResourceMappings(apiProduct.getProductResources(), connection);
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while adding API product " + identifier.getName() + " of provider "
@@ -13828,7 +13804,7 @@ public class ApiMgtDAO {
             //add the resources in each API in the API product.
             for (APIProductResource apiProductResource : productResources) {
                 APIProductIdentifier productIdentifier = apiProductResource.getProductIdentifier();
-                int productId = getAPIProductID(productIdentifier, connection);
+                int productId = getAPIID(productIdentifier, connection);
                 URITemplate uriTemplate = apiProductResource.getUriTemplate();
                 prepStmtAddResourceMapping.setInt(1, productId);
                 prepStmtAddResourceMapping.setInt(2, uriTemplate.getId());
@@ -13989,7 +13965,7 @@ public class ApiMgtDAO {
             ps.setString(6, identifier.getVersion());
             ps.executeUpdate();
 
-            int productId = getAPIProductID(product.getId(), conn);
+            int productId = getAPIID(product.getId(), conn);
             updateAPIProductResourceMappings(product, productId, conn);
             conn.commit();
         } catch (SQLException e) {

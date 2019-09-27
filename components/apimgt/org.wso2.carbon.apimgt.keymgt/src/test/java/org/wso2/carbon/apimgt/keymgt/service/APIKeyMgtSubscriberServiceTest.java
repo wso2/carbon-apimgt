@@ -473,6 +473,16 @@ public class APIKeyMgtSubscriberServiceTest {
         Mockito.when(statusLine.getStatusCode()).thenReturn(200);
         Mockito.when(httpResponse.getStatusLine()).thenReturn(statusLine);
         PowerMockito.when(APIUtil.getHttpClient(Mockito.anyInt(), Mockito.anyString())).thenReturn(httpClient);
+        Answer<String> answer = new Answer<String>() {
+            public String answer(InvocationOnMock invocation) throws Throwable {
+                String input = invocation.getArgumentAt(0, String.class);
+                if (input != null && input.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR)) {
+                    input = input.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR, APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT);
+                }
+                return input;
+            }
+        };
+        PowerMockito.when(APIUtil.replaceEmailDomain(Mockito.anyString())).thenAnswer(answer);
 
         String jsonResponse =
                 "{\"scope\":\"\",\"token_type\":\"Bearer\",\"expires_in\":2061,\"access_token\":\"" + ACCESS_TOKEN
@@ -664,6 +674,17 @@ public class APIKeyMgtSubscriberServiceTest {
         Mockito.when(statusLine.getStatusCode()).thenReturn(200);
         Mockito.when(httpResponse.getStatusLine()).thenReturn(statusLine);
         PowerMockito.when(APIUtil.getHttpClient(Mockito.anyInt(), Mockito.anyString())).thenReturn(httpClient);
+        Answer<String> answer = new Answer<String>() {
+            public String answer(InvocationOnMock invocation) throws Throwable {
+                String input = invocation.getArgumentAt(0, String.class);
+                if (input != null && input.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR)) {
+                    input = input.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR, APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT);
+                }
+                return input;
+            }
+        };
+        PowerMockito.when(APIUtil.replaceEmailDomain(Mockito.anyString())).thenAnswer(answer);
+
         boolean status = apiKeyMgtSubscriberService.revokeTokensOfUserByApp(USER_NAME, APPLICATION_NAME,
                 APPLICATION_OWNER);
         Assert.assertEquals(true, status);

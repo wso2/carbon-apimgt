@@ -12,5 +12,5 @@ script: mvn clean install -q -B -V | grep -v DEBUG; test ${PIPESTATUS[0]} -eq 0;
 cache:
   directories:
    - $HOME/.m2
-   - /home/travis/build/wso2/carbon-apimgt/features/apimgt/org.wso2.carbon.apimgt.publisher.feature/src/main/resources/publisher-new/node_modules
-   - /home/travis/build/wso2/carbon-apimgt/features/apimgt/org.wso2.carbon.apimgt.store.feature/src/main/resources/store-new/node_modules
+   - /home/travis/build/wso2/carbon-apimgt/features/apimgt/org.wso2.carbon.apimgt.publisher.feature/src/main/resources/publisher/node_modules
+   - /home/travis/build/wso2/carbon-apimgt/features/apimgt/org.wso2.carbon.apimgt.store.feature/src/main/resources/devportal/node_modules

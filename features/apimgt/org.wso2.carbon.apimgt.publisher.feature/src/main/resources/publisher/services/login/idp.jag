@@ -1,0 +1,97 @@
+<%
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+    var log = new Log("Services login DCR request");
+    var site = require("/site/conf/site.json");
+    include("/services/constants.jag");
+    include("/services/jagg.jag");
+
+    var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    var serverUrl = utils.getServerURL();
+    var settingsAPIUrl = serverUrl + SETTINGS_REST_API_URL_SUFFIX;
+    var settingsResponse = get(settingsAPIUrl, {}, "json");
+
+    var dcrUrl = MGT_TRANSPORT + HOST + ":" + getServerPort() + DCR_URL_SUFFIX;
+    var authorizeEndpoint = serverUrl + AUTHORIZE_ENDPOINT_SUFFIX;
+    var loginCallbackUrl = serverUrl + site.context + LOGIN_CALLBACK_URL_SUFFIX;
+    var logoutCallbackUrl = serverUrl + site.context + LOGOUT_CALLBACK_URL_SUFFIX;
+    var callbackUrl = "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";
+    var scopes = settingsResponse.data.scopes.join(" ");
+    var referer = request.getHeader("Referer");
+    var state = "";
+    // get the pathname from query param 'referrer'
+    if (referer !== null) {
+        state = referer.replace(/(https?:\/\/.*):(\d*)\/?(publisher)/g, '');
+    }
+
+    var authorizationHeader = "Basic " + utils.getBase64EncodedAdminCredentials();
+    var SystemApplicationDAO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
+    var systemApplicationDAO = new SystemApplicationDAO();
+    var clientId;
+    systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME);
+
+    var lock = SystemApplicationDAO.getLock();
+    if (systemApplicationDTO !== null) {
+        clientId = systemApplicationDTO.getConsumerKey();
+    } else {
+        try {
+            lock.acquire();
+            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME);
+            if (systemApplicationDTO == null) {
+                var dcrRequestData = {
+                    "callbackUrl": callbackUrl,
+                    "clientName": PUBLISHER_CLIENT_APP_NAME,
+                    "owner": String(utils.getAdminUsername()),
+                    "grantType": "authorization_code refresh_token",
+                    "saasApp": true
+                };
+
+                var result = post(dcrUrl, JSON.stringify(dcrRequestData), {
+                    "Authorization": authorizationHeader,
+                    "Content-Type": "application/json"
+                }, "json");
+                clientId = result.data.clientId;
+                var clientSecret = result.data.clientSecret;
+
+                var addApplicationKey = systemApplicationDAO
+                                                .addApplicationKey(PUBLISHER_CLIENT_APP_NAME, clientId, clientSecret);
+                if (!addApplicationKey) {
+                    log.error("Error while persisting application information in system application DB table!!");
+                    log.error("Client ID = " + clientId);
+                }
+            }
+        } finally {
+            lock.release();
+        }
+    }
+
+    var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl;
+    log.debug("Redirecting to = " + authorizeEndpoint + authRequestParams);
+    var cookie = {
+        'name': 'CLIENT_ID',
+        'value': clientId,
+        'path': site.context + "/",
+        "HttpOnly": false,
+        "secure": true,
+        "maxAge": -1
+    };
+    response.addCookie(cookie);
+    response.sendRedirect(authorizeEndpoint + authRequestParams);
+
+%>
