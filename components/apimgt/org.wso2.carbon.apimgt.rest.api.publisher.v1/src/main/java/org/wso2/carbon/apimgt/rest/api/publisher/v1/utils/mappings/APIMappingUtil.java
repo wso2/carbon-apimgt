@@ -857,7 +857,7 @@ public class APIMappingUtil {
             dto.setLastUpdatedTime(String.valueOf(timeStamp));
         }
         if (null != model.getCreatedTime()) {
-            Date createdTime = model.getLastUpdated();
+            Date createdTime = new Date(Long.parseLong(model.getCreatedTime()));
             Timestamp timeStamp = new Timestamp(createdTime.getTime());
             dto.setCreatedTime(String.valueOf(timeStamp));
         }
@@ -1760,7 +1760,7 @@ public class APIMappingUtil {
             productDto.setLastUpdatedTime(String.valueOf(timeStamp));
         }
         if (null != product.getCreatedTime()) {
-            Date createdTime = product.getLastUpdated();
+            Date createdTime = product.getCreatedTime();
             Timestamp timeStamp = new Timestamp(createdTime.getTime());
             productDto.setCreatedTime(String.valueOf(timeStamp));
         }
