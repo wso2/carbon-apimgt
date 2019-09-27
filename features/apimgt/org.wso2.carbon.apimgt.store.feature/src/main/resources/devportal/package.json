@@ -28,7 +28,6 @@
         "caniuse-api": "^1.6.1",
         "cleanup-dependencies": "0.0.6",
         "downshift": "^2.1.1",
-        "eslint-config-airbnb": "^17.1.0",
         "eslint-plugin-import": "^2.14.0",
         "eslint-plugin-jsx-a11y": "^6.1.2",
         "file-loader": "^0.11.2",
