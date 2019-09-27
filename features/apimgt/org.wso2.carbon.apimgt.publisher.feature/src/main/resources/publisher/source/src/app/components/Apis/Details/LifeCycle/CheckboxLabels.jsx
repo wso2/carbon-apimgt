@@ -29,28 +29,17 @@ import green from '@material-ui/core/colors/green';
 import LaunchIcon from '@material-ui/icons/Launch';
 
 const useStyles = makeStyles(theme => ({
-    buttonsWrapper: {
-        marginTop: 40,
-    },
     stateButton: {
         marginRight: theme.spacing.unit,
     },
     paperCenter: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         display: 'block',
         alignItems: 'left',
         justifyContent: 'center',
     },
-    subHeading: {
-        fontSize: '1rem',
-        fontWeight: 400,
-        display: 'inline-block',
-    },
-    heading: {
-        fontSize: '1rem',
-        fontWeight: 800,
-        marginTop: theme.spacing.unit * 2,
-        display: 'inline-flex',
+    headingBox: {
+        display: 'grid',
         lineHeight: '38px',
         justifyContent: 'center',
     },
@@ -68,30 +57,20 @@ const useStyles = makeStyles(theme => ({
         justifyContent: 'flex-start',
         alignItems: 'center',
     },
-    mainTitle: {
-        fontSize: '1rem',
-        fontWeight: 800,
-        display: 'inline-flex',
-        justifyContent: 'center',
-        marginLeft: theme.spacing.unit * 15,
-    },
-    captionText: {
-        fontSize: '0.3rem',
-        fontWeight: 800,
-        display: 'inline-flex',
-        justifyContent: 'center',
-        marginLeft: theme.spacing.unit * 12,
-    },
     grid: {
-        marginTop: theme.spacing(1),
+        marginTop: theme.spacing(2),
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'left',
         alignItems: 'left',
     },
+    labelsGrid: {
+        fontWeight: 600,
+        marginTop: theme.spacing(3),
+    },
 }));
 /**
- *
+ * This component renders the requirements list
  * @param {*} props
  */
 export default function CheckboxLabels(props) {
@@ -104,14 +83,14 @@ export default function CheckboxLabels(props) {
 
     return (
         <Paper className={classes.paperCenter}>
-            <Grid xs={12}>
-                <Typography className={classes.mainTitle}>
+            <Grid xs={12} className={classes.headingBox}>
+                <Typography variant='h5' style={{ fontWeight: 600 }}>
                     <FormattedMessage
                         id='Apis.Details.Configuration.Configuration.requirements'
                         defaultMessage='Requirements'
                     />
                 </Typography>
-                <Typography className={classes.captionText}>
+                <Typography variant='caption'>
                     <FormattedMessage
                         id='Apis.Details.Configuration.Configuration.requirements'
                         defaultMessage='Requirements for next state transition'
@@ -120,8 +99,8 @@ export default function CheckboxLabels(props) {
             </Grid>
             {(api.lifeCycleStatus === 'CREATED' || api.lifeCycleStatus === 'PROTOTYPED') && (
                 <React.Fragment>
-                    <Grid xs={12}>
-                        <Typography className={classes.heading}>
+                    <Grid xs={12} className={classes.labelsGrid}>
+                        <Typography variant='h10' >
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.publisher'
                                 defaultMessage='Publish'
@@ -135,7 +114,7 @@ export default function CheckboxLabels(props) {
                             ) : (
                                 <CloseIcon className={classes.iconFalse} />
                             )}
-                            <Typography className={classes.subHeading}>Endpoint provided</Typography>
+                            <Typography variant='h10'>Endpoint provided</Typography>
                             <Link to={'/apis/' + api.id + '/endpoints'}>
                                 <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
                             </Link>
@@ -146,14 +125,14 @@ export default function CheckboxLabels(props) {
                             ) : (
                                 <CloseIcon className={classes.iconFalse} />
                             )}
-                            <Typography className={classes.subHeading}>Tiers selected</Typography>
+                            <Typography variant='h10'>Tiers selected</Typography>
                             <Link to={'/apis/' + api.id + '/subscriptions'}>
                                 <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
                             </Link>
                         </Grid>
                     </Grid>
-                    <Grid xs={12}>
-                        <Typography className={classes.heading}>
+                    <Grid xs={12} className={classes.labelsGrid}>
+                        <Typography variant='h10' >
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.prototype'
                                 defaultMessage='Deploy as a Prototype'
@@ -167,7 +146,7 @@ export default function CheckboxLabels(props) {
                             ) : (
                                 <CloseIcon className={classes.iconFalse} />
                             )}
-                            <Typography className={classes.subHeading}>Prototype Endpoint provided</Typography>
+                            <Typography variant='h10'>Prototype Endpoint provided</Typography>
                             <Link to={'/apis/' + api.id + '/endpoints'}>
                                 <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
                             </Link>
@@ -177,8 +156,8 @@ export default function CheckboxLabels(props) {
             )}
             {api.lifeCycleStatus === 'PUBLISHED' && (
                 <React.Fragment>
-                    <Grid xs={12}>
-                        <Typography className={classes.heading}>
+                    <Grid xs={12} className={classes.labelsGrid}>
+                        <Typography variant='h10' >
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.prototype'
                                 defaultMessage='Deploy as a Prototype'
@@ -192,7 +171,7 @@ export default function CheckboxLabels(props) {
                             ) : (
                                 <CloseIcon className={classes.iconFalse} />
                             )}
-                            <Typography className={classes.subHeading}>Prototype Endpoint provided</Typography>
+                            <Typography variant='h10'>Prototype Endpoint provided</Typography>
                             <Link to={'/apis/' + api.id + '/endpoints'}>
                                 <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
                             </Link>
