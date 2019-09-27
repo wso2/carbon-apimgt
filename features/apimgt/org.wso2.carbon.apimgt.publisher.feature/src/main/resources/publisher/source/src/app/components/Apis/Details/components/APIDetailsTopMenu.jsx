@@ -89,6 +89,20 @@ const APIDetailsTopMenu = (props) => {
                 </Typography>
             </div>
             <VerticalDivider height={70} />
+            <div className={classes.dateWrapper}>
+                <Tooltip title={moment(api.lastUpdatedTime).calendar()} aria-label='add'>
+                    <Typography variant='caption' display='block'>
+                        <FormattedMessage
+                            id='Apis.Details.components.APIDetailsTopMenu.last.updated.time'
+                            defaultMessage='Last updated:'
+                        />{' '}
+                        {moment(api.lastUpdatedTime).fromNow()}
+                    </Typography>
+                </Tooltip>
+            </div>
+            <VerticalDivider height={70} />
+            <GoTo api={api} isAPIProduct={isAPIProduct} />
+            {isVisibleInStore && <VerticalDivider height={70} />}
             {isVisibleInStore && (
                 <a
                     target='_blank'
@@ -107,20 +121,6 @@ const APIDetailsTopMenu = (props) => {
                     </Typography>
                 </a>
             )}
-            {isVisibleInStore && <VerticalDivider height={70} />}
-            <div className={classes.dateWrapper}>
-                <Tooltip title={moment(api.lastUpdatedTime).calendar()} aria-label='add'>
-                    <Typography variant='caption' display='block'>
-                        <FormattedMessage
-                            id='Apis.Details.components.APIDetailsTopMenu.last.updated.time'
-                            defaultMessage='Last updated:'
-                        />{' '}
-                        {moment(api.lastUpdatedTime).fromNow()}
-                    </Typography>
-                </Tooltip>
-            </div>
-            <VerticalDivider height={70} />
-            <GoTo api={api} isAPIProduct={isAPIProduct} />
             {isAPIProduct ? null : <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />}
             <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />
         </div>
