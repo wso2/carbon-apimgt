@@ -18,7 +18,6 @@
 
 import React, { Component } from 'react';
 import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -26,12 +25,13 @@ import Checkbox from '@material-ui/core/Checkbox';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import { injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import LifeCycleImage from './LifeCycleImage';
 import CheckboxLabels from './CheckboxLabels';
+import LifecyclePending from './LifecyclePending';
 
 const styles = theme => ({
     buttonsWrapper: {
@@ -62,20 +62,25 @@ const styles = theme => ({
  * @extends {Component}
  */
 class LifeCycleUpdate extends Component {
+    /**
+     * @param {*} props @inheritdoc
+     */
     constructor(props) {
         super(props);
         this.updateLifeCycleState = this.updateLifeCycleState.bind(this);
         this.api = new API();
+        this.WORKFLOW_STATUS = {
+            CREATED: 'CREATED',
+            APPROVED: 'APPROVED',
+        };
         this.state = {
             newState: null,
         };
     }
 
     /**
-     *
-     *
-     * @param {*} apiUUID
-     * @param {*} action
+     * @param {*} apiUUID api UUID
+     * @param {*} action life cycle action
      * @memberof LifeCycleUpdate
      */
     updateLCStateOfAPI(apiUUID, action) {
@@ -91,14 +96,22 @@ class LifeCycleUpdate extends Component {
                 /* TODO: Handle IO erros ~tmkb */
                 this.props.handleUpdate(true);
                 const newState = response.body.lifecycleState.state;
+                const { workflowStatus } = response.body;
                 this.context.updateAPI();
                 this.setState({ newState });
                 const { intl } = this.props;
 
-                Alert.info(intl.formatMessage({
-                    id: 'Apis.Details.LifeCycle.LifeCycleUpdate.success',
-                    defaultMessage: 'Lifecycle state updated successfully',
-                }));
+                if (workflowStatus === this.WORKFLOW_STATUS.CREATED) {
+                    Alert.info(intl.formatMessage({
+                        id: 'Apis.Details.LifeCycle.LifeCycleUpdate.success',
+                        defaultMessage: 'Lifecycle state change request has been sent',
+                    }));
+                } else {
+                    Alert.info(intl.formatMessage({
+                        id: 'Apis.Details.LifeCycle.LifeCycleUpdate.success',
+                        defaultMessage: 'Lifecycle state updated successfully',
+                    }));
+                }
                 /* TODO: add i18n ~tmkb */
             })
             .catch((errorResponse) => {
@@ -110,7 +123,7 @@ class LifeCycleUpdate extends Component {
     /**
      *
      *
-     * @param {*} event
+     * @param {*} event event
      * @memberof LifeCycleUpdate
      */
     updateLifeCycleState(event) {
@@ -124,9 +137,7 @@ class LifeCycleUpdate extends Component {
 
 
     /**
-     *
-     *
-     * @returns
+     * @inheritdoc
      * @memberof LifeCycleUpdate
      */
     render() {
@@ -135,7 +146,7 @@ class LifeCycleUpdate extends Component {
         } = this.props;
         const lifecycleStates = [...lcState.availableTransitions];
         const { newState } = this.state;
-        const isWorkflowPending = api.workflowStatus && api.workflowStatus.toLowerCase() === 'pending';
+        const isWorkflowPending = api.workflowStatus && api.workflowStatus === this.WORKFLOW_STATUS.CREATED;
         const lcMap = new Map();
         lcMap.set('Published', 'Publish');
         lcMap.set('Prototyped', 'Deploy as a prototype');
@@ -168,18 +179,7 @@ class LifeCycleUpdate extends Component {
             <Grid container>
                 {isWorkflowPending ? (
                     <Grid item xs={12}>
-                        <Typography variant='h5'>
-                            <FormattedMessage
-                                id='Apis.Details.LifeCycle.LifeCycleUpdate.pending'
-                                defaultMessage='Pending lifecycle state change.'
-                            />
-                        </Typography>
-                        <Typography>
-                            <FormattedMessage
-                                id='Apis.Details.LifeCycle.LifeCycleUpdate.adjective'
-                                defaultMessage='adjective'
-                            />
-                        </Typography>
+                        <LifecyclePending currentState={lcState.state} />
                     </Grid>
                 ) : (
                     <Grid item xs={12}>
@@ -219,19 +219,10 @@ class LifeCycleUpdate extends Component {
                         </FormGroup>
                     )}
                     <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
-
                         <div className={classes.buttonsWrapper}>
-                            {isWorkflowPending ? (
-                                <div className='btn-group' role='group'>
-                                    <input
-                                        type='button'
-                                        className='btn btn-primary wf-cleanup-btn'
-                                        defaultValue='Delete pending lifecycle state change request'
-                                    />
-                                </div>
-                            ) : (
-                                lifecycleButtons.map(transitionState =>
-                                    (
+                            {!isWorkflowPending && (
+                                lifecycleButtons.map((transitionState) => {
+                                    return (
                                         <Button
                                             disabled={transitionState.disabled}
                                             variant='outlined'
@@ -242,10 +233,11 @@ class LifeCycleUpdate extends Component {
                                         >
                                             {transitionState.event}
                                         </Button>
-                                    ))
-                                /* Skip when transitions available for current state ,
+                                    );
+                                }))
+                            /* Skip when transitions available for current state ,
                             this occurs in states where have allowed re-publishing in prototype and published sates */
-                            )}
+                            }
                         </div>
                     </ScopeValidation>
                 </Grid>

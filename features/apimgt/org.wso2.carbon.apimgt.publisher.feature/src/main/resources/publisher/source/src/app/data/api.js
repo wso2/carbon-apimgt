@@ -859,7 +859,7 @@ class API extends Resource {
      */
     cleanupPendingTask(id, callback = null) {
         const promise_deletePendingTask = this.client.then(client => {
-            return client.apis['API Lifecycle'].delete_apis_apiId_lifecycle_lifecycle_pending_task(
+            return client.apis['API Lifecycle'].delete_apis__apiId__lifecycle_state_pending_tasks(
                 {
                     apiId: id,
                 },
