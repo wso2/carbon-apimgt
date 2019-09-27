@@ -166,7 +166,7 @@ function FullWidthGrid(props) {
         changeSelectedDoc(doc);
         scrollToY(0, 1500, 'easeInOutQuint');
     };
-    const apiId = props.match.params.api_uuid;
+    const apiId = props.match.params.apiUuid;
 
     useEffect(() => {
         const restApi = new API();
