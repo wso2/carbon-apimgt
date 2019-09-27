@@ -102,7 +102,7 @@ const APIDetailsTopMenu = (props) => {
                     <Typography variant='caption'>
                         <FormattedMessage
                             id='Apis.Details.components.APIDetailsTopMenu.view.in.portal'
-                            defaultMessage='View in Developer Portal'
+                            defaultMessage='View in Dev Portal'
                         />
                     </Typography>
                 </a>
