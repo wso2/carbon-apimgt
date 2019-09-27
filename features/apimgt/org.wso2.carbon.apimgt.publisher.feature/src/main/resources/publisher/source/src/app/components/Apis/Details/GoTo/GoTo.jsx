@@ -102,8 +102,7 @@ function getSuggestions(value, isAPIProduct, { showEmpty = false } = {}) {
     const inputValue = deburr(value.trim()).toLowerCase();
     const inputLength = inputValue.length;
     let count = 0;
-    const newSuggestions = [];
-    newSuggestions.push(...suggestions.common);
+    const newSuggestions = [...suggestions.common];
     isAPIProduct ? newSuggestions.push(...suggestions.productOnly) : newSuggestions.push(...suggestions.apiOnly);
     return inputLength === 0 && !showEmpty
         ? []
@@ -169,6 +168,13 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
+
+/**
+ *
+ *
+ * @param {*} props
+ * @returns
+ */
 function GoTo(props) {
     const { isAPIProduct } = props;
     const classes = useStyles();
