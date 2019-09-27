@@ -207,7 +207,9 @@ class APIProduct extends Resource {
             };
             return client.apis['API Products'].put_api_products__apiProductId_(payload);
         });
-        return promisedUpdate;
+        return promisedUpdate.then(response => {
+            return new APIProduct(response.body);
+        });
     }
 
     /**
