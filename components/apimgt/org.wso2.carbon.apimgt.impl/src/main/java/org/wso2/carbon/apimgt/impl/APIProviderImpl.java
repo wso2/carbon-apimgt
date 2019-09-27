@@ -6094,6 +6094,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return APIUtil.getAPIWorkflowStatus(apiIdentifier, workflowType);
     }
 
+    @Override
     public void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException {
         int apiId;
         try {
@@ -6104,7 +6105,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (WorkflowException e) {
             handleException("Error while deleting the workflow task.", e);
         }
-
     }
 
     private void cleanUpPendingAPIStateChangeTask(int apiId) throws WorkflowException, APIManagementException {

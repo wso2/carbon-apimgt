@@ -1462,8 +1462,17 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdLifecycleStatePendingTasksDelete(String apiId, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            apiProvider.deleteWorkflowTask(apiIdentifier);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while deleting task ";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
     @Override

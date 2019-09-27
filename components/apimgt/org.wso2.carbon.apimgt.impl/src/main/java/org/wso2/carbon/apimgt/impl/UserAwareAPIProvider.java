@@ -568,4 +568,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         checkCreatePermission();
         return super.getCertificateContent(alias);
     }
+
+    @Override
+    public void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException {
+        checkPublishPermission();
+        super.deleteWorkflowTask(apiIdentifier);
+    }
 }
