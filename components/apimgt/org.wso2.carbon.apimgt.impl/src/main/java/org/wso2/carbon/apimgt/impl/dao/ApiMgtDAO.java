@@ -13951,12 +13951,8 @@ public class ApiMgtDAO {
             String query = SQLConstants.UPDATE_PRODUCT_SQL;
 
             ps = conn.prepareStatement(query);
-            Set<Tier> tiers = product.getAvailableTiers();
-            List<String> tierList = new ArrayList<String>();
-            for (Tier tier : tiers) {
-                tierList.add(tier.getName());
-            }
-            ps.setString(1, StringUtils.join(tierList,","));
+
+            ps.setString(1, product.getProductLevelPolicy());
             ps.setString(2, username);
             ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
             APIProductIdentifier identifier = product.getId();
