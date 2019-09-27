@@ -103,28 +103,11 @@ const LoadableSwitch = withRouter(Loadable.Map({
                     render={props => (
                         <Overview {...props} />)}
                 />
-                {!advertised
-                    && (
-                        <React.Fragment>
-                            <Route path='/apis/:apiUuid/credentials' component={Credentials} />
-                            <Route path='/apis/:apiUuid/comments' component={Comments} />
-                            <Route path='/apis/:apiUuid/test' component={ApiConsole} />
-                            <Route path='/apis/:apiUuid/sdk' component={Sdk} />
-                        </React.Fragment>
-                    )
-                }
                 <Route path='/apis/:apiUuid/docs' component={Documentation} />
-                <Redirect exact from='/api-products/:apiUuid' to={redirectURL} />
-                <Route
-                    path='/api-products/:apiUuid/overview'
-                    render={props => (
-                        <Overview {...props} />)}
-                />
-                <Route path='/api-products/:apiUuid/credentials' component={Credentials} />
-                <Route path='/api-products/:apiUuid/comments' component={Comments} />
-                <Route path='/api-products/:apiUuid/test' component={ApiConsole} />
-                <Route path='/api-products/:apiUuid/docs' component={Documentation} />
-                <Route path='/api-products/:apiUuid/sdk' component={Sdk} />
+                {!advertised && <Route path='/apis/:apiUuid/comments' component={Comments} /> }
+                {!advertised && <Route path='/apis/:apiUuid/credentials' component={Credentials} /> }
+                {!advertised && <Route path='/apis/:apiUuid/test' component={ApiConsole} /> }
+                {!advertised && <Route path='/apis/:apiUuid/sdk' component={Sdk} /> }
                 <Route component={PageNotFound} />
             </Switch>
         );
