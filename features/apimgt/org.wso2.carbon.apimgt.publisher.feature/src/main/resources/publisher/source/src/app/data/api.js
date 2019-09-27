@@ -1529,12 +1529,13 @@ class API extends Resource {
         if (params && 'query' in params) {
             Object.entries(params.query).forEach(([key, value], index) => {
                 query = `${key}:${value}`;
-                if (Object.entries(params.query).length !== index+1) {
+                if (Object.entries(params.query).length !== index + 1) {
                     query += ','
                 }
             });
             params.query = query;
         }
+        console.log(params);
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         const promisedAPIs = apiClient.then(client => {
             return client.apis['APIs'].get_apis(params, Resource._requestMetaData());

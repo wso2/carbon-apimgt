@@ -8107,7 +8107,7 @@ public final class APIUtil {
         if (inputSearchQuery != null && inputSearchQuery.contains(" ") && !inputSearchQuery
                 .contains(APIConstants.TAG_COLON_SEARCH_TYPE_PREFIX) && (!inputSearchQuery
                 .contains(APIConstants.CONTENT_SEARCH_TYPE_PREFIX) || inputSearchQuery.split(":").length > 2)) {
-            if (inputSearchQuery.split(" ").length > 1) { // name=*a*&type=HTTP
+            if (inputSearchQuery.split(" ").length > 1) {
                 String[] searchCriterias = inputSearchQuery.split(" ");
                 for (int i = 0; i < searchCriterias.length; i++) {
                     if (searchCriterias[i].contains(":") && searchCriterias[i].split(":").length > 1) {
