@@ -210,7 +210,7 @@
                 <version>1.5.0</version>
                 <executions>
                     <execution>
-                        <id>npm install (initialize)</id>
+                        <id>npm ci (initialize)</id>
                         <goals>
                             <goal>exec</goal>
                         </goals>

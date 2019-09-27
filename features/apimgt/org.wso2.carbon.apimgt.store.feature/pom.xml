@@ -265,7 +265,7 @@
                 <version>1.5.0</version>
                 <executions>
                     <execution>
-                        <id>npm install (initialize)</id>
+                        <id>npm ci (initialize)</id>
                         <goals>
                             <goal>exec</goal>
                         </goals>
@@ -274,6 +274,7 @@
                             <workingDirectory>${basedir}/src/main/resources/devportal</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
+                                <!--<argument>ci</argument>-->
                                 <argument>install</argument>
                                 <argument>--silent</argument>
                             </arguments>
