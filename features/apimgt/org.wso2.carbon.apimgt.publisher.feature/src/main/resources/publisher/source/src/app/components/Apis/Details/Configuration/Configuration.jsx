@@ -427,7 +427,8 @@ export default function Configuration() {
                     <Grid container direction='row' alignItems='center' spacing={4} style={{ marginTop: 20 }}>
                         <Grid item>
                             <Button
-                                disabled={isUpdating}
+                                disabled={isUpdating ||
+                                ((apiConfig.visibility === 'RESTRICTED' && apiConfig.visibleRoles.length === 0))}
                                 type='submit'
                                 variant='contained'
                                 color='primary'
