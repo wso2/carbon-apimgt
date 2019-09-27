@@ -6091,12 +6091,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public WorkflowDTO getAPIWorkflowStatus(APIIdentifier apiIdentifier, String workflowType)
             throws APIManagementException {
-        int apiId = apiMgtDAO.getAPIID(apiIdentifier, null);
-
-        WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
-                WorkflowConstants.WF_TYPE_AM_API_STATE);
-
-        return wfDTO;
+        return APIUtil.getAPIWorkflowStatus(apiIdentifier, workflowType);
     }
 
     public void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException {

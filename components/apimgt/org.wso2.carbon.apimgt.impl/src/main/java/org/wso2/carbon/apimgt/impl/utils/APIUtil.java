@@ -126,11 +126,13 @@ import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.impl.token.JWTSignatureAlg;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
@@ -9186,5 +9188,22 @@ public final class APIUtil {
             return APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
         }
         return alias;
+    }
+
+    /**
+     * Get the workflow status information for the given api for the given workflow type
+     *
+     * @param apiIdentifier Api identifier
+     * @param workflowType  workflow type
+     * @return WorkflowDTO
+     * @throws APIManagementException
+     */
+    public static WorkflowDTO getAPIWorkflowStatus(APIIdentifier apiIdentifier, String workflowType)
+            throws APIManagementException {
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        int apiId = apiMgtDAO.getAPIID(apiIdentifier, null);
+        WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
+                WorkflowConstants.WF_TYPE_AM_API_STATE);
+        return wfDTO;
     }
 }

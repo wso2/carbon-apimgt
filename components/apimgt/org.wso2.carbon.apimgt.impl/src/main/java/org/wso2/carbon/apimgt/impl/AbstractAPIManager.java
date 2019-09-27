@@ -69,6 +69,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -79,6 +80,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.LRUCache;
 import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -126,6 +128,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+
+import static org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_API_STATE;
 
 /**
  * The basic abstract implementation of the core APIManager interface. This implementation uses
@@ -501,7 +505,14 @@ public abstract class AbstractAPIManager implements APIManager {
 
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(uuid);
             if (apiArtifact != null) {
-                return getApiForPublishing(registry, apiArtifact);
+                API api = getApiForPublishing(registry, apiArtifact);
+                APIIdentifier apiIdentifier = APIUtil.getAPIIdentifier(apiArtifact.getPath());
+                WorkflowDTO workflowDTO = APIUtil.getAPIWorkflowStatus(apiIdentifier, WF_TYPE_AM_API_STATE);
+                if (workflowDTO != null) {
+                    WorkflowStatus status = workflowDTO.getStatus();
+                    api.setWorkflowStatus(status.toString());
+                }
+                return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
                 log.error(msg);

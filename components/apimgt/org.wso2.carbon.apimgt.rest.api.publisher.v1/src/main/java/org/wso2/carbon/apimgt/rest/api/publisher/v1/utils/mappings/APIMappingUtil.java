@@ -861,6 +861,7 @@ public class APIMappingUtil {
             Timestamp timeStamp = new Timestamp(createdTime.getTime());
             dto.setCreatedTime(String.valueOf(timeStamp));
         }
+        dto.setWorkflowStatus(model.getWorkflowStatus());
         return dto;
     }
 
