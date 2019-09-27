@@ -5970,12 +5970,13 @@ public final class APIUtil {
      * @param match string to match
      * @return whether the provided URL content contains the string to match
      */
-    public static boolean isURLContentContainsString(URL url, String match) {
+    public static boolean isURLContentContainsString(URL url, String match, int maxLines) {
         try (BufferedReader in =
                      new BufferedReader(new InputStreamReader(url.openStream(), Charset.defaultCharset()))) {
             String inputLine;
             StringBuilder urlContent = new StringBuilder();
-            while ((inputLine = in.readLine()) != null) {
+            while ((inputLine = in.readLine()) != null && maxLines > 0) {
+                maxLines --;
                 urlContent.append(inputLine);
                 if (urlContent.indexOf(match) > 0) {
                     return true;
