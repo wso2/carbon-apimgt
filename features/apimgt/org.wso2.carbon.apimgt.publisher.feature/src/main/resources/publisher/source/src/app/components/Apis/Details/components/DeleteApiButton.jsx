@@ -103,7 +103,7 @@ class DeleteApiButton extends React.Component {
     handleApiDelete() {
         const { api, history } = this.props;
         if (api.apiType === API.CONSTS.APIProduct) {
-            api.deleteProduct().then((response) => {
+            API.deleteProduct(api.id).then((response) => {
                 if (response.status !== 200) {
                     console.log(response);
                     Alert.error('Something went wrong while deleting the API Product!');
