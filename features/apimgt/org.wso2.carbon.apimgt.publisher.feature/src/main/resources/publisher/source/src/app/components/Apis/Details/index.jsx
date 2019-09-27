@@ -343,9 +343,9 @@ class Details extends Component {
         return promisedUpdate
             .then((updatedAPI) => {
                 if (isAPIProduct) {
-                    Alert.info(`${updatedAPI.body.name} API updated successfully`);
-                    this.setState({ api: updatedAPI.body });
-                    return updatedAPI.body;
+                    Alert.info(`${updatedAPI.name} API updated successfully`);
+                    this.setState({ api: updatedAPI });
+                    return updatedAPI;
                 } else {
                     Alert.info(`${updatedAPI.name} API updated successfully`);
                     this.setState({ api: updatedAPI });
