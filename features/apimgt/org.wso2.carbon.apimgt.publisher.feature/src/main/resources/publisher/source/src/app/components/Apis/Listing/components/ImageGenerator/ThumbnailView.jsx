@@ -48,6 +48,17 @@ import ImageGenerator from './ImageGenerator';
 import Background from './Background';
 
 const windowURL = window.URL || window.webkitURL;
+const dropzoneStyles = {
+    border: '1px dashed ',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    height: 75,
+    padding: '8px 0px',
+    position: 'relative',
+    textAlign: 'center',
+    width: '100%',
+    margin: '10px 0',
+};
 const styles = theme => ({
     acceptDrop: {
         backgroundColor: green[50],
@@ -299,7 +310,7 @@ class ThumbnailView extends Component {
                 fileObj = new File([blob], 'FileName.json', { type: 'application/json' });
             }
 
-            this.uploadThumbnail(api.id, fileObj, intl);
+            this.uploadThumbnail(selectedTab, api.id, fileObj, intl);
         }
     };
 
@@ -309,7 +320,7 @@ class ThumbnailView extends Component {
      * @param {String} apiId ID of the API to be updated
      * @param {File} file new thumbnail image file
      */
-    uploadThumbnail(apiId, file, intl) {
+    uploadThumbnail(selectedTab, apiId, file, intl) {
         const { api: { apiType, id } } = this.props;
         const promisedThumbnail = apiType === Api.CONSTS.APIProduct ?
             new APIProduct().addAPIProductThumbnail(id, file) :
@@ -321,7 +332,11 @@ class ThumbnailView extends Component {
                     id: 'Apis.Listing.components.ImageGenerator.ThumbnailView.thumbnail.upload.success',
                     defaultMessage: 'Thumbnail uploaded successfully',
                 }));
-                this.setState({ open: false, thumbnail: file.preview });
+                if (selectedTab === 'upload') {
+                    this.setState({ open: false, thumbnail: windowURL.createObjectURL(file) });
+                } else {
+                    this.setState({ open: false, thumbnail: file.preview });
+                }
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -339,7 +354,7 @@ class ThumbnailView extends Component {
      */
     handleClose() {
         if (this.state.file) {
-            windowURL.revokeObjectURL(this.state.file.preview);
+            windowURL.revokeObjectURL(this.state.file);
         }
         this.setState({ open: false, file: null });
     }
@@ -481,7 +496,7 @@ class ThumbnailView extends Component {
                                             className={classes.preview}
                                             src={
                                                 file && file.length > 0
-                                                    ? file[0].preview
+                                                    ? windowURL.createObjectURL(file[0])
                                                     : '/publisher/site/public/images/api/api-default.png'
                                             }
                                             alt='Thumbnail Preview'
@@ -499,9 +514,20 @@ class ThumbnailView extends Component {
                                             this.onDrop(dropFile);
                                         }}
                                     >
-                                        <div className={classes.dropZoneWrapper}>
-                                            <Icon className={classes.dropIcon}>cloud_upload</Icon>
-                                        </div>
+                                        {({ getRootProps, getInputProps }) => (
+                                            <div {...getRootProps({ style: dropzoneStyles })}>
+                                                <input {...getInputProps()} />
+                                                <div className={classes.dropZoneWrapper}>
+                                                    <Icon className={classes.dropIcon}>cloud_upload</Icon>
+                                                    <Typography>
+                                                        <FormattedMessage
+                                                            id='upload.image'
+                                                            defaultMessage='Click or drag the image to upload.'
+                                                        />
+                                                    </Typography>
+                                                </div>
+                                            </div>
+                                        )}
                                     </Dropzone>
                                 </Grid>
                             </Grid>
@@ -595,7 +621,7 @@ class ThumbnailView extends Component {
                             variant='contained'
                             color='primary'
                             size='small'
-                            onClick={this.handleClick('btnUploadAPIThumb')}
+                            onClick={this.handleClick('btnUploadAPIThumb', intl)}
                         >
                             <FormattedMessage
                                 id='Apis.Listing.components.ImageGenerator.ThumbnailView.upload.btn'
