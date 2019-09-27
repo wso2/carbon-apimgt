@@ -165,7 +165,7 @@ class Listing extends Component {
                     // eslint-disable-next-line react/no-unused-state
                     this.setState({ notFound: true });
                 } else if (status === 401) {
-                    window.location = '/store/services/configs';
+                    window.location = '/devportal/services/configs';
                 }
             });
     };

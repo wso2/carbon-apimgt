@@ -367,7 +367,7 @@ class InfoBar extends React.Component {
                                         <div>
                                             <LaunchIcon />
                                         </div>
-                                        <div className={classes.linkText}>Visit Publisher Store</div>
+                                        <div className={classes.linkText}>Visit Publisher Dev Portal</div>
                                     </a>
                                     <VerticalDivider height={70} />
                                 </React.Fragment>

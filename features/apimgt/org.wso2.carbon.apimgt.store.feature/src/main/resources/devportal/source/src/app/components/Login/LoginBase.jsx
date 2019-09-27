@@ -26,10 +26,10 @@ const LoginBase = (props) => {
             <header className='header header-default'>
                 <div className='container-fluid'>
                     <div className='pull-left brand float-remove-xs text-center-xs'>
-                        <a href='/store/'>
-                            <img src='/store/site/public/images/logo.svg' className='logo' />
+                        <a href='/devportal/'>
+                            <img src='/devportal/site/public/images/logo.svg' className='logo' />
                             <h1>
-                                <FormattedMessage defaultMessage='API Store' id='Login.LoginBase.api.store'  />
+                                <FormattedMessage defaultMessage='API Dev Portal' id='Login.LoginBase.api.store'  />
                             </h1>
                         </a>
                     </div>

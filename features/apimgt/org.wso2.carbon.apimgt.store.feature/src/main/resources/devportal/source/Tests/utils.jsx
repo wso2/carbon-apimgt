@@ -75,7 +75,7 @@ class TestUtils {
                 }
                 const { partialToken, validityPeriod } = response.data;
                 document.clearCookies();
-                Utils.setCookie(User.CONST.WSO2_AM_TOKEN_1, partialToken + WSO2_AM_TOKEN_MSF4J, validityPeriod, '/store');
+                Utils.setCookie(User.CONST.WSO2_AM_TOKEN_1, partialToken + WSO2_AM_TOKEN_MSF4J, validityPeriod, '/devportal');
             },
         );
         return promisedAuth;

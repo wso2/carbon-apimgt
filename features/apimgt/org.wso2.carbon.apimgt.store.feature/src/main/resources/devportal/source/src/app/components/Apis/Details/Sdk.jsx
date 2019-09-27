@@ -147,7 +147,7 @@ class Sdk extends React.Component {
      * Handle sdk image not found issue. Point to a default image
      */
     addDefaultSrc = (ev) => {
-        ev.target.src = '/store-new/site/public/images/sdks/default.svg';
+        ev.target.src = '/devportal/site/public/images/sdks/default.svg';
     };
 
     /**
@@ -173,7 +173,7 @@ class Sdk extends React.Component {
                                         <img
                                             alt={language}
                                             src={
-                                                '/store-new/site/public/images/sdks/'
+                                                '/devportal/site/public/images/sdks/'
                                                     + new String(language)
                                                     + '.svg'
                                             }
@@ -216,13 +216,13 @@ class Sdk extends React.Component {
                                         <Divider />
                                         <CardMedia
                                             title={language.toString().toUpperCase()}
-                                            src={'/store-new/site/public/images/sdks/' + new String(language) + '.svg'}
+                                            src={'/devportal/site/public/images/sdks/' + new String(language) + '.svg'}
                                         >
                                             <img
                                                 alt={language}
                                                 onError={this.addDefaultSrc}
                                                 src={
-                                                    `/store-new/site/public/images/sdks/${language}.svg`
+                                                    `/devportal/site/public/images/sdks/${language}.svg`
                                                 }
                                                 style={{ width: '100px', height: '100px', margin: '30px' }}
                                             />
