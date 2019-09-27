@@ -49,7 +49,7 @@ public class TenantManagerHostObject extends ScriptableObject {
 
     public static String getStoreTenantThemesPath() {
         return "repository" + File.separator + "deployment" + File.separator + "server" + File.separator + "jaggeryapps"
-                + File.separator + "store-new" + File.separator + "site" + File.separator + "public"
+                + File.separator + "devportal" + File.separator + "site" + File.separator + "public"
                 + File.separator + "tenant_themes" + File.separator;
     }
 
