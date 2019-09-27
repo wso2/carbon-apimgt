@@ -520,7 +520,7 @@ public class APIGatewayManager {
                             client.deleteDefaultApi(tenantDomain, api.getId());
                         }
                     }
-                    if (api.getType().equals(APIConstants.GRAPHQL_API)) {
+                    if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
                         localEntryUUId = localEntryUUId + APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION;
                     }
                     localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
@@ -719,7 +719,7 @@ public class APIGatewayManager {
                         }
                         client.deleteDefaultApi(tenantDomain, api.getId());
                     }
-                    if (api.getType().equals(APIConstants.GRAPHQL_API)) {
+                    if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
                         localEntryUUId = localEntryUUId + APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION;
                     }
                     localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);

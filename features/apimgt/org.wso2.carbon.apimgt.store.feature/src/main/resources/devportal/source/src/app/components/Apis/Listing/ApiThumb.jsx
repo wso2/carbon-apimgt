@@ -267,7 +267,7 @@ class ApiThumb extends React.Component {
                         <div className={classes.thumbRight}>
                             <Typography variant='subtitle1' gutterBottom align='right'>
                                 {(api.type === 'GRAPHQL' || api.transportType === 'GRAPHQL') && (
-                                    <Chip label={api.TransportType === null ? api.type : api.transportType} color='primary' />
+                                    <Chip label={api.transportType === null ? api.type : api.transportType} color='primary' />
                                 )}
                             </Typography>
                         </div>
