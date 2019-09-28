@@ -19,6 +19,7 @@
 import React, { useReducer, useEffect, useState } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
+import Box from '@material-ui/core/Box';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import cloneDeep from 'lodash.clonedeep';
 import Swagger from 'swagger-client';
@@ -238,7 +239,14 @@ export default function Resources(props) {
     // Note: Make sure not to use any hooks after/within this condition , because it returns conditionally
     // If you do so, You will probably get `Rendered more hooks than during the previous render.` exception
     if (isEmpty(openAPI)) {
-        return <CircularProgress />;
+        return (
+            <Grid container direction='row' justify='center' alignItems='center'>
+                <Grid item>
+                    {/* TODO:  */}
+                    <CircularProgress disableShrink />
+                </Grid>
+            </Grid>
+        );
     }
 
     return (
