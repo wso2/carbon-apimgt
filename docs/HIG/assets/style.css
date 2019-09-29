@@ -117,12 +117,6 @@ ol.padded li, ul.padded li {
     padding: 20px 0;
 }
 
-code {
-    background-color: #e5e5e5;
-    border: 1px dotted #bbb;
-    padding: 1px 4px;
-}
-
 header {
     background: rgba(255, 255, 255, 0.95);
     box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.85), 0 2px 6px rgba(0, 0, 0, 0.15);
@@ -410,4 +404,56 @@ form.horizontal label {
 form.vertical label {
     display: block;
     margin: 0.25em 0;
+}
+
+.s-tag-table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    table-layout: auto
+}
+
+.s-tag-table {
+    margin-top: 16px;
+    margin-bottom: 40px;
+    width: 100%
+}
+
+.s-tag-table:first-child {
+    margin-top: 0
+}
+
+.s-tag-table td {
+    border: 1px solid #eee;
+    color: #000;
+    padding: .75em;
+    vertical-align: middle
+}
+
+.s-tag-table td>:last-child {
+    margin-bottom: 0
+}
+
+.s-tag-table tr:first-child {
+    background-color: #f5f5f5;
+    font-weight: 500
+}
+
+.s-tag-table tr:first-child td {
+    border-top: 1px solid #e5e5e5
+}
+
+.s-tag-table tr:first-child td p {
+    color: #616161
+}
+
+.s-tag-table tr:last-child td {
+    border-bottom: 1px solid #e5e5e5
+}
+
+.s-tag-table tr td:first-child {
+    border-left: 1px solid #e5e5e5
+}
+
+.s-tag-table tr td:last-child {
+    border-right: 1px solid #e5e5e5
 }
