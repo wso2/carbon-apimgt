@@ -2064,6 +2064,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (api.getId().getProviderName().contains("AT")) {
             String provider = api.getId().getProviderName().replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        } else {
+            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
 
         failedEnvironment = removeFromGateway(api, tenantDomain);
@@ -2080,6 +2082,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (api.getId().getProviderName().contains("AT")) {
             String provider = api.getId().getProviderName().replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        } else {
+            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
 
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
@@ -2092,6 +2096,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (api.getId().getProviderName().contains("AT")) {
             String provider = api.getId().getProviderName().replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        } else {
+            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         return gatewayManager.isAPIPublished(api, tenantDomain);
@@ -3275,7 +3281,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.updateSubscription(subscribedAPI);
     }
 
-    public void deleteAPI(APIIdentifier identifier) throws APIManagementException {
+    public void deleteAPI(APIIdentifier identifier, String apiUuid) throws APIManagementException {
         String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                 identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
@@ -3350,6 +3356,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
             API api = new API(identifier);
+            api.setUUID(apiUuid);
             api.setAsDefaultVersion(Boolean.parseBoolean(isDefaultVersion));
             api.setAsPublishedDefaultVersion(api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
             api.setType(type);

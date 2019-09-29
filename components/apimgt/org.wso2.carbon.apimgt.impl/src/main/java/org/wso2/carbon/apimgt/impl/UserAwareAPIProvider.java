@@ -119,10 +119,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void deleteAPI(APIIdentifier identifier) throws APIManagementException {
+    public void deleteAPI(APIIdentifier identifier, String apiUUid) throws APIManagementException {
         checkCreatePermission();
         checkAccessControlPermission(identifier);
-        super.deleteAPI(identifier);
+        super.deleteAPI(identifier, apiUUid);
     }
 
     @Override

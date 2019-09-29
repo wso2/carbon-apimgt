@@ -520,11 +520,13 @@ public class APIGatewayManager {
                             client.deleteDefaultApi(tenantDomain, api.getId());
                         }
                     }
-                    if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
-                        localEntryUUId = localEntryUUId + APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION;
+                    if(localEntryUUId != null && !localEntryUUId.isEmpty()) {
+                        if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
+                            localEntryUUId = localEntryUUId + APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION;
+                        }
+                        localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
+                        localEntryAdminClient.deleteEntry(localEntryUUId);
                     }
-                    localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
-                    localEntryAdminClient.deleteEntry(localEntryUUId);
                 } catch (AxisFault axisFault) {
                     /*
                     didn't throw this exception to handle multiple gateway publishing
