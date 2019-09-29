@@ -8864,6 +8864,13 @@ public final class APIUtil {
             List<APIProductResource> resources = ApiMgtDAO.getInstance().
                     getAPIProductResourceMappings(apiProductIdentifier);
 
+            Set<String> tags = new HashSet<String>();
+            Tag[] tag = registry.getTags(artifactPath);
+            for (Tag tag1 : tag) {
+                tags.add(tag1.getTagName());
+            }
+            apiProduct.addTags(tags);
+
             for (APIProductResource resource : resources) {
                 String apiPath = APIUtil.getAPIPath(resource.getApiIdentifier());
 
