@@ -43,8 +43,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import Alert from 'AppComponents/Shared/Alert';
 
 const alertPropertyMap = {
-    AbnormalResponseTime: 'thresholdResponseTime',
-    AbnormalBackendTime: 'thresholdBackendTime',
+    AbnormalRequestsPerMin: 'requestCount',
 };
 
 const styles = theme => ({
@@ -85,14 +84,16 @@ const AlertConfiguration = (props) => {
     const [selectedAPIName, setSelectedAPIName] = useState();
     const [apiNames, setAPINames] = useState(new Set());
     const [apiVersions, setAPIVersions] = useState([]);
+    const [applications, setApplications] = useState([]);
     const [selectedAPIVersion, setSelectedAPIVersion] = useState();
-    const [value, setValue] = useState(300);
+    const [value, setValue] = useState();
     const [isProcessing, setProcessing] = useState({});
     const [collapseOpen, setCollapseOpen] = useState(false);
+    const [selectedApplicationName, setSelectedApplicationName] = useState();
 
     useEffect(() => {
         const alertConfigPromise = api.getAlertConfigurations(alertType);
-        const apisPromise = api.all();
+        const apisPromise = api.getAllAPIs();
         Promise.all([alertConfigPromise, apisPromise])
             .then((response) => {
                 const apisList = response[1].body.list;
@@ -119,10 +120,32 @@ const AlertConfiguration = (props) => {
     };
 
     /**
+     * Handles the api version select event.
+     * In this method, get the subscriptions of the selected api+version and set to the state.
+     * @param {string} version The selected api version.
+     * */
+    const handleApiVersionSelect = (version) => {
+        setSelectedAPIVersion(version);
+        const existingAPI = apis.filter((tmpAPi) => {
+            return tmpAPi.name === selectedAPIName && tmpAPi.version === version ? tmpAPi.id : -1;
+        });
+        if (existingAPI.length > 0) {
+            api.getSubscriptions(existingAPI[0].id).then((res) => {
+                const subscribedApps = res.body.list.map((subscription) => {
+                    return subscription.applicationInfo;
+                });
+                setApplications(subscribedApps);
+            }).catch(err => {
+                console.log(err);
+            });
+        }
+    };
+
+    /**
      * Get the alert configuration of the alert type.
      * This method is called after a configuration addition or deletion.
      *
-     * @param {string} action : The action that is being performed.
+     * @param {string} action The action that is being performed.
      * */
     const getAlertConfig = (action) => {
         api.getAlertConfigurations(alertType).then((response) => {
@@ -137,23 +160,23 @@ const AlertConfiguration = (props) => {
      * */
     const handleAddConfiguration = () => {
         setProcessing({ add: true });
-        const configId = base64url.encode(selectedAPIName + '#' + selectedAPIVersion + '#carbon.super');
-        const propertyName = alertPropertyMap[alertType];
+        const configId = base64url.encode(selectedAPIName + '#' + selectedAPIVersion + '#' + selectedApplicationName);
         const alertConfig = {
             apiName: selectedAPIName,
             apiVersion: selectedAPIVersion,
-            [propertyName]: value,
+            applicationName: selectedApplicationName,
+            requestCount: value,
         };
         api.putAlertConfiguration(alertType, alertConfig, configId)
             .then(() => {
                 Alert.info(intl.formatMessage({
-                    id: 'Apis.Settings.Alert.AlertConfiguration.alert.config.add.success.msg',
+                    id: 'Settings.Alert.AlertConfiguration.alert.config.add.success.msg',
                     defaultMessage: 'Alert Configuration added successfully',
                 }));
             })
             .catch(() => {
                 Alert.error(intl.formatMessage({
-                    id: 'Apis.Settings.Alert.AlertConfiguration.alert.config.add.error.msg',
+                    id: 'Settings.Alert.AlertConfiguration.alert.config.add.error.msg',
                     defaultMessage: 'Error occurred while adding alert configuration',
                 }));
             })
@@ -171,17 +194,21 @@ const AlertConfiguration = (props) => {
         setProcessing({ delete: id });
         api.deleteAlertConfiguration(alertType, id).then(() => {
             Alert.info(intl.formatMessage({
-                id: 'Apis.Settings.Alert.AlertConfiguration.alert.config.delete.success.msg',
+                id: 'Settings.Alert.AlertConfiguration.alert.config.delete.success.msg',
                 defaultMessage: 'Alert Configuration deleted successfully',
             }));
         }).catch(() => {
             Alert.error(intl.formatMessage({
-                id: 'Apis.Settings.Alert.AlertConfiguration.alert.config.delete.error.msg',
+                id: 'Settings.Alert.AlertConfiguration.alert.config.delete.error.msg',
                 defaultMessage: 'Error occurred while deleting the configuration.',
             }));
         }).finally(() => {
             getAlertConfig('delete');
         });
+    };
+
+    const isAddingDissabled = () => {
+        return !selectedAPIName || !selectedAPIVersion || !selectedApplicationName || !value || isProcessing.add;
     };
 
     if (!apis || !alertConfiguration) {
@@ -196,7 +223,7 @@ const AlertConfiguration = (props) => {
                             add
                         </Icon>
                         <FormattedMessage
-                            id='Apis.Settings.Alert.AlertConfiguration.add'
+                            id='Settings.Alert.AlertConfiguration.add'
                             defaultMessage='New Configuration'
                         />
                     </Typography>
@@ -210,7 +237,7 @@ const AlertConfiguration = (props) => {
                                 fullWidth
                                 required
                                 label={<FormattedMessage
-                                    id='Apis.Settings.Alerts.AlertConfiguration.api.name.label'
+                                    id='Settings.Alerts.AlertConfiguration.api.name.label'
                                     defaultMessage='API Name'
                                 />}
                                 className={classes.textField}
@@ -223,7 +250,7 @@ const AlertConfiguration = (props) => {
                                 }}
                                 helperText={
                                     <FormattedMessage
-                                        id='Apis.Settings.Alerts.AlertConfiguration.select.api.helper'
+                                        id='Settings.Alerts.AlertConfiguration.select.api.helper'
                                         defaultMessage='Select the API Name'
                                     />
                                 }
@@ -244,12 +271,12 @@ const AlertConfiguration = (props) => {
                                 fullWidth
                                 required
                                 label={<FormattedMessage
-                                    id='Apis.Settings.Alerts.AlertConfiguration.api.version.label'
+                                    id='Settings.Alerts.AlertConfiguration.api.version.label'
                                     defaultMessage='API Version'
                                 />}
                                 className={classes.textField}
                                 value={selectedAPIVersion}
-                                onChange={event => setSelectedAPIVersion(event.target.value)}
+                                onChange={event => handleApiVersionSelect(event.target.value)}
                                 SelectProps={{
                                     MenuProps: {
                                         className: classes.menu,
@@ -257,7 +284,7 @@ const AlertConfiguration = (props) => {
                                 }}
                                 helperText={
                                     <FormattedMessage
-                                        id='Apis.Settings.Alerts.AlertConfiguration.select.version.helper'
+                                        id='Settings.Alerts.AlertConfiguration.select.version.helper'
                                         defaultMessage='Select API Version'
                                     />
                                 }
@@ -274,25 +301,63 @@ const AlertConfiguration = (props) => {
                         </Grid>
                         <Grid item xs>
                             <TextField
+                                id='outlined-select-applications'
+                                select
+                                fullWidth
+                                required
+                                label={<FormattedMessage
+                                    id='Settings.Alerts.AlertConfiguration.applications.label'
+                                    defaultMessage='Application'
+                                />}
+                                className={classes.textField}
+                                value={selectedApplicationName}
+                                onChange={event => setSelectedApplicationName(event.target.value)}
+                                SelectProps={{
+                                    MenuProps: {
+                                        className: classes.menu,
+                                    },
+                                }}
+                                helperText={
+                                    <FormattedMessage
+                                        id='Settings.Alerts.AlertConfiguration.select.application.helper'
+                                        defaultMessage='Select Application'
+                                    />
+                                }
+                                variant='outlined'
+                            >
+                                {applications && applications.map((applicationInfo) => {
+                                    return (
+                                        <MenuItem key={applicationInfo.applicationId} value={applicationInfo.name}>
+                                            {applicationInfo.name}
+                                        </MenuItem>
+                                    );
+                                })}
+                            </TextField>
+                        </Grid>
+                        <Grid item xs>
+                            <TextField
                                 id='outlined-value'
                                 type='number'
                                 fullWidth
                                 required
-                                label={alertName}
+                                label={<FormattedMessage
+                                    id='Settings.Alerts.AlertConfiguration.request.count.label'
+                                    defaultMessage='Request Count.'
+                                />}
                                 className={classes.textField}
                                 value={value}
                                 onChange={event => setValue(event.target.value)}
                                 variant='outlined'
                                 endAdornment={<InputAdornment position='end'>ms</InputAdornment>}
                                 helperText={<FormattedMessage
-                                    id='Apis.Settings.Alerts.AlertConfiguration.threshold.value.helper'
-                                    defaultMessage='Enter threshold value.'
+                                    id='Settings.Alerts.AlertConfiguration.threshold.value.helper'
+                                    defaultMessage='Enter Request Count.'
                                 />}
                             />
                         </Grid>
                         <Grid item className={classes.configAddBtnContainer}>
                             <Fab
-                                disabled={!selectedAPIName || !selectedAPIVersion || !value || isProcessing.add}
+                                disabled={isAddingDissabled()}
                                 color='primary'
                                 size='medium'
                                 onClick={handleAddConfiguration}
@@ -309,7 +374,7 @@ const AlertConfiguration = (props) => {
             <React.Fragment>
                 <Typography className={classes.configNameHeading}>
                     <FormattedMessage
-                        id='Apis.Settings.Alerts.AlertConfiguration.configuration'
+                        id='Settings.Alerts.AlertConfiguration.configuration'
                         defaultMessage='{name} Configurations'
                         values={{ name: alertName }}
                     />
@@ -319,7 +384,7 @@ const AlertConfiguration = (props) => {
                         <div className={classes.contentWrapper}>
                             <Typography>
                                 <FormattedMessage
-                                    id='Apis.Settings.Alerts.AlertConfiguration.no.config.message'
+                                    id='Settings.Alerts.AlertConfiguration.no.config.message'
                                     defaultMessage={'You do not have any configurations. Click on {newConfig} button' +
                                     ' to add a configuration.'}
                                     values={{
@@ -334,14 +399,20 @@ const AlertConfiguration = (props) => {
                             <TableRow>
                                 <TableCell>
                                     <FormattedMessage
-                                        id='Apis.Settings.Alerts.AlertConfiguration.api.name'
+                                        id='Settings.Alerts.AlertConfiguration.api.name'
                                         defaultMessage='API Name'
                                     />
                                 </TableCell>
                                 <TableCell>
                                     <FormattedMessage
-                                        id='Apis.Settings.Alerts.AlertConfiguration.api.version'
+                                        id='Settings.Alerts.AlertConfiguration.api.version'
                                         defaultMessage='API Version'
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    <FormattedMessage
+                                        id='Settings.Alerts.AlertConfiguration.app.name'
+                                        defaultMessage='Application Name'
                                     />
                                 </TableCell>
                                 <TableCell>{alertName}</TableCell>
@@ -354,6 +425,7 @@ const AlertConfiguration = (props) => {
                                     <TableRow id={configuration.configurationId}>
                                         <TableCell>{configuration.configuration.apiName}</TableCell>
                                         <TableCell>{configuration.configuration.apiVersion}</TableCell>
+                                        <TableCell>{configuration.configuration.applicationName}</TableCell>
                                         <TableCell>
                                             {configuration.configuration[alertPropertyMap[alertType]]}
                                         </TableCell>

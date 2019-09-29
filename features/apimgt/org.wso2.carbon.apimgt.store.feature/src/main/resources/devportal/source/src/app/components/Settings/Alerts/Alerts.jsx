@@ -37,12 +37,12 @@ import {
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import AlertConfiguration from 'AppComponents/Apis/Settings/Alerts/AlertConfiguration';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import ChipInput from 'material-ui-chip-input';
 import Grid from '@material-ui/core/Grid';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
+import AlertConfiguration from './AlertConfiguration';
 
 
 const styles = theme => ({
@@ -86,48 +86,64 @@ const Alerts = (props) => {
     const [isAnalyticsEnabled, setAnalyticsEnabled] = useState(false);
     const [isInProgress, setInProgress] = useState({ subscribing: false, unSubscribing: false });
     const [unsubscribeAll, setUnsubscribeAll] = useState(false);
+    const [api, setAPI] = useState(new API());
 
     const alertIdMapping =
         {
-            1: {
+            3: {
                 name: intl.formatMessage({
-                    id: 'Apis.Settings.Alerts.Alerts.abnormal.response.time',
-                    defaultMessage: 'Abnormal Response Time',
+                    id: 'Settings.Alerts.Alerts.abnormal.response.time',
+                    defaultMessage: 'Abnormal Requests per Minute',
                 }),
-                displayName: 'AbnormalResponseTime',
+                displayName: 'AbnormalRequestsPerMin',
                 description: intl.formatMessage({
-                    id: 'Apis.Settings.Alerts.Alerts.abnormal.request.time.description',
-                    defaultMessage: 'This alert gets triggered if the backend time' +
-                        ' corresponding to a particular API is higher than the predefined value. ' +
-                        'These alerts could be treated as an indication of a slow ' +
-                        'backend. In technical terms, if the backend time of a particular API of a tenant lies ' +
-                        'outside the predefined value, an alert will be sent out.',
+                    id: 'Settings.Alerts.Alerts.abnormal.request.per.min.description',
+                    defaultMessage: 'This alert is triggered if there is a sudden spike the request count within a ' +
+                            'period of one minute by default for a particular API for an application. These alerts ' +
+                            'could be treated as an indication of a possible high traffic, suspicious activity, ' +
+                            'possible malfunction of the client application, etc.',
                 }),
             },
-            2: {
+            4: {
                 name: intl.formatMessage({
-                    id: 'Apis.Settings.Alerts.Alerts.abnormal.backend.time',
-                    defaultMessage: 'Abnormal Backend Time',
+                    id: 'Settings.Alerts.Alerts.abnormal.backend.time',
+                    defaultMessage: 'Abnormal Resource Access',
                 }),
-                displayName: 'AbnormalBackendTime',
+                displayName: 'AbnormalRequestPattern',
                 description: intl.formatMessage({
-                    id: 'Apis.Settings.Alerts.Alerts.abnormal.backend.time.description',
-                    defaultMessage: 'This alert gets triggered if the response time of a particular API is higher ' +
-                        'than the predefined value. These alerts could be treated as an indication of a slow ' +
-                        'WSO2 API Manager runtime or a slow backend.',
+                    id: 'Settings.Alerts.Alerts.abnormal.request.pattern.description',
+                    defaultMessage: 'This alert is triggered if there is a change in the resource access pattern of ' +
+                        'a user of a particular application. These alerts could be treated as an indication of a ' +
+                        'suspicious activity made by a user over your application.',
                 }),
             },
-            7: {
+            5: {
                 name: intl.formatMessage({
-                    id: 'Apis.Settings.Alerts.Alerts.api.health.monitor',
-                    defaultMessage: 'API Health Monitor',
+                    id: 'Settings.Alerts.Alerts.api.health.monitor',
+                    defaultMessage: 'Unusual IP Access',
                 }),
-                displayName: 'APIHealthMonitor',
+                displayName: 'UnusualIPAccess',
                 description: intl.formatMessage({
-                    id: 'Apis.Settings.Alerts.Alerts.api.health.monitor.description',
-                    defaultMessage: 'This alert gets triggered if at least one of the two cases below are satisfied; ' +
-                    'Response time of an API > Threshold response time value defined for that particular API or ' +
-                    'Response status code >= 500 (By Default) AND Response status code < 600 (By Default)',
+                    id: 'Settings.Alerts.Alerts.unusual.ip.access.description',
+                    defaultMessage: 'This alert is triggered if there is either a change in the request source IP ' +
+                        'for a particular application by a user or if the request is from an IP used before a ' +
+                        'time period of 30 days (default). These alerts could be treated as an indication of a ' +
+                        'suspicious activity made by a user over an application.',
+                }),
+            },
+            6: {
+                name: intl.formatMessage({
+                    id: 'Settings.Alerts.Alerts.api.health.monitor',
+                    defaultMessage: 'Frequent Tier Limit Hitting',
+                }),
+                displayName: 'FrequentTierLimitHitting',
+                description: intl.formatMessage({
+                    id: 'Settings.Alerts.Alerts.tier.limit.hitting.description',
+                    defaultMessage: 'This alert is triggered if at least one of the two cases below are satisfied.' +
+                        ' if a particular application gets throttled out for hitting the subscribed tier limit of ' +
+                        'that application more than 10 times (by default) within an hour (by default) or if a ' +
+                        'particular user of an application gets throttled out for hitting the subscribed tier limit ' +
+                        'of a particular API more than 10 times (by default) within a day (by default)',
                 }),
             },
         };
@@ -160,7 +176,7 @@ const Alerts = (props) => {
      * @param {string} selectedType : The alert type which needs to be check.
      * */
     const isAlertConfigured = (selectedType) => {
-        API.getAlertConfigurations(selectedType.displayName).then((res) => {
+        api.getAlertConfigurations(selectedType.displayName).then((res) => {
             const data = res.body;
             if (data.length === 0) {
                 setOpenDialog({ open: true, alertType: selectedType.displayName, name: selectedType.name });
@@ -213,9 +229,11 @@ const Alerts = (props) => {
     };
 
     useEffect(() => {
-        const supportedAlertsPromise = API.getSupportedAlertTypes();
-        const subscribedAlertsPromise = API.getSubscribedAlertTypesByUser();
+        const supportedAlertsPromise = api.getSupportedAlertTypes();
+        const subscribedAlertsPromise = api.getSubscribedAlertTypesByUser();
+        console.log(subscribedAlertsPromise, supportedAlertsPromise);
         Promise.all([supportedAlertsPromise, subscribedAlertsPromise]).then((response) => {
+            console.log('success', response);
             if (response[0].status === 204 || response[1].status === 204) {
                 setAnalyticsEnabled(false);
             } else {
@@ -229,7 +247,7 @@ const Alerts = (props) => {
             setSubscribedAlerts({});
             console.error(err);
             Alert.error(intl.formatMessage({
-                id: 'Apis.Settings.Alerts.Alerts.loading.error.msg',
+                id: 'Settings.Alerts.Alerts.loading.error.msg',
                 defaultMessage: 'Error occurred while loading alerts',
             }));
         });
@@ -241,15 +259,15 @@ const Alerts = (props) => {
     const handleSubscribe = () => {
         setInProgress({ subscribing: true });
         const alertsToSubscribe = { alerts: subscribedAlerts, emailList: emails };
-        API.subscribeAlerts(alertsToSubscribe).then(() => {
+        api.subscribeAlerts(alertsToSubscribe).then(() => {
             Alert.success(intl.formatMessage({
-                id: 'Apis.Settings.Alerts.Alerts.subscribe.success.msg',
+                id: 'Settings.Alerts.Alerts.subscribe.success.msg',
                 defaultMessage: 'Subscribed to Alerts Successfully.',
             }));
         }).catch((err) => {
             console.error(err);
             Alert.error(intl.formatMessage({
-                id: 'Apis.Settings.Alerts.Alerts.subscribe.error.msg',
+                id: 'Settings.Alerts.Alerts.subscribe.error.msg',
                 defaultMessage: 'Error occurred while subscribing to alerts.',
             }));
         }).finally(() => setInProgress({ subscribing: false }));
@@ -260,17 +278,17 @@ const Alerts = (props) => {
      * */
     const handleUnSubscribe = () => {
         setInProgress({ unSubscribing: true });
-        API.unsubscribeAlerts().then(() => {
+        api.unsubscribeAlerts().then(() => {
             setSubscribedAlerts([]);
             setEmailsList([]);
             Alert.success(intl.formatMessage({
-                id: 'Apis.Settings.Alerts.Alerts.unsubscribe.success.msg',
+                id: 'Settings.Alerts.Alerts.unsubscribe.success.msg',
                 defaultMessage: 'Unsubscribed from all alerts successfully.',
             }));
         }).catch((err) => {
             console.error(err);
             Alert.error(intl.formatMessage({
-                id: 'Apis.Settings.Alerts.Alerts.unsubscribe.error.msg',
+                id: 'Settings.Alerts.Alerts.unsubscribe.error.msg',
                 defaultMessage: 'Error occurred while Unsubscribing.',
             }));
         }).finally(() => setInProgress({ unSubscribing: false }));
@@ -287,7 +305,7 @@ const Alerts = (props) => {
                             <div className={classes.contentWrapper}>
                                 <Typography>
                                     <FormattedMessage
-                                        id='Apis.Settings.Alerts.Alerts.enable.analytics.message'
+                                        id='Settings.Alerts.Alerts.enable.analytics.message'
                                         defaultMessage='Enable Analytics to Configure Alerts'
                                     />
                                 </Typography>
@@ -300,13 +318,13 @@ const Alerts = (props) => {
                             <React.Fragment>
                                 <Typography variant='h6' className={classes.manageAlertHeading}>
                                     <FormattedMessage
-                                        id='Apis.Settings.Alerts.Alerts.subscribe.to.alerts.heading'
+                                        id='Settings.Alerts.Alerts.subscribe.to.alerts.heading'
                                         defaultMessage='Manage Alert Subscriptions'
                                     />
                                 </Typography>
                                 <Typography variant='caption'>
                                     <FormattedMessage
-                                        id='Apis.Settings.Alerts.Alerts.subscribe.to.alerts.subheading'
+                                        id='Settings.Alerts.Alerts.subscribe.to.alerts.subheading'
                                         defaultMessage={'Select the Alert types to subscribe/ unsubscribe and click' +
                                         ' Save.'}
                                     />
@@ -391,13 +409,13 @@ const Alerts = (props) => {
                 <DialogTitle>
                     <Typography className={classes.configDialogHeading}>
                         <FormattedMessage
-                            id='Apis.Settings.Alerts.Alerts.configure.alert'
+                            id='Settings.Alerts.Alerts.configure.alert'
                             defaultMessage='Configurations'
                         />
                     </Typography>
                 </DialogTitle>
                 <DialogContent>
-                    <AlertConfiguration alertType={openDialog.alertType} alertName={openDialog.name} api={API} />
+                    <AlertConfiguration alertType={openDialog.alertType} alertName={openDialog.name} api={api} />
                 </DialogContent>
                 <DialogActions>
                     <Button
@@ -406,7 +424,7 @@ const Alerts = (props) => {
                         onClick={() => setOpenDialog({ open: false })}
                     >
                         <Typography>
-                            <FormattedMessage id='Apis.Settings.Alerts.Alerts.close.btn' defaultMessage='Close' />
+                            <FormattedMessage id='Settings.Alerts.Alerts.close.btn' defaultMessage='Close' />
                         </Typography>
                     </Button>
                 </DialogActions>
@@ -415,7 +433,7 @@ const Alerts = (props) => {
                 <DialogTitle>
                     <Typography className={classes.configDialogHeading}>
                         <FormattedMessage
-                            id='Apis.Settings.Alerts.Alerts.unsubscribe.confirm.dialog.heading'
+                            id='Settings.Alerts.Alerts.unsubscribe.confirm.dialog.heading'
                             defaultMessage='Confirm Unsubscribe from All Alerts'
                         />
                     </Typography>
@@ -423,7 +441,7 @@ const Alerts = (props) => {
                 <DialogContent>
                     <Typography>
                         <FormattedMessage
-                            id='Apis.Settings.Alerts.Alerts.unsubscribe.confirm.dialog.message'
+                            id='Settings.Alerts.Alerts.unsubscribe.confirm.dialog.message'
                             defaultMessage={'This will remove all the existing alert subscriptions and emails. This' +
                             ' action cannot be undone.'}
                         />
@@ -440,7 +458,7 @@ const Alerts = (props) => {
                     >
                         <Typography>
                             <FormattedMessage
-                                id='Apis.Settings.Alerts.Alerts.confirm.btn'
+                                id='Settings.Alerts.Alerts.confirm.btn'
                                 defaultMessage='Unsubscribe All'
                             />
                         </Typography>
@@ -451,7 +469,7 @@ const Alerts = (props) => {
                         onClick={() => setUnsubscribeAll(false)}
                     >
                         <Typography>
-                            <FormattedMessage id='Apis.Settings.Alerts.Alerts.cancel.btn' defaultMessage='Cancel' />
+                            <FormattedMessage id='Settings.Alerts.Alerts.cancel.btn' defaultMessage='Cancel' />
                         </Typography>
                     </Button>
                 </DialogActions>
