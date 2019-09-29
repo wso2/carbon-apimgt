@@ -34,6 +34,7 @@ import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import { IntlProvider } from 'react-intl';
 import { AppContextProvider } from 'AppComponents/Shared/AppContext';
+import SettingsBase from 'AppComponents/Apis/Settings/SettingsBase';
 
 const theme = createMuiTheme(Configurations.themes.light);
 
@@ -107,6 +108,7 @@ export default class Protected extends Component {
                                     <Redirect exact from='/' to='/apis' />
                                     <Route path='/apis' component={Apis} />
                                     <Route path='/api-products' component={Apis} />
+                                    <Route path='/settings' component={SettingsBase} />
                                     <Route component={PageNotFound} />
                                 </Switch>
                             </Base>
