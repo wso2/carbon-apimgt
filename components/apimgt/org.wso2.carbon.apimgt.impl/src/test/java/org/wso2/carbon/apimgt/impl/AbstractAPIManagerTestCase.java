@@ -294,6 +294,8 @@ public class AbstractAPIManagerTestCase {
 
         GenericArtifact genericArtifact = getGenericArtifact(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION,
                 "sample");
+        Mockito.when(genericArtifact.getPath()).thenReturn("test");
+        PowerMockito.mockStatic(APIUtil.class);
         Mockito.when(genericArtifactManager.getGenericArtifact("1")).thenThrow(RegistryException.class)
                 .thenReturn(null, genericArtifact);
 
