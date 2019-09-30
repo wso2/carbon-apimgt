@@ -119,10 +119,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void deleteAPI(APIIdentifier identifier) throws APIManagementException {
+    public void deleteAPI(APIIdentifier identifier, String apiUUid) throws APIManagementException {
         checkCreatePermission();
         checkAccessControlPermission(identifier);
-        super.deleteAPI(identifier);
+        super.deleteAPI(identifier, apiUUid);
     }
 
     @Override
@@ -567,5 +567,11 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException {
         checkCreatePermission();
         return super.getCertificateContent(alias);
+    }
+
+    @Override
+    public void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException {
+        checkPublishPermission();
+        super.deleteWorkflowTask(apiIdentifier);
     }
 }

@@ -100,9 +100,9 @@ class Scopes extends React.Component {
      */
     render() {
         const {
-            intl, classes, isAPIProduct, api,
+            intl, classes, api,
         } = this.props;
-        const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
+        const urlPrefix = (api.apiType === 'APIProduct') ? 'api-products' : 'apis';
         const { scopes } = api;
         const url = `/${urlPrefix}/${api.id}/scopes/create`;
         const editUrl = `/${urlPrefix}/${api.id}/scopes/edit`;
@@ -136,7 +136,7 @@ class Scopes extends React.Component {
             {
                 options: {
                     customBodyRender: (value, tableMeta) => {
-                        if (tableMeta.rowData) {
+                        if (value && tableMeta.rowData) {
                             return (
                                 <List component='nav' className={classes.root}>
                                     {value.map(resource => (
@@ -192,7 +192,7 @@ class Scopes extends React.Component {
                                             </Link>
                                         </td>
                                         <td>
-                                            <Delete scopeName={scopeName} apiId={this.apiId} api={api} />
+                                            <Delete scopeName={scopeName} api={api} isAPIProduct />
                                         </td>
                                     </tr>
                                 </table>
@@ -225,7 +225,7 @@ class Scopes extends React.Component {
             aScope.push(scope.name);
             aScope.push(scope.description);
             aScope.push(scope.bindings.values);
-            const resources = api.operations
+            const resources = api.operations && api.operations
                 .filter((op) => {
                     return op.scopes.includes(scope.name);
                 })
@@ -352,7 +352,6 @@ Scopes.propTypes = {
     api: PropTypes.instanceOf(Object).isRequired,
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
-    isAPIProduct: PropTypes.bool.isRequired,
 };
 
 Scopes.defaultProps = {

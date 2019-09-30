@@ -98,7 +98,7 @@ function Edit(props) {
                             }
                         });
                 } else {
-                    Alert.info(`${doc.name} ${intl.formatMessage({
+                    Alert.info(`${name} ${intl.formatMessage({
                         id: 'Apis.Details.Documents.Edit.markdown.editor.update.success.message',
                         defaultMessage: 'Updated successfully.',
                     })}`);

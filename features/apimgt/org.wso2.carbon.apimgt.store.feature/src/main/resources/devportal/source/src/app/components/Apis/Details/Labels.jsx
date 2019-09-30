@@ -147,7 +147,7 @@ class Labels extends React.Component {
                                     <Grid container item xs={12} spacing={2}>
                                         <Typography className={classes.heading}>
                                             <FormattedMessage
-                                                id='Apis.Details.InfoBar.gateway.urls'
+                                                id='Apis.Details.InfoBar.microgateway.urls'
                                                 defaultMessage='Microgateway URLs'
                                             />
                                         </Typography>
@@ -180,7 +180,7 @@ class Labels extends React.Component {
                                             >
                                                 <CloudDownloadRounded className={classes.buttonIcon} />
                                                 <FormattedMessage
-                                                    id='Apis.Details.Environments.download.wsdl'
+                                                    id='Apis.Details.Environments.download.swagger'
                                                     defaultMessage='Swagger'
                                                 />
                                             </Button>

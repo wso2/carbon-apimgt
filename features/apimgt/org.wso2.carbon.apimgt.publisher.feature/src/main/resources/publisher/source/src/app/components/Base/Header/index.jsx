@@ -24,6 +24,7 @@ import Hidden from '@material-ui/core/Hidden';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
+import SettingsButton from 'AppComponents/Base/Header/settings/SettingsButton';
 
 import Avatar from './avatar/Avatar';
 import HeaderSearch from './headersearch/HeaderSearch';
@@ -103,7 +104,12 @@ class Header extends React.Component {
      */
     render() {
         const { openNavBar, smScreen } = this.state;
-        const { classes, avatar, theme } = this.props;
+        const {
+            classes,
+            avatar,
+            settings,
+            theme,
+        } = this.props;
         return (
             <React.Fragment>
                 <AppBar className={classes.appBar} position='fixed'>
@@ -127,6 +133,7 @@ class Header extends React.Component {
                             </IconButton>
                             {smScreen && <HeaderSearch toggleSmSearch={this.toggleSmSearch} smSearch={smScreen} />}
                         </Hidden>
+                        {settings}
                         {avatar}
                     </Toolbar>
                 </AppBar>
@@ -136,6 +143,7 @@ class Header extends React.Component {
 }
 Header.defaultProps = {
     avatar: <Avatar />,
+    settings: <SettingsButton />,
 };
 
 Header.propTypes = {
@@ -145,6 +153,7 @@ Header.propTypes = {
         toolbar: PropTypes.string,
     }).isRequired,
     avatar: PropTypes.element,
+    settings: PropTypes.element,
     theme: PropTypes.shape({
         custom: PropTypes.shape({
             logo: PropTypes.string,

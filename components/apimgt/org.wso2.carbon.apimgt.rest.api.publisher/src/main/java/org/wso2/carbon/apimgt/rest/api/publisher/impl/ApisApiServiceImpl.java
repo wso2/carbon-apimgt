@@ -1161,7 +1161,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             //deletes the API
-            apiProvider.deleteAPI(apiIdentifier);
+            apiProvider.deleteAPI(apiIdentifier, "");
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
             keyManager.deleteRegisteredResourceByAPIId(apiId);
             return Response.ok().build();

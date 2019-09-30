@@ -21,12 +21,10 @@ import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import { FormattedMessage } from 'react-intl';
-import FormControl from '@material-ui/core/FormControl';
 import API from 'AppData/api.js';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import { isRestricted } from 'AppData/AuthManager';
@@ -136,13 +134,14 @@ class BusinessInformation extends React.Component {
                 </div>
                 <Grid container spacing={7}>
                     <Grid item xs={12}>
-                        <Paper className={classes.paperRoot} >
-                            <FormControl margin='normal' className={classes.FormControlOdd}>
-                                <TextField
-                                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
-                                    fullWidth
-                                    id='name'
-                                    label={
+                        <form noValidate autoComplete='off'>
+                            <TextField
+                                autoFocus
+                                disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                                fullWidth
+                                id='name'
+                                label={
+                                    <React.Fragment>
                                         <FormattedMessage
                                             id={
                                                 'Apis.Details.BusinessInformation.BusinessInformation' +
@@ -150,33 +149,35 @@ class BusinessInformation extends React.Component {
                                             }
                                             defaultMessage='Business Owner'
                                         />
-                                    }
-                                    helperText={
-                                        <FormattedMessage
-                                            id={
-                                                'Apis.Details.BusinessInformation.BusinessInformation' +
-                                                '.business.owner.name.helper.text'
-                                            }
-                                            defaultMessage='Provide the name of the business owner'
-                                        />
-                                    }
-                                    type='text'
-                                    name='name'
-                                    margin='normal'
-                                    value={businessOwner || api.businessInformation.businessOwner}
-                                    onChange={this.handleChange('businessOwner')}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    autoFocus
-                                />
-                            </FormControl>
-                            <FormControl margin='normal' className={classes.FormControl}>
-                                <TextField
-                                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
-                                    fullWidth
-                                    id='name'
-                                    label={
+                                        <sup className={classes.mandatoryStar}>*</sup>
+                                    </React.Fragment>
+                                }
+                                helperText={
+                                    <FormattedMessage
+                                        id={
+                                            'Apis.Details.BusinessInformation.BusinessInformation' +
+                                            '.business.owner.name.helper.text'
+                                        }
+                                        defaultMessage='Provide the name of the business owner'
+                                    />
+                                }
+                                type='text'
+                                name='name'
+                                margin='normal'
+                                variant='outlined'
+                                value={businessOwner}
+                                onChange={this.handleChange('businessOwner')}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            />
+
+                            <TextField
+                                disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                                fullWidth
+                                id='name'
+                                label={
+                                    <React.Fragment>
                                         <FormattedMessage
                                             id={
                                                 'Apis.Details.BusinessInformation.BusinessInformation.' +
@@ -184,33 +185,36 @@ class BusinessInformation extends React.Component {
                                             }
                                             defaultMessage='Business Owner Email'
                                         />
-                                    }
-                                    helperText={
-                                        <FormattedMessage
-                                            id={
-                                                'Apis.Details.BusinessInformation.BusinessInformation' +
-                                                '.business.owner.email.helper.text'
-                                            }
-                                            defaultMessage='Provide the email of the business owner'
-                                        />
-                                    }
-                                    type='text'
-                                    name='name'
-                                    margin='normal'
-                                    value={businessOwnerEmail || api.businessInformation.businessOwnerEmail}
-                                    onChange={this.handleChange('businessOwnerEmail')}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    autoFocus
-                                />
-                            </FormControl>
-                            <FormControl margin='normal' className={classes.FormControlOdd}>
-                                <TextField
-                                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
-                                    fullWidth
-                                    id='name'
-                                    label={
+                                        <sup className={classes.mandatoryStar}>*</sup>
+                                    </React.Fragment>
+                                }
+                                helperText={
+                                    <FormattedMessage
+                                        id={
+                                            'Apis.Details.BusinessInformation.BusinessInformation' +
+                                            '.business.owner.email.helper.text'
+                                        }
+                                        defaultMessage='Provide the email of the business owner'
+                                    />
+                                }
+                                type='text'
+                                name='name'
+                                margin='normal'
+                                value={businessOwnerEmail}
+                                onChange={this.handleChange('businessOwnerEmail')}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                variant='outlined'
+                                autoFocus
+                            />
+
+                            <TextField
+                                disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                                fullWidth
+                                id='name'
+                                label={
+                                    <React.Fragment>
                                         <FormattedMessage
                                             id={
                                                 'Apis.Details.BusinessInformation.BusinessInformation' +
@@ -218,62 +222,63 @@ class BusinessInformation extends React.Component {
                                             }
                                             defaultMessage='Technical Owner'
                                         />
-                                    }
-                                    helperText={
-                                        <FormattedMessage
-                                            id={
-                                                'Apis.Details.BusinessInformation.BusinessInformation' +
-                                                '.technical.owner.name.helper.text'
-                                            }
-                                            defaultMessage='Provide the name of the technical owner'
-                                        />
-                                    }
-                                    type='text'
-                                    name='name'
-                                    margin='normal'
-                                    value={technicalOwner || api.businessInformation.technicalOwner}
-                                    onChange={this.handleChange('technicalOwner')}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    autoFocus
-                                />
-                            </FormControl>
-                            <FormControl margin='normal' className={classes.FormControl}>
-                                <TextField
-                                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
-                                    fullWidth
-                                    id='name'
-                                    label={
-                                        <FormattedMessage
-                                            id={
-                                                'Apis.Details.BusinessInformation.BusinessInformation' +
-                                                '.technical.owner.email'
-                                            }
-                                            defaultMessage='Technical Owner Email'
-                                        />
-                                    }
-                                    helperText={
-                                        <FormattedMessage
-                                            id={
-                                                'Apis.Details.BusinessInformation.BusinessInformation' +
-                                                '.technical.owner.email.helper.text'
-                                            }
-                                            defaultMessage='Provide the email of the technical owner'
-                                        />
-                                    }
-                                    type='text'
-                                    name='name'
-                                    margin='normal'
-                                    value={technicalOwnerEmail || api.businessInformation.technicalOwnerEmail}
-                                    onChange={this.handleChange('technicalOwnerEmail')}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    autoFocus
-                                />
-                            </FormControl>
-                        </Paper>
+                                    </React.Fragment>
+                                }
+                                helperText={
+                                    <FormattedMessage
+                                        id={
+                                            'Apis.Details.BusinessInformation.BusinessInformation' +
+                                            '.technical.owner.name.helper.text'
+                                        }
+                                        defaultMessage='Provide the name of the technical owner'
+                                    />
+                                }
+                                type='text'
+                                name='name'
+                                margin='normal'
+                                value={technicalOwner}
+                                onChange={this.handleChange('technicalOwner')}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                autoFocus
+                                variant='outlined'
+                            />
+
+                            <TextField
+                                disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                                fullWidth
+                                id='name'
+                                label={
+                                    <FormattedMessage
+                                        id={
+                                            'Apis.Details.BusinessInformation.BusinessInformation' +
+                                            '.technical.owner.email'
+                                        }
+                                        defaultMessage='Technical Owner Email'
+                                    />
+                                }
+                                helperText={
+                                    <FormattedMessage
+                                        id={
+                                            'Apis.Details.BusinessInformation.BusinessInformation' +
+                                            '.technical.owner.email.helper.text'
+                                        }
+                                        defaultMessage='Provide the email of the technical owner'
+                                    />
+                                }
+                                type='text'
+                                name='name'
+                                margin='normal'
+                                value={technicalOwnerEmail}
+                                onChange={this.handleChange('technicalOwnerEmail')}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                autoFocus
+                                variant='outlined'
+                            />
+                        </form>
                         <div className={classes.buttonWrapper}>
                             <Grid
                                 container
@@ -282,6 +287,13 @@ class BusinessInformation extends React.Component {
                                 spacing={4}
                                 className={classes.buttonSection}
                             >
+                                <Grid container direction='row' justify='flex-end' alignItems='center'>
+                                    <Grid item>
+                                        <Typography variant='caption' display='block' gutterBottom>
+                                            <sup style={{ color: 'red' }}>*</sup> Mandatory fields
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
                                 <Grid item>
                                     <div>
                                         <Button

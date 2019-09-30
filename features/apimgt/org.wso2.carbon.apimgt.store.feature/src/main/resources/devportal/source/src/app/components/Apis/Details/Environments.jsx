@@ -323,7 +323,7 @@ class Environments extends React.Component {
                                             || endpoint.defaultVersionURLs.wss !== null) && (
                                             <Typography className={classes.heading}>
                                                 <FormattedMessage
-                                                    id='Apis.Details.InfoBar.gateway.urls'
+                                                    id='Apis.Details.InfoBar.default.gateway.urls'
                                                     defaultMessage='Default Gateway URLs'
                                                 />
                                             </Typography>
@@ -475,7 +475,7 @@ class Environments extends React.Component {
                                             >
                                                 <CloudDownloadRounded className={classes.buttonIcon} />
                                                 <FormattedMessage
-                                                    id='Apis.Details.Environments.download.wsdl'
+                                                    id='Apis.Details.Environments.download.swagger'
                                                     defaultMessage='Swagger'
                                                 />
                                             </Button>

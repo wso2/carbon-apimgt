@@ -77,7 +77,7 @@ public class APIMappingUtil {
 
             // Delete the API if it already exists
             if (apiProvider.checkIfAPIExists(apiId)) {
-                apiProvider.deleteAPI(apiId);
+                apiProvider.deleteAPI(apiId , "");
             }
             apiToAdd.setApiOwner(adminUsername);
             String initialState = apiToAdd.getStatus().toString();

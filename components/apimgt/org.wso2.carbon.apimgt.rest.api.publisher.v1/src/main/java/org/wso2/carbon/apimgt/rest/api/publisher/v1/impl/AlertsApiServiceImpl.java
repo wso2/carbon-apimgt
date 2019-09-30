@@ -56,7 +56,7 @@ public class AlertsApiServiceImpl implements AlertsApiService {
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while adding configuration for alert type", e, log);
         } catch (AlertManagementException e) {
-            RestApiUtil.handleInternalServerError("Analytics not enabled", e, log);
+            return Response.status(Response.Status.BAD_REQUEST).entity("Analytics not Enabled").build();
         }
         return Response.status(Response.Status.OK).build();
     }
@@ -73,7 +73,7 @@ public class AlertsApiServiceImpl implements AlertsApiService {
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while removing configuration for alert type", e, log);
         } catch (AlertManagementException e) {
-            RestApiUtil.handleInternalServerError("Analytics not enabled", e, log);
+            return Response.status(Response.Status.BAD_REQUEST).entity("Analytics not Enabled").build();
         }
         return Response.status(Response.Status.OK).build();
     }
@@ -94,7 +94,7 @@ public class AlertsApiServiceImpl implements AlertsApiService {
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving alert configurations", e, log);
         } catch (AlertManagementException e) {
-            RestApiUtil.handleInternalServerError("Analytics not enabled", e, log);
+            return Response.status(Response.Status.BAD_REQUEST).entity("Analytics not Enabled").build();
         }
         return Response.status(Response.Status.NO_CONTENT).build();
     }
