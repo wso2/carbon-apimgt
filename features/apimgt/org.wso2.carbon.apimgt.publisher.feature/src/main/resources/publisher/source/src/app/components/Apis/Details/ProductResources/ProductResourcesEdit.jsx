@@ -41,7 +41,6 @@ import cloneDeep from 'lodash.clonedeep';
 import API from 'AppData/api';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-import SearchParser from 'AppComponents/Base/Header/headersearch/SearchParser';
 import MethodView from 'AppComponents/Apis/Details/ProductResources/MethodView';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import CONSTS from 'AppData/Constants';
@@ -184,15 +183,18 @@ function ProductResourcesEdit() {
         if (text) {
             // Build the search query and update
             const inputValue = text.trim().toLowerCase();
-            let composeQuery = SearchParser.parse(inputValue);
-            composeQuery = '?query=' + composeQuery;
+            const composeQuery = '?query=name:' + inputValue + ' type:HTTP';
             const composeQueryJSON = queryString.parse(composeQuery);
             // TODO we need to make the limit and offset changeable from the UI ( paggination )
             composeQueryJSON.limit = 100;
             composeQueryJSON.offset = 0;
             return API.search(composeQueryJSON);
         } else {
-            return API.all({});
+            return API.all({
+                query: {
+                    type: 'HTTP',
+                },
+            });
         }
     };
     const addPropsToSelectedApiPaths = (paths, apiId, latestApiResources = apiResources) => {

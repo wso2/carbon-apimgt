@@ -1625,8 +1625,9 @@ public class APIMappingUtil {
         return listDto;
     }
 
-    public static APIProductDTO fromAPIProducttoDTO(APIProduct product) {
+    public static APIProductDTO fromAPIProducttoDTO(APIProduct product) throws APIManagementException {
         APIProductDTO productDto = new APIProductDTO();
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         productDto.setName(product.getId().getName());
         productDto.setProvider(product.getId().getProviderName());
         productDto.setId(product.getUuid());
@@ -1690,6 +1691,9 @@ public class APIMappingUtil {
             }
         }
         productDto.setApis(new ArrayList<>(aggregatedAPIs.values()));
+        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(product.getId());
+        List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
+        productDto.setScopes(scopeDTOS);
 
         String subscriptionAvailability = product.getSubscriptionAvailability();
         if (subscriptionAvailability != null) {
@@ -1933,6 +1937,16 @@ public class APIMappingUtil {
 
         }
 
+        // scopes
+        for (ScopeDTO scope : dto.getScopes()) {
+            for (String aRole : scope.getBindings().getValues()) {
+                boolean isValidRole = APIUtil.isRoleNameExist(provider, aRole);
+                if (!isValidRole) {
+                    String error = "Role '" + aRole + "' Does not exist.";
+                    RestApiUtil.handleBadRequest(error, log);
+                }
+            }
+        }
         Set<Scope> scopes = getScopes(dto);
         product.setScopes(scopes);
 

@@ -472,6 +472,8 @@ public class APIGatewayManager {
 	 */
     public Map<String, String> removeFromGateway(API api, String tenantDomain) {
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
+        LocalEntryAdminClient localEntryAdminClient;
+        String localEntryUUId = api.getUUID();
         if (api.getEnvironments() != null) {
             for (String environmentName : api.getEnvironments()) {
                 try {
@@ -518,7 +520,14 @@ public class APIGatewayManager {
                             client.deleteDefaultApi(tenantDomain, api.getId());
                         }
                     }
-
+                    if (localEntryUUId != null && !localEntryUUId.isEmpty()) {
+                        if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
+                            localEntryUUId = localEntryUUId + APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION;
+                        }
+                        localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain == null ?
+                                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
+                        localEntryAdminClient.deleteEntry(localEntryUUId);
+                    }
                 } catch (AxisFault axisFault) {
                     /*
                     didn't throw this exception to handle multiple gateway publishing
@@ -698,6 +707,8 @@ public class APIGatewayManager {
 
     public Map<String, String> removeDefaultAPIFromGateway(API api, String tenantDomain) {
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
+        LocalEntryAdminClient localEntryAdminClient;
+        String localEntryUUId = api.getUUID();
         if (api.getEnvironments() != null) {
             for (String environmentName : api.getEnvironments()) {
                 try {
@@ -711,6 +722,11 @@ public class APIGatewayManager {
                         }
                         client.deleteDefaultApi(tenantDomain, api.getId());
                     }
+                    if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
+                        localEntryUUId = localEntryUUId + APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION;
+                    }
+                    localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
+                    localEntryAdminClient.deleteEntry(localEntryUUId);
                 } catch (AxisFault axisFault) {
                     /*
                 didn't throw this exception to handle multiple gateway publishing

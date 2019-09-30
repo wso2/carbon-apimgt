@@ -61,6 +61,7 @@ public class SearchResultMappingUtil {
         }
         apiResultDTO.setContext(context);
         apiResultDTO.setType(SearchResultDTO.TypeEnum.API);
+        apiResultDTO.setTransportType(api.getType());
         apiResultDTO.setDescription(api.getDescription());
         apiResultDTO.setStatus(api.getStatus());
         apiResultDTO.setThumbnailUri(api.getThumbnailUrl());

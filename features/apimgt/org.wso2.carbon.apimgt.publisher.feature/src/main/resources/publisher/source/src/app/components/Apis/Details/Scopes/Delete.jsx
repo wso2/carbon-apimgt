@@ -61,8 +61,8 @@ function Delete(props) {
     };
     const deleteScope = () => {
         const { scopeName } = props;
-        const ops = JSON.parse(JSON.stringify(api.operations));
-        const operations = ops.map((op) => {
+        const ops = api.operations && JSON.parse(JSON.stringify(api.operations));
+        const operations = ops && ops.map((op) => {
             // eslint-disable-next-line no-param-reassign
             op.scopes = op.scopes.filter((scope) => {
                 return scope !== scopeName;

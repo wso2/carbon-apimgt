@@ -22,6 +22,7 @@ import { Link, withRouter } from 'react-router-dom';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import { FormattedMessage } from 'react-intl';
 import classNames from 'classnames';
+import AuthManager from 'AppData/AuthManager';
 
 const styles = theme => ({
     listRoot: {
@@ -57,6 +58,7 @@ function GlobalNavLinks(props) {
         classes, theme, smallView, history,
     } = props;
 
+    const publisherUser = !AuthManager.isNotPublisher();
     const ditectCurrentMenu = (location) => {
         const { pathname } = location;
         if (/\/apis$/g.test(pathname) || /\/apis\//g.test(pathname)) {
@@ -97,6 +99,7 @@ function GlobalNavLinks(props) {
                     />
                 </ListItem>
             </Link>
+            { publisherUser &&
             <Link
                 to='/api-products'
                 className={classNames({ [classes.selected]: selected === 'api-products', [classes.links]: true })}
@@ -121,7 +124,7 @@ function GlobalNavLinks(props) {
                         }
                     />
                 </ListItem>
-            </Link>
+            </Link>}
         </List>
     );
 }

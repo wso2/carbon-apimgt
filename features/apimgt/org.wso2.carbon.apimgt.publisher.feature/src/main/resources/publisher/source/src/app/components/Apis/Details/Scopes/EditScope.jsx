@@ -74,9 +74,9 @@ class EditScope extends React.Component {
     updateScope() {
         const { apiScope } = this.state;
         const {
-            intl, api, history, isAPIProduct, updateAPI,
+            intl, api, history, updateAPI,
         } = this.props;
-        const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
+        const urlPrefix = api.apiType === 'APIProduct' ? 'api-products' : 'apis';
         const scopes = api.scopes.map((scope) => {
             if (scope.name === apiScope.name) {
                 return apiScope;

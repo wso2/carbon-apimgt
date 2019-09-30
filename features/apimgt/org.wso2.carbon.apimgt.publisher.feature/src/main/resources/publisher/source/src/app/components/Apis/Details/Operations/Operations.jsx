@@ -274,7 +274,7 @@ class Operations extends React.Component {
                                                 operation={item}
                                                 handleUpdateList={this.handleUpdateList}
                                                 scopes={this.props.api.scopes}
-                                                disabledAction
+                                                isOperationRateLimiting={!apiThrottlingPolicy}
                                                 apiPolicies={apiPolicies}
                                             />
                                         );

@@ -4846,6 +4846,9 @@ definitions:
           - DOC
           - API
         example: API
+      transportType:
+        type: string
+        description: Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
 
   APISearchResult:
     title: API Result

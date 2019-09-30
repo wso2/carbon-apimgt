@@ -8089,9 +8089,11 @@ public final class APIUtil {
      */
     public static String constructApisGetQuery(String query) throws APIManagementException {
         String newSearchQuery = constructQueryWithProvidedCriterias(query.trim());
-        String typeCriteria = APIConstants.TYPE_SEARCH_TYPE_KEY + APIUtil.getORBasedSearchCriteria
-                (APIConstants.API_SUPPORTED_TYPE_LIST);
-        newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
+        if (!query.contains(APIConstants.TYPE)) {
+            String typeCriteria = APIConstants.TYPE_SEARCH_TYPE_KEY + APIUtil.getORBasedSearchCriteria
+                    (APIConstants.API_SUPPORTED_TYPE_LIST);
+            newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
+        }
         return newSearchQuery;
     }
 
@@ -8863,6 +8865,13 @@ public final class APIUtil {
 
             List<APIProductResource> resources = ApiMgtDAO.getInstance().
                     getAPIProductResourceMappings(apiProductIdentifier);
+
+            Set<String> tags = new HashSet<String>();
+            Tag[] tag = registry.getTags(artifactPath);
+            for (Tag tag1 : tag) {
+                tags.add(tag1.getTagName());
+            }
+            apiProduct.addTags(tags);
 
             for (APIProductResource resource : resources) {
                 String apiPath = APIUtil.getAPIPath(resource.getApiIdentifier());
