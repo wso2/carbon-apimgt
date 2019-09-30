@@ -175,8 +175,10 @@ class Credentials extends React.Component {
         const { subscriptionRequest } = this.state;
         const { intl } = this.props;
         const api = new Api();
-        api.subscribe(subscriptionRequest.apiId, subscriptionRequest.applicationId,
-            subscriptionRequest.throttlingPolicy.tierName, apiType)
+        api.subscribe(
+            subscriptionRequest.apiId, subscriptionRequest.applicationId,
+            subscriptionRequest.throttlingPolicy.tierName, apiType,
+        )
             .then((response) => {
                 console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
                 Alert.info(intl.formatMessage({
