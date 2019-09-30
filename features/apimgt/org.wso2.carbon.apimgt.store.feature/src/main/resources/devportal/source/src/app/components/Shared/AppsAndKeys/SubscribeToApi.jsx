@@ -91,7 +91,7 @@ const styles = theme => ({
 const subscribeToApi = (props) => {
     const [appSelected, setAppSelected] = useState('');
     const [policySelected, setPolicySelected] = useState('');
-    const [applicationsList, setAapplicationsList] = useState([]);
+    const [applicationsList, setApplicationsList] = useState([]);
     const {
         classes, throttlingPolicyList, applicationsAvailable, subscriptionRequest, updateSubscriptionRequest,
     } = props;
@@ -104,7 +104,7 @@ const subscribeToApi = (props) => {
 
     useEffect(() => {
         if (applicationsAvailable && applicationsAvailable[0]) {
-            setAapplicationsList(applicationsAvailable);
+            setApplicationsList(applicationsAvailable);
             setAppSelected(applicationsAvailable[0].value);
             const newRequest = { ...subscriptionRequest };
             newRequest.applicationId = applicationsAvailable[0].value;
