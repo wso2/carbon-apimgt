@@ -524,7 +524,8 @@ public class APIGatewayManager {
                         if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
                             localEntryUUId = localEntryUUId + APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION;
                         }
-                        localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
+                        localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain == null ?
+                                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
                         localEntryAdminClient.deleteEntry(localEntryUUId);
                     }
                 } catch (AxisFault axisFault) {
