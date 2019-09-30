@@ -2815,31 +2815,30 @@ public class ApiMgtDAO {
         return subscribers;
     }
 
-    public long getAPISubscriptionCountByAPI(APIIdentifier identifier) throws APIManagementException {
-
+    public long getAPISubscriptionCountByAPI(Identifier identifier) throws APIManagementException {
         String sqlQuery = SQLConstants.GET_API_SUBSCRIPTION_COUNT_BY_API_SQL;
+        String artifactType = APIConstants.API_IDENTIFIER_TYPE;
+        if (identifier instanceof APIProductIdentifier) {
+            sqlQuery = SQLConstants.GET_SUBSCRIPTION_COUNT_BY_API_PRODUCT_SQL;
+            artifactType = APIConstants.API_PRODUCT_IDENTIFIER_TYPE;
+        }
+
         long subscriptions = 0;
 
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet result = null;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-
-            ps = connection.prepareStatement(sqlQuery);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
             ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            ps.setString(2, identifier.getApiName());
+            ps.setString(2, identifier.getName());
             ps.setString(3, identifier.getVersion());
-            result = ps.executeQuery();
-            while (result.next()) {
-                subscriptions = result.getLong("SUB_ID");
+            try (ResultSet result = ps.executeQuery()) {
+                while (result.next()) {
+                    subscriptions = result.getLong("SUB_ID");
+                }
             }
         } catch (SQLException e) {
-            handleException("Failed to get subscription count for API", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, result);
+            handleException("Failed to get subscription count for " + artifactType , e);
         }
+
         return subscriptions;
     }
 
@@ -3246,6 +3245,60 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, result);
         }
+    }
+
+    /**
+     * @param providerName Name of the provider
+     * @return UserApplicationAPIUsage of given provider
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get
+     *                                                           UserApplicationAPIUsage for given provider
+     */
+    public UserApplicationAPIUsage[] getAllAPIProductUsageByProvider(String providerName) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement ps =
+                    connection.prepareStatement(SQLConstants.GET_APP_API_PRODUCT_USAGE_BY_PROVIDER_SQL)) {
+            ps.setString(1, APIUtil.replaceEmailDomainBack(providerName));
+            try (ResultSet result = ps.executeQuery()) {
+                Map<String, UserApplicationAPIUsage> userApplicationUsages = new TreeMap<String, UserApplicationAPIUsage>();
+                while (result.next()) {
+                    int subId = result.getInt("SUBSCRIPTION_ID");
+                    Map<String, String> keyData = getAccessTokenData(subId);
+                    String accessToken = keyData.get("token");
+                    String tokenStatus = keyData.get("status");
+                    String userId = result.getString("USER_ID");
+                    String application = result.getString("APPNAME");
+                    int appId = result.getInt("APPLICATION_ID");
+                    String subStatus = result.getString("SUB_STATUS");
+                    String subsCreateState = result.getString("SUBS_CREATE_STATE");
+                    String key = userId + "::" + application;
+                    UserApplicationAPIUsage usage = userApplicationUsages.get(key);
+                    if (usage == null) {
+                        usage = new UserApplicationAPIUsage();
+                        usage.setUserId(userId);
+                        usage.setApplicationName(application);
+                        usage.setAppId(appId);
+                        usage.setAccessToken(accessToken);
+                        usage.setAccessTokenStatus(tokenStatus);
+                        userApplicationUsages.put(key, usage);
+                    }
+                    APIProductIdentifier apiProductId = new APIProductIdentifier(result.getString("API_PRODUCT_PROVIDER"), result.getString
+                            ("API_PRODUCT_NAME"), result.getString("API_PRODUCT_VERSION"));
+                    SubscribedAPI apiSubscription = new SubscribedAPI(new Subscriber(userId), apiProductId);
+                    apiSubscription.setSubStatus(subStatus);
+                    apiSubscription.setSubCreatedStatus(subsCreateState);
+                    apiSubscription.setUUID(result.getString("SUB_UUID"));
+                    apiSubscription.setTier(new Tier(result.getString("SUB_TIER_ID")));
+                    Application applicationObj = new Application(result.getString("APP_UUID"));
+                    apiSubscription.setApplication(applicationObj);
+                    usage.addApiSubscriptions(apiSubscription);
+                }
+                return userApplicationUsages.values().toArray(new UserApplicationAPIUsage[userApplicationUsages.size()]);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to find API Product Usage for :" + providerName, e);
+        }
+
+        return new UserApplicationAPIUsage[]{};
     }
 
     /**
