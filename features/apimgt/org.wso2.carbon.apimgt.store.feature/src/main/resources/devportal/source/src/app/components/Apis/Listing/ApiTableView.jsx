@@ -26,6 +26,7 @@ import API from 'AppData/api';
 import CONSTS from 'AppData/Constants';
 import Configurations from 'Config';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
+import Loading from 'AppComponents/Base/Loading/Loading';
 import ImageGenerator from './ImageGenerator';
 import ApiThumb from './ApiThumb';
 import DocThumb from './DocThumb';
@@ -55,7 +56,7 @@ class ApiTableView extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: [],
+            data: null,
         };
         this.page = 0;
         this.count = 100;
@@ -375,6 +376,9 @@ class ApiTableView extends React.Component {
         }
         if (page === 0 && this.count <= rowsPerPage) {
             options.pagination = false;
+        }
+        if (data === null) {
+            return <Loading />;
         }
         return (
             <MuiThemeProvider theme={this.getMuiTheme()}>
