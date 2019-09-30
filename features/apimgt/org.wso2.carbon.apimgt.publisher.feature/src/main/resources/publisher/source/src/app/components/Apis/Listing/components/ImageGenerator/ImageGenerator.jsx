@@ -76,7 +76,7 @@ class ImageGenerator extends PureComponent {
 
         if (api.type === 'DOC') {
             colorPair = theme.custom.thumbnail.document.backgrounds;
-        } else if (backgroundIndex && colorPairs.length > backgroundIndex) {
+        } else if (typeof backgroundIndex === 'number' && colorPairs.length > backgroundIndex) {
             // Obtain or generate background color pair
             colorPair = colorPairs[backgroundIndex];
         } else {
