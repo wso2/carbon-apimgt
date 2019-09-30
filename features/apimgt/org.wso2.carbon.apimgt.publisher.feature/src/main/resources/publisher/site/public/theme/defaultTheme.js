@@ -32,6 +32,7 @@ const Configurations = {
                 fontSize: 12,
                 subtitle2: {
                     fontWeight: 600,
+                    fontSize: '0.875rem',
                 },
                 h4: {
                     fontSize: '1.3rem',
