@@ -354,7 +354,7 @@ class ThumbnailView extends Component {
      */
     handleClose() {
         if (this.state.file) {
-            windowURL.revokeObjectURL(this.state.file);
+            windowURL.revokeObjectURL(this.state.file.preview);
         }
         this.setState({ open: false, file: null });
     }
