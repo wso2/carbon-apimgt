@@ -520,7 +520,7 @@ public class APIGatewayManager {
                             client.deleteDefaultApi(tenantDomain, api.getId());
                         }
                     }
-                    if(localEntryUUId != null && !localEntryUUId.isEmpty()) {
+                    if (localEntryUUId != null && !localEntryUUId.isEmpty()) {
                         if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
                             localEntryUUId = localEntryUUId + APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION;
                         }
