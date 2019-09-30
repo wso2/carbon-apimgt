@@ -1272,4 +1272,12 @@ public interface APIProvider extends APIManager {
      * @return A List of labels related to the given tenant
      */
     List<Label> getAllLabels(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Remove pending lifecycle state change task for the given api.
+     *
+     * @param apiIdentifier api identifier
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException;
 }

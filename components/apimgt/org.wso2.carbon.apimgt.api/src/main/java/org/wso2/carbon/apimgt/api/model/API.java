@@ -125,6 +125,11 @@ public class API implements Serializable {
     private boolean isDefaultVersion = false;
     private boolean isPublishedDefaultVersion = false;
 
+    /**
+     * Used to set the workflow status in lifecycle state change workflow
+     */
+    private String workflowStatus = null;
+
     private Set<String> environments;
 
     private String createdTime;
@@ -932,6 +937,14 @@ public class API implements Serializable {
 
     public void setWsdlResource(ResourceFile wsdl) {
         this.wsdlResource = wsdl;
+    }
+
+    public String getWorkflowStatus() {
+        return workflowStatus;
+    }
+
+    public void setWorkflowStatus(String workflowStatus) {
+        this.workflowStatus = workflowStatus;
     }
 
     public List<APIEndpoint> getEndpoint() {

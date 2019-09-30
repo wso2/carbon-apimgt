@@ -6091,14 +6091,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public WorkflowDTO getAPIWorkflowStatus(APIIdentifier apiIdentifier, String workflowType)
             throws APIManagementException {
-        int apiId = apiMgtDAO.getAPIID(apiIdentifier, null);
-
-        WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
-                WorkflowConstants.WF_TYPE_AM_API_STATE);
-
-        return wfDTO;
+        return APIUtil.getAPIWorkflowStatus(apiIdentifier, workflowType);
     }
 
+    @Override
     public void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException {
         int apiId;
         try {
@@ -6109,7 +6105,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (WorkflowException e) {
             handleException("Error while deleting the workflow task.", e);
         }
-
     }
 
     private void cleanUpPendingAPIStateChangeTask(int apiId) throws WorkflowException, APIManagementException {
