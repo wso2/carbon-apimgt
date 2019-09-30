@@ -193,13 +193,13 @@ class ViewToken extends React.Component {
                         defaultMessage=' seconds'
                     />
                     {token.isOauth && <FormattedMessage
-                        id='Shared.AppsAndKeys.ViewToken.info.second'
+                        id='Shared.AppsAndKeys.ViewToken.info.third'
                         defaultMessage=' and the token has ('
                     />
                     }
                     {this.getTokeScopesString(token.tokenScopes)}
                     {token.isOauth && <FormattedMessage
-                        id='Shared.AppsAndKeys.ViewToken.info.third'
+                        id='Shared.AppsAndKeys.ViewToken.info.fourth'
                         defaultMessage=') scopes'
                     />
                     }.

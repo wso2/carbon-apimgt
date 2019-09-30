@@ -304,6 +304,17 @@ class Layout extends React.Component {
                             />
                             {user ? (
                                 <React.Fragment>
+                                    <Link to='/settings'>
+                                        <Button
+                                            className={classes.userLink}
+                                        >
+                                            <Icon>settings</Icon>
+                                            <FormattedMessage
+                                                id='Base.index.settings.caption'
+                                                defaultMessage='Settings'
+                                            />
+                                        </Button>
+                                    </Link>
                                     <Button
                                         buttonRef={(node) => {
                                             this.anchorEl = node;

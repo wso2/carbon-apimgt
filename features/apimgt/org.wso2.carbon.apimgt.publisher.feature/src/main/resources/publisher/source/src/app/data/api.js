@@ -2018,6 +2018,111 @@ class API extends Resource {
             );
         });
     }
+
+    /**
+     * @static
+     * Get the supported alert types by the publisher.
+     * @return {Promise}
+     * */
+    static getSupportedAlertTypes() {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['Alerts'].getPublisherAlertTypes(this._requestMetaData());
+        });
+    }
+
+    /**
+     * @static
+     * Get the subscribed alert types by the current user.
+     * @returns {Promise}
+     * */
+    static getSubscribedAlertTypesByUser() {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['Alert Subscriptions'].getSubscribedAlertTypes(this._requestMetaData());
+        });
+    }
+
+    /**
+     * @static
+     * Subscribe to the provided set of alerts.
+     * @return {Promise}
+     * */
+    static subscribeAlerts(alerts) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['Alert Subscriptions'].subscribeToAlerts({body: alerts}, this._requestMetaData());
+        });
+    }
+
+    /**
+     * @static
+     * Unsubscribe from all the alerts.
+     * @return {Promise}
+     * */
+    static unsubscribeAlerts() {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['Alert Subscriptions'].unsubscribeAllAlerts(this._requestMetaData());
+        });
+    }
+
+    /**
+     * @static
+     * Get the configuration for the given alert type.
+     * @param {string} alertType The alert type name.
+     * @return {Promise}
+     * */
+    static getAlertConfigurations(alertType) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['Alert Configuration'].getAllAlertConfigs(
+                {
+                    alertType: alertType
+                },
+                this._requestMetaData());
+        });
+    }
+
+    /**
+     * @static
+     * Add configuration for the given alert type.
+     * @param {string} alertType The alert type name.
+     * @param {object} alertConfig Alert configurations.
+     * @param {string} configId The alert configuration id.
+     * @return {Promise}
+     * */
+    static putAlertConfiguration(alertType, alertConfig, configId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['Alert Configuration'].addAlertConfig(
+                {
+                    alertType: alertType,
+                    body: alertConfig,
+                    configurationId: configId,
+                },
+                this._requestMetaData());
+        });
+    }
+
+    /**
+     * @static
+     * Delete configuration.
+     * @param {string} alertType The alert type name.
+     * @param {string} configId The alert configuration id.
+     * @return {Promise}
+     * */
+    static deleteAlertConfiguration(alertType, configId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['Alert Configuration'].deleteAlertConfig(
+                {
+                    alertType: alertType,
+                    configurationId: configId
+                },
+                this._requestMetaData());
+        });
+    }
 }
 
 API.CONSTS = {

@@ -92,7 +92,7 @@ export default function CheckboxLabels(props) {
                 </Typography>
                 <Typography variant='caption'>
                     <FormattedMessage
-                        id='Apis.Details.Configuration.Configuration.requirements'
+                        id='Apis.Details.Configuration.Configuration.requirements.state.transition'
                         defaultMessage='Requirements for next state transition'
                     />
                 </Typography>
