@@ -426,13 +426,13 @@ class Credentials extends React.Component {
                                             <React.Fragment>
                                                 <Typography variant='h5'>
                                                     <FormattedMessage
-                                                        id='Apis.Details.Credentials.Credentials.api.credentials.view.apps.title'
+                                                        id='Apis.Details.Credentials.Credentials.api.credentials.subscribed.apps.title'
                                                         defaultMessage='View Credentials'
                                                     />
                                                 </Typography>
                                                 <Typography variant='body2'>
                                                     <FormattedMessage
-                                                        id='Apis.Details.Credentials.Credentials.api.credentials.view.apps.title.sub'
+                                                        id='Apis.Details.Credentials.Credentials.api.credentials.subscribed.apps.description'
                                                         defaultMessage='( Subscribed Applications )'
                                                     />
                                                 </Typography>
