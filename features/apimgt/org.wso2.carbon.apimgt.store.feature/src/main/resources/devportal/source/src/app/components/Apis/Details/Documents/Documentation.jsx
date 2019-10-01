@@ -17,6 +17,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -28,10 +29,10 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Icon from '@material-ui/core/Icon';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
-import { FormattedMessage } from 'react-intl';
-import Alert from '../../../Shared/Alert';
-import API from '../../../../data/api';
-import CustomIcon from '../../../Shared/CustomIcon';
+import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
+import Alert from 'AppComponents/Shared/Alert';
+import API from 'AppData/api';
+import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import View from './View';
 
 const styles = theme => ({
@@ -90,13 +91,31 @@ const styles = theme => ({
         padding: theme.spacing.unit * 2,
         marginTop: 50,
     },
+    contentWrapper: {
+        maxWidth: theme.custom.contentAreaWidth,
+        paddingLeft: theme.spacing(3),
+        paddingTop: theme.spacing(3),
+    },
+    titleSub: {
+        marginLeft: theme.spacing(2),
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
+    },
+    generateCredentialWrapper: {
+        marginLeft: 0,
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
+    },
+    genericMessageWrapper: {
+        marginLeft: theme.spacing(2),
+    }
 });
 window.requestAnimFrame = (function () {
     return (
-        window.requestAnimationFrame
-        || window.webkitRequestAnimationFrame
-        || window.mozRequestAnimationFrame
-        || function (callback) {
+        window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        function (callback) {
             window.setTimeout(callback, 1000 / 60);
         }
     );
@@ -154,7 +173,7 @@ function scrollToY(scrollTargetY, speed, easing) {
     tick();
 }
 function FullWidthGrid(props) {
-    const { classes } = props;
+    const { classes, intl } = props;
     const [selectedIndexA, changeSelectedIndexA] = useState(0);
     const [selectedIndexB, changeSelectedIndexB] = useState(0);
     const [documentList, changeDocumentList] = useState(null);
@@ -228,89 +247,130 @@ function FullWidthGrid(props) {
     const toggleOpen = () => {
         setOpen(!open);
     };
+
     return (
-        <div className={classes.contentWrapper}>
-            <Typography variant='h4'>
-                <FormattedMessage id='Apis.Details.Documents.Documentation.title' defaultMessage='Documentation' />
-            </Typography>
-            {documentList && (
-                <Grid container spacing={3} className={classes.docContent}>
-                    <Grid item xs={12} sm={3}>
-                        <Paper className={classes.paperMenu}>
-                            <List component='nav' className={classes.listRoot}>
-                                {documentList.map((type, indexA) => (
-                                    <React.Fragment>
-                                        <ListItem className={classes.parentListItem}>
-                                            <ListItemIcon>
-                                                <CustomIcon strokeColor='#444' width={24} height={24} icon='docs' />
-                                            </ListItemIcon>
-                                            <ListItemText primary={type.docType} />
-                                        </ListItem>
-                                        {type.docs.length > 0 && (
-                                            <List component='div' className={classes.childList}>
-                                                {type.docs.map((doc, indexB) => (
-                                                    <ListItem
-                                                        button
-                                                        className={classes.nested}
-                                                        classes={{
-                                                            selected: classes.selected,
-                                                        }}
-                                                        selected={
-                                                            selectedIndexA === indexA && selectedIndexB === indexB
-                                                        }
-                                                        onClick={event => handleListItemClick(event, indexA, indexB, doc)
-                                                        }
-                                                    >
+        <Grid container>
+            <Grid item md={12} lg={12}>
+                <Grid container spacing={5}>
+                    <Grid item md={12}>
+                        <Typography variant='h4' className={classes.titleSub}>
+                            <FormattedMessage
+                                id='Apis.Details.Documents.Documentation.title'
+                                defaultMessage='Documentation'
+                            />
+                        </Typography>
+                        {!documentList || (documentList && documentList.length === 0) ? (
+                            <div className={classes.genericMessageWrapper}>
+                            <GenericDisplayDialog
+                                classes={classes}
+                                heading={intl.formatMessage({
+                                    defaultMessage: 'No Documents Yet',
+                                    id: 'Apis.Details.Documents.Documentation.no.docs',
+                                })}
+                                caption={intl.formatMessage({
+                                    defaultMessage: 'No documents available for this API yet',
+                                    id:
+                                        'Apis.Details.Documents.Documentation.no.docs.content',
+                                })}
+                                
+                            /></div>
+                        ) : (
+                            <Grid container spacing={3} className={classes.docContent}>
+                                <Grid item xs={12} sm={3}>
+                                    <Paper className={classes.paperMenu}>
+                                        <List component='nav' className={classes.listRoot}>
+                                            {documentList.map((type, indexA) => (
+                                                <React.Fragment>
+                                                    <ListItem className={classes.parentListItem}>
                                                         <ListItemIcon>
-                                                            {doc.sourceType === 'MARKDOWN' && <Icon>code</Icon>}
-                                                            {doc.sourceType === 'INLINE' && <Icon>description</Icon>}
-                                                            {doc.sourceType === 'URL' && <Icon>open_in_new</Icon>}
-                                                            {doc.sourceType === 'FILE' && <Icon>arrow_downward</Icon>}
+                                                            <CustomIcon
+                                                                strokeColor='#444'
+                                                                width={24}
+                                                                height={24}
+                                                                icon='docs'
+                                                            />
                                                         </ListItemIcon>
-                                                        <ListItemText
-                                                            inset
-                                                            primary={doc.name}
-                                                            secondary={truncateSummary(doc.summary)}
-                                                        />
+                                                        <ListItemText primary={type.docType} />
                                                     </ListItem>
-                                                ))}
-                                            </List>
-                                        )}
-                                    </React.Fragment>
-                                ))}
-                            </List>
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={12} sm={9}>
-                        {selectedDoc && (
-                            <React.Fragment>
-                                <Paper className={classes.paper}>
-                                    {(selectedDoc.sourceType === 'MARKDOWN' || selectedDoc.sourceType === 'INLINE') && (
-                                        <Icon className={classes.fullView} onClick={toggleOpen}>
-                                            launch
-                                        </Icon>
-                                    )}
-                                    <View doc={selectedDoc} apiId={apiId} fullScreen={open} />
-                                </Paper>
-                                <Dialog fullScreen open={open} onClose={toggleOpen}>
-                                    <Paper square className={classes.popupHeader}>
-                                        <IconButton color='inherit' onClick={toggleOpen} aria-label='Close'>
-                                            <Icon>close</Icon>
-                                        </IconButton>
-                                        <Typography variant='h4' className={classes.docName}>
-                                            {selectedDoc.name}
-                                        </Typography>
+                                                    {type.docs.length > 0 && (
+                                                        <List component='div' className={classes.childList}>
+                                                            {type.docs.map((doc, indexB) => (
+                                                                <ListItem
+                                                                    button
+                                                                    className={classes.nested}
+                                                                    classes={{
+                                                                        selected: classes.selected,
+                                                                    }}
+                                                                    selected={
+                                                                        selectedIndexA === indexA &&
+                                                                        selectedIndexB === indexB
+                                                                    }
+                                                                    onClick={event =>
+                                                                        handleListItemClick(event, indexA, indexB, doc)
+                                                                    }
+                                                                >
+                                                                    <ListItemIcon>
+                                                                        {doc.sourceType === 'MARKDOWN' && (
+                                                                            <Icon>code</Icon>
+                                                                        )}
+                                                                        {doc.sourceType === 'INLINE' && (
+                                                                            <Icon>description</Icon>
+                                                                        )}
+                                                                        {doc.sourceType === 'URL' && (
+                                                                            <Icon>open_in_new</Icon>
+                                                                        )}
+                                                                        {doc.sourceType === 'FILE' && (
+                                                                            <Icon>arrow_downward</Icon>
+                                                                        )}
+                                                                    </ListItemIcon>
+                                                                    <ListItemText
+                                                                        inset
+                                                                        primary={doc.name}
+                                                                        secondary={truncateSummary(doc.summary)}
+                                                                    />
+                                                                </ListItem>
+                                                            ))}
+                                                        </List>
+                                                    )}
+                                                </React.Fragment>
+                                            ))}
+                                        </List>
                                     </Paper>
-                                    <div className={classes.viewWrapper}>
-                                        <View doc={selectedDoc} apiId={apiId} fullScreen={open} />
-                                    </div>
-                                </Dialog>
-                            </React.Fragment>
+                                </Grid>
+                                <Grid item xs={12} sm={9}>
+                                    {selectedDoc && (
+                                        <React.Fragment>
+                                            <Paper className={classes.paper}>
+                                                {(selectedDoc.sourceType === 'MARKDOWN' ||
+                                                    selectedDoc.sourceType === 'INLINE') && (
+                                                    <Icon className={classes.fullView} onClick={toggleOpen}>
+                                                        launch
+                                                    </Icon>
+                                                )}
+                                                <View doc={selectedDoc} apiId={apiId} fullScreen={open} />
+                                            </Paper>
+                                            <Dialog fullScreen open={open} onClose={toggleOpen}>
+                                                <Paper square className={classes.popupHeader}>
+                                                    <IconButton color='inherit' onClick={toggleOpen} aria-label='Close'>
+                                                        <Icon>close</Icon>
+                                                    </IconButton>
+                                                    <Typography variant='h4' className={classes.docName}>
+                                                        {selectedDoc.name}
+                                                    </Typography>
+                                                </Paper>
+                                                <div className={classes.viewWrapper}>
+                                                    <View doc={selectedDoc} apiId={apiId} fullScreen={open} />
+                                                </div>
+                                            </Dialog>
+                                        </React.Fragment>
+                                    )}
+                                </Grid>
+                            </Grid>
                         )}
                     </Grid>
                 </Grid>
-            )}
-        </div>
+            </Grid>
+        </Grid>
     );
 }
 
@@ -318,4 +378,4 @@ FullWidthGrid.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(FullWidthGrid);
+export default injectIntl(withStyles(styles)(FullWidthGrid));

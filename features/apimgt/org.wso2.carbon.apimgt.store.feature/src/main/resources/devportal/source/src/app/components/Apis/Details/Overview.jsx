@@ -37,7 +37,6 @@ import Comments from './Comments/Comments';
 import Sdk from './Sdk';
 import API from '../../../data/api';
 import OverviewDocuments from './OverviewDocuments';
-// import StandaloneSubscription from './Overview/StandaloneSubscription';
 
 /**
  *
@@ -211,7 +210,7 @@ function Overview(props) {
                                                     id='Apis.Details.Overview.credential.wizard.info'
                                                     defaultMessage={
                                                         'Use the Key Generation Wizard. Create a new application -> subscribe -> '
-                                                        + ' generate keys and accesstoken to invoke this API.'
+                                                        + ' generate keys and access token to invoke this API.'
                                                     }
                                                 />
                                             </Typography>
