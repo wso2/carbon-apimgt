@@ -372,7 +372,7 @@ class Details extends React.Component {
                                     handleMenuSelect={this.handleMenuSelect}
                                     active={active}
                                 />
-                                {!api.type == 'WS'
+                                {api.type !== 'WS'
                                     && (
                                         <LeftMenuItem
                                             text='test'
@@ -386,7 +386,7 @@ class Details extends React.Component {
                     }
                     <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={active} />
                     {!api.advertiseInfo.advertised
-                        && !api.type == 'WS' && <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
+                        && api.type !== 'WS' && <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
                     }
                 </div>
                 <div className={classes.content}>

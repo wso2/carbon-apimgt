@@ -376,7 +376,7 @@ class Details extends Component {
         const { api, apiNotFound, isAPIProduct } = this.state;
         let isWebsocket = false;
         if (api) {
-            isWebsocket = (api.type == 'WS');
+            isWebsocket = (api.type === 'WS');
         }
         const {
             classes,
