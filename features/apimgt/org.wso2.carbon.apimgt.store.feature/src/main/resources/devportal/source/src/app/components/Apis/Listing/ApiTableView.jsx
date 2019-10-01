@@ -27,12 +27,14 @@ import CONSTS from 'AppData/Constants';
 import Configurations from 'Config';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import Loading from 'AppComponents/Base/Loading/Loading';
+import Alert from 'AppComponents/Shared/Alert';
 import ImageGenerator from './ImageGenerator';
 import ApiThumb from './ApiThumb';
 import DocThumb from './DocThumb';
 import { ApiContext } from '../Details/ApiContext';
+import NoApi from './NoApi';
 
-const styles = (theme) => ({
+const styles = theme => ({
     rowImageOverride: {
         '& .material-icons': {
             marginTop: 5,
@@ -57,6 +59,7 @@ class ApiTableView extends React.Component {
         super(props);
         this.state = {
             data: null,
+            loading: false,
         };
         this.page = 0;
         this.count = 100;
@@ -134,8 +137,11 @@ class ApiTableView extends React.Component {
 
     componentDidUpdate(prevProps) {
         const { query, selectedTag } = this.props;
-        if ((this.apiType !== this.context.apiType) || query !== prevProps.query ||
-            (prevProps.selectedTag !== selectedTag)) {
+        if (
+            this.apiType !== this.context.apiType ||
+            query !== prevProps.query ||
+            prevProps.selectedTag !== selectedTag
+        ) {
             this.apiType = this.context.apiType;
             this.getData();
         }
@@ -143,13 +149,24 @@ class ApiTableView extends React.Component {
 
     // get data
     getData = () => {
-        this.xhrRequest().then((data) => {
-            const { body } = data;
-            const { list, pagination } = body;
-            const { total } = pagination;
-            this.count = total;
-            this.setState({ data: list });
-        });
+        const { intl } = this.props;
+        this.xhrRequest()
+            .then((data) => {
+                const { body } = data;
+                const { list, pagination } = body;
+                const { total } = pagination;
+                this.count = total;
+                this.setState({ data: list });
+            })
+            .catch((e) => {
+                Alert.error(intl.formatMessage({
+                    defaultMessage: 'Error While Loading APIs',
+                    id: 'Apis.Listing.ApiTableView.error.loading',
+                }));
+            })
+            .finally(() => {
+                this.setState({ loading: false });
+            });
     };
 
     xhrRequest = () => {
@@ -172,14 +189,26 @@ class ApiTableView extends React.Component {
     };
 
     changePage = (page) => {
+        const { intl } = this.props;
         this.page = page;
-        this.xhrRequest().then((data) => {
-            const { body } = data;
-            const { list } = body;
-            this.setState({
-                data: list,
+        this.setState({ loading: true });
+        this.xhrRequest()
+            .then((data) => {
+                const { body } = data;
+                const { list } = body;
+                this.setState({
+                    data: list,
+                });
+            })
+            .catch((e) => {
+                Alert.error(intl.formatMessage({
+                    defaultMessage: 'Error While Loading APIs',
+                    id: 'Apis.Listing.ApiTableView.error.loading',
+                }));
+            })
+            .finally(() => {
+                this.setState({ loading: false });
             });
-        });
     };
 
     /**
@@ -188,7 +217,7 @@ class ApiTableView extends React.Component {
      * @memberof ApiTableView
      */
     render() {
-        const { intl, gridView } = this.props;
+        const { intl, gridView, loading } = this.props;
         const columns = [
             {
                 name: 'id',
@@ -242,7 +271,6 @@ class ApiTableView extends React.Component {
                                     <Link to={'/apis/' + apiId + '/overview'} className={classes.rowImageOverride}>
                                         <ImageGenerator api={artifact} width={30} height={30} />
                                         {apiName}
-
                                     </Link>
                                 );
                             }
@@ -360,9 +388,9 @@ class ApiTableView extends React.Component {
                 const artifact = tableViewObj.state.data[dataIndex];
                 if (artifact) {
                     if (artifact.type === 'DOC') {
-                        return (<DocThumb doc={artifact} />);
+                        return <DocThumb doc={artifact} />;
                     } else {
-                        return (<ApiThumb api={artifact} />);
+                        return <ApiThumb api={artifact} />;
                     }
                 }
                 return <span />;
@@ -377,8 +405,11 @@ class ApiTableView extends React.Component {
         if (page === 0 && this.count <= rowsPerPage) {
             options.pagination = false;
         }
-        if (data === null) {
+        if (loading) {
             return <Loading />;
+        }
+        if ((data && data.length === 0) || !data) {
+            return <NoApi />;
         }
         return (
             <MuiThemeProvider theme={this.getMuiTheme()}>

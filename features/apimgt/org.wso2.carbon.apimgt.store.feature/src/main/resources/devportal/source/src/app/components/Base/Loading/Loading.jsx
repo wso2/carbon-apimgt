@@ -21,9 +21,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 const LoadingAnimation = (props) => {
     return (
-        <div>
-            <CircularProgress style={{ margin: 'auto', display: 'block' }} />
-        </div>
+        <div class="apim-dual-ring"></div>
     );
 };
 
