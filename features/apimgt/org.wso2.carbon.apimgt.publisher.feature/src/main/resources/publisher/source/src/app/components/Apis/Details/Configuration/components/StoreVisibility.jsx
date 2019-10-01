@@ -48,6 +48,7 @@ import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
  */
 export default function StoreVisibility(props) {
     const [roleValidity, setRoleValidity] = useState(true);
+    const [roleExists, setRoleExists] = useState(false);
     const { api, configDispatcher } = props;
     const [invalidRoles, setInvalidRoles] = useState([]);
     const isPublic = api.visibility === 'PUBLIC';
@@ -57,10 +58,14 @@ export default function StoreVisibility(props) {
         if (invalidRoles.length === 0) {
             setRoleValidity(true);
         }
+        if (api.visibility === 'RESTRICTED' && api.visibleRoles.length !== 0) {
+            setRoleExists(true);
+        }
     }, [invalidRoles]);
     const handleRoleAddition = (role) => {
         const promise = APIValidation.role.validate(base64url.encode(role));
         promise.then(() => {
+            setRoleExists(true);
             setRoleValidity(true);
             configDispatcher({
                 action: 'visibleRoles',
@@ -80,6 +85,11 @@ export default function StoreVisibility(props) {
     const handleRoleDeletion = (role) => {
         if (invalidRoles.includes(role)) {
             setInvalidRoles(invalidRoles.filter(existingRole => existingRole !== role));
+        }
+        if (api.visibility === 'RESTRICTED' && api.visibleRoles.length > 1) {
+            setRoleExists(true);
+        } else {
+            setRoleExists(false);
         }
         configDispatcher({
             action: 'visibleRoles',
@@ -185,7 +195,7 @@ export default function StoreVisibility(props) {
                             ),
                         }}
                         onAdd={handleRoleAddition}
-                        error={!roleValidity}
+                        error={!roleValidity || !roleExists}
                         helperText={
                             roleValidity ? (
                                 <FormattedMessage
