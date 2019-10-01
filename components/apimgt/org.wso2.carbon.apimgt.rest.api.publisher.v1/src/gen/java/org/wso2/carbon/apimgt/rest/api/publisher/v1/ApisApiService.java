@@ -88,7 +88,7 @@ public interface ApisApiService {
       public Response apisApiIdScopesPost(String apiId, ScopeDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String url, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdThumbnailGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisCopyApiPost(String newVersion, String apiId, Boolean defaultVersion, MessageContext messageContext) throws APIManagementException;

@@ -49,4 +49,8 @@ export default class Resource {
     isAPIProduct() {
         return this.apiType === 'APIProduct';
     }
+
+    isGraphql() {
+        return this.type === 'GRAPHQL';
+    }
 }

@@ -2246,12 +2246,26 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param apiId             API identifier
      * @param apiDefinition     Swagger definition
+     * @param url               Swagger definition URL
+     * @param fileInputStream   Swagger definition input file content
+     * @param fileDetail
      * @param ifMatch           If-match header value
      * @return updated swagger document of the API
      */
     @Override
-    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch, MessageContext messageContext) {
+    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String url, InputStream fileInputStream,
+            Attachment fileDetail, String ifMatch, MessageContext messageContext) {
+
+        // Validate and retrieve the OpenAPI definition
+        Map validationResponseMap = null;
         try {
+            //Handle URL and file based definition imports
+            if(url != null || fileInputStream != null) {
+                validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, true);
+                APIDefinitionValidationResponse validationResponse = (APIDefinitionValidationResponse) validationResponseMap
+                        .get(RestApiConstants.RETURN_MODEL);
+                apiDefinition = validationResponse.getJsonContent();
+            }
             String updatedSwagger = updateSwagger(apiId, apiDefinition);
             return Response.ok().entity(updatedSwagger).build();
         } catch (APIManagementException e) {
