@@ -218,7 +218,13 @@ export default function Configuration() {
                                     <Box py={2}>
                                         <Grid container spacing={0} >
                                             <Grid item xs={12} md={2}>
-                                                <ThumbnailView api={api} width={100} height={100} isEditable />
+                                                <ThumbnailView
+                                                    api={api}
+                                                    width={100}
+                                                    height={100}
+                                                    isEditable={!isRestricted(['apim:api_publish',
+                                                        'apim:api_create'], api)}
+                                                />
                                             </Grid>
                                             <Grid item xs={12} md={10}>
                                                 <Description api={apiConfig} configDispatcher={configDispatcher} />
