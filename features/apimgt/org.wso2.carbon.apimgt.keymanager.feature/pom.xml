@@ -212,6 +212,7 @@
                                 </bundleDef>
                                 <bundleDef>com.fasterxml.jackson.core:jackson-core:${fasterxml.jackson.version}
                                 </bundleDef>
+                                <bundleDef>org.wso2.wsdl4j:wsdl4j.wso2:${wsdl4j.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>

@@ -240,6 +240,7 @@
                                     org.wso2.orbit.commons-text:commons-text:${org.wso2.orbit.commons-text.version}
                                 </bundleDef>
                                 <bundleDef>org.wso2.orbit.graphQL:graphQL:${graphql.java.version}</bundleDef>
+                                <bundleDef>org.wso2.wsdl4j:wsdl4j.wso2:${wsdl4j.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>
