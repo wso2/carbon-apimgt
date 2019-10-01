@@ -54,7 +54,10 @@ export default function Tags(props) {
                     />
                 )}
                 onAdd={(tag) => {
-                    configDispatcher({ action: 'tags', value: [...api.tags, tag] });
+                    configDispatcher({
+                        action: 'tags',
+                        value: [...api.tags, tag.length > 30 ? tag.substring(0, 30) : tag],
+                    });
                 }}
                 onDelete={(tag) => {
                     configDispatcher({ action: 'tags', value: api.tags.filter(oldTag => oldTag !== tag) });
