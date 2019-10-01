@@ -213,7 +213,7 @@ handleReset = () => {
                                     <Typography variant='h6'>
                                         <FormattedMessage
                                             id='Apis.Details.Credentials.Wizard.Wizard.subscribe.to.new.application'
-                                            defaultMessage='Subscribe to new Application'
+                                            defaultMessage='Create Application and Subscribe'
                                         />
                                     </Typography>
                                 </div>
