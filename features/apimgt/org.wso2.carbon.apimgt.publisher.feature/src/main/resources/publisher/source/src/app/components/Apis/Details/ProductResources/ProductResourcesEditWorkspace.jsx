@@ -637,7 +637,7 @@ function ProductResourcesEdit(props) {
                                     </Typography>
                                     <Typography component='p'>
                                         <FormattedMessage
-                                            id='Apis.Details.ProductResources.ProductResourcesEdit.empty.content'
+                                            id='Apis.Details.ProductResources.ProductResourcesEdit.empty.title.content'
                                             defaultMessage='Use the left side panel to add resources'
                                         />
                                     </Typography>
