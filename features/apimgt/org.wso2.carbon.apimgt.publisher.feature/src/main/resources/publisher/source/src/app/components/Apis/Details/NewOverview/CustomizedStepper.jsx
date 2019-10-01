@@ -10,11 +10,9 @@ import LaunchIcon from '@material-ui/icons/Launch';
 import Grid from '@material-ui/core/Grid';
 import green from '@material-ui/core/colors/green';
 import Api from 'AppData/api';
-import { FormattedMessage } from 'react-intl';
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
 import { Link } from 'react-router-dom';
-import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import ArrowForwardIosRoundedIcon from '@material-ui/icons/ArrowForwardIosRounded';
 
 
@@ -114,8 +112,6 @@ const useStyles = makeStyles(theme => ({
         height: '82px',
         borderRight: '0',
         marginRight: '0',
-
-
     },
 }));
 
@@ -201,14 +197,14 @@ export default function CustomizedSteppers(props) {
                 <Step className={classes.label}>
                     <StepLabel style={{ position: 'relative' }}>
                         {lifecycleState === 'Published' && (
-                            <Box bgcolor='primary.main' p={2} m={2} border={1}>
+                            <Box className={classes.box}>
                                 <Typography variant='h6'>
                             Published
                                 </Typography>
                             </Box>
                         )}
                         {lifecycleState === 'Prototyped' && (
-                            <Box bgcolor='primary.main' p={2} m={2} border={1}>
+                            <Box className={classes.box}>
                                 <Typography variant='h6'>
                                 Prototyped
                                 </Typography>
@@ -217,8 +213,11 @@ export default function CustomizedSteppers(props) {
                         {lifecycleState === 'Created' && (
                             <Box className={classes.box}>
                                 <Typography variant='h6'>
-                                Published
+                                Publish
                                 </Typography>
+                                <Link to={'/apis/' + api.id + '/lifecycle'}>
+                                    <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
+                                </Link>
                             </Box>
                         )}
                     </StepLabel>
@@ -227,3 +226,10 @@ export default function CustomizedSteppers(props) {
         </div>
     );
 }
+
+CustomizedSteppers.propTypes = {
+    classes: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({
+        id: PropTypes.string,
+    }).isRequired,
+};
