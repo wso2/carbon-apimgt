@@ -209,8 +209,8 @@ function Overview(props) {
                                                 <FormattedMessage
                                                     id='Apis.Details.Overview.credential.wizard.info'
                                                     defaultMessage={
-                                                        'Use the Key Generation Wizard. Create a new application -> subscribe -> '
-                                                        + ' generate keys and access token to invoke this API.'
+                                                        'Use the Key Generation Wizard. Create a new application -> Subscribe -> '
+                                                        + ' Generate keys and Access Token to invoke this API.'
                                                     }
                                                 />
                                             </Typography>

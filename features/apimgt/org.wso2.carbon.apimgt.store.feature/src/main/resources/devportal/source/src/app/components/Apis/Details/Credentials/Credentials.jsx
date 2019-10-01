@@ -363,8 +363,8 @@ class Credentials extends React.Component {
                                                             <FormattedMessage
                                                                 id='Apis.Details.Credentials.Credentials.api.credentials.with.wizard.message'
                                                                 defaultMessage={
-                                                                    'Use the Key Generation Wizard. Create a new application -> subscribe -> '
-                                                                    + ' generate keys and access token to invoke this API.'
+                                                                    'Use the Key Generation Wizard. Create a new application -> Subscribe -> '
+                                                                    + ' Generate keys and Access Token to invoke this API.'
                                                                 }
                                                             />
                                                         </Typography>
