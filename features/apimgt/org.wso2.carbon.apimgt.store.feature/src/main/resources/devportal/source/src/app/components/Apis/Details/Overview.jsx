@@ -124,6 +124,8 @@ function Overview(props) {
         switch (apiType) {
             case 'GRAPHQL':
                 return <Operations api={api} />;
+            case 'WS':
+                return '';
             default:
                 return <Resources api={api} />;
         }
@@ -236,6 +238,8 @@ function Overview(props) {
                                 </ExpansionPanel>
                             </Grid>
                         )}
+                    {!api.type == 'WS' 
+                    && (
                     <Grid item xs={12} lg={6}>
                         <ExpansionPanel defaultExpanded>
                             <ExpansionPanelSummary>
@@ -270,6 +274,7 @@ function Overview(props) {
                                 )}
                         </ExpansionPanel>
                     </Grid>
+                    )}
                     {!api.advertiseInfo.advertised
                         && (
                             <React.Fragment>
@@ -311,6 +316,8 @@ function Overview(props) {
                                         </ExpansionPanelActions>
                                     </ExpansionPanel>
                                 </Grid>
+                                {!api.type == 'WS' 
+                                && (
                                 <Grid item xs={6}>
                                     <ExpansionPanel defaultExpanded>
                                         <ExpansionPanelSummary>
@@ -354,6 +361,7 @@ function Overview(props) {
                                         </ExpansionPanelActions>
                                     </ExpansionPanel>
                                 </Grid>
+                                )}
                             </React.Fragment>
                         )
                     }

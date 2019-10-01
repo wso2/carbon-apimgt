@@ -143,6 +143,8 @@ function Overview(props) {
                 return <Operations parentClasses={classes} api={api} />;
             case 'APIProduct':
                 return <ProductResources parentClasses={classes} api={api} />;
+            case 'WS':
+                return '';
             default:
                 return <Resources parentClasses={classes} api={api} />;
         }

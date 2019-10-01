@@ -287,6 +287,8 @@ class Details extends Component {
                         />
                     </React.Fragment>
                 );
+            case 'WS':
+                return '';
             default:
                 return (
                     <React.Fragment>
@@ -372,6 +374,10 @@ class Details extends Component {
      */
     render() {
         const { api, apiNotFound, isAPIProduct } = this.state;
+        let isWebsocket = false;
+        if (api) {
+            isWebsocket = (api.type == 'WS');
+        }
         const {
             classes,
             theme,
@@ -490,14 +496,16 @@ class Details extends Component {
                                 Icon={<LifeCycleIcon />}
                             />
                         )}
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.left.menu.scope',
-                                defaultMessage: 'scopes',
-                            })}
-                            to={pathPrefix + 'scopes'}
-                            Icon={<ScopesIcon />}
-                        />
+                        {!isWebsocket && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.left.menu.scope',
+                                    defaultMessage: 'scopes',
+                                })}
+                                to={pathPrefix + 'scopes'}
+                                Icon={<ScopesIcon />}
+                            />
+                        )}
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.documents',
@@ -530,16 +538,17 @@ class Details extends Component {
                             to={pathPrefix + 'subscriptions'}
                             Icon={<SubscriptionsIcon />}
                         />
-
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.left.menu.mediation.policies',
-                                defaultMessage: 'mediation policies',
-                            })}
-                            to={pathPrefix + 'mediation policies'}
-                            Icon={<ScopesIcon />}
-                        />
-                        {!isAPIProduct && !isRestricted(['apim:api_publish'], api) && (
+                        {!isWebsocket && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.left.menu.mediation.policies',
+                                    defaultMessage: 'mediation policies',
+                                })}
+                                to={pathPrefix + 'mediation policies'}
+                                Icon={<ScopesIcon />}
+                            />
+                        )}
+                        {!isAPIProduct && !isWebsocket && !isRestricted(['apim:api_publish'], api) && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.monetization',
