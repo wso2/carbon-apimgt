@@ -138,12 +138,12 @@ class TokenManager extends React.Component {
         const promisedSettings = api.getSettings();
         promisedSettings
             .then((response) => {
-                let { keyRequest } = this.state;
-                keyRequest = { ...keyRequest };
-                keyRequest.serverSupportedGrantTypes = response.obj.grantTypes;
-                keyRequest.supportedGrantTypes = response.obj.grantTypes.filter(item => item !== 'authorization_code'
+                const { keyRequest } = this.state;
+                const newKeyRequest = { ...keyRequest };
+                newKeyRequest.serverSupportedGrantTypes = response.obj.grantTypes;
+                newKeyRequest.supportedGrantTypes = response.obj.grantTypes.filter(item => item !== 'authorization_code'
                     && item !== 'implicit');
-                this.setState({ keyRequest });
+                this.setState({ keyRequest: newKeyRequest });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
