@@ -131,7 +131,7 @@ class API extends Resource {
         } else {
             payload = {
                 body: apiData,
-                openAPIVersion: 'v2',
+                openAPIVersion: 'v3',
             };
             promise_create = this.client.then(client => {
                 return client.apis['APIs'].post_apis(payload, this._requestMetaData());
@@ -277,7 +277,7 @@ class API extends Resource {
         }
     }
 
-    save(openAPIVersion = 'v2') {
+    save(openAPIVersion = 'v3') {
         const promisedAPIResponse = this.client.then((client) => {
             const properties = client.spec.definitions.API.properties;
             const data = {};
