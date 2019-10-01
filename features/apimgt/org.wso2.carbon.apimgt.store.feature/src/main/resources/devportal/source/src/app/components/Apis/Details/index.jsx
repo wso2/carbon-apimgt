@@ -372,17 +372,21 @@ class Details extends React.Component {
                                     handleMenuSelect={this.handleMenuSelect}
                                     active={active}
                                 />
-                                <LeftMenuItem
-                                    text='test'
-                                    handleMenuSelect={this.handleMenuSelect}
-                                    active={active}
-                                />
+                                {!api.type == 'WS'
+                                    && (
+                                        <LeftMenuItem
+                                            text='test'
+                                            handleMenuSelect={this.handleMenuSelect}
+                                            active={active}
+                                        />
+                                    )
+                                }
                             </React.Fragment>
                         )
                     }
                     <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={active} />
                     {!api.advertiseInfo.advertised
-                        && <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
+                        && !api.type == 'WS' && <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
                     }
                 </div>
                 <div className={classes.content}>

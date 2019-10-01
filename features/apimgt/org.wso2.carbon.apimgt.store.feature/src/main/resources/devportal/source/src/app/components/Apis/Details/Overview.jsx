@@ -160,6 +160,8 @@ function Overview(props) {
         switch (apiType) {
             case 'GRAPHQL':
                 return <Operations api={api} />;
+            case 'WS':
+                return '';
             default:
                 return <Resources api={api} />;
         }
@@ -286,39 +288,41 @@ function Overview(props) {
                             </ExpansionPanel>
                         </Grid>
                     )}
-                    <Grid item xs={12} lg={6}>
-                        <ExpansionPanel defaultExpanded>
-                            <ExpansionPanelSummary>
-                                <CustomIcon
-                                    strokeColor={theme.palette.secondary.main}
-                                    className={classes.iconClass}
-                                    width={24}
-                                    height={24}
-                                    icon='credentials'
-                                />
-                                {getTitleForAPIOperationType(api.type)}
-                                <Typography className={classes.heading} variant='h6' />
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails className={classes.resourceWrapper}>
-                                {getResourcesForAPIs(api.type, api)}
-                            </ExpansionPanelDetails>
-                            {!api.advertiseInfo.advertised && (
-                                <React.Fragment>
-                                    <Divider />
-                                    <ExpansionPanelActions className={classes.actionPanel}>
-                                        <Link to={'/apis/' + api.id + '/test'} className={classes.linkToTest}>
-                                            <Button size='small' color='primary'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Overview.resources.show.more'
-                                                    defaultMessage='Test >>'
-                                                />
-                                            </Button>
-                                        </Link>
-                                    </ExpansionPanelActions>
-                                </React.Fragment>
-                            )}
-                        </ExpansionPanel>
-                    </Grid>
+                    {!api.type == 'WS' && (
+                        <Grid item xs={12} lg={6}>
+                            <ExpansionPanel defaultExpanded>
+                                <ExpansionPanelSummary>
+                                    <CustomIcon
+                                        strokeColor={theme.palette.secondary.main}
+                                        className={classes.iconClass}
+                                        width={24}
+                                        height={24}
+                                        icon='credentials'
+                                    />
+                                    {getTitleForAPIOperationType(api.type)}
+                                    <Typography className={classes.heading} variant='h6' />
+                                </ExpansionPanelSummary>
+                                <ExpansionPanelDetails className={classes.resourceWrapper}>
+                                    {getResourcesForAPIs(api.type, api)}
+                                </ExpansionPanelDetails>
+                                {!api.advertiseInfo.advertised && (
+                                    <React.Fragment>
+                                        <Divider />
+                                        <ExpansionPanelActions className={classes.actionPanel}>
+                                            <Link to={'/apis/' + api.id + '/test'} className={classes.linkToTest}>
+                                                <Button size='small' color='primary'>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Overview.resources.show.more'
+                                                        defaultMessage='Test >>'
+                                                    />
+                                                </Button>
+                                            </Link>
+                                        </ExpansionPanelActions>
+                                    </React.Fragment>
+                                )}
+                            </ExpansionPanel>
+                        </Grid>
+                    )}
                     {!api.advertiseInfo.advertised && (
                         <React.Fragment>
                             <Grid item xs={12} lg={6}>
@@ -373,49 +377,51 @@ function Overview(props) {
                                     </ExpansionPanelActions>
                                 </ExpansionPanel>
                             </Grid>
-                            <Grid item xs={6}>
-                                <ExpansionPanel defaultExpanded>
-                                    <ExpansionPanelSummary>
-                                        <CustomIcon
-                                            strokeColor={theme.palette.secondary.main}
-                                            className={classes.iconClass}
-                                            width={24}
-                                            height={24}
-                                            icon='sdk'
-                                        />
-                                        <Typography className={classes.heading} variant='h6'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Overview.sdk.generation.title'
-                                                defaultMessage='SDK Generation'
+                            {!api.type == 'WS' && (
+                                <Grid item xs={6}>
+                                    <ExpansionPanel defaultExpanded>
+                                        <ExpansionPanelSummary>
+                                            <CustomIcon
+                                                strokeColor={theme.palette.secondary.main}
+                                                className={classes.iconClass}
+                                                width={24}
+                                                height={24}
+                                                icon='sdk'
                                             />
-                                        </Typography>
-                                    </ExpansionPanelSummary>
-                                    <ExpansionPanelDetails className={classes.resourceWrapper}>
-                                        <Grid container className={classes.root} spacing={2}>
-                                            {api && <Sdk apiId={api.id} onlyIcons />}
-                                            <Grid item xs={12}>
-                                                <Typography>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Overview.sdk.generation.description'
-                                                        defaultMessage='If you wants to create a software application to consume the subscribed APIs, you can generate client side SDK for a supported language/framework and use it as a start point to write the software application.'
-                                                    />
-                                                </Typography>
-                                            </Grid>
-                                        </Grid>
-                                    </ExpansionPanelDetails>
-                                    <Divider />
-                                    <ExpansionPanelActions className={classes.actionPanel}>
-                                        <Link to={'/apis/' + api.id + '/sdk'} className={classes.linkToTest}>
-                                            <Button size='small' color='primary'>
+                                            <Typography className={classes.heading} variant='h6'>
                                                 <FormattedMessage
-                                                    id='Apis.Details.Overview.sdk.generation.show.more'
-                                                    defaultMessage='Show More >>'
+                                                    id='Apis.Details.Overview.sdk.generation.title'
+                                                    defaultMessage='SDK Generation'
                                                 />
-                                            </Button>
-                                        </Link>
-                                    </ExpansionPanelActions>
-                                </ExpansionPanel>
-                            </Grid>
+                                            </Typography>
+                                        </ExpansionPanelSummary>
+                                        <ExpansionPanelDetails className={classes.resourceWrapper}>
+                                            <Grid container className={classes.root} spacing={2}>
+                                                {api && <Sdk apiId={api.id} onlyIcons />}
+                                                <Grid item xs={12}>
+                                                    <Typography>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Overview.sdk.generation.description'
+                                                            defaultMessage='If you wants to create a software application to consume the subscribed APIs, you can generate client side SDK for a supported language/framework and use it as a start point to write the software application.'
+                                                        />
+                                                    </Typography>
+                                                </Grid>
+                                            </Grid>
+                                        </ExpansionPanelDetails>
+                                        <Divider />
+                                        <ExpansionPanelActions className={classes.actionPanel}>
+                                            <Link to={'/apis/' + api.id + '/sdk'} className={classes.linkToTest}>
+                                                <Button size='small' color='primary'>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Overview.sdk.generation.show.more'
+                                                        defaultMessage='Show More >>'
+                                                    />
+                                                </Button>
+                                            </Link>
+                                        </ExpansionPanelActions>
+                                    </ExpansionPanel>
+                                </Grid>
+                            )}
                         </React.Fragment>
                     )}
                     <Grid item xs={12} lg={6}>
