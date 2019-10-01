@@ -84,7 +84,7 @@ const subscibeButtonPanel = (props) => {
                         >
                             <FormattedMessage
                                 id='Apis.Details.Credentials.SubscibeButtonPanel.subscribe.to.available.app'
-                                defaultMessage='Subscribe to Available App'
+                                defaultMessage='Subscribe'
                             />
                         </Button>
                         <Typography
@@ -94,10 +94,16 @@ const subscibeButtonPanel = (props) => {
                         >
                             {avalibleAppsLength}
                             {' '}
-                            <FormattedMessage
-                                id='Apis.Details.Credentials.SubscibeButtonPanel.available'
-                                defaultMessage='Available'
-                            />
+                            {avalibleAppsLength > 1 ?
+                                <FormattedMessage
+                                    id='Apis.Details.Credentials.SubscibeButtonPanel.available'
+                                    defaultMessage='Apps Available'
+                                /> :
+                                <FormattedMessage
+                                    id='Apis.Details.Credentials.SubscibeButtonPanel.available'
+                                    defaultMessage='App Available'
+                                />
+                            }
                         </Typography>
                     </div>
                 )}
@@ -110,7 +116,7 @@ const subscibeButtonPanel = (props) => {
                 >
                     <FormattedMessage
                         id='Apis.Details.Credentials.SubscibeButtonPanel.subscribe.to.new.app'
-                        defaultMessage='Subscribe to New App'
+                        defaultMessage='Create Application and Subscribe'
                     />
                 </Button>
             </ScopeValidation>
