@@ -808,7 +808,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 || !hasValidLength(api.getId().getProviderName(), APIConstants.MAX_LENGTH_PROVIDER)
                 || !hasValidLength(api.getContext(), APIConstants.MAX_LENGTH_CONTEXT)
                 ) {
-            handleException("Character length exceeds the allowable limit.");
+            throw new APIManagementException("Character length exceeds the allowable limit",
+                    ExceptionCodes.LENGTH_EXCEEDS);
         }
     }
 
@@ -6988,7 +6989,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 || !hasValidLength(product.getId().getVersion(), APIConstants.MAX_LENGTH_VERSION)
                 || !hasValidLength(product.getId().getProviderName(), APIConstants.MAX_LENGTH_PROVIDER)
                 || !hasValidLength(product.getContext(), APIConstants.MAX_LENGTH_CONTEXT)) {
-            handleException("Character length exceeds the allowable limit.");
+            throw new APIManagementException("Character length exceeds the allowable limit",
+                    ExceptionCodes.LENGTH_EXCEEDS);
         }
     }
 
