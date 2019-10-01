@@ -50,11 +50,11 @@ function BusinessInformation(props) {
                 </Typography>
                 <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
                     {!api.businessInformation.businessOwner && (
-                        <React.Fragment>&lt;
+                        <React.Fragment>
                             <FormattedMessage
-                                id='Apis.Details.NewOverview.BusinessInformation.business.owner.not.configured'
-                                defaultMessage='Not Configured'
-                            />&gt;
+                                id='Apis.Details.NewOverview.BusinessInformation.business.owner.not.set'
+                                defaultMessage='-'
+                            />
                         </React.Fragment>
                     )}
                 </Typography>
@@ -75,11 +75,11 @@ function BusinessInformation(props) {
                 </Typography>
                 <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
                     {!api.businessInformation.technicalOwner && (
-                        <React.Fragment>&lt;
+                        <React.Fragment>
                             <FormattedMessage
-                                id='Apis.Details.NewOverview.BusinessInformation.technical.owner.not.configured'
-                                defaultMessage='Not Configured'
-                            />&gt;
+                                id='Apis.Details.NewOverview.BusinessInformation.technical.owner.not.set'
+                                defaultMessage='-'
+                            />
                         </React.Fragment>
                     )}
                 </Typography>
