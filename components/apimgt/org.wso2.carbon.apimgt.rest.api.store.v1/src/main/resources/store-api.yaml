@@ -3220,7 +3220,7 @@ paths:
   ##################################################
   # Alert configuration api
   #################################################
-  '/alerts/{alert-type}/configurations':
+  '/alerts/{alertType}/configurations':
     #----------------------------------------------
     # Get the alert configs
     #----------------------------------------------
@@ -3238,7 +3238,7 @@ paths:
       tags:
         - Alert Configuration
       parameters:
-        - $ref: '#/parameters/alert-type'
+        - $ref: '#/parameters/alertType'
       responses:
         200:
           description: |
@@ -3258,7 +3258,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  '/alerts/{alert-type}/configurations/{configuration-id}':
+  '/alerts/{alertType}/configurations/{configurationId}':
     #----------------------------------------------
     # Add alert config
     #----------------------------------------------
@@ -3274,8 +3274,8 @@ paths:
       description: |
         This operation is used to add configuration for the AbnormalRequestsPerMin alert type.
       parameters:
-        - $ref: '#/parameters/alert-type'
-        - $ref: '#/parameters/configuration-id'
+        - $ref: '#/parameters/alertType'
+        - $ref: '#/parameters/configurationId'
         - in: body
           name: body
           description:
@@ -3326,8 +3326,8 @@ paths:
       description: |
         This operation is used to delete configuration from the AbnormalRequestsPerMin alert type.
       parameters:
-        - $ref: '#/parameters/alert-type'
-        - $ref: '#/parameters/configuration-id'
+        - $ref: '#/parameters/alertType'
+        - $ref: '#/parameters/configurationId'
       tags:
         - Alert Configuration
       responses:
@@ -3588,9 +3588,9 @@ parameters:
       Validator for conditional requests; based on ETag.
     type: string
 
-  # The alert-type parameter
-  alert-type:
-    name: alert-type
+  # The alertType parameter
+  alertType:
+    name: alertType
     in: path
     type: string
     required: true
@@ -3598,8 +3598,8 @@ parameters:
       The alert type.
 
   # The alert subscription id parameter
-  configuration-id:
-    name: configuration-id
+  configurationId:
+    name: configurationId
     type: string
     in: path
     required: true
@@ -4846,6 +4846,9 @@ definitions:
           - DOC
           - API
         example: API
+      transportType:
+        type: string
+        description: Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
 
   APISearchResult:
     title: API Result

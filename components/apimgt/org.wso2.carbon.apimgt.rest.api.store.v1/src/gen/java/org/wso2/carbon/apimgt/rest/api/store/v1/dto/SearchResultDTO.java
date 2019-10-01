@@ -53,6 +53,7 @@ public enum TypeEnum {
 }
 
     private TypeEnum type = null;
+    private String transportType = null;
 
   /**
    **/
@@ -106,6 +107,24 @@ public enum TypeEnum {
     this.type = type;
   }
 
+  /**
+   * Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
+   **/
+  public SearchResultDTO transportType(String transportType) {
+    this.transportType = transportType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL")
+  @JsonProperty("transportType")
+  public String getTransportType() {
+    return transportType;
+  }
+  public void setTransportType(String transportType) {
+    this.transportType = transportType;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -118,12 +137,13 @@ public enum TypeEnum {
     SearchResultDTO searchResult = (SearchResultDTO) o;
     return Objects.equals(id, searchResult.id) &&
         Objects.equals(name, searchResult.name) &&
-        Objects.equals(type, searchResult.type);
+        Objects.equals(type, searchResult.type) &&
+        Objects.equals(transportType, searchResult.transportType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, type);
+    return Objects.hash(id, name, type, transportType);
   }
 
   @Override
@@ -134,6 +154,7 @@ public enum TypeEnum {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    transportType: ").append(toIndentedString(transportType)).append("\n");
     sb.append("}");
     return sb.toString();
   }

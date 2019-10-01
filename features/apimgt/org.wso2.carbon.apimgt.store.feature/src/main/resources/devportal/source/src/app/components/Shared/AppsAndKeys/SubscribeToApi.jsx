@@ -91,8 +91,10 @@ const styles = theme => ({
 const subscribeToApi = (props) => {
     const [appSelected, setAppSelected] = useState('');
     const [policySelected, setPolicySelected] = useState('');
-    const [applicationsList, seAapplicationsList] = useState([]);
-    const { classes, throttlingPolicyList, applicationsAvailable } = props;
+    const [applicationsList, setApplicationsList] = useState([]);
+    const {
+        classes, throttlingPolicyList, applicationsAvailable, subscriptionRequest, updateSubscriptionRequest,
+    } = props;
 
     useEffect(() => {
         if (throttlingPolicyList && throttlingPolicyList[0]) {
@@ -102,8 +104,11 @@ const subscribeToApi = (props) => {
 
     useEffect(() => {
         if (applicationsAvailable && applicationsAvailable[0]) {
-            seAapplicationsList(applicationsAvailable);
+            setApplicationsList(applicationsAvailable);
             setAppSelected(applicationsAvailable[0].value);
+            const newRequest = { ...subscriptionRequest };
+            newRequest.applicationId = applicationsAvailable[0].value;
+            updateSubscriptionRequest(newRequest);
         }
     }, [applicationsAvailable]);
 
@@ -114,7 +119,6 @@ const subscribeToApi = (props) => {
     * @param {*} event event fired
     */
     const handleChange = (field, event) => {
-        const { subscriptionRequest, updateSubscriptionRequest } = props;
         const newRequest = { ...subscriptionRequest };
         const { target } = event;
         switch (field) {

@@ -32,41 +32,6 @@ import ApiThumb from './ApiThumb';
 import DocThumb from './DocThumb';
 import { ApiContext } from '../Details/ApiContext';
 
-class StarRatingColumn extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            rating: null,
-        };
-        this.api = new API();
-    }
-
-    componentDidMount() {
-        const promised_rating = this.api.getRatingFromUser(this.props.apiId, null);
-        promised_rating
-            .then((response) => {
-                const rating = response.obj;
-                this.setState({
-                    rating: rating.userRating,
-                });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-    }
-
-    render() {
-        const { rating } = this.state;
-        return rating && <StarRatingBar rating={rating} />;
-    }
-}
-
 const styles = (theme) => ({
     rowImageOverride: {
         '& .material-icons': {
@@ -91,7 +56,7 @@ class ApiTableView extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: [],
+            data: null,
         };
         this.page = 0;
         this.count = 100;
@@ -412,7 +377,7 @@ class ApiTableView extends React.Component {
         if (page === 0 && this.count <= rowsPerPage) {
             options.pagination = false;
         }
-        if (data.length === 0) {
+        if (data === null) {
             return <Loading />;
         }
         return (

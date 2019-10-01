@@ -143,9 +143,9 @@ class CreateScope extends React.Component {
      */
     addScope() {
         const {
-            intl, api, history, isAPIProduct, updateAPI,
+            intl, api, history, updateAPI,
         } = this.props;
-        const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
+        const urlPrefix = api.apiType === 'APIProduct' ? 'api-products' : 'apis';
         if (this.validateScopeName('name', this.state.apiScope.name)) {
             // return status of the validation
             return;
@@ -274,8 +274,8 @@ class CreateScope extends React.Component {
      * @memberof CreateScope
      */
     render() {
-        const { classes, isAPIProduct, api } = this.props;
-        const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
+        const { classes, api } = this.props;
+        const urlPrefix = (api.apiType === 'APIProduct') ? 'api-products' : 'apis';
         const url = `/${urlPrefix}/${api.id}/scopes`;
         const { roleValidity, validRoles, invalidRoles } = this.state;
 
@@ -450,7 +450,6 @@ CreateScope.propTypes = {
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
-    isAPIProduct: PropTypes.bool.isRequired,
     updateAPI: PropTypes.func.isRequired,
 };
 

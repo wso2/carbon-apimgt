@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.5.143-SNAPSHOT</version>
+        <version>6.5.156-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -274,7 +274,7 @@
                             <workingDirectory>${basedir}/src/main/resources/devportal</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
-                                <argument>install</argument>
+                                <argument>ci</argument>
                                 <argument>--silent</argument>
                             </arguments>
                         </configuration>
