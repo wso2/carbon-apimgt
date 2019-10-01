@@ -39,7 +39,6 @@ public class PublisherAlertsAPIUtils {
      * @return true if the validation is successful. Error response otherwise.
      * */
     public static boolean validateConfigParameters(String configId) {
-        String userName = RestApiUtil.getLoggedInUsername();
         String decodedConfigurationId = new String(Base64.getDecoder().decode(configId.getBytes()));
         String[] parameters = decodedConfigurationId.split("#");
         if (parameters.length != 2) {
