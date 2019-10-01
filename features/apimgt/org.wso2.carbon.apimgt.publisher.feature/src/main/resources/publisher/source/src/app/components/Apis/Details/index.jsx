@@ -29,7 +29,7 @@ import DocumentsIcon from '@material-ui/icons/LibraryBooks';
 import BusinessIcon from '@material-ui/icons/Business';
 import CodeIcon from '@material-ui/icons/Code';
 import ConfigurationIcon from '@material-ui/icons/Build';
-import RuntimeConfigurationIcon from '@material-ui/icons/settings';
+import RuntimeConfigurationIcon from '@material-ui/icons/Settings';
 import PropertiesIcon from '@material-ui/icons/List';
 import SubscriptionsIcon from '@material-ui/icons/RssFeed';
 import MonetizationIcon from '@material-ui/icons/LocalAtm';
