@@ -6867,6 +6867,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // other servers to avoid synapse
             if (gatewayExists && "Synapse".equals(gatewayType)) {
                 apiProduct.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
+                List<APIProductResource> resourceMappings = apiMgtDAO.getAPIProductResourceMappings(identifier);
+                apiProduct.setProductResources(resourceMappings);
                 removeFromGateway(apiProduct);
 
             } else {

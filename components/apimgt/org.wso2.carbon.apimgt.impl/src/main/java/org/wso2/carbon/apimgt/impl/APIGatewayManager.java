@@ -256,7 +256,7 @@ public class APIGatewayManager {
                             } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT
                                     .equalsIgnoreCase(api.getImplementation())) {
                                 client.addApi(builder, tenantDomain, api.getId());
-                                client.addEndpoint(api, builder, tenantDomain);
+                                client.saveEndpoint(api, builder, tenantDomain);
                             }
 
                             if (api.isDefaultVersion()) {
@@ -432,7 +432,7 @@ public class APIGatewayManager {
 
                     for (API api : associatedAPIs) {
                         APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
-                        client.addEndpoint(api, apiTemplateBuilder, tenantDomain);
+                        client.saveEndpoint(api, apiTemplateBuilder, tenantDomain);
                         setSecureVaultProperty(client, api, tenantDomain, environment);
                         deployClientCertificates(client, api, tenantDomain);
                     }
