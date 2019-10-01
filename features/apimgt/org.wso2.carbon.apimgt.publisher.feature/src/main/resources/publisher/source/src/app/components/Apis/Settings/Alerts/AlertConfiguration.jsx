@@ -137,7 +137,7 @@ const AlertConfiguration = (props) => {
      * */
     const handleAddConfiguration = () => {
         setProcessing({ add: true });
-        const configId = base64url.encode(selectedAPIName + '#' + selectedAPIVersion + '#carbon.super');
+        const configId = base64url.encode(selectedAPIName + '#' + selectedAPIVersion);
         const propertyName = alertPropertyMap[alertType];
         const alertConfig = {
             apiName: selectedAPIName,
