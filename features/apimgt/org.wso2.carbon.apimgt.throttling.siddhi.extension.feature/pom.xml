@@ -78,6 +78,9 @@
                                 <bundleDef>
                                     com.google.code.gson:gson:${google.code.gson.version}
                                 </bundleDef>
+                                <bundleDef>
+                                    org.wso2.wsdl4j:wsdl4j.wso2:${wsdl4j.version}
+                                </bundleDef>
                             </bundles>
                         </configuration>
                     </execution>
