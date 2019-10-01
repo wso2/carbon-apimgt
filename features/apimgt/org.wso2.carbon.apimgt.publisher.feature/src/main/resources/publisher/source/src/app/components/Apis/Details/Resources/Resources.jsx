@@ -242,7 +242,6 @@ export default function Resources(props) {
         return (
             <Grid container direction='row' justify='center' alignItems='center'>
                 <Grid item>
-                    {/* TODO:  */}
                     <CircularProgress disableShrink />
                 </Grid>
             </Grid>
