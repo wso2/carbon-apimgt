@@ -43,84 +43,44 @@ const subscibeButtonPanel = (props) => {
         classes, avalibleAppsLength, subscribedAppsLength, handleClickToggle, intl,
     } = props;
     return (
-        <div className={classes.subscribeButtons}>
-            <div>
-                <Typography variant='h5'>
-                    <FormattedMessage
-                        id='Apis.Details.Credentials.SubscibeButtonPanel.subscribed.applications'
-                        defaultMessage='Subscribed Applications'
-                    />
-                </Typography>
-                <Typography variant='caption'>
-                        (
-                    {' '}
-                    {subscribedAppsLength}
-                    {' '}
-                    {subscribedAppsLength === 1
-                        ? intl.formatMessage({
-                            defaultMessage: 'subscription',
-                            id: 'Apis.Details.Credentials.SubscibeButtonPanel.subscription',
-                        })
-                        : intl.formatMessage({
-                            defaultMessage: 'subscriptions',
-                            id: 'Apis.Details.Credentials.SubscibeButtonPanel.subscriptions',
-                        })}
-                    {' '}
-                        )
-                </Typography>
-            </div>
-            <ScopeValidation
-                resourcePath={resourcePaths.SUBSCRIPTIONS}
-                resourceMethod={resourceMethods.POST}
+        <ScopeValidation resourcePath={resourcePaths.SUBSCRIPTIONS} resourceMethod={resourceMethods.POST}>
+            {avalibleAppsLength > 0 && (
+                <div>
+                    <Button
+                        variant='outlined'
+                        size='small'
+                        color='primary'
+                        className={classes.buttonElm}
+                        onClick={() => handleClickToggle('openAvailable')}
+                    >
+                        <FormattedMessage
+                            id='Apis.Details.Credentials.SubscibeButtonPanel.subscribe.to.available.app'
+                            defaultMessage='Subscribe to Available App'
+                        />
+                    </Button>
+                    <Typography variant='caption' component='p' className={classes.buttonElmText}>
+                        {avalibleAppsLength}
+                        {' '}
+                        <FormattedMessage
+                            id='Apis.Details.Credentials.SubscibeButtonPanel.available'
+                            defaultMessage='Available'
+                        />
+                    </Typography>
+                </div>
+            )}
+            <Button
+                variant='outlined'
+                size='large'
+                color='primary'
+                className={classes.buttonElm}
+                onClick={() => handleClickToggle('openNew')}
             >
-                {avalibleAppsLength > 0 && (
-                    <div>
-                        <Button
-                            variant='outlined'
-                            size='small'
-                            color='primary'
-                            className={classes.buttonElm}
-                            onClick={() => handleClickToggle('openAvailable')}
-                        >
-                            <FormattedMessage
-                                id='Apis.Details.Credentials.SubscibeButtonPanel.subscribe.to.available.app'
-                                defaultMessage='Subscribe'
-                            />
-                        </Button>
-                        <Typography
-                            variant='caption'
-                            component='p'
-                            className={classes.buttonElmText}
-                        >
-                            {avalibleAppsLength}
-                            {' '}
-                            {avalibleAppsLength > 1 ?
-                                <FormattedMessage
-                                    id='Apis.Details.Credentials.SubscibeButtonPanel.available'
-                                    defaultMessage='Apps Available'
-                                /> :
-                                <FormattedMessage
-                                    id='Apis.Details.Credentials.SubscibeButtonPanel.available'
-                                    defaultMessage='App Available'
-                                />
-                            }
-                        </Typography>
-                    </div>
-                )}
-                <Button
-                    variant='outlined'
-                    size='small'
-                    color='primary'
-                    className={classes.buttonElm}
-                    onClick={() => handleClickToggle('openNew')}
-                >
-                    <FormattedMessage
-                        id='Apis.Details.Credentials.SubscibeButtonPanel.subscribe.to.new.app'
-                        defaultMessage='Create Application and Subscribe'
-                    />
-                </Button>
-            </ScopeValidation>
-        </div>
+                <FormattedMessage
+                    id='Apis.Details.Credentials.SubscibeButtonPanel.subscribe.wizard'
+                    defaultMessage='Wizard'
+                />
+            </Button>
+        </ScopeValidation>
     );
 };
 subscibeButtonPanel.propTypes = {

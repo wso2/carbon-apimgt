@@ -38,7 +38,7 @@ import { ApiContext } from '../Details/ApiContext';
  */
 const styles = theme => ({
     thumbContent: {
-        width: theme.custom.thumbnail.width - theme.spacing.unit,
+        width: theme.custom.thumbnail.width - theme.spacing(2),
         backgroundColor: theme.palette.background.paper,
         padding: theme.spacing.unit,
     },
@@ -48,6 +48,8 @@ const styles = theme => ({
     },
     thumbRight: {
         alignSelf: 'flex-end',
+        display: 'flex',
+        flexDirection: 'column',
     },
     thumbInfo: {
         display: 'flex',
@@ -68,7 +70,6 @@ const styles = theme => ({
         cursor: 'pointer',
         margin: 0,
         display: 'inline-block',
-        lineHeight: '1em',
     },
     thumbWrapper: {
         position: 'relative',
@@ -85,7 +86,7 @@ const styles = theme => ({
     imageWrapper: {
         color: theme.palette.text.secondary,
         backgroundColor: theme.palette.background.paper,
-        width: theme.custom.thumbnail.width + theme.spacing.unit,
+        width: theme.custom.thumbnail.width,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -94,6 +95,9 @@ const styles = theme => ({
         position: 'absolute',
         bottom: 1,
         backgroundColor: theme.custom.thumbnail.contentBackgroundColor,
+    },
+    ratingWrapper: {
+        marginLeft: '-6px',
     },
 });
 /**
@@ -260,7 +264,7 @@ class ApiThumb extends React.Component {
                     </div>
                     <div className={classes.thumbInfo}>
                         <div className={classes.thumbLeft}>
-                            <Typography variant='subtitle1' gutterBottom align='left'>
+                            <Typography variant='subtitle1' gutterBottom align='left' className={classes.ratingWrapper}>
                                 <StarRatingBar apiRating={api.avgRating} apiId={api.id} isEditable={false} showSummary={false} />
                             </Typography>
                         </div>

@@ -28,6 +28,9 @@ const Configurations = {
             typography: {
                 fontFamily: '"Open Sans", "Helvetica", "Arial", sans-serif',
                 fontSize: 12,
+                body2: {
+                    lineHeight: 2,
+                },
             },
             custom: {
                 starColor: '#f2c73a',
@@ -47,6 +50,10 @@ const Configurations = {
                 adminRole: 'admin',
                 commentsLimit: 5,
                 maxCommentLength: 512,
+                overviewPage: {
+                    commentsBackground: '/devportal/site/public/images/overview/comments.svg',
+                    documentsBackground: '/devportal/site/public/images/overview/documents.svg',
+                },
                 resourceChipColors: {
                     get: '#02a8f4',
                     post: '#8ac149',
@@ -86,8 +93,9 @@ const Configurations = {
                         },
                     },
                 },
+                noApiImage: '/devportal/site/public/images/nodata.svg',
                 landingPage: {
-                    active: true,
+                    active: false,
                     carousel: {
                         active: true,
                         slides: [

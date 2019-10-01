@@ -20,20 +20,8 @@ import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import { Link } from 'react-router-dom';
-import Divider from '@material-ui/core/Divider';
-import ExpansionPanelActions from '@material-ui/core/ExpansionPanelActions';
-import Button from '@material-ui/core/Button';
 import { FormattedMessage } from 'react-intl';
-import CustomIcon from '../../Shared/CustomIcon';
-import { ApiContext } from './ApiContext';
-import Resources from './Resources';
-import Operations from './Operations';
-import Comments from './Comments/Comments';
-import Sdk from './Sdk';
 import API from '../../../data/api';
 
 /**
@@ -82,6 +70,13 @@ const styles = theme => ({
     linkToTest: {
         textDecoration: 'none',
     },
+    emptyBox: {
+        background: '#ffffff55',
+        color: '#444',
+        border: 'solid 1px #fff',
+        padding: theme.spacing(2),
+        marginTop: 50,
+    },
 });
 
 function OverviewDocuments(props) {
@@ -89,7 +84,7 @@ function OverviewDocuments(props) {
 
     useEffect(() => {
         const restApi = new API();
-        const { apiId} = props;
+        const { apiId } = props;
         const promisedApi = restApi.getDocumentsByAPIId(apiId);
         promisedApi
             .then((response) => {
@@ -116,10 +111,23 @@ function OverviewDocuments(props) {
      */
 
     const { classes, apiId } = props;
+    if (docs.length === 0) {
+        return (
+            <Grid item xs={12}>
+                <div className={classes.emptyBox}>
+                    <Typography variant='body2'>
+                        <FormattedMessage
+                            id='Apis.Details.Overview.documents.no.content'
+                            defaultMessage='No Documents Yet'
+                        />
+                    </Typography>
+                </div>
+            </Grid>
+        );
+    }
 
     return (
         <React.Fragment>
-            {' '}
             <Grid item xs={12}>
                 <div className={classes.subscriptionTop}>
                     <div className={classes.boxBadge}>{docs.length}</div>
@@ -134,19 +142,18 @@ function OverviewDocuments(props) {
                 </Typography>
                 {docs.length > 0 && (
                     <div className={classes.subscriptionBox}>
-                    <Link to={'/apis/' + apiId + '/documents'} className={classes.linkStyle}>
-                        {docs[0].name}
-                    </Link>
-                    <Typography variant='caption'>
+                        <Link to={'/apis/' + apiId + '/documents'} className={classes.linkStyle}>
+                            {docs[0].name}
+                        </Link>
+                        {/* <Typography variant='caption'>
                         <FormattedMessage
                             id='Apis.Details.Overview.documents.last.updated'
                             defaultMessage='Last Updated'
                         />
                         21 minutes ago
-                    </Typography>
-                </div>
+                    </Typography> */}
+                    </div>
                 )}
-                
             </Grid>
         </React.Fragment>
     );

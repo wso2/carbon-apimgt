@@ -133,6 +133,7 @@ const styles = theme => ({
         left: 0,
         top: 0,
         boxShadow: '11px -1px 15px -8px rgba(115,115,115,1)',
+        overflowY: 'auto',
     },
     leftLInkMain: {
         borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
