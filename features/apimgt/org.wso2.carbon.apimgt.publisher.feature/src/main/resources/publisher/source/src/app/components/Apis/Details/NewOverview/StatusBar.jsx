@@ -20,6 +20,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
+import { isRestricted } from 'AppData/AuthManager';
 
 /**
  *
@@ -34,7 +35,12 @@ export default function StatusBar(props) {
             <Grid container spacing={24}>
                 <Grid item xs={12} md={2} lg={2}>
                     {/* Thumbnail */}
-                    <ThumbnailView api={api} width={80} height={80} isEditable />
+                    <ThumbnailView
+                        api={api}
+                        width={80}
+                        height={80}
+                        isEditable={!isRestricted(['apim:api_publish', 'apim:api_create'], api)}
+                    />
                 </Grid>
                 <Grid item xs={12} md={6} lg={6}>
                     {/* Status */}

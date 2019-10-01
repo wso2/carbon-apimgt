@@ -18,8 +18,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
 import ChipInput from 'material-ui-chip-input';
 import { FormattedMessage } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
@@ -38,35 +36,34 @@ export default function Tags(props) {
 
     return (
         <React.Fragment>
-            <Grid container>
-                <Grid item xs={12}>
-                    <Typography variant='subtitle1'>
-                        <FormattedMessage
-                            id='Apis.Details.Configuration.components.Tags.title'
-                            defaultMessage='Tags'
-                        />
-                    </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                    <ChipInput
-                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], apiFromContext)}
-                        value={api.tags}
-                        helperText={(
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.components.Tags.helper'
-                                defaultMessage='Press `enter` after typing the tag name,To add a new tag'
-                            />
-                        )}
-                        onAdd={(tag) => {
-                            configDispatcher({ action: 'tags', value: [...api.tags, tag] });
-                        }}
-                        onDelete={(tag) => {
-                            configDispatcher({ action: 'tags', value: api.tags.filter(oldTag => oldTag !== tag) });
-                        }}
-                        style={{ display: 'flex' }}
+            <ChipInput
+                fullWidth
+                variant='outlined'
+                label={
+                    <FormattedMessage
+                        id='Apis.Details.Configuration.components.Tags.title'
+                        defaultMessage='Tags'
                     />
-                </Grid>
-            </Grid>
+                }
+                disabled={isRestricted(['apim:api_create', 'apim:api_publish'], apiFromContext)}
+                value={api.tags}
+                helperText={(
+                    <FormattedMessage
+                        id='Apis.Details.Configuration.components.Tags.helper'
+                        defaultMessage='Press `enter` after typing the tag name,To add a new tag'
+                    />
+                )}
+                onAdd={(tag) => {
+                    configDispatcher({
+                        action: 'tags',
+                        value: [...api.tags, tag.length > 30 ? tag.substring(0, 30) : tag],
+                    });
+                }}
+                onDelete={(tag) => {
+                    configDispatcher({ action: 'tags', value: api.tags.filter(oldTag => oldTag !== tag) });
+                }}
+                style={{ display: 'flex' }}
+            />
         </React.Fragment>
     );
 }

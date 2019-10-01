@@ -29,6 +29,7 @@ import DocumentsIcon from '@material-ui/icons/LibraryBooks';
 import BusinessIcon from '@material-ui/icons/Business';
 import CodeIcon from '@material-ui/icons/Code';
 import ConfigurationIcon from '@material-ui/icons/Build';
+import RuntimeConfigurationIcon from '@material-ui/icons/Settings';
 import PropertiesIcon from '@material-ui/icons/List';
 import SubscriptionsIcon from '@material-ui/icons/RssFeed';
 import MonetizationIcon from '@material-ui/icons/LocalAtm';
@@ -50,6 +51,7 @@ import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import AppContext from 'AppComponents/Shared/AppContext';
 import Overview from './NewOverview/Overview';
 import Configuration from './Configuration/Configuration';
+import RuntimeConfiguration from './Configuration/RuntimeConfiguration';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
 import Operations from './Operations/Operations';
@@ -443,11 +445,19 @@ class Details extends Component {
                         />
                         <LeftMenuItem
                             text={intl.formatMessage({
-                                id: 'Apis.Details.index.configuration',
-                                defaultMessage: 'configuration',
+                                id: 'Apis.Details.index.design.configs',
+                                defaultMessage: 'Design Configs',
                             })}
                             to={pathPrefix + 'configuration'}
                             Icon={<ConfigurationIcon />}
+                        />
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.runtime.configs',
+                                defaultMessage: 'Runtime Configs',
+                            })}
+                            to={pathPrefix + 'runtime-configuration'}
+                            Icon={<RuntimeConfigurationIcon />}
                         />
                         {!isAPIProduct && (
                             <LeftMenuItem
@@ -579,8 +589,16 @@ class Details extends Component {
                                     component={() => <Configuration api={api} />}
                                 />
                                 <Route
+                                    path={Details.subPaths.RUNTIME_CONFIGURATION}
+                                    component={() => <RuntimeConfiguration api={api} />}
+                                />
+                                <Route
                                     path={Details.subPaths.CONFIGURATION_PRODUCT}
                                     component={() => <Configuration api={api} />}
+                                />
+                                <Route
+                                    path={Details.subPaths.RUNTIME_CONFIGURATION_PRODUCT}
+                                    component={() => <RuntimeConfiguration api={api} />}
                                 />
                                 <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
                                 <Route
@@ -674,7 +692,9 @@ Details.subPaths = {
     SCHEMA_DEFINITION: '/apis/:api_uuid/schema definition',
     LIFE_CYCLE: '/apis/:api_uuid/lifecycle',
     CONFIGURATION: '/apis/:api_uuid/configuration',
+    RUNTIME_CONFIGURATION: '/apis/:api_uuid/runtime-configuration',
     CONFIGURATION_PRODUCT: '/api-products/:apiprod_uuid/configuration',
+    RUNTIME_CONFIGURATION_PRODUCT: '/api-products/:apiprod_uuid/runtime-configuration',
     ENDPOINTS: '/apis/:api_uuid/endpoints',
     ENVIRONMENTS: '/apis/:api_uuid/environments',
     OPERATIONS: '/apis/:api_uuid/operations',

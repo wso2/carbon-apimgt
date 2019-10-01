@@ -23,34 +23,20 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
+import Container from '@material-ui/core/Container';
+import Box from '@material-ui/core/Box';
 import { FormattedMessage } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Alert from 'AppComponents/Shared/Alert';
-import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import LaunchIcon from '@material-ui/icons/Launch';
 
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import { isRestricted } from 'AppData/AuthManager';
 import DefaultVersion from './components/DefaultVersion';
-import ResponseCaching from './components/ResponseCaching';
 import Description from './components/Description';
 import AccessControl from './components/AccessControl';
 import StoreVisibility from './components/StoreVisibility';
-import CORSConfiguration from './components/CORSConfiguration';
 import Tags from './components/Tags';
-import SchemaValidation from './components/SchemaValidation';
-import MaxBackendTps from './components/MaxBackendTps';
-
-import APISecurity, {
-    DEFAULT_API_SECURITY_OAUTH2,
-    API_SECURITY_BASIC_AUTH,
-    API_SECURITY_API_KEY,
-    API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY,
-    API_SECURITY_MUTUAL_SSL_MANDATORY,
-    API_SECURITY_MUTUAL_SSL,
-} from './components/APISecurity/APISecurity';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -109,6 +95,9 @@ const useStyles = makeStyles(theme => ({
         display: 'inline-flex',
         lineHeight: '38px',
     },
+    btnSpacing: {
+        marginRight: theme.spacing(1),
+    },
 }));
 
 /**
@@ -162,7 +151,7 @@ export default function Configuration() {
      * @returns {Object} updated state
      */
     function configReducer(state, configAction) {
-        const { action, value, event } = configAction;
+        const { action, value } = configAction;
         const nextState = { ...copyAPIConfig(state) };
         switch (action) {
             case 'description':
@@ -181,85 +170,6 @@ export default function Configuration() {
                 return { ...copyAPIConfig(state), [action]: value };
             case 'visibleRoles':
                 return { ...copyAPIConfig(state), [action]: value };
-            case 'securityScheme':
-                // If event came from mandatory selector of either Application level or Transport level
-                if (
-                    [API_SECURITY_MUTUAL_SSL_MANDATORY, API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY]
-                        .includes(event.name)
-                ) {
-                    // If user select not mandatory (optional) , Remove the respective schema, else add it
-                    if (event.value === 'optional') {
-                        return {
-                            ...copyAPIConfig(state),
-                            [action]: state[action].filter(schema => schema !== event.name),
-                        };
-                    } else if (state[action].includes(event.name)) {
-                        return state; // Add for completeness, Ideally there couldn't exist this state
-                    } else {
-                        return { ...copyAPIConfig(state), [action]: [...state[action], event.name] };
-                    }
-                }
-                // User checked on one of api security schemas (either OAuth, Basic, ApiKey or Mutual SSL)
-                if (event.checked) {
-                    if (state[action].includes(event.value)) {
-                        return state; // Add for completeness, Ideally there couldn't exist this state
-                    } else {
-                        return { ...copyAPIConfig(state), [action]: [...state[action], event.value] };
-                    }
-                } else if (state[action].includes(event.value)) {
-                    // User has unchecked a security schema type
-                    const newState = {
-                        ...copyAPIConfig(state),
-                        [action]: state[action].filter(schema => schema !== event.value),
-                    };
-                    if (
-                        !(
-                            newState[action].includes(DEFAULT_API_SECURITY_OAUTH2) ||
-                            newState[action].includes(API_SECURITY_BASIC_AUTH) ||
-                            newState[action].includes(API_SECURITY_API_KEY)
-                        )
-                    ) {
-                        const noMandatoryOAuthBasicAuth = newState[action]
-                            .filter(schema => schema !== API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
-                        return {
-                            ...newState,
-                            [action]: noMandatoryOAuthBasicAuth,
-                        };
-                    } else if (!newState[action].includes(API_SECURITY_MUTUAL_SSL)) {
-                        const noMandatoryMutualSSL = newState[action]
-                            .filter(schema => schema !== API_SECURITY_MUTUAL_SSL_MANDATORY);
-                        return {
-                            ...newState,
-                            [action]: noMandatoryMutualSSL,
-                        };
-                    }
-
-                    return newState;
-                } else {
-                    return state; // Add for completeness, Ideally there couldn't exist this state
-                }
-            case 'transport':
-                if (event.checked) {
-                    return { ...copyAPIConfig(state), transport: [...state.transport, event.value] };
-                } else {
-                    return {
-                        ...copyAPIConfig(state),
-                        transport: state.transport.filter(transport => transport !== event.value),
-                    };
-                }
-            case 'accessControlAllowHeaders':
-            case 'accessControlAllowMethods':
-            case 'accessControlAllowCredentials':
-            case 'corsConfigurationEnabled':
-                nextState.corsConfiguration[action] = value;
-                return nextState;
-            case 'accessControlAllowOrigins':
-                if (event.checked) {
-                    nextState.corsConfiguration[action] = [event.value];
-                } else {
-                    nextState.corsConfiguration[action] = event.checked === false ? [] : event.value;
-                }
-                return nextState;
             default:
                 return state;
         }
@@ -268,7 +178,6 @@ export default function Configuration() {
     const [isUpdating, setIsUpdating] = useState(false);
     const [apiConfig, configDispatcher] = useReducer(configReducer, copyAPIConfig(api));
     const classes = useStyles();
-    const paperHeight = window.innerHeight - 400;
     /**
      *
      * Handle the configuration view save button action
@@ -286,187 +195,101 @@ export default function Configuration() {
 
     return (
         <React.Fragment>
-            <div className={classes.titleWrapper}>
-                <Typography variant='h4' align='left' className={classes.mainTitle}>
-                    <FormattedMessage
-                        id='Apis.Details.Configuration.Configuration.topic.header'
-                        defaultMessage='Configuration'
-                    />
-                </Typography>
-            </div>
-            {
-                // TODO:
-                // Move design configurations to a sub page
-            }
-            <div className={classes.contentWrapper}>
-                <Grid container direction='row' justify='space-around' alignItems='flex-start' spacing={8}>
-                    <Grid item xs={4}>
-                        <Typography className={classes.heading} variant='h6'>
+            <Container maxWidth='md'>
+                <Grid container spacing={2}>
+                    <Grid item md={12}>
+                        <Typography variant='h5'>
                             <FormattedMessage
-                                id='Apis.Details.Configuration.Configuration.section.design'
-                                defaultMessage='Design'
+                                id='Apis.Details.Configuration.Configuration.Design.topic.header'
+                                defaultMessage='Design Configurations'
                             />
                         </Typography>
-                        <Paper className={classes.paper} style={{ minHeight: paperHeight }}>
-                            <Grid
-                                container
-                                direction='row'
-                                justify='space-around'
-                                alignItems='flex-start'
-                                spacing={1}
-                                style={{ marginBottom: 20 }}
-                            >
-                                <Grid item xs={12} md={4}>
-                                    <ThumbnailView api={api} width={100} height={100} isEditable />
-                                </Grid>
-                                <Grid item xs={12} md={8}>
-                                    <Description api={apiConfig} configDispatcher={configDispatcher} />
-                                </Grid>
-                            </Grid>
-                            {/* TODO: Use MUI <Box /> with `p` property to add padding to individual elements,
-                             instead of custom class ~tmkb */}
-                            <div className={classes.itemPadding}>
-                                <AccessControl api={apiConfig} configDispatcher={configDispatcher} />
-                            </div>
-                            <div className={classes.itemPadding}>
-                                <StoreVisibility api={apiConfig} configDispatcher={configDispatcher} />
-                            </div>
-                            <div className={classes.itemPadding}>
-                                <Tags api={apiConfig} configDispatcher={configDispatcher} />
-                            </div>
-                            {api.apiType !== 'APIProduct' && (
-                                <div className={classes.itemPadding}>
-                                    <Grid container direction='row'>
-                                        <Grid item xs={12} md={6}>
-                                            <DefaultVersion api={apiConfig} configDispatcher={configDispatcher} />
+                        <Typography variant='caption'>
+                            <FormattedMessage
+                                id='Apis.Details.Configuration.Configuration.Design.sub.heading'
+                                defaultMessage='On this page you can change design/metadata related configurations'
+                            />
+                        </Typography>
+                    </Grid>
+                    <Grid item md={12}>
+                        <Paper elevation={0}>
+                            <form noValidate autoComplete='off'>
+                                <Box px={8} py={5}>
+                                    <Box py={2}>
+                                        <Grid container spacing={0} >
+                                            <Grid item xs={12} md={2}>
+                                                <ThumbnailView
+                                                    api={api}
+                                                    width={100}
+                                                    height={100}
+                                                    isEditable={!isRestricted(['apim:api_publish',
+                                                        'apim:api_create'], api)}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12} md={10}>
+                                                <Description api={apiConfig} configDispatcher={configDispatcher} />
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
-                                </div>
-                            )}
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={5}>
-                        <Typography className={classes.heading} variant='h6'>
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.Configuration.section.request'
-                                defaultMessage='Request'
-                            />
-                        </Typography>
-                        <Grid
-                            direction=' column'
-                            justify='space-between'
-                            alignItems='flex-start'
-                            spacing={6}
-                            style={{ minHeight: paperHeight }}
-                        >
-                            <Grid item xs={12} style={{ marginBottom: 30, position: 'relative' }}>
-                                <Paper className={classes.paper}>
-                                    <APISecurity api={apiConfig} configDispatcher={configDispatcher} />
-                                    <CORSConfiguration api={apiConfig} configDispatcher={configDispatcher} />
-                                    <SchemaValidation api={apiConfig} configDispatcher={configDispatcher} />
-                                </Paper>
-                                <ArrowForwardIcon className={classes.arrowForwardIcon} />
-                            </Grid>
-                            {
-                                // TODO:
-                                // Add Mediation Policies
-                            }
-                            <Typography className={classes.heading} variant='h6'>
-                                <FormattedMessage
-                                    id='Apis.Details.Configuration.Configuration.section.response'
-                                    defaultMessage='Response'
-                                />
-                            </Typography>
-                            <Grid item xs={12} style={{ position: 'relative' }}>
-                                <Paper className={classes.paper}>
-                                    <ResponseCaching api={apiConfig} configDispatcher={configDispatcher} />
-                                </Paper>
-                                <ArrowBackIcon className={classes.arrowBackIcon} />
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                    <Grid item xs={3}>
-                        <Typography className={classes.heading} variant='h6'>
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.Configuration.section.backend'
-                                defaultMessage='Backend'
-                            />
-                        </Typography>
-                        <Grid
-                            direction=' column'
-                            justify='space-between'
-                            alignItems='flex-start'
-                            spacing={6}
-                            style={{ minHeight: paperHeight }}
-                        >
-                            <Grid item xs={12} style={{ marginBottom: 30, position: 'relative' }}>
-                                <Paper className={classes.paper} style={{ minHeight: paperHeight }}>
-                                    {!api.isAPIProduct() && (
-                                        <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
-                                    )}
-                                    <Link to={'/apis/' + api.id + '/endpoints'}>
-                                        <Typography
-                                            className={classes.subHeading}
+                                    </Box>
+                                    <Box py={1}>
+                                        <AccessControl api={apiConfig} configDispatcher={configDispatcher} />
+                                    </Box>
+                                    <Box py={1}>
+                                        <StoreVisibility api={apiConfig} configDispatcher={configDispatcher} />
+                                    </Box>
+                                    <Box py={1}>
+                                        <Tags api={apiConfig} configDispatcher={configDispatcher} />
+                                    </Box>
+                                    <Box py={1}>
+                                        {api.apiType !== 'APIProduct' && (
+                                            <DefaultVersion api={apiConfig} configDispatcher={configDispatcher} />
+                                        )}
+                                    </Box>
+                                    <Box pt={2}>
+                                        <Button
+                                            disabled={isUpdating ||
+                                            ((apiConfig.visibility === 'RESTRICTED' &&
+                                                apiConfig.visibleRoles.length === 0))}
+                                            type='submit'
+                                            variant='contained'
                                             color='primary'
-                                            display='inline'
-                                            variant='caption'
+                                            className={classes.btnSpacing}
+                                            onClick={handleSave}
                                         >
                                             <FormattedMessage
-                                                id='Apis.Details.Configuration.Configuration.endpoints'
-                                                defaultMessage='Endpoints'
+                                                id='Apis.Details.Configuration.Configuration.save'
+                                                defaultMessage='Save'
                                             />
-                                            <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
-                                        </Typography>
-                                    </Link>
-                                </Paper>
-                            </Grid>
-                        </Grid>
+                                            {isUpdating && <CircularProgress size={15} />}
+                                        </Button>
+                                        <Link to={'/apis/' + api.id + '/overview'}>
+                                            <Button>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Configuration.Configuration.cancel'
+                                                    defaultMessage='Cancel'
+                                                />
+                                            </Button>
+                                        </Link>
+                                    </Box>
+                                    {isRestricted(['apim:api_create'], api) && (
+                                        <Box py={1}>
+                                            <Typography variant='body2' color='primary'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Configuration.Configuration.update.not.allowed'
+                                                    defaultMessage={
+                                                        '* You are not authorized to update particular fields of' +
+                                                        ' the API due to insufficient permissions'
+                                                    }
+                                                />
+                                            </Typography>
+                                        </Box>
+                                    )}
+                                </Box>
+                            </form>
+                        </Paper>
                     </Grid>
                 </Grid>
-                <Grid container>
-                    <Grid container direction='row' alignItems='center' spacing={4} style={{ marginTop: 20 }}>
-                        <Grid item>
-                            <Button
-                                disabled={isUpdating ||
-                                ((apiConfig.visibility === 'RESTRICTED' && apiConfig.visibleRoles.length === 0))}
-                                type='submit'
-                                variant='contained'
-                                color='primary'
-                                onClick={handleSave}
-                            >
-                                <FormattedMessage
-                                    id='Apis.Details.Configuration.Configuration.save'
-                                    defaultMessage='Save'
-                                />
-                                {isUpdating && <CircularProgress size={15} />}
-                            </Button>
-                        </Grid>
-                        <Grid item>
-                            <Link to={'/apis/' + api.id + '/overview'}>
-                                <Button>
-                                    <FormattedMessage
-                                        id='Apis.Details.Configuration.Configuration.cancel'
-                                        defaultMessage='Cancel'
-                                    />
-                                </Button>
-                            </Link>
-                        </Grid>
-                        {isRestricted(['apim:api_create'], api) && (
-                            <Grid item>
-                                <Typography variant='body2' color='primary'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Configuration.Configuration.update.not.allowed'
-                                        defaultMessage={
-                                            '* You are not authorized to update particular fields of' +
-                                            ' the API due to insufficient permissions'
-                                        }
-                                    />
-                                </Typography>
-                            </Grid>
-                        )}
-                    </Grid>
-                </Grid>
-            </div>
+            </Container>
         </React.Fragment>
     );
 }

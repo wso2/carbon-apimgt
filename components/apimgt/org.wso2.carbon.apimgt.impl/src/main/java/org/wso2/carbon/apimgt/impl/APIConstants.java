@@ -1749,4 +1749,9 @@ public final class APIConstants {
         public static final String PUB_API_LIST_RESPONSE_PARAMS_COUNT = "count";
         public static final String PUB_API_RESPONSE_PARAMS_ID = "id";
     }
+    
+    public static final int MAX_LENGTH_API_NAME = 50;
+    public static final int MAX_LENGTH_VERSION = 30;
+    public static final int MAX_LENGTH_PROVIDER = 50;
+    public static final int MAX_LENGTH_CONTEXT = 82; //context becomes context + version + two '/'. so max context is 50 
 }

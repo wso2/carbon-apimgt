@@ -132,8 +132,10 @@ class KeyConfiguration extends React.Component {
         if (notFound) {
             return <ResourceNotFound />;
         }
-        const grantTypeDisplayListMap = this.getGrantTypeDisplayList(serverSupportedGrantTypes,
-            Configurations.grantTypes);
+        const grantTypeDisplayListMap = this.getGrantTypeDisplayList(
+            serverSupportedGrantTypes,
+            Configurations.grantTypes,
+        );
 
         return (
             <React.Fragment>
