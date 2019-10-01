@@ -428,7 +428,6 @@ class ThumbnailView extends Component {
             <React.Fragment>
                 {isEditable ? (
                     <ButtonBase
-                        style={{ marginBottom: theme.spacing(3) }}
                         focusRipple
                         className={classes.thumb}
                         onClick={this.handleClick('btnEditAPIThumb', intl)}
