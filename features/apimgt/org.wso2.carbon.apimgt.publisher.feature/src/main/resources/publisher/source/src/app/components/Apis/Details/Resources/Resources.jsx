@@ -155,8 +155,7 @@ export default function Resources(props) {
             case 'operation':
                 copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()] = spec;
                 return updateSwagger(data, copyOfOpenAPI).then(() => updateAPIOperations(data, apiOperation));
-            // eslint-disable-next-line no-case-declarations
-            case 'add':
+            case 'add': {
                 if (copyOfOpenAPI.paths[data.target] && copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()]) {
                     const message = 'Operation already exist !!';
                     Alert.error(message);
@@ -180,6 +179,7 @@ export default function Resources(props) {
                     }) : [],
                 };
                 return updateSwagger(data, copyOfOpenAPI);
+            }
             case 'delete':
                 delete copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()];
                 if (isEmpty(copyOfOpenAPI.paths[data.target])) {
