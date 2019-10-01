@@ -129,6 +129,33 @@ class TokenManager extends React.Component {
         this.loadApplication();
     }
 
+
+    /**
+     * get supported grant types from the settings api
+     */
+    getserverSupportedGrantTypes = () => {
+        const api = new API();
+        const promisedSettings = api.getSettings();
+        promisedSettings
+            .then((response) => {
+                let { keyRequest } = this.state;
+                keyRequest = { ...keyRequest };
+                keyRequest.serverSupportedGrantTypes = response.obj.grantTypes;
+                keyRequest.supportedGrantTypes = response.obj.grantTypes.filter(item => item !== 'authorization_code'
+                    && item !== 'implicit');
+                this.setState({ keyRequest });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+            });
+    };
+
     /**
      * load application key generation ui
      */
@@ -161,32 +188,6 @@ class TokenManager extends React.Component {
                 });
         }
     }
-
-    /**
-     * get supported grant types from the settings api
-     */
-    getserverSupportedGrantTypes = () => {
-        const api = new API();
-        const promisedSettings = api.getSettings();
-        promisedSettings
-            .then((response) => {
-                let { keyRequest } = this.state;
-                keyRequest = { ...keyRequest };
-                keyRequest.serverSupportedGrantTypes = response.obj.grantTypes;
-                keyRequest.supportedGrantTypes = response.obj.grantTypes.filter(item => item !== 'authorization_code'
-                    && item !== 'implicit');
-                this.setState({ keyRequest });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-    };
 
     /**
      * Check if the current user is the owner of the application
