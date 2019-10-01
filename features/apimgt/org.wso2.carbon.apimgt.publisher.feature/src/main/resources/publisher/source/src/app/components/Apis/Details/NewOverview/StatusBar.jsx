@@ -20,7 +20,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
-import {isRestricted} from "AppData/AuthManager";
+import { isRestricted } from 'AppData/AuthManager';
 
 /**
  *
