@@ -1871,24 +1871,6 @@ public class APIMappingUtil {
 
         product.setProductLevelPolicy(dto.getApiThrottlingPolicy());
 
-        // set default API Level Policy
-        if (StringUtils.isBlank(product.getProductLevelPolicy())) {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            Policy[] apiPolicies = apiProvider.getPolicies(RestApiUtil.getLoggedInUsername(),
-                    PolicyConstants.POLICY_LEVEL_API);
-            if (apiPolicies.length > 0) {
-                for (Policy policy : apiPolicies) {
-                    if (policy.getPolicyName().equals(APIConstants.UNLIMITED_TIER)) {
-                        product.setProductLevelPolicy(APIConstants.UNLIMITED_TIER);
-                        break;
-                    }
-                }
-                if (StringUtils.isBlank(product.getProductLevelPolicy())) {
-                    product.setProductLevelPolicy(apiPolicies[0].getPolicyName());
-                }
-            }
-        }
-
         if (dto.getSubscriptionAvailability() != null) {
             product.setSubscriptionAvailability(
                     mapSubscriptionAvailabilityFromDTOtoAPIProduct(dto.getSubscriptionAvailability()));

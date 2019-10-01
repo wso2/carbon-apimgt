@@ -1298,6 +1298,18 @@ public class SQLConstants {
             "   AND API.API_ID=SUB.API_ID" +
             "   AND SUB.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
+    public static final String GET_SUBSCRIPTION_COUNT_BY_API_PRODUCT_SQL =
+            " SELECT" +
+            "   COUNT(SUB.SUBSCRIPTION_ID) AS SUB_ID " +
+            " FROM " +
+            "   AM_SUBSCRIPTION SUB, " +
+            "   AM_API_PRODUCT APIPRODUCT " +
+            " WHERE APIPRODUCT.API_PRODUCT_PROVIDER=? " +
+            "   AND APIPRODUCT.API_PRODUCT_NAME=?" +
+            "   AND APIPRODUCT.API_PRODUCT_VERSION=?" +
+            "   AND APIPRODUCT.API_PRODUCT_ID=SUB.API_PRODUCT_ID" +
+            "   AND SUB.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+
     public static final String UPDATE_SUBSCRIPTION_OF_APPLICATION_SQL =
             " UPDATE AM_SUBSCRIPTION " +
             " SET " +
@@ -1430,6 +1442,35 @@ public class SQLConstants {
             "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID " +
             "   AND API.API_PROVIDER = ? " +
             "   AND API.API_ID = SUBS.API_ID " +
+            "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'" +
+            " ORDER BY " +
+            "   APP.NAME";
+
+    public static final String GET_APP_API_PRODUCT_USAGE_BY_PROVIDER_SQL =
+            " SELECT " +
+            "   SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
+            "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
+            "   SUBS.SUB_STATUS AS SUB_STATUS, " +
+            "   SUBS.TIER_ID AS TIER_ID, " +
+            "   APIPRODUCT.API_PRODUCT_PROVIDER AS API_PRODUCT_PROVIDER, " +
+            "   APIPRODUCT.API_PRODUCT_NAME AS API_PRODUCT_NAME, " +
+            "   APIPRODUCT.API_PRODUCT_VERSION AS API_PRODUCT_VERSION, " +
+            "   SUB.USER_ID AS USER_ID, " +
+            "   APP.NAME AS APPNAME, " +
+            "   SUBS.UUID AS SUB_UUID, " +
+            "   SUBS.TIER_ID AS SUB_TIER_ID, " +
+            "   APP.UUID AS APP_UUID, " +
+            "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE " +
+            " FROM " +
+            "   AM_SUBSCRIPTION SUBS, " +
+            "   AM_APPLICATION APP, " +
+            "   AM_SUBSCRIBER SUB, " +
+            "   AM_API_PRODUCT APIPRODUCT " +
+            " WHERE " +
+            "   SUBS.APPLICATION_ID = APP.APPLICATION_ID " +
+            "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID " +
+            "   AND APIPRODUCT.API_PRODUCT_PROVIDER = ? " +
+            "   AND APIPRODUCT.API_PRODUCT_ID = SUBS.API_PRODUCT_ID " +
             "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'" +
             " ORDER BY " +
             "   APP.NAME";
