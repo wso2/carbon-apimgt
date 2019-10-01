@@ -20,7 +20,6 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
-import Divider from '@material-ui/core/Divider';
 import Slide from '@material-ui/core/Slide';
 import Button from '@material-ui/core/Button';
 import Subscription from 'AppData/Subscription';
@@ -195,7 +194,6 @@ class Credentials extends React.Component {
      * @memberof Credentials
      */
     handleSubscribe = () => {
-        debugger;
         const { updateSubscriptionData, apiType } = this.context;
         const { subscriptionRequest } = this.state;
         const { intl } = this.props;
