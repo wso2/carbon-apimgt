@@ -803,6 +803,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("API Version contains one or more illegal characters  " +
                     "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )");
         }
+        if (!hasValidLength(apiName, APIConstants.MAX_LENGTH_API_NAME)
+                || !hasValidLength(apiVersion, APIConstants.MAX_LENGTH_VERSION)
+                || !hasValidLength(api.getId().getProviderName(), APIConstants.MAX_LENGTH_PROVIDER)
+                || !hasValidLength(api.getContext(), APIConstants.MAX_LENGTH_CONTEXT)
+                ) {
+            throw new APIManagementException("Character length exceeds the allowable limit",
+                    ExceptionCodes.LENGTH_EXCEEDS);
+        }
     }
 
     /**
@@ -815,6 +823,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Pattern pattern = Pattern.compile(APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA);
         Matcher matcher = pattern.matcher(toExamine);
         return matcher.find();
+    }
+    
+
+    /**
+     * Check whether the provided information exceeds the maximum length
+     * @param field text field to validate
+     * @param maxLength maximum allowd length
+     * @return true if the length is valid
+     */
+    public boolean hasValidLength(String field, int maxLength) {
+        return field.length() <= maxLength;
     }
 
     /**
@@ -6966,6 +6985,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )");
         }
         //version is not a mandatory field for now
+        if (!hasValidLength(apiName, APIConstants.MAX_LENGTH_API_NAME)
+                || !hasValidLength(product.getId().getVersion(), APIConstants.MAX_LENGTH_VERSION)
+                || !hasValidLength(product.getId().getProviderName(), APIConstants.MAX_LENGTH_PROVIDER)
+                || !hasValidLength(product.getContext(), APIConstants.MAX_LENGTH_CONTEXT)) {
+            throw new APIManagementException("Character length exceeds the allowable limit",
+                    ExceptionCodes.LENGTH_EXCEEDS);
+        }
     }
 
     /**
