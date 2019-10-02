@@ -315,6 +315,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                     + " already exists.", log);
         }
         if (body.getAuthorizationHeader() == null) {
+            body.setAuthorizationHeader(APIUtil
+                    .getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));
+        }
+        if (body.getAuthorizationHeader() == null) {
             body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
 
