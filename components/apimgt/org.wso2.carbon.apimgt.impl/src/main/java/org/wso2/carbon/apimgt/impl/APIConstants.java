@@ -1025,6 +1025,7 @@ public final class APIConstants {
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";
     public static final String VELOCITY_LOGGER = "VelocityLogger";
 
+    public static final String SHA_256 = "SHA-256";
 
     public static class DigestAuthConstants {
         public static final String REALM = "realm";
