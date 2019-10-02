@@ -180,12 +180,10 @@ class LifeCycle extends Component {
             return <Progress />;
         }
         return (
-            <div className={classes.root}>
-                <div className={classes.titleWrapper}>
-                    <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        <FormattedMessage id='Apis.Details.LifeCycle.LifeCycle.lifecycle' defaultMessage='Lifecycle' />
-                    </Typography>
-                </div>
+            <React.Fragment>
+                <Typography variant='h4' gutterBottom>
+                    <FormattedMessage id='Apis.Details.LifeCycle.LifeCycle.lifecycle' defaultMessage='Lifecycle' />
+                </Typography>
                 <div className={classes.contentWrapper}>
                     <Grid container>
                         <Grid item xs={12}>
@@ -213,7 +211,7 @@ class LifeCycle extends Component {
                         </Grid>
                     </Grid>
                 </div>
-            </div>
+            </React.Fragment>
         );
     }
 }

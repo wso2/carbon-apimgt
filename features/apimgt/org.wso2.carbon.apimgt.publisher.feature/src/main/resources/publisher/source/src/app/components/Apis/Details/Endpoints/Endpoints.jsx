@@ -316,7 +316,7 @@ function Endpoints(props) {
                             container
                             direction='row'
                             alignItems='flex-start'
-                            spacing={4}
+                            spacing={1}
                             className={classes.buttonSection}
                         >
                             <Grid item>

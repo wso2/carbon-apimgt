@@ -49,7 +49,7 @@ import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 
 const EditorDialog = React.lazy(() => import('./SwaggerEditorDrawer'));
 
-const styles = () => ({
+const styles = theme => ({
     titleWrapper: {
         display: 'flex',
         flexDirection: 'row',
@@ -65,6 +65,7 @@ const styles = () => ({
     topBar: {
         display: 'flex',
         flexDirection: 'row',
+        marginBottom: theme.spacing(2),
     },
     converterWrapper: {
         display: 'flex',
@@ -75,6 +76,9 @@ const styles = () => ({
     },
     downloadLink: {
         color: 'black',
+    },
+    button: {
+        marginLeft: theme.spacing(1),
     },
 });
 /**
@@ -425,10 +429,10 @@ class APIDefinition extends React.Component {
         }
 
         return (
-            <div className={classes.root}>
+            <React.Fragment>
                 <div className={classes.topBar}>
                     <div className={classes.titleWrapper}>
-                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+                        <Typography variant='h4'>
                             {graphQL ? (
                                 <FormattedMessage
                                     id='Apis.Details.APIDefinition.APIDefinition.schema.definition'
@@ -605,7 +609,7 @@ class APIDefinition extends React.Component {
                         </Button>
                     </DialogActions>
                 </Dialog>
-            </div>
+            </React.Fragment>
         );
     }
 }

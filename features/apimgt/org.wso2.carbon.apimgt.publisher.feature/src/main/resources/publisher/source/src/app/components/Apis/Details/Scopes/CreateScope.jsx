@@ -52,9 +52,11 @@ const styles = theme => ({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
+        marginBottom: theme.spacing(3),
     },
     titleLink: {
         color: theme.palette.primary.main,
+        marginRight: theme.spacing(1),
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
@@ -292,7 +294,7 @@ class CreateScope extends React.Component {
                         <Grid item md={12}>
                             <div className={classes.titleWrapper}>
                                 <Link to={url} className={classes.titleLink}>
-                                    <Typography variant='h4' align='left' className={classes.mainTitle}>
+                                    <Typography variant='h4'>
                                         <FormattedMessage
                                             id='Apis.Details.Scopes.Scopes.heading.scope.heading'
                                             defaultMessage='Scopes'
@@ -300,7 +302,7 @@ class CreateScope extends React.Component {
                                     </Typography>
                                 </Link>
                                 <Icon>keyboard_arrow_right</Icon>
-                                <Typography variant='h4' align='left' className={classes.mainTitle}>
+                                <Typography variant='h4'>
                                     <FormattedMessage
                                         id='Apis.Details.Scopes.CreateScope.create.new.scope'
                                         defaultMessage='Create New Scope'

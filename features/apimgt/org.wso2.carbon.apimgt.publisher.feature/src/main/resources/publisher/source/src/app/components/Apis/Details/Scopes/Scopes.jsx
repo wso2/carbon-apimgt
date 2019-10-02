@@ -44,7 +44,7 @@ const styles = theme => ({
     },
     buttonProgress: {
         position: 'relative',
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
     },
     headline: { paddingTop: theme.spacing.unit * 1.25, paddingLeft: theme.spacing.unit * 2.5 },
     heading: {
@@ -55,7 +55,7 @@ const styles = theme => ({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: theme.spacing.unit * 2,
+        marginBottom: theme.spacing(2),
     },
     mainTitle: {
         paddingLeft: 0,
@@ -64,9 +64,10 @@ const styles = theme => ({
         textTransform: theme.custom.leftMenuTextStyle,
         textDecoration: 'none',
         color: theme.palette.getContrastText(theme.palette.primary.main),
+        marginLeft: theme.spacing(1),
     },
     buttonIcon: {
-        marginRight: 10,
+        marginRight: theme.spacing(1),
     },
     content: {
         margin: `${theme.spacing.unit * 2}px 0 ${theme.spacing.unit * 2}px 0`,
