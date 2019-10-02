@@ -53,5 +53,6 @@
         <module>org.wso2.carbon.apimgt.jms.listener</module>
         <module>org.wso2.carbon.apimgt.broker.lifecycle</module>
         <module>org.wso2.carbon.apimgt.hybrid.gateway</module>
+        <module>org.wso2.carbon.apimgt.revokedjwt.service</module>
     </modules>
 </project>
