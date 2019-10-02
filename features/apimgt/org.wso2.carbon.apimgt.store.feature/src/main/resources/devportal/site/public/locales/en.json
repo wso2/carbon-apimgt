@@ -133,6 +133,7 @@
   "Applications.Details.SubscriptionTableData.delete": "Delete",
   "Applications.Details.SubscriptionTableData.delete.subscription.confirmation": "Are you sure you want to delete the Subscription?",
   "Applications.Details.SubscriptionTableData.view.subscription.invoice": "View Invoice",
+  "Applications.Details.SubscriptionTableData.view.subscription.invoice.title": "Upcoming Invoice",
   "Applications.Details.Subscriptions\n                                                                    .subscription.tier": "Subscription Tier",
   "Applications.Details.Subscriptions.Status": "Status",
   "Applications.Details.Subscriptions.action": "Action",
