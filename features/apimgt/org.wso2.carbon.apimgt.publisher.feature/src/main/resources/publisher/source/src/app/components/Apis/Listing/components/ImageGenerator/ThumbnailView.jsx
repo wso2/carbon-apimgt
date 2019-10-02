@@ -398,7 +398,8 @@ class ThumbnailView extends Component {
         if (selectedTab === 'upload') {
             return !(file && file[0]); // If no files is uploaded retrun true
         } else {
-            return !(selectedIconUpdate || backgroundIndexUpdate || colorUpdate); // If one of them is selected we return false
+            // If one of them is selected we return false
+            return !(selectedIconUpdate || backgroundIndexUpdate || colorUpdate);
         }
     }
     /**
