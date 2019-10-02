@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -63,6 +64,7 @@ public enum WorkflowStatusEnum {
   @ApiModelProperty(example = "APPROVED", required = true, value = "This attribute declares whether this workflow task is approved or rejected. ")
   @JsonProperty("workflowStatus")
   @NotNull
+  @NotEmpty
   public WorkflowStatusEnum getWorkflowStatus() {
     return workflowStatus;
   }

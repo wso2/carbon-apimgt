@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -29,6 +30,7 @@ public class GraphQLSchemaDTO   {
   @ApiModelProperty(example = "admin--HackerNewsAPI.graphql", required = true, value = "")
   @JsonProperty("name")
   @NotNull
+  @NotEmpty
   public String getName() {
     return name;
   }

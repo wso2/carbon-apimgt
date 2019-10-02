@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -50,6 +51,7 @@ public class ProductAPIDTO   {
   @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", required = true, value = "")
   @JsonProperty("apiId")
   @NotNull
+  @NotEmpty
   public String getApiId() {
     return apiId;
   }
