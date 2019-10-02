@@ -41,6 +41,7 @@ function Configuration(props) {
         oauth2: 'OAuth2',
         basic_auth: 'Basic Auth',
         mutualssl: 'Mutual TLS',
+        api_key: 'API Key',
     };
     const { api } = useContext(APIContext);
 
@@ -147,9 +148,12 @@ function Configuration(props) {
                         <Typography component='p' variant='body1'>
                             {api.securityScheme && api.securityScheme.length !== 0 && (
                                 <React.Fragment>
-                                    {api.securityScheme.map(item =>
+                                    {api.securityScheme.map((item, index) =>
                                         (item.includes('mandatory') ? null : (
-                                            <span>{securitySchemeMap[item] + ', '}</span>
+                                            <span>
+                                                {securitySchemeMap[item]}
+                                                {(api.securityScheme.length) !== index + 1 && ', '}
+                                            </span>
                                         )))}
                                 </React.Fragment>
                             )}
