@@ -71,7 +71,7 @@ function LeftMenuItem(props) {
     const {
         classes, theme, Icon, to, history, text, route,
     } = props;
-    const routeToCheck = route ? route : text;
+    const routeToCheck = route || text;
     const { leftMenu } = theme.custom;
     const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
     const iconSize = theme.custom.leftMenuIconSize;
