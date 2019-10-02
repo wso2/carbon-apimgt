@@ -50,6 +50,12 @@ const styles = theme => ({
     },
     dateWrapper: {
         flex: 1,
+        alignSelf: 'flex-start',
+    },
+    lastUpdatedTypography: {
+        width: '25%',
+        alignSelf: 'flex-end',
+        'margin-top': '30px',
     },
 });
 
@@ -90,8 +96,12 @@ const APIDetailsTopMenu = (props) => {
             </div>
             <VerticalDivider height={70} />
             <div className={classes.dateWrapper}>
-                <Tooltip title={moment(api.lastUpdatedTime).calendar()} aria-label='add'>
-                    <Typography variant='caption' display='block'>
+                <Tooltip
+                    title={moment(api.lastUpdatedTime).calendar()}
+                    aria-label='add'
+                    className={classes.lastUpdatedTooltip}
+                >
+                    <Typography variant='caption' display='block' className={classes.lastUpdatedTypography}>
                         <FormattedMessage
                             id='Apis.Details.components.APIDetailsTopMenu.last.updated.time'
                             defaultMessage='Last updated:'
