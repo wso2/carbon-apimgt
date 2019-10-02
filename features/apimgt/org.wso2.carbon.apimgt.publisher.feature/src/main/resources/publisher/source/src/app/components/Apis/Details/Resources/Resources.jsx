@@ -164,7 +164,7 @@ export default function Resources(props) {
                     // If target is not there add an empty object
                     copyOfOpenAPI.paths[data.target] = {};
                 }
-                const regEx = /(?<=\{)(?!\s*\{)[^{}]+/g;
+                const regEx = /[^{\}]+(?=})/g;
                 const params = data.target.match(regEx);
                 let parameters;
                 if (copyOfOpenAPI.openapi) {
