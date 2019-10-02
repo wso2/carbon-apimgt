@@ -82,7 +82,7 @@ export default function ExternalStores() {
                 <h4>
                     <FormattedMessage
                         id='Apis.Details.ExternalStores.ExternalStores.external.stores.not.found.for.api'
-                        defaultMessage='External Stores not found for api: '
+                        defaultMessage='External Developer Portals not found for api: '
                     />
                     <span style={{ color: 'green' }}> {api.id} </span>
                 </h4>
@@ -103,7 +103,7 @@ export default function ExternalStores() {
                 const reason = response && ('[' + response.message + '] ' + response.description);
                 Alert.error(intl.formatMessage({
                     id: 'Apis.Details.ExternalStores.ExternalStores.error.getting.published.external.stores',
-                    defaultMessage: 'Error while getting published external stores!! {reason}',
+                    defaultMessage: 'Error while getting published external developer portals!! {reason}',
                 }, { reason }));
             });
     }
@@ -125,7 +125,7 @@ export default function ExternalStores() {
                 const successfulStores = response.body.list.map(store => store.id);
                 Alert.success(intl.formatMessage({
                     id: 'Apis.Details.ExternalStores.ExternalStores.successfully.published.to.external.stores',
-                    defaultMessage: 'Successfully Published to external stores: ',
+                    defaultMessage: 'Successfully Published to external developer portals: ',
                 }, { successfulStores }));
             })
             .catch((error) => {
@@ -133,7 +133,7 @@ export default function ExternalStores() {
                 const reason = response && ('[' + response.message + '] ' + response.description);
                 Alert.error(intl.formatMessage({
                     id: 'Apis.Details.ExternalStores.ExternalStores.error.while.updating.external.stores',
-                    defaultMessage: 'Error while updating external stores!! {reason}',
+                    defaultMessage: 'Error while updating external developer portals!! {reason}',
                 }, { reason }));
             })
             .finally(() => {
@@ -148,7 +148,7 @@ export default function ExternalStores() {
                 <Typography variant='h4' align='left' >
                     <FormattedMessage
                         id='Apis.Details.ExternalStores.ExternalStores.external-stores'
-                        defaultMessage='External Stores'
+                        defaultMessage='External Developer Portals'
                     />
                 </Typography>
                 <Paper className={classes.root}>
@@ -245,7 +245,7 @@ export default function ExternalStores() {
                                         <FormattedMessage
                                             id='Apis.Details.ExternalStores.ExternalStores.update.not.allowed'
                                             defaultMessage={'* You are not authorized to publish the API' +
-                                            ' to external stores due to insufficient permissions'}
+                                            ' to external developer portals due to insufficient permissions'}
                                         />
                                     </Typography>
                                 </Grid>

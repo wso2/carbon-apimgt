@@ -323,17 +323,16 @@ public class OIDCRelyingPartyObject extends ScriptableObject {
         post.setHeader(HttpHeaders.AUTHORIZATION, String.format("Basic %s", Base64.
                 encode(String.format("%s:%s", clientId, clientSecret))).trim());
 
+        StringBuilder jsonString = new StringBuilder();
         HttpResponse response = client.execute(post);
-        BufferedReader rd = new BufferedReader(new
-                InputStreamReader(response.getEntity().getContent()));
-
-        String jsonString = "";
-        String line;
-        while ((line = rd.readLine()) != null) {
-            jsonString = jsonString + line;
-            log.debug("Response from Token Endpoint : " + jsonString);
+        try (BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()))) {
+            String line;
+            while ((line = rd.readLine()) != null) {
+                jsonString.append(line);
+                log.debug("Response from Token Endpoint : " + jsonString);
+            }
         }
-        return jsonString;
+        return jsonString.toString();
     }
 
     private static AuthenticationToken getAuthenticationToken(String jsonTokenResponse)
