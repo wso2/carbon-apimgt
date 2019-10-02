@@ -293,7 +293,7 @@ public class BasicAuthCredentialValidator {
     }
 
     /**
-     * Returns the md5 hash of a given string.
+     * Returns the SHA-256 hash of a given string.
      *
      * @param str the string input to be hashed
      * @return hashed string
