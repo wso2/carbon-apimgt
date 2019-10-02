@@ -250,7 +250,7 @@ function Configuration(props) {
                         <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                             <FormattedMessage
                                 id='Apis.Details.NewOverview.MetaData.visibility.store'
-                                defaultMessage='Visibility on Store'
+                                defaultMessage='Visibility on Devportal'
                             />
                             <Tooltip
                                 placement='top'
@@ -264,8 +264,8 @@ function Configuration(props) {
                                             id='Apis.Details.NewOverview.MetaData.visibility.store.all.tooltip'
                                             defaultMessage={
                                                 'Public: The API is accessible to everyone and can be ' +
-                                                'advertised in multiple stores - a central store ' +
-                                                'and/or non-WSO2 stores.'
+                                                'advertised in multiple devportals - a central devportal ' +
+                                                'and/or non-WSO2 devportals.'
                                             }
                                         />
                                         <br />
@@ -273,7 +273,7 @@ function Configuration(props) {
                                             id='Apis.Details.NewOverview.MetaData.visibility.store.res.tooltip'
                                             defaultMessage={
                                                 'Restricted by roles: The API is visible only ' +
-                                                'to specific user roles in the tenant store that you specify.'
+                                                'to specific user roles in the tenant devportal that you specify.'
                                             }
                                         />
                                     </React.Fragment>
