@@ -69,15 +69,16 @@ function LeftMenuItem(props) {
     const [selected, setSelected] = useState(false);
 
     const {
-        classes, theme, Icon, to, history, text,
+        classes, theme, Icon, to, history, text, route,
     } = props;
+    const routeToCheck = route ? route : text;
     const { leftMenu } = theme.custom;
     const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
     const iconSize = theme.custom.leftMenuIconSize;
     const ditectCurrentMenu = (location) => {
         const { pathname } = location;
-        const test1 = new RegExp('/' + text + '$', 'g');
-        const test2 = new RegExp('/' + text + '/', 'g');
+        const test1 = new RegExp('/' + routeToCheck + '$', 'g');
+        const test2 = new RegExp('/' + routeToCheck + '/', 'g');
         if (pathname.match(test1) || pathname.match(test2)) {
             setSelected(true);
         } else {
@@ -151,6 +152,9 @@ function LeftMenuItem(props) {
         </Link>
     );
 }
+LeftMenuItem.defaultProps = {
+    route: null,
+};
 LeftMenuItem.propTypes = {
     classes: PropTypes.shape({
         divider: PropTypes.string,
@@ -179,6 +183,7 @@ LeftMenuItem.propTypes = {
     Icon: PropTypes.element.isRequired,
     text: PropTypes.string.isRequired,
     to: PropTypes.string.isRequired,
+    route: PropTypes.string,
     history: PropTypes.shape({
         location: PropTypes.string.isRequired,
     }).isRequired,
