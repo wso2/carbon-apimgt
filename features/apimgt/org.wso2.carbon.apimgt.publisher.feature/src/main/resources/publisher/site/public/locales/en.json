@@ -133,7 +133,7 @@
   "Apis.Details.Configuration.components.schema.validation.tooltip": "Enable the request and response validation against the OpenAPI definition",
   "Apis.Details.Configuration.components.storeVisibility.dropdown.restrict": "Restrict by role(s)",
   "Apis.Details.Configuration.components.storeVisibility.form.helper.text": "By default API is visible to all developer portal users",
-  "Apis.Details.Configuration.components.storeVisibility.head.topic": "Devloper Portal Visibility",
+  "Apis.Details.Configuration.components.storeVisibility.head.topic": "Developer Portal Visibility",
   "Apis.Details.Configuration.components.storeVisibility.tooltip.public": "Public :",
   "Apis.Details.Configuration.components.storeVisibility.tooltip.public.desc": "The API is accessible to everyone and can be advertised in multiple developer portals - a central developer portal and/or non-WSO2 developer portals.",
   "Apis.Details.Configuration.components.storeVisibility.tooltip.restrict": "Restricted by roles(s) :",
