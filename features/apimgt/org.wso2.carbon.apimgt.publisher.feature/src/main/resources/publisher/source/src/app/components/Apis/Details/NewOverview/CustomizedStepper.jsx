@@ -13,6 +13,7 @@ import Api from 'AppData/api';
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
 import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 import ArrowForwardIosRoundedIcon from '@material-ui/icons/ArrowForwardIosRounded';
 
 
@@ -153,7 +154,10 @@ export default function CustomizedSteppers(props) {
                     <StepLabel style={{ position: 'relative' }}>
                         <Box className={classes.box}>
                             <Typography variant='h6'>
-                                Created
+                                <FormattedMessage
+                                    id='apis.details.overview.steps.create'
+                                    defaultMessage='Created'
+                                />
                             </Typography>
                         </Box>
                         <ArrowForwardIosRoundedIcon className={classes.arrowIcon} />
@@ -163,7 +167,10 @@ export default function CustomizedSteppers(props) {
                     <StepLabel style={{ position: 'relative' }} >
                         <Box p={2} bgcolor='white' width='377px' borderColor='grey.500' borderLeft='0' borderRight='0' >
                             <Typography variant='h10'>
-                            Requirements
+                                <FormattedMessage
+                                    id='apis.details.overview.steps.requirements'
+                                    defaultMessage='Requirements'
+                                />
                             </Typography>
                             <Grid xs={12} className={classes.gridRequirements}>
                                 <Grid xs={4} className={classes.gridSmall}>
@@ -172,8 +179,12 @@ export default function CustomizedSteppers(props) {
                                     ) : (
                                         <CloseIcon className={classes.iconFalse} />
                                     )}
-
-                                    <Typography variant='caption'>Endpoint</Typography>
+                                    <Typography variant='caption'>
+                                        <FormattedMessage
+                                            id='apis.details.overview.steps.business.plan'
+                                            defaultMessage='Endpoint'
+                                        />
+                                    </Typography>
                                     <Link to={'/apis/' + api.id + '/endpoints'}>
                                         <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
                                     </Link>
@@ -184,7 +195,12 @@ export default function CustomizedSteppers(props) {
                                     ) : (
                                         <CloseIcon className={classes.iconFalse} />
                                     )}
-                                    <Typography variant='caption'>Business plans</Typography>
+                                    <Typography variant='caption'>
+                                        <FormattedMessage
+                                            id='apis.details.overview.steps.business.plan'
+                                            defaultMessage=' Business plans'
+                                        />
+                                    </Typography>
                                     <Link to={'/apis/' + api.id + '/subscriptions'}>
                                         <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
                                     </Link>
@@ -199,21 +215,30 @@ export default function CustomizedSteppers(props) {
                         {lifecycleState === 'Published' && (
                             <Box className={classes.box}>
                                 <Typography variant='h6'>
-                            Published
+                                    <FormattedMessage
+                                        id='apis.details.overview.steps.published'
+                                        defaultMessage='Published'
+                                    />
                                 </Typography>
                             </Box>
                         )}
                         {lifecycleState === 'Prototyped' && (
                             <Box className={classes.box}>
                                 <Typography variant='h6'>
-                                Prototyped
+                                    <FormattedMessage
+                                        id='apis.details.overview.steps.prototyped'
+                                        defaultMessage='Prototyped'
+                                    />
                                 </Typography>
                             </Box>
                         )}
                         {lifecycleState === 'Created' && (
                             <Box className={classes.box}>
                                 <Typography variant='h6'>
-                                Publish
+                                    <FormattedMessage
+                                        id='apis.details.overview.steps.publish'
+                                        defaultMessage='Publish'
+                                    />
                                 </Typography>
                                 <Link to={'/apis/' + api.id + '/lifecycle'}>
                                     <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
