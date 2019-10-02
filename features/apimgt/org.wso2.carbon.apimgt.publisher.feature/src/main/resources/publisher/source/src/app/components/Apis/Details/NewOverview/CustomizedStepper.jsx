@@ -155,7 +155,7 @@ export default function CustomizedSteppers(props) {
                         <Box className={classes.box}>
                             <Typography variant='h6'>
                                 <FormattedMessage
-                                    id='apis.details.overview.steps.create'
+                                    id='Apis.Details.Overview.CustomizedStepper.create'
                                     defaultMessage='Created'
                                 />
                             </Typography>
@@ -168,7 +168,7 @@ export default function CustomizedSteppers(props) {
                         <Box p={2} bgcolor='white' width='377px' borderColor='grey.500' borderLeft='0' borderRight='0' >
                             <Typography variant='h10'>
                                 <FormattedMessage
-                                    id='apis.details.overview.steps.requirements'
+                                    id='Apis.Details.Overview.CustomizedStepper.requirements'
                                     defaultMessage='Requirements'
                                 />
                             </Typography>
@@ -181,7 +181,7 @@ export default function CustomizedSteppers(props) {
                                     )}
                                     <Typography variant='caption'>
                                         <FormattedMessage
-                                            id='apis.details.overview.steps.business.plan'
+                                            id='Apis.Details.Overview.CustomizedStepper.business.plan'
                                             defaultMessage='Endpoint'
                                         />
                                     </Typography>
@@ -197,7 +197,7 @@ export default function CustomizedSteppers(props) {
                                     )}
                                     <Typography variant='caption'>
                                         <FormattedMessage
-                                            id='apis.details.overview.steps.business.plan'
+                                            id='Apis.Details.Overview.CustomizedStepper.business.plan'
                                             defaultMessage=' Business plans'
                                         />
                                     </Typography>
@@ -216,7 +216,7 @@ export default function CustomizedSteppers(props) {
                             <Box className={classes.box}>
                                 <Typography variant='h6'>
                                     <FormattedMessage
-                                        id='apis.details.overview.steps.published'
+                                        id='Apis.Details.Overview.CustomizedStepper.published'
                                         defaultMessage='Published'
                                     />
                                 </Typography>
@@ -226,7 +226,7 @@ export default function CustomizedSteppers(props) {
                             <Box className={classes.box}>
                                 <Typography variant='h6'>
                                     <FormattedMessage
-                                        id='apis.details.overview.steps.prototyped'
+                                        id='Apis.Details.Overview.CustomizedStepper.prototyped'
                                         defaultMessage='Prototyped'
                                     />
                                 </Typography>
@@ -236,7 +236,7 @@ export default function CustomizedSteppers(props) {
                             <Box className={classes.box}>
                                 <Typography variant='h6'>
                                     <FormattedMessage
-                                        id='apis.details.overview.steps.publish'
+                                        id='Apis.Details.Overview.CustomizedStepper.publish'
                                         defaultMessage='Publish'
                                     />
                                 </Typography>
