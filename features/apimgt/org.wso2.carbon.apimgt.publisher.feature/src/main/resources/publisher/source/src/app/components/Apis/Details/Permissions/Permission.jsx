@@ -416,8 +416,8 @@ class Permission extends Component {
                             <div className='custom-card'>
                                 <Badge status='processing' text={api.lifeCycleStatus} />
                                 <p><FormattedMessage id='Apis.Details.Permissions.Permission.11.Apps' defaultMessage='11 Apps' /></p>
-                                <a href={'/store/apis/' + this.api_uuid} target='_blank' title='Store'>
-                                    <FormattedMessage id='Apis.Details.Permissions.Permission.View.In.Store' defaultMessage='View in devportal' />
+                                <a href={'/store/apis/' + this.api_uuid} target='_blank' title='Developer Portal'>
+                                    <FormattedMessage id='Apis.Details.Permissions.Permission.View.In.Store' defaultMessage='View in developer portal' />
                                 </a>
                             </div>
                         </Card>

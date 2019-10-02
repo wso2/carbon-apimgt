@@ -553,7 +553,7 @@ class Details extends Component {
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.external-stores',
-                                    defaultMessage: 'external devportals',
+                                    defaultMessage: 'external developer portals',
                                 })}
                                 to={pathPrefix + 'external-stores'}
                                 Icon={<StoreIcon />}
