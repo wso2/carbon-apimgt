@@ -112,14 +112,13 @@ export default function Environments() {
     }
 
     return (
-        <div>
-            <Typography variant='h4' align='left' className={classes.mainTitle}>
+        <React.Fragment>
+            <Typography variant='h4' gutterBottom>
                 <FormattedMessage
                     id='Apis.Details.Environments.Environments.APIGateways'
                     defaultMessage='API Gateways'
                 />
             </Typography>
-
             <Paper className={classes.saveButton}>
                 <Table >
                     <TableHead>
@@ -236,7 +235,7 @@ export default function Environments() {
                 container
                 direction='row'
                 alignItems='flex-start'
-                spacing={4}
+                spacing={1}
             >
                 <Grid item>
                     <Button
@@ -265,6 +264,6 @@ export default function Environments() {
                     </Link>
                 </Grid>
             </Grid>
-        </div >
+        </React.Fragment>
     );
 }

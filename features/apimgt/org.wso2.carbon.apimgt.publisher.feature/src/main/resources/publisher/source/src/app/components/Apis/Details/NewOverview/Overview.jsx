@@ -153,14 +153,12 @@ function Overview(props) {
     }
     return (
         <React.Fragment>
-            <div className={classes.titleWrapper}>
-                <Typography variant='h4' align='left' className={classes.mainTitle}>
-                    <FormattedMessage
-                        id='Apis.Details.Overview.Overview.topic.header'
-                        defaultMessage='Overview'
-                    />
-                </Typography>
-            </div>
+            <Typography variant='h4' align='left' className={classes.mainTitle}>
+                <FormattedMessage
+                    id='Apis.Details.Overview.Overview.topic.header'
+                    defaultMessage='Overview'
+                />
+            </Typography>
             <div className={classes.contentWrapper}>
                 <Paper className={classes.root}>
                     <Grid container spacing={24}>

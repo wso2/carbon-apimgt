@@ -56,7 +56,7 @@ const useStyles = makeStyles(theme => ({
         alignItems: 'center',
     },
     button: {
-        marginLeft: theme.spacing.unit * 2,
+        marginLeft: theme.spacing(2),
         textTransform: theme.custom.leftMenuTextStyle,
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
@@ -74,34 +74,34 @@ const useStyles = makeStyles(theme => ({
         marginTop: 0,
     },
     buttonWrapper: {
-        paddingTop: theme.spacing.unit * 3,
+        paddingTop: theme.spacing(3),
     },
     paperRoot: {
-        padding: theme.spacing.unit * 3,
-        marginTop: theme.spacing.unit * 3,
+        padding: theme.spacing(3),
+        marginTop: theme.spacing(3),
     },
     addNewHeader: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         backgroundColor: theme.palette.grey['300'],
         fontSize: theme.typography.h6.fontSize,
         color: theme.typography.h6.color,
         fontWeight: theme.typography.h6.fontWeight,
     },
     addNewOther: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
     },
     addNewWrapper: {
         backgroundColor: theme.palette.background.paper,
         color: theme.palette.getContrastText(theme.palette.background.paper),
         border: 'solid 1px ' + theme.palette.grey['300'],
         borderRadius: theme.shape.borderRadius,
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
     },
     addProperty: {
-        marginRight: theme.spacing.unit * 2,
+        marginRight: theme.spacing(2),
     },
     buttonIcon: {
-        marginRight: 10,
+        marginRight: theme.spacing(1),
     },
     link: {
         cursor: 'pointer',
@@ -299,7 +299,7 @@ function Properties(props) {
     const classes = useStyles();
 
     return (
-        <div className={classes.root}>
+        <React.Fragment>
             <div className={classes.titleWrapper}>
                 <Typography variant='h4' align='left' className={classes.mainTitle}>
                     <FormattedMessage
@@ -535,7 +535,7 @@ function Properties(props) {
                     </Grid>
                 </Grid>
             )}
-        </div>
+        </React.Fragment>
     );
 }
 
