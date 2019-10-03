@@ -130,7 +130,7 @@ class CommentAdd extends React.Component {
                 })
                 .catch((error) => {
                     console.error(error);
-                    if (error.response.body.message) {
+                    if (error.response && error.response.body && error.response.body.message) {
                         Alert.error(error.response.body.message);
                     } else {
                         Alert.error(
