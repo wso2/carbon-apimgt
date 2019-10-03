@@ -527,4 +527,24 @@ var objectToJson = function (policy) {
     }
     return apiPolicy;
 };
+
+var validateRoles = function(roles,username) {
+    var validRole,
+    provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        validRole = provider.validateRoles(roles,username);
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke validateRoles function.");
+        }
+        return {
+            error:false,
+            valid: validRole
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+};
 %>
