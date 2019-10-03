@@ -102,7 +102,6 @@ const useStyles = makeStyles(theme => ({
  *
  */
 export default function CustomizedSteppers() {
-    const restApi = new Api();
     const [api, updateAPI] = useAPI();
     const classes = useStyles();
     const isEndpointAvailable = api.endpointConfig !== null;
@@ -113,7 +112,7 @@ export default function CustomizedSteppers() {
     const [isUpdating, setUpdating] = useState(false);
 
     useEffect(() => {
-        restApi.getLcState(api.id)
+        api.getLcState(api.id)
             .then((result) => {
                 setlifecycleState(result.body.state);
             });
@@ -125,11 +124,11 @@ export default function CustomizedSteppers() {
  */
     function updateLCStateOfAPI() {
         setUpdating(true);
-        const promisedUpdate = restApi.updateLcState(api.id, 'Publish');
+        const promisedUpdate = api.publish();
         promisedUpdate
             .then(() => {
                 updateAPI()
-                    .then(() => Alert.info('API Updated Successfully'))
+                    .then()
                     .catch((error) => {
                         if (error.response) {
                             Alert.error(error.response.body.description);
@@ -140,18 +139,18 @@ export default function CustomizedSteppers() {
                     });
                 Alert.info('Lifecycle state updated successfully');
             })
+            .finally(() => setUpdating(false))
             .catch((errorResponse) => {
                 console.log(errorResponse);
                 Alert.error(JSON.stringify(errorResponse.message));
-            })
-            .finally(() => setUpdating(false));
+            });
     }
 
     /**
- * This component renders the final lifecycle state
+ * This function renders the final lifecycle state
  * @param {*} state
  */
-    function FinalLifecycleState(state) {
+    function finalLifecycleState(state) {
         switch (state) {
             case 'Published':
                 return (
@@ -321,7 +320,7 @@ export default function CustomizedSteppers() {
                 <Step className={classes.label}>
                     <StepLabel style={{ position: 'relative' }}>
                         <Box className={classes.box} >
-                            {FinalLifecycleState(lifecycleState)}
+                            {finalLifecycleState(lifecycleState)}
                         </Box>
                     </StepLabel>
                 </Step>
