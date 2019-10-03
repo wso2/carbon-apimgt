@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -64,6 +65,7 @@ public enum KeyTypeEnum {
   @ApiModelProperty(required = true, value = "Consumer key of the application")
   @JsonProperty("consumerKey")
   @NotNull
+  @NotEmpty
   public String getConsumerKey() {
     return consumerKey;
   }
@@ -83,6 +85,7 @@ public enum KeyTypeEnum {
   @ApiModelProperty(required = true, value = "Consumer secret of the application")
   @JsonProperty("consumerSecret")
   @NotNull
+  @NotEmpty
   public String getConsumerSecret() {
     return consumerSecret;
   }
@@ -101,6 +104,7 @@ public enum KeyTypeEnum {
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("keyType")
   @NotNull
+  @NotEmpty
   public KeyTypeEnum getKeyType() {
     return keyType;
   }
