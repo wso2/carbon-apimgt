@@ -8948,7 +8948,7 @@ public final class APIUtil {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
             adminPassword = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
-                    .getRealmConfiguration().getAdminUserName();
+                    .getRealmConfiguration().getAdminPassword();
 
         } catch (UserStoreException e) {
             handleInternalException("Error in getting admin password from user-mgt.xml", e);
