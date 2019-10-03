@@ -82,7 +82,7 @@ class APICardView extends React.Component {
                 name: 'Policy',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.APIList.policy',
-                    defaultMessage: 'PolicyAAAA',
+                    defaultMessage: 'Policy',
                 }),
                 options: {
                     customBodyRender: (value, tableMeta, updateValue) => {
