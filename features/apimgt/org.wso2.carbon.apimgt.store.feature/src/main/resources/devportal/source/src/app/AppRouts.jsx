@@ -54,11 +54,9 @@ function AppRouts(props) {
     return (
         <Switch>
             <Redirect exact from='/' to={getRedirectingPath(theme)} />
-            {<Route path='/home' component={Landing} />}
-            {<Route path='/api-groups' component={TagCloudListing} />}
-            {<Route path='/applications' component={Applications} />}
+            <Route path='/home' component={Landing} />
+            <Route path='/api-groups' component={TagCloudListing} />
             <Route path='/(apis|api-products)' component={Apis} />
-            <Route path='/settings' component={SettingsBase} />
             {isAuthenticated ? (
                 <React.Fragment>
                     <Route path='/settings' component={SettingsBase} />
