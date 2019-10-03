@@ -424,7 +424,7 @@ function ProductResourcesEdit(props) {
                 <Typography className={classes.messageWrapper}>
                     <FormattedMessage
                         id='Apis.Details.ProductResources.ProductResourcesWorkspace.ApisnotFound'
-                        defaultMessage='No REST APIs Created to add resources'
+                        defaultMessage='No REST APIs are available'
                     />
                 </Typography>
             </Grid>
@@ -433,13 +433,13 @@ function ProductResourcesEdit(props) {
             <Grid container>
                 <Grid item xs={8} className={classes.leftMost}>
                     <FormattedMessage
-                        id='Apis.Details.ProductResources.ProductResourcesEdit.find.and.select'
+                        id='Apis.Details.ProductResources.ProductResourcesWorkspace.find.and.select'
                         defaultMessage='Find and select resources for the API Product'
                     />
                 </Grid>
                 <Grid item xs={4} className={classes.rightMost}>
                     <FormattedMessage
-                        id='Apis.Details.ProductResources.ProductResourcesEdit.selected'
+                        id='Apis.Details.ProductResources.ProductResourcesWorkspace.selected'
                         defaultMessage='Selected resources of API Product'
                     />
                     <div />
@@ -453,7 +453,7 @@ function ProductResourcesEdit(props) {
                 <Grid item xs={3}>
                     <div className={classes.colTitle}>
                         <FormattedMessage
-                            id='Apis.Details.ProductResources.ProductResourcesEdit.select.an.api'
+                            id='Apis.Details.ProductResources.ProductResourcesWorkspace.select.an.api'
                             defaultMessage='Select an API'
                         />
                     </div>
@@ -525,7 +525,7 @@ function ProductResourcesEdit(props) {
                                     component='div'
                                 >
                                     <FormattedMessage
-                                        id='Apis.Details.ProductResources.ProductResourcesEdit.api.all.resources'
+                                        id='Apis.Details.ProductResources.ProductResourcesWorkspace.api.all.resources'
                                         defaultMessage={
                                             'All resources available with the API are displayed bellow.' +
                                             'Click the right hand side arrow to add them to the api product.'
@@ -541,7 +541,7 @@ function ProductResourcesEdit(props) {
                             >
                                 <Typography variant='body2'>
                                     <FormattedMessage
-                                        id='Apis.Details.ProductResources.ProductResourcesEdit.toolbar.add.selected'
+                                        id='Apis.Details.ProductResources.ProductResourcesWorkspace.toolbar.add.selected'
                                         defaultMessage='Add Selected'
                                     />
                                 </Typography>
@@ -554,7 +554,7 @@ function ProductResourcesEdit(props) {
                             >
                                 <Typography variant='body2'>
                                     <FormattedMessage
-                                        id='Apis.Details.ProductResources.ProductResourcesEdit.toolbar.add.all'
+                                        id='Apis.Details.ProductResources.ProductResourcesWorkspace.toolbar.add.all'
                                         defaultMessage='Add All'
                                     />
                                 </Typography>
@@ -655,7 +655,7 @@ function ProductResourcesEdit(props) {
                                 <div className={classes.messageWrapper}>
                                     <Typography component='p'>
                                         <FormattedMessage
-                                            id='Apis.Details.ProductResources.ProductResourcesEdit.empty.title.content'
+                                            id='Apis.Details.ProductResources.ProductResourcesWorkspace.empty.title.content'
                                             defaultMessage='Use the left side panel to add resources'
                                         />
                                     </Typography>
