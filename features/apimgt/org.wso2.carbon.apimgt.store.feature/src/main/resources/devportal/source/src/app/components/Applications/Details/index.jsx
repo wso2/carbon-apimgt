@@ -18,9 +18,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-    Route, Switch, Redirect, Link,
-} from 'react-router-dom';
+import { Route, Switch, Redirect, Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import API from 'AppData/api';
 import { PageNotFound } from 'AppComponents/Base/Errors/index';
