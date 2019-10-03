@@ -56,6 +56,16 @@ const useStyles = makeStyles(theme => ({
         overflowY: 'auto',
         height: 400,
     },
+    ResourceWrapper: {
+        overflowY: 'auto',
+        height: 298,
+    },
+    SelectedResourceWrapper: {
+        overflowY: 'auto',
+        overflowX: 'auto',
+        height: 430,
+        width: 350,
+    },
     leftMost: {
         background: theme.palette.grey[700],
         color: theme.palette.getContrastText(theme.palette.grey[700]),
@@ -143,7 +153,7 @@ const useStyles = makeStyles(theme => ({
 
 function ProductResourcesEdit(props) {
     const classes = useStyles();
-    const { apiResources, setApiResources } = props;
+    const { apiResources, setApiResources, isStateCreate } = props;
 
     // Define states
     const [allApis, setAllApis] = useState([]);
@@ -409,21 +419,33 @@ function ProductResourcesEdit(props) {
     }
     return (
         <React.Fragment>
+            {allApis.length === 0 &&
             <Grid container>
-                <Grid item xs={7} className={classes.leftMost}>
+                <Typography className={classes.messageWrapper}>
+                    <FormattedMessage
+                        id='Apis.Details.ProductResources.ProductResourcesWorkspace.ApisnotFound'
+                        defaultMessage='No REST APIs Created to add resources'
+                    />
+                </Typography>
+            </Grid>
+            }
+            { allApis.length > 0 && !isStateCreate &&
+            <Grid container>
+                <Grid item xs={8} className={classes.leftMost}>
                     <FormattedMessage
                         id='Apis.Details.ProductResources.ProductResourcesEdit.find.and.select'
                         defaultMessage='Find and select resources for the API Product'
                     />
                 </Grid>
-                <Grid item xs={5} className={classes.rightMost}>
+                <Grid item xs={4} className={classes.rightMost}>
                     <FormattedMessage
                         id='Apis.Details.ProductResources.ProductResourcesEdit.selected'
                         defaultMessage='Selected resources of API Product'
                     />
                     <div />
                 </Grid>
-            </Grid>
+            </Grid>}
+            {allApis.length > 0 &&
             <Grid container>
                 {/* ************************************************ */}
                 {/* 1st column API search and select column          */}
@@ -484,7 +506,7 @@ function ProductResourcesEdit(props) {
                 {/* ************************************************ */}
                 {/* 2nd column Resource Selection                    */}
                 {/* ************************************************ */}
-                <Grid item xs={4}>
+                <Grid item xs={5}>
                     <Paper className={classes.paper}>
                         <div className={classes.colTitle}>
                             <FormattedMessage
@@ -493,7 +515,7 @@ function ProductResourcesEdit(props) {
                             />
                         </div>
                         {selectedApi && (
-                            <React.Fragment>
+                            <React.Fragment className={classes.ResourceWrapper}>
                                 <Typography variant='h5' className={classes.selectedTitle}>
                                     {selectedApi.name}
                                 </Typography>
@@ -539,102 +561,98 @@ function ProductResourcesEdit(props) {
                                 <Icon>fast_forward</Icon>
                             </a>
                         </div>
-                        <List dense>
-                            {Object.keys(selectedApiPaths).map((key) => {
-                                const path = selectedApiPaths[key];
-                                const labelId = `checkbox-list-label-${key}`;
-                                return Object.keys(path).map((innerKey) => {
-                                    const methodObj = path[innerKey];
-                                    return (
-                                        CONSTS.HTTP_METHODS.includes(innerKey) && (
-                                            <ListItem key={`${innerKey} - ${key}`} role={undefined} dense>
-                                                <ListItemIcon>
-                                                    <Checkbox
-                                                        edge='start'
-                                                        checked={methodObj.checked}
-                                                        tabIndex={-1}
-                                                        disableRipple
-                                                        onChange={() => updateCheckBox(key, innerKey)}
-                                                    />
-                                                </ListItemIcon>
-                                                <ListItemText
-                                                    id={labelId}
-                                                    primary={
-                                                        <div>
-                                                            <span>{key}</span>
-                                                            <MethodView
-                                                                method={innerKey}
-                                                                className={classes.methodView}
-                                                            />
-                                                        </div>
-                                                    }
-                                                    secondary={
-                                                        methodObj['x-auth-type'] &&
+                        <div className={classes.ResourceWrapper}>
+                            <List dense>
+                                {Object.keys(selectedApiPaths).map((key) => {
+                                    const path = selectedApiPaths[key];
+                                    const labelId = `checkbox-list-label-${key}`;
+                                    return Object.keys(path).map((innerKey) => {
+                                        const methodObj = path[innerKey];
+                                        return (
+                                            CONSTS.HTTP_METHODS.includes(innerKey) && (
+                                                <ListItem key={`${innerKey} - ${key}`} role={undefined} dense>
+                                                    <ListItemIcon>
+                                                        <Checkbox
+                                                            edge='start'
+                                                            checked={methodObj.checked}
+                                                            tabIndex={-1}
+                                                            disableRipple
+                                                            onChange={() => updateCheckBox(key, innerKey)}
+                                                        />
+                                                    </ListItemIcon>
+                                                    <ListItemText
+                                                        id={labelId}
+                                                        primary={
+                                                            <div>
+                                                                <span>{key}</span>
+                                                                <MethodView
+                                                                    method={innerKey}
+                                                                    className={classes.methodView}
+                                                                />
+                                                            </div>
+                                                        }
+                                                        secondary={
+                                                            methodObj['x-auth-type'] &&
                                                         methodObj['x-throttling-tier'] &&
                                                         `${methodObj['x-auth-type']} - ${
                                                             methodObj['x-throttling-tier']
                                                         }`
-                                                    }
-                                                    onClick={() =>
-                                                        updateResourceTree(
-                                                            {
-                                                                target: key,
-                                                                verb: innerKey,
-                                                                apiId: selectedApi.id,
-                                                                name: selectedApi.name,
-                                                            },
-                                                            'add',
-                                                        )
-                                                    }
-                                                    className={classes.middleText}
-                                                />
-                                                <ListItemSecondaryAction>
-                                                    {methodObj.allreadyAdded && (
-                                                        <Icon className={classes.inactiveIcon}>chevron_right</Icon>
-                                                    )}
-                                                    {!methodObj.allreadyAdded && (
-                                                        <IconButton
-                                                            edge='end'
-                                                            aria-label='comments'
-                                                            onClick={() =>
-                                                                updateResourceTree(
-                                                                    {
-                                                                        target: key,
-                                                                        verb: innerKey,
-                                                                        apiId: selectedApi.id,
-                                                                        name: selectedApi.name,
-                                                                    },
-                                                                    'add',
-                                                                )
-                                                            }
-                                                        >
-                                                            <Icon>chevron_right</Icon>
-                                                        </IconButton>
-                                                    )}
-                                                </ListItemSecondaryAction>
-                                            </ListItem>
-                                        )
-                                    );
-                                });
-                            })}
-                        </List>
+                                                        }
+                                                        onClick={() =>
+                                                            updateResourceTree(
+                                                                {
+                                                                    target: key,
+                                                                    verb: innerKey,
+                                                                    apiId: selectedApi.id,
+                                                                    name: selectedApi.name,
+                                                                },
+                                                                'add',
+                                                            )
+                                                        }
+                                                        className={classes.middleText}
+                                                    />
+                                                    <ListItemSecondaryAction>
+                                                        {methodObj.allreadyAdded && (
+                                                            <Icon className={classes.inactiveIcon}>chevron_right</Icon>
+                                                        )}
+                                                        {!methodObj.allreadyAdded && (
+                                                            <IconButton
+                                                                edge='end'
+                                                                aria-label='comments'
+                                                                onClick={() =>
+                                                                    updateResourceTree(
+                                                                        {
+                                                                            target: key,
+                                                                            verb: innerKey,
+                                                                            apiId: selectedApi.id,
+                                                                            name: selectedApi.name,
+                                                                        },
+                                                                        'add',
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Icon>chevron_right</Icon>
+                                                            </IconButton>
+                                                        )}
+                                                    </ListItemSecondaryAction>
+                                                </ListItem>
+                                            )
+                                        );
+                                    });
+                                })}
+                            </List>
+                        </div>
                     </Paper>
                 </Grid>
                 {/* ************************************************ */}
                 {/* Third column with  selected resources            */}
                 {/* ************************************************ */}
-                <Grid item xs={5}>
+                <Grid item xs={4}>
                     <Paper className={classes.paper}>
                         <div className={classes.colTitle} />
-                        <div className={classes.treeViewRoot}>
-                            {apiResources && apiResources.length === 0 && (
+                        <div className={classes.SelectedResourceWrapper}>
+                            {allApis.length > 0 && apiResources && apiResources.length === 0 && (
                                 <div className={classes.messageWrapper}>
-                                    <Typography variant='h5' component='h3'>
-                                        <FormattedMessage
-                                            id='Apis.Details.ProductResources.ProductResourcesEdit.empty.title'
-                                            defaultMessage='No resources are available'
-                                        />
-                                    </Typography>
                                     <Typography component='p'>
                                         <FormattedMessage
                                             id='Apis.Details.ProductResources.ProductResourcesEdit.empty.title.content'
@@ -685,11 +703,13 @@ function ProductResourcesEdit(props) {
                     </Paper>
                 </Grid>
             </Grid>
+            }
         </React.Fragment>
     );
 }
 ProductResourcesEdit.propTypes = {
     apiResources: PropTypes.instanceOf(Array).isRequired,
     setApiResources: PropTypes.func.isRequired,
+    isStateCreate: PropTypes.isRequired,
 };
 export default ProductResourcesEdit;

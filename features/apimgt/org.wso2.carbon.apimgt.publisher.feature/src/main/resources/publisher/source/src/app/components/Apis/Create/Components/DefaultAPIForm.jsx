@@ -159,7 +159,7 @@ export default function DefaultAPIForm(props) {
     }
 
     return (
-        <Grid item md={9}>
+        <Grid item md={11}>
             <form noValidate autoComplete='off'>
                 <TextField
                     autoFocus
