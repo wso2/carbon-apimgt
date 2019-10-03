@@ -202,7 +202,6 @@ export default function UploadCertificate(props) {
                                 onChange={handleEndpointOnChange}
                                 onBlur={handleEndpointOnChange}
                                 endpoint={endpoint}
-                                helperText='Endpoint for the certificate'
                                 isEndpointEmpty={isEndpointEmpty}
                                 required
                             />
@@ -223,7 +222,16 @@ export default function UploadCertificate(props) {
                             margin='normal'
                             variant='outlined'
                             error={isAliasEmpty}
-                            helperText={isAliasEmpty ? 'Alias should not be empty' : 'Alias for the certificate'}
+                            helperText={isAliasEmpty ? 
+                                <FormattedMessage
+                                    id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias.error'
+                                    defaultMessage='Alias should not be empty'
+                                /> :
+                                <FormattedMessage
+                                    id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias.helpertext'
+                                    defaultMessage='Alias for the certificate'
+                                />
+                            }
                             fullWidth
                         />
                         <Dropzone

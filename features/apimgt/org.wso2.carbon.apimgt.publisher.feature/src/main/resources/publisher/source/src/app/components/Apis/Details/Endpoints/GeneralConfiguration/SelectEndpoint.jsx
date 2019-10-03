@@ -27,14 +27,22 @@ export default function SelectEndpoint(props) {
         onChange,
         onBlur,
         endpoint,
-        helperText,
         isEndpointEmpty,
     } = props;
     return (
         <TextField
             autoFocus
             error={isEndpointEmpty}
-            helperText={isEndpointEmpty ? 'Endpoint should not be empty' : helperText}
+            helperText={isEndpointEmpty ? 
+                <FormattedMessage
+                    id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint.error'
+                    defaultMessage='Endpoint should not be empty'
+                /> :
+                <FormattedMessage
+                    id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint.helpertext'
+                    defaultMessage='Endpoint for the certificate'
+                />
+            }
             required
             id='certificateEndpoint'
             label={
@@ -64,6 +72,5 @@ SelectEndpoint.propTypes = {
     onBlur: PropTypes.func.isRequired,
     classes: PropTypes.shape({}).isRequired,
     endpoint: PropTypes.string.isRequired,
-    helperText: PropTypes.string.isRequired,
     isEndpointEmpty: PropTypes.string.isRequired,
 };
