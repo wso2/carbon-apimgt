@@ -99,9 +99,7 @@ export default class ProtectedApp extends Component {
             if (hasViewScope) {
                 this.setState({ userResolved: true, scopesFound: true });
             } else {
-                console.log(
-                    'No relevant scopes found, redirecting to Anonymous View',
-                );
+                console.log('No relevant scopes found, redirecting to Anonymous View');
                 this.setState({ userResolved: true });
             }
         } else {
@@ -112,31 +110,23 @@ export default class ProtectedApp extends Component {
             userPromise
                 .then((loggedUser) => {
                     if (loggedUser != null) {
-                        const hasViewScope = loggedUser.scopes.includes(
-                            'apim:subscribe',
-                        );
+                        const hasViewScope = loggedUser.scopes.includes('apim:subscribe');
                         if (hasViewScope) {
                             this.setState({
                                 userResolved: true,
                                 scopesFound: true,
                             });
                         } else {
-                            console.log(
-                                'No relevant scopes found, redirecting to Anonymous View',
-                            );
+                            console.log('No relevant scopes found, redirecting to Anonymous View');
                             this.setState({ userResolved: true });
                         }
                     } else {
-                        console.log(
-                            'User returned with null, redirect to Anonymous View',
-                        );
+                        console.log('User returned with null, redirect to Anonymous View');
                         this.setState({ userResolved: true });
                     }
                 })
                 .catch((error) => {
-                    console.log(
-                        'Error: ' + error + ',redirecting to Anonymous View',
-                    );
+                    console.log('Error: ' + error + ',redirecting to Anonymous View');
                     this.setState({ userResolved: true });
                 });
         }
