@@ -9178,4 +9178,22 @@ public final class APIUtil {
                 WorkflowConstants.WF_TYPE_AM_API_STATE);
         return wfDTO;
     }
+
+    /**
+     * Get expiry time of a given jwt token
+     * @param token jwt token
+     * @return the expiry time
+     */
+    public static Long getExpiryifJWT(String token) {
+        String[] jwtParts = token.split("\\.");
+        org.json.JSONObject jwtHeader = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().decode(jwtParts[0])));
+        // Check if the decoded header contains type as 'JWT'.
+        if (APIConstants.JWT.equals(jwtHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))) {
+            if (jwtParts[1] != null) {
+                org.json.JSONObject jwtPayload = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().decode(jwtParts[1])));
+                return jwtPayload.getLong("exp"); // extract expiry time and return
+            }
+        }
+        return 0L;
+    }
 }

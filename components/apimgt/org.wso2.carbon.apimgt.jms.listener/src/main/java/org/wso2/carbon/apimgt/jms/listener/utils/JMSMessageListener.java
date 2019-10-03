@@ -280,23 +280,10 @@ public class JMSMessageListener implements MessageListener {
 
         // Get expiry time of JWT token
         if (revokedToken.contains(APIConstants.DOT)) {
-            Long expiryTime = getExpiryifJWT(revokedToken);
+            Long expiryTime = APIUtil.getExpiryifJWT(revokedToken);
             // Add revoked token to revoked JWT map
             RevokedJWTDataHolder.addRevokedJWTToMap(revokedToken, expiryTime);
         }
-    }
-
-    protected Long getExpiryifJWT(String token) {
-        String[] jwtParts = token.split("\\.");
-        JSONObject jwtHeader = new JSONObject(new String(Base64.getUrlDecoder().decode(jwtParts[0])));
-        // Check if the decoded header contains type as 'JWT'.
-        if (APIConstants.JWT.equals(jwtHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))) {
-            if (jwtParts[1] != null) {
-                JSONObject jwtPayload = new JSONObject(new String(Base64.getUrlDecoder().decode(jwtParts[1])));
-                return jwtPayload.getLong("exp"); // extract expiry time and return
-            }
-        }
-        return 0L;
     }
 
     protected String getSignatureIfJWT(String token) {

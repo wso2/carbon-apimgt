@@ -3635,4 +3635,10 @@ public class SQLConstants {
                 "DELETE FROM AM_NOTIFICATION_SUBSCRIBER WHERE UUID= ?";
 
     }
+
+    public static class RevokedJWTConstants {
+
+        public static final String ADD_JWT_SIGNATURE = "INSERT INTO AM_REVOKED_JWT (SIGNATURE," +
+                "EXPIRY_TIMESTAMP) VALUES(?,?)";
+    }
 }

@@ -20,7 +20,11 @@ package org.wso2.carbon.apimgt.keymgt.events;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.token.TokenRevocationNotifier;
 import org.wso2.carbon.identity.oauth.event.AbstractOAuthEventInterceptor;
 import org.wso2.carbon.identity.oauth2.dto.OAuthRevocationRequestDTO;
@@ -29,6 +33,7 @@ import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
 import org.wso2.carbon.identity.oauth2.model.RefreshTokenValidationDataDO;
 
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
 
@@ -95,6 +100,12 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
         } else {
             log.debug("Persistent message sending isn't enabled or configured properly");
         }
+        String revokedToken = revokeRequestDTO.getToken();
+        if (revokedToken.contains(APIConstants.DOT)) {
+            Long expiryTime = APIUtil.getExpiryifJWT(revokedToken);
+            // Persist revoked JWT token to database.
+            persistRevokedJWTSignature(revokedToken, expiryTime);
+        }
     }
 
     /**
@@ -134,5 +145,14 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    private void persistRevokedJWTSignature(String tokenSignature, Long expiryTime) {
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        try {
+            apiMgtDAO.addRevokedJWTSignature(tokenSignature, expiryTime);
+        } catch (APIManagementException e) {
+            log.error("Unable to add revoked JWT signature to the database");
+        }
     }
 }

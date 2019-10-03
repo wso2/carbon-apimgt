@@ -14361,4 +14361,36 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, connection, rs);
         }
     }
+
+    /**
+     * Persist revoked jwt signatures to database
+     * @param jwtSignature signature of jwt token
+     * @param expiryTime expiry time of the token
+     */
+    public void addRevokedJWTSignature(String jwtSignature, Long expiryTime) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            String addJwtSignature = SQLConstants.RevokedJWTConstants.ADD_JWT_SIGNATURE;
+            ps = conn.prepareStatement(addJwtSignature);
+            ps.setString(1, jwtSignature);
+            ps.setLong(2, expiryTime);
+            ps.execute();
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Error while rolling back the failed operation", e1);
+                }
+            }
+            handleException("Error in adding revoked jwt signature to database : " + e.getMessage(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+    }
 }
