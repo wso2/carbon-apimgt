@@ -424,7 +424,7 @@ function ProductResourcesEdit(props) {
                 <Typography className={classes.messageWrapper}>
                     <FormattedMessage
                         id='Apis.Details.ProductResources.ProductResourcesWorkspace.ApisnotFound'
-                        defaultMessage='No REST APIs are available'
+                        defaultMessage='No REST APIs are created yet'
                     />
                 </Typography>
             </Grid>
@@ -541,7 +541,8 @@ function ProductResourcesEdit(props) {
                             >
                                 <Typography variant='body2'>
                                     <FormattedMessage
-                                        id='Apis.Details.ProductResources.ProductResourcesWorkspace.toolbar.add.selected'
+                                        id='Apis.Details.ProductResources.ProductResourcesWorkspace.
+                                        toolbar.add.selected'
                                         defaultMessage='Add Selected'
                                     />
                                 </Typography>
@@ -655,7 +656,7 @@ function ProductResourcesEdit(props) {
                                 <div className={classes.messageWrapper}>
                                     <Typography component='p'>
                                         <FormattedMessage
-                                            id='Apis.Details.ProductResources.ProductResourcesWorkspace.empty.title.content'
+                                            id='Apis.Details.ProductResources.ProductResourcesWorkspace.empty.title'
                                             defaultMessage='Use the left side panel to add resources'
                                         />
                                     </Typography>
