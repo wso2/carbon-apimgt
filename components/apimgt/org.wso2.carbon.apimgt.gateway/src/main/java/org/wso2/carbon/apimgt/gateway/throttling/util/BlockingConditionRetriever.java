@@ -126,7 +126,6 @@ public class BlockingConditionRetriever extends TimerTask {
 
 
     public void startWebServiceThrottleDataRetriever() {
-
         new Timer().schedule(this, getThrottleProperties().getBlockCondition().getInitDelay());
     }
 }

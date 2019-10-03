@@ -26,6 +26,7 @@ import org.json.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
+import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottleConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -247,7 +248,8 @@ public class JMSMessageListener implements MessageListener {
         }
     }
 
-    private void handleRevokedTokenMessage(String revokedToken){
+    private void handleRevokedTokenMessage(String revokedToken) {
+
         if (StringUtils.isEmpty(revokedToken)) {
             return;
         }
@@ -266,11 +268,8 @@ public class JMSMessageListener implements MessageListener {
             if (cachedTenantDomain == null) { //the token is not in cache
                 return;
             }
-            //Remove the super-tenant cache entry if the token is a not a super-tenant one
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(cachedTenantDomain)) {
-                Utils.removeCacheEntryFromGatewayCache(revokedToken);
-                Utils.putInvalidTokenEntryIntoInvalidTokenCache(revokedToken, cachedTenantDomain);
-            }
+            Utils.removeCacheEntryFromGatewayCache(revokedToken);
+            Utils.putInvalidTokenEntryIntoInvalidTokenCache(revokedToken, cachedTenantDomain);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -278,6 +277,26 @@ public class JMSMessageListener implements MessageListener {
         //Remove token from the token's own tenant's cache.
         Utils.removeTokenFromTenantTokenCache(revokedToken, cachedTenantDomain);
         Utils.putInvalidTokenIntoTenantInvalidTokenCache(revokedToken, cachedTenantDomain);
+
+        // Get expiry time of JWT token
+        if (revokedToken.contains(APIConstants.DOT)) {
+            Long expiryTime = getExpiryifJWT(revokedToken);
+            // Add revoked token to revoked JWT map
+            RevokedJWTDataHolder.addRevokedJWTToMap(revokedToken, expiryTime);
+        }
+    }
+
+    protected Long getExpiryifJWT(String token) {
+        String[] jwtParts = token.split("\\.");
+        JSONObject jwtHeader = new JSONObject(new String(Base64.getUrlDecoder().decode(jwtParts[0])));
+        // Check if the decoded header contains type as 'JWT'.
+        if (APIConstants.JWT.equals(jwtHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))) {
+            if (jwtParts[1] != null) {
+                JSONObject jwtPayload = new JSONObject(new String(Base64.getUrlDecoder().decode(jwtParts[1])));
+                return jwtPayload.getLong("exp"); // extract expiry time and return
+            }
+        }
+        return 0L;
     }
 
     protected String getSignatureIfJWT(String token) {

@@ -28,10 +28,14 @@ public class RevokedJWTDataHolder {
     private static final Log log = LogFactory.getLog(RevokedJWTDataHolder.class);
     private static Map<String, Long> revokedJWTMap = new ConcurrentHashMap<>();
 
-    public void addRevokedJWTFromMap(Map<String, Long> data){
-        if(data.size() > 0) {
-            revokedJWTMap.putAll(data);
+    public static void addRevokedJWTToMap(String key, Long value){
+        if(key != null && value != null) {
+            revokedJWTMap.put(key,value);
         }
+    }
+
+    public static boolean isJWTTokenSignatureExistsInRevokedMap(String jwtSignature) {
+        return revokedJWTMap.containsKey(jwtSignature);
     }
 
 }

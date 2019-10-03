@@ -108,7 +108,7 @@ public class RevokedJWTTokensRetriever extends TimerTask {
     private void loadRevokedJWTTokensFromWebService() {
         RevokedJWTTokensDTO revokedJWTTokensDTO = retrieveRevokedJWTTokensData();
         if(revokedJWTTokensDTO != null) {
-            revokedJWTDataHolder.addRevokedJWTFromMap(null);
+            revokedJWTDataHolder.addRevokedJWTToMap(null,null);
         }
     }
 

@@ -24,17 +24,16 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -44,7 +43,6 @@ import javax.cache.Cache;
 import javax.cache.Caching;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A Validator class to validate JWT tokens in an API request.
@@ -97,19 +95,22 @@ public class JWTValidator {
             if (cacheToken != null) {
                 log.debug("Token retrieved from the token cache.");
                 isVerified = true;
-            } else if (getInvalidTokenCache().get(tokenSignature) != null) {
+            }
+            // For JWT tokens, invalid cache isn't checked since invalid tokens will anyway be in revoked jwt map
+            else if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Token retrieved from the invalid token cache. Token: " + GatewayUtils.getMaskedToken(splitToken));
+                    log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
+                            getMaskedToken(splitToken));
                 }
-                log.error("Invalid JWT token.");
+                log.debug("Invalid JWT token.");
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
         }
 
-        // Not found in cache
+        // Not found in cache or revoked map
         if (!isVerified) {
-            log.debug("Token not found in the cache.");
+            log.debug("Token not found in the cache or revoked jwt token map.");
             try {
                 payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
             } catch (JSONException | IllegalArgumentException e) {
@@ -120,6 +121,7 @@ public class JWTValidator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token. Failed to decode the token.", e);
             }
+            log.debug("Verifying signature of JWT");
             isVerified = GatewayUtils.verifyTokenSignature(splitToken, APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS);
             if (isGatewayTokenCacheEnabled) {
                 // Add token to tenant token cache
