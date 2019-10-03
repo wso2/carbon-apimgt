@@ -26,12 +26,6 @@ import MUIDataTable from "mui-datatables";
 import { FormattedMessage } from 'react-intl';
 import Subscription from 'AppData/Subscription';
 
-const useStyles = makeStyles(theme => ({
-    root: {
-        padding: theme.spacing(3, 2),
-    },
-}));
-
 const columns = ["Name", "Value"];
 
 const options = {
@@ -91,7 +85,7 @@ function Invoice(props) {
                 onClick = {handlePopup}
             >
                 <FormattedMessage
-                    id = 'Applications.Details.SubscriptionTableData.view.subscription.invoice'
+                    id = 'Applications.Details.Invoice.view.btn'
                     defaultMessage = 'View Invoice'
                 />
             </Button>
