@@ -24,6 +24,7 @@ import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Tooltip from '@material-ui/core/Tooltip';
 import API from 'AppData/api';
+import { capitalizeFirstLetter } from 'AppData/StringFormatter';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import BusinessInformation from './BusinessInformation';
 
@@ -57,7 +58,10 @@ function MetaData(props) {
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
-                            {api.description && <React.Fragment>{api.description}</React.Fragment>}
+                            {api.description &&
+                            <React.Fragment>
+                                {capitalizeFirstLetter(api.description)}
+                            </React.Fragment>}
                         </Typography>
                         <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
                             {!api.description &&
@@ -179,7 +183,7 @@ function MetaData(props) {
                                     placement='top-start'
                                 >
                                     <Typography variant='body1' display='block'>
-                                        {moment(api.createdTime).fromNow()}
+                                        {capitalizeFirstLetter(moment(api.createdTime).fromNow())}
                                     </Typography>
                                 </Tooltip>
                             </React.Fragment>}
@@ -219,7 +223,7 @@ function MetaData(props) {
                                     placement='top-start'
                                 >
                                     <Typography variant='body1' display='block'>
-                                        {moment(api.lastUpdatedTime).fromNow()}
+                                        {capitalizeFirstLetter(moment(api.lastUpdatedTime).fromNow())}
                                     </Typography>
                                 </Tooltip>
                             </React.Fragment>}
