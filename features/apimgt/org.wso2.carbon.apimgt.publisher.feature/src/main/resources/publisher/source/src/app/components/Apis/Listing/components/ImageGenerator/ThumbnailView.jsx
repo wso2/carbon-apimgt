@@ -217,8 +217,11 @@ class ThumbnailView extends Component {
             selectedTab: 'design',
             category: MaterialIcons.categories[0].name,
             selectedIcon: null,
+            selectedIconUpdate: null,
             color: null,
+            colorUpdate: null,
             backgroundIndex: null,
+            backgroundIndexUpdate: null,
         };
         this.handleClick = this.handleClick.bind(this);
         this.handleClose = this.handleClose.bind(this);
@@ -239,9 +242,12 @@ class ThumbnailView extends Component {
                         const iconJson = JSON.parse(response.data);
                         this.setState({
                             selectedIcon: iconJson.key,
+                            selectedIconUpdate: iconJson.key,
                             category: iconJson.category,
                             color: iconJson.color,
+                            colorUpdate: iconJson.color,
                             backgroundIndex: iconJson.backgroundIndex,
+                            backgroundIndexUpdate: iconJson.backgroundIndex,
                         });
                     } else if (response && response.data.size > 0) {
                         const url = windowURL.createObjectURL(response.data);
@@ -279,7 +285,7 @@ class ThumbnailView extends Component {
         } else if (action === 'btnUploadAPIThumb') {
             const { api } = this.props;
             const {
-                selectedTab, selectedIcon, category, color, backgroundIndex, file,
+                selectedTab, selectedIconUpdate, category, colorUpdate, backgroundIndexUpdate, file,
             } = this.state;
             let fileObj;
             if (selectedTab === 'upload') {
@@ -293,7 +299,7 @@ class ThumbnailView extends Component {
                 /* eslint prefer-destructuring: ["error", {VariableDeclarator: {object: true}}] */
                 fileObj = file[0];
             } else {
-                if (!selectedIcon && !color && !backgroundIndex) {
+                if (!selectedIconUpdate && !colorUpdate && !backgroundIndexUpdate) {
                     Alert.error(intl.formatMessage({
                         id: 'the.icon.is.not.modified',
                         defaultMessage: 'The icon is not modified',
@@ -301,10 +307,10 @@ class ThumbnailView extends Component {
                     return;
                 }
                 const newIconJson = {
-                    key: selectedIcon,
+                    key: selectedIconUpdate,
                     category,
-                    color,
-                    backgroundIndex,
+                    color: colorUpdate,
+                    backgroundIndex: backgroundIndexUpdate,
                 };
                 const blob = new Blob([JSON.stringify(newIconJson)], { type: 'application/json' });
                 fileObj = new File([blob], 'FileName.json', { type: 'application/json' });
@@ -335,7 +341,13 @@ class ThumbnailView extends Component {
                 if (selectedTab === 'upload') {
                     this.setState({ open: false, thumbnail: windowURL.createObjectURL(file) });
                 } else {
-                    this.setState({ open: false, thumbnail: file.preview });
+                    this.setState({
+                        open: false,
+                        thumbnail: file.preview,
+                        selectedIcon: this.state.selectedIconUpdate,
+                        color: this.state.colorUpdate,
+                        backgroundIndex: this.state.backgroundIndexUpdate,
+                    });
                 }
             })
             .catch((error) => {
@@ -356,7 +368,13 @@ class ThumbnailView extends Component {
         if (this.state.file) {
             windowURL.revokeObjectURL(this.state.file.preview);
         }
-        this.setState({ open: false, file: null });
+        this.setState({
+            open: false,
+            file: null,
+            colorUpdate: this.state.color,
+            backgroundIndexUpdate: this.state.background,
+            selectedIconUpdate: this.state.selectedIcon,
+        });
     }
     handleChange = (event, selectedTab) => {
         this.setState({ selectedTab });
@@ -364,23 +382,24 @@ class ThumbnailView extends Component {
     handleSelectionChange = name => (event) => {
         this.setState({ [name]: event.target.value });
     };
-    selectIcon = (selectedIcon) => {
-        this.setState({ selectedIcon });
+    selectIcon = (selectedIconUpdate) => {
+        this.setState({ selectedIconUpdate });
     };
-    handleChangeComplete = (color) => {
-        this.setState({ color: color.hex });
+    handleChangeComplete = (colorUpdate) => {
+        this.setState({ colorUpdate: colorUpdate.hex });
     };
-    selectBackground = (backgroundIndex) => {
-        this.setState({ backgroundIndex });
+    selectBackground = (backgroundIndexUpdate) => {
+        this.setState({ backgroundIndexUpdate });
     };
     saveDisableEnable() {
         const {
-            file, selectedTab, selectedIcon, color, backgroundIndex,
+            file, selectedTab, selectedIconUpdate, colorUpdate, backgroundIndexUpdate,
         } = this.state;
         if (selectedTab === 'upload') {
             return !(file && file[0]); // If no files is uploaded retrun true
         } else {
-            return !(selectedIcon || backgroundIndex || color); // If one of them is selected we return false
+            // If one of them is selected we return false
+            return !(selectedIconUpdate || backgroundIndexUpdate || colorUpdate);
         }
     }
     /**
@@ -392,7 +411,8 @@ class ThumbnailView extends Component {
         } = this.props;
         const colorPairs = theme.custom.thumbnail.backgrounds;
         const {
-            file, thumbnail, selectedTab, selectedIcon, color, backgroundIndex,
+            file, thumbnail, selectedTab, selectedIcon, selectedIconUpdate, color,
+            colorUpdate, backgroundIndex, backgroundIndexUpdate,
         } = this.state;
         let { category } = this.state;
         if (!category) category = MaterialIcons.categories[0].name;
@@ -428,7 +448,6 @@ class ThumbnailView extends Component {
             <React.Fragment>
                 {isEditable ? (
                     <ButtonBase
-                        style={{ marginBottom: theme.spacing(3) }}
                         focusRipple
                         className={classes.thumb}
                         onClick={this.handleClick('btnEditAPIThumb', intl)}
@@ -540,9 +559,9 @@ class ThumbnailView extends Component {
                                         height={height}
                                         api={api}
                                         fixedIcon={{
-                                            key: selectedIcon,
-                                            color,
-                                            backgroundIndex,
+                                            key: selectedIconUpdate,
+                                            color: colorUpdate,
+                                            backgroundIndex: backgroundIndexUpdate,
                                             category,
                                             api,
                                         }}

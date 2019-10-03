@@ -111,6 +111,11 @@ public class APIProviderImplWrapper extends APIProviderImpl {
         policyBuilder.setPolicyTemplateLocation(POLICY_LOCATION);
         return policyBuilder;
     }
+    
+    @Override
+    public boolean hasValidLength(String field, int maxLength) {
+        return true;
+    }
 
     protected String getTenantConfigContent() throws RegistryException, UserStoreException {
         return "{\"EnableMonetization\":false,\"IsUnlimitedTierPaid\":false,\"ExtensionHandlerPosition\":\"bottom\","

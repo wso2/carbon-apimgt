@@ -18,16 +18,13 @@
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import Grid from '@material-ui/core/Grid';
-import FormControl from '@material-ui/core/FormControl';
+import { makeStyles } from '@material-ui/core/styles';
+import Box from '@material-ui/core/Box';
+import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import Select from '@material-ui/core/Select';
 import { isRestricted } from 'AppData/AuthManager';
 import ChipInput from 'material-ui-chip-input';
 import APIValidation from 'AppData/APIValidation';
@@ -38,6 +35,14 @@ import Chip from '@material-ui/core/Chip';
 import { red } from '@material-ui/core/colors/';
 import Alert from 'AppComponents/Shared/Alert';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+
+const useStyles = makeStyles(theme => ({
+    tooltip: {
+        position: 'absolute',
+        right: theme.spacing(-4),
+        top: theme.spacing(1),
+    },
+}));
 
 /**
  *
@@ -52,6 +57,7 @@ export default function AccessControl(props) {
     const { api, configDispatcher } = props;
     const isNone = api.accessControl === 'NONE';
     const [apiFromContext] = useAPI();
+    const classes = useStyles();
 
     const [invalidRoles, setInvalidRoles] = useState([]);
     useEffect(() => {
@@ -125,43 +131,49 @@ export default function AccessControl(props) {
     };
 
     return (
-        <Grid container spacing={0} alignItems='flex-start'>
-            <Grid item xs={11}>
-                <FormControl style={{ display: 'flex' }}>
-                    <InputLabel htmlFor='accessControl-selector'>
+        <React.Fragment>
+            <Box style={{ position: 'relative' }} >
+                <TextField
+                    fullWidth
+                    id='accessControl-selector'
+                    select
+                    label={
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.AccessControl.head.topic'
                             defaultMessage='Access control'
                         />
-                    </InputLabel>
-                    <Select
-                        disabled={isRestricted(['apim:api_create'], apiFromContext)}
-                        value={api.accessControl}
-                        onChange={({ target: { value } }) => configDispatcher({ action: 'accessControl', value })}
-                        input={<Input name='accessControl' id='accessControl-selector' />}
-                    >
-                        <MenuItem value='NONE'>
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.components.AccessControl.dropdown.all'
-                                defaultMessage='All'
-                            />
-                        </MenuItem>
-                        <MenuItem value='RESTRICTED'>
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.components.AccessControl.dropdown.restrict'
-                                defaultMessage='Restrict by role'
-                            />
-                        </MenuItem>
-                    </Select>
-                    <FormHelperText>
+                    }
+                    value={api.accessControl}
+                    name='accessControl'
+                    onChange={({ target: { value } }) => configDispatcher({ action: 'accessControl', value })}
+                    SelectProps={{
+                        MenuProps: {
+                            className: classes.menu,
+                        },
+                    }}
+                    helperText={
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.AccessControl.form.helper.text'
                             defaultMessage='By default there is no access restrictions'
                         />
-                    </FormHelperText>
-                </FormControl>
-            </Grid>
-            <Grid item xs={1}>
+                    }
+                    margin='normal'
+                    variant='outlined'
+                    disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                >
+                    <MenuItem value='NONE'>
+                        <FormattedMessage
+                            id='Apis.Details.Configuration.components.AccessControl.dropdown.none'
+                            defaultMessage='All'
+                        />
+                    </MenuItem>
+                    <MenuItem value='RESTRICTED'>
+                        <FormattedMessage
+                            id='Apis.Details.Configuration.components.AccessControl.dropdown.restricted'
+                            defaultMessage='Restrict by role(s)'
+                        />
+                    </MenuItem>
+                </TextField>
                 <Tooltip
                     title={(
                         <React.Fragment>
@@ -175,19 +187,22 @@ export default function AccessControl(props) {
                                 {'  '}
                                 <FormattedMessage
                                     id='Apis.Details.Configuration.components.AccessControl.tooltip.all.desc'
-                                    defaultMessage='The API is viewable, modifiable by all the publishers and creators.'
+                                    defaultMessage='The API is viewable, modifiable by all the publishers and
+                                    creators.'
                                 />
                                 <br />
                                 <br />
                                 <strong>
                                     <FormattedMessage
-                                        id='Apis.Details.Configuration.components.AccessControl.tooltip.restrict'
+                                        id='Apis.Details.Configuration.components.AccessControl.tooltip.
+                                        restrict'
                                         defaultMessage='Restricted by roles :'
                                     />
                                 </strong>
                                 {'  '}
                                 <FormattedMessage
-                                    id='Apis.Details.Configuration.components.AccessControl.tooltip.restrict.desc'
+                                    id='Apis.Details.Configuration.components.AccessControl.tooltip.restrict.
+                                    desc'
                                     defaultMessage={'The API can be viewable and modifiable by only specific' +
                                     ' publishers and creators with the roles that you specify'}
                                 />
@@ -197,14 +212,22 @@ export default function AccessControl(props) {
                     aria-label='Access control'
                     placement='right-end'
                     interactive
+                    className={classes.tooltip}
                 >
                     <HelpOutline />
                 </Tooltip>
-            </Grid>
-
+            </Box>
             {!isNone && (
-                <Grid item>
+                <Box py={2}>
                     <ChipInput
+                        fullWidth
+                        variant='outlined'
+                        label={
+                            <FormattedMessage
+                                id='Apis.Details.Configuration.components.AccessControl.roles'
+                                defaultMessage='Roles'
+                            />
+                        }
                         disabled={isRestricted(['apim:api_create'], apiFromContext)}
                         value={api.accessControlRoles.concat(invalidRoles)}
                         alwaysShowPlaceholder={false}
@@ -213,7 +236,7 @@ export default function AccessControl(props) {
                         InputProps={{
                             endAdornment: (!roleValidity || !userRoleValidity) && (
                                 <InputAdornment position='end'>
-                                    <Error color='error' />
+                                    <Error color='error' style={{ paddingBottom: 8 }} />
                                 </InputAdornment>
                             ),
                         }}
@@ -223,21 +246,22 @@ export default function AccessControl(props) {
                         chipRenderer={({ value }, key) => (
                             <Chip
                                 key={key}
+                                size='small'
                                 label={value}
                                 onDelete={() => {
                                     handleRoleDeletion(value);
                                 }}
                                 style={{
                                     backgroundColor: invalidRoles.includes(value) ? red[300] : null,
-                                    margin: '8px 8px 8px 0',
+                                    margin: '0 8px 12px 0',
                                     float: 'left',
                                 }}
                             />
                         )}
                     />
-                </Grid>
+                </Box>
             )}
-        </Grid>
+        </React.Fragment>
     );
 }
 

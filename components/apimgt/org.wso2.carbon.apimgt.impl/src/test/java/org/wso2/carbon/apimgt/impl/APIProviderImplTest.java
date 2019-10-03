@@ -2117,6 +2117,7 @@ public class APIProviderImplTest {
         API oldApi = new API(identifier);
         oldApi.setStatus(APIConstants.CREATED);
         oldApi.setVisibility("public");
+        oldApi.setContext("/api1");
 
 
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);

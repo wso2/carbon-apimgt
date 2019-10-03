@@ -64,15 +64,13 @@ function Endpoints(props) {
     };
 
     return (
-        <React.Fragment className={classes.root}>
-            <div>
-                <Typography variant='h4' align='left' className={classes.titleWrapper}>
-                    <FormattedMessage
-                        id='Apis.Details.EndpointsNew.Endpoints.endpoints.header'
-                        defaultMessage='Endpoints'
-                    />
-                </Typography>
-            </div>
+        <React.Fragment>
+            <Typography variant='h4' gutterBottom>
+                <FormattedMessage
+                    id='Apis.Details.EndpointsNew.Endpoints.endpoints.header'
+                    defaultMessage='Endpoints'
+                />
+            </Typography>
             <ApiContext.Consumer>
                 {({ api, updateAPI }) => (
                     <div>
@@ -85,7 +83,7 @@ function Endpoints(props) {
                             container
                             direction='row'
                             alignItems='flex-start'
-                            spacing={4}
+                            spacing={1}
                             className={classes.buttonSection}
                         >
                             <Grid item>

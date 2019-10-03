@@ -16,7 +16,7 @@
  * under the License.
  */
 import React, { useState } from 'react';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import { injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -37,7 +37,6 @@ const styles = theme => ({
  * Used to display generate api key in UI
  */
 const tokens = (props) => {
-
     const [infiniteValidity, setInfiniteValidity] = useState(true);
 
     /**
@@ -58,7 +57,7 @@ const tokens = (props) => {
                 if (currentTarget.checked) {
                     newRequest.timeout = -1;
                 } else {
-                    newRequest.timeout=null;
+                    newRequest.timeout = null;
                 }
                 break;
             case 'timeout':
@@ -69,14 +68,18 @@ const tokens = (props) => {
         }
         updateAccessTokenRequest(newRequest);
     };
-    const {classes, intl, accessTokenRequest} = props;
+    const { classes, intl, accessTokenRequest } = props;
 
     return (
         <React.Fragment>
             <FormControl margin='normal' className={classes.FormControl}>
                 <FormControlLabel
-                    control={<Checkbox checked={infiniteValidity} onChange={e => handleChange('infiniteValidity', e)} value={accessTokenRequest.timeout}/>}
-                    label="Api Key with infinite validity period"
+                    control={<Checkbox
+                        checked={infiniteValidity}
+                        onChange={e => handleChange('infiniteValidity', e)}
+                        value={accessTokenRequest.timeout}
+                    />}
+                    label='Api Key with infinite validity period'
                 />
                 {!infiniteValidity && <TextField
                     required

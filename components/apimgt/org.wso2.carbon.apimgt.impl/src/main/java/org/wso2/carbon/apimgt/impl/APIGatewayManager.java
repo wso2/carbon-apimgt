@@ -256,7 +256,7 @@ public class APIGatewayManager {
                             } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT
                                     .equalsIgnoreCase(api.getImplementation())) {
                                 client.addApi(builder, tenantDomain, api.getId());
-                                client.addEndpoint(api, builder, tenantDomain);
+                                client.saveEndpoint(api, builder, tenantDomain);
                             }
 
                             if (api.isDefaultVersion()) {
@@ -432,7 +432,7 @@ public class APIGatewayManager {
 
                     for (API api : associatedAPIs) {
                         APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
-                        client.addEndpoint(api, apiTemplateBuilder, tenantDomain);
+                        client.saveEndpoint(api, apiTemplateBuilder, tenantDomain);
                         setSecureVaultProperty(client, api, tenantDomain, environment);
                         deployClientCertificates(client, api, tenantDomain);
                     }
@@ -546,6 +546,52 @@ public class APIGatewayManager {
                 }
             }
             updateRemovedClientCertificates(api, tenantDomain);
+        }
+        return failedEnvironmentsMap;
+    }
+
+    /**
+     * Removed an API Product from the configured Gateways
+     *
+     * @param apiProduct
+     *            - The API Product to be removed
+     * @param tenantDomain
+     *            - Tenant Domain of the publisher
+     */
+    public Map<String, String> removeFromGateway(APIProduct apiProduct, String tenantDomain, Set<API> associatedAPIs) {
+        Map<String, String> failedEnvironmentsMap = new HashMap<>();
+        if (apiProduct.getEnvironments() != null) {
+            for (String environmentName : apiProduct.getEnvironments()) {
+                try {
+                    Environment environment = environments.get(environmentName);
+                    //If the environment is removed from the configuration, continue without removing
+                    if (environment == null) {
+                        continue;
+                    }
+
+                    APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
+
+                    APIIdentifier id = new APIIdentifier(PRODUCT_PREFIX, apiProduct.getId().getName(), PRODUCT_VERSION);
+                    client.deleteApi(tenantDomain, id);
+
+                    for (API api : associatedAPIs) {
+                        if (client.getApi(tenantDomain, api.getId()) == null) {
+                            client.deleteEndpoint(api, tenantDomain);
+                            unDeployClientCertificates(client, api, tenantDomain);
+                            undeployCustomSequences(client, api, tenantDomain, environment);
+                        }
+                    }
+                } catch (AxisFault | EndpointAdminException | CertificateManagementException e) {
+                    /*
+                    didn't throw this exception to handle multiple gateway publishing
+                    if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                    therefore this didn't break the gateway unpublisihing if one gateway unreachable
+                    */
+                    log.error("Error occurred when removing from gateway " + environmentName,
+                            e);
+                    failedEnvironmentsMap.put(environmentName, e.getMessage());
+                }
+            }
         }
         return failedEnvironmentsMap;
     }

@@ -29,6 +29,7 @@ import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { FormattedMessage } from 'react-intl';
+import classNames from 'classnames';
 
 /**
  * @inheritdoc
@@ -72,27 +73,50 @@ const styles = theme => ({
         textDecoration: 'none',
     },
     FormControl: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         width: '100%',
     },
     FormControlOdd: {
-        padding: theme.spacing.unit * 2,
         backgroundColor: theme.palette.background.paper,
-        width: '100%',
     },
     quotaHelp: {
         position: 'relative',
     },
     subscribeRoot: {
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
+    },
+    subscribeRootSmall: {
+        marginLeft: `-${theme.spacing(4)}px`,
+    },
+    smallDisplay: {
+        width: 240,
+        '& .MuiInput-formControl': {
+            marginTop: 0,
+        },
+    },
+    smallDisplayFix: {
+        '& .MuiSelect-selectMenu': {
+            padding: 0,
+        },
+    },
+    selectMenuRoot: {
+        margin: 0,
+        padding: 0,
     },
 });
 
 const subscribeToApi = (props) => {
     const [appSelected, setAppSelected] = useState('');
     const [policySelected, setPolicySelected] = useState('');
-    const [applicationsList, seAapplicationsList] = useState([]);
-    const { classes, throttlingPolicyList, applicationsAvailable } = props;
+    const [applicationsList, setApplicationsList] = useState([]);
+    const {
+        classes,
+        throttlingPolicyList,
+        applicationsAvailable,
+        subscriptionRequest,
+        updateSubscriptionRequest,
+        renderSmall,
+    } = props;
 
     useEffect(() => {
         if (throttlingPolicyList && throttlingPolicyList[0]) {
@@ -102,19 +126,21 @@ const subscribeToApi = (props) => {
 
     useEffect(() => {
         if (applicationsAvailable && applicationsAvailable[0]) {
-            seAapplicationsList(applicationsAvailable);
+            setApplicationsList(applicationsAvailable);
             setAppSelected(applicationsAvailable[0].value);
+            const newRequest = { ...subscriptionRequest };
+            newRequest.applicationId = applicationsAvailable[0].value;
+            updateSubscriptionRequest(newRequest);
         }
     }, [applicationsAvailable]);
 
     /**
-    * This method is used to handle the updating of subscription
-    * request object and selected fields.
-    * @param {*} field field that should be updated in subscription request
-    * @param {*} event event fired
-    */
+     * This method is used to handle the updating of subscription
+     * request object and selected fields.
+     * @param {*} field field that should be updated in subscription request
+     * @param {*} event event fired
+     */
     const handleChange = (field, event) => {
-        const { subscriptionRequest, updateSubscriptionRequest } = props;
         const newRequest = { ...subscriptionRequest };
         const { target } = event;
         switch (field) {
@@ -133,10 +159,10 @@ const subscribeToApi = (props) => {
     };
 
     return (
-        <Grid container spacing={3} className={classes.subscribeRoot}>
-            <Grid item xs={12} md={6}>
+        <Grid container className={classNames(classes.subscribeRoot, { [classes.subscribeRootSmall]: renderSmall })}>
+            <Grid item xs={12} md={renderSmall ? 12 : 6}>
                 {appSelected && (
-                    <FormControl className={classes.FormControl}>
+                    <FormControl className={classNames(classes.FormControl, { [classes.smallDisplay]: renderSmall })}>
                         <InputLabel shrink htmlFor='age-label-placeholder' className={classes.quotaHelp}>
                             <FormattedMessage
                                 id='Shared.AppsAndKeys.SubscribeToApi.application'
@@ -166,7 +192,12 @@ const subscribeToApi = (props) => {
                     </FormControl>
                 )}
                 {throttlingPolicyList && (
-                    <FormControl className={classes.FormControlOdd}>
+                    <FormControl
+                        className={classNames(classes.FormControl, classes.smallDisplayFix, {
+                            [classes.smallDisplay]: renderSmall,
+                            [classes.FormControlOdd]: !renderSmall,
+                        })}
+                    >
                         <InputLabel shrink htmlFor='policy-label-placeholder' className={classes.quotaHelp}>
                             <FormattedMessage
                                 id='Shared.AppsAndKeys.SubscribeToApi.throttling.policy'
@@ -183,37 +214,31 @@ const subscribeToApi = (props) => {
                         >
                             {throttlingPolicyList.map(policy => (
                                 <MenuItem value={policy.tierName} key={policy.tierName}>
-                                    {(policy.tierPlan === 'COMMERCIAL') ? (
+                                    {policy.tierPlan === 'COMMERCIAL' ? (
                                         <React.Fragment>
                                             <ListItemText
+                                                classes={{ root: classes.selectMenuRoot }}
                                                 primary={policy.tierName}
                                                 secondary={
                                                     policy.monetizationAttributes.pricePerRequest ? (
                                                         <Typography>
-                                                            {policy.monetizationAttributes.pricePerRequest}
-                                                            {' '}
-                                                            {' '}
-                                                            {policy.monetizationAttributes.currencyType}
-                                                            {' '}
-                                                            {' per '}
+                                                            {policy.monetizationAttributes.pricePerRequest}{' '}
+                                                            {policy.monetizationAttributes.currencyType} {' per '}
                                                             {policy.monetizationAttributes.billingCycle}
                                                         </Typography>
                                                     ) : (
                                                         <Typography>
-                                                            {policy.monetizationAttributes.fixedPrice}
-                                                            {' '}
-                                                            {' '}
+                                                            {policy.monetizationAttributes.fixedPrice}{' '}
                                                             {policy.monetizationAttributes.currencyType}
                                                             {' per '}
                                                             {policy.monetizationAttributes.billingCycle}
                                                         </Typography>
-                                                    )}
+                                                    )
+                                                }
                                             />
                                         </React.Fragment>
                                     ) : (
-                                        <ListItemText
-                                            primary={policy.tierName}
-                                        />
+                                        <ListItemText primary={policy.tierName} />
                                     )}
                                 </MenuItem>
                             ))}
@@ -222,8 +247,7 @@ const subscribeToApi = (props) => {
                             <FormattedMessage
                                 id='Shared.AppsAndKeys.SubscribeToApi.available.policies'
                                 defaultMessage='Available Policies -'
-                            />
-                            {' '}
+                            />{' '}
                             {throttlingPolicyList.map((policy, index) => (
                                 <span key={policy.tierName}>
                                     {policy.tierName}
@@ -253,6 +277,10 @@ subscribeToApi.propTypes = {
     subscriptionRequest: PropTypes.shape({}).isRequired,
     updateSubscriptionRequest: PropTypes.func.isRequired,
     rootClass: PropTypes.shape({}).isRequired,
+    renderSmall: PropTypes.bool,
+};
+subscribeToApi.defaultProps = {
+    renderSmall: false,
 };
 
 export default withStyles(styles)(subscribeToApi);

@@ -155,7 +155,7 @@ export default function Resources(props) {
             case 'operation':
                 copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()] = spec;
                 return updateSwagger(data, copyOfOpenAPI).then(() => updateAPIOperations(data, apiOperation));
-            case 'add':
+            case 'add': {
                 if (copyOfOpenAPI.paths[data.target] && copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()]) {
                     const message = 'Operation already exist !!';
                     Alert.error(message);
@@ -164,10 +164,38 @@ export default function Resources(props) {
                     // If target is not there add an empty object
                     copyOfOpenAPI.paths[data.target] = {};
                 }
+                const regEx = /[^{}]+(?=})/g;
+                const params = data.target.match(regEx);
+                let parameters;
+                if (copyOfOpenAPI.openapi) {
+                    parameters = params ? params.map((para) => {
+                        const paraObj = {};
+                        paraObj.name = para;
+                        paraObj.in = 'path';
+                        paraObj.required = true;
+                        paraObj.schema = {
+                            type: 'string',
+                            format: 'string',
+                        };
+                        return paraObj;
+                    }) : [];
+                } else {
+                    parameters = params ? params.map((para) => {
+                        const paraObj = {};
+                        paraObj.name = para;
+                        paraObj.in = 'path';
+                        paraObj.required = true;
+                        paraObj.type = 'string';
+                        paraObj.format = 'string';
+                        return paraObj;
+                    }) : [];
+                }
                 copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()] = {
                     responses: { 200: { description: 'ok' } },
+                    parameters,
                 };
                 return updateSwagger(data, copyOfOpenAPI);
+            }
             case 'delete':
                 delete copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()];
                 if (isEmpty(copyOfOpenAPI.paths[data.target])) {

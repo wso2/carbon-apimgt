@@ -7,6 +7,7 @@ const getApiProductPayload = (calculatorApiId, mathApiId) => ({
     visibleRoles: ['testrole', 'admin'],
     visibleTenants: ['string'],
     policies: ['Bronze', 'Silver', 'Unlimited'],
+    apiThrottlingPolicy: 'Unlimited',
     state: 'PUBLISHED',
     subscriptionAvailability: 'ALL_TENANTS',
     subscriptionAvailableTenants: [],

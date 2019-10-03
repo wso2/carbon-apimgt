@@ -29,7 +29,10 @@ import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import Resources from './Resources';
 import Operations from './Operations';
 import ProductResources from './ProductResources';
+import StatusBar from './StatusBar';
 import Configuration from './Configuration';
+import MetaData from './MetaData';
+import Endpoints from './Endpoints';
 
 const styles = theme => ({
     root: {
@@ -129,6 +132,11 @@ const styles = theme => ({
 function Overview(props) {
     const { classes, api: newApi } = props;
     const { api } = useContext(ApiContext);
+    let loadEndpoints;
+
+    if (api.apiType === API.CONSTS.API) {
+        loadEndpoints = <Endpoints parentClasses={classes} api={api} />;
+    }
     function getResourcesClassForAPIs(apiType) {
         switch (apiType) {
             case 'GRAPHQL':
@@ -145,22 +153,39 @@ function Overview(props) {
     }
     return (
         <React.Fragment>
-            <div className={classes.titleWrapper}>
-                <Typography variant='h4' align='left' className={classes.mainTitle}>
-                    <FormattedMessage
-                        id='Apis.Details.Overview.Overview.topic.header'
-                        defaultMessage='Overview'
-                    />
-                </Typography>
-            </div>
+            <Typography variant='h4' align='left' className={classes.mainTitle}>
+                <FormattedMessage
+                    id='Apis.Details.Overview.Overview.topic.header'
+                    defaultMessage='Overview'
+                />
+            </Typography>
             <div className={classes.contentWrapper}>
                 <Paper className={classes.root}>
                     <Grid container spacing={24}>
                         <Grid item xs={12} md={12} lg={12} className={classes.leftSideWrapper}>
-                            <Configuration parentClasses={classes} />
+                            <StatusBar api={api} />
                         </Grid>
                         <Grid item xs={12} md={12} lg={12}>
-                            {getResourcesClassForAPIs(api.type)}
+                            <Grid container spacing={24}>
+                                <Grid item xs={12} md={6} lg={6}>
+                                    <MetaData parentClasses={classes} />
+                                </Grid>
+                                <Grid item xs={12} md={6} lg={6}>
+                                    <Configuration parentClasses={classes} />
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid item xs={12} md={12} lg={12}>
+                            <div className={classes.specialGap}>
+                                <Grid container spacing={24}>
+                                    <Grid item xs={12} md={6} lg={6}>
+                                        {getResourcesClassForAPIs(api.type)}
+                                    </Grid>
+                                    <Grid item xs={12} md={6} lg={6}>
+                                        {loadEndpoints}
+                                    </Grid>
+                                </Grid>
+                            </div>
                         </Grid>
                     </Grid>
                 </Paper>

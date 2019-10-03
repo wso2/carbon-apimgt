@@ -189,7 +189,8 @@ public enum ExceptionCodes implements ErrorHandler {
     LAST_UPDATED_TIME_RETRIEVAL_ERROR(900702, "Error while retrieving last access time for the resource", 500,
             "Error while retrieving last access time for the resource"),
     INVALID_DATE_TIME_STAMP(900703, "Invalid timestamp value", 400, "Timestamp should be in ISO8601 format"),
-
+    LENGTH_EXCEEDS(900704, "Character length exceeds the allowable limit", 400,
+            "One of the provided input character length exceeds the allowable limit."),
 
     // Oauth related codes
     AUTH_GENERAL_ERROR(900900, "Authorization Error", 403, " Error in authorization"),

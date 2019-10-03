@@ -17,6 +17,10 @@ const styles = theme => ({
         paddingLeft: theme.spacing.unit * 2,
         borderRadius: theme.shape.borderRadius,
         border: 'solid 1px ' + theme.palette.secondary.main,
+        '& span.material-icons': {
+            fontSize: 60,
+            color: theme.palette.primary.main,
+        }
     },
     iconItem: {
         paddingRight: theme.spacing.unit * 2,

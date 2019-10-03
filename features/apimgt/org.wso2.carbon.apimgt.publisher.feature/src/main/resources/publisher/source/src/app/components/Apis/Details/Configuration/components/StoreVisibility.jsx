@@ -17,17 +17,14 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import Grid from '@material-ui/core/Grid';
-import FormControl from '@material-ui/core/FormControl';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
+import Box from '@material-ui/core/Box';
+import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import Select from '@material-ui/core/Select';
 import ChipInput from 'material-ui-chip-input';
 import APIValidation from 'AppData/APIValidation';
 import base64url from 'base64url';
@@ -39,6 +36,14 @@ import Alert from 'AppComponents/Shared/Alert';
 import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
+const useStyles = makeStyles(theme => ({
+    tooltip: {
+        position: 'absolute',
+        right: theme.spacing(-4),
+        top: theme.spacing(1),
+    },
+}));
+
 /**
  *
  * api.accessControl possible values are `NONE` and `RESTRICTED`
@@ -48,19 +53,25 @@ import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
  */
 export default function StoreVisibility(props) {
     const [roleValidity, setRoleValidity] = useState(true);
+    const [roleExists, setRoleExists] = useState(false);
     const { api, configDispatcher } = props;
     const [invalidRoles, setInvalidRoles] = useState([]);
     const isPublic = api.visibility === 'PUBLIC';
     const [apiFromContext] = useAPI();
+    const classes = useStyles();
 
     useEffect(() => {
         if (invalidRoles.length === 0) {
             setRoleValidity(true);
         }
+        if (api.visibility === 'RESTRICTED' && api.visibleRoles.length !== 0) {
+            setRoleExists(true);
+        }
     }, [invalidRoles]);
     const handleRoleAddition = (role) => {
         const promise = APIValidation.role.validate(base64url.encode(role));
         promise.then(() => {
+            setRoleExists(true);
             setRoleValidity(true);
             configDispatcher({
                 action: 'visibleRoles',
@@ -81,6 +92,11 @@ export default function StoreVisibility(props) {
         if (invalidRoles.includes(role)) {
             setInvalidRoles(invalidRoles.filter(existingRole => existingRole !== role));
         }
+        if (api.visibility === 'RESTRICTED' && api.visibleRoles.length > 1) {
+            setRoleExists(true);
+        } else {
+            setRoleExists(false);
+        }
         configDispatcher({
             action: 'visibleRoles',
             value: api.visibleRoles.filter(existingRole => existingRole !== role),
@@ -88,43 +104,49 @@ export default function StoreVisibility(props) {
     };
 
     return (
-        <Grid container spacing={0} alignItems='flex-start'>
-            <Grid item xs={11}>
-                <FormControl style={{ display: 'flex' }} >
-                    <InputLabel htmlFor='storeVisibility-selector'>
+        <React.Fragment>
+            <Box style={{ position: 'relative' }} >
+                <TextField
+                    fullWidth
+                    id='storeVisibility-selector'
+                    select
+                    label={
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.storeVisibility.head.topic'
-                            defaultMessage='Store Visibility'
+                            defaultMessage='Developer Portal Visibility'
                         />
-                    </InputLabel>
-                    <Select
-                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], apiFromContext)}
-                        value={api.visibility}
-                        onChange={({ target: { value } }) => configDispatcher({ action: 'visibility', value })}
-                        input={<Input name='storeVisibility' id='storeVisibility-selector' />}
-                    >
-                        <MenuItem value='PUBLIC'>
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.components.StoreVisibility.dropdown.public'
-                                defaultMessage='Public'
-                            />
-                        </MenuItem>
-                        <MenuItem value='RESTRICTED'>
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.components.storeVisibility.dropdown.restrict'
-                                defaultMessage='Restrict by role(s)'
-                            />
-                        </MenuItem>
-                    </Select>
-                    <FormHelperText>
+                    }
+                    value={api.visibility}
+                    name='storeVisibility'
+                    onChange={({ target: { value } }) => configDispatcher({ action: 'visibility', value })}
+                    SelectProps={{
+                        MenuProps: {
+                            className: classes.menu,
+                        },
+                    }}
+                    helperText={
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.storeVisibility.form.helper.text'
-                            defaultMessage='By default API is visible to all store users'
+                            defaultMessage='By default API is visible to all developer portal users'
                         />
-                    </FormHelperText>
-                </FormControl>
-            </Grid>
-            <Grid item xs={1}>
+                    }
+                    margin='normal'
+                    variant='outlined'
+                    disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                >
+                    <MenuItem value='PUBLIC'>
+                        <FormattedMessage
+                            id='Apis.Details.Configuration.components.StoreVisibility.dropdown.public'
+                            defaultMessage='Public'
+                        />
+                    </MenuItem>
+                    <MenuItem value='RESTRICTED'>
+                        <FormattedMessage
+                            id='Apis.Details.Configuration.components.storeVisibility.dropdown.restrict'
+                            defaultMessage='Restrict by role(s)'
+                        />
+                    </MenuItem>
+                </TextField>
                 <Tooltip
                     title={(
                         <React.Fragment>
@@ -140,7 +162,8 @@ export default function StoreVisibility(props) {
                                     id='Apis.Details.Configuration.components.storeVisibility.tooltip.public.desc'
                                     defaultMessage={
                                         'The API is accessible to everyone and can be advertised ' +
-                                        'in multiple stores - a central store and/or non-WSO2 stores.'
+                                        'in multiple developer portals - a central developer portal ' +
+                                        'and/or non-WSO2 developer portals.'
                                     }
                                 />
                                 <br />
@@ -156,7 +179,7 @@ export default function StoreVisibility(props) {
                                     id='Apis.Details.Configuration.components.storeVisibility.tooltip.restrict.desc'
                                     defaultMessage={
                                         'The API is visible only to specific user' +
-                                        ' roles in the tenant store that you specify.'
+                                        ' roles in the tenant developer portal that you specify.'
                                     }
                                 />
                             </p>
@@ -164,14 +187,23 @@ export default function StoreVisibility(props) {
                     )}
                     aria-label='Store Visibility'
                     placement='right-end'
+                    className={classes.tooltip}
                     interactive
                 >
                     <HelpOutline />
                 </Tooltip>
-            </Grid>
+            </Box>
             {!isPublic && (
-                <Grid item>
+                <Box py={2}>
                     <ChipInput
+                        fullWidth
+                        variant='outlined'
+                        label={
+                            <FormattedMessage
+                                id='Apis.Details.Configuration.components.storeVisibility.roles'
+                                defaultMessage='Roles'
+                            />
+                        }
                         disabled={isRestricted(['apim:api_create', 'apim:api_publish'], apiFromContext)}
                         value={api.visibleRoles.concat(invalidRoles)}
                         alwaysShowPlaceholder={false}
@@ -180,12 +212,12 @@ export default function StoreVisibility(props) {
                         InputProps={{
                             endAdornment: !roleValidity && (
                                 <InputAdornment position='end'>
-                                    <Error color='error' />
+                                    <Error color='error' style={{ paddingBottom: 8 }} />
                                 </InputAdornment>
                             ),
                         }}
                         onAdd={handleRoleAddition}
-                        error={!roleValidity}
+                        error={!roleValidity || !roleExists}
                         helperText={
                             roleValidity ? (
                                 <FormattedMessage
@@ -202,21 +234,22 @@ export default function StoreVisibility(props) {
                         chipRenderer={({ value }, key) => (
                             <Chip
                                 key={key}
+                                size='small'
                                 label={value}
                                 onDelete={() => {
                                     handleRoleDeletion(value);
                                 }}
                                 style={{
                                     backgroundColor: invalidRoles.includes(value) ? red[300] : null,
-                                    margin: '8px 8px 8px 0',
+                                    margin: '0 8px 12px 0',
                                     float: 'left',
                                 }}
                             />
                         )}
                     />
-                </Grid>
+                </Box>
             )}
-        </Grid>
+        </React.Fragment>
     );
 }
 

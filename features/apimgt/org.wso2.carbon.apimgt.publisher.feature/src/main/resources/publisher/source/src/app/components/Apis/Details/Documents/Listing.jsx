@@ -68,7 +68,7 @@ const styles = theme => ({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: theme.spacing.unit,
+        marginBottom: theme.spacing(2),
     },
     mainTitle: {
         paddingRight: 10,
@@ -93,6 +93,9 @@ const styles = theme => ({
     head: {
         fontWeight: 200,
         marginBottom: 20,
+    },
+    buttonIcon: {
+        marginRight: theme.spacing(1),
     },
 });
 function LinkGenerator(props) {
@@ -373,9 +376,9 @@ class Listing extends React.Component {
             },
         ];
         return (
-            <div className={classes.root}>
+            <React.Fragment>
                 <div className={classes.titleWrapper}>
-                    <Typography variant='h4' align='left' className={classes.mainTitle}>
+                    <Typography variant='h4' className={classes.mainTitle}>
                         <FormattedMessage
                             id='Apis.Details.Documents.Listing.documents.listing.title'
                             defaultMessage='Documents'
@@ -435,7 +438,7 @@ class Listing extends React.Component {
                         </InlineMessage>
                     )}
                 </div>
-            </div>
+            </React.Fragment>
         );
     }
 }
