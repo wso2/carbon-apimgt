@@ -31,6 +31,7 @@ import Operations from './Operations';
 import ProductResources from './ProductResources';
 import StatusBar from './StatusBar';
 import Configuration from './Configuration';
+import CustomizedStepper from './CustomizedStepper';
 import MetaData from './MetaData';
 import Endpoints from './Endpoints';
 
@@ -161,6 +162,7 @@ function Overview(props) {
                     defaultMessage='Overview'
                 />
             </Typography>
+            <CustomizedStepper />
             <div className={classes.contentWrapper}>
                 <Paper className={classes.root}>
                     <Grid container spacing={24}>
