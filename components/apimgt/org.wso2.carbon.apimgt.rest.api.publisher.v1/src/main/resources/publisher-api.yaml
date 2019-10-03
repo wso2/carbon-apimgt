@@ -6138,7 +6138,7 @@ paths:
                 The content type of the body.
               type: string
           schema:
-            $ref: '#/definitions/TenantList'
+            type: '#/definitions/TenantList'
         404:
           description: |
             Not Found.
