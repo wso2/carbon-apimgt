@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -48,6 +49,7 @@ public class CommentDTO   {
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("content")
   @NotNull
+  @NotEmpty
   public String getContent() {
     return content;
   }

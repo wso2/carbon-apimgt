@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -69,6 +70,7 @@ public enum KeyTypeEnum {
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("keyType")
   @NotNull
+  @NotEmpty
   public KeyTypeEnum getKeyType() {
     return keyType;
   }
@@ -88,6 +90,7 @@ public enum KeyTypeEnum {
   @ApiModelProperty(required = true, value = "Grant types that should be supported by the application")
   @JsonProperty("grantTypesToBeSupported")
   @NotNull
+  @NotEmpty
   public List<String> getGrantTypesToBeSupported() {
     return grantTypesToBeSupported;
   }
