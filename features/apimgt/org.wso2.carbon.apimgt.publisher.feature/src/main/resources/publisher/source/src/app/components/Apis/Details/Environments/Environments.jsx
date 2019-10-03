@@ -79,7 +79,10 @@ export default function Environments() {
     const [selectedMgLabel, setSelectedMgLabel] = useState([...api.labels]);
 
     const [isUpdating, setUpdating] = useState(false);
-
+    let isWebsocket = false;
+    if (api) {
+        isWebsocket = (api.type === 'WS');
+    }
     const restApi = new API();
     const [mgLabels, setMgLabels] = useState([]);
     useEffect(() => {
@@ -111,6 +114,85 @@ export default function Environments() {
             .finally(() => setUpdating(false));
     }
 
+    /**
+     *
+     * Renders the Micro gateway information
+     */
+    function MicroGateway() {
+        if (isWebsocket) {
+            return null;
+        }
+        return (
+            <React.Fragment>
+                <Typography variant='h4' align='left' className={classes.mainTitle}>
+                    <FormattedMessage
+                        id='Apis.Details.Environments.Environments.Microgateways'
+                        defaultMessage='Microgateways'
+                    />
+                </Typography>
+                {mgLabels.length > 0 ? (
+                    <Paper className={classes.gatewayPaper}>
+                        <Table >
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell />
+                                    <TableCell align='left'>Label</TableCell>
+                                    <TableCell align='left'>Description</TableCell>
+                                    <TableCell align='left'>Access URL</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {mgLabels.map(row => (
+                                    <TableRow key={row.name}>
+                                        <TableCell padding='checkbox'>
+                                            <Checkbox
+                                                disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                                                checked={selectedMgLabel.includes(row.name)}
+                                                onChange={
+                                                    (event) => {
+                                                        const { checked, name } = event.target;
+                                                        if (checked) {
+                                                            setSelectedMgLabel([...selectedMgLabel, name]);
+                                                        } else {
+                                                            setSelectedMgLabel(selectedMgLabel.filter(env =>
+                                                                env !== name));
+                                                        }
+                                                    }
+                                                }
+                                                name={row.name}
+                                            />
+                                        </TableCell>
+                                        <TableCell component='th' scope='row' align='left'>
+                                            {row.name}
+                                        </TableCell>
+                                        <TableCell align='left'>{row.description}</TableCell>
+                                        <TableCell align='left'>{row.access_urls.join(', ')}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </Paper>) :
+                    (
+                        <InlineMessage type='info' height={100} className={classes.emptyBox} >
+                            <div className={classes.contentWrapper}>
+                                <Typography component='p' className={classes.content}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.microgateway.labels.emptym1'
+                                        defaultMessage='Microgateway labels are not available.'
+                                    />
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.microgateway.labels.emptym2'
+                                        defaultMessage=' You can request the administrator to add labels.'
+                                    />
+                                </Typography>
+                            </div>
+                        </InlineMessage>
+                    )
+                }
+            </React.Fragment>
+        );
+    }
+
     return (
         <React.Fragment>
             <Typography variant='h4' gutterBottom>
@@ -127,8 +209,17 @@ export default function Environments() {
                             <TableCell>Name</TableCell>
                             <TableCell align='right'>Type</TableCell>
                             <TableCell align='right'>ServerURL</TableCell>
-                            <TableCell align='right'>Http</TableCell>
-                            <TableCell align='right'>Https</TableCell>
+                            {isWebsocket ? (
+                                <React.Fragment>
+                                    <TableCell align='right'>WS</TableCell>
+                                    <TableCell align='right'>WSS</TableCell>
+                                </React.Fragment>
+                            ) : (
+                                <React.Fragment>
+                                    <TableCell align='right'>Http</TableCell>
+                                    <TableCell align='right'>Https</TableCell>
+                                </React.Fragment>
+                            )}
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -157,79 +248,25 @@ export default function Environments() {
                                 </TableCell>
                                 <TableCell align='right'>{row.type}</TableCell>
                                 <TableCell align='right'>{row.serverUrl}</TableCell>
-                                <TableCell align='right'>{row.endpoints.http}</TableCell>
-                                <TableCell align='right'>{row.endpoints.https}</TableCell>
+
+                                {isWebsocket ? (
+                                    <React.Fragment>
+                                        <TableCell align='right'>{row.endpoints.ws}</TableCell>
+                                        <TableCell align='right'>{row.endpoints.wss}</TableCell>
+                                    </React.Fragment>
+                                ) : (
+                                    <React.Fragment>
+                                        <TableCell align='right'>{row.endpoints.http}</TableCell>
+                                        <TableCell align='right'>{row.endpoints.https}</TableCell>
+                                    </React.Fragment>
+                                )}
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
             </Paper>
 
-            <Typography variant='h4' align='left' className={classes.mainTitle}>
-                <FormattedMessage
-                    id='Apis.Details.Environments.Environments.Microgateways'
-                    defaultMessage='Microgateways'
-                />
-            </Typography>
-            {mgLabels.length > 0 ? (
-                <Paper className={classes.gatewayPaper}>
-                    <Table >
-                        <TableHead>
-                            <TableRow>
-                                <TableCell />
-                                <TableCell align='left'>Label</TableCell>
-                                <TableCell align='left'>Description</TableCell>
-                                <TableCell align='left'>Access URL</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {mgLabels.map(row => (
-                                <TableRow key={row.name}>
-                                    <TableCell padding='checkbox'>
-                                        <Checkbox
-                                            disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
-                                            checked={selectedMgLabel.includes(row.name)}
-                                            onChange={
-                                                (event) => {
-                                                    const { checked, name } = event.target;
-                                                    if (checked) {
-                                                        setSelectedMgLabel([...selectedMgLabel, name]);
-                                                    } else {
-                                                        setSelectedMgLabel(selectedMgLabel.filter(env =>
-                                                            env !== name));
-                                                    }
-                                                }
-                                            }
-                                            name={row.name}
-                                        />
-                                    </TableCell>
-                                    <TableCell component='th' scope='row' align='left'>
-                                        {row.name}
-                                    </TableCell>
-                                    <TableCell align='left'>{row.description}</TableCell>
-                                    <TableCell align='left'>{row.access_urls.join(', ')}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </Paper>) :
-                (
-                    <InlineMessage type='info' height={100} className={classes.emptyBox} >
-                        <div className={classes.contentWrapper}>
-                            <Typography component='p' className={classes.content}>
-                                <FormattedMessage
-                                    id='Apis.Details.Environments.microgateway.labels.emptym1'
-                                    defaultMessage='Microgateway labels are not available.'
-                                />
-                                <FormattedMessage
-                                    id='Apis.Details.Environments.microgateway.labels.emptym2'
-                                    defaultMessage=' You can request the administrator to add labels.'
-                                />
-                            </Typography>
-                        </div>
-                    </InlineMessage>
-                )
-            }
+            <MicroGateway />
 
             <Grid
                 container
