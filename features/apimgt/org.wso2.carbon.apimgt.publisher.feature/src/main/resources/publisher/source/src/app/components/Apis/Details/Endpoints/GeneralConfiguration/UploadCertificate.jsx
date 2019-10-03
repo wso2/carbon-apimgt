@@ -222,7 +222,7 @@ export default function UploadCertificate(props) {
                             margin='normal'
                             variant='outlined'
                             error={isAliasEmpty}
-                            helperText={isAliasEmpty ? 
+                            helperText={isAliasEmpty ?
                                 <FormattedMessage
                                     id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias.error'
                                     defaultMessage='Alias should not be empty'

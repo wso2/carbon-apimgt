@@ -33,7 +33,7 @@ export default function SelectEndpoint(props) {
         <TextField
             autoFocus
             error={isEndpointEmpty}
-            helperText={isEndpointEmpty ? 
+            helperText={isEndpointEmpty ?
                 <FormattedMessage
                     id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint.error'
                     defaultMessage='Endpoint should not be empty'
