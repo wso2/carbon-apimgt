@@ -91,7 +91,7 @@ function MetaData(props) {
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
-                            {api.provider && <React.Fragment>{capitalizeFirstLetter(api.provider)}</React.Fragment>}
+                            {api.provider && <React.Fragment>{api.provider}</React.Fragment>}
                         </Typography>
                     </Grid>
                     <Grid item xs={12} md={6} lg={4}>
