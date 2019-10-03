@@ -162,7 +162,7 @@ function Overview(props) {
                     defaultMessage='Overview'
                 />
             </Typography>
-            <CustomizedStepper api={api} />
+            <CustomizedStepper />
             <div className={classes.contentWrapper}>
                 <Paper className={classes.root}>
                     <Grid container spacing={24}>
