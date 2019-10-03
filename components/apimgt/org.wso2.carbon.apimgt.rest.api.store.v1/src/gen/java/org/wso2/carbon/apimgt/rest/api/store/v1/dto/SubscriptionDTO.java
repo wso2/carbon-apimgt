@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -122,6 +123,7 @@ public enum StatusEnum {
   @ApiModelProperty(example = "b3ade481-30b0-4b38-9a67-498a40873a6d", required = true, value = "The UUID of the application")
   @JsonProperty("applicationId")
   @NotNull
+  @NotEmpty
   public String getApplicationId() {
     return applicationId;
   }
@@ -192,6 +194,7 @@ public enum StatusEnum {
   @ApiModelProperty(example = "Unlimited", required = true, value = "")
   @JsonProperty("throttlingPolicy")
   @NotNull
+  @NotEmpty
   public String getThrottlingPolicy() {
     return throttlingPolicy;
   }
