@@ -188,7 +188,8 @@ class CreateEditForm extends React.Component {
         return { docPromise, file };
     };
     updateDocument = (apiId) => {
-        const restAPI = new Api();
+        const { apiType } = this.props;
+        const restAPI = apiType === Api.CONSTS.APIProduct ? new APIProduct() : new Api();
         const {
             name, type, summary, sourceType, sourceUrl, file, otherTypeName,
         } = this.state;
