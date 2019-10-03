@@ -107,6 +107,8 @@ export default function UploadCertificate(props) {
     const [endpoint, setEndpoint] = useState('');
     const [isSaving, setSaving] = useState(false);
     const [certificate, setCertificate] = useState({ name: '', content: {} });
+    const [isEndpointEmpty, setIsEndpointEmpty] = useState(false);
+    const [isAliasEmpty, setIsAliasEmpty] = useState(false);
     const classes = useStyles();
 
     const closeCertificateUpload = () => {
@@ -155,6 +157,23 @@ export default function UploadCertificate(props) {
         }
     };
 
+    const handleEndpointOnChange = (value) => {
+        setEndpoint(value);
+        if (value) {
+            setIsEndpointEmpty(false);
+        } else {
+            setIsEndpointEmpty(true);
+        }
+    };
+
+    const handleAliasOnChange = (value) => {
+        setAlias(value);
+        if (value) {
+            setIsAliasEmpty(false);
+        } else {
+            setIsAliasEmpty(true);
+        }
+    };
 
     return (
         <Dialog open={uploadCertificateOpen}>
@@ -180,15 +199,11 @@ export default function UploadCertificate(props) {
                         ) :
                             <SelectEndpoint
                                 endpoints={endpoints}
-                                onChange={setEndpoint}
+                                onChange={handleEndpointOnChange}
+                                onBlur={handleEndpointOnChange}
                                 endpoint={endpoint}
-                                helperText={
-                                    <FormattedMessage
-                                        id={'Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.' +
-                                        'select.an.endpoint.for.certificate'}
-                                        defaultMessage='Select an Endpoint for the certificate'
-                                    />
-                                }
+                                helperText='Endpoint for the certificate'
+                                isEndpointEmpty={isEndpointEmpty}
                                 required
                             />
                         }
@@ -203,9 +218,12 @@ export default function UploadCertificate(props) {
                             }
                             value={alias}
                             placeholder='My Alias'
-                            onChange={event => setAlias(event.target.value)}
+                            onChange={event => handleAliasOnChange(event.target.value)}
+                            onBlur={event => handleAliasOnChange(event.target.value)}
                             margin='normal'
                             variant='outlined'
+                            error={isAliasEmpty}
+                            helperText={isAliasEmpty ? 'Alias should not be empty' : 'Alias for the certificate'}
                             fullWidth
                         />
                         <Dropzone
@@ -265,6 +283,12 @@ export default function UploadCertificate(props) {
                 </Grid>
             </DialogContent>
             <DialogActions>
+                <Button onClick={closeCertificateUpload}>
+                    <FormattedMessage
+                        id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.cancel.button'
+                        defaultMessage='Close'
+                    />
+                </Button>
                 <Button
                     onClick={saveCertificate}
                     variant='contained'
@@ -283,12 +307,6 @@ export default function UploadCertificate(props) {
                         defaultMessage='Save'
                     />
                     {isSaving && <CircularProgress size={24} />}
-                </Button>
-                <Button onClick={closeCertificateUpload}>
-                    <FormattedMessage
-                        id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.cancel.button'
-                        defaultMessage='Close'
-                    />
                 </Button>
             </DialogActions>
         </Dialog>

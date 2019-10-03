@@ -25,10 +25,16 @@ export default function SelectEndpoint(props) {
     const {
         endpoints,
         onChange,
+        onBlur,
         endpoint,
+        helperText,
+        isEndpointEmpty,
     } = props;
     return (
         <TextField
+            autoFocus
+            error={isEndpointEmpty}
+            helperText={isEndpointEmpty ? 'Endpoint should not be empty' : helperText}
             required
             id='certificateEndpoint'
             label={
@@ -39,6 +45,7 @@ export default function SelectEndpoint(props) {
             value={endpoint}
             placeholder='Endpoint'
             onChange={event => onChange(event.target.value)}
+            onBlur={event => onBlur(event.target.value)}
             margin='normal'
             variant='outlined'
             fullWidth
@@ -54,6 +61,9 @@ export default function SelectEndpoint(props) {
 SelectEndpoint.propTypes = {
     endpoints: PropTypes.shape({}).isRequired,
     onChange: PropTypes.func.isRequired,
+    onBlur: PropTypes.func.isRequired,
     classes: PropTypes.shape({}).isRequired,
     endpoint: PropTypes.string.isRequired,
+    helperText: PropTypes.string.isRequired,
+    isEndpointEmpty: PropTypes.string.isRequired,
 };
