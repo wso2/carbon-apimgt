@@ -90,7 +90,7 @@ class Contact extends React.Component {
                         })}
                         style={{ margin: 8 }}
                         placeholder={intl.formatMessage({
-                            defaultMessage: 'Briefly wirte your message.',
+                            defaultMessage: 'Briefly write your message.',
                             id: 'LandingPage.Contact.message.placeholder',
                         })}
                         helperText={intl.formatMessage({

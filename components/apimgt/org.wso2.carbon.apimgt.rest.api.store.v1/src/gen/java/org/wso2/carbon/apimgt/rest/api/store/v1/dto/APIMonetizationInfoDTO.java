@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -29,6 +30,7 @@ public class APIMonetizationInfoDTO   {
   @ApiModelProperty(example = "true", required = true, value = "Flag to indicate the monetization status")
   @JsonProperty("enabled")
   @NotNull
+  @NotEmpty
   public Boolean isEnabled() {
     return enabled;
   }

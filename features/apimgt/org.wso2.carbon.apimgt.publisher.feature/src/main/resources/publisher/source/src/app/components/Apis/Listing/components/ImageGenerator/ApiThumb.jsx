@@ -84,7 +84,7 @@ const styles = theme => ({
         display: 'flex',
     },
     contextBox: {
-        width: '70%',
+        width: '110px',
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -95,6 +95,7 @@ const styles = theme => ({
         'padding-top': 5,
         'padding-right': 5,
         'padding-bottom': 1.5,
+        textAlign: 'left',
     },
     imageOverlap: {
         position: 'absolute',

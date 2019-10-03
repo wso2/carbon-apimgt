@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -63,6 +64,7 @@ public enum TypeEnum {
   @ApiModelProperty(example = "json_fault.xml", required = true, value = "")
   @JsonProperty("name")
   @NotNull
+  @NotEmpty
   public String getName() {
     return name;
   }
@@ -81,6 +83,7 @@ public enum TypeEnum {
   @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", required = true, value = "")
   @JsonProperty("id")
   @NotNull
+  @NotEmpty
   public String getId() {
     return id;
   }
@@ -99,6 +102,7 @@ public enum TypeEnum {
   @ApiModelProperty(example = "in", required = true, value = "")
   @JsonProperty("type")
   @NotNull
+  @NotEmpty
   public TypeEnum getType() {
     return type;
   }
