@@ -50,6 +50,8 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 abstract class AbstractWSDLProcessor implements WSDLProcessor {
 
+    protected static final int MAX_URL_READ_LINES = 100;
+
     /**
      * Returns an "XXE safe" built DOM XML object by reading the content from the provided URL.
      *

@@ -56,6 +56,7 @@ const styles = theme => ({
         textOverflow: 'ellipsis',
         cursor: 'pointer',
         margin: 0,
+        'padding-left': '5px',
     },
     imageWrapper: {
         color: theme.palette.text.secondary,
@@ -108,6 +109,9 @@ const styles = theme => ({
     textWrapper: {
         color: theme.palette.text.secondary,
         textDecoration: 'none',
+    },
+    thumbBy: {
+        'padding-left': '5px',
     },
 });
 
@@ -231,7 +235,7 @@ class APIThumb extends Component {
                         </Typography>
                     </div>
                     <div className={classes.row}>
-                        <Typography variant='caption' gutterBottom align='left'>
+                        <Typography variant='caption' gutterBottom align='left' className={classes.thumbBy}>
                             <FormattedMessage id='by' defaultMessage='By' />:
                             {api.provider}
                         </Typography>
