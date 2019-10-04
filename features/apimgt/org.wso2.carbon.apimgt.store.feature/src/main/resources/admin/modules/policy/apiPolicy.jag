@@ -533,9 +533,7 @@ var validateRoles = function(roles,username) {
     provider = jagg.module("manager").getAPIProviderObj();
     try {
         validRole = provider.validateRoles(roles,username);
-        if (log.isDebugEnabled()) {
-            log.debug("Invoke validateRoles function.");
-        }
+        log.debug("Invoke validateRoles function.");
         return {
             error:false,
             valid: validRole

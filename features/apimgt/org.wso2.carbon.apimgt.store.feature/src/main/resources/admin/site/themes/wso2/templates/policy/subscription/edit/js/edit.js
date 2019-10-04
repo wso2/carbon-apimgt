@@ -81,7 +81,7 @@ function validateRolesInput(text, element, requiredMsg, invalidRoleMsg){
         $('#label'+elementId).remove();
         element.after('<label class="error" id="label'+elementId+'" >' + requiredMsg + '</label>');
         return false;
-    }else{
+    } else {
         if (!validateRoles(text)) {
             element.css("border", "1px solid red");
             $('#label'+elementId).remove();
