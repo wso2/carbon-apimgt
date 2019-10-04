@@ -90,7 +90,7 @@ const styles = theme => ({
         fontSize: theme.typography.pxToRem(14),
         fontWeight: '400',
         border: '1px solid #dadde9',
-        borderRadius: '15px',
+        borderRadius: '5px',
         padding: '15px 10px 0 18px',
     },
 });
