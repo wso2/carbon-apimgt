@@ -47,7 +47,7 @@ const headerStyle = {
 
 const buttonStyleRetry = {
     padding: '5px 15px',
-    margin: 20,
+    margin: 10,
     borderRadius: 5,
     textTransform: 'uppercase',
     color: '#15b8cf',
@@ -57,7 +57,7 @@ const buttonStyleRetry = {
 
 const buttonStyleLogout = {
     padding: '5px 15px',
-    margin: 20,
+    margin: 10,
     borderRadius: 5,
     textTransform: 'uppercase',
     color: '#000',
@@ -70,6 +70,10 @@ function onRetry() {
 
 function onLogout() {
     window.location = Configurations.app.context + '/services/logout';
+}
+
+function onGoToAnonymousView() {
+    window.location = Configurations.app.context + '/services/auth/callback/logout';
 }
 
 class LoginDenied extends Component {
@@ -97,18 +101,26 @@ class LoginDenied extends Component {
                             + 'that you are authorized to access the requested resource.'}
                     />
                 </p>
-                <button onClick={onRetry} style={buttonStyleRetry}>
-                    <FormattedMessage
-                        id='LoginDenied.retry'
-                        defaultMessage='Retry'
-                    />
-                </button>
-                <button onClick={onLogout} style={buttonStyleLogout}>
-                    <FormattedMessage
-                        id='LoginDenied.logout'
-                        defaultMessage='Logout'
-                    />
-                </button>
+                <div>
+                    <button onClick={onGoToAnonymousView} style={buttonStyleRetry}>
+                        <FormattedMessage
+                            id='LoginDenied.anonymousview'
+                            defaultMessage='Go To Public Portal'
+                        />
+                    </button>
+                    <button onClick={onRetry} style={buttonStyleRetry}>
+                        <FormattedMessage
+                            id='LoginDenied.retry'
+                            defaultMessage='Retry'
+                        />
+                    </button>
+                    <button onClick={onLogout} style={buttonStyleLogout}>
+                        <FormattedMessage
+                            id='LoginDenied.logout'
+                            defaultMessage='Logout'
+                        />
+                    </button>
+                </div>
             </div>
         );
     }
