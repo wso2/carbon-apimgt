@@ -40,7 +40,7 @@ function RenderMethodBase(props) {
     }
     return (
         <Chip
-            label={method}
+            label={method.toUpperCase()}
             style={{
                 backgroundColor: chipColor, color: chipTextColor, height: 20, marginRight: 5,
             }}

@@ -11,6 +11,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -33,6 +34,7 @@ public class EnvironmentDTO   {
   @ApiModelProperty(example = "Production and Sandbox", required = true, value = "")
   @JsonProperty("name")
   @NotNull
+  @NotEmpty
   public String getName() {
     return name;
   }
@@ -51,6 +53,7 @@ public class EnvironmentDTO   {
   @ApiModelProperty(example = "hybrid", required = true, value = "")
   @JsonProperty("type")
   @NotNull
+  @NotEmpty
   public String getType() {
     return type;
   }
@@ -69,6 +72,7 @@ public class EnvironmentDTO   {
   @ApiModelProperty(example = "https://localhost:9443/services/", required = true, value = "")
   @JsonProperty("serverUrl")
   @NotNull
+  @NotEmpty
   public String getServerUrl() {
     return serverUrl;
   }
@@ -87,6 +91,7 @@ public class EnvironmentDTO   {
   @ApiModelProperty(example = "true", required = true, value = "")
   @JsonProperty("showInApiConsole")
   @NotNull
+  @NotEmpty
   public Boolean isShowInApiConsole() {
     return showInApiConsole;
   }
@@ -105,6 +110,7 @@ public class EnvironmentDTO   {
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("endpoints")
   @NotNull
+  @NotEmpty
   public EnvironmentEndpointsDTO getEndpoints() {
     return endpoints;
   }
