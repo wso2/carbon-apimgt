@@ -166,8 +166,11 @@ export default function CustomizedSteppers() {
                             <a
                                 target='_blank'
                                 rel='noopener noreferrer'
-                                href={`${window.location.origin}${Configuration.app.storeContext}/apis/
-                                ${api.id}/overview`}
+                                href={
+                                    `${window.location.origin}${Configuration.app.storeContext}/apis/` +
+                                    api.id +
+                                    '/overview'
+                                }
                                 className={classes.viewInStoreLauncher}
                             >
                                 <Typography variant='caption'>

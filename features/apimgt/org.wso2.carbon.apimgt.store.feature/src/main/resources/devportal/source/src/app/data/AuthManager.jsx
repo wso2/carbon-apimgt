@@ -24,6 +24,7 @@ import Utils from './Utils';
 import User from './User';
 import APIClient from './APIClient';
 import APIClientFactory from './APIClientFactory';
+import CONSTS from './Constants';
 
 
 /**
@@ -87,6 +88,10 @@ class AuthManager {
         return User.fromJson(JSON.parse(userData), environmentName);
     }
 
+    static hasBasicLoginPermission(scopes) {
+        return scopes.includes('apim:subscribe');
+    }
+
     /**
      * Do token introspection and Get the currently logged in user's details
      * When user authentication happens via redirection flow, This method might get used to
@@ -118,8 +123,14 @@ class AuthManager {
                         username = data.username;
                     }
                     user = new User(currentEnv.label, username);
-                    user.scopes = data.scope.split(' ');
-                    AuthManager.setUser(user, currentEnv.label);
+                    const scopes = data.scope.split(' ');
+                    if (this.hasBasicLoginPermission(scopes)) {
+                        user.scopes = scopes;
+                        AuthManager.setUser(user, currentEnv.label);
+                    } else {
+                        console.warn('The user with ' + partialToken + ' doesn\'t have enough permission!');
+                        throw new Error(CONSTS.errorCodes.INSUFFICIENT_PREVILEGES);
+                    }
                 } else {
                     console.warn('User with ' + partialToken + ' is not active!');
                 }
