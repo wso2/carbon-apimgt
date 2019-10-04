@@ -477,10 +477,10 @@ class Details extends Component {
                         )}
                         {!isAPIProduct && (
                             <LeftMenuItem
-                                text='{intl.formatMessage({
+                                text={intl.formatMessage({
                                     id: 'Apis.Details.index.environments',
                                     defaultMessage: 'environments',
-                                })}'
+                                })}
                                 to={pathPrefix + 'environments'}
                                 Icon={<PersonPinCircleOutlinedIcon />}
                             />
