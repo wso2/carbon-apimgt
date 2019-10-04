@@ -33,6 +33,7 @@ import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/S
 import PropTypes from 'prop-types';
 import Api from 'AppData/api';
 import Subscription from 'AppData/Subscription';
+import Invoice from './Invoice';
 
 /**
  *
@@ -143,7 +144,7 @@ class SubscriptionTableData extends React.Component {
     render() {
         const {
             subscription: {
-                apiInfo, status, throttlingPolicy, subscriptionId, apiId,
+                apiInfo, status, throttlingPolicy, subscriptionId, apiId, isMonetizedAPI, isDynamicUsagePolicy,
             },
         } = this.props;
         const { openMenu } = this.state;
@@ -196,19 +197,7 @@ class SubscriptionTableData extends React.Component {
                     </div>
                 </TableCell>
                 <TableCell>
-                    <div>
-                        <Button
-                            variant='outlined'
-                            size='small'
-                            color='primary'
-                            disabled={!(this.isMonetizedAPI && this.isDynamicUsagePolicy)}
-                        >
-                            <FormattedMessage
-                                id='Applications.Details.SubscriptionTableData.view.subscription.invoice'
-                                defaultMessage='View Invoice'
-                            />
-                        </Button>
-                    </div>
+                    <Invoice subscriptionId={subscriptionId} isMonetizedAPI={isMonetizedAPI} isDynamicUsagePolicy={isDynamicUsagePolicy} />
                 </TableCell>
             </TableRow>
         );

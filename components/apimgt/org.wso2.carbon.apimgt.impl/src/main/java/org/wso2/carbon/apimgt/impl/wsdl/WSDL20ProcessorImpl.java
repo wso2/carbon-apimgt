@@ -243,7 +243,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
 
     @Override
     public boolean canProcess(URL url) {
-        return APIUtil.isURLContentContainsString(url, WSDL20_NAMESPACE);
+        return APIUtil.isURLContentContainsString(url, WSDL20_NAMESPACE, MAX_URL_READ_LINES);
     }
 
     @Override

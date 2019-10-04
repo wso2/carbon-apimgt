@@ -3,16 +3,16 @@
 
             <hr/>
             <h4 class="operation-heading"><a name="subscriptionsGet"></a>Get all subscriptions
-</h4> <code>GET https://apis.wso2.com/api/am/store/v0.14/subscriptions</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v0.15/subscriptions</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of
 
 1. Retrieving applications which are subscibed to a specific API.
-&#x60;GET https://localhost:9443/api/am/store/v0.14/subscriptions?apiId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed&#x60;
+&#x60;GET https://localhost:9443/api/am/store/v0.15/subscriptions?apiId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed&#x60;
 
 2. Retrieving APIs which are subscribed by a specific application.
-&#x60;GET https://localhost:9443/api/am/store/v0.14/subscriptions?applicationId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed&#x60;
+&#x60;GET https://localhost:9443/api/am/store/v0.15/subscriptions?applicationId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed&#x60;
 
 **IMPORTANT:**
 * It is mandatory to provide either **apiId** or **applicationId**.
@@ -28,7 +28,7 @@
                 </h4>
             </div>
 
-                <div id="request-subscriptionsGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.14/subscriptions?apiId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed
+                <div id="request-subscriptionsGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.15/subscriptions?apiId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -64,9 +64,9 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://localhost:9443/api/am/store/v0.14/subscriptions?apiId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://localhost:9443/api/am/store/v0.15/subscriptions?apiId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed&quot;</code></div>
 
-         
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -88,17 +88,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-                            
+
                             <span class="param-in">Query </span>
-                            
-                            
-                            
+
+
+
                         </td>
                         <td class="param-name">
                             <p>apiId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -118,17 +118,17 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
+
                             <span class="param-in">Query </span>
-                            
-                            
-                            
+
+
+
                         </td>
                         <td class="param-name">
                             <p>applicationId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -146,16 +146,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
+
                             <span class="param-in">Query </span>
-                            
-                            
-                            
+
+
+
                         </td>
                         <td class="param-name">
                             <p>groupId</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -174,16 +174,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
+
                             <span class="param-in">Query </span>
-                            
-                            
-                            
+
+
+
                         </td>
                         <td class="param-name">
                             <p>offset</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -202,16 +202,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
+
                             <span class="param-in">Query </span>
-                            
-                            
-                            
+
+
+
                         </td>
                         <td class="param-name">
                             <p>limit</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -230,16 +230,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -258,16 +258,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -317,7 +317,7 @@ variant of the resource.
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+
                             </span>
                         </td>
                     </tr>

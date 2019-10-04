@@ -40,6 +40,7 @@ RolesApiService delegate = new RolesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Check given role name is already exist", notes = "Using this operation, user can check a given role name exists or not. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
     }, tags={ "Roles" })
