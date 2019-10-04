@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
@@ -78,10 +95,12 @@ const useStyles = makeStyles(theme => ({
     label: {
         paddingLeft: '0',
         paddingRight: '0',
+        flexBasis: '33.3333%',
+        maxWidth: '33.3333%',
     },
     stepper: {
         background: theme.palette.background.default,
-        marginLeft: theme.spacing(8),
+        marginLeft: theme.spacing(10),
     },
     box: {
         display: 'flex',
@@ -89,7 +108,6 @@ const useStyles = makeStyles(theme => ({
         justifyContent: 'center',
         background: 'white',
         padding: '2px',
-        width: '405px',
         height: '82px',
         borderRight: '0',
         marginRight: '0',
@@ -121,9 +139,9 @@ export default function CustomizedSteppers() {
  * Update the LifeCycle state of the API
  *
  */
-    function updateLCStateOfAPI() {
+    function updateLCStateOfAPI(apiId, state) {
         setUpdating(true);
-        const promisedUpdate = api.publish();
+        const promisedUpdate = api.updateLcState(apiId, state);
         promisedUpdate
             .then(() => {
                 updateAPI()
@@ -224,23 +242,36 @@ export default function CustomizedSteppers() {
                 return (
                     <Grid xs={12} display='block'>
                         <Grid xs={12}>
-                            <Button
-                                variant='contained'
-                                color='primary'
-                                onClick={updateLCStateOfAPI}
-                                disabled={(!isEndpointAvailable || !isTierAvailable) ||
+                            {isPrototypedAvailable ? (
+                                <Button
+                                    variant='contained'
+                                    color='primary'
+                                    onClick={() => updateLCStateOfAPI(api.id, 'Deploy as a Prototype')}
+                                    disabled={api.workflowStatus === 'CREATED'}
+                                >
+                          Deploy as a prototype
+                                    {isUpdating && <CircularProgress size={20} />}
+                                </Button>
+
+                            ) : (
+                                <Button
+                                    variant='contained'
+                                    color='primary'
+                                    onClick={() => updateLCStateOfAPI(api.id, 'Publish')}
+                                    disabled={(!isEndpointAvailable || !isTierAvailable) ||
                              api.workflowStatus === 'CREATED'}
-                            >
+                                >
                          Publish
-                                {isUpdating && <CircularProgress size={20} />}
-                            </Button>
+                                    {isUpdating && <CircularProgress size={20} />}
+                                </Button>
+                            )}
                         </Grid>
                         {api.workflowStatus === 'CREATED' && (
                             <Grid xs={12}>
                                 <Typography variant='caption' color='error'>
                                     <FormattedMessage
-                                        id='Apis.Details.Overview.CustomizedStepper.retired'
-                                        defaultMessage='The Publish request is pending'
+                                        id='Apis.Details.Overview.CustomizedStepper.pending'
+                                        defaultMessage='The request is pending'
                                     />
                                 </Typography>
                             </Grid>
@@ -278,7 +309,7 @@ export default function CustomizedSteppers() {
                 </Step>
                 <Step className={classes.label}>
                     <StepLabel style={{ position: 'relative' }} >
-                        <Box p={2} bgcolor='white' width='377px' borderColor='grey.500' borderLeft='0' borderRight='0' >
+                        <Box p={2} bgcolor='white' borderLeft='0' borderRight='0' >
                             <Tooltip title='You have to specify an Endpoint for the API' placement='top'>
                                 <Grid className={classes.gridEndpoint}>
                                     {isEndpointAvailable ? (
