@@ -59,7 +59,7 @@ class ApiTableView extends React.Component {
         super(props);
         this.state = {
             data: null,
-            loading: false,
+            loading: true,
         };
         this.page = 0;
         this.count = 100;
@@ -217,7 +217,8 @@ class ApiTableView extends React.Component {
      * @memberof ApiTableView
      */
     render() {
-        const { intl, gridView, loading } = this.props;
+        const { intl, gridView } = this.props;
+        const { loading } = this.state;
         const columns = [
             {
                 name: 'id',
