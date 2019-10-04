@@ -3,7 +3,7 @@
 
             <hr/>
             <h4 class="operation-heading"><a name="applicationsGet"></a>Retrieve/Search applications
-</h4> <code>GET https://apis.wso2.com/api/am/store/v0.14/applications</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v0.15/applications</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve list of applications that is belonged to the user associated with the provided access token.
@@ -19,7 +19,7 @@
                 </h4>
             </div>
 
-                <div id="request-applicationsGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.14/applications
+                <div id="request-applicationsGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.15/applications
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -59,9 +59,9 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://localhost:9443/api/am/store/v0.14/applications&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://localhost:9443/api/am/store/v0.15/applications&quot;</code></div>
 
-         
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -83,16 +83,16 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-                            
+
                             <span class="param-in">Query </span>
-                            
-                            
-                            
+
+
+
                         </td>
                         <td class="param-name">
                             <p>groupId</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -111,16 +111,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
+
                             <span class="param-in">Query </span>
-                            
-                            
-                            
+
+
+
                         </td>
                         <td class="param-name">
                             <p>query</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -146,16 +146,16 @@ Currently this does not support wildcards. Given name must exactly match the app
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
+
                             <span class="param-in">Query </span>
-                            
-                            
-                            
+
+
+
                         </td>
                         <td class="param-name">
                             <p>limit</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -174,16 +174,16 @@ Currently this does not support wildcards. Given name must exactly match the app
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
+
                             <span class="param-in">Query </span>
-                            
-                            
-                            
+
+
+
                         </td>
                         <td class="param-name">
                             <p>offset</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -202,16 +202,16 @@ Currently this does not support wildcards. Given name must exactly match the app
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -230,16 +230,16 @@ Currently this does not support wildcards. Given name must exactly match the app
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -289,7 +289,7 @@ variant of the resource.
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+
                             </span>
                         </td>
                     </tr>

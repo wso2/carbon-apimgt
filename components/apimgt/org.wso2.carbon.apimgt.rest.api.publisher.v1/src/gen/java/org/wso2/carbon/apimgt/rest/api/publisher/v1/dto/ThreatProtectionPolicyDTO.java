@@ -10,7 +10,6 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
-import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -51,7 +50,6 @@ public class ThreatProtectionPolicyDTO   {
   @ApiModelProperty(required = true, value = "Name of the policy")
   @JsonProperty("name")
   @NotNull
-  @NotEmpty
   public String getName() {
     return name;
   }
@@ -71,7 +69,6 @@ public class ThreatProtectionPolicyDTO   {
   @ApiModelProperty(required = true, value = "Type of the policy")
   @JsonProperty("type")
   @NotNull
-  @NotEmpty
   public String getType() {
     return type;
   }
@@ -91,7 +88,6 @@ public class ThreatProtectionPolicyDTO   {
   @ApiModelProperty(required = true, value = "policy as a json string")
   @JsonProperty("policy")
   @NotNull
-  @NotEmpty
   public String getPolicy() {
     return policy;
   }

@@ -10,7 +10,6 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
-import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -31,7 +30,6 @@ public class ErrorListItemDTO   {
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("code")
   @NotNull
-  @NotEmpty
   public String getCode() {
     return code;
   }
@@ -51,7 +49,6 @@ public class ErrorListItemDTO   {
   @ApiModelProperty(required = true, value = "Description about individual errors occurred ")
   @JsonProperty("message")
   @NotNull
-  @NotEmpty
   public String getMessage() {
     return message;
   }

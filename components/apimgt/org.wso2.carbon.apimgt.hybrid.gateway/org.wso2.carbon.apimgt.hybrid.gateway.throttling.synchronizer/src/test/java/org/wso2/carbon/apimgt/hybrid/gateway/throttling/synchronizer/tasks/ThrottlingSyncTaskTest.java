@@ -126,9 +126,9 @@ public class ThrottlingSyncTaskTest {
         PowerMockito.when(APIUtil.getHttpClient(Mockito.anyInt(), Mockito.anyString())).thenReturn(httpClient);
 
         Mockito.when(configManager.getProperty(any(String.class)))
-                .thenReturn("https://api.cloud.wso2.com/api/am/admin/v0.14/throttling/policies/subscription",
-                        "https://api.cloud.wso2.com/api/am/admin/v0.14/throttling/policies/application",
-                        "https://api.cloud.wso2.com/api/am/admin/v0.14/throttling/policies/advanced");
+                .thenReturn("https://api.cloud.wso2.com/api/am/admin/v0.15/throttling/policies/subscription",
+                        "https://api.cloud.wso2.com/api/am/admin/v0.15/throttling/policies/application",
+                        "https://api.cloud.wso2.com/api/am/admin/v0.15/throttling/policies/advanced");
 
         String subPolicies = "{\"count\":2,\"list\":[{\"policyId\":\"8e73b2b4-76c2-4a0f-9520-087337395ce6\"," +
                 "\"policyName\":\"Gold\",\"displayName\":\"Gold\",\"description\":" +
