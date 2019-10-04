@@ -120,6 +120,7 @@ function copyAPIConfig(api) {
         id: api.id,
         name: api.name,
         description: api.description,
+        lifeCycleStatus: api.lifeCycleStatus,
         accessControl: api.accessControl,
         authorizationHeader: api.authorizationHeader,
         responseCachingEnabled: api.responseCachingEnabled,

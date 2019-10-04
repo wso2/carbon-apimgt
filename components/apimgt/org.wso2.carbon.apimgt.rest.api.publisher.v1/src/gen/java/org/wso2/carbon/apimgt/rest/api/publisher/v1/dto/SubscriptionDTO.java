@@ -11,7 +11,6 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
-import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -66,7 +65,6 @@ public enum SubscriptionStatusEnum {
   @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", required = true, value = "")
   @JsonProperty("subscriptionId")
   @NotNull
-  @NotEmpty
   public String getSubscriptionId() {
     return subscriptionId;
   }
@@ -85,7 +83,6 @@ public enum SubscriptionStatusEnum {
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("applicationInfo")
   @NotNull
-  @NotEmpty
   public ApplicationInfoDTO getApplicationInfo() {
     return applicationInfo;
   }
@@ -104,7 +101,6 @@ public enum SubscriptionStatusEnum {
   @ApiModelProperty(example = "Unlimited", required = true, value = "")
   @JsonProperty("throttlingPolicy")
   @NotNull
-  @NotEmpty
   public String getThrottlingPolicy() {
     return throttlingPolicy;
   }
@@ -123,7 +119,6 @@ public enum SubscriptionStatusEnum {
   @ApiModelProperty(example = "BLOCKED", required = true, value = "")
   @JsonProperty("subscriptionStatus")
   @NotNull
-  @NotEmpty
   public SubscriptionStatusEnum getSubscriptionStatus() {
     return subscriptionStatus;
   }
