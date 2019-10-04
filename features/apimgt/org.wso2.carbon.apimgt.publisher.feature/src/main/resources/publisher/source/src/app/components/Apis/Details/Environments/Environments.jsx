@@ -16,10 +16,9 @@
  * under the License.
  */
 
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
-import API from 'AppData/api';
 import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
@@ -27,7 +26,6 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { Link } from 'react-router-dom';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -38,31 +36,15 @@ import Alert from 'AppComponents/Shared/Alert';
 import Paper from '@material-ui/core/Paper';
 import { isRestricted } from 'AppData/AuthManager';
 import { makeStyles } from '@material-ui/core/styles';
+import MicroGateway from 'AppComponents/Apis/Details/Environments/MicroGateway';
 
 const useStyles = makeStyles(theme => ({
     root: {
         display: 'flex',
         flexWrap: 'wrap',
     },
-    mainTitle: {
-        paddingTop: theme.spacing.unit * 3,
-    },
-    gatewayPaper: {
-        marginTop: theme.spacing.unit * 2,
-    },
     saveButton: {
         marginTop: theme.spacing.unit * 3,
-    },
-    content: {
-        marginTop: theme.spacing.unit * 2,
-        margin: `${theme.spacing.unit * 2}px 0 ${theme.spacing.unit * 2}px 0`,
-    },
-    emptyBox: {
-        marginTop: theme.spacing.unit * 2,
-    },
-    contentWrapper: {
-        maxWidth: theme.custom.contentAreaWidth,
-        paddingLeft: theme.spacing.unit * 3,
     },
 }));
 
@@ -83,14 +65,6 @@ export default function Environments() {
     if (api) {
         isWebsocket = (api.type === 'WS');
     }
-    const restApi = new API();
-    const [mgLabels, setMgLabels] = useState([]);
-    useEffect(() => {
-        restApi.microgatewayLabelsGet()
-            .then((result) => {
-                setMgLabels(result.body.list);
-            });
-    }, []);
 
     /**
      *
@@ -112,85 +86,6 @@ export default function Environments() {
                 console.error(error);
             })
             .finally(() => setUpdating(false));
-    }
-
-    /**
-     *
-     * Renders the Micro gateway information
-     */
-    function MicroGateway() {
-        if (isWebsocket) {
-            return null;
-        }
-        return (
-            <React.Fragment>
-                <Typography variant='h4' align='left' className={classes.mainTitle}>
-                    <FormattedMessage
-                        id='Apis.Details.Environments.Environments.Microgateways'
-                        defaultMessage='Microgateways'
-                    />
-                </Typography>
-                {mgLabels.length > 0 ? (
-                    <Paper className={classes.gatewayPaper}>
-                        <Table >
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell />
-                                    <TableCell align='left'>Label</TableCell>
-                                    <TableCell align='left'>Description</TableCell>
-                                    <TableCell align='left'>Access URL</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {mgLabels.map(row => (
-                                    <TableRow key={row.name}>
-                                        <TableCell padding='checkbox'>
-                                            <Checkbox
-                                                disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
-                                                checked={selectedMgLabel.includes(row.name)}
-                                                onChange={
-                                                    (event) => {
-                                                        const { checked, name } = event.target;
-                                                        if (checked) {
-                                                            setSelectedMgLabel([...selectedMgLabel, name]);
-                                                        } else {
-                                                            setSelectedMgLabel(selectedMgLabel.filter(env =>
-                                                                env !== name));
-                                                        }
-                                                    }
-                                                }
-                                                name={row.name}
-                                            />
-                                        </TableCell>
-                                        <TableCell component='th' scope='row' align='left'>
-                                            {row.name}
-                                        </TableCell>
-                                        <TableCell align='left'>{row.description}</TableCell>
-                                        <TableCell align='left'>{row.access_urls.join(', ')}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </Paper>) :
-                    (
-                        <InlineMessage type='info' height={100} className={classes.emptyBox} >
-                            <div className={classes.contentWrapper}>
-                                <Typography component='p' className={classes.content}>
-                                    <FormattedMessage
-                                        id='Apis.Details.Environments.microgateway.labels.emptym1'
-                                        defaultMessage='Microgateway labels are not available.'
-                                    />
-                                    <FormattedMessage
-                                        id='Apis.Details.Environments.microgateway.labels.emptym2'
-                                        defaultMessage=' You can request the administrator to add labels.'
-                                    />
-                                </Typography>
-                            </div>
-                        </InlineMessage>
-                    )
-                }
-            </React.Fragment>
-        );
     }
 
     return (
@@ -266,7 +161,13 @@ export default function Environments() {
                 </Table>
             </Paper>
 
-            <MicroGateway />
+            {!isWebsocket &&
+                <MicroGateway
+                    selectedMgLabel={selectedMgLabel}
+                    setSelectedMgLabel={setSelectedMgLabel}
+                    api={api}
+                />
+            }
 
             <Grid
                 container
