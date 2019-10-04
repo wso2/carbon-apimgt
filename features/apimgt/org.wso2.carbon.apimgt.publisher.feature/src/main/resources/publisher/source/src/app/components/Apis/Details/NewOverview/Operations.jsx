@@ -48,7 +48,10 @@ function RenderMethodBase(props) {
     } else {
         chipTextColor = theme.palette.getContrastText(theme.custom.operationChipColor[method]);
     }
-    return <Chip label={method} style={{ backgroundColor: chipColor, color: chipTextColor, height: 20 }} />;
+    return (<Chip
+        label={method.toUpperCase()}
+        style={{ backgroundColor: chipColor, color: chipTextColor, height: 20 }}
+    />);
 }
 
 RenderMethodBase.propTypes = {
@@ -109,7 +112,7 @@ function Operations(props) {
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
-                                        <RenderMethod method={item.verb.toLowerCase()} />
+                                        <RenderMethod method={item.verb} />
                                     </TableCell>
                                 </TableRow>
                             ))}
