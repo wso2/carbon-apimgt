@@ -3409,7 +3409,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 for (String aRole : scope.getRoles().split(",")) {
                     boolean isValidRole = APIUtil.isRoleNameExist(apiId.getProviderName(), aRole);
                     if (!isValidRole) {
-                        String error = "Role '" + aRole + "' Does not exist.";
+                        String error = "Role '" + aRole + "' does not exist.";
                         RestApiUtil.handleBadRequest(error, log);
                     }
                 }
