@@ -73,10 +73,10 @@ function validateInput(text, element, errorMsg){
     }
 }
 
-function validateRolesInput(text, element, requiredMsg, invalidRoleMsg){
+function validateRolesInput(text, element, requiredMsg, invalidRoleMsg) {
     var elementId = element.attr('id');
     text = text.trim();
-    if(text == ""){
+    if (text == "") {
         element.css("border", "1px solid red");
         $('#label'+elementId).remove();
         element.after('<label class="error" id="label'+elementId+'" >' + requiredMsg + '</label>');
