@@ -49,7 +49,7 @@ Define the following resource:
     get:
       x-scope: apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0
-      .1:9443/api/am/admin/v0.14/sample"
+      .1:9443/api/am/admin/v0.15/sample"
       x-wso2-request: |
        GET https://127.0.0.1:9443/api/am/admin/v0.10/sample
        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -198,7 +198,7 @@ beans.xml file.
 
 13. Build the org.wso2.carbon.apimgt.rest.api.util component.
 
-14. Build org.wso2.carbon.apimgt.rest.api.admin and deploy the api#am#admin#v0.14.war in the pack
+14. Build org.wso2.carbon.apimgt.rest.api.admin and deploy the api#am#admin#v0.15.war in the pack
 - **NOTE**: You do not need to put the org.wso2.carbon.apimgt.rest.api.util.jar as a patch as this will be bundled inside the
 webapp when we build the two components in that order. 
 
@@ -218,12 +218,12 @@ In the following example the value of the x-scope element is apim:api_view.
 16. Invoke the /sample resource with the generated access token.
 
 ```
-curl -H "Authorization: Bearer <access-token>" https://localhost:9443/api/am/admin/v0.14/sample -k -v
+curl -H "Authorization: Bearer <access-token>" https://localhost:9443/api/am/admin/v0.15/sample -k -v
 
 v0.10 - APIM 2.0.0
 v0.11 - APIM 2.1.0
 v0.12 - APIM 2.2.0
 v0.13 - APIM 2.5.0
-v0.14 - APIM 2.6.0
+v0.15 - APIM 2.6.0
 ```
 

@@ -50,9 +50,9 @@ Add this resource:
     get:
       x-scope: apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0
-      .1:9443/api/am/store/v0.14/sample"
+      .1:9443/api/am/store/v0.15/sample"
       x-wso2-request: |
-       GET https://127.0.0.1:9443/api/am/store/v0.14/sample
+       GET https://127.0.0.1:9443/api/am/store/v0.15/sample
        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK"
       summary: |
@@ -218,7 +218,7 @@ beans.xml
 
 13. Build org.wso2.carbon.apimgt.rest.api.util component
 
-14. Build org.wso2.carbon.apimgt.rest.api.store and deploy the api#am#store#v0.14.war in the pack
+14. Build org.wso2.carbon.apimgt.rest.api.store and deploy the api#am#store#v0.15.war in the pack
 - **NOTE**: Yod do not need to put the org.wso2.carbon.apimgt.rest.api.util.jar as a patch as this will be bundled inside the
 webapp when you build the two components in that order. 
 
@@ -245,6 +245,6 @@ v0.10 - APIM 2.0.0
 v0.11 - APIM 2.1.0
 v0.12 - APIM 2.2.0
 v0.13 - APIM 2.5.0
-v0.14 - APIM 2.6.0
+v0.15 - APIM 2.6.0
 ```
 
