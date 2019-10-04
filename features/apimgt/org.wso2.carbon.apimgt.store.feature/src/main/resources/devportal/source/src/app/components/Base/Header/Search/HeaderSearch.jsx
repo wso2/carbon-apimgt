@@ -17,7 +17,7 @@
  */
 
 import React from 'react';
-import { Redirect, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Autosuggest from 'react-autosuggest';
 import { withStyles } from '@material-ui/core/styles';
@@ -27,10 +27,7 @@ import InfoIcon from '@material-ui/icons/InfoOutlined';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import { FormattedMessage, injectIntl } from 'react-intl';
-
-import {
-    renderInput, renderSuggestion, getSuggestions, getSuggestionValue, buildSearchQuery,
-} from './SearchUtils';
+import { renderInput, renderSuggestion, getSuggestions, getSuggestionValue, buildSearchQuery } from './SearchUtils';
 
 const styles = theme => ({
     container: {
@@ -205,17 +202,16 @@ class HeaderSearch extends React.Component {
      * @memberof HeaderSearch
      */
     handleDropDownChange(event) {
-        const { searchText, lcState } = this.state;
+        const { searchText } = this.state;
         this.setState({
             lcState: event.target.value,
         });
-        const {history} = this.props;
+        const { history } = this.props;
         if (event.target.value) {
             history.push('/apis/search?query=' + buildSearchQuery(searchText, event.target.value));
         } else {
             history.push('/apis/');
         }
-
     }
 
     /**
@@ -396,7 +392,7 @@ HeaderSearch.defaultProps = {
     toggleSmSearch: undefined,
 };
 HeaderSearch.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.instanceOf(Object).isRequired,
     smSearch: PropTypes.bool,
     toggleSmSearch: PropTypes.func,
     history: PropTypes.shape({
