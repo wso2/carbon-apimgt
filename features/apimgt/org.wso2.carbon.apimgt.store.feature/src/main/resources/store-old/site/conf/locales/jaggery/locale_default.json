@@ -394,6 +394,10 @@
     "subscriptionStatus": "subscriptionStatus",
     "tenants": "Visible to Tenants",
     "timeWarn": "timeWarn",
-    " Statistics ": " Statistics "
+    " Statistics ": " Statistics ",
+    "Try" : "Try",
+    "Using" : "Using",
+    "Set Request Header" : "Set Request Header"
+
 
 }

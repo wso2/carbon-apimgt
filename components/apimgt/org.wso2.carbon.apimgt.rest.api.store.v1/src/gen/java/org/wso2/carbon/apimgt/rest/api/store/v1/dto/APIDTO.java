@@ -22,7 +22,6 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
-import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -86,7 +85,6 @@ public class APIDTO   {
   @ApiModelProperty(example = "CalculatorAPI", required = true, value = "Name of the API")
   @JsonProperty("name")
   @NotNull
-  @NotEmpty
   public String getName() {
     return name;
   }
@@ -124,7 +122,6 @@ public class APIDTO   {
   @ApiModelProperty(example = "CalculatorAPI", required = true, value = "A string that represents thecontext of the user's request")
   @JsonProperty("context")
   @NotNull
-  @NotEmpty
   public String getContext() {
     return context;
   }
@@ -144,7 +141,6 @@ public class APIDTO   {
   @ApiModelProperty(example = "1.0.0", required = true, value = "The version of the API")
   @JsonProperty("version")
   @NotNull
-  @NotEmpty
   public String getVersion() {
     return version;
   }
@@ -164,7 +160,6 @@ public class APIDTO   {
   @ApiModelProperty(example = "admin", required = true, value = "If the provider value is not given user invoking the api will be used as the provider. ")
   @JsonProperty("provider")
   @NotNull
-  @NotEmpty
   public String getProvider() {
     return provider;
   }
@@ -220,7 +215,6 @@ public class APIDTO   {
   @ApiModelProperty(example = "PUBLISHED", required = true, value = "This describes in which status of the lifecycle the API is.")
   @JsonProperty("lifeCycleStatus")
   @NotNull
-  @NotEmpty
   public String getLifeCycleStatus() {
     return lifeCycleStatus;
   }
