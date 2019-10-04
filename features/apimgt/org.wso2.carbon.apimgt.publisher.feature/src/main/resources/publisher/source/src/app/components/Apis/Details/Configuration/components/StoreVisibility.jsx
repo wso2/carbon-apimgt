@@ -132,7 +132,7 @@ export default function StoreVisibility(props) {
                     }
                     margin='normal'
                     variant='outlined'
-                    disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], apiFromContext)}
                 >
                     <MenuItem value='PUBLIC'>
                         <FormattedMessage

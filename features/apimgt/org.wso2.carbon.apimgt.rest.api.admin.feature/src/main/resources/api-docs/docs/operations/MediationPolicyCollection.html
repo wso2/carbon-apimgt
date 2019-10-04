@@ -3,7 +3,7 @@
 
             <hr/>
             <h4 class="operation-heading"><a name="policiesMediationGet"></a>Get all global mediation policies
-</h4> <code>GET https://apis.wso2.com/api/am/admin/v0.14/policies/mediation</code>
+</h4> <code>GET https://apis.wso2.com/api/am/admin/v0.15/policies/mediation</code>
             <p class="marked"></p>
 
             <p class="marked">This operation provides you a list of available all global level mediation policies.
@@ -19,7 +19,7 @@
                 </h4>
             </div>
 
-                <div id="request-policiesMediationGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/admin/v0.14/policies/mediation
+                <div id="request-policiesMediationGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/admin/v0.15/policies/mediation
 Authorization: Bearer 36a1644d-16c8-3f10-af2a-cedac82a6f21</code></div>
 
             <div class="pointer" data-toggle="collapse" data-target="#response-policiesMediationGet">
@@ -105,9 +105,9 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 36a1644d-16c8-3f10-af2a-cedac82a6f21&quot; https://localhost:9443/api/am/admin/v0.14/policies/mediation</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 36a1644d-16c8-3f10-af2a-cedac82a6f21&quot; https://localhost:9443/api/am/admin/v0.15/policies/mediation</code></div>
 
-         
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -129,16 +129,16 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-                            
+
                             <span class="param-in">Query </span>
-                            
-                            
-                            
+
+
+
                         </td>
                         <td class="param-name">
                             <p>limit</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -157,16 +157,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
+
                             <span class="param-in">Query </span>
-                            
-                            
-                            
+
+
+
                         </td>
                         <td class="param-name">
                             <p>offset</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -185,16 +185,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
+
                             <span class="param-in">Query </span>
-                            
-                            
-                            
+
+
+
                         </td>
                         <td class="param-name">
                             <p>query</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -212,16 +212,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -240,16 +240,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -299,7 +299,7 @@ variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+
                             </span>
                         </td>
                     </tr>
@@ -315,7 +315,7 @@ variant of the resource (Will be supported in future).
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="policiesMediationPost"></a>Add a global mediation policy</h4> <code>POST https://apis.wso2.com/api/am/admin/v0.14/policies/mediation</code>
+            <h4 class="operation-heading"><a name="policiesMediationPost"></a>Add a global mediation policy</h4> <code>POST https://apis.wso2.com/api/am/admin/v0.15/policies/mediation</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to add a new global mediation policy.
@@ -331,7 +331,7 @@ variant of the resource (Will be supported in future).
                 </h4>
             </div>
 
-                <div id="request-policiesMediationPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/admin/v0.14/policies/mediation
+                <div id="request-policiesMediationPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/admin/v0.15/policies/mediation
 Content-Type: application/json
 Authorization: Bearer 45c1e774-7d5a-3e2a-b76c-53f786efac6b
 
@@ -348,7 +348,7 @@ Authorization: Bearer 45c1e774-7d5a-3e2a-b76c-53f786efac6b
                 </h4>
             </div>
                 <div id="response-policiesMediationPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
-Location: https://localhost:9443/api/am/admin/v0.14/registry/resource/_system/governance/apimgt/customsequences/fault/add_custom_header_fault.xml
+Location: https://localhost:9443/api/am/admin/v0.15/registry/resource/_system/governance/apimgt/customsequences/fault/add_custom_header_fault.xml
 Content-Type: application/json
 
 {
@@ -359,9 +359,9 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 45c1e774-7d5a-3e2a-b76c-53f786efac6b&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://localhost:9443/api/am/admin/v0.14/policies/mediation&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 45c1e774-7d5a-3e2a-b76c-53f786efac6b&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://localhost:9443/api/am/admin/v0.15/policies/mediation&quot;</code></div>
 
-         
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -383,17 +383,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
-                            
+
+
+
+
                             <span class="param-in">Body </span>
                         </td>
                         <td class="param-name">
                             <p>body</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -411,17 +411,17 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>Content-Type</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -439,16 +439,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-Match</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -467,16 +467,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-Unmodified-Since</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>

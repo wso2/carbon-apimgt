@@ -1,5 +1,7 @@
 ## API Manager REST API Development
 
+#####Note: 0.x APIs are DEPRECATED from API Manager 3.0.0 onwards. Please use v1.0 implementation when adding new features.
+
 This guide explains the procedure of adding a new resource to API Manager CXF based REST APIs.
 The procedure follows a top-down approach. We first define our API changes in the particular API's Swagger definition.
 The changes are then applied to the CXF service Java classes using code generation.
@@ -50,9 +52,9 @@ Add this resource:
     get:
       x-scope: apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0
-      .1:9443/api/am/store/v0.14/sample"
+      .1:9443/api/am/store/v0.15/sample"
       x-wso2-request: |
-       GET https://127.0.0.1:9443/api/am/store/v0.14/sample
+       GET https://127.0.0.1:9443/api/am/store/v0.15/sample
        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK"
       summary: |
@@ -218,7 +220,7 @@ beans.xml
 
 13. Build org.wso2.carbon.apimgt.rest.api.util component
 
-14. Build org.wso2.carbon.apimgt.rest.api.store and deploy the api#am#store#v0.14.war in the pack
+14. Build org.wso2.carbon.apimgt.rest.api.store and deploy the api#am#store#v0.15.war in the pack
 - **NOTE**: Yod do not need to put the org.wso2.carbon.apimgt.rest.api.util.jar as a patch as this will be bundled inside the
 webapp when you build the two components in that order. 
 
@@ -244,7 +246,7 @@ curl -H "Authorization: Bearer <access-token>" https://localhost:9443/api/am/sto
 v0.10 - APIM 2.0.0
 v0.11 - APIM 2.1.0
 v0.12 - APIM 2.2.0
-v0.13 - APIM 2.5.0
 v0.14 - APIM 2.6.0
+v0.15 - APIM 3.0.0
 ```
 

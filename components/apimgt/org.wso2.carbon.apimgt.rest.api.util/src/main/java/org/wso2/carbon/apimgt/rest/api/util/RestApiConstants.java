@@ -121,12 +121,12 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_PRODUCT_DOCUMENT_CONTENT = RESOURCE_PATH_PRODUCT_DOCUMENTS_DOCUMENT_ID + "/content";
     public static final String RESOURCE_PATH_RESOURCE_PATHS = "/resource-paths";
     public static final String RESOURCE_PATH_COMMENTS = "/comments";
-    public static final String REST_API_STORE_VERSION_0 ="v0.14";
+    public static final String REST_API_STORE_VERSION_0 ="v0.15";
     public static final String REST_API_STORE_VERSION_1 ="v1";
     public static final String REST_API_STORE_CONTEXT="/api/am/store/";
     public static final String REST_API_STORE_CONTEXT_FULL_0 = REST_API_STORE_CONTEXT + REST_API_STORE_VERSION_0;
     public static final String REST_API_STORE_CONTEXT_FULL_1 = REST_API_STORE_CONTEXT + REST_API_STORE_VERSION_1;
-    public static final String REST_API_PUBLISHER_VERSION_0 ="v0.14";
+    public static final String REST_API_PUBLISHER_VERSION_0 ="v0.15";
     public static final String REST_API_PUBLISHER_VERSION_1 = "v1";
     public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
     public static final String REST_API_PUBLISHER_CONTEXT_FULL_0 =

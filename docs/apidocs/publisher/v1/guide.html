@@ -26,9 +26,9 @@
 
     <p> The REST API is implemented based on REST best practices and specifications as a CXF REST web application running on WSO2 API Manager.
         API development is started with a swagger specification with a contract-first approach.
-        Please see <a href="https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.1.66/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml">full swagger definition</a> which is written using swagger 2.0.
+        Please see <a href="https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.5.176/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml">full swagger definition</a> which is written using swagger 2.0.
         This can be also retrieved from the Web app itself using the URL
-        <code>https://&lt;host-name[:port]&gt;/api/am/publisher/v0.14/swagger.json</code>
+        <code>https://&lt;host-name[:port]&gt;/api/am/publisher/v1.0/swagger.yaml</code>
     </p>
 
     <p>
@@ -43,7 +43,7 @@
         example is shown below,
     </p>
 
-    <div class="pre"><code class="bash">curl -k -X POST -H "Authorization: Basic YWRtaW46YWRtaW4=" -H "Content-Type: application/json" -d @payload.json https://localhost:9443/client-registration/v0.14/register</code></div>
+    <div class="pre"><code class="bash">curl -k -X POST -H "Authorization: Basic YWRtaW46YWRtaW4=" -H "Content-Type: application/json" -d @payload.json https://localhost:9443/client-registration/v0.15/register</code></div>
     <br/>
 
     <p>

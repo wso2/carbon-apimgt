@@ -32,13 +32,13 @@ public class SubscriptionsApi  {
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Block a subscription", notes = "This operation can be used to block a subscription. Along with the request, `blockState` must be specified as a query parameter.\n\n1. `BLOCKED` : Subscription is completely blocked for both Production and Sandbox environments.\n2. `PROD_ONLY_BLOCKED` : Subscription is blocked for Production environment only.\n", response = void.class)
-    @io.swagger.annotations.ApiResponses(value = { 
+    @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSubscription was blocked successfully.\n"),
-        
+
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error\n"),
-        
+
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested subscription does not exist.\n"),
-        
+
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
     public Response subscriptionsBlockSubscriptionPost(@ApiParam(value = "Subscription Id\n",required=true) @QueryParam("subscriptionId")  String subscriptionId,
@@ -49,15 +49,15 @@ public class SubscriptionsApi  {
     return delegate.subscriptionsBlockSubscriptionPost(subscriptionId,blockState,ifMatch,ifUnmodifiedSince);
     }
     @GET
-    
+
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get all Subscriptions", notes = "This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of\n\n1. Retrieving all subscriptions for the user's APIs.\n`GET https://localhost:9443/api/am/publisher/v0.14/subscriptions`\n\n2. Retrieving subscriptions for a specific API.\n`GET https://localhost:9443/api/am/publisher/v0.14/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`\n", response = SubscriptionListDTO.class)
-    @io.swagger.annotations.ApiResponses(value = { 
+    @io.swagger.annotations.ApiOperation(value = "Get all Subscriptions", notes = "This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of\n\n1. Retrieving all subscriptions for the user's APIs.\n`GET https://localhost:9443/api/am/publisher/v0.15/subscriptions`\n\n2. Retrieving subscriptions for a specific API.\n`GET https://localhost:9443/api/am/publisher/v0.15/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`\n", response = SubscriptionListDTO.class)
+    @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSubscription list returned.\n"),
-        
+
         @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"),
-        
+
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported\n") })
 
     public Response subscriptionsGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",required=true) @QueryParam("apiId") @Encoded String apiId,
@@ -73,11 +73,11 @@ public class SubscriptionsApi  {
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Get details of a subscription", notes = "This operation can be used to get details of a single subscription.\n", response = ExtendedSubscriptionDTO.class)
-    @io.swagger.annotations.ApiResponses(value = { 
+    @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSubscription returned\n"),
-        
+
         @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"),
-        
+
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Subscription does not exist.\n") })
 
     public Response subscriptionsSubscriptionIdGet(@ApiParam(value = "Subscription Id\n",required=true ) @PathParam("subscriptionId")  String subscriptionId,
@@ -92,13 +92,13 @@ public class SubscriptionsApi  {
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Unblock a Subscription", notes = "This operation can be used to unblock a subscription specifying the subscription Id. The subscription will be fully unblocked after performing this operation.\n", response = void.class)
-    @io.swagger.annotations.ApiResponses(value = { 
+    @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSubscription was unblocked successfully.\n"),
-        
+
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error\n"),
-        
+
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested subscription does not exist.\n"),
-        
+
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
     public Response subscriptionsUnblockSubscriptionPost(@ApiParam(value = "Subscription Id\n",required=true) @QueryParam("subscriptionId")  String subscriptionId,

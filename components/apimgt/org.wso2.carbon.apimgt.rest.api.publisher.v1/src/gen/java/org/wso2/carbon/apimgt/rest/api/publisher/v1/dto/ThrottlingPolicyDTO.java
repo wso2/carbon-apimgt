@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -107,6 +108,7 @@ public enum TierPlanEnum {
   @ApiModelProperty(example = "Platinum", required = true, value = "")
   @JsonProperty("name")
   @NotNull
+  @NotEmpty
   public String getName() {
     return name;
   }
@@ -195,6 +197,7 @@ public enum TierPlanEnum {
   @ApiModelProperty(example = "50", required = true, value = "Maximum number of requests which can be sent within a provided unit time ")
   @JsonProperty("requestCount")
   @NotNull
+  @NotEmpty
   public Long getRequestCount() {
     return requestCount;
   }
@@ -213,6 +216,7 @@ public enum TierPlanEnum {
   @ApiModelProperty(example = "60000", required = true, value = "")
   @JsonProperty("unitTime")
   @NotNull
+  @NotEmpty
   public Long getUnitTime() {
     return unitTime;
   }
@@ -249,6 +253,7 @@ public enum TierPlanEnum {
   @ApiModelProperty(example = "FREE", required = true, value = "This attribute declares whether this policy is available under commercial or free ")
   @JsonProperty("tierPlan")
   @NotNull
+  @NotEmpty
   public TierPlanEnum getTierPlan() {
     return tierPlan;
   }
@@ -268,6 +273,7 @@ public enum TierPlanEnum {
   @ApiModelProperty(example = "true", required = true, value = "By making this attribute to false, you are capabale of sending requests even if the request count exceeded within a unit time ")
   @JsonProperty("stopOnQuotaReach")
   @NotNull
+  @NotEmpty
   public Boolean isStopOnQuotaReach() {
     return stopOnQuotaReach;
   }
