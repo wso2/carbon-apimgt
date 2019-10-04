@@ -652,7 +652,7 @@ public class WSO2APIPublisher implements APIPublisher {
      * Get HTTP Client for service endpoint port and protocol.
      *
      * @param storeEndpoint service endpoint URL Eg: http://localhost:9763/api/am/admin/v1.0/import/api
-     *                      Eg: http://localhost:9763/api/am/publisher/v0.14
+     *                      Eg: http://localhost:9763/api/am/publisher/v0.15
      * @return HTTP Client
      * @throws APIManagementException If an error occurs due to malformed URL.
      */

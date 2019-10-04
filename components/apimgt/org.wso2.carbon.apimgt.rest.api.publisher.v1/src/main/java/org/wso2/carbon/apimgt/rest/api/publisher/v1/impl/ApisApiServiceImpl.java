@@ -155,7 +155,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query,
-            String ifNoneMatch, Boolean expand, String accept ,String tenantDomain, MessageContext messageContext) {
+            String ifNoneMatch, Boolean expand, String accept, MessageContext messageContext) {
 
         List<API> allMatchedApis = new ArrayList<>();
         Object apiListDTO;
@@ -177,10 +177,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
-            // We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider
-            // instead of looking at type and query
-            String username = RestApiUtil.getLoggedInUsername();
-            tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
 
             /*if (migrationMode) { // migration flow
@@ -2842,22 +2839,22 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             //adding the api
             apiProvider.addAPI(apiToAdd);
-            
+
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
             API createdApi = apiProvider.getAPI(createdApiId);
-            
-            
+
+
             String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(url);
 
             String updatedSwagger = updateSwagger(createdApi.getUUID(), swaggerStr);
             SequenceGenerator.generateSequencesFromSwagger(updatedSwagger, apiToAdd.getId());
-            
+
             return createdApi;
         } catch (APIManagementException | FaultGatewaysException e) {
             RestApiUtil.handleInternalServerError("Error while importing WSDL to create a SOAP-to-REST API",
                     e, log);
-        } 
+        }
         return null;
     }
 
