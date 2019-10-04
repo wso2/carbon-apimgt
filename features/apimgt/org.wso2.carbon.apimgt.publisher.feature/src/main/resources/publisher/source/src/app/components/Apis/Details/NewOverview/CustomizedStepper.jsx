@@ -139,9 +139,9 @@ export default function CustomizedSteppers() {
  * Update the LifeCycle state of the API
  *
  */
-    function updateLCStateOfAPI() {
+    function updateLCStateOfAPI(apiId, state) {
         setUpdating(true);
-        const promisedUpdate = api.publish();
+        const promisedUpdate = api.updateLcState(apiId, state);
         promisedUpdate
             .then(() => {
                 updateAPI()
@@ -242,23 +242,36 @@ export default function CustomizedSteppers() {
                 return (
                     <Grid xs={12} display='block'>
                         <Grid xs={12}>
-                            <Button
-                                variant='contained'
-                                color='primary'
-                                onClick={updateLCStateOfAPI}
-                                disabled={(!isEndpointAvailable || !isTierAvailable) ||
+                            {isPrototypedAvailable ? (
+                                <Button
+                                    variant='contained'
+                                    color='primary'
+                                    onClick={() => updateLCStateOfAPI(api.id, 'Deploy as a Prototype')}
+                                    disabled={api.workflowStatus === 'CREATED'}
+                                >
+                          Deploy as a prototype
+                                    {isUpdating && <CircularProgress size={20} />}
+                                </Button>
+
+                            ) : (
+                                <Button
+                                    variant='contained'
+                                    color='primary'
+                                    onClick={() => updateLCStateOfAPI(api.id, 'Publish')}
+                                    disabled={(!isEndpointAvailable || !isTierAvailable) ||
                              api.workflowStatus === 'CREATED'}
-                            >
+                                >
                          Publish
-                                {isUpdating && <CircularProgress size={20} />}
-                            </Button>
+                                    {isUpdating && <CircularProgress size={20} />}
+                                </Button>
+                            )}
                         </Grid>
                         {api.workflowStatus === 'CREATED' && (
                             <Grid xs={12}>
                                 <Typography variant='caption' color='error'>
                                     <FormattedMessage
-                                        id='Apis.Details.Overview.CustomizedStepper.retired'
-                                        defaultMessage='The Publish request is pending'
+                                        id='Apis.Details.Overview.CustomizedStepper.pending'
+                                        defaultMessage='The request is pending'
                                     />
                                 </Typography>
                             </Grid>
