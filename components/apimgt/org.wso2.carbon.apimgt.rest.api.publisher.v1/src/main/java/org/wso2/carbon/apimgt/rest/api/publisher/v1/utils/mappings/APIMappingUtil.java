@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -45,8 +46,6 @@ import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.policy.Policy;
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -1890,10 +1889,17 @@ public class APIMappingUtil {
 
         List<APIProductResource> productResources = new ArrayList<APIProductResource>();
 
-        for (int i = 0; i < dto.getApis().size(); i++) {
-            ProductAPIDTO res = dto.getApis().get(i);
+        Set<String> verbResourceCombo = new HashSet<>();
+        for (ProductAPIDTO res : dto.getApis()) {
             List<APIOperationsDTO> productAPIOperationsDTO = res.getOperations();
             for (APIOperationsDTO resourceItem : productAPIOperationsDTO) {
+
+                if (!verbResourceCombo.add(resourceItem.getVerb() + resourceItem.getTarget())) {
+                    throw new APIManagementException("API Product resource: " + resourceItem.getTarget() +
+                            ", with verb: " + resourceItem.getVerb() + " , is duplicated for id " + id,
+                            ExceptionCodes.from(ExceptionCodes.API_PRODUCT_DUPLICATE_RESOURCE,
+                                    resourceItem.getTarget(), resourceItem.getVerb()));
+                }
 
                 URITemplate template = new URITemplate();
                 template.setHTTPVerb(resourceItem.getVerb());
@@ -1907,7 +1913,6 @@ public class APIMappingUtil {
                 resource.setUriTemplate(template);
                 productResources.add(resource);
             }
-
         }
 
         // scopes
