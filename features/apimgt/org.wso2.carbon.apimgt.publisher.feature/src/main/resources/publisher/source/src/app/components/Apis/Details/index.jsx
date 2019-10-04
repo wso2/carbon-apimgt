@@ -454,6 +454,7 @@ class Details extends Component {
                                 id: 'Apis.Details.index.design.configs',
                                 defaultMessage: 'Design Configs',
                             })}
+                            route='configuration'
                             to={pathPrefix + 'configuration'}
                             Icon={<ConfigurationIcon />}
                         />
@@ -462,6 +463,7 @@ class Details extends Component {
                                 id: 'Apis.Details.index.runtime.configs',
                                 defaultMessage: 'Runtime Configs',
                             })}
+                            route='runtime-configuration'
                             to={pathPrefix + 'runtime-configuration'}
                             Icon={<RuntimeConfigurationIcon />}
                         />
@@ -481,6 +483,7 @@ class Details extends Component {
                                     id: 'Apis.Details.index.gateways',
                                     defaultMessage: 'gateways',
                                 })}
+                                route='environments'
                                 to={pathPrefix + 'environments'}
                                 Icon={<PersonPinCircleOutlinedIcon />}
                             />
