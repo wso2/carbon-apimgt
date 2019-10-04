@@ -174,7 +174,9 @@ class ApiTableView extends React.Component {
         const { page, rowsPerPage } = this;
         const { apiType } = this.context;
         const api = new API();
-        if (query) {
+        const searchParam = new URLSearchParams(query);
+        const searchQuery = searchParam.get('query');
+        if (query && searchQuery !== null) {
             const composeQuery = queryString.parse(query);
             composeQuery.limit = this.rowsPerPage;
             composeQuery.offset = page * rowsPerPage;

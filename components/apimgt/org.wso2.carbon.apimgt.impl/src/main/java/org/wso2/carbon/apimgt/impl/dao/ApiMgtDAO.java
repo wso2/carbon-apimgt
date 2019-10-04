@@ -3493,18 +3493,24 @@ public class ApiMgtDAO {
             String sqlAddQuery;
             String ratingId = UUID.randomUUID().toString();
             if (!userRatingExists) {
-                //This query to update the AM_API_RATINGS table
-                sqlAddQuery = SQLConstants.ADD_API_RATING_SQL;
-            } else {
                 //This query to insert into the AM_API_RATINGS table
+                sqlAddQuery = SQLConstants.ADD_API_RATING_SQL;
+                ps = conn.prepareStatement(sqlAddQuery);
+                ps.setString(1, ratingId);
+                ps.setInt(2, rating);
+                ps.setInt(3, apiId);
+                ps.setInt(4, subscriber.getId());
+            } else {
+                // This query to update the AM_API_RATINGS table
                 sqlAddQuery = SQLConstants.UPDATE_API_RATING_SQL;
+                ps = conn.prepareStatement(sqlAddQuery);
+                // Adding data to the AM_API_RATINGS table
+                ps.setInt(1, rating);
+                ps.setInt(2, apiId);
+                ps.setInt(3, subscriber.getId());
             }
-            // Adding data to the AM_API_RATINGS  table
-            ps = conn.prepareStatement(sqlAddQuery);
-            ps.setString(1, ratingId);
-            ps.setInt(2, rating);
-            ps.setInt(3, apiId);
-            ps.setInt(4, subscriber.getId());
+
+
             ps.executeUpdate();
 
         } catch (SQLException e) {
