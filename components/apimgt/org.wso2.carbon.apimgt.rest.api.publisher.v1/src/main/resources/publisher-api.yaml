@@ -5922,6 +5922,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_publish
       operationId: validateSystemRole
       summary:
         Check given role name is already exist
