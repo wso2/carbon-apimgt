@@ -3401,9 +3401,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                             .handleBadRequest("Scope " + scope.getName() + " is already assigned by another API", log);
                 }
             }
-            if (StringUtils.isBlank(scope.getDescription())) {
-                RestApiUtil.handleBadRequest("Scope cannot have empty description", log);
-            }
+            //todo: validate with migrations
+//            if (StringUtils.isBlank(scope.getDescription())) {
+//                RestApiUtil.handleBadRequest("Scope cannot have empty description", log);
+//            }
             if (scope.getRoles() != null) {
                 for (String aRole : scope.getRoles().split(",")) {
                     boolean isValidRole = APIUtil.isRoleNameExist(apiId.getProviderName(), aRole);
