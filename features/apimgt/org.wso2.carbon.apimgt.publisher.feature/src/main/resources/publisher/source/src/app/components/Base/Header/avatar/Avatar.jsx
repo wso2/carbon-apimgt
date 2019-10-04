@@ -67,6 +67,11 @@ class Avatar extends Component {
                 openMenu: !this.state.openMenu,
                 profileIcon: event.currentTarget,
             });
+        } else {
+            this.setState({
+                openMenu: false,
+                profileIcon: this.state.profileIcon,
+            });
         }
     }
 
