@@ -537,8 +537,9 @@ function ProductResourcesEdit(props) {
                                             <FormattedMessage
                                                 id='Apis.Details.ProductResources.ProductResourcesWorkspace.api.all.
                                                 resourcesOfAPI'
-                                                defaultMessage={'Resources of the ' + selectedApi.name + ' API are shown below.' +
-                                            'Click the right hand side arrow to add them to the API Product.'
+                                                defaultMessage={'Resources of the ' + selectedApi.name + ' API are' +
+                                                'shown below.Click the right hand side arrow to add them to the API' +
+                                                'Product.'
                                                 }
                                             />
                                         </Typography>
@@ -677,8 +678,10 @@ function ProductResourcesEdit(props) {
                                             <FormattedMessage
                                                 id='Apis.Details.ProductResources.ProductResourcesWorkspace.
                                                 api.all.product.resources'
-                                                defaultMessage={'Resources of the ' + api.name + ' API Product are shown below.' +
-                                            'Click the remove button to remove them from the api product.'
+                                                defaultMessage={
+                                                    'Resources of the ' + api.name + ' API Product are shown below.' +
+                                                    'Click the right hand side button to remove them from the ' +
+                                                    'api product.'
                                                 }
                                             />
                                         </Typography>
