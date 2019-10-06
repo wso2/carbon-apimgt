@@ -173,8 +173,7 @@ export default function DefaultAPIForm(props) {
                         </React.Fragment>
                     }
                     helperText={
-                        (validity.name && validity.name.message) ||
-                        'API name can not contain spaces or any special characters'
+                        (validity.name && validity.name.message)
                     }
                     value={api.name}
                     name='name'
@@ -274,7 +273,7 @@ export default function DefaultAPIForm(props) {
                                     }}
                                     helperText={
                                         (validity.context && validity.context.message) ||
-                                        `API will be exposed in ${actualContext(api)} context at the gateway`
+                                        `API Product will be exposed in ${actualContext(api)} context at the gateway`
                                     }
                                     margin='normal'
                                     variant='outlined'
@@ -312,7 +311,7 @@ export default function DefaultAPIForm(props) {
                     />
                 )}
 
-                <SelectPolicies policies={api.policies} onChange={onChange} />
+                <SelectPolicies policies={api.policies} isAPIProduct={isAPIProduct} onChange={onChange} />
             </form>
             <Grid container direction='row' justify='flex-end' alignItems='center'>
                 <Grid item>

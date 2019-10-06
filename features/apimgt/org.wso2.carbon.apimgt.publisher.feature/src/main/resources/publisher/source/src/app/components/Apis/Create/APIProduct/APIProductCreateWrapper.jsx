@@ -17,12 +17,13 @@
  */
 import React, { useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
-import Paper from '@material-ui/core/Paper';
+import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import { FormattedMessage } from 'react-intl';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
+import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { Link } from 'react-router-dom';
@@ -34,6 +35,24 @@ import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm'
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import ProductResourcesEditWorkspace from 'AppComponents/Apis/Details/ProductResources/ProductResourcesEditWorkspace';
 
+const useStyles = makeStyles(theme => ({
+    box: {
+        width: '60%',
+        margin: 'auto',
+    },
+    saveButton: {
+        padding: '0px 0px 0px 10px',
+    },
+    titleWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingBottom: theme.spacing(2),
+    },
+    buttonWrapper: {
+        marginTop: theme.spacing(4),
+    },
+}));
 
 /**
  * Handle API creation from GraphQL Definition.
@@ -127,6 +146,7 @@ export default function ApiProductCreateWrapper(props) {
     }
 
     const [isCreating, setCreating] = useState();
+    const classes = useStyles();
 
     const createAPIProduct = () => {
         {
@@ -165,14 +185,14 @@ export default function ApiProductCreateWrapper(props) {
             <APICreateProductBase
                 title={pageTitle}
             >
-                <Paper>
+                <Box className={classes.box}>
                     {wizardStep === 0 && (
                         <Stepper activeStep={0}>
                             <Step>
                                 <StepLabel>
                                     <FormattedMessage
                                         id='Apis.Create.APIProduct.APIProductCreateWrapper.productDetails'
-                                        defaultMessage='Provide Product Details'
+                                        defaultMessage='Provide Details'
                                     />
                                 </StepLabel>
                             </Step>
@@ -193,7 +213,7 @@ export default function ApiProductCreateWrapper(props) {
                                 <StepLabel>
                                     <FormattedMessage
                                         id='Apis.Create.APIProduct.APIProductCreateWrapper.productDetails'
-                                        defaultMessage='Provide Product Details'
+                                        defaultMessage='Provide Details'
                                     />
                                 </StepLabel>
                             </Step>
@@ -208,9 +228,9 @@ export default function ApiProductCreateWrapper(props) {
                             </Step>
                         </Stepper>
                     )}
-                </Paper>
+                </Box>
                 <Grid container spacing={3}>
-                    <Grid item md={12} />
+                    {wizardStep === 0 && <Grid item md={12} />}
                     {wizardStep === 0 && <Grid item md={1} />}
                     <Grid item md={wizardStep === 0 ? 10 : 12}>
                         {wizardStep === 0 && (
@@ -226,14 +246,33 @@ export default function ApiProductCreateWrapper(props) {
                                 apiResources={apiResources}
                                 setApiResources={setApiResources}
                                 isStateCreate
+                                api={apiInputs}
                             />
                         )}
                     </Grid>
-                    {wizardStep === 0 && <Grid item md={1} />}
-                    <Grid item md={1} />
-                    <Grid item md={wizardStep === 0 ? 9 : 10}>
-                        <Grid container direction='row' justify='space-between'>
+                    { wizardStep === 0 && <Grid item md={1} />}
+                    { wizardStep === 0 && <Grid item md={1} />}
+                    <Grid item md={9}>
+                        <Grid
+                            className={wizardStep === 1 && classes.saveButton}
+                            container
+                            direction='row'
+                            justify='flex-start'
+                            alignItems='center'
+                            spacing={2}
+                        >
                             <Grid item>
+                                {wizardStep === 1 &&
+                                <Button
+                                    variant='outlined'
+                                    onClick={() =>
+                                        setWizardStep(step => step - 1)}
+                                >
+                                    <FormattedMessage
+                                        id='Apis.Create.APIProduct.APIProductCreateWrapper.back'
+                                        defaultMessage='Back'
+                                    />
+                                </Button>}
                                 {wizardStep === 0 && (
                                     <Link to='/apis/'>
                                         <Button variant='outlined'>
@@ -244,23 +283,8 @@ export default function ApiProductCreateWrapper(props) {
                                         </Button>
                                     </Link>
                                 )}
-                                {wizardStep === 1 &&
-                                <Button onClick={() =>
-                                    setWizardStep(step => step - 1)}
-                                >Back
-                                </Button>}
                             </Grid>
-                            <Grid item>
-                                {wizardStep === 0 && (
-                                    <Button
-                                        onClick={() => setWizardStep(step => step + 1)}
-                                        variant='contained'
-                                        color='primary'
-                                        disabled={!apiInputs.isFormValid}
-                                    >
-                                    Next
-                                    </Button>
-                                )}
+                            <Grid item >
                                 {wizardStep === 1 && (
                                     <Button
                                         variant='contained'
@@ -269,10 +293,23 @@ export default function ApiProductCreateWrapper(props) {
                                         onClick={createAPIProduct}
                                     >
                                         <FormattedMessage
-                                            id='Apis.Details.ProductResources.ProductResourcesEdit.save'
+                                            id='Apis.Create.APIProduct.APIProductCreateWrapper.save'
                                             defaultMessage='Save'
                                         />
                                         {isCreating && <CircularProgress size={24} />}
+                                    </Button>
+                                )}
+                                {wizardStep === 0 && (
+                                    <Button
+                                        onClick={() => setWizardStep(step => step + 1)}
+                                        variant='contained'
+                                        color='primary'
+                                        disabled={!apiInputs.isFormValid}
+                                    >
+                                        <FormattedMessage
+                                            id='Apis.Create.APIProduct.APIProductCreateWrapper.next'
+                                            defaultMessage='Next'
+                                        />
                                     </Button>
                                 )}
                             </Grid>
