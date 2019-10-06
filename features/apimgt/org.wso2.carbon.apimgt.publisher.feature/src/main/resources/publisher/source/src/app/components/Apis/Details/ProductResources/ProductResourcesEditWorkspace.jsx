@@ -538,7 +538,7 @@ function ProductResourcesEdit(props) {
                                                 id='Apis.Details.ProductResources.ProductResourcesWorkspace.api.all.
                                                 resourcesOfAPI'
                                                 defaultMessage={'Resources of the ' + selectedApi.name + ' API are' +
-                                                'shown below.Click the right hand side arrow to add them to the API' +
+                                                'shown below.Click the right hand side arrow to add them to the API ' +
                                                 'Product.'
                                                 }
                                             />
@@ -681,7 +681,7 @@ function ProductResourcesEdit(props) {
                                                 defaultMessage={
                                                     'Resources of the ' + api.name + ' API Product are shown below.' +
                                                     'Click the right hand side button to remove them from the ' +
-                                                    'api product.'
+                                                    'API Product.'
                                                 }
                                             />
                                         </Typography>
