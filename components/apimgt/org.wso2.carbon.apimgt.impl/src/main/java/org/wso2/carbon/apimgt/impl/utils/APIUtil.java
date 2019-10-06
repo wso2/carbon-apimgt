@@ -4636,6 +4636,22 @@ public final class APIUtil {
         return true;
     }
 
+    /**
+     * Returns whether Product REST APIs' token cache is enabled
+     *
+     * @return true if token cache is enabled
+     */
+    public static boolean isRESTAPITokenCacheEnabled() {
+        try {
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
+            String cacheEnabled = config.getFirstProperty(APIConstants.REST_API_TOKEN_CACHE_ENABLED);
+            return Boolean.parseBoolean(cacheEnabled);
+        } catch (Exception e) {
+            log.error("Did not found valid API Validation Information cache configuration. Use default configuration" + e);
+        }
+        return true;
+    }
 
     public static Cache getAPIContextCache() {
         CacheManager contextCacheManager = Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).

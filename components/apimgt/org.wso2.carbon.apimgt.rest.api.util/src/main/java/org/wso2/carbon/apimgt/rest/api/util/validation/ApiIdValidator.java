@@ -28,12 +28,15 @@ public class ApiIdValidator implements ConstraintValidator<ValidateApiId, String
     }
 
     public boolean isValid(String apiId, ConstraintValidatorContext constraintContext) {
+
+        Object a = new String[]{};
+
         if (apiId == null) {
             return false;
         } else if (apiId.matches("[\\w.@]+-[\\w.]+-[\\w.]+")) { //matches provider-name-version template
             return true;
         } else if (apiId.toLowerCase().matches(
-                "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}")) { // matches UUID format 
+                "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}")) { // matches UUID format
             return true;
         }
         return false;
