@@ -176,8 +176,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=", APIConstants.NAME_TYPE_PREFIX + "=");
             }
 
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(ExceptionCodes.API_EXPORT_ERROR);
-
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();

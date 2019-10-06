@@ -23,7 +23,7 @@
   "apim.cache.restapi_token.enable": true,
   "apim.cache.publisher_roles.enable": true,
   "apim.cache.jwt_claim.enable": true,
-  "apim.cache.restapi.token_expiry_time" : "300s",
+  "apim.cache.restapi_token.expiry_time" : "300s",
   "apim.analytics.enable": false,
   "apim.analytics.provider_impl": "org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl",
   "apim.analytics.store_api_url": "https://localhost:7444",

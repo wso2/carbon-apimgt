@@ -247,6 +247,4 @@ public final class RestApiConstants {
     public static final String ERROR_TOKEN_INVALID = "Provided access token is invalid";
     public static final String ERROR_TOKEN_EXPIRED = "Access token is expired";
     public static final String ERROR_SCOPE_VALIDATION_FAILED = "You cannot access API as scope validation failed";
-
-
 }

@@ -98,7 +98,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
 
         // if we got valid access token we will proceed with next
         if (tokenInfo != null && tokenInfo.isTokenValid()) {
-            if (!retrievedFromTokenCache) {
+            if (APIUtil.isRESTAPITokenCacheEnabled() && !retrievedFromTokenCache) {
                 //put the token info into token cache
                 getRESTAPITokenCache().put(accessToken, tokenInfo);
             }
@@ -137,7 +137,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
             }
         } else {
             log.error(RestApiConstants.ERROR_TOKEN_INVALID);
-            if (!retrievedFromInvalidTokenCache) {
+            if (APIUtil.isRESTAPITokenCacheEnabled() && !retrievedFromInvalidTokenCache) {
                 getRESTAPIInvalidTokenCache().put(accessToken, tokenInfo);
             }
         }

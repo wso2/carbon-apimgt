@@ -29,8 +29,6 @@ public class ApiIdValidator implements ConstraintValidator<ValidateApiId, String
 
     public boolean isValid(String apiId, ConstraintValidatorContext constraintContext) {
 
-        Object a = new String[]{};
-
         if (apiId == null) {
             return false;
         } else if (apiId.matches("[\\w.@]+-[\\w.]+-[\\w.]+")) { //matches provider-name-version template

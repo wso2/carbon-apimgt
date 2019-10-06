@@ -161,8 +161,8 @@
         <GatewayResourceCacheExpiry>{{apim.cache.resource.expiry_time}}</GatewayResourceCacheExpiry>
         {% endif %}
         <!-- Expiry time for the apim REST API token cache -->
-        {% if apim.cache.restapi.token_expiry_time is defined %}
-        <RESTAPITokenCacheExpiry>{{apim.cache.restapi.token_expiry_time}}</RESTAPITokenCacheExpiry>
+        {% if apim.cache.restapi_token.expiry_time is defined %}
+        <RESTAPITokenCacheExpiry>{{apim.cache.restapi_token.expiry_time}}</RESTAPITokenCacheExpiry>
         {% endif %}
         <!-- This parameter specifies the expiration time of the TagCache. TagCache will
              only be created when this element is uncommented. When the specified
