@@ -201,7 +201,7 @@ class AuthManager {
                 return false;
             } else if (
                 // if the user has creator role, but not the publisher role
-                api.lifeCycleStatus === 'CREATED') {
+                api.lifeCycleStatus === 'CREATED' || api.lifeCycleStatus === 'PROTOTYPED') {
                 return false;
             } else {
                 return true;

@@ -31,6 +31,8 @@ import Utils from './data/Utils';
 import ConfigManager from './data/ConfigManager';
 import AppRouts from './AppRouts';
 import TenantListing from './TenantListing';
+import CONSTS from './data/Constants';
+import LoginDenied from './LoginDenied';
 
 /**
  * Language.
@@ -100,7 +102,7 @@ export default class ProtectedApp extends Component {
                 this.setState({ userResolved: true, scopesFound: true });
             } else {
                 console.log('No relevant scopes found, redirecting to Anonymous View');
-                this.setState({ userResolved: true });
+                this.setState({ userResolved: true, notEnoughPermission: true });
             }
         } else {
             // If no user data available , Get the user info from existing token information
@@ -126,8 +128,12 @@ export default class ProtectedApp extends Component {
                     }
                 })
                 .catch((error) => {
-                    console.log('Error: ' + error + ',redirecting to Anonymous View');
-                    this.setState({ userResolved: true });
+                    if (error && error.message === CONSTS.errorCodes.INSUFFICIENT_PREVILEGES) {
+                        this.setState({ userResolved: true, notEnoughPermission: true });
+                    } else {
+                        console.log('Error: ' + error + ',redirecting to Anonymous View');
+                        this.setState({ userResolved: true });
+                    }
                 });
         }
     }
@@ -182,7 +188,7 @@ export default class ProtectedApp extends Component {
      * @returns {Component}
      */
     render() {
-        const { userResolved, tenantList } = this.state;
+        const { userResolved, tenantList, notEnoughPermission } = this.state;
         const { tenantDomain } = this.context;
         if (!userResolved) {
             return <Loading />;
@@ -192,6 +198,9 @@ export default class ProtectedApp extends Component {
         let isAuthenticated = false;
         if (scopesFound && isUserFound) {
             isAuthenticated = true;
+        }
+        if (notEnoughPermission) {
+            return <LoginDenied />;
         }
 
         // Waiting till the tenant list is retrieved

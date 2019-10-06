@@ -239,6 +239,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             API apiToAdd = prepareToCreateAPIByDTO(body);
+            validateScopes(apiToAdd);
             //adding the api
             apiProvider.addAPI(apiToAdd);
 
@@ -567,6 +568,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
+            validateScopes(apiToUpdate);
             apiToUpdate.setThumbnailUrl(originalAPI.getThumbnailUrl());
 
             //attach micro-geteway labels
@@ -2317,6 +2319,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         existingAPI.setUriTemplates(uriTemplates);
         existingAPI.setScopes(scopes);
+        validateScopes(existingAPI);
 
         //Update API is called to update URITemplates and scopes of the API
         apiProvider.updateAPI(existingAPI);
@@ -2606,6 +2609,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 definitionToAdd = apiDefinition
                         .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
             }
+            validateScopes(apiToAdd);
 
             // adding the API and definition
             apiProvider.addAPI(apiToAdd);
@@ -3375,5 +3379,41 @@ public class ApisApiServiceImpl implements ApisApiService {
             log.error("Parser Error occurred while parsing config json string in to json object", e);
         }
         return null;
+    }
+
+    /**
+     * validate user inout scopes
+     *
+     * @param api api information
+     * @throws APIManagementException throw if validation failure
+     */
+    private void validateScopes(API api) throws APIManagementException {
+        APIIdentifier apiId = api.getId();
+        for (Scope scope : api.getScopes()) {
+            if (!(APIUtil.isWhiteListedScope(scope.getName()))) {
+                String username = RestApiUtil.getLoggedInUsername();
+                String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+                int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+                APIProvider apiProvider = RestApiUtil.getProvider(username);
+
+                if (apiProvider.isScopeKeyAssigned(apiId, scope.getName(), tenantId)) {
+                    RestApiUtil
+                            .handleBadRequest("Scope " + scope.getName() + " is already assigned by another API", log);
+                }
+            }
+            //todo: validate with migrations
+//            if (StringUtils.isBlank(scope.getDescription())) {
+//                RestApiUtil.handleBadRequest("Scope cannot have empty description", log);
+//            }
+            if (scope.getRoles() != null) {
+                for (String aRole : scope.getRoles().split(",")) {
+                    boolean isValidRole = APIUtil.isRoleNameExist(apiId.getProviderName(), aRole);
+                    if (!isValidRole) {
+                        String error = "Role '" + aRole + "' does not exist.";
+                        RestApiUtil.handleBadRequest(error, log);
+                    }
+                }
+            }
+        }
     }
 }
