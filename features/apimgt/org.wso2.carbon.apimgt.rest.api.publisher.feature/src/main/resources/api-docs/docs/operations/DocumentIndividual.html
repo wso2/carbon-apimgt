@@ -2,7 +2,7 @@
     <h1><a name="Document (Individual)"></a>Document (Individual)</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdContentGet"></a>Get the content of an API document</h4> <code>GET https://apis.wso2.com/api/am/publisher/v0.14/apis/{apiId}/documents/{documentId}/content</code>
+            <h4 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdContentGet"></a>Get the content of an API document</h4> <code>GET https://apis.wso2.com/api/am/publisher/v0.15/apis/{apiId}/documents/{documentId}/content</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrive the content of an API&#39;s document.
@@ -12,7 +12,7 @@ The document can be of 3 types. In each cases responses are different.
 1. **Inline type**:
    The content of the document will be retrieved in &#x60;text/plain&#x60; content type
 
-   _Sample cURL_ : &#x60;curl -k -H &quot;Authorization:Bearer 579f0af4-37be-35c7-81a4-f1f1e9ee7c51&quot; -F inlineContent&#x3D;@&quot;docs.txt&quot; -X POST &quot;https://localhost:9443/api/am/publisher/v0.14/apis/995a4972-3178-4b17-a374-756e0e19127c/documents/43c2bcce-60e7-405f-bc36-e39c0c5e189e/content&#x60;
+   _Sample cURL_ : &#x60;curl -k -H &quot;Authorization:Bearer 579f0af4-37be-35c7-81a4-f1f1e9ee7c51&quot; -F inlineContent&#x3D;@&quot;docs.txt&quot; -X POST &quot;https://localhost:9443/api/am/publisher/v0.15/apis/995a4972-3178-4b17-a374-756e0e19127c/documents/43c2bcce-60e7-405f-bc36-e39c0c5e189e/content&#x60;
 2. **FILE type**:
    The file will be downloaded with the related content type (eg. &#x60;application/pdf&#x60;)
 3. **URL type**:
@@ -29,7 +29,7 @@ The document can be of 3 types. In each cases responses are different.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsDocumentIdContentGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content
+                <div id="request-apisApiIdDocumentsDocumentIdContentGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v0.15/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content
 Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a
 </code></div>
 
@@ -56,9 +56,9 @@ startxref
 %%EOF</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a&quot; &quot;https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content&quot; &gt; sample.pdf</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a&quot; &quot;https://localhost:9443/api/am/publisher/v0.15/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content&quot; &gt; sample.pdf</code></div>
 
-         
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -80,17 +80,17 @@ startxref
                 </thead>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>apiId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -110,17 +110,17 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>documentId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -138,16 +138,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -166,16 +166,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -195,16 +195,16 @@ variant of the resource (Will be supported in future).
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-Modified-Since</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -245,7 +245,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">OK. File or inline content returned. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+
                             </span>
                         </td>
                     </tr>
@@ -254,7 +254,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">See Other. Source can be retrived from the URL specified at the Location header. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+
                             </span>
                         </td>
                     </tr>
@@ -263,7 +263,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+
                             </span>
                         </td>
                     </tr>
@@ -288,7 +288,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdContentPost"></a>Upload the content of an API document</h4> <code>POST https://apis.wso2.com/api/am/publisher/v0.14/apis/{apiId}/documents/{documentId}/content</code>
+            <h4 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdContentPost"></a>Upload the content of an API document</h4> <code>POST https://apis.wso2.com/api/am/publisher/v0.15/apis/{apiId}/documents/{documentId}/content</code>
             <p class="marked"></p>
 
             <p class="marked">Thid operation can be used to upload a file or add inline content to an API document.
@@ -309,7 +309,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsDocumentIdContentPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v0.14/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content
+                <div id="request-apisApiIdDocumentsDocumentIdContentPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v0.15/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content
 Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 Content-Length: 8004
 Content-Type: multipart/form-data; boundary&#x3D;------------------------7b9a53f1ffa452b9
@@ -330,7 +330,7 @@ Content-Type: application/octet-stream
                 </h4>
             </div>
                 <div id="response-apisApiIdDocumentsDocumentIdContentPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
-Location: https://localhost:9443/api/am/publisher/v0.14/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content
+Location: https://localhost:9443/api/am/publisher/v0.15/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content
 Content-Type: application/json
 
 {
@@ -345,9 +345,9 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -F file&#x3D;@&quot;sample.pdf&quot; -X POST &quot;https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -F file&#x3D;@&quot;sample.pdf&quot; -X POST &quot;https://localhost:9443/api/am/publisher/v0.15/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content&quot;</code></div>
 
-         
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -369,17 +369,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>apiId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -399,17 +399,17 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>documentId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -427,17 +427,17 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>Content-Type</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -456,15 +456,15 @@ Should be formatted as **provider-name-version**.
                     <tr>
                         <td class="parameter">
                             <span class="param-in">Form </span>
-                            
-                            
-                            
-                            
+
+
+
+
                         </td>
                         <td class="param-name">
                             <p>file</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -483,15 +483,15 @@ Should be formatted as **provider-name-version**.
                     <tr>
                         <td class="parameter">
                             <span class="param-in">Form </span>
-                            
-                            
-                            
-                            
+
+
+
+
                         </td>
                         <td class="param-name">
                             <p>inlineContent</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -509,16 +509,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-Match</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -537,16 +537,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-Unmodified-Since</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -620,7 +620,7 @@ Should be formatted as **provider-name-version**.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdDelete"></a>Delete a document of an API</h4> <code>DELETE https://apis.wso2.com/api/am/publisher/v0.14/apis/{apiId}/documents/{documentId}</code>
+            <h4 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdDelete"></a>Delete a document of an API</h4> <code>DELETE https://apis.wso2.com/api/am/publisher/v0.15/apis/{apiId}/documents/{documentId}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to delete a document associated with an API.
@@ -636,7 +636,7 @@ Should be formatted as **provider-name-version**.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsDocumentIdDelete"class="pre collapse in"><code class="json">DELETE https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058
+                <div id="request-apisApiIdDocumentsDocumentIdDelete"class="pre collapse in"><code class="json">DELETE https://localhost:9443/api/am/publisher/v0.15/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -649,9 +649,9 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 <div id="response-apisApiIdDocumentsDocumentIdDelete" class="pre collapse in"><code class="json">HTTP/1.1 200 OK</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X DELETE https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X DELETE https://localhost:9443/api/am/publisher/v0.15/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058</code></div>
 
-         
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -673,17 +673,17 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 </thead>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>apiId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -703,17 +703,17 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>documentId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -731,16 +731,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-Match</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -759,16 +759,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-Unmodified-Since</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -808,7 +808,7 @@ Should be formatted as **provider-name-version**.
                         <td class="parameter"><p class="marked">OK. Resource successfully deleted. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+
                             </span>
                         </td>
                     </tr>
@@ -833,7 +833,7 @@ Should be formatted as **provider-name-version**.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdGet"></a>Get a document of an API</h4> <code>GET https://apis.wso2.com/api/am/publisher/v0.14/apis/{apiId}/documents/{documentId}</code>
+            <h4 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdGet"></a>Get a document of an API</h4> <code>GET https://apis.wso2.com/api/am/publisher/v0.15/apis/{apiId}/documents/{documentId}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve a particular document&#39;s metadata associated with an API.
@@ -849,7 +849,7 @@ Should be formatted as **provider-name-version**.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsDocumentIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5
+                <div id="request-apisApiIdDocumentsDocumentIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v0.15/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -874,9 +874,9 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://localhost:9443/api/am/publisher/v0.15/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5&quot;</code></div>
 
-         
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -898,17 +898,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>apiId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -928,17 +928,17 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>documentId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -956,16 +956,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -984,16 +984,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -1013,16 +1013,16 @@ variant of the resource (Will be supported in future).
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-Modified-Since</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -1072,7 +1072,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+
                             </span>
                         </td>
                     </tr>
@@ -1097,7 +1097,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdPut"></a>Update a document of an API</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v0.14/apis/{apiId}/documents/{documentId}</code>
+            <h4 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdPut"></a>Update a document of an API</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v0.15/apis/{apiId}/documents/{documentId}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to update metadata of an API&#39;s document.
@@ -1113,7 +1113,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsDocumentIdPut"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/publisher/v0.14/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5
+                <div id="request-apisApiIdDocumentsDocumentIdPut"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/publisher/v0.15/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5
 Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a
 Content-Type: application/json
 
@@ -1149,9 +1149,9 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a&quot; -H &quot;Content-Type: application/json&quot; -X PUT -d data.json &quot;https://localhost:9443/api/am/publisher/v0.14/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a&quot; -H &quot;Content-Type: application/json&quot; -X PUT -d data.json &quot;https://localhost:9443/api/am/publisher/v0.15/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5&quot;</code></div>
 
-         
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -1173,17 +1173,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>apiId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -1203,17 +1203,17 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>documentId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -1231,17 +1231,17 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
-                            
+
+
+
+
                             <span class="param-in">Body </span>
                         </td>
                         <td class="param-name">
                             <p>body</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -1260,17 +1260,17 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>Content-Type</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -1288,16 +1288,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-Match</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -1316,16 +1316,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-Unmodified-Since</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>

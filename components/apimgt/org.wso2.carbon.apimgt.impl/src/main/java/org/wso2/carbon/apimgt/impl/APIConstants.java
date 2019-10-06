@@ -1021,6 +1021,7 @@ public final class APIConstants {
     public static final String[] GRAPHQL_SUPPORTED_METHODS = {"QUERY", "MUTATION", "SUBSCRIPTION"};
     public static final String API_GRAPHQL_SCHEMA_RESOURCE_LOCATION = API_APPLICATION_DATA_LOCATION + "/graphql/";
     public static final String GRAPHQL_SCHEMA_FILE_EXTENSION = ".graphql";
+    public static final String GRAPHQL_LOCAL_ENTRY_EXTENSION = "_graphQL";
     public static final String GRAPHQL_SCHEMA_PROVIDER_SEPERATOR = "--";
     public static final String GRAPHQL_RESOURCE_PATH = "/*";
     public static final String GRAPHQL_SCHEMA_DEFINITION_SEPARATOR = "schemaDefinition=";
@@ -1045,6 +1046,7 @@ public final class APIConstants {
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";
     public static final String VELOCITY_LOGGER = "VelocityLogger";
 
+    public static final String SHA_256 = "SHA-256";
 
     public static class DigestAuthConstants {
         public static final String REALM = "realm";
@@ -1230,6 +1232,8 @@ public final class APIConstants {
     public static final String X_WSO2_PRODUCTION_ENDPOINTS = "x-wso2-production-endpoints";
     public static final String X_WSO2_SANDBOX_ENDPOINTS = "x-wso2-sandbox-endpoints";
     public static final String X_WSO2_BASEPATH = "x-wso2-basePath";
+    public static final String X_WSO2_TRANSPORTS = "x-wso2-transports";
+    public static final String X_WSO2_ENDPOINT_TYPE = "endpoint_type";
 
     //API Constants
     public static final String API_DATA_NAME = "name";
@@ -1255,6 +1259,19 @@ public final class APIConstants {
     public static final String API_DATA_SANDBOX_ENDPOINTS = "sandbox_endpoints";
     public static final String API_DATA_URL = "url";
     public static final String API_UUID = "apiUUID";
+
+    public static final String IMPLEMENTATION_STATUS = "implementation_status";
+    public static final String ENDPOINT_TYPE_DEFAULT = "default";
+    public static final String ENDPOINT_TYPE_FAILOVER = "failover";
+    public static final String ENDPOINT_TYPE_LOADBALANCE = "load_balance";
+    public static final String ENDPOINT_CONFIG = "endpoint_config";
+    public static final String ENDPOINT_TYPE_HTTP = "http";
+    public static final String ENDPOINT_TYPE_ADDRESS = "address";
+    public static final String ENDPOINT_PRODUCTION_FAILOVERS = "production_failovers";
+    public static final String ENDPOINT_SANDBOX_FAILOVERS = "sandbox_failovers";
+    public static final String ENDPOINT_PRODUCTION_ENDPOINTS = "production_endpoints";
+    public static final String ENDPOINT_SANDBOX_ENDPOINTS = "sandbox_endpoints";
+    public static final String ENDPOINT_URL = "url";
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
     public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
@@ -1754,7 +1771,7 @@ public final class APIConstants {
         public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
                 REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_1;
         public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
-        public static final String REST_API_ADMIN_VERSION = "v0.14";
+        public static final String REST_API_ADMIN_VERSION = "v0.15";
         public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION;
         public static final String REST_API_ADMIN_IMPORT_API_RESOURCE = "/import/api";
         public static final String IMPORT_API_PRESERVE_PROVIDER = "preserveProvider";
@@ -1769,4 +1786,9 @@ public final class APIConstants {
         public static final String PUB_API_LIST_RESPONSE_PARAMS_COUNT = "count";
         public static final String PUB_API_RESPONSE_PARAMS_ID = "id";
     }
+    
+    public static final int MAX_LENGTH_API_NAME = 50;
+    public static final int MAX_LENGTH_VERSION = 30;
+    public static final int MAX_LENGTH_PROVIDER = 50;
+    public static final int MAX_LENGTH_CONTEXT = 82; //context becomes context + version + two '/'. so max context is 50 
 }

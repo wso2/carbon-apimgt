@@ -24,13 +24,7 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
-import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
@@ -55,7 +49,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -79,6 +72,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+            APIProductIdentifier apiProductIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
             if (log.isDebugEnabled()) {
                 log.debug("Delete API Product request: Id " +apiProductId + " by " + username);
             }
@@ -86,6 +80,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if (apiProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
+
+            List<SubscribedAPI> apiUsages = apiProvider.getAPIProductUsageByAPIProductId(apiProductIdentifier);
+            if (apiUsages != null && apiUsages.size() > 0) {
+                RestApiUtil.handleConflict("Cannot remove the API " + apiProductIdentifier + " as active subscriptions exist", log);
+            }
+
             apiProvider.deleteAPIProduct(apiProduct.getId());
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -493,6 +493,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             product.setUuid(apiProductId);
 
             apiProvider.updateAPIProduct(product);
+
+            APIDefinition parser = new OAS3Parser();
+            SwaggerData swaggerData = new SwaggerData(product);
+            String apiDefinition = parser.generateAPIDefinition(swaggerData);
+            apiProvider.saveSwaggerDefinition(product, apiDefinition);
+
             APIProduct updatedProduct = apiProvider.getAPIProduct(productIdentifier);
             APIProductDTO updatedProductDTO = APIMappingUtil.fromAPIProducttoDTO(updatedProduct);
             return Response.ok().entity(updatedProductDTO).build();
@@ -721,7 +727,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
             APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(body, provider);
 
-            apiProvider.addAPIProduct(productToBeAdded);
+            apiProvider.addAPIProductWithoutPublishingToGateway(productToBeAdded);
             APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
 
             APIDefinition parser = new OAS3Parser();
@@ -730,6 +736,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             apiProvider.saveSwagger20Definition(productToBeAdded.getId(), apiDefinition);
 
             APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
+
+            apiProvider.saveToGateway(createdProduct);
 
             APIProductDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(createdProduct);
             URI createdApiProductUri = new URI(

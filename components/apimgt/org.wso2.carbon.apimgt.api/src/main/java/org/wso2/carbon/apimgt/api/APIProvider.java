@@ -128,6 +128,16 @@ public interface APIProvider extends APIManager {
     List<SubscribedAPI> getAPIUsageByAPIId(APIIdentifier apiId) throws APIManagementException;
 
     /**
+     * Returns usage details of a particular api product published by a provider
+     *
+     * @param apiProductId API Product identifier
+     * @return UserApplicationAPIUsages for given provider
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to get UserApplicationAPIUsage
+     */
+    List<SubscribedAPI> getAPIProductUsageByAPIProductId(APIProductIdentifier apiProductId) throws APIManagementException;
+
+    /**
      * Shows how a given consumer uses the given API.
      *
      * @param apiIdentifier APIIdentifier
@@ -451,7 +461,7 @@ public interface APIProvider extends APIManager {
      * @param identifier APIIdentifier
      * @throws APIManagementException if failed to remove the API
      */
-    void deleteAPI(APIIdentifier identifier) throws APIManagementException;
+    void deleteAPI(APIIdentifier identifier, String apiId) throws APIManagementException;
 
     /**
      * Search API
@@ -1171,7 +1181,14 @@ public interface APIProvider extends APIManager {
      * @return UUID of the api product
      * @throws APIManagementException exception
      */
-    void addAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException;
+    void addAPIProductWithoutPublishingToGateway(APIProduct product) throws APIManagementException;
+
+    /**
+     * Publish API Product to Gateway
+     * @param product product object containing details of the product
+     * @throws FaultGatewaysException
+     */
+    void saveToGateway(APIProduct product) throws FaultGatewaysException, APIManagementException;
 
     /**
      * Delete an API Product
@@ -1265,4 +1282,12 @@ public interface APIProvider extends APIManager {
      * @return A List of labels related to the given tenant
      */
     List<Label> getAllLabels(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Remove pending lifecycle state change task for the given api.
+     *
+     * @param apiIdentifier api identifier
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException;
 }

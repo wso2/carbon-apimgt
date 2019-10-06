@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
+import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
@@ -255,7 +256,7 @@ public class APIGatewayManager {
                             } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT
                                     .equalsIgnoreCase(api.getImplementation())) {
                                 client.addApi(builder, tenantDomain, api.getId());
-                                client.addEndpoint(api, builder, tenantDomain);
+                                client.saveEndpoint(api, builder, tenantDomain);
                             }
 
                             if (api.isDefaultVersion()) {
@@ -330,9 +331,12 @@ public class APIGatewayManager {
      *            - The template builder
      * @param tenantDomain
      *            - Tenant Domain of the publisher
+     * @param associatedAPIs
+     *            - APIs associated with the current API Product
      */
-    public Map<String, String> publishToGateway(APIProduct apiProduct, APITemplateBuilder builder, String tenantDomain) {
-        Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
+    public Map<String, String> publishToGateway(APIProduct apiProduct, APITemplateBuilder builder, String tenantDomain,
+                                                Set<API> associatedAPIs) {
+        Map<String, String> failedEnvironmentsMap = new HashMap<>(0);
 
         if (apiProduct.getEnvironments() == null) {
             return failedEnvironmentsMap;
@@ -360,6 +364,7 @@ public class APIGatewayManager {
                 continue;
             }
             APIGatewayAdminClient client;
+            LocalEntryAdminClient localEntryAdminClient;
             try {
                 client = new APIGatewayAdminClient(environment);
                 if (debugEnabled) {
@@ -372,6 +377,15 @@ public class APIGatewayManager {
                     long endTime = System.currentTimeMillis();
                     log.debug("Time taken to fetch API Data: " + (endTime - apiGetStartTime) / 1000 + "  seconds");
                 }
+
+                localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
+
+                String definition = apiProduct.getDefinition();
+                localEntryAdminClient.deleteEntry(apiProduct.getUuid());
+                localEntryAdminClient.addLocalEntry("<localEntry key=\"" + apiProduct.getUuid() + "\">" +
+                        definition.replaceAll("&(?!amp;)", "&amp;").
+                                replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                        + "</localEntry>");
 
                 // If the API exists in the Gateway
                 if (apiData != null) {
@@ -386,6 +400,13 @@ public class APIGatewayManager {
 
                     //Update the API
                     client.updateApi(builder, tenantDomain, id);
+
+                    for (API api : associatedAPIs) {
+                        APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
+                        client.saveEndpoint(api, apiTemplateBuilder, tenantDomain);
+                        setSecureVaultProperty(client, api, tenantDomain, environment);
+                        updateClientCertificates(client, api, tenantDomain);
+                    }
 
                     if (debugEnabled) {
                         long endTime = System.currentTimeMillis();
@@ -409,20 +430,27 @@ public class APIGatewayManager {
                     //Add the API
                     client.addApi(builder, tenantDomain, id);
 
+                    for (API api : associatedAPIs) {
+                        APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
+                        client.saveEndpoint(api, apiTemplateBuilder, tenantDomain);
+                        setSecureVaultProperty(client, api, tenantDomain, environment);
+                        deployClientCertificates(client, api, tenantDomain);
+                    }
+
                     if (debugEnabled) {
                         long endTime = System.currentTimeMillis();
                         log.debug("Publishing API (if the API does not exist in the Gateway) took " +
                                 (endTime - startTime) / 1000 + "  seconds");
                     }
                 }
-            } catch (AxisFault axisFault) {
+            } catch (AxisFault | EndpointAdminException | APIManagementException | CertificateManagementException e) {
                 /*
                 didn't throw this exception to handle multiple gateway publishing
                 if gateway is unreachable we collect that environments into map with issue and show on popup in ui
                 therefore this didn't break the gateway publishing if one gateway unreachable
                  */
-                failedEnvironmentsMap.put(environmentName, axisFault.getMessage());
-                log.error("Error occurred when publish to gateway " + environmentName, axisFault);
+                failedEnvironmentsMap.put(environmentName, e.getMessage());
+                log.error("Error occurred when publish to gateway " + environmentName, e);
             }
 
             if (debugEnabled) {
@@ -444,6 +472,8 @@ public class APIGatewayManager {
 	 */
     public Map<String, String> removeFromGateway(API api, String tenantDomain) {
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
+        LocalEntryAdminClient localEntryAdminClient;
+        String localEntryUUId = api.getUUID();
         if (api.getEnvironments() != null) {
             for (String environmentName : api.getEnvironments()) {
                 try {
@@ -490,7 +520,14 @@ public class APIGatewayManager {
                             client.deleteDefaultApi(tenantDomain, api.getId());
                         }
                     }
-
+                    if (localEntryUUId != null && !localEntryUUId.isEmpty()) {
+                        if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
+                            localEntryUUId = localEntryUUId + APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION;
+                        }
+                        localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain == null ?
+                                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
+                        localEntryAdminClient.deleteEntry(localEntryUUId);
+                    }
                 } catch (AxisFault axisFault) {
                     /*
                     didn't throw this exception to handle multiple gateway publishing
@@ -509,6 +546,52 @@ public class APIGatewayManager {
                 }
             }
             updateRemovedClientCertificates(api, tenantDomain);
+        }
+        return failedEnvironmentsMap;
+    }
+
+    /**
+     * Removed an API Product from the configured Gateways
+     *
+     * @param apiProduct
+     *            - The API Product to be removed
+     * @param tenantDomain
+     *            - Tenant Domain of the publisher
+     */
+    public Map<String, String> removeFromGateway(APIProduct apiProduct, String tenantDomain, Set<API> associatedAPIs) {
+        Map<String, String> failedEnvironmentsMap = new HashMap<>();
+        if (apiProduct.getEnvironments() != null) {
+            for (String environmentName : apiProduct.getEnvironments()) {
+                try {
+                    Environment environment = environments.get(environmentName);
+                    //If the environment is removed from the configuration, continue without removing
+                    if (environment == null) {
+                        continue;
+                    }
+
+                    APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
+
+                    APIIdentifier id = new APIIdentifier(PRODUCT_PREFIX, apiProduct.getId().getName(), PRODUCT_VERSION);
+                    client.deleteApi(tenantDomain, id);
+
+                    for (API api : associatedAPIs) {
+                        if (client.getApi(tenantDomain, api.getId()) == null) {
+                            client.deleteEndpoint(api, tenantDomain);
+                            unDeployClientCertificates(client, api, tenantDomain);
+                            undeployCustomSequences(client, api, tenantDomain, environment);
+                        }
+                    }
+                } catch (AxisFault | EndpointAdminException | CertificateManagementException e) {
+                    /*
+                    didn't throw this exception to handle multiple gateway publishing
+                    if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                    therefore this didn't break the gateway unpublisihing if one gateway unreachable
+                    */
+                    log.error("Error occurred when removing from gateway " + environmentName,
+                            e);
+                    failedEnvironmentsMap.put(environmentName, e.getMessage());
+                }
+            }
         }
         return failedEnvironmentsMap;
     }
@@ -670,6 +753,8 @@ public class APIGatewayManager {
 
     public Map<String, String> removeDefaultAPIFromGateway(API api, String tenantDomain) {
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
+        LocalEntryAdminClient localEntryAdminClient;
+        String localEntryUUId = api.getUUID();
         if (api.getEnvironments() != null) {
             for (String environmentName : api.getEnvironments()) {
                 try {
@@ -683,6 +768,11 @@ public class APIGatewayManager {
                         }
                         client.deleteDefaultApi(tenantDomain, api.getId());
                     }
+                    if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
+                        localEntryUUId = localEntryUUId + APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION;
+                    }
+                    localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
+                    localEntryAdminClient.deleteEntry(localEntryUUId);
                 } catch (AxisFault axisFault) {
                     /*
                 didn't throw this exception to handle multiple gateway publishing

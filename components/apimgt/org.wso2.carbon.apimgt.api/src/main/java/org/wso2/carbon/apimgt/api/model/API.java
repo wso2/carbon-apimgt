@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -123,6 +124,11 @@ public class API implements Serializable {
 
     private boolean isDefaultVersion = false;
     private boolean isPublishedDefaultVersion = false;
+
+    /**
+     * Used to set the workflow status in lifecycle state change workflow
+     */
+    private String workflowStatus = null;
 
     private Set<String> environments;
 
@@ -933,6 +939,14 @@ public class API implements Serializable {
         this.wsdlResource = wsdl;
     }
 
+    public String getWorkflowStatus() {
+        return workflowStatus;
+    }
+
+    public void setWorkflowStatus(String workflowStatus) {
+        this.workflowStatus = workflowStatus;
+    }
+
     public List<APIEndpoint> getEndpoint() {
 
         return endpoints;
@@ -970,5 +984,21 @@ public class API implements Serializable {
                     .append("\"}\n");
         }
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+
+        if (!(o instanceof API)) {
+            return false;
+        }
+
+        return Objects.equals(id, ((API) o).id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.impl.utils;
 import com.google.gson.Gson;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.om.impl.traverse.OMChildElementIterator;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
@@ -127,11 +126,13 @@ import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.impl.token.JWTSignatureAlg;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
@@ -145,7 +146,6 @@ import org.wso2.carbon.core.commons.stub.loggeduserinfo.LoggedUserInfoAdminStub;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
-import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.endpoints.EndpointManager;
@@ -156,7 +156,6 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
-import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -5973,12 +5972,13 @@ public final class APIUtil {
      * @param match string to match
      * @return whether the provided URL content contains the string to match
      */
-    public static boolean isURLContentContainsString(URL url, String match) {
+    public static boolean isURLContentContainsString(URL url, String match, int maxLines) {
         try (BufferedReader in =
                      new BufferedReader(new InputStreamReader(url.openStream(), Charset.defaultCharset()))) {
             String inputLine;
             StringBuilder urlContent = new StringBuilder();
-            while ((inputLine = in.readLine()) != null) {
+            while ((inputLine = in.readLine()) != null && maxLines > 0) {
+                maxLines --;
                 urlContent.append(inputLine);
                 if (urlContent.indexOf(match) > 0) {
                     return true;
@@ -8090,9 +8090,11 @@ public final class APIUtil {
      */
     public static String constructApisGetQuery(String query) throws APIManagementException {
         String newSearchQuery = constructQueryWithProvidedCriterias(query.trim());
-        String typeCriteria = APIConstants.TYPE_SEARCH_TYPE_KEY + APIUtil.getORBasedSearchCriteria
-                (APIConstants.API_SUPPORTED_TYPE_LIST);
-        newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
+        if (!query.contains(APIConstants.TYPE)) {
+            String typeCriteria = APIConstants.TYPE_SEARCH_TYPE_KEY + APIUtil.getORBasedSearchCriteria
+                    (APIConstants.API_SUPPORTED_TYPE_LIST);
+            newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
+        }
         return newSearchQuery;
     }
 
@@ -8821,16 +8823,13 @@ public final class APIUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String productName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String productVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, productName, productVersion);
-            int apiProductId = ApiMgtDAO.getInstance().getAPIProductID(apiProductIdentifier, null);
-
-            if (apiProductId == -1) {
-                return null;
-            }
-
+            APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, productName,
+                    productVersion);
             apiProduct = new APIProduct(apiProductIdentifier);
+            ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
+
             setResourceProperties(apiProduct, registry, artifactPath);
-            apiProduct.setProductId(apiProductId);
+
             //set uuid
             apiProduct.setUuid(artifact.getId());
             apiProduct.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
@@ -8868,12 +8867,27 @@ public final class APIUtil {
             List<APIProductResource> resources = ApiMgtDAO.getInstance().
                     getAPIProductResourceMappings(apiProductIdentifier);
 
+            Set<String> tags = new HashSet<String>();
+            Tag[] tag = registry.getTags(artifactPath);
+            for (Tag tag1 : tag) {
+                tags.add(tag1.getTagName());
+            }
+            apiProduct.addTags(tags);
+
             for (APIProductResource resource : resources) {
                 String apiPath = APIUtil.getAPIPath(resource.getApiIdentifier());
 
                 Resource productResource = registry.get(apiPath);
                 String artifactId = productResource.getUUID();
                 resource.setApiId(artifactId);
+
+                GenericArtifactManager artifactManager = getArtifactManager(registry,
+                        APIConstants.API_KEY);
+
+                GenericArtifact apiArtifact = artifactManager.getGenericArtifact(resource.getApiId());
+                API api = getAPI(apiArtifact, registry);
+
+                resource.setEndpointConfig(api.getEndpointConfig());
             }
 
             apiProduct.setProductResources(resources);
@@ -8935,7 +8949,7 @@ public final class APIUtil {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
             adminPassword = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
-                    .getRealmConfiguration().getAdminUserName();
+                    .getRealmConfiguration().getAdminPassword();
 
         } catch (UserStoreException e) {
             handleInternalException("Error in getting admin password from user-mgt.xml", e);
@@ -9184,5 +9198,22 @@ public final class APIUtil {
             return APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
         }
         return alias;
+    }
+
+    /**
+     * Get the workflow status information for the given api for the given workflow type
+     *
+     * @param apiIdentifier Api identifier
+     * @param workflowType  workflow type
+     * @return WorkflowDTO
+     * @throws APIManagementException
+     */
+    public static WorkflowDTO getAPIWorkflowStatus(APIIdentifier apiIdentifier, String workflowType)
+            throws APIManagementException {
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        int apiId = apiMgtDAO.getAPIID(apiIdentifier, null);
+        WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
+                WorkflowConstants.WF_TYPE_AM_API_STATE);
+        return wfDTO;
     }
 }

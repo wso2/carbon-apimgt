@@ -45,6 +45,8 @@ import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -171,16 +173,7 @@ public class APIMappingUtil {
         if (dto.getSubscriptionAvailableTenants() != null) {
             model.setSubscriptionAvailableTenants(StringUtils.join(dto.getSubscriptionAvailableTenants(), ","));
         }
-        // scopes
-        for (ScopeDTO scope : dto.getScopes()) {
-            for (String aRole : scope.getBindings().getValues()) {
-                boolean isValidRole = APIUtil.isRoleNameExist(provider, aRole);
-                if (!isValidRole) {
-                    String error = "Role '" + aRole + "' Does not exist.";
-                    RestApiUtil.handleBadRequest(error, log);
-                }
-            }
-        }
+
         Set<Scope> scopes = getScopes(dto);
         model.setScopes(scopes);
 
@@ -855,10 +848,11 @@ public class APIMappingUtil {
             dto.setLastUpdatedTime(String.valueOf(timeStamp));
         }
         if (null != model.getCreatedTime()) {
-            Date createdTime = model.getLastUpdated();
+            Date createdTime = new Date(Long.parseLong(model.getCreatedTime()));
             Timestamp timeStamp = new Timestamp(createdTime.getTime());
             dto.setCreatedTime(String.valueOf(timeStamp));
         }
+        dto.setWorkflowStatus(model.getWorkflowStatus());
         return dto;
     }
 
@@ -1622,8 +1616,9 @@ public class APIMappingUtil {
         return listDto;
     }
 
-    public static APIProductDTO fromAPIProducttoDTO(APIProduct product) {
+    public static APIProductDTO fromAPIProducttoDTO(APIProduct product) throws APIManagementException {
         APIProductDTO productDto = new APIProductDTO();
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         productDto.setName(product.getId().getName());
         productDto.setProvider(product.getId().getProviderName());
         productDto.setId(product.getUuid());
@@ -1660,7 +1655,7 @@ public class APIMappingUtil {
         productDto.setState(StateEnum.valueOf(product.getState()));
         productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
                 .replace(RestApiConstants.APIPRODUCTID_PARAM, product.getUuid()));
-        List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
+
         //Aggregate API resources to each relevant API.
         Map<String, ProductAPIDTO> aggregatedAPIs = new HashMap<String, ProductAPIDTO>();
         List<APIProductResource> resources = product.getProductResources();
@@ -1670,11 +1665,7 @@ public class APIMappingUtil {
                 ProductAPIDTO productAPI = aggregatedAPIs.get(uuid);
                 URITemplate template = apiProductResource.getUriTemplate();
                 List<APIOperationsDTO> operations = productAPI.getOperations();
-                APIOperationsDTO operation = new APIOperationsDTO();
-                operation.setVerb(template.getHTTPVerb());
-                operation.setTarget(template.getResourceURI());
-                operation.setAuthType(template.getAuthType());
-                operation.setThrottlingPolicy(template.getThrottlingTier());
+                APIOperationsDTO operation = getOperationFromURITemplate(template);
                 operations.add(operation);
             } else {
                 ProductAPIDTO productAPI = new ProductAPIDTO();
@@ -1683,19 +1674,17 @@ public class APIMappingUtil {
                 List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
                 URITemplate template = apiProductResource.getUriTemplate();
 
-                APIOperationsDTO operation = new APIOperationsDTO();
-                operation.setVerb(template.getHTTPVerb());
-                operation.setTarget(template.getResourceURI());
-                operation.setAuthType(template.getAuthType());
-                operation.setThrottlingPolicy(template.getThrottlingTier());
+                APIOperationsDTO operation = getOperationFromURITemplate(template);
                 operations.add(operation);
 
                 productAPI.setOperations(operations);
                 aggregatedAPIs.put(uuid, productAPI);
             }
         }
-        apis = new ArrayList<ProductAPIDTO>(aggregatedAPIs.values());
-        productDto.setApis(apis);
+        productDto.setApis(new ArrayList<>(aggregatedAPIs.values()));
+        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(product.getId());
+        List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
+        productDto.setScopes(scopeDTOS);
 
         String subscriptionAvailability = product.getSubscriptionAvailability();
         if (subscriptionAvailability != null) {
@@ -1713,6 +1702,9 @@ public class APIMappingUtil {
             tiersToReturn.add(tier.getName());
         }
         productDto.setPolicies(tiersToReturn);
+
+        productDto.setApiThrottlingPolicy(product.getProductLevelPolicy());
+
         if (product.getVisibility() != null) {
             productDto.setVisibility(mapVisibilityFromAPIProducttoDTO(product.getVisibility()));
         }
@@ -1764,7 +1756,7 @@ public class APIMappingUtil {
             productDto.setLastUpdatedTime(String.valueOf(timeStamp));
         }
         if (null != product.getCreatedTime()) {
-            Date createdTime = product.getLastUpdated();
+            Date createdTime = product.getCreatedTime();
             Timestamp timeStamp = new Timestamp(createdTime.getTime());
             productDto.setCreatedTime(String.valueOf(timeStamp));
         }
@@ -1838,8 +1830,7 @@ public class APIMappingUtil {
             product.setTechnicalOwnerEmail(dto.getBusinessInformation().getTechnicalOwnerEmail());
         }
 
-        String state = dto.getState() == null ? APIStatus.CREATED.toString() :dto.getState().toString() ;
-        product.setState(state);
+        product.setState(APIStatus.PUBLISHED.toString());
         Set<Tier> apiTiers = new HashSet<>();
         List<String> tiersFromDTO = dto.getPolicies();
 
@@ -1868,6 +1859,9 @@ public class APIMappingUtil {
             apiTiers.add(new Tier(tier));
         }
         product.setAvailableTiers(apiTiers);
+
+        product.setProductLevelPolicy(dto.getApiThrottlingPolicy());
+
         if (dto.getSubscriptionAvailability() != null) {
             product.setSubscriptionAvailability(
                     mapSubscriptionAvailabilityFromDTOtoAPIProduct(dto.getSubscriptionAvailability()));
@@ -1916,6 +1910,16 @@ public class APIMappingUtil {
 
         }
 
+        // scopes
+        for (ScopeDTO scope : dto.getScopes()) {
+            for (String aRole : scope.getBindings().getValues()) {
+                boolean isValidRole = APIUtil.isRoleNameExist(provider, aRole);
+                if (!isValidRole) {
+                    String error = "Role '" + aRole + "' Does not exist.";
+                    RestApiUtil.handleBadRequest(error, log);
+                }
+            }
+        }
         Set<Scope> scopes = getScopes(dto);
         product.setScopes(scopes);
 

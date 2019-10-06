@@ -82,13 +82,14 @@ public class ImportApiServiceImpl extends ImportApiService {
     public Response importApiPost(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider,
                                   Boolean overwrite) {
 
-        //Check if the URL parameter value is specified, otherwise the default value is true.
-        if (preserveProvider == null) {
-            preserveProvider = true;
-        }
         //Check whether to update. If not specified, default value is false.
         if (overwrite == null) {
             overwrite = false;
+        }
+
+        //Check if the URL parameter value is specified, otherwise the default value is true.
+        if (preserveProvider == null) {
+            preserveProvider = true;
         }
 
         try {

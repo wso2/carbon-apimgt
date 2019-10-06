@@ -2117,6 +2117,7 @@ public class APIProviderImplTest {
         API oldApi = new API(identifier);
         oldApi.setStatus(APIConstants.CREATED);
         oldApi.setVisibility("public");
+        oldApi.setContext("/api1");
 
 
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
@@ -2620,7 +2621,7 @@ public class APIProviderImplTest {
     public void testDeleteAPI() throws RegistryException, UserStoreException, APIManagementException,
             WorkflowException {
         APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
-
+        String apiUuid = "12345w";
         String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                 identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
@@ -2670,13 +2671,14 @@ public class APIProviderImplTest {
                 WorkflowConstants.WF_TYPE_AM_API_STATE)).thenReturn(wfDTO);
         Mockito.doNothing().when(apiStateWFExecutor).cleanUpPendingTask("REF");
 
-        apiProvider.deleteAPI(identifier);
+        apiProvider.deleteAPI(identifier, apiUuid);
     }
 
     @Test(expected = APIManagementException.class)
     public void testDeleteAPI_RegistryException() throws RegistryException, UserStoreException, APIManagementException,
             WorkflowException {
         APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
+        String apiUuid = "12345w";
 
         String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
@@ -2688,13 +2690,14 @@ public class APIProviderImplTest {
         Mockito.when(apiSourceArtifact.getUUID()).thenReturn("12640983654");
         PowerMockito.when(APIUtil.getAPIPath(identifier)).thenReturn(path);
         PowerMockito.when(apiProvider.registry.get(path)).thenThrow(RegistryException.class);
-        apiProvider.deleteAPI(identifier);
+        apiProvider.deleteAPI(identifier, apiUuid);
     }
 
     @Test(expected = APIManagementException.class)
     public void testDeleteAPI_WFException() throws RegistryException, UserStoreException, APIManagementException,
             WorkflowException {
         APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
+        String apiUuid = "1234w";
 
         String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
@@ -2747,17 +2750,18 @@ public class APIProviderImplTest {
         Mockito.when(wfe.getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE)).
                 thenThrow(WorkflowException.class);
 
-        apiProvider.deleteAPI(identifier);
+        apiProvider.deleteAPI(identifier, apiUuid);
     }
 
     @Test
     public void testDeleteAPI_WithActiveSubscriptions() throws RegistryException, UserStoreException,
             APIManagementException, WorkflowException {
         APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
+        String apiUuid = "12345w";
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
         Mockito.when(apimgtDAO.getAPISubscriptionCountByAPI(identifier)).thenReturn(1L);
         try {
-            apiProvider.deleteAPI(identifier);
+            apiProvider.deleteAPI(identifier, apiUuid);
         } catch (APIManagementException e) {
             Assert.assertEquals("Cannot remove the API as active subscriptions exist.", e.getMessage());
         }

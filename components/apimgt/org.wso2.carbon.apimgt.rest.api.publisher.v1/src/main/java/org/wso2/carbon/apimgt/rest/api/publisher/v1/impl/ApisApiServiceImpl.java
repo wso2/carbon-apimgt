@@ -176,7 +176,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query,
-            String ifNoneMatch, Boolean expand, String accept ,String tenantDomain, MessageContext messageContext) {
+            String ifNoneMatch, Boolean expand, String accept, MessageContext messageContext) {
 
         List<API> allMatchedApis = new ArrayList<>();
         Object apiListDTO;
@@ -198,10 +198,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
-            // We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider
-            // instead of looking at type and query
-            String username = RestApiUtil.getLoggedInUsername();
-            tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
 
             /*if (migrationMode) { // migration flow
@@ -260,6 +257,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             API apiToAdd = prepareToCreateAPIByDTO(body);
+            validateScopes(apiToAdd);
             //adding the api
             apiProvider.addAPI(apiToAdd);
 
@@ -588,6 +586,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
+            validateScopes(apiToUpdate);
             apiToUpdate.setThumbnailUrl(originalAPI.getThumbnailUrl());
 
             //attach micro-geteway labels
@@ -1157,7 +1156,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             //deletes the API
-            apiProvider.deleteAPI(apiIdentifier);
+            apiProvider.deleteAPI(apiIdentifier, apiId);
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
             keyManager.deleteRegisteredResourceByAPIId(apiId);
             return Response.ok().build();
@@ -1654,8 +1653,17 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdLifecycleStatePendingTasksDelete(String apiId, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            apiProvider.deleteWorkflowTask(apiIdentifier);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while deleting task ";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
     @Override
@@ -2500,6 +2508,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         existingAPI.setUriTemplates(uriTemplates);
         existingAPI.setScopes(scopes);
+        validateScopes(existingAPI);
 
         //Update API is called to update URITemplates and scopes of the API
         apiProvider.updateAPI(existingAPI);
@@ -2789,6 +2798,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 definitionToAdd = apiDefinition
                         .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
             }
+            validateScopes(apiToAdd);
 
             // adding the API and definition
             apiProvider.addAPI(apiToAdd);
@@ -3025,22 +3035,22 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             //adding the api
             apiProvider.addAPI(apiToAdd);
-            
+
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
             API createdApi = apiProvider.getAPI(createdApiId);
-            
-            
+
+
             String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(url);
 
             String updatedSwagger = updateSwagger(createdApi.getUUID(), swaggerStr);
             SequenceGenerator.generateSequencesFromSwagger(updatedSwagger, apiToAdd.getId());
-            
+
             return createdApi;
         } catch (APIManagementException | FaultGatewaysException e) {
             RestApiUtil.handleInternalServerError("Error while importing WSDL to create a SOAP-to-REST API",
                     e, log);
-        } 
+        }
         return null;
     }
 
@@ -3558,5 +3568,41 @@ public class ApisApiServiceImpl implements ApisApiService {
             log.error("Parser Error occurred while parsing config json string in to json object", e);
         }
         return null;
+    }
+
+    /**
+     * validate user inout scopes
+     *
+     * @param api api information
+     * @throws APIManagementException throw if validation failure
+     */
+    private void validateScopes(API api) throws APIManagementException {
+        APIIdentifier apiId = api.getId();
+        for (Scope scope : api.getScopes()) {
+            if (!(APIUtil.isWhiteListedScope(scope.getName()))) {
+                String username = RestApiUtil.getLoggedInUsername();
+                String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+                int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+                APIProvider apiProvider = RestApiUtil.getProvider(username);
+
+                if (apiProvider.isScopeKeyAssigned(apiId, scope.getName(), tenantId)) {
+                    RestApiUtil
+                            .handleBadRequest("Scope " + scope.getName() + " is already assigned by another API", log);
+                }
+            }
+            //todo: validate with migrations
+//            if (StringUtils.isBlank(scope.getDescription())) {
+//                RestApiUtil.handleBadRequest("Scope cannot have empty description", log);
+//            }
+            if (scope.getRoles() != null) {
+                for (String aRole : scope.getRoles().split(",")) {
+                    boolean isValidRole = APIUtil.isRoleNameExist(apiId.getProviderName(), aRole);
+                    if (!isValidRole) {
+                        String error = "Role '" + aRole + "' does not exist.";
+                        RestApiUtil.handleBadRequest(error, log);
+                    }
+                }
+            }
+        }
     }
 }

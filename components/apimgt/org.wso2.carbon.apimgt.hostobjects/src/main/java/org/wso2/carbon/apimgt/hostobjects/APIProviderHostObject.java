@@ -4243,7 +4243,7 @@ public class APIProviderHostObject extends ScriptableObject {
             // delete the local Entry for given API ID
             API api = apiProvider.getAPI(apiId);
             apiProvider.deleteSwaggerLocalEntry(api);
-            apiProvider.deleteAPI(apiId);
+            apiProvider.deleteAPI(apiId, "");
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
 
             if (apiId.toString() != null) {

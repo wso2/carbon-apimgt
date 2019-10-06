@@ -49,9 +49,11 @@ import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportManager;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
@@ -128,7 +130,8 @@ public class WSO2APIPublisher implements APIPublisher {
      */
     private File exportAPIArchive(API api) throws APIManagementException {
 
-        File file;
+        File apiArchive;
+        String archiveBasePath = null;
         String tenantDomain = null;
         int tenantId;
         APIImportExportManager apiImportExportManager;
@@ -145,10 +148,22 @@ public class WSO2APIPublisher implements APIPublisher {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
             api.setRedirectURL(getExternalStoreRedirectURL(tenantId));
+            //remove custom sequences from API to prevent them getting deployed in external store gateway
+            api.setInSequence(null);
+            api.setOutSequence(null);
+            api.setFaultSequence(null);
             //Export API as an archive file and set it as a multipart entity in the request
-            file = apiImportExportManager.exportAPIArchive(api, Boolean.TRUE, ExportFormat.JSON);
+            archiveBasePath = apiImportExportManager.exportAPIArtifacts(api, Boolean.TRUE, ExportFormat.JSON);
+            //remove endpoint_certificates.json if exists to prevent adding them into external store trustore
+            File endpointCertificates = new File(archiveBasePath + File.separator + api.getId().getApiName() + "-"
+                    + api.getId().getVersion() + APIImportExportConstants.JSON_ENDPOINTS_CERTIFICATE_FILE);
+            if (endpointCertificates.exists()) {
+                FileUtils.deleteQuietly(endpointCertificates);
+            }
+            CommonUtil.archiveDirectory(archiveBasePath);
+            apiArchive = new File(archiveBasePath + APIConstants.ZIP_FILE_EXTENSION);
             if (log.isDebugEnabled()) {
-                log.debug("API successfully exported to file: " + file.getName());
+                log.debug("API successfully exported to file: " + apiArchive.getName());
             }
         } catch (APIImportExportException e) {
             String errorMessage = "Error while exporting API: " + api.getId().getApiName() + " version: "
@@ -160,8 +175,12 @@ public class WSO2APIPublisher implements APIPublisher {
                     + " when exporting API:" + api.getId().getApiName() + " version: " + api.getId().getVersion();
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, e);
+        } finally {
+            if (archiveBasePath != null) {
+                FileUtils.deleteQuietly(new File(archiveBasePath));
+            }
         }
-        return file;
+        return apiArchive;
     }
 
     /**
@@ -633,7 +652,7 @@ public class WSO2APIPublisher implements APIPublisher {
      * Get HTTP Client for service endpoint port and protocol.
      *
      * @param storeEndpoint service endpoint URL Eg: http://localhost:9763/api/am/admin/v1.0/import/api
-     *                      Eg: http://localhost:9763/api/am/publisher/v0.14
+     *                      Eg: http://localhost:9763/api/am/publisher/v0.15
      * @return HTTP Client
      * @throws APIManagementException If an error occurs due to malformed URL.
      */

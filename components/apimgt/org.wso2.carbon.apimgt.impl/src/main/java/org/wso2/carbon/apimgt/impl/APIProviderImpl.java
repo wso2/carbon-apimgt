@@ -452,6 +452,33 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
+     * Returns usage details of a particular API
+     *
+     * @param apiProductId API Product identifier
+     * @return UserApplicationAPIUsages for given provider
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException If failed to get UserApplicationAPIUsage
+     */
+    @Override
+    public List<SubscribedAPI> getAPIProductUsageByAPIProductId(APIProductIdentifier apiProductId) throws APIManagementException {
+        APIProductIdentifier apiIdEmailReplaced = new APIProductIdentifier(APIUtil.replaceEmailDomain(apiProductId.getProviderName()),
+                apiProductId.getName(), apiProductId.getVersion());
+        UserApplicationAPIUsage[] allApiProductResult = apiMgtDAO.getAllAPIProductUsageByProvider(apiProductId.getProviderName());
+        List<SubscribedAPI> subscribedAPIs = new ArrayList<>();
+        for (UserApplicationAPIUsage usage : allApiProductResult) {
+            for (SubscribedAPI apiSubscription : usage.getApiSubscriptions()) {
+                APIProductIdentifier subsApiProductId = apiSubscription.getProductId();
+                APIProductIdentifier subsApiProductIdEmailReplaced = new APIProductIdentifier(
+                        APIUtil.replaceEmailDomain(subsApiProductId.getProviderName()), subsApiProductId.getName(),
+                        subsApiProductId.getVersion());
+                if (subsApiProductIdEmailReplaced.equals(apiIdEmailReplaced)) {
+                    subscribedAPIs.add(apiSubscription);
+                }
+            }
+        }
+        return subscribedAPIs;
+    }
+
+    /**
      * Shows how a given consumer uses the given API.
      *
      * @param apiIdentifier APIIdentifier
@@ -803,6 +830,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("API Version contains one or more illegal characters  " +
                     "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )");
         }
+        if (!hasValidLength(apiName, APIConstants.MAX_LENGTH_API_NAME)
+                || !hasValidLength(apiVersion, APIConstants.MAX_LENGTH_VERSION)
+                || !hasValidLength(api.getId().getProviderName(), APIConstants.MAX_LENGTH_PROVIDER)
+                || !hasValidLength(api.getContext(), APIConstants.MAX_LENGTH_CONTEXT)
+                ) {
+            throw new APIManagementException("Character length exceeds the allowable limit",
+                    ExceptionCodes.LENGTH_EXCEEDS);
+        }
     }
 
     /**
@@ -815,6 +850,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Pattern pattern = Pattern.compile(APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA);
         Matcher matcher = pattern.matcher(toExamine);
         return matcher.find();
+    }
+    
+
+    /**
+     * Check whether the provided information exceeds the maximum length
+     * @param field text field to validate
+     * @param maxLength maximum allowd length
+     * @return true if the length is valid
+     */
+    public boolean hasValidLength(String field, int maxLength) {
+        return field.length() <= maxLength;
     }
 
     /**
@@ -1839,12 +1885,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APITemplateBuilder builder = null;
         APIProductIdentifier apiProductId = apiProduct.getId();
 
+        apiProduct.setDefinition(getOpenAPIDefinition(apiProduct.getId()));
+
         String provider = apiProductId.getProviderName();
         if (provider.contains("AT")) {
             provider = provider.replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        } else {
+            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
-
 
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         gatewayManager.setProductResourceSequences(this, apiProduct, tenantDomain);
@@ -1855,13 +1904,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Error while publishing to Gateway ", e);
         }
 
-        failedEnvironment = gatewayManager.publishToGateway(apiProduct, builder, tenantDomain);
+        Set<API> associatedAPIs = getAssociatedAPIs(apiProduct);
+        failedEnvironment = gatewayManager.publishToGateway(apiProduct, builder, tenantDomain, associatedAPIs);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + apiProductId.getName() + ", API Version " + apiProductId.getVersion()
                     + " published to gateway";
             log.debug(logMessage);
         }
         return failedEnvironment;
+    }
+
+
+    private Set<API> getAssociatedAPIs(APIProduct apiProduct) throws APIManagementException {
+        List<APIProductResource> productResources = apiProduct.getProductResources();
+
+        Set<API> apis = new HashSet<>();
+
+        for (APIProductResource productResource : productResources) {
+            API api = getAPI(productResource.getApiIdentifier());
+            apis.add(api);
+        }
+
+        return apis;
     }
 
     /**
@@ -2046,6 +2110,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (api.getId().getProviderName().contains("AT")) {
             String provider = api.getId().getProviderName().replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        } else {
+            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
 
         failedEnvironment = removeFromGateway(api, tenantDomain);
@@ -2057,11 +2123,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return failedEnvironment;
     }
 
+    private Map<String, String> removeFromGateway(APIProduct apiProduct) throws APIManagementException {
+        String tenantDomain = null;
+        if (apiProduct.getId().getProviderName().contains("AT")) {
+            String provider = apiProduct.getId().getProviderName().replace("-AT-", "@");
+            tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        }
+
+        Map<String, String> failedEnvironment = removeFromGateway(apiProduct, tenantDomain);
+        if (log.isDebugEnabled()) {
+            String logMessage = "API Name: " + apiProduct.getId().getName() + ", API Version " + apiProduct.getId().getVersion()
+                    + " deleted from gateway";
+            log.debug(logMessage);
+        }
+        return failedEnvironment;
+    }
+
     public Map<String, String> removeDefaultAPIFromGateway(API api) {
         String tenantDomain = null;
         if (api.getId().getProviderName().contains("AT")) {
             String provider = api.getId().getProviderName().replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        } else {
+            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
 
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
@@ -2074,6 +2158,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (api.getId().getProviderName().contains("AT")) {
             String provider = api.getId().getProviderName().replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        } else {
+            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         return gatewayManager.isAPIPublished(api, tenantDomain);
@@ -2243,9 +2329,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private APITemplateBuilder getAPITemplateBuilder(APIProduct apiProduct) throws APIManagementException {
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(apiProduct);
-        vtb.addHandler(
-                "org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtLatencyStatsHandler", Collections
-                        .<String, String>emptyMap());
+        Map<String, String> latencyStatsProperties = new HashMap<String, String>();
+        latencyStatsProperties.put(APIConstants.API_UUID, apiProduct.getUuid());
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtLatencyStatsHandler",
+                latencyStatsProperties);
 
         Map<String, String> corsProperties = new HashMap<>();
         corsProperties.put(APIConstants.CORSHeaders.IMPLEMENTATION_TYPE_HANDLER_VALUE,
@@ -3256,7 +3343,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.updateSubscription(subscribedAPI);
     }
 
-    public void deleteAPI(APIIdentifier identifier) throws APIManagementException {
+    public void deleteAPI(APIIdentifier identifier, String apiUuid) throws APIManagementException {
         String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                 identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
@@ -3331,6 +3418,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
             API api = new API(identifier);
+            api.setUUID(apiUuid);
             api.setAsDefaultVersion(Boolean.parseBoolean(isDefaultVersion));
             api.setAsPublishedDefaultVersion(api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
             api.setType(type);
@@ -6072,14 +6160,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public WorkflowDTO getAPIWorkflowStatus(APIIdentifier apiIdentifier, String workflowType)
             throws APIManagementException {
-        int apiId = apiMgtDAO.getAPIID(apiIdentifier, null);
-
-        WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
-                WorkflowConstants.WF_TYPE_AM_API_STATE);
-
-        return wfDTO;
+        return APIUtil.getAPIWorkflowStatus(apiIdentifier, workflowType);
     }
 
+    @Override
     public void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException {
         int apiId;
         try {
@@ -6090,7 +6174,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (WorkflowException e) {
             handleException("Error while deleting the workflow task.", e);
         }
-
     }
 
     private void cleanUpPendingAPIStateChangeTask(int apiId) throws WorkflowException, APIManagementException {
@@ -6178,6 +6261,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected Map<String, String> removeFromGateway(API api, String tenantDomain) {
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         return gatewayManager.removeFromGateway(api, tenantDomain);
+    }
+
+    protected Map<String, String> removeFromGateway(APIProduct apiProduct, String tenantDomain) throws APIManagementException {
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        Set<API> associatedAPIs = getAssociatedAPIs(apiProduct);
+        return gatewayManager.removeFromGateway(apiProduct, tenantDomain, associatedAPIs);
     }
 
     protected int getTenantId(String tenantDomain) throws UserStoreException {
@@ -6627,7 +6716,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void addAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException {
+    public void addAPIProductWithoutPublishingToGateway(APIProduct product) throws APIManagementException {
         validateApiProductInfo(product);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
@@ -6686,10 +6775,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         product.setProductResources(validResources);
         //now we have validated APIs and it's resources inside the API product. Add it to database
 
+        apiMgtDAO.addAPIProduct(product, tenantDomain);
+    }
+
+    @Override
+    public void saveToGateway(APIProduct product) throws FaultGatewaysException, APIManagementException {
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
 
+        List<APIProductResource> productResources = product.getProductResources();
+
         //Only publish to gateways if the state is in Published state and has atleast one resource
-        if("PUBLISHED".equals(product.getState()) && !validResources.isEmpty()) {
+        if("PUBLISHED".equals(product.getState()) && !productResources.isEmpty()) {
             Map<String, String> failedToPublishEnvironments = publishToGateway(product);
             if (!failedToPublishEnvironments.isEmpty()) {
                 Set<String> publishedEnvironments =
@@ -6700,8 +6796,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 failedGateways.put("UNPUBLISHED", Collections.<String,String>emptyMap());
             }
         }
-
-        apiMgtDAO.addAPIProduct(product, tenantDomain);
 
         if (!failedGateways.isEmpty() &&
                 (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {
@@ -6719,9 +6813,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //this is the product rxt instance path
         String apiProductArtifactPath = APIUtil.getAPIProductPath(identifier);
 
-        //todo : check whether there are any subscriptions for this api
-
         try {
+            //int apiId = apiMgtDAO.getAPIID(identifier, null);
+            long subsCount = apiMgtDAO.getAPISubscriptionCountByAPI(identifier);
+            if (subsCount > 0) {
+                //Logging as a WARN since this isn't an error scenario.
+                String message = "Cannot remove the API Product as active subscriptions exist.";
+                log.warn(message);
+                throw new APIManagementException(message);
+            }
+
             GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
             if (artifactManager == null) {
@@ -6745,6 +6846,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             GenericArtifact apiProductArtifact = artifactManager.getGenericArtifact(apiArtifactResourceUUID);
+            String environments = apiProductArtifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             //Delete the dependencies associated  with the api product artifact
             GovernanceArtifact[] dependenciesArray = apiProductArtifact.getDependencies();
             if (dependenciesArray.length > 0) {
@@ -6756,7 +6858,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //delete registry resources
             artifactManager.removeGenericArtifact(productResourceUUID);
 
-            //todo : remove from gateways
+            APIManagerConfiguration config = getAPIManagerConfiguration();
+            boolean gatewayExists = !config.getApiGatewayEnvironments().isEmpty();
+            String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+
+            APIProduct apiProduct = new APIProduct(identifier);
+            // gatewayType check is required when API Management is deployed on
+            // other servers to avoid synapse
+            if (gatewayExists && "Synapse".equals(gatewayType)) {
+                apiProduct.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
+                List<APIProductResource> resourceMappings = apiMgtDAO.getAPIProductResourceMappings(identifier);
+                apiProduct.setProductResources(resourceMappings);
+                removeFromGateway(apiProduct);
+
+            } else {
+                log.debug("Gateway is not existed for the current API Provider");
+            }
 
             apiMgtDAO.deleteAPIProduct(identifier);
             if (log.isDebugEnabled()) {
@@ -6940,6 +7057,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )");
         }
         //version is not a mandatory field for now
+        if (!hasValidLength(apiName, APIConstants.MAX_LENGTH_API_NAME)
+                || !hasValidLength(product.getId().getVersion(), APIConstants.MAX_LENGTH_VERSION)
+                || !hasValidLength(product.getId().getProviderName(), APIConstants.MAX_LENGTH_PROVIDER)
+                || !hasValidLength(product.getContext(), APIConstants.MAX_LENGTH_CONTEXT)) {
+            throw new APIManagementException("Character length exceeds the allowable limit",
+                    ExceptionCodes.LENGTH_EXCEEDS);
+        }
     }
 
     /**

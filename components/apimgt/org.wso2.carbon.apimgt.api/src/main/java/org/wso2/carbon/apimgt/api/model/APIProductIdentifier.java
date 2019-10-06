@@ -91,7 +91,7 @@ public class APIProductIdentifier implements Serializable, Identifier {
     
     @Override
     public String toString() {
-        return this.getProviderName() + '-' + this.getName() + " : " + this.uuid;
+        return this.getProviderName() + '-' + this.getName();
     }
 
     @Override

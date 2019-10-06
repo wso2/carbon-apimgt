@@ -3,7 +3,7 @@
 
             <hr/>
             <h4 class="operation-heading"><a name="applicationsApplicationIdKeysKeyTypeGet"></a>Get key details of a given type
-</h4> <code>GET https://apis.wso2.com/api/am/store/v0.14/applications/{applicationId}/keys/{keyType}</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v0.15/applications/{applicationId}/keys/{keyType}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve key details of an individual application specifying the key type in the URI.
@@ -19,7 +19,7 @@
                 </h4>
             </div>
 
-                <div id="request-applicationsApplicationIdKeysKeyTypeGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.14/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION
+                <div id="request-applicationsApplicationIdKeysKeyTypeGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.15/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -48,9 +48,9 @@ Content-Type: application/json
 </code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://localhost:9443/api/am/store/v0.14/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://localhost:9443/api/am/store/v0.15/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION&quot;</code></div>
 
-         
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -72,17 +72,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>applicationId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -100,17 +100,17 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>keyType</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -134,16 +134,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
+
                             <span class="param-in">Query </span>
-                            
-                            
-                            
+
+
+
                         </td>
                         <td class="param-name">
                             <p>groupId</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -162,16 +162,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -237,7 +237,7 @@ Content-Type: application/json
             </table>
             <hr/>
             <h4 class="operation-heading"><a name="applicationsApplicationIdKeysKeyTypePut"></a>Update grant types and callback url of an application
-</h4> <code>PUT https://apis.wso2.com/api/am/store/v0.14/applications/{applicationId}/keys/{keyType}</code>
+</h4> <code>PUT https://apis.wso2.com/api/am/store/v0.15/applications/{applicationId}/keys/{keyType}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to update grant types and callback url of an application. (Consumer Key and Consumer Secret are ignored) Upon succesfull you will retrieve the updated key details as the response.
@@ -253,7 +253,7 @@ Content-Type: application/json
                 </h4>
             </div>
 
-                <div id="request-applicationsApplicationIdKeysKeyTypePut"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/store/v0.14/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/SANDBOX
+                <div id="request-applicationsApplicationIdKeysKeyTypePut"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/store/v0.15/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/SANDBOX
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 {
    &quot;supportedGrantTypes&quot;: [
@@ -292,9 +292,9 @@ Content-Type: application/json
 </code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X PUT -d @data.json &quot;https://localhost:9443/api/am/store/v0.14/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524/keys/SANDBOX&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X PUT -d @data.json &quot;https://localhost:9443/api/am/store/v0.15/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524/keys/SANDBOX&quot;</code></div>
 
-         
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -316,17 +316,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>applicationId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -344,17 +344,17 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>keyType</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -378,17 +378,17 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
-                            
+
+
+
+
                             <span class="param-in">Body </span>
                         </td>
                         <td class="param-name">
                             <p>body</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>

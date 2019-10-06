@@ -3,7 +3,7 @@
 
             <hr/>
             <h4 class="operation-heading"><a name="subscriptionsPost"></a>Add a new subscription
-</h4> <code>POST https://apis.wso2.com/api/am/store/v0.14/subscriptions</code>
+</h4> <code>POST https://apis.wso2.com/api/am/store/v0.15/subscriptions</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to add a new subscription providing the id of the API and the application.
@@ -19,7 +19,7 @@
                 </h4>
             </div>
 
-                <div id="request-subscriptionsPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/store/v0.14/subscriptions
+                <div id="request-subscriptionsPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/store/v0.15/subscriptions
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 
 {
@@ -35,7 +35,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 </h4>
             </div>
                 <div id="response-subscriptionsPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
-Location: https://localhost:9443/api/am/store/v0.14/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9
+Location: https://localhost:9443/api/am/store/v0.15/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9
 Content-Type: application/json
 
 {
@@ -47,9 +47,9 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST  -d @data.json &quot;https://localhost:9443/api/am/store/v0.14/subscriptions&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST  -d @data.json &quot;https://localhost:9443/api/am/store/v0.15/subscriptions&quot;</code></div>
 
-         
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -71,17 +71,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
-                            
+
+
+
+
                             <span class="param-in">Body </span>
                         </td>
                         <td class="param-name">
                             <p>body</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -100,17 +100,17 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>Content-Type</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -167,7 +167,7 @@ Content-Type: application/json
                         <td class="parameter"><p class="marked">Unsupported media type. The entity of the request was in a not supported format. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+
                             </span>
                         </td>
                     </tr>
@@ -175,7 +175,7 @@ Content-Type: application/json
             </table>
             <hr/>
             <h4 class="operation-heading"><a name="subscriptionsSubscriptionIdDelete"></a>Remove a subscription
-</h4> <code>DELETE https://apis.wso2.com/api/am/store/v0.14/subscriptions/{subscriptionId}</code>
+</h4> <code>DELETE https://apis.wso2.com/api/am/store/v0.15/subscriptions/{subscriptionId}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to remove a subscription.
@@ -191,7 +191,7 @@ Content-Type: application/json
                 </h4>
             </div>
 
-                <div id="request-subscriptionsSubscriptionIdDelete"class="pre collapse in"><code class="json">DELETE https://localhost:9443/api/am/store/v0.14/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9
+                <div id="request-subscriptionsSubscriptionIdDelete"class="pre collapse in"><code class="json">DELETE https://localhost:9443/api/am/store/v0.15/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9
 </code></div>
 
             <div class="pointer" data-toggle="collapse" data-target="#response-subscriptionsSubscriptionIdDelete">
@@ -203,9 +203,9 @@ Content-Type: application/json
                 <div id="response-subscriptionsSubscriptionIdDelete" class="pre collapse in"><code class="json">HTTP/1.1 200 OK</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X DELETE &quot;https://localhost:9443/api/am/store/v0.14/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X DELETE &quot;https://localhost:9443/api/am/store/v0.15/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9&quot;</code></div>
 
-         
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -227,17 +227,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>subscriptionId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -255,16 +255,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-Match</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -283,16 +283,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-Unmodified-Since</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -332,7 +332,7 @@ Content-Type: application/json
                         <td class="parameter"><p class="marked">OK. Resource successfully deleted. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+
                             </span>
                         </td>
                     </tr>
@@ -358,7 +358,7 @@ Content-Type: application/json
             </table>
             <hr/>
             <h4 class="operation-heading"><a name="subscriptionsSubscriptionIdGet"></a>Get details of a subscription
-</h4> <code>GET https://apis.wso2.com/api/am/store/v0.14/subscriptions/{subscriptionId}</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v0.15/subscriptions/{subscriptionId}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to get details of a single subscription.
@@ -374,7 +374,7 @@ Content-Type: application/json
                 </h4>
             </div>
 
-                <div id="request-subscriptionsSubscriptionIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.14/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9
+                <div id="request-subscriptionsSubscriptionIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.15/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -396,9 +396,9 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://localhost:9443/api/am/store/v0.14/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://localhost:9443/api/am/store/v0.15/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9&quot;</code></div>
 
-         
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -420,17 +420,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>subscriptionId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -448,16 +448,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -476,16 +476,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -505,16 +505,16 @@ variant of the resource.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-Modified-Since</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -564,7 +564,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+
                             </span>
                         </td>
                     </tr>

@@ -20,14 +20,14 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.5.131-SNAPSHOT</version>
+        <version>6.5.186-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.store.feature</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - API Store Feature</name>
+    <name>WSO2 Carbon - API Developer Portal Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the core bundles required for API management back end
     </description>
@@ -271,10 +271,10 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
-                            <workingDirectory>${basedir}/src/main/resources/store-new</workingDirectory>
+                            <workingDirectory>${basedir}/src/main/resources/devportal</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
-                                <argument>install</argument>
+                                <argument>ci</argument>
                                 <argument>--silent</argument>
                             </arguments>
                         </configuration>
@@ -286,7 +286,7 @@
                         </goals>
                         <phase>compile</phase>
                         <configuration>
-                            <workingDirectory>${basedir}/src/main/resources/store-new</workingDirectory>
+                            <workingDirectory>${basedir}/src/main/resources/devportal</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>run</argument>
@@ -304,14 +304,14 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <include>store-new/site/**</include>
-                    <include>store-new/services/**</include>
-                    <include>store-new/jaggery.conf</include>
+                    <include>devportal/site/**</include>
+                    <include>devportal/services/**</include>
+                    <include>devportal/jaggery.conf</include>
                     <include>p2.inf</include>
                     <include>admin/**</include>
                     <include>apistore/**</include>
                     <include>customTheme/**</include>
-                    <include>store/**</include>
+                    <include>store-old/**</include>
                 </includes>
             </resource>
         </resources>

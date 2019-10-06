@@ -39,10 +39,9 @@ public class PublisherAlertsAPIUtils {
      * @return true if the validation is successful. Error response otherwise.
      * */
     public static boolean validateConfigParameters(String configId) {
-        String userName = RestApiUtil.getLoggedInUsername();
         String decodedConfigurationId = new String(Base64.getDecoder().decode(configId.getBytes()));
         String[] parameters = decodedConfigurationId.split("#");
-        if (parameters.length != 3) {
+        if (parameters.length != 2) {
             RestApiUtil.handleBadRequest(
                     "The configuration id validation failed. Should be {apiName}#{apiVersion}#{tenantDomain}",
                     log);
@@ -52,9 +51,6 @@ public class PublisherAlertsAPIUtils {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             if (!apiProvider.isApiNameExist(parameters[0])) {
                 RestApiUtil.handleBadRequest("Invalid API Name", log);
-            }
-            if (!MultitenantUtils.getTenantDomain(userName).equals(parameters[2])) {
-                RestApiUtil.handleBadRequest("Invalid Tenant Domain", log);
             }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while validating payload", e, log);
