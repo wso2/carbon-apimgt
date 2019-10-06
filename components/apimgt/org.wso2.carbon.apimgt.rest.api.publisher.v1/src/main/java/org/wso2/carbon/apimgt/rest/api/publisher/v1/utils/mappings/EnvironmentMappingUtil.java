@@ -48,12 +48,20 @@ public class EnvironmentMappingUtil {
         environmentDTO.setServerUrl(environment.getServerURL());
         environmentDTO.setShowInApiConsole(environment.isShowInConsole());
         String[] gatewayEndpoints = environment.getApiGatewayEndpoint().split(",");
+        String[] webSocketGatewayEndpoints = environment.getWebsocketGatewayEndpoint().split(",");
         EnvironmentEndpointsDTO environmentEndpointsDTO = new EnvironmentEndpointsDTO();
         for (String gatewayEndpoint : gatewayEndpoints) {
             if (isHttpURL(gatewayEndpoint)) {
                 environmentEndpointsDTO.setHttp(gatewayEndpoint);
             } else if (isHttpsURL(gatewayEndpoint)) {
                 environmentEndpointsDTO.setHttps(gatewayEndpoint);
+            }
+        }
+        for (String websocketGatewayEndpoint : webSocketGatewayEndpoints) {
+            if (isWebSocketURL(websocketGatewayEndpoint)) {
+                environmentEndpointsDTO.setWs(websocketGatewayEndpoint);
+            } else if (isSecureWebsocketURL(websocketGatewayEndpoint)) {
+                environmentEndpointsDTO.setWss(websocketGatewayEndpoint);
             }
         }
         environmentDTO.setEndpoints(environmentEndpointsDTO);
@@ -99,6 +107,26 @@ public class EnvironmentMappingUtil {
      */
     private static boolean isHttpsURL(String url) {
         return url.matches("^https://.*");
+    }
+
+    /**
+     * Check whether given url is a WS url
+     *
+     * @param url url to check
+     * @return true if the given url is WS, false otherwise
+     */
+    private static boolean isWebSocketURL(String url) {
+        return url.matches("^ws://.*");
+    }
+
+    /**
+     * Check whether given url is a WSS url
+     *
+     * @param url url to check
+     * @return true if the given url is WSS, false otherwise
+     */
+    private static boolean isSecureWebsocketURL(String url) {
+        return url.matches("^wss://.*");
     }
 
 }

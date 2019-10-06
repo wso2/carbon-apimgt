@@ -8049,6 +8049,14 @@ definitions:
         type: string
         description: HTTPS environment URL
         example: "https://localhost:8243"
+      ws:
+        type: string
+        description: WS environment URL
+        example: "http://localhost:9099"
+      wss:
+        type: string
+        description: WSS environment URL
+        example: "https://localhost:8099"
 
 #-----------------------------------------------------
 # The File Information resource
