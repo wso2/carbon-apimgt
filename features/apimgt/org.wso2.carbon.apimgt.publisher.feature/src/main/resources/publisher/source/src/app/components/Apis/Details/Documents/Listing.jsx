@@ -100,7 +100,7 @@ const styles = theme => ({
     },
 });
 function LinkGenerator(props) {
-    return props.apiType === API.CONSTS.APIProduct ? (
+    return props.isAPIProduct ? (
         <Link to={'/api-products/' + props.apiId + '/documents/' + props.docId + '/view'}>{props.docName}</Link>
     ) : (
         <Link to={'/apis/' + props.apiId + '/documents/' + props.docId + '/view'}>{props.docName}</Link>
@@ -130,7 +130,6 @@ class Listing extends React.Component {
      */
     getDocumentsList() {
         const { api, intl } = this.props;
-
         if (api.apiType === API.CONSTS.APIProduct) {
             const apiProduct = new APIProduct();
             const docs = apiProduct.getDocuments(api.id);
@@ -256,6 +255,7 @@ class Listing extends React.Component {
                                             </td>
                                             <td>
                                                 <Edit
+                                                    apiType={api.apiType}
                                                     docName={docName}
                                                     docId={docId}
                                                     apiId={this.apiId}
@@ -288,6 +288,7 @@ class Listing extends React.Component {
                                             </td>
                                             <td>
                                                 <Edit
+                                                    apiType={api.apiType}
                                                     docName={docName}
                                                     docId={docId}
                                                     apiId={this.apiId}
@@ -321,6 +322,7 @@ class Listing extends React.Component {
                                             </td>
                                             <td>
                                                 <Edit
+                                                    apiType={api.apiType}
                                                     docName={docName}
                                                     docId={docId}
                                                     apiId={this.apiId}
@@ -348,6 +350,7 @@ class Listing extends React.Component {
                                             </td>
                                             <td>
                                                 <Edit
+                                                    apiType={api.apiType}
                                                     docName={docName}
                                                     docId={docId}
                                                     apiId={this.apiId}

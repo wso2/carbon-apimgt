@@ -151,7 +151,8 @@ function Configuration(props) {
                                         (item.includes('mandatory') ? null : (
                                             <span>
                                                 {securitySchemeMap[item]}
-                                                {(!(api.securityScheme[index + 1].includes('mandatory'))) && ', '}
+                                                {api.apiType !== API.CONSTS.APIProduct &&
+                                                    (!(api.securityScheme[index + 1].includes('mandatory'))) && ', '}
                                             </span>
                                         )))}
                                 </React.Fragment>

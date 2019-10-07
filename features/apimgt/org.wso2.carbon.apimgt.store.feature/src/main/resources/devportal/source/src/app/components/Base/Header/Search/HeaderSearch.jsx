@@ -17,21 +17,21 @@
  */
 
 import React from 'react';
-import { Redirect, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Autosuggest from 'react-autosuggest';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { injectIntl } from 'react-intl';
-
-import {
-    renderInput, renderSuggestion, getSuggestions, getSuggestionValue, buildSearchQuery,
-} from './SearchUtils';
+import InfoIcon from '@material-ui/icons/InfoOutlined';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import { renderInput, renderSuggestion, getSuggestions, getSuggestionValue, buildSearchQuery } from './SearchUtils';
 
 const styles = theme => ({
     container: {
-        flexGrow: 2,
+        flexGrow: 0,
     },
     smContainer: {
         position: 'absolute',
@@ -39,7 +39,7 @@ const styles = theme => ({
     suggestionsContainerOpen: {
         display: 'block',
         position: 'absolute',
-        width: '535px',
+        width: '517px',
         zIndex: theme.zIndex.modal + 1,
     },
     suggestion: {
@@ -75,6 +75,23 @@ const styles = theme => ({
         borderRight: '1px solid rgba(0, 0, 0, 0.42)',
         height: '39px',
         padding: '0 10px',
+    },
+    infoButton: {
+        margin: theme.spacing(1),
+        color: 'white',
+    },
+    emptyContainer: {
+        flexGrow: 1,
+    },
+    InfoToolTip: {
+        backgroundColor: '#f5f5f9',
+        color: 'rgba(0,0,0,0.87)',
+        maxWidth: 249,
+        fontSize: theme.typography.pxToRem(14),
+        fontWeight: '400',
+        border: '1px solid #dadde9',
+        borderRadius: '5px',
+        padding: '15px 10px 0 18px',
     },
 });
 
@@ -185,17 +202,16 @@ class HeaderSearch extends React.Component {
      * @memberof HeaderSearch
      */
     handleDropDownChange(event) {
-        const { searchText, lcState } = this.state;
+        const { searchText } = this.state;
         this.setState({
             lcState: event.target.value,
         });
-        const {history} = this.props;
+        const { history } = this.props;
         if (event.target.value) {
             history.push('/apis/search?query=' + buildSearchQuery(searchText, event.target.value));
         } else {
             history.push('/apis/');
         }
-
     }
 
     /**
@@ -252,37 +268,121 @@ class HeaderSearch extends React.Component {
             responsiveContainer = classes.smContainer;
         }
         return (
-            <Autosuggest
-                theme={{
-                    container: responsiveContainer,
-                    suggestionsContainerOpen: classes.suggestionsContainerOpen,
-                    suggestionsList: classes.suggestionsList,
-                    suggestion: classes.suggestion,
-                }}
-                suggestions={suggestions}
-                renderInputComponent={renderInput}
-                onSuggestionsFetchRequested={this.handleSuggestionsFetchRequested}
-                onSuggestionsClearRequested={this.handleSuggestionsClearRequested}
-                getSuggestionValue={getSuggestionValue}
-                renderSuggestion={renderSuggestion}
-                renderSuggestionsContainer={this.renderSuggestionsContainer}
-                onSuggestionSelected={this.onSuggestionSelected}
-                inputProps={{
-                    autoFocus,
-                    classes,
-                    placeholder: intl.formatMessage({
-                        id: 'Base.Header.headersearch.HeaderSearch.search_api.tooltip',
-                        defaultMessage: 'Search APIs',
-                    }),
-                    value: searchText,
-                    lcState,
-                    onChange: this.handleChange,
-                    onDropDownChange: this.handleDropDownChange,
-                    onKeyDown: this.onKeyDown,
-                    onBlur: this.clearOnBlur,
-                    isLoading,
-                }}
-            />
+            <React.Fragment>
+                <Autosuggest
+                    theme={{
+                        container: responsiveContainer,
+                        suggestionsContainerOpen: classes.suggestionsContainerOpen,
+                        suggestionsList: classes.suggestionsList,
+                        suggestion: classes.suggestion,
+                    }}
+                    suggestions={suggestions}
+                    renderInputComponent={renderInput}
+                    onSuggestionsFetchRequested={this.handleSuggestionsFetchRequested}
+                    onSuggestionsClearRequested={this.handleSuggestionsClearRequested}
+                    getSuggestionValue={getSuggestionValue}
+                    renderSuggestion={renderSuggestion}
+                    renderSuggestionsContainer={this.renderSuggestionsContainer}
+                    onSuggestionSelected={this.onSuggestionSelected}
+                    inputProps={{
+                        autoFocus,
+                        classes,
+                        placeholder: intl.formatMessage({
+                            id: 'Base.Header.headersearch.HeaderSearch.search_api.tooltip',
+                            defaultMessage: 'Search APIs',
+                        }),
+                        value: searchText,
+                        lcState,
+                        onChange: this.handleChange,
+                        onDropDownChange: this.handleDropDownChange,
+                        onKeyDown: this.onKeyDown,
+                        onBlur: this.clearOnBlur,
+                        isLoading,
+                    }}
+                />
+                <Tooltip
+                    interactive
+                    placement='top'
+                    classes={{
+                        tooltip: classes.InfoToolTip,
+                    }}
+                    title={
+                        <React.Fragment>
+                            <FormattedMessage
+                                id='Base.Header.headersearch.HeaderSearch.tooltip.title'
+                                defaultMessage='Search Options'
+                            />
+                            <ol style={{ marginLeft: '-20px', marginTop: '5px' }}>
+                                <li>
+                                    <FormattedMessage
+                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option1'
+                                        defaultMessage='By API Name [Default]'
+                                    />
+                                </li>
+                                <li>
+                                    <FormattedMessage
+                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option2'
+                                        defaultMessage='By API Provider [ Syntax - provider:xxxx ]'
+                                    />
+                                </li>
+                                <li>
+                                    <FormattedMessage
+                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option3'
+                                        defaultMessage='By API Version [ Syntax - version:xxxx ]'
+                                    />
+                                </li>
+                                <li>
+                                    <FormattedMessage
+                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option4'
+                                        defaultMessage='By Context [ Syntax - context:xxxx ]'
+                                    />
+                                </li>
+                                <li>
+                                    <FormattedMessage
+                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option5'
+                                        defaultMessage='By Description [ Syntax - description:xxxx ]'
+                                    />
+                                </li>
+                                <li>
+                                    <FormattedMessage
+                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option6'
+                                        defaultMessage='By Tags [ Syntax - tags:xxxx ]'
+                                    />
+                                </li>
+                                <li>
+                                    <FormattedMessage
+                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option7'
+                                        defaultMessage='By Sub-Context [ Syntax - subcontext:xxxx ]'
+                                    />
+                                </li>
+                                <li>
+                                    <FormattedMessage
+                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option8'
+                                        defaultMessage='By Documentation Content [ Syntax - doc:xxxx ]'
+                                    />
+                                </li>
+                                <li>
+                                    <FormattedMessage
+                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option9'
+                                        defaultMessage='By Microgateway Label [ Syntax - label:xxxx ]'
+                                    />
+                                </li>
+                                <li>
+                                    <FormattedMessage
+                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option10'
+                                        defaultMessage='By API Properties [Syntax - property_name:property_value]'
+                                    />
+                                </li>
+                            </ol>
+                        </React.Fragment>
+                    }
+                >
+                    <IconButton className={classes.infoButton} >
+                        <InfoIcon />
+                    </IconButton>
+                </Tooltip>
+                <div className={classes.emptyContainer} />
+            </React.Fragment>
         );
     }
 }
@@ -292,7 +392,7 @@ HeaderSearch.defaultProps = {
     toggleSmSearch: undefined,
 };
 HeaderSearch.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.instanceOf(Object).isRequired,
     smSearch: PropTypes.bool,
     toggleSmSearch: PropTypes.func,
     history: PropTypes.shape({
