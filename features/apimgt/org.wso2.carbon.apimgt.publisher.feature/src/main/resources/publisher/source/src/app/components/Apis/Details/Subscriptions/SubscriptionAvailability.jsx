@@ -124,7 +124,7 @@ export default function SimpleSelect(props) {
     }
     return (
         <Paper className={classes.subscriptionAvailabilityPaper}>
-            <form className={classes.root} autoComplete='off'>
+            <form className={classes.root} autoComplete='off' onSubmit={(e) => { e.preventDefault(); }}>
                 <Grid container spacing={1} className={classes.grid}>
                     <Grid item xs={4} className={classes.gridLabel}>
                         <FormLabel>
