@@ -499,7 +499,7 @@ class Details extends Component {
                                 Icon={<LifeCycleIcon />}
                             />
                         )}
-                        {!isWebsocket && (
+                        {!isWebsocket && !isAPIProduct && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.left.menu.scope',
@@ -541,7 +541,7 @@ class Details extends Component {
                             to={pathPrefix + 'subscriptions'}
                             Icon={<SubscriptionsIcon />}
                         />
-                        {!isWebsocket && (
+                        {!isAPIProduct && !isWebsocket && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.left.menu.mediation.policies',
@@ -651,6 +651,10 @@ class Details extends Component {
                                     path={Details.subPaths.SUBSCRIPTIONS}
                                     component={() => <Subscriptions api={api} updateAPI={this.updateAPI} />}
                                 />
+                                <Route
+                                    path={Details.subPaths.SUBSCRIPTIONS_PRODUCT}
+                                    component={() => <Subscriptions api={api} updateAPI={this.updateAPI} />}
+                                />
                                 <Route path={Details.subPaths.SECURITY} component={() => <Security api={api} />} />
                                 <Route path={Details.subPaths.COMMENTS} component={() => <Comments api={api} />} />
                                 <Route
@@ -718,6 +722,7 @@ Details.subPaths = {
     MEDIATION_POLICIES_PRODUCT: '/api-products/:apiprod_uuid/mediation policies',
     DOCUMENTS: '/apis/:api_uuid/documents',
     DOCUMENTS_PRODUCT: '/api-products/:apiprod_uuid/documents',
+    SUBSCRIPTIONS_PRODUCT: '/api-products/:apiprod_uuid/subscriptions',
     SUBSCRIPTIONS: '/apis/:api_uuid/subscriptions',
     SECURITY: '/apis/:api_uuid/security',
     COMMENTS: '/apis/:api_uuid/comments',
