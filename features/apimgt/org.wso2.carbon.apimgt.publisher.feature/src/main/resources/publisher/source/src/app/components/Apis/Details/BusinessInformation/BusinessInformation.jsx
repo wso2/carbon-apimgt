@@ -198,8 +198,7 @@ class BusinessInformation extends React.Component {
                                         <FormattedMessage
                                             id={
                                                 'Apis.Details.BusinessInformation.BusinessInformation' +
-                                                '.business.owner.name.helper.text' +
-                                                '.error'
+                                                '.business.owner.name.helper.text.error'
                                             }
                                             defaultMessage='Name of the business owner should not be empty'
                                         />
