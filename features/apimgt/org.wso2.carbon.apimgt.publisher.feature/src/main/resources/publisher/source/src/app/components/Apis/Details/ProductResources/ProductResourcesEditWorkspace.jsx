@@ -473,7 +473,7 @@ function ProductResourcesEdit(props) {
                                         label='API'
                                         style={{ margin: 8 }}
                                         placeholder='Filter APIs'
-                                        helperText='Filter the visible APIs'
+                                        helperText='Filter by name'
                                         onChange={handleSearchTextChange}
                                         value={searchText}
                                         fullWidth
@@ -521,27 +521,13 @@ function ProductResourcesEdit(props) {
                                 <div className={classes.colTitle}>
                                     <FormattedMessage
                                         id='Apis.Details.ProductResources.ProductResourcesEdit.api.resources'
-                                        defaultMessage='API Resources'
+                                        defaultMessage='Select API Resources'
                                     />
                                 </div>
                                 {selectedApi && (
                                     <React.Fragment className={classes.ResourceWrapper}>
                                         <Typography variant='h5' className={classes.selectedTitle}>
                                             {selectedApi.name}
-                                        </Typography>
-                                        <Typography
-                                            variant='caption'
-                                            className={classes.selectedApiDescription}
-                                            component='div'
-                                        >
-                                            <FormattedMessage
-                                                id='Apis.Details.ProductResources.ProductResourcesWorkspace.api.all.
-                                                resourcesOfAPI'
-                                                defaultMessage={'Resources of the ' + selectedApi.name + ' API are' +
-                                                'shown below.Click the right hand side arrow to add them to the API ' +
-                                                'Product.'
-                                                }
-                                            />
                                         </Typography>
                                     </React.Fragment>
                                 )}
@@ -669,21 +655,6 @@ function ProductResourcesEdit(props) {
                                     <React.Fragment className={classes.ResourceWrapper}>
                                         <Typography variant='h5' className={classes.selectedTitle}>
                                             {api.name}
-                                        </Typography>
-                                        <Typography
-                                            variant='caption'
-                                            className={classes.selectedApiDescription}
-                                            component='div'
-                                        >
-                                            <FormattedMessage
-                                                id='Apis.Details.ProductResources.ProductResourcesWorkspace.
-                                                api.all.product.resources'
-                                                defaultMessage={
-                                                    'Resources of the ' + api.name + ' API Product are shown below.' +
-                                                    'Click the right hand side button to remove them from the ' +
-                                                    'API Product.'
-                                                }
-                                            />
                                         </Typography>
                                     </React.Fragment>
                                 )}
