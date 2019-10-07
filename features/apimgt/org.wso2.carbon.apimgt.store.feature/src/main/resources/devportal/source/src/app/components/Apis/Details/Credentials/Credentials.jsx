@@ -133,7 +133,6 @@ class Credentials extends React.Component {
         value: 0,
         expanded: true,
         wizardOn: false,
-        openAvailable: false,
         openNew: false,
         selectedAppId: false,
         selectedKeyType: false,
@@ -166,8 +165,8 @@ class Credentials extends React.Component {
         const { subscriptionRequest } = this.state;
         const newSubscriptionRequest = { ...subscriptionRequest, apiId: api.id };
         const throttlingPolicyList = api.tiers;
-        if (throttlingPolicyList) {
-            [newSubscriptionRequest.throttlingPolicy] = throttlingPolicyList;
+        if (throttlingPolicyList && throttlingPolicyList[0]) {
+            newSubscriptionRequest.throttlingPolicy = throttlingPolicyList[0].tierName;
         }
         if (applicationsAvailable && applicationsAvailable[0]) {
             newSubscriptionRequest.applicationId = applicationsAvailable[0].value;
@@ -210,8 +209,7 @@ class Credentials extends React.Component {
                     defaultMessage: 'Subscribed successfully',
                     id: 'Apis.Details.Credentials.Credentials.subscribed.successfully',
                 }));
-                if (updateSubscriptionData) updateSubscriptionData();
-                this.setState({ openAvailable: false });
+                if (updateSubscriptionData) updateSubscriptionData(this.updateData);
             })
             .catch((error) => {
                 console.log('Error while creating the subscription.');
@@ -367,7 +365,6 @@ class Credentials extends React.Component {
                                                         </Typography>
                                                         <Button
                                                             variant='contained'
-                                                            size='large'
                                                             color='primary'
                                                             className={classes.buttonElm}
                                                             onClick={() => this.handleClickToggle('openNew')}
@@ -400,7 +397,6 @@ class Credentials extends React.Component {
                                                             />
                                                             <Button
                                                                 variant='contained'
-                                                                size='large'
                                                                 color='primary'
                                                                 className={classes.buttonElm}
                                                                 onClick={() => this.handleSubscribe()}

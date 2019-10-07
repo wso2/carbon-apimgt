@@ -130,7 +130,6 @@ const subscribeToApi = (props) => {
             setAppSelected(applicationsAvailable[0].value);
             const newRequest = { ...subscriptionRequest };
             newRequest.applicationId = applicationsAvailable[0].value;
-            updateSubscriptionRequest(newRequest);
         }
     }, [applicationsAvailable]);
 
@@ -268,6 +267,10 @@ subscribeToApi.propTypes = {
         selectEmpty: PropTypes.shape({}),
         FormControlOdd: PropTypes.shape({}),
         subscribeRoot: PropTypes.shape({}),
+        subscribeRootSmall: PropTypes.shape({}),
+        smallDisplayFix: PropTypes.shape({}),
+        selectMenuRoot: PropTypes.shape({}),
+        smallDisplay: PropTypes.shape({}),
     }).isRequired,
     applicationsAvailable: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string,
