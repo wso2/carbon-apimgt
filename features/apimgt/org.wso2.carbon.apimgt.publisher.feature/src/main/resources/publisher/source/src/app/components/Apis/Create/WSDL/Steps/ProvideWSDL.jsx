@@ -33,6 +33,8 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import APIValidation from 'AppData/APIValidation';
 import Wsdl from 'AppData/Wsdl';
 import DropZoneLocal from 'AppComponents/Shared/DropZoneLocal';
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
+import CheckIcon from '@material-ui/icons/Check';
 
 const useStyles = makeStyles(theme => ({
     mandatoryStar: {
@@ -51,30 +53,54 @@ export default function ProvideWSDL(props) {
     const { apiInputs, inputsDispatcher, onValidate } = props;
     const isFileInput = apiInputs.inputType === 'file';
     const isArchiveInput = apiInputs.inputType === 'archive';
-    const isGenerateRESTAPI = apiInputs.type === 'SOAPtoREST';
+    const isGenerateRESTAPI = apiInputs.type === 'SOAPTOREST';
     const classes = useStyles();
     const [isError, setValidity] = useState(); // If valid value is `null` else an error object will be there
     const [isValidating, setIsValidating] = useState(false);
 
     /**
-     * Handles WSDL validation response and trigger the callback when validation is successful.
+     * Handles WSDL validation response and returns the state.
      *
      * @param {*} response WSDL validation response
-     * @param {function} onSuccess function to call if the validation is successful
+     * @param {string} type of the input; file or url
+     * @returns {boolean} validation status
      */
-    function handleWSDLValidationResponse(response, onSuccess = null) {
-        const {
-            body: { isValid },
-        } = response;
-        if (isValid) {
-            setValidity(null);
-            if (onSuccess) {
-                onSuccess();
+    function handleWSDLValidationResponse(response, type) {
+        const isWSDLValid = response.body.isValid;
+        let success = false;
+        if (isWSDLValid) {
+            if (type === 'file') {
+                setValidity({ ...isError, file: null });
+            } else {
+                setValidity({ ...isError, url: null });
             }
+            success = true;
+        } else if (type === 'file') {
+            setValidity({ ...isError, file: { message: 'WSDL content validation failed!' } });
         } else {
-            setValidity({ message: 'WSDL content validation failed!' });
+            setValidity({ ...isError, url: { message: 'Invalid WSDL URL!' } });
         }
-        onValidate(isValid);
+        onValidate(isWSDLValid);
+        setIsValidating(false);
+        return success;
+    }
+
+    /**
+     * Handles WSDL validation error response.
+     *
+     * @param error {*} error object
+     * @param type {string} file/url type
+     */
+    function handleWSDLValidationErrorResponse(error, type) {
+        let message = 'Error occurred during validation';
+        if (error.response && error.response.body.description) {
+            message = error.response.body.description;
+        }
+        if (type === 'file') {
+            setValidity({ ...isError, file: { message } });
+        } else {
+            setValidity({ ...isError, url: { message } });
+        }
         setIsValidating(false);
     }
 
@@ -87,12 +113,12 @@ export default function ProvideWSDL(props) {
         if (state === null) {
             setIsValidating(true);
             Wsdl.validateUrl(apiInputs.inputValue).then((response) => {
-                handleWSDLValidationResponse(response);
+                handleWSDLValidationResponse(response, 'url');
+            }).catch((error) => {
+                handleWSDLValidationErrorResponse(error, 'url');
             });
-            // Valid URL string
-            // TODO: Handle catch network or api call failures ~tmkb
         } else {
-            setValidity(state);
+            setValidity({ ...isError, url: state });
             onValidate(false);
         }
     }
@@ -107,13 +133,14 @@ export default function ProvideWSDL(props) {
         if (state === null) {
             setIsValidating(true);
             Wsdl.validateFileOrArchive(file).then((response) => {
-                handleWSDLValidationResponse(response, () => {
+                if (handleWSDLValidationResponse(response, 'file')) {
                     inputsDispatcher({ action: 'inputValue', value: file });
-                });
+                }
+            }).catch((error) => {
+                handleWSDLValidationErrorResponse(error, 'file');
             });
-            // TODO: Handle catch network or api call failures
         } else {
-            setValidity(state);
+            setValidity({ ...isError, file: state });
             onValidate(false);
         }
     }
@@ -128,6 +155,43 @@ export default function ProvideWSDL(props) {
         // accept the first file. This information is shown in the dropdown helper text
         validateFileOrArchive(files[0]);
     }
+
+    let urlStateEndAdornment = null;
+    if (isValidating) {
+        urlStateEndAdornment = (
+            <InputAdornment position='end'>
+                <CircularProgress />
+            </InputAdornment>
+        );
+    } else if (isError && isError.url) {
+        urlStateEndAdornment = (
+            <InputAdornment position='end'>
+                <ErrorOutlineIcon fontSize='large' color='error' />
+            </InputAdornment>
+        );
+    } else if (isError && !isError.url) {
+        urlStateEndAdornment = (
+            <InputAdornment position='end'>
+                <CheckIcon fontSize='large' color='primary' />
+            </InputAdornment>
+        );
+    }
+
+    const fileControlLabel = isGenerateRESTAPI ? (<FormattedMessage
+        id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label.wsdl.file'
+        defaultMessage='WSDL File'
+    />) : (<FormattedMessage
+        id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label.wsdl.file.archive'
+        defaultMessage='WSDL File/Archive'
+    />);
+
+    const dropBoxControlLabel = isGenerateRESTAPI ? (<FormattedMessage
+        id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.file.dropzone'
+        defaultMessage='Select a WSDL file'
+    />) : (<FormattedMessage
+        id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.file.archive.dropzone'
+        defaultMessage='Select a WSDL file/archive'
+    />);
 
     return (
         <React.Fragment>
@@ -198,19 +262,7 @@ export default function ProvideWSDL(props) {
                             <FormControlLabel
                                 value='file'
                                 control={<Radio />}
-                                label={<FormattedMessage
-                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label'
-                                    defaultMessage='WSDL File'
-                                />}
-                            />
-                            <FormControlLabel
-                                disabled={isGenerateRESTAPI}
-                                value='archive'
-                                control={<Radio />}
-                                label={<FormattedMessage
-                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.archive.label'
-                                    defaultMessage='WSDL Archive'
-                                />}
+                                label={fileControlLabel}
                             />
                         </RadioGroup>
                     </FormControl>
@@ -218,7 +270,12 @@ export default function ProvideWSDL(props) {
                 <Grid item md={7}>
                     {(isFileInput || isArchiveInput) ? (
                         // TODO: Pass message saying accepting only one file ~tmkb
-                        <DropZoneLocal onDrop={onDrop} files={apiInputs.inputValue} />
+                        <DropZoneLocal onDrop={onDrop} files={apiInputs.inputValue} error={isError && isError.file}>
+                            {isValidating && <CircularProgress />}
+                            {isError && isError.file ? (
+                                isError.file.message
+                            ) : dropBoxControlLabel}
+                        </DropZoneLocal>
                     ) : (
                         <TextField
                             autoFocus
@@ -237,15 +294,11 @@ export default function ProvideWSDL(props) {
                                 onBlur: ({ target: { value } }) => {
                                     validateUrl(APIValidation.url.required().validate(value).error);
                                 },
-                                endAdornment: isValidating && (
-                                    <InputAdornment position='end'>
-                                        <CircularProgress />
-                                    </InputAdornment>
-                                ),
+                                endAdornment: urlStateEndAdornment,
                             }}
-                            // 'Give the URL of WSDL endpoint'
-                            helperText={isError && isError.message}
-                            error={Boolean(isError)}
+                            helperText={
+                                (isError && isError.url && isError.url.message) || 'Click away to validate the URL'}
+                            error={isError && Boolean(isError.url)}
                             disabled={isValidating}
                         />
                     )}

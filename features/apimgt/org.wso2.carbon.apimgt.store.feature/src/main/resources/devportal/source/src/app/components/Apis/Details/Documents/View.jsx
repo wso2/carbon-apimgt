@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -25,13 +25,14 @@ import Button from '@material-ui/core/Button';
 import ReactMarkdown from 'react-markdown';
 import ReactSafeHtml from 'react-safe-html';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import API from '../../../../data/api';
+import { ApiContext } from '../ApiContext';
+import API from 'AppData/api';
 import Alert from '../../../Shared/Alert';
 
 const styles = theme => ({
     root: {
-        paddingTop: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit * 2,
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
     },
     docTitle: {
         fontWeight: 100,
@@ -39,7 +40,7 @@ const styles = theme => ({
         color: theme.palette.grey[500],
     },
     docBadge: {
-        padding: theme.spacing.unit,
+        padding: theme.spacing(1),
         background: theme.palette.primary.main,
         position: 'absolute',
         top: 0,
@@ -47,18 +48,21 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
     button: {
-        padding: theme.spacing.unit * 2,
-        marginTop: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
+        marginTop: theme.spacing(2),
     },
     displayURL: {
-        padding: theme.spacing.unit * 2,
-        marginTop: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
+        marginTop: theme.spacing(2),
         background: theme.palette.grey[200],
         color: theme.palette.getContrastText(theme.palette.grey[200]),
         display: 'flex',
     },
     displayURLLink: {
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
+    },
+    docSummary: {
+        marginTop: theme.spacing(2),
     },
 });
 /**
@@ -71,6 +75,7 @@ function View(props) {
     const {
         classes, doc, apiId, fullScreen, intl,
     } = props;
+    const { api } = useContext(ApiContext);
     const [code, setCode] = useState('');
     const restAPI = new API();
 
@@ -82,7 +87,13 @@ function View(props) {
         const docPromise = restAPI.getInlineContentOfDocument(apiId, doc.documentId);
         docPromise
             .then((doc) => {
-                setCode(doc.text);
+                let text = doc.text;
+
+                Object.keys(api).map( fieldName => {
+                    let regex = new RegExp('\_\_\_'+ fieldName +'\_\_\_', 'g');
+                    text = text.replace(regex, api[fieldName]);
+                });
+                setCode(text);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -141,22 +152,23 @@ function View(props) {
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
-                    Alert.error(
-                        intl.formatMessage({
-                            id: 'Apis.Details.Documents.View.error.downloading',
-                            defaultMessage: 'Error downloading the file',
-                        }),
-                    );
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Documents.View.error.downloading',
+                        defaultMessage: 'Error downloading the file',
+                    }));
                 }
             });
     };
     return (
         <React.Fragment>
             {!fullScreen && <div className={classes.docBadge}>{doc.type}</div>}
-            <Typography variant='h5' component='h3' className={classes.docTitle}>
-                {doc.name}
-            </Typography>
-            <Typography variant='caption'>{doc.summary}</Typography>
+
+            {doc.summary && (
+                <Typography variant='body1' className={classes.docSummary}>
+                    {doc.summary}
+                </Typography>
+            )}
+
             {doc.sourceType === 'MARKDOWN' && <ReactMarkdown source={code} />}
             {doc.sourceType === 'INLINE' && <ReactSafeHtml html={code} />}
             {doc.sourceType === 'URL' && (

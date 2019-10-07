@@ -1,4 +1,4 @@
-<APIManager>
+<APIManager xmlns:svns="http://org.wso2.securevault/configuration">
     <!-- JNDI name of the data source to be used by the API publisher, API store and API
          key manager. This data source should be defined in the master-datasources.xml file
          in conf/datasources directory. -->
@@ -112,9 +112,15 @@
                 {% else %}
                 <GatewayEndpoint></GatewayEndpoint>
                 {% endif %}
-                <!-- Endpoint of the Websocket APIs hosted in this API Gateway -->
-                {% if environment_name.ws_endpoint %}
+                <!-- Endpoint URLs of the WebSocket APIs hosted in this API Gateway -->
+                {% if environment_name.ws_endpoint is defined and environment_name.wss_endpoint is defined %}
+                <GatewayWSEndpoint>{{environment_name.ws_endpoint}},{{environment_name.wss_endpoint}}</GatewayWSEndpoint>
+                {% elif environment_name.ws_endpoint is not defined and environment_name.wss_endpoint is defined %}
+                <GatewayWSEndpoint>{{environment_name.wss_endpoint}}</GatewayWSEndpoint>
+                {% elif environment_name.ws_endpoint is defined and environment_name.wss_endpoint is not defined %}
                 <GatewayWSEndpoint>{{environment_name.ws_endpoint}}</GatewayWSEndpoint>
+                {% else %}
+                <GatewayWSEndpoint></GatewayWSEndpoint>
                 {% endif %}
             </Environment>
             {% endfor %}

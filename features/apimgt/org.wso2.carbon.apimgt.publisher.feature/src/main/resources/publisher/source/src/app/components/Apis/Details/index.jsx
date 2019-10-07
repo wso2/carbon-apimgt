@@ -287,6 +287,8 @@ class Details extends Component {
                         />
                     </React.Fragment>
                 );
+            case 'WS':
+                return '';
             default:
                 return (
                     <React.Fragment>
@@ -372,6 +374,10 @@ class Details extends Component {
      */
     render() {
         const { api, apiNotFound, isAPIProduct } = this.state;
+        let isWebsocket = false;
+        if (api) {
+            isWebsocket = (api.type === 'WS');
+        }
         const {
             classes,
             theme,
@@ -448,6 +454,7 @@ class Details extends Component {
                                 id: 'Apis.Details.index.design.configs',
                                 defaultMessage: 'Design Configs',
                             })}
+                            route='configuration'
                             to={pathPrefix + 'configuration'}
                             Icon={<ConfigurationIcon />}
                         />
@@ -456,6 +463,7 @@ class Details extends Component {
                                 id: 'Apis.Details.index.runtime.configs',
                                 defaultMessage: 'Runtime Configs',
                             })}
+                            route='runtime-configuration'
                             to={pathPrefix + 'runtime-configuration'}
                             Icon={<RuntimeConfigurationIcon />}
                         />
@@ -475,6 +483,7 @@ class Details extends Component {
                                     id: 'Apis.Details.index.gateways',
                                     defaultMessage: 'gateways',
                                 })}
+                                route='environments'
                                 to={pathPrefix + 'environments'}
                                 Icon={<PersonPinCircleOutlinedIcon />}
                             />
@@ -490,14 +499,16 @@ class Details extends Component {
                                 Icon={<LifeCycleIcon />}
                             />
                         )}
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.left.menu.scope',
-                                defaultMessage: 'scopes',
-                            })}
-                            to={pathPrefix + 'scopes'}
-                            Icon={<ScopesIcon />}
-                        />
+                        {!isWebsocket && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.left.menu.scope',
+                                    defaultMessage: 'scopes',
+                                })}
+                                to={pathPrefix + 'scopes'}
+                                Icon={<ScopesIcon />}
+                            />
+                        )}
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.documents',
@@ -530,16 +541,17 @@ class Details extends Component {
                             to={pathPrefix + 'subscriptions'}
                             Icon={<SubscriptionsIcon />}
                         />
-
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.left.menu.mediation.policies',
-                                defaultMessage: 'mediation policies',
-                            })}
-                            to={pathPrefix + 'mediation policies'}
-                            Icon={<ScopesIcon />}
-                        />
-                        {!isAPIProduct && !isRestricted(['apim:api_publish'], api) && (
+                        {!isWebsocket && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.left.menu.mediation.policies',
+                                    defaultMessage: 'mediation policies',
+                                })}
+                                to={pathPrefix + 'mediation policies'}
+                                Icon={<ScopesIcon />}
+                            />
+                        )}
+                        {!isAPIProduct && !isWebsocket && !isRestricted(['apim:api_publish'], api) && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.monetization',
@@ -553,7 +565,7 @@ class Details extends Component {
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.external-stores',
-                                    defaultMessage: 'external stores',
+                                    defaultMessage: 'external developer portals',
                                 })}
                                 to={pathPrefix + 'external-stores'}
                                 Icon={<StoreIcon />}

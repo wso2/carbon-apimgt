@@ -3,7 +3,7 @@
   "info": {
     "version": "0.15.0",
     "title": "WSO2 API Manager - Admin",
-    "description": "This document specifies a **RESTful API** for WSO2 **API Manager** - Admin Portal.\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.1.66/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/admin-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
+    "description": "This document specifies a **RESTful API** for WSO2 **API Manager** - Admin Portal.\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.5.176/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/admin-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
     "contact": {
       "name": "WSO2",
       "url": "http://wso2.com/products/api-manager/",

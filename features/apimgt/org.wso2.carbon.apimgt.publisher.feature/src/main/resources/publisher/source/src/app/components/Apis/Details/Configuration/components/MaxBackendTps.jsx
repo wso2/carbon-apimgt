@@ -113,15 +113,23 @@ export default function MaxBackendTps(props) {
                             >
                                 <FormControlLabel
                                     value='unlimited'
-                                    control={<Radio color='default' />}
+                                    control={<Radio
+                                        color='default'
+                                        disabled={isRestricted(['apim:api_create'], api)}
+                                    />}
                                     label='Unlimited'
                                     labelPlacement='end'
+
                                 />
                                 <FormControlLabel
                                     value='specify'
-                                    control={<Radio color='default' />}
+                                    control={<Radio
+                                        color='default'
+                                        disabled={isRestricted(['apim:api_create'], api)}
+                                    />}
                                     label='Specify'
                                     labelPlacement='end'
+                                    disabled={isRestricted(['apim:api_create'], api)}
                                 />
                             </RadioGroup>
                         </FormControl>

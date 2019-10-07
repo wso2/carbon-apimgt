@@ -1025,6 +1025,7 @@ public final class APIConstants {
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";
     public static final String VELOCITY_LOGGER = "VelocityLogger";
 
+    public static final String SHA_256 = "SHA-256";
 
     public static class DigestAuthConstants {
         public static final String REALM = "realm";
@@ -1210,6 +1211,8 @@ public final class APIConstants {
     public static final String X_WSO2_PRODUCTION_ENDPOINTS = "x-wso2-production-endpoints";
     public static final String X_WSO2_SANDBOX_ENDPOINTS = "x-wso2-sandbox-endpoints";
     public static final String X_WSO2_BASEPATH = "x-wso2-basePath";
+    public static final String X_WSO2_TRANSPORTS = "x-wso2-transports";
+    public static final String X_WSO2_ENDPOINT_TYPE = "endpoint_type";
 
     //API Constants
     public static final String API_DATA_NAME = "name";
@@ -1235,6 +1238,19 @@ public final class APIConstants {
     public static final String API_DATA_SANDBOX_ENDPOINTS = "sandbox_endpoints";
     public static final String API_DATA_URL = "url";
     public static final String API_UUID = "apiUUID";
+
+    public static final String IMPLEMENTATION_STATUS = "implementation_status";
+    public static final String ENDPOINT_TYPE_DEFAULT = "default";
+    public static final String ENDPOINT_TYPE_FAILOVER = "failover";
+    public static final String ENDPOINT_TYPE_LOADBALANCE = "load_balance";
+    public static final String ENDPOINT_CONFIG = "endpoint_config";
+    public static final String ENDPOINT_TYPE_HTTP = "http";
+    public static final String ENDPOINT_TYPE_ADDRESS = "address";
+    public static final String ENDPOINT_PRODUCTION_FAILOVERS = "production_failovers";
+    public static final String ENDPOINT_SANDBOX_FAILOVERS = "sandbox_failovers";
+    public static final String ENDPOINT_PRODUCTION_ENDPOINTS = "production_endpoints";
+    public static final String ENDPOINT_SANDBOX_ENDPOINTS = "sandbox_endpoints";
+    public static final String ENDPOINT_URL = "url";
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
     public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
