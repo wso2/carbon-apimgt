@@ -61,6 +61,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.xerces.util.SecurityManager;
+import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -9195,5 +9196,23 @@ public final class APIUtil {
             }
         }
         return 0L;
+    }
+
+    public static String getSignatureIfJWT(String token) {
+        if (token.contains(APIConstants.DOT)) {
+            try {
+                String[] jwtParts = token.split("\\.");
+                org.json.JSONObject jwtHeader = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().decode(jwtParts[0])));
+                // Check if the decoded header contains type as 'JWT'.
+                if (APIConstants.JWT.equals(jwtHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))) {
+                    if (jwtParts.length == 3) {
+                        return jwtParts[2]; //JWT signature available
+                    }
+                }
+            } catch (JSONException | IllegalArgumentException e) {
+                log.debug("Not a JWT token. Failed to decode the token header.", e);
+            }
+        }
+        return token; //Not a JWT. Treat as an opaque token
     }
 }

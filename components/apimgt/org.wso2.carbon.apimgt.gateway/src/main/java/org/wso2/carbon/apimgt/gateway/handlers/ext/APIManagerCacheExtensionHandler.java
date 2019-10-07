@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import javax.cache.Caching;
@@ -61,7 +62,7 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
         if (revokedToken != null) {
 
             //handle JWT tokens
-            revokedToken = getSignatureIfJWT(revokedToken); //JWT signature is the cache key
+            revokedToken = APIUtil.getSignatureIfJWT(revokedToken); //JWT signature is the cache key
 
             //Find the actual tenant domain on which the access token was cached. It is stored as a reference in
             //the super tenant cache.
@@ -170,24 +171,6 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
 
     protected String getCachedTenantDomain(String token) {
         return (String) CacheProvider.getGatewayTokenCache().get(token);
-    }
-
-    private String getSignatureIfJWT(String token) {
-        if (token.contains(APIConstants.DOT)) {
-            try {
-                String[] jwtParts = token.split("\\.");
-                JSONObject jwtHeader = new JSONObject(new String(Base64.getUrlDecoder().decode(jwtParts[0])));
-                // Check if the decoded header contains type as 'JWT'.
-                if (APIConstants.JWT.equals(jwtHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))) {
-                    if (jwtParts.length == 3) {
-                        return jwtParts[2]; //JWT signature available
-                    }
-                }
-            } catch (JSONException | IllegalArgumentException e) {
-                log.debug("Not a JWT token. Failed to decode the token header.", e);
-            }
-        }
-        return token; //Not a JWT. Treat as an opaque token
     }
 
 }

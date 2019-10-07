@@ -3,7 +3,7 @@
 swagger: '2.0'
 info:
   title: Revoked JWT tokens Retrieval API
-  description: This API allows you to fetch the JTIs of revoked JWT tokens from the database.
+  description: This API allows you to fetch the signatures and expiry time of revoked JWT tokens.
   version: "1.0.0"
 # the domain of the service
 host: wso2.com
@@ -41,23 +41,26 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/ThrottledEvent'
+              $ref: '#/definitions/RevokedJWTList'
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
 definitions:
-  ThrottledEvent:
+  RevokedJWTList:
+    type: array
+    items:
+      $ref: '#/definitions/RevokedJWT'
+
+  RevokedJWT:
     properties:
-      throttle_key:
+      jwt_signature:
         type: string
-        description: throttle key.
-      last_updated_time:
-        type: string
-        description: Last time decision updated.
-      throttle_state:
-        type: string
-        description: throttle state.
+        description: signature of the JWT token.
+      expiry_time:
+        type: integer
+        format: int64
+        description: expiry timestamp.
 
   Error:
     properties:
@@ -68,26 +71,3 @@ definitions:
         type: string
       fields:
         type: string
-
-  BlockConditions:
-    properties:
-        api:
-         type: array
-         items:
-          type: string
-        application:
-          type: array
-          items:
-           type: string
-        ip:
-          type: array
-          items:
-           type: string
-        user:
-          type: array
-          items:
-           type: string
-        custom:
-          type: array
-          items:
-           type: string

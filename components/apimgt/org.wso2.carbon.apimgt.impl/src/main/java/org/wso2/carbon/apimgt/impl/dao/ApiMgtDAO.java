@@ -14364,10 +14364,12 @@ public class ApiMgtDAO {
 
     /**
      * Persist revoked jwt signatures to database
+     *
      * @param jwtSignature signature of jwt token
-     * @param expiryTime expiry time of the token
+     * @param expiryTime   expiry time of the token
      */
     public void addRevokedJWTSignature(String jwtSignature, Long expiryTime) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;

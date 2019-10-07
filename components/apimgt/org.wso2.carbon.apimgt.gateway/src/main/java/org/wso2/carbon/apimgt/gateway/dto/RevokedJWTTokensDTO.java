@@ -19,29 +19,22 @@ package org.wso2.carbon.apimgt.gateway.dto;
 
 public class RevokedJWTTokensDTO {
 
-    private String jti;
+    private String jwtSignature;
+    private Long expiryTime;
 
-    public Long getTtl() {
-
-        return ttl;
+    public void setExpiryTime(Long expiryTime) {
+        this.expiryTime = expiryTime;
     }
 
-    public void setTtl(Long ttl) {
-
-        this.ttl = ttl;
+    public Long getExpiryTime() {
+        return expiryTime;
     }
 
-    private Long ttl;
-
-
-    public String getJti() {
-
-        return jti;
+    public String getSignature() {
+        return jwtSignature;
     }
-
-    public void setJti(String jti) {
-
-        this.jti = jti;
+    public void setSignature(String jwtSignature) {
+        this.jwtSignature = jwtSignature;
     }
 
 }

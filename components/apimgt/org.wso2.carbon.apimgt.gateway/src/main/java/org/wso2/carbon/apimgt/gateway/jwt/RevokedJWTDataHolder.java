@@ -23,14 +23,19 @@ import org.apache.commons.logging.LogFactory;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ *  Singleton which stores the revoked JWT map
+ */
 public class RevokedJWTDataHolder {
 
     private static final Log log = LogFactory.getLog(RevokedJWTDataHolder.class);
     private static Map<String, Long> revokedJWTMap = new ConcurrentHashMap<>();
+    private static RevokedJWTDataHolder instance = new RevokedJWTDataHolder();
 
-    public static void addRevokedJWTToMap(String key, Long value){
-        if(key != null && value != null) {
-            revokedJWTMap.put(key,value);
+    public static void addRevokedJWTToMap(String key, Long value) {
+        if (key != null && value != null) {
+            log.debug("Adding revoked JWT key, value pair to the revoked map :" + key + " , " + value);
+            revokedJWTMap.put(key, value);
         }
     }
 
@@ -38,4 +43,11 @@ public class RevokedJWTDataHolder {
         return revokedJWTMap.containsKey(jwtSignature);
     }
 
+    private RevokedJWTDataHolder() {
+
+    }
+
+    public static RevokedJWTDataHolder getInstance() {
+        return instance;
+    }
 }

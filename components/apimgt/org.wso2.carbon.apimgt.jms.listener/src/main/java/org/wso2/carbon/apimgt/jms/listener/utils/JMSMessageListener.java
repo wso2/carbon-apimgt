@@ -254,8 +254,14 @@ public class JMSMessageListener implements MessageListener {
             return;
         }
 
+        boolean isTokenJWT = revokedToken.contains(APIConstants.DOT);
         //handle JWT tokens
-        revokedToken = getSignatureIfJWT(revokedToken); //JWT signature is the cache key
+        if (isTokenJWT) {
+            // Get expiry time of JWT token
+            Long expiryTime = APIUtil.getExpiryifJWT(revokedToken);
+            revokedToken = APIUtil.getSignatureIfJWT(revokedToken); //JWT signature is the cache key
+            RevokedJWTDataHolder.addRevokedJWTToMap(revokedToken, expiryTime);  // Add revoked token to revoked JWT map
+        }
 
         //Find the actual tenant domain on which the access token was cached. It is stored as a reference in
         //the super tenant cache.
@@ -277,30 +283,5 @@ public class JMSMessageListener implements MessageListener {
         //Remove token from the token's own tenant's cache.
         Utils.removeTokenFromTenantTokenCache(revokedToken, cachedTenantDomain);
         Utils.putInvalidTokenIntoTenantInvalidTokenCache(revokedToken, cachedTenantDomain);
-
-        // Get expiry time of JWT token
-        if (revokedToken.contains(APIConstants.DOT)) {
-            Long expiryTime = APIUtil.getExpiryifJWT(revokedToken);
-            // Add revoked token to revoked JWT map
-            RevokedJWTDataHolder.addRevokedJWTToMap(revokedToken, expiryTime);
-        }
-    }
-
-    protected String getSignatureIfJWT(String token) {
-        if (token.contains(APIConstants.DOT)) {
-            try {
-                String[] jwtParts = token.split("\\.");
-                JSONObject jwtHeader = new JSONObject(new String(Base64.getUrlDecoder().decode(jwtParts[0])));
-                // Check if the decoded header contains type as 'JWT'.
-                if (APIConstants.JWT.equals(jwtHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))) {
-                    if (jwtParts.length == 3) {
-                        return jwtParts[2]; //JWT signature available
-                    }
-                }
-            } catch (JSONException | IllegalArgumentException e) {
-                log.debug("Not a JWT token. Failed to decode the token header.", e);
-            }
-        }
-        return token; //Not a JWT. Treat as an opaque token
     }
 }

@@ -38,12 +38,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * Class which is responsible to fetch the revoked JWT signatures via webservice database during startup
+ */
 public class RevokedJWTTokensRetriever extends TimerTask {
 
     private static final Log log = LogFactory.getLog(RevokedJWTTokensRetriever.class);
     private static final int revokedJWTTokensRetrievalTimeoutInSeconds = 15;
     private static final int revokedJWTTokensRetrievalRetries = 15;
-    private static RevokedJWTDataHolder revokedJWTDataHolder = new RevokedJWTDataHolder();
 
     @Override
     public void run() {
@@ -55,16 +57,17 @@ public class RevokedJWTTokensRetriever extends TimerTask {
     }
 
     /**
-     * This method will retrieve revoked JWT tokens by calling a WebService.
+     * This method will retrieve revoked JWT tokens by calling a web service.
      *
-     * @return .
+     * @return List of RevokedJWTTokensDTOs.
      */
-    private RevokedJWTTokensDTO retrieveRevokedJWTTokensData() {
+    private RevokedJWTTokensDTO[] retrieveRevokedJWTTokensData() {
 
         try {
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                            .getAPIManagerConfiguration();
-            String serviceURL = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
+                    .getAPIManagerConfiguration();
+            String serviceURL = "https://" + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
+                    System.getProperty(APIConstants.KEYMANAGER_PORT) + "/revokedjwt/data/v1";
             String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
             String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
             String url = serviceURL + "/revokedjwt";
@@ -86,8 +89,9 @@ public class RevokedJWTTokensRetriever extends TimerTask {
                     retryCount++;
                     if (retryCount < revokedJWTTokensRetrievalRetries) {
                         retry = true;
-                        log.warn("Failed retrieving revoked JWT tokens from remote endpoint: " + ex.getMessage()
-                                + ". Retrying after " + revokedJWTTokensRetrievalTimeoutInSeconds + " seconds...");
+                        log.warn("Failed retrieving revoked JWT token signatures from remote endpoint: " +
+                                ex.getMessage() + ". Retrying after " + revokedJWTTokensRetrievalTimeoutInSeconds +
+                                " seconds...");
                         Thread.sleep(revokedJWTTokensRetrievalTimeoutInSeconds * 1000);
                     } else {
                         throw ex;
@@ -97,7 +101,7 @@ public class RevokedJWTTokensRetriever extends TimerTask {
 
             String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
             if (responseString != null && !responseString.isEmpty()) {
-                return new Gson().fromJson(responseString, RevokedJWTTokensDTO.class);
+                return new Gson().fromJson(responseString, RevokedJWTTokensDTO[].class);
             }
         } catch (IOException | InterruptedException e) {
             log.error("Exception when retrieving revoked JWT tokens from remote endpoint ", e);
@@ -106,12 +110,18 @@ public class RevokedJWTTokensRetriever extends TimerTask {
     }
 
     private void loadRevokedJWTTokensFromWebService() {
-        RevokedJWTTokensDTO revokedJWTTokensDTO = retrieveRevokedJWTTokensData();
-        if(revokedJWTTokensDTO != null) {
-            revokedJWTDataHolder.addRevokedJWTToMap(null,null);
+
+        RevokedJWTTokensDTO[] revokedJWTTokensDTOs = retrieveRevokedJWTTokensData();
+        for (RevokedJWTTokensDTO revokedJWTToken : revokedJWTTokensDTOs) {
+            RevokedJWTDataHolder.getInstance().addRevokedJWTToMap(revokedJWTToken.getSignature(),
+                    revokedJWTToken.getExpiryTime());
         }
     }
 
+    /**
+     *  Initiates the timer task to fetch data from the web service.
+     *  Timer task will not run after the retry count is completed.
+     */
     public void startRevokedJWTTokensRetriever() {
         //todo init delay configurable?
         new Timer().schedule(this, 60000);
