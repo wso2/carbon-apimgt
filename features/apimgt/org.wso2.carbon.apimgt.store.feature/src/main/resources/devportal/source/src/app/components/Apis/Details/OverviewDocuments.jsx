@@ -142,7 +142,7 @@ function OverviewDocuments(props) {
                 </Typography>
                 {docs.length > 0 && (
                     <div className={classes.subscriptionBox}>
-                        <Link to={'/apis/' + apiId + '/documents'} className={classes.linkStyle}>
+                        <Link to={'/apis/' + apiId + '/docs'} className={classes.linkStyle}>
                             {docs[0].name}
                         </Link>
                         {/* <Typography variant='caption'>

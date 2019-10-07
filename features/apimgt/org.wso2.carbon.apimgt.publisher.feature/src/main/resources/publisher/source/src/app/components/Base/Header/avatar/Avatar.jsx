@@ -46,7 +46,7 @@ class Avatar extends Component {
 
     /**
      *
-     * Open and Close (Toggle) Avatar dropdown menu
+     * Open Avatar dropdown menu
      * @param {React.SyntheticEvent} event `click` event on Avatar
      * @memberof Avatar
      */
