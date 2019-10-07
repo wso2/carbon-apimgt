@@ -2400,7 +2400,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 api.setScopes(scopes);
             }
 
-            apiProvider.updateAPI(api);
+            apiProvider.manageAPI(api);
 
             String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL
                     .replace(RestApiConstants.APIID_PARAM, apiId);
