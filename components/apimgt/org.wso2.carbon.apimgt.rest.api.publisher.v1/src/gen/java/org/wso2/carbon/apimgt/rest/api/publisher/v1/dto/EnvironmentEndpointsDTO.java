@@ -17,6 +17,8 @@ public class EnvironmentEndpointsDTO   {
   
     private String http = null;
     private String https = null;
+    private String ws = null;
+    private String wss = null;
 
   /**
    * HTTP environment URL
@@ -54,6 +56,42 @@ public class EnvironmentEndpointsDTO   {
     this.https = https;
   }
 
+  /**
+   * WS environment URL
+   **/
+  public EnvironmentEndpointsDTO ws(String ws) {
+    this.ws = ws;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "http://localhost:9099", value = "WS environment URL")
+  @JsonProperty("ws")
+  public String getWs() {
+    return ws;
+  }
+  public void setWs(String ws) {
+    this.ws = ws;
+  }
+
+  /**
+   * WSS environment URL
+   **/
+  public EnvironmentEndpointsDTO wss(String wss) {
+    this.wss = wss;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "https://localhost:8099", value = "WSS environment URL")
+  @JsonProperty("wss")
+  public String getWss() {
+    return wss;
+  }
+  public void setWss(String wss) {
+    this.wss = wss;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -65,12 +103,14 @@ public class EnvironmentEndpointsDTO   {
     }
     EnvironmentEndpointsDTO environmentEndpoints = (EnvironmentEndpointsDTO) o;
     return Objects.equals(http, environmentEndpoints.http) &&
-        Objects.equals(https, environmentEndpoints.https);
+        Objects.equals(https, environmentEndpoints.https) &&
+        Objects.equals(ws, environmentEndpoints.ws) &&
+        Objects.equals(wss, environmentEndpoints.wss);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(http, https);
+    return Objects.hash(http, https, ws, wss);
   }
 
   @Override
@@ -80,6 +120,8 @@ public class EnvironmentEndpointsDTO   {
     
     sb.append("    http: ").append(toIndentedString(http)).append("\n");
     sb.append("    https: ").append(toIndentedString(https)).append("\n");
+    sb.append("    ws: ").append(toIndentedString(ws)).append("\n");
+    sb.append("    wss: ").append(toIndentedString(wss)).append("\n");
     sb.append("}");
     return sb.toString();
   }
