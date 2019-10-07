@@ -36,9 +36,8 @@ import { useAppContext } from 'AppComponents/Shared/AppContext';
 import ProductResourcesEditWorkspace from 'AppComponents/Apis/Details/ProductResources/ProductResourcesEditWorkspace';
 
 const useStyles = makeStyles(theme => ({
-    box: {
-        width: '60%',
-        margin: 'auto',
+    Paper: {
+        height: '40px',
     },
     saveButton: {
         padding: '0px 0px 0px 10px',
@@ -51,6 +50,9 @@ const useStyles = makeStyles(theme => ({
     },
     buttonWrapper: {
         marginTop: theme.spacing(4),
+    },
+    alternativeLabel: {
+        marginTop: theme.spacing(1),
     },
 }));
 
@@ -79,7 +81,7 @@ export default function ApiProductCreateWrapper(props) {
                 <FormattedMessage
                     id='Apis.Create.APIProduct.APIProductCreateWrapper.sub.heading'
                     defaultMessage={
-                        'Create an API Product providing Name, Context parameters, Resources' +
+                        'Create an API Product providing Name, Context, Resources' +
                         ' and optionally business plans'
                     }
                 />
@@ -144,9 +146,22 @@ export default function ApiProductCreateWrapper(props) {
             value: isFormValid,
         });
     }
+    function getSteps() {
+        return [
+            <FormattedMessage
+                variant='caption'
+                id='Apis.Create.APIProduct.APIProductCreateWrapper.defineProvide'
+                defaultMessage='Define API Product'
+            />, <FormattedMessage
+                variant='caption'
+                id='Apis.Create.APIProduct.APIProductCreateWrapper.resources'
+                defaultMessage='Add Resources'
+            />];
+    }
 
     const [isCreating, setCreating] = useState();
     const classes = useStyles();
+    const steps = getSteps();
 
     const createAPIProduct = () => {
         {
@@ -185,54 +200,31 @@ export default function ApiProductCreateWrapper(props) {
             <APICreateProductBase
                 title={pageTitle}
             >
-                <Box className={classes.box}>
+                <Box>
                     {wizardStep === 0 && (
-                        <Stepper activeStep={0}>
-                            <Step>
-                                <StepLabel>
-                                    <FormattedMessage
-                                        id='Apis.Create.APIProduct.APIProductCreateWrapper.productDetails'
-                                        defaultMessage='Provide Details'
-                                    />
-                                </StepLabel>
-                            </Step>
+                        <Stepper alternativeLabel activeStep={0}>
+                            {steps.map(label => (
+                                <Step key={label}>
+                                    <StepLabel className={classes.alternativeLabel}>{label}</StepLabel>
+                                </Step>
+                            ))}
 
-                            <Step>
-                                <StepLabel>
-                                    <FormattedMessage
-                                        id='Apis.Create.APIProduct.APIProductCreateWrapper.resources'
-                                        defaultMessage='Add Resources'
-                                    />
-                                </StepLabel>
-                            </Step>
                         </Stepper>
                     )}
                     {wizardStep === 1 && (
-                        <Stepper activeStep={1}>
-                            <Step>
-                                <StepLabel>
-                                    <FormattedMessage
-                                        id='Apis.Create.APIProduct.APIProductCreateWrapper.productDetails'
-                                        defaultMessage='Provide Details'
-                                    />
-                                </StepLabel>
-                            </Step>
-
-                            <Step>
-                                <StepLabel>
-                                    <FormattedMessage
-                                        id='Apis.Create.APIProduct.APIProductCreateWrapper.resources'
-                                        defaultMessage='Add Resources'
-                                    />
-                                </StepLabel>
-                            </Step>
+                        <Stepper alternativeLabel activeStep={1}>
+                            {steps.map(label => (
+                                <Step key={label}>
+                                    <StepLabel>{label}</StepLabel>
+                                </Step>
+                            ))}
                         </Stepper>
                     )}
                 </Box>
-                <Grid container spacing={3}>
+                <Grid container spacing={2}>
                     {wizardStep === 0 && <Grid item md={12} />}
                     {wizardStep === 0 && <Grid item md={1} />}
-                    <Grid item md={wizardStep === 0 ? 10 : 12}>
+                    <Grid item md={wizardStep === 0 ? 11 : 12}>
                         {wizardStep === 0 && (
                             <DefaultAPIForm
                                 onValidate={handleOnValidate}
@@ -251,7 +243,6 @@ export default function ApiProductCreateWrapper(props) {
                         )}
                     </Grid>
                     { wizardStep === 0 && <Grid item md={1} />}
-                    { wizardStep === 0 && <Grid item md={1} />}
                     <Grid item md={9}>
                         <Grid
                             className={wizardStep === 1 && classes.saveButton}
@@ -264,7 +255,6 @@ export default function ApiProductCreateWrapper(props) {
                             <Grid item>
                                 {wizardStep === 1 &&
                                 <Button
-                                    variant='outlined'
                                     onClick={() =>
                                         setWizardStep(step => step - 1)}
                                 >
@@ -275,7 +265,7 @@ export default function ApiProductCreateWrapper(props) {
                                 </Button>}
                                 {wizardStep === 0 && (
                                     <Link to='/apis/'>
-                                        <Button variant='outlined'>
+                                        <Button>
                                             <FormattedMessage
                                                 id='Apis.Create.APIProduct.APIProductCreateWrapper.cancel'
                                                 defaultMessage='Cancel'
