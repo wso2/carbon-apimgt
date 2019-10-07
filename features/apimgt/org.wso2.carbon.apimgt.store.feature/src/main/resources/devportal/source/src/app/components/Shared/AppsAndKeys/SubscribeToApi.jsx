@@ -262,15 +262,15 @@ const subscribeToApi = (props) => {
 };
 subscribeToApi.propTypes = {
     classes: PropTypes.shape({
-        FormControl: PropTypes.shape({}),
-        quotaHelp: PropTypes.shape({}),
-        selectEmpty: PropTypes.shape({}),
-        FormControlOdd: PropTypes.shape({}),
-        subscribeRoot: PropTypes.shape({}),
-        subscribeRootSmall: PropTypes.shape({}),
-        smallDisplayFix: PropTypes.shape({}),
-        selectMenuRoot: PropTypes.shape({}),
-        smallDisplay: PropTypes.shape({}),
+        FormControl: PropTypes.string,
+        quotaHelp: PropTypes.string,
+        selectEmpty: PropTypes.string,
+        FormControlOdd: PropTypes.string,
+        subscribeRoot: PropTypes.string,
+        subscribeRootSmall: PropTypes.string,
+        smallDisplayFix: PropTypes.string,
+        selectMenuRoot: PropTypes.string,
+        smallDisplay: PropTypes.string,
     }).isRequired,
     applicationsAvailable: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string,
