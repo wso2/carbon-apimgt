@@ -45,6 +45,7 @@ public final class RevokedJWTDBUtil {
     private static long timeBetweenUpdates = 10000;
 
     public static void initialize() throws Exception {
+
         if (dataSource != null) {
             return;
         }

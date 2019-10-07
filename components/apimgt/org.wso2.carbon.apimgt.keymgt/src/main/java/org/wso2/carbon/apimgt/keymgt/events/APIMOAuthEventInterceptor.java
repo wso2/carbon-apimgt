@@ -89,6 +89,7 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
             OAuthRevocationResponseDTO revokeResponseDTO, AccessTokenDO accessTokenDO,
             RefreshTokenValidationDataDO refreshTokenDO, Map<String, Object> params) {
 
+        // If the response header contains RevokedAccessToken header, it implies the token revocation was a success.
         ResponseHeader[] responseHeaders = revokeResponseDTO.getResponseHeaders();
         boolean isRevokedAccessTokenHeaderExists = false;
         if(responseHeaders != null) {
@@ -137,7 +138,7 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
             org.wso2.carbon.identity.oauth.dto.OAuthRevocationResponseDTO revokeRespDTO, AccessTokenDO accessTokenDO,
             Map<String, Object> params) {
 
-        if(accessTokenDO != null) {
+        if(accessTokenDO != null) { // if accessTokenDO is not null, it implies the revocation was a success
             if (realtimeNotifierEnabled) {
                 log.debug("Realtime message sending is enabled");
                 tokenRevocationNotifier.sendMessageOnRealtime(accessTokenDO.getTokenId(), realtimeNotifierProperties);
