@@ -28,6 +28,7 @@ import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api.js';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import { isRestricted } from 'AppData/AuthManager';
+import APIValidation from 'AppData/APIValidation';
 import Joi from '@hapi/joi';
 
 const styles = theme => ({
@@ -98,14 +99,15 @@ class BusinessInformation extends React.Component {
         }
         // Validate whether mandatory fields are filled and given valid email addresses.
         if (name === 'businessOwner') {
-            this.isValidBusinessOwnerName = (value !== '');
+            const nameStatus = APIValidation.name.validate(value).error;
+            this.isValidBusinessOwnerName = (nameStatus === null);
         }
         if (name === 'businessOwnerEmail') {
-            const emailStatus = Joi.string().email({ tlds: true }).required().validate(value).error;
+            const emailStatus = APIValidation.email.validate(value).error;
             this.isValidBusinessOwnerEmail = (emailStatus === null);
         }
         if (name === 'technicalOwnerEmail') {
-            const emailStatus = Joi.string().email({ tlds: true }).required().validate(value).error;
+            const emailStatus = APIValidation.email.validate(value).error;
             this.isValidTechnicalOwnerEmail = (emailStatus === null);
         }
         this.setState({
