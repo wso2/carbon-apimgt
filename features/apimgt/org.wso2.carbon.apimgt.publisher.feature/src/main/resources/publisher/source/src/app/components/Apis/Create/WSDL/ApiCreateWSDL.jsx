@@ -18,7 +18,7 @@
 import React, { useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
+import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import { FormattedMessage } from 'react-intl';
 import Stepper from '@material-ui/core/Stepper';
@@ -173,8 +173,8 @@ export default function ApiCreateWSDL(props) {
                 </React.Fragment>
             }
         >
-            <Paper>
-                <Stepper activeStep={0}>
+            <Box>
+                <Stepper alternativeLabel activeStep={0}>
                     <Step>
                         <StepLabel>Provide WSDL</StepLabel>
                     </Step>
@@ -183,7 +183,7 @@ export default function ApiCreateWSDL(props) {
                         <StepLabel>Create API</StepLabel>
                     </Step>
                 </Stepper>
-            </Paper>
+            </Box>
 
             <Grid container spacing={3}>
                 <Grid item md={12} />
@@ -202,13 +202,13 @@ export default function ApiCreateWSDL(props) {
                 </Grid>
                 <Grid item md={1} />
                 <Grid item md={9}>
-                    <Grid container direction='row' justify='space-between'>
+                    <Grid container direction='row' justify='flex-start' alignItems='center' spacing={2}>
                         <Grid item>
                             {wizardStep === 0 && (
                                 <Link to='/apis/'>
-                                    <Button variant='outlined'>
+                                    <Button>
                                         <FormattedMessage
-                                            id='Apis.Create.WSDL.ApiCreateWSDL.cancel'
+                                            id='Apis.Create.OpenAPI.ApiCreateOpenAPI.cancel'
                                             defaultMessage='Cancel'
                                         />
                                     </Button>
