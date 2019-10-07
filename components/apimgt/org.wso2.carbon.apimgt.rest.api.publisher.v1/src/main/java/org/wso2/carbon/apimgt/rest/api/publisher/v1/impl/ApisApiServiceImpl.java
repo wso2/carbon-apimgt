@@ -45,12 +45,7 @@ import org.json.XML;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.api.APIDefinition;
-import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.FaultGatewaysException;
-import org.wso2.carbon.apimgt.api.MonetizationException;
+import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -563,6 +558,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (!errorMessage.isEmpty()) {
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
+            }
+            // Validate if resources are empty
+            if (body.getOperations() == null || body.getOperations().isEmpty()) {
+                RestApiUtil.handleBadRequest(ExceptionCodes.NO_RESOURCES_FOUND, log);
             }
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
             validateScopes(apiToUpdate);
@@ -2298,6 +2297,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (APIManagementException e) {
             // catch APIManagementException inside again to capture validation error
             RestApiUtil.handleBadRequest(e.getMessage(), log);
+        }
+        if(uriTemplates == null || uriTemplates.isEmpty()) {
+            RestApiUtil.handleBadRequest(ExceptionCodes.NO_RESOURCES_FOUND, log);
         }
         Set<Scope> scopes = oasParser.getScopes(apiDefinition);
         //validating scope roles
