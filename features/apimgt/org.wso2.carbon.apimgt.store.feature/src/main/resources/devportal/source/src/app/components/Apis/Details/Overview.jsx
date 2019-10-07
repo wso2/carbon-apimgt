@@ -284,12 +284,14 @@ function Overview(props) {
                                                 {` ${applicationsAvailable.length} `}
                                                 {applicationsAvailable.length === 1 ? (
                                                     <FormattedMessage
-                                                        id='Apis.Details.Overview.subscribe.to.application.content'
+                                                        id={'Apis.Details.Overview.subscribe.to.' +
+                                                        'application.content.Application'}
                                                         defaultMessage='Application'
                                                     />
                                                 ) : (
                                                     <FormattedMessage
-                                                        id='Apis.Details.Overview.subscribe.to.application.content'
+                                                        id={'Apis.Details.Overview.subscribe.to.' +
+                                                    'application.content.Applications'}
                                                         defaultMessage='Applications'
                                                     />
                                                 )}
