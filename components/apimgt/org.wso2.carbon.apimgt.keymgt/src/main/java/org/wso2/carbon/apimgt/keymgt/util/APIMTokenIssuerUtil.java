@@ -71,7 +71,8 @@ public class APIMTokenIssuerUtil {
         jwtTokenInfoDTO.setSubscribedApiDTOList(subscribedApiDTOList);
 
         SubscriptionPolicy[] subscriptionPolicies = ApiMgtDAO.getInstance()
-                .getSubscriptionPolicies(subscriptionTiers.toArray(new String[0]), APIUtil.getTenantId(appOwner));
+                .getSubscriptionPolicies(
+                        APIUtil.getTenantId(appOwner));
 
         Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<>();
         for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies) {
