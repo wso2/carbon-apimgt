@@ -92,6 +92,8 @@ const definition = {
     apiDocument: documentSchema.document().isDocumentPresent(),
     operationVerb: Joi.string().required(),
     operationTarget: Joi.string().required(),
+    name: Joi.string().min(1).max(255),
+    email: Joi.string().email({ tlds: true }).required(),
 };
 
 export default definition;
