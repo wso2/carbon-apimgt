@@ -23,7 +23,7 @@ import PropTypes from 'prop-types';
 import { PageNotFound } from 'AppComponents/Base/Errors/index';
 
 import APICreateDefault from './Default/APICreateDefault';
-import APIProductCreateWrapper from './Default/APIProductCreateWrapper';
+import APIProductCreateWrapper from './APIProduct/APIProductCreateWrapper';
 import ApiCreateSwagger from './OpenAPI/ApiCreateOpenAPI';
 import ApiCreateWSDL from './WSDL/ApiCreateWSDL';
 import ApiCreateGraphQL from './GraphQL/ApiCreateGraphQL';

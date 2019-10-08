@@ -18,14 +18,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import {
-    Route, Switch, Redirect, Link, withRouter,
-} from 'react-router-dom';
+import { Route, Switch, Redirect, Link, withRouter } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Loadable from 'react-loadable';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Api from 'AppData/api';
-import CONSTS from 'AppData/Constants';
 import AuthManager from 'AppData/AuthManager';
 import withSettings from 'AppComponents/Shared/withSettingsContext';
 import Alert from 'AppComponents/Shared/Alert';
@@ -372,17 +369,21 @@ class Details extends React.Component {
                                     handleMenuSelect={this.handleMenuSelect}
                                     active={active}
                                 />
-                                <LeftMenuItem
-                                    text='test'
-                                    handleMenuSelect={this.handleMenuSelect}
-                                    active={active}
-                                />
+                                {api.type !== 'WS'
+                                    && (
+                                        <LeftMenuItem
+                                            text='test'
+                                            handleMenuSelect={this.handleMenuSelect}
+                                            active={active}
+                                        />
+                                    )
+                                }
                             </React.Fragment>
                         )
                     }
                     <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={active} />
                     {!api.advertiseInfo.advertised
-                        && <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
+                        && api.type !== 'WS' && <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
                     }
                 </div>
                 <div className={classes.content}>

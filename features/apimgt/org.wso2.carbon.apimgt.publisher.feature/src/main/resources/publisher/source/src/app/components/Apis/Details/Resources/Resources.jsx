@@ -27,7 +27,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
-
+import { isRestricted } from 'AppData/AuthManager';
 import Operation from './components/Operation';
 import GroupOfOperations from './components/GroupOfOperations';
 import SpecErrors from './components/SpecErrors';
@@ -36,6 +36,7 @@ import GoToDefinitionLink from './components/GoToDefinitionLink';
 import APIRateLimiting from './components/APIRateLimiting';
 import { getTaggedOperations } from './operationUtils';
 import OperationsSelector from './components/OperationsSelector';
+
 
 /**
  * This component handles the Resource page in API details though it's written in a sharable way
@@ -46,7 +47,6 @@ import OperationsSelector from './components/OperationsSelector';
  */
 export default function Resources(props) {
     const {
-        disableAddOperation,
         operationProps,
         disableRateLimiting,
         hideAPIDefinitionLink,
@@ -164,11 +164,23 @@ export default function Resources(props) {
                     // If target is not there add an empty object
                     copyOfOpenAPI.paths[data.target] = {};
                 }
-                const regEx = /(?<=\{)(?!\s*\{)[^{}]+/g;
+                const regEx = /[^{}]+(?=})/g;
                 const params = data.target.match(regEx);
-                copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()] = {
-                    responses: { 200: { description: 'ok' } },
-                    parameters: params ? params.map((para) => {
+                let parameters;
+                if (copyOfOpenAPI.openapi) {
+                    parameters = params ? params.map((para) => {
+                        const paraObj = {};
+                        paraObj.name = para;
+                        paraObj.in = 'path';
+                        paraObj.required = true;
+                        paraObj.schema = {
+                            type: 'string',
+                            format: 'string',
+                        };
+                        return paraObj;
+                    }) : [];
+                } else {
+                    parameters = params ? params.map((para) => {
                         const paraObj = {};
                         paraObj.name = para;
                         paraObj.in = 'path';
@@ -176,7 +188,11 @@ export default function Resources(props) {
                         paraObj.type = 'string';
                         paraObj.format = 'string';
                         return paraObj;
-                    }) : [],
+                    }) : [];
+                }
+                copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()] = {
+                    responses: { 200: { description: 'ok' } },
+                    parameters,
                 };
                 return updateSwagger(data, copyOfOpenAPI);
             }
@@ -242,7 +258,7 @@ export default function Resources(props) {
                     />
                 </Grid>
             )}
-            {!disableAddOperation && (
+            {!isRestricted(['apim:api_create'], api) && (
                 <Grid item md={12}>
                     <AddOperation updateOpenAPI={updateOpenAPI} />
                 </Grid>
@@ -305,13 +321,11 @@ Resources.defaultProps = {
     disableRateLimiting: false,
     disableMultiSelect: false,
     hideAPIDefinitionLink: false,
-    disableAddOperation: false,
 };
 
 Resources.propTypes = {
     disableRateLimiting: PropTypes.bool,
     hideAPIDefinitionLink: PropTypes.bool,
-    disableAddOperation: PropTypes.bool,
     disableMultiSelect: PropTypes.bool,
     operationProps: PropTypes.shape({
         disableUpdate: PropTypes.bool,

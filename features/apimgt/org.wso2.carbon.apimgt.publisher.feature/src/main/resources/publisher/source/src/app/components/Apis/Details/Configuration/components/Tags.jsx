@@ -16,12 +16,14 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import ChipInput from 'material-ui-chip-input';
 import { FormattedMessage } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import Chip from '@material-ui/core/Chip';
+import { red } from '@material-ui/core/colors/';
 
 /**
  *
@@ -33,7 +35,9 @@ import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 export default function Tags(props) {
     const { api, configDispatcher } = props;
     const [apiFromContext] = useAPI();
-
+    const [isTagValid, setIsTagValid] = useState(true);
+    const [invalidTags, setInvalidTags] = useState([]);
+    const regexPattern = /([~!@#;%^&*+=|\\<>"'/,])/;
     return (
         <React.Fragment>
             <ChipInput
@@ -47,21 +51,54 @@ export default function Tags(props) {
                 }
                 disabled={isRestricted(['apim:api_create', 'apim:api_publish'], apiFromContext)}
                 value={api.tags}
-                helperText={(
+                error={!isTagValid}
+                helperText={isTagValid ? (
                     <FormattedMessage
                         id='Apis.Details.Configuration.components.Tags.helper'
                         defaultMessage='Press `enter` after typing the tag name,To add a new tag'
                     />
-                )}
+                ) : (
+                    <FormattedMessage
+                        id='Apis.Details.Configuration.components.Tags.error'
+                        defaultMessage={
+                            'The tag contains one or more illegal characters ' +
+                            '( ~ ! @ # ; % ^ & * + = { } | < > , \' " \\\\ / ) .'
+                        }
+                    />
+                )
+                }
                 onAdd={(tag) => {
+                    if (regexPattern.test(tag)) {
+                        setIsTagValid(false);
+                        setInvalidTags([...invalidTags, tag]);
+                    }
                     configDispatcher({
                         action: 'tags',
                         value: [...api.tags, tag.length > 30 ? tag.substring(0, 30) : tag],
                     });
                 }}
-                onDelete={(tag) => {
-                    configDispatcher({ action: 'tags', value: api.tags.filter(oldTag => oldTag !== tag) });
-                }}
+                chipRenderer={({ value }, key) => (
+                    <Chip
+                        key={key}
+                        size='small'
+                        label={value}
+                        onDelete={() => {
+                            if (invalidTags.includes(value)) {
+                                const currentInvalidTags = invalidTags.filter(existingTag => existingTag !== value);
+                                setInvalidTags(currentInvalidTags);
+                                if (currentInvalidTags.length === 0) {
+                                    setIsTagValid(true);
+                                }
+                            }
+                            configDispatcher({ action: 'tags', value: api.tags.filter(oldTag => oldTag !== value) });
+                        }}
+                        style={{
+                            backgroundColor: regexPattern.test(value) ? red[300] : null,
+                            margin: '0 8px 12px 0',
+                            float: 'left',
+                        }}
+                    />
+                )}
                 style={{ display: 'flex' }}
             />
         </React.Fragment>

@@ -59,7 +59,7 @@ class ApiTableView extends React.Component {
         super(props);
         this.state = {
             data: null,
-            loading: false,
+            loading: true,
         };
         this.page = 0;
         this.count = 100;
@@ -174,7 +174,9 @@ class ApiTableView extends React.Component {
         const { page, rowsPerPage } = this;
         const { apiType } = this.context;
         const api = new API();
-        if (query) {
+        const searchParam = new URLSearchParams(query);
+        const searchQuery = searchParam.get('query');
+        if (query && searchQuery !== null) {
             const composeQuery = queryString.parse(query);
             composeQuery.limit = this.rowsPerPage;
             composeQuery.offset = page * rowsPerPage;
@@ -217,7 +219,8 @@ class ApiTableView extends React.Component {
      * @memberof ApiTableView
      */
     render() {
-        const { intl, gridView, loading } = this.props;
+        const { intl, gridView } = this.props;
+        const { loading } = this.state;
         const columns = [
             {
                 name: 'id',

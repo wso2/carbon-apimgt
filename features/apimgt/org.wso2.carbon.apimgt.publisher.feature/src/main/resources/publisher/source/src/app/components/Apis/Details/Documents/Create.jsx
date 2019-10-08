@@ -79,11 +79,11 @@ function Create(props) {
     const { api, isAPIProduct } = useContext(APIContext);
     const [newDoc, setNewDoc] = useState(null);
     const {
-        classes, intl, apiType, history,
+        classes, intl, history
     } = props;
     const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
     const listingPath = `/${urlPrefix}/${api.id}/documents`;
-    const restAPI = apiType === Api.CONSTS.APIProduct ? new APIProduct() : new Api();
+    const restAPI = api.apiType === Api.CONSTS.APIProduct ? new APIProduct() : new Api();
     let createEditForm = useRef(null);
 
     const addDocument = (apiId) => {
@@ -165,7 +165,7 @@ function Create(props) {
                                     innerRef={(node) => {
                                         createEditForm = node;
                                     }}
-                                    apiType={apiType}
+                                    apiType={api.apiType}
                                     apiId={api.id}
                                 />
                                 <Divider />

@@ -49,6 +49,7 @@ import javax.cache.Cache;
 import javax.cache.Caching;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -292,7 +293,7 @@ public class BasicAuthCredentialValidator {
     }
 
     /**
-     * Returns the md5 hash of a given string.
+     * Returns the SHA-256 hash of a given string.
      *
      * @param str the string input to be hashed
      * @return hashed string
@@ -300,10 +301,10 @@ public class BasicAuthCredentialValidator {
     private String hashString(String str) {
         String generatedHash = null;
         try {
-            // Create MessageDigest instance for MD5
-            MessageDigest md = MessageDigest.getInstance("MD5");
+            // Create MessageDigest instance for SHA-256
+            MessageDigest md = MessageDigest.getInstance(APIConstants.SHA_256);
             //Add str bytes to digest
-            md.update(str.getBytes());
+            md.update(str.getBytes(StandardCharsets.UTF_8));
             //Get the hash's bytes
             byte[] bytes = md.digest();
             //This bytes[] has bytes in decimal format;

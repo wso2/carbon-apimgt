@@ -4636,6 +4636,22 @@ public final class APIUtil {
         return true;
     }
 
+    /**
+     * Returns whether Product REST APIs' token cache is enabled
+     *
+     * @return true if token cache is enabled
+     */
+    public static boolean isRESTAPITokenCacheEnabled() {
+        try {
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
+            String cacheEnabled = config.getFirstProperty(APIConstants.REST_API_TOKEN_CACHE_ENABLED);
+            return Boolean.parseBoolean(cacheEnabled);
+        } catch (Exception e) {
+            log.error("Did not found valid API Validation Information cache configuration. Use default configuration" + e);
+        }
+        return true;
+    }
 
     public static Cache getAPIContextCache() {
         CacheManager contextCacheManager = Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).
@@ -5972,12 +5988,13 @@ public final class APIUtil {
      * @param match string to match
      * @return whether the provided URL content contains the string to match
      */
-    public static boolean isURLContentContainsString(URL url, String match) {
+    public static boolean isURLContentContainsString(URL url, String match, int maxLines) {
         try (BufferedReader in =
                      new BufferedReader(new InputStreamReader(url.openStream(), Charset.defaultCharset()))) {
             String inputLine;
             StringBuilder urlContent = new StringBuilder();
-            while ((inputLine = in.readLine()) != null) {
+            while ((inputLine = in.readLine()) != null && maxLines > 0) {
+                maxLines --;
                 urlContent.append(inputLine);
                 if (urlContent.indexOf(match) > 0) {
                     return true;
@@ -8948,7 +8965,7 @@ public final class APIUtil {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
             adminPassword = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
-                    .getRealmConfiguration().getAdminUserName();
+                    .getRealmConfiguration().getAdminPassword();
 
         } catch (UserStoreException e) {
             handleInternalException("Error in getting admin password from user-mgt.xml", e);
@@ -9171,19 +9188,20 @@ public final class APIUtil {
         }
         jwtTokenInfoDTO.setSubscribedApiDTOList(subscribedApiDTOList);
 
-        SubscriptionPolicy[] subscriptionPolicies = ApiMgtDAO.getInstance()
-                .getSubscriptionPolicies(subscriptionTiers.toArray(new String[0]), APIUtil.getTenantId(appOwner));
+        if (subscriptionTiers.size() > 0) {
+            SubscriptionPolicy[] subscriptionPolicies = ApiMgtDAO.getInstance()
+                    .getSubscriptionPolicies(subscriptionTiers.toArray(new String[0]), APIUtil.getTenantId(appOwner));
 
-        Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<>();
-        for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies) {
-            SubscriptionPolicyDTO subscriptionPolicyDTO = new SubscriptionPolicyDTO();
-            subscriptionPolicyDTO.setSpikeArrestLimit(subscriptionPolicy.getRateLimitCount());
-            subscriptionPolicyDTO.setSpikeArrestUnit(subscriptionPolicy.getRateLimitTimeUnit());
-            subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicy.isStopOnQuotaReach());
-            subscriptionPolicyDTOList.put(subscriptionPolicy.getPolicyName(), subscriptionPolicyDTO);
+            Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<>();
+            for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies) {
+                SubscriptionPolicyDTO subscriptionPolicyDTO = new SubscriptionPolicyDTO();
+                subscriptionPolicyDTO.setSpikeArrestLimit(subscriptionPolicy.getRateLimitCount());
+                subscriptionPolicyDTO.setSpikeArrestUnit(subscriptionPolicy.getRateLimitTimeUnit());
+                subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicy.isStopOnQuotaReach());
+                subscriptionPolicyDTOList.put(subscriptionPolicy.getPolicyName(), subscriptionPolicyDTO);
+            }
+            jwtTokenInfoDTO.setSubscriptionPolicyDTOList(subscriptionPolicyDTOList);
         }
-        jwtTokenInfoDTO.setSubscriptionPolicyDTOList(subscriptionPolicyDTOList);
-
         return jwtTokenInfoDTO;
     }
 

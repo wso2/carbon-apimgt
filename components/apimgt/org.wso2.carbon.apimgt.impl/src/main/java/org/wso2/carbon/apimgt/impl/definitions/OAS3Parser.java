@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -61,10 +62,12 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -179,10 +182,23 @@ public class OAS3Parser extends APIDefinition {
                 }
                 scopeSet.add(scope);
             }
-            return scopeSet;
+            return sortScopes(scopeSet);
         } else {
-            return getScopesFromExtensions(openAPI);
+            return sortScopes(getScopesFromExtensions(openAPI));
         }
+    }
+
+    /**
+     * Sort scopes by name.
+     * This method was added to display scopes in publisher in a sorted manner.
+     *
+     * @param scopeSet
+     * @return Scope set
+     */
+    private Set<Scope> sortScopes(Set<Scope> scopeSet) {
+        List<Scope> scopesSortedlist = new ArrayList<>(scopeSet);
+        scopesSortedlist.sort(Comparator.comparing(Scope::getName));
+        return new LinkedHashSet(scopesSortedlist);
     }
 
     /**
@@ -399,27 +415,7 @@ public class OAS3Parser extends APIDefinition {
      */
     private void removePublisherSpecificInfo(OpenAPI openAPI) {
         Map<String, Object> extensions = openAPI.getExtensions();
-        if (extensions == null) {
-            return;
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_AUTH_HEADER)) {
-            extensions.remove(APIConstants.X_WSO2_AUTH_HEADER);
-        }
-        if (extensions.containsKey(APIConstants.X_THROTTLING_TIER)) {
-            extensions.remove(APIConstants.X_THROTTLING_TIER);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_CORS)) {
-            extensions.remove(APIConstants.X_WSO2_CORS);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS)) {
-            extensions.remove(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_SANDBOX_ENDPOINTS)) {
-            extensions.remove(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_BASEPATH)) {
-            extensions.remove(APIConstants.X_WSO2_BASEPATH);
-        }
+        OASParserUtil.removePublisherSpecificInfo(extensions);
     }
 
     /**
@@ -469,7 +465,7 @@ public class OAS3Parser extends APIDefinition {
     @Override
     public String getOASDefinitionForPublisher(API api, String oasDefinition) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(oasDefinition);
-        // setting scopes id it is null
+        // setting scopes id if it is null
         // https://github.com/swagger-api/swagger-parser/issues/1202
         OAuthFlow oAuthFlow = openAPI.getComponents().getSecuritySchemes().get("default").getFlows().getImplicit();
         if (oAuthFlow.getScopes() == null) {
@@ -483,21 +479,18 @@ public class OAS3Parser extends APIDefinition {
             openAPI.addExtension(APIConstants.X_THROTTLING_TIER, api.getApiLevelPolicy());
         }
         openAPI.addExtension(APIConstants.X_WSO2_CORS, api.getCorsConfiguration());
-        String endpointConfig = api.getEndpointConfig();
-        if (!StringUtils.isBlank(endpointConfig)) {
-            org.json.JSONObject endpoints = new org.json.JSONObject(endpointConfig);
-            if (endpoints.has(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
-                String prodUrls = endpoints.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)
-                        .getString(APIConstants.API_DATA_URL);
-                openAPI.addExtension(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS, prodUrls);
-            }
-            if (endpoints.has(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
-                String sandUrls = endpoints.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS)
-                        .getString(APIConstants.API_DATA_URL);
-                openAPI.addExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandUrls);
-            }
+        Object prodEndpointObj = OASParserUtil.generateOASConfigForEndpoints(api, true);
+        if (prodEndpointObj != null) {
+            openAPI.addExtension(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS, prodEndpointObj);
+        }
+        Object sandEndpointObj = OASParserUtil.generateOASConfigForEndpoints(api, false);
+        if (prodEndpointObj != null) {
+            openAPI.addExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandEndpointObj);
         }
         openAPI.addExtension(APIConstants.X_WSO2_BASEPATH, api.getContext());
+        if (api.getTransports() != null) {
+            openAPI.addExtension(APIConstants.X_WSO2_TRANSPORTS, api.getTransports().split(","));
+        }
         return Json.pretty(openAPI);
     }
 

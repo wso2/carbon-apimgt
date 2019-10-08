@@ -24,6 +24,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.models.RefModel;
 import io.swagger.models.RefPath;
@@ -40,6 +41,8 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
@@ -78,6 +81,7 @@ public class OASParserUtil {
     private static final Log log = LogFactory.getLog(OASParserUtil.class);
     private static APIDefinition oas2Parser = new OAS2Parser();
     private static APIDefinition oas3Parser = new OAS3Parser();
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Return correct OAS parser by validating give definition with OAS 2/3 parsers.
@@ -404,5 +408,163 @@ public class OASParserUtil {
             template.setScopes(scopeObj);
         }
         return template;
+    }
+
+    /**
+     * generate endpoint information for OAS definition
+     *
+     * @param api          API
+     * @param isProduction is production endpoints
+     * @return JsonNode
+     */
+    public static JsonNode generateOASConfigForEndpoints(API api, boolean isProduction) {
+        if (api.getEndpointConfig() == null || api.getEndpointConfig().trim().isEmpty()) {
+            return null;
+        }
+        JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
+        if (endpointConfig.has(APIConstants.IMPLEMENTATION_STATUS)) {
+            // no need to populate if it is prototype API
+            return null;
+        }
+        ObjectNode endpointResult = objectMapper.createObjectNode();
+        String type = endpointConfig.getString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE);
+        if (APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(type)) {
+            endpointResult.put(APIConstants.X_WSO2_ENDPOINT_TYPE, APIConstants.ENDPOINT_TYPE_DEFAULT);
+            return endpointResult;
+        } else if (APIConstants.ENDPOINT_TYPE_FAILOVER.equalsIgnoreCase(type)) {
+            populateFailoverConfig(endpointResult, endpointConfig, isProduction);
+        } else if (APIConstants.ENDPOINT_TYPE_LOADBALANCE.equalsIgnoreCase(type)) {
+            populateLoadBalanceConfig(endpointResult, endpointConfig, isProduction);
+        } else if (APIConstants.ENDPOINT_TYPE_HTTP.equalsIgnoreCase(type)) {
+            setPrimaryConfig(endpointResult, endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_HTTP);
+        } else if (APIConstants.ENDPOINT_TYPE_ADDRESS.equalsIgnoreCase(type)) {
+            setPrimaryConfig(endpointResult, endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_ADDRESS);
+        } else {
+            return null;
+        }
+        return endpointResult;
+    }
+
+    /**
+     * Set failover configuration
+     *
+     * @param endpointResult result object
+     * @param endpointConfig endpoint configuration json string
+     * @param isProd         endpoint type
+     */
+    private static void populateFailoverConfig(ObjectNode endpointResult, JSONObject endpointConfig, boolean isProd) {
+        JSONArray endpointsURLs;
+        JSONObject primaryEndpoints;
+        if (isProd) {
+            endpointsURLs = endpointConfig.getJSONArray(APIConstants.ENDPOINT_PRODUCTION_FAILOVERS);
+            primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+        } else {
+            endpointsURLs = endpointConfig.getJSONArray(APIConstants.ENDPOINT_SANDBOX_FAILOVERS);
+            primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+        }
+
+        ArrayNode endpointsArray = objectMapper.createArrayNode();
+        String type = "";
+        if (endpointsURLs != null) {
+            for (int i = 0; i < endpointsURLs.length(); i++) {
+                JSONObject obj = endpointsURLs.getJSONObject(i);
+                endpointsArray.add(obj.getString(APIConstants.ENDPOINT_URL));
+                type = obj.getString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE);
+            }
+        }
+        if (primaryEndpoints != null && primaryEndpoints.has(APIConstants.ENDPOINT_URL)) {
+            endpointsArray.add(primaryEndpoints.getString(APIConstants.ENDPOINT_URL));
+        }
+        endpointResult.put(APIConstants.ENDPOINT_URL, endpointsArray);
+        endpointResult.put(APIConstants.X_WSO2_ENDPOINT_TYPE, type);
+        endpointResult.put(APIConstants.ENDPOINT_CONFIG, APIConstants.ENDPOINT_TYPE_FAILOVER);
+    }
+
+    /**
+     * Set load balance configuration
+     *
+     * @param endpointResult result object
+     * @param endpointConfig endpoint configuration json string
+     * @param isProd         endpoint type
+     */
+    private static void populateLoadBalanceConfig(ObjectNode endpointResult, JSONObject endpointConfig,
+            boolean isProd) {
+        JSONArray primaryProdEndpoints = new JSONArray();
+        if (isProd && endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) &&
+                endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) instanceof JSONArray) {
+            primaryProdEndpoints = endpointConfig.getJSONArray(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+        } else if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) &&
+                endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) instanceof JSONArray) {
+            primaryProdEndpoints = endpointConfig.getJSONArray(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+        }
+
+        ArrayNode endpointsArray = objectMapper.createArrayNode();
+        String type = "http";
+        if (primaryProdEndpoints != null) {
+            for (int i = 0; i < primaryProdEndpoints.length(); i++) {
+                JSONObject obj = primaryProdEndpoints.getJSONObject(i);
+                endpointsArray.add(obj.getString(APIConstants.ENDPOINT_URL));
+                if (obj.has(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) {
+                    type = obj.getString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE);
+                }
+            }
+        }
+        endpointResult.put(APIConstants.ENDPOINT_URL, endpointsArray);
+        endpointResult.put(APIConstants.X_WSO2_ENDPOINT_TYPE, type);
+        endpointResult.put(APIConstants.ENDPOINT_CONFIG, APIConstants.ENDPOINT_TYPE_LOADBALANCE);
+    }
+
+    /**
+     * Set baisc configuration
+     *
+     * @param endpointResult result object
+     * @param endpointConfig endpoint configuration json string
+     * @param isProd         endpoint type
+     * @param type           endpoint type
+     */
+    private static void setPrimaryConfig(ObjectNode endpointResult, JSONObject endpointConfig, boolean isProd,
+            String type) {
+        JSONObject primaryEndpoints = new JSONObject();
+        if (isProd && endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+            primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+        } else if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+            primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+        }
+        if (primaryEndpoints != null && primaryEndpoints.has(APIConstants.ENDPOINT_URL)) {
+            endpointResult.put(APIConstants.ENDPOINT_URL, primaryEndpoints.getString(APIConstants.ENDPOINT_URL));
+            endpointResult.put(APIConstants.X_WSO2_ENDPOINT_TYPE, type);
+        }
+    }
+
+    /**
+     * remove publisher/MG related extension from OAS
+     *
+     * @param extensions extensions
+     */
+    public static void removePublisherSpecificInfo(Map<String, Object> extensions) {
+        if (extensions == null) {
+            return;
+        }
+        if (extensions.containsKey(APIConstants.X_WSO2_AUTH_HEADER)) {
+            extensions.remove(APIConstants.X_WSO2_AUTH_HEADER);
+        }
+        if (extensions.containsKey(APIConstants.X_THROTTLING_TIER)) {
+            extensions.remove(APIConstants.X_THROTTLING_TIER);
+        }
+        if (extensions.containsKey(APIConstants.X_WSO2_CORS)) {
+            extensions.remove(APIConstants.X_WSO2_CORS);
+        }
+        if (extensions.containsKey(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS)) {
+            extensions.remove(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
+        }
+        if (extensions.containsKey(APIConstants.X_WSO2_SANDBOX_ENDPOINTS)) {
+            extensions.remove(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
+        }
+        if (extensions.containsKey(APIConstants.X_WSO2_BASEPATH)) {
+            extensions.remove(APIConstants.X_WSO2_BASEPATH);
+        }
+        if (extensions.containsKey(APIConstants.X_WSO2_TRANSPORTS)) {
+            extensions.remove(APIConstants.X_WSO2_TRANSPORTS);
+        }
     }
 }

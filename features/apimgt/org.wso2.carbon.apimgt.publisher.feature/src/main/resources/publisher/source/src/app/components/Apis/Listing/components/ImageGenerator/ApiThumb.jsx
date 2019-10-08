@@ -23,7 +23,6 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
 import Chip from '@material-ui/core/Chip';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -49,6 +48,70 @@ const styles = theme => ({
         color: green[200],
         position: 'absolute',
         marginLeft: '200px',
+    },
+    thumbHeader: {
+        width: '90%',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        cursor: 'pointer',
+        margin: 0,
+        'padding-left': '5px',
+    },
+    imageWrapper: {
+        color: theme.palette.text.secondary,
+        backgroundColor: theme.palette.background.paper,
+        width: theme.custom.thumbnail.width + theme.spacing.unit,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    thumbContent: {
+        width: theme.custom.thumbnail.width - theme.spacing.unit,
+        backgroundColor: theme.palette.background.paper,
+        padding: theme.spacing.unit,
+    },
+    thumbLeft: {
+        alignSelf: 'flex-start',
+        flex: 1,
+        width: '25%',
+        'padding-left': '5px',
+        'padding-right': '65px',
+    },
+    thumbRight: {
+        alignSelf: 'flex-end',
+    },
+    thumbInfo: {
+        display: 'flex',
+    },
+    contextBox: {
+        width: '110px',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        cursor: 'pointer',
+        margin: 0,
+        display: 'inline-block',
+        lineHeight: '1em',
+        'padding-top': 5,
+        'padding-right': 5,
+        'padding-bottom': 1.5,
+        textAlign: 'left',
+    },
+    imageOverlap: {
+        position: 'absolute',
+        bottom: 1,
+        backgroundColor: theme.custom.thumbnail.contentBackgroundColor,
+    },
+    row: {
+        display: 'inline-block',
+    },
+    textWrapper: {
+        color: theme.palette.text.secondary,
+        textDecoration: 'none',
+    },
+    thumbBy: {
+        'padding-left': '5px',
     },
 });
 
@@ -162,29 +225,53 @@ class APIThumb extends Component {
             >
                 <CardMedia src='None' component={ThumbnailView} height={140} title='Thumbnail' api={api} />
                 <CardContent className={classes.apiDetails}>
-                    <Typography gutterBottom variant='h5' component='h2'>
-                        {api.name}
-                    </Typography>
-                    <Grid container>
-                        <Grid item md={6}>
+                    <div className={classes.textWrapper}>
+                        <Typography
+                            gutterBottom
+                            variant='h4'
+                            className={classes.thumbHeader}
+                        >
+                            {api.name}
+                        </Typography>
+                    </div>
+                    <div className={classes.row}>
+                        <Typography variant='caption' gutterBottom align='left' className={classes.thumbBy}>
                             <FormattedMessage id='by' defaultMessage='By' />:
-                            <Typography className={classes.providerText} variant='body1' gutterBottom>
-                                {api.provider}
-                            </Typography>
-                        </Grid>
-                        <Grid item md={6}>
-                            <FormattedMessage id='context' defaultMessage='Context' />:
-                            <Typography variant='body1' gutterBottom>
-                                {api.context}
-                            </Typography>
-                        </Grid>
+                            {api.provider}
+                        </Typography>
+                    </div>
+                    <div className={classes.thumbInfo}>
                         {isAPIProduct ? null : (
-                            <Grid item md={6}>
-                                <FormattedMessage id='version' defaultMessage='Version' />:
-                                <Typography variant='body1'>{api.version}</Typography>
-                            </Grid>
+                            <div className={classes.row}>
+                                <div className={classes.thumbLeft}>
+                                    <Typography variant='subtitle1'>{api.version}</Typography>
+                                </div>
+
+                                <div className={classes.thumbLeft}>
+                                    <Typography variant='caption' gutterBottom align='left'>
+                                        <FormattedMessage
+                                            defaultMessage='Version'
+                                            id='Apis.Listing.ApiThumb.version'
+                                        />
+                                    </Typography>
+                                </div>
+                            </div>
+
                         )}
-                    </Grid>
+                        <div className={classes.row}>
+                            <div className={classes.thumbRight}>
+                                <Typography variant='subtitle1' align='right' className={classes.contextBox}>
+                                    {api.context}
+                                </Typography>
+                            </div>
+
+                            <div className={classes.thumbRight}>
+                                <Typography variant='caption' gutterBottom align='right' className={classes.context}>
+                                    <FormattedMessage defaultMessage='Context' id='Apis.Listing.ApiThumb.context' />
+                                </Typography>
+                            </div>
+                        </div>
+                    </div>
                 </CardContent>
                 <CardActions className={classes.apiActions}>
                     <Chip

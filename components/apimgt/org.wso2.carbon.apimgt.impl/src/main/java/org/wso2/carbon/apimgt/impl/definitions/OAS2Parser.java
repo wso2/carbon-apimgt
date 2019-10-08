@@ -64,6 +64,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -176,9 +177,9 @@ public class OAS2Parser extends APIDefinition {
                 }
                 scopeSet.add(scope);
             }
-            return scopeSet;
+            return sortScopes(scopeSet);
         } else {
-            return getScopesFromExtensions(swagger);
+            return sortScopes(getScopesFromExtensions(swagger));
         }
     }
 
@@ -213,6 +214,19 @@ public class OAS2Parser extends APIDefinition {
             }
         }
         return scopeList;
+    }
+
+    /**
+     * Sort scopes by name.
+     * This method was added to display scopes in publisher in a sorted manner.
+     *
+     * @param scopeSet
+     * @return Scope set
+     */
+    private Set<Scope> sortScopes(Set<Scope> scopeSet) {
+        List<Scope> scopesSortedlist = new ArrayList<>(scopeSet);
+        scopesSortedlist.sort(Comparator.comparing(Scope::getName));
+        return new LinkedHashSet<>(scopesSortedlist);
     }
 
     /**
@@ -418,27 +432,7 @@ public class OAS2Parser extends APIDefinition {
      */
     private void removePublisherSpecificInfo(Swagger swagger) {
         Map<String, Object> extensions = swagger.getVendorExtensions();
-        if (extensions == null) {
-            return;
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_AUTH_HEADER)) {
-            extensions.remove(APIConstants.X_WSO2_AUTH_HEADER);
-        }
-        if (extensions.containsKey(APIConstants.X_THROTTLING_TIER)) {
-            extensions.remove(APIConstants.X_THROTTLING_TIER);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_CORS)) {
-            extensions.remove(APIConstants.X_WSO2_CORS);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS)) {
-            extensions.remove(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_SANDBOX_ENDPOINTS)) {
-            extensions.remove(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_BASEPATH)) {
-            extensions.remove(APIConstants.X_WSO2_BASEPATH);
-        }
+        OASParserUtil.removePublisherSpecificInfo(extensions);
     }
 
     /**
@@ -496,21 +490,18 @@ public class OAS2Parser extends APIDefinition {
             swagger.setVendorExtension(APIConstants.X_THROTTLING_TIER, api.getApiLevelPolicy());
         }
         swagger.setVendorExtension(APIConstants.X_WSO2_CORS, api.getCorsConfiguration());
-        String endpointConfig = api.getEndpointConfig();
-        if (!StringUtils.isBlank(endpointConfig)) {
-            JSONObject endpoints = new JSONObject(endpointConfig);
-            if (endpoints.has(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
-                String prodUrls = endpoints.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)
-                        .getString(APIConstants.API_DATA_URL);
-                swagger.setVendorExtension(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS, prodUrls);
-            }
-            if (endpoints.has(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
-                String sandUrls = endpoints.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS)
-                        .getString(APIConstants.API_DATA_URL);
-                swagger.setVendorExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandUrls);
-            }
+        Object prodEndpointObj = OASParserUtil.generateOASConfigForEndpoints(api, true);
+        if (prodEndpointObj != null) {
+            swagger.setVendorExtension(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS, prodEndpointObj);
+        }
+        Object sandEndpointObj = OASParserUtil.generateOASConfigForEndpoints(api, false);
+        if (prodEndpointObj != null) {
+            swagger.setVendorExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandEndpointObj);
         }
         swagger.setVendorExtension(APIConstants.X_WSO2_BASEPATH, api.getContext());
+        if (api.getTransports() != null) {
+            swagger.setVendorExtension(APIConstants.X_WSO2_TRANSPORTS, api.getTransports().split(","));
+        }
         return getSwaggerJsonString(swagger);
     }
 

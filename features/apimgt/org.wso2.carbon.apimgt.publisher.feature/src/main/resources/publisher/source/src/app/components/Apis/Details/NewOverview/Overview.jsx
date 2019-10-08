@@ -29,8 +29,8 @@ import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import Resources from './Resources';
 import Operations from './Operations';
 import ProductResources from './ProductResources';
-import StatusBar from './StatusBar';
 import Configuration from './Configuration';
+import CustomizedStepper from './CustomizedStepper';
 import MetaData from './MetaData';
 import Endpoints from './Endpoints';
 
@@ -143,6 +143,8 @@ function Overview(props) {
                 return <Operations parentClasses={classes} api={api} />;
             case 'APIProduct':
                 return <ProductResources parentClasses={classes} api={api} />;
+            case 'WS':
+                return '';
             default:
                 return <Resources parentClasses={classes} api={api} />;
         }
@@ -159,12 +161,16 @@ function Overview(props) {
                     defaultMessage='Overview'
                 />
             </Typography>
+            {api.type !== API.CONSTS.APIProduct && (
+                <Grid container spacing={12}>
+                    <Grid item xs={12} s={12} md={12} lg={12}>
+                        <CustomizedStepper />
+                    </Grid>
+                </Grid>
+            )}
             <div className={classes.contentWrapper}>
                 <Paper className={classes.root}>
                     <Grid container spacing={24}>
-                        <Grid item xs={12} md={12} lg={12} className={classes.leftSideWrapper}>
-                            <StatusBar api={api} />
-                        </Grid>
                         <Grid item xs={12} md={12} lg={12}>
                             <Grid container spacing={24}>
                                 <Grid item xs={12} md={6} lg={6}>

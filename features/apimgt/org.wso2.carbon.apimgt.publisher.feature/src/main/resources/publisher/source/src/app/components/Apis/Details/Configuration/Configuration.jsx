@@ -113,6 +113,7 @@ function copyAPIConfig(api) {
         id: api.id,
         name: api.name,
         description: api.description,
+        lifeCycleStatus: api.lifeCycleStatus,
         accessControl: api.accessControl,
         authorizationHeader: api.authorizationHeader,
         responseCachingEnabled: api.responseCachingEnabled,
@@ -178,6 +179,11 @@ export default function Configuration() {
     const [isUpdating, setIsUpdating] = useState(false);
     const [apiConfig, configDispatcher] = useReducer(configReducer, copyAPIConfig(api));
     const classes = useStyles();
+
+    const invalidTagsExist = apiConfig.tags.find((tag) => {
+        return (/([~!@#;%^&*+=|\\<>"'/,])/.test(tag));
+    });
+
     /**
      *
      * Handle the configuration view save button action
@@ -247,9 +253,11 @@ export default function Configuration() {
                                     </Box>
                                     <Box pt={2}>
                                         <Button
-                                            disabled={isUpdating ||
-                                            ((apiConfig.visibility === 'RESTRICTED' &&
-                                                apiConfig.visibleRoles.length === 0))}
+                                            disabled={
+                                                isUpdating || invalidTagsExist ||
+                                                (apiConfig.visibility === 'RESTRICTED' &&
+                                                    apiConfig.visibleRoles.length === 0)
+                                            }
                                             type='submit'
                                             variant='contained'
                                             color='primary'

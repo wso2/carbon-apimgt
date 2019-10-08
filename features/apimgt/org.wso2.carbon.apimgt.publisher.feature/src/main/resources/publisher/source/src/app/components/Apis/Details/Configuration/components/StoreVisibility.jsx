@@ -113,7 +113,7 @@ export default function StoreVisibility(props) {
                     label={
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.storeVisibility.head.topic'
-                            defaultMessage='Store Visibility'
+                            defaultMessage='Developer Portal Visibility'
                         />
                     }
                     value={api.visibility}
@@ -127,12 +127,12 @@ export default function StoreVisibility(props) {
                     helperText={
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.storeVisibility.form.helper.text'
-                            defaultMessage='By default API is visible to all store users'
+                            defaultMessage='By default API is visible to all developer portal users'
                         />
                     }
                     margin='normal'
                     variant='outlined'
-                    disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], apiFromContext)}
                 >
                     <MenuItem value='PUBLIC'>
                         <FormattedMessage
@@ -162,7 +162,8 @@ export default function StoreVisibility(props) {
                                     id='Apis.Details.Configuration.components.storeVisibility.tooltip.public.desc'
                                     defaultMessage={
                                         'The API is accessible to everyone and can be advertised ' +
-                                        'in multiple stores - a central store and/or non-WSO2 stores.'
+                                        'in multiple developer portals - a central developer portal ' +
+                                        'and/or non-WSO2 developer portals.'
                                     }
                                 />
                                 <br />
@@ -178,7 +179,7 @@ export default function StoreVisibility(props) {
                                     id='Apis.Details.Configuration.components.storeVisibility.tooltip.restrict.desc'
                                     defaultMessage={
                                         'The API is visible only to specific user' +
-                                        ' roles in the tenant store that you specify.'
+                                        ' roles in the tenant developer portal that you specify.'
                                     }
                                 />
                             </p>

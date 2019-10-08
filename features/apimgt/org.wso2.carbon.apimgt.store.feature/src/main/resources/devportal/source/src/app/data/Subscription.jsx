@@ -59,6 +59,20 @@ export default class Subscription extends Resource {
     }
 
     /**
+    * Get pending invoice if available * @param {*} subscriptionUUID
+    */
+    getMonetizationInvoice(subscriptionUUID) {
+        const promiseInvoice = this.client.then(client => {
+            return client.apis['API Monetization'].get_subscriptions__subscriptionId__usage( 
+                {
+                    subscriptionId: subscriptionUUID 
+                }
+            );
+        });
+        return promiseInvoice;
+    }
+
+    /**
     * Delete subscription
     * @param subscriptionId id of the subscription
     * @returns {promise} With 200 OK.

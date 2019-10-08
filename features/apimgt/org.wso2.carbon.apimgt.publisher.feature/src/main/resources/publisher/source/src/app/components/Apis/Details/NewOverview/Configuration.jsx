@@ -26,6 +26,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import Box from '@material-ui/core/Box';
 import API from 'AppData/api';
+import { capitalizeFirstLetter, upperCaseString, lowerCaseString } from 'AppData/StringFormatter';
 import APIContext from '../components/ApiContext';
 import Policies from './Policies';
 
@@ -41,6 +42,7 @@ function Configuration(props) {
         oauth2: 'OAuth2',
         basic_auth: 'Basic Auth',
         mutualssl: 'Mutual TLS',
+        api_key: 'API Key',
     };
     const { api } = useContext(APIContext);
 
@@ -68,7 +70,6 @@ function Configuration(props) {
                                 classes={{
                                     tooltip: parentClasses.htmlTooltip,
                                 }}
-                                disableHoverListener
                                 title={
                                     <React.Fragment>
                                         <FormattedMessage
@@ -93,7 +94,7 @@ function Configuration(props) {
                                 <React.Fragment>
                                     {api.transport.map((item, index) => (
                                         <span>
-                                            {item}
+                                            {upperCaseString(item)}
                                             {api.transport.length !== index + 1 && ', '}
                                         </span>
                                     ))}
@@ -127,7 +128,6 @@ function Configuration(props) {
                                 classes={{
                                     tooltip: parentClasses.htmlTooltip,
                                 }}
-                                disableHoverListener
                                 title={
                                     <React.Fragment>
                                         <FormattedMessage
@@ -147,9 +147,13 @@ function Configuration(props) {
                         <Typography component='p' variant='body1'>
                             {api.securityScheme && api.securityScheme.length !== 0 && (
                                 <React.Fragment>
-                                    {api.securityScheme.map(item =>
+                                    {api.securityScheme.map((item, index) =>
                                         (item.includes('mandatory') ? null : (
-                                            <span>{securitySchemeMap[item] + ', '}</span>
+                                            <span>
+                                                {securitySchemeMap[item]}
+                                                {api.apiType !== API.CONSTS.APIProduct &&
+                                                    (!(api.securityScheme[index + 1].includes('mandatory'))) && ', '}
+                                            </span>
                                         )))}
                                 </React.Fragment>
                             )}
@@ -181,7 +185,6 @@ function Configuration(props) {
                                 classes={{
                                     tooltip: parentClasses.htmlTooltip,
                                 }}
-                                disableHoverListener
                                 title={
                                     <React.Fragment>
                                         <FormattedMessage
@@ -211,7 +214,10 @@ function Configuration(props) {
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
-                            {api.accessControl && <React.Fragment>{api.accessControl}</React.Fragment>}
+                            {api.accessControl &&
+                                <React.Fragment>
+                                    {capitalizeFirstLetter(lowerCaseString(api.accessControl))}
+                                </React.Fragment>}
                             {api.accessControl === 'RESTRICTED' && ' ( Visible to '}
                             {api.accessControl === 'RESTRICTED' && api.accessControlRoles.join()}
                             {api.accessControl === 'RESTRICTED' && ' ) '}
@@ -250,30 +256,29 @@ function Configuration(props) {
                         <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                             <FormattedMessage
                                 id='Apis.Details.NewOverview.MetaData.visibility.store'
-                                defaultMessage='Visibility on Store'
+                                defaultMessage='Visibility on Developer Portal'
                             />
                             <Tooltip
                                 placement='top'
                                 classes={{
                                     tooltip: parentClasses.htmlTooltip,
                                 }}
-                                disableHoverListener
                                 title={
                                     <React.Fragment>
                                         <FormattedMessage
                                             id='Apis.Details.NewOverview.MetaData.visibility.store.all.tooltip'
                                             defaultMessage={
-                                                'Public: The API is accessible to everyone and can be ' +
-                                                'advertised in multiple stores - a central store ' +
-                                                'and/or non-WSO2 stores.'
+                                                'Public: The API is accessible to everyone and can be advertised ' +
+                                                'in multiple developer portals - a central developer portal ' +
+                                                'and/or non-WSO2 developer portals.'
                                             }
                                         />
                                         <br />
                                         <FormattedMessage
                                             id='Apis.Details.NewOverview.MetaData.visibility.store.res.tooltip'
                                             defaultMessage={
-                                                'Restricted by roles: The API is visible only ' +
-                                                'to specific user roles in the tenant store that you specify.'
+                                                'Restricted by roles: The API is visible only to ' +
+                                                'specific user roles in the tenant developer portal that you specify.'
                                             }
                                         />
                                     </React.Fragment>
@@ -287,7 +292,10 @@ function Configuration(props) {
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
-                            {api.visibility && <React.Fragment>{api.visibility}</React.Fragment>}
+                            {api.visibility &&
+                                <React.Fragment>
+                                    {capitalizeFirstLetter(lowerCaseString(api.visibility))}
+                                </React.Fragment>}
                             {api.visibility === 'RESTRICTED' && ' ( Visible to '}
                             {api.visibility === 'RESTRICTED' && api.visibleRoles.join()}
                             {api.visibility === 'RESTRICTED' && ' ) '}
@@ -306,7 +314,13 @@ function Configuration(props) {
                             </Grid>
                             <Grid item xs={12} md={6} lg={8}>
                                 { api.tags && api.tags.map(tag =>
-                                    (<Chip key={tag} label={tag} className={parentClasses.chip} />))
+                                    (<Chip
+                                        key={tag}
+                                        label={tag}
+                                        style={{
+                                            'font-size': 13, height: 20, marginRight: 5,
+                                        }}
+                                    />))
                                 }
                                 {api.tags.length === 0 && (
                                     <React.Fragment>

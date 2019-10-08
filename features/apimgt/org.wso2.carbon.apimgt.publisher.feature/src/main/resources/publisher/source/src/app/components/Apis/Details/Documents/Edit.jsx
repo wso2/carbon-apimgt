@@ -63,7 +63,7 @@ function Transition(props) {
 function Edit(props) {
     const restAPI = new Api();
 
-    const { intl } = props;
+    const { intl, apiType } = props;
     const [open, setOpen] = useState(false);
     let createEditForm = useRef(null);
 
@@ -117,7 +117,7 @@ function Edit(props) {
             });
     };
 
-    const { classes, docId, apiId } = props;
+    const { classes, docId, apiId} = props;
     return (
         <div>
             <Button onClick={toggleOpen}>
@@ -159,6 +159,7 @@ function Edit(props) {
                         }}
                         docId={docId}
                         apiId={apiId}
+                        apiType={apiType}
                     />
                 </div>
             </Dialog>
