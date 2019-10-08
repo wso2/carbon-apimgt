@@ -39,9 +39,11 @@ import IconButton from '@material-ui/core/IconButton';
 import Checkbox from '@material-ui/core/Checkbox';
 // splitted operation components
 
+import { isRestricted } from 'AppData/AuthManager';
 import DescriptionAndSummary from './operationComponents/DescriptionAndSummary';
 import OperationGovernance from './operationComponents/OperationGovernance';
 import Parameters from './operationComponents/Parameters';
+
 
 /**
  *
@@ -259,7 +261,7 @@ export default function Operation(props) {
                     <DescriptionAndSummary
                         operation={operation}
                         operationActionsDispatcher={operationActionsDispatcher}
-                        disableUpdate={disableUpdate}
+                        disableUpdate={isRestricted(['apim:api_create'], api)}
                     />
                     <OperationGovernance
                         operation={operation}
