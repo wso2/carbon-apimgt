@@ -36,6 +36,7 @@ import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientExcepti
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
+import org.wso2.carbon.identity.oauth2.validators.JDBCScopeValidator;
 import org.wso2.carbon.identity.oauth2.validators.OAuth2ScopeValidator;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.identity.oauth.dao.OAuthAppDAO;
@@ -204,8 +205,19 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                     try {
                         if (validator != null && ArrayUtils.isEmpty(scopeValidators)) {
                             // validate scopes for old created applications
-                            isValid = validator.validateScope(accessTokenDO, resource);
-                            oAuth2ScopeValidators.clear();
+                            if (validator instanceof JDBCScopeValidator) {
+                                isValid = validator.validateScope(accessTokenDO, resource);
+                                if (!isValid) {
+                                    log.debug(String.format("Scope validation of token %s using %s failed for %s",
+                                            accessTokenDO.getTokenId(), validator.getValidatorName(),
+                                            scopeList.toString()));
+                                    apiKeyValidationInfoDTO.setAuthorized(false);
+                                    apiKeyValidationInfoDTO.setValidationStatus
+                                            (APIConstants.KeyValidationStatus.INVALID_SCOPE);
+                                    return false;
+                                }
+                                break;
+                            }
                         } else if (validator != null && appScopeValidators.contains(validator.getValidatorName())) {
                             //take the intersection of defined scope validators and scope validators registered for the apps
                             log.debug(String.format("Validating scope of token %s using %s", accessTokenDO.getTokenId(),
