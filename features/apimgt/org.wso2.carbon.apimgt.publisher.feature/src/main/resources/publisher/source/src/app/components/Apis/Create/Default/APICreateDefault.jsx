@@ -21,7 +21,6 @@ import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import { FormattedMessage } from 'react-intl';
 import Button from '@material-ui/core/Button';
-import Box from '@material-ui/core/Box';
 import { Link } from 'react-router-dom';
 import { withRouter } from 'react-router';
 import Alert from 'AppComponents/Shared/Alert';

@@ -31,7 +31,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import LaunchIcon from '@material-ui/icons/Launch';
 import { Link } from 'react-router-dom';
-
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 /**
  *
  * Renders the security , throttling policies and scopes selection section in the operation collapsed page
@@ -94,7 +94,10 @@ export default function OperationGovernance(props) {
                     id='operation_rate_limiting_policy'
                     select
                     fullWidth={!isOperationRateLimiting}
-                    SelectProps={{ autoWidth: true }}
+                    SelectProps={{
+                        autoWidth: true,
+                        IconComponent: isOperationRateLimiting ? ArrowDropDownIcon : 'span',
+                    }}
                     disabled={disableUpdate || !isOperationRateLimiting}
                     label={
                         isOperationRateLimiting ? (
