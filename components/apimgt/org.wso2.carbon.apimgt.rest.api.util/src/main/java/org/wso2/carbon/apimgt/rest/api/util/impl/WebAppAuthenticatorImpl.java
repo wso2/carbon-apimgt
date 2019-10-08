@@ -24,6 +24,9 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.WebAppAuthenticator;
@@ -36,6 +39,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 
 import java.util.*;
+import javax.cache.Cache;
 
 /**
  * This web app authenticator class specifically implemented for API Manager store and publisher rest APIs
@@ -53,19 +57,55 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
      * @throws APIManagementException when error in authentication process
      */
     public boolean authenticate(Message message) throws APIManagementException {
+        boolean retrievedFromInvalidTokenCache = false;
+        boolean retrievedFromTokenCache = false;
         String accessToken = RestApiUtil.extractOAuthAccessTokenFromMessage(message,
                 RestApiConstants.REGEX_BEARER_PATTERN, RestApiConstants.AUTH_HEADER_NAME);
         AccessTokenInfo tokenInfo = null;
+
+        //validate the token from cache if it is enabled
+        if (APIUtil.isRESTAPITokenCacheEnabled()) {
+            tokenInfo = (AccessTokenInfo)getRESTAPITokenCache().get(accessToken);
+            if (tokenInfo != null) {
+                if (isAccessTokenExpired(tokenInfo)) {
+                    tokenInfo.setTokenValid(false);
+                    //remove the token from token cache and put the token into invalid token cache
+                    // when the access token is expired
+                    getRESTAPIInvalidTokenCache().put(accessToken, tokenInfo);
+                    getRESTAPITokenCache().remove(accessToken);
+                    log.error(RestApiConstants.ERROR_TOKEN_EXPIRED);
+                    return false;
+                } else {
+                    retrievedFromTokenCache = true;
+                }
+            } else {
+                //if the token doesn't exist in the valid token cache, then check it in the invalid token cache
+                tokenInfo = (AccessTokenInfo)getRESTAPIInvalidTokenCache().get(accessToken);
+                if (tokenInfo != null) {
+                    retrievedFromInvalidTokenCache = true;
+                }
+            }
+        }
+
+        // if the tokenInfo is null, then only retrieve the token information from the database
         try {
-            tokenInfo = new AMDefaultKeyManagerImpl().getTokenMetaData(accessToken);
+            if (tokenInfo == null) {
+                tokenInfo = new AMDefaultKeyManagerImpl().getTokenMetaData(accessToken);
+            }
         } catch (APIManagementException e) {
             log.error("Error while retrieving token information for token: " + accessToken, e);
         }
+
         // if we got valid access token we will proceed with next
         if (tokenInfo != null && tokenInfo.isTokenValid()) {
-            // If token is valid then we have to do other validations and set user and tenant to
-            //carbon context. Scope validation should come here.
-            //If access token is valid then we will perform scope check for given resource.
+            if (APIUtil.isRESTAPITokenCacheEnabled() && !retrievedFromTokenCache) {
+                //put the token info into token cache
+                getRESTAPITokenCache().put(accessToken, tokenInfo);
+            }
+
+            // If token is valid then we have to do other validations and set user and tenant to carbon context.
+            // Scope validation should come here.
+            // If access token is valid then we will perform scope check for given resource.
             if (validateScopes(message, tokenInfo)) {
                 //Add the user scopes list extracted from token to the cxf message
                 message.getExchange().put(RestApiConstants.USER_REST_API_SCOPES, tokenInfo.getScopes());
@@ -93,10 +133,13 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                     log.error("Error while retrieving tenant id for tenant domain: " + tenantDomain, e);
                 }
             } else {
-                log.error("You cannot access API as scope validation failed");
+                log.error(RestApiConstants.ERROR_SCOPE_VALIDATION_FAILED);
             }
         } else {
-            log.error("Authentication failed. Please check your username/password");
+            log.error(RestApiConstants.ERROR_TOKEN_INVALID);
+            if (APIUtil.isRESTAPITokenCacheEnabled() && !retrievedFromInvalidTokenCache) {
+                getRESTAPIInvalidTokenCache().put(accessToken, tokenInfo);
+            }
         }
         return false;
     }
@@ -174,5 +217,20 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
             }
         }
         return false;
+    }
+
+    private Cache getRESTAPITokenCache() {
+        return CacheProvider.getRESTAPITokenCache();
+    }
+
+    private Cache getRESTAPIInvalidTokenCache() {
+        return CacheProvider.getRESTAPIInvalidTokenCache();
+    }
+
+    private boolean isAccessTokenExpired (AccessTokenInfo accessTokenInfo) {
+        APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
+        infoDTO.setValidityPeriod(accessTokenInfo.getValidityPeriod());
+        infoDTO.setIssuedTime(accessTokenInfo.getIssuedTime());
+        return APIUtil.isAccessTokenExpired(infoDTO);
     }
 }

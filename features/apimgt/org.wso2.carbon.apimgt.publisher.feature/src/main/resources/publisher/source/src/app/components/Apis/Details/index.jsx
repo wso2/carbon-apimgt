@@ -454,6 +454,7 @@ class Details extends Component {
                                 id: 'Apis.Details.index.design.configs',
                                 defaultMessage: 'Design Configs',
                             })}
+                            route='configuration'
                             to={pathPrefix + 'configuration'}
                             Icon={<ConfigurationIcon />}
                         />
@@ -462,6 +463,7 @@ class Details extends Component {
                                 id: 'Apis.Details.index.runtime.configs',
                                 defaultMessage: 'Runtime Configs',
                             })}
+                            route='runtime-configuration'
                             to={pathPrefix + 'runtime-configuration'}
                             Icon={<RuntimeConfigurationIcon />}
                         />
@@ -481,6 +483,7 @@ class Details extends Component {
                                     id: 'Apis.Details.index.environments',
                                     defaultMessage: 'environments',
                                 })}
+                                route='environments'
                                 to={pathPrefix + 'environments'}
                                 Icon={<PersonPinCircleOutlinedIcon />}
                             />
@@ -496,7 +499,7 @@ class Details extends Component {
                                 Icon={<LifeCycleIcon />}
                             />
                         )}
-                        {!isWebsocket && (
+                        {!isWebsocket && !isAPIProduct && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.left.menu.scope',
@@ -538,7 +541,7 @@ class Details extends Component {
                             to={pathPrefix + 'subscriptions'}
                             Icon={<SubscriptionsIcon />}
                         />
-                        {!isWebsocket && (
+                        {!isAPIProduct && !isWebsocket && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.left.menu.mediation.policies',
@@ -648,6 +651,10 @@ class Details extends Component {
                                     path={Details.subPaths.SUBSCRIPTIONS}
                                     component={() => <Subscriptions api={api} updateAPI={this.updateAPI} />}
                                 />
+                                <Route
+                                    path={Details.subPaths.SUBSCRIPTIONS_PRODUCT}
+                                    component={() => <Subscriptions api={api} updateAPI={this.updateAPI} />}
+                                />
                                 <Route path={Details.subPaths.SECURITY} component={() => <Security api={api} />} />
                                 <Route path={Details.subPaths.COMMENTS} component={() => <Comments api={api} />} />
                                 <Route
@@ -715,6 +722,7 @@ Details.subPaths = {
     MEDIATION_POLICIES_PRODUCT: '/api-products/:apiprod_uuid/mediation policies',
     DOCUMENTS: '/apis/:api_uuid/documents',
     DOCUMENTS_PRODUCT: '/api-products/:apiprod_uuid/documents',
+    SUBSCRIPTIONS_PRODUCT: '/api-products/:apiprod_uuid/subscriptions',
     SUBSCRIPTIONS: '/apis/:api_uuid/subscriptions',
     SECURITY: '/apis/:api_uuid/security',
     COMMENTS: '/apis/:api_uuid/comments',

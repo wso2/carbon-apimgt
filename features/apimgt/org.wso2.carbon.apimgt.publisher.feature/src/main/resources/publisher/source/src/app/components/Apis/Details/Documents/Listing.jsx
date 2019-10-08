@@ -19,7 +19,7 @@
 import React from 'react';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Link, withRouter } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import MUIDataTable from 'mui-datatables';
 import API from 'AppData/api.js';
@@ -31,6 +31,7 @@ import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import Create from './Create';
 import MarkdownEditor from './MarkdownEditor';
 import TextEditor from './TextEditor';
@@ -99,7 +100,7 @@ const styles = theme => ({
     },
 });
 function LinkGenerator(props) {
-    return props.apiType === API.CONSTS.APIProduct ? (
+    return props.isAPIProduct ? (
         <Link to={'/api-products/' + props.apiId + '/documents/' + props.docId + '/view'}>{props.docName}</Link>
     ) : (
         <Link to={'/apis/' + props.apiId + '/documents/' + props.docId + '/view'}>{props.docName}</Link>
@@ -129,7 +130,6 @@ class Listing extends React.Component {
      */
     getDocumentsList() {
         const { api, intl } = this.props;
-
         if (api.apiType === API.CONSTS.APIProduct) {
             const apiProduct = new APIProduct();
             const docs = apiProduct.getDocuments(api.id);
@@ -255,6 +255,7 @@ class Listing extends React.Component {
                                             </td>
                                             <td>
                                                 <Edit
+                                                    apiType={api.apiType}
                                                     docName={docName}
                                                     docId={docId}
                                                     apiId={this.apiId}
@@ -287,6 +288,7 @@ class Listing extends React.Component {
                                             </td>
                                             <td>
                                                 <Edit
+                                                    apiType={api.apiType}
                                                     docName={docName}
                                                     docId={docId}
                                                     apiId={this.apiId}
@@ -320,6 +322,7 @@ class Listing extends React.Component {
                                             </td>
                                             <td>
                                                 <Edit
+                                                    apiType={api.apiType}
                                                     docName={docName}
                                                     docId={docId}
                                                     apiId={this.apiId}
@@ -347,6 +350,7 @@ class Listing extends React.Component {
                                             </td>
                                             <td>
                                                 <Edit
+                                                    apiType={api.apiType}
                                                     docName={docName}
                                                     docId={docId}
                                                     apiId={this.apiId}
@@ -384,15 +388,20 @@ class Listing extends React.Component {
                             defaultMessage='Documents'
                         />
                     </Typography>
-                    <Link to={url}>
-                        <Button size='small' className={classes.button}>
-                            <AddCircle className={classes.buttonIcon} />
-                            <FormattedMessage
-                                id='Apis.Details.Documents.Listing.add.new.document.button'
-                                defaultMessage='Add New Document'
-                            />
-                        </Button>
-                    </Link>
+                    <ScopeValidation
+                        resourcePath={isAPIProduct ? resourcePath.API_PRODUCTS : resourcePath.API_CHANGE_LC}
+                        resourceMethod={resourceMethod.POST}
+                    >
+                        <Link to={url}>
+                            <Button size='small' className={classes.button}>
+                                <AddCircle className={classes.buttonIcon} />
+                                <FormattedMessage
+                                    id='Apis.Details.Documents.Listing.add.new.document.button'
+                                    defaultMessage='Add New Document'
+                                />
+                            </Button>
+                        </Link>
+                    </ScopeValidation>
                 </div>
                 <div className={classes.contentWrapper}>
                     {showAddDocs && (

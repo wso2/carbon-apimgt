@@ -23,7 +23,6 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
-import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -279,7 +278,6 @@ public enum EndpointImplementationTypeEnum {
   @ApiModelProperty(example = "CalculatorAPI", required = true, value = "")
   @JsonProperty("name")
   @NotNull
-  @NotEmpty
   public String getName() {
     return name;
   }
@@ -315,7 +313,6 @@ public enum EndpointImplementationTypeEnum {
   @ApiModelProperty(example = "CalculatorAPI", required = true, value = "")
   @JsonProperty("context")
   @NotNull
-  @NotEmpty
   public String getContext() {
     return context;
   }
@@ -334,7 +331,6 @@ public enum EndpointImplementationTypeEnum {
   @ApiModelProperty(example = "1.0.0", required = true, value = "")
   @JsonProperty("version")
   @NotNull
-  @NotEmpty
   public String getVersion() {
     return version;
   }

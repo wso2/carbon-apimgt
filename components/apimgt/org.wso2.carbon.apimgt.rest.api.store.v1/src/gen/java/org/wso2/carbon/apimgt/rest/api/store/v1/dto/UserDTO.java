@@ -10,7 +10,6 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
-import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -33,7 +32,6 @@ public class UserDTO   {
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("username")
   @NotNull
-  @NotEmpty
   public String getUsername() {
     return username;
   }
@@ -52,7 +50,6 @@ public class UserDTO   {
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("password")
   @NotNull
-  @NotEmpty
   public String getPassword() {
     return password;
   }
@@ -71,7 +68,6 @@ public class UserDTO   {
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("firstName")
   @NotNull
-  @NotEmpty
   public String getFirstName() {
     return firstName;
   }
@@ -90,7 +86,6 @@ public class UserDTO   {
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("lastName")
   @NotNull
-  @NotEmpty
   public String getLastName() {
     return lastName;
   }
@@ -109,7 +104,6 @@ public class UserDTO   {
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("email")
   @NotNull
-  @NotEmpty
   public String getEmail() {
     return email;
   }

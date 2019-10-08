@@ -16,8 +16,8 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
-import intl, { FormattedMessage, injectIntl } from 'react-intl';
+import React from 'react';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -126,8 +126,10 @@ class CreateEditForm extends React.Component {
             file: null,
             disableName: false,
             otherTypeName: null,
-            nameValidity: true,
+            nameNotDuplicate: true,
             urlValidity: null,
+            nameEmpty: false,
+            summeryEmpty: false,
         };
     }
 
@@ -186,7 +188,8 @@ class CreateEditForm extends React.Component {
         return { docPromise, file };
     };
     updateDocument = (apiId) => {
-        const restAPI = new Api();
+        const { apiType } = this.props;
+        const restAPI = apiType === Api.CONSTS.APIProduct ? new APIProduct() : new Api();
         const {
             name, type, summary, sourceType, sourceUrl, file, otherTypeName,
         } = this.state;
@@ -236,21 +239,35 @@ class CreateEditForm extends React.Component {
     validate(field, value) {
         if (field === 'url') {
             const urlValidity = value ? APIValidation.url.validate(value).error : null;
-            this.setState({ urlValidity : urlValidity });
+            this.setState({ urlValidity });
         } else if (field === 'name') {
             if (value) {
-                const promise = APIValidation.apiDocument.validate({id: this.props.apiId, name: value});
-                promise.then((isDocumentPresent) => {
-                    this.setState({ nameValidity: !isDocumentPresent })
-                }).catch(error => {
-                    if (error.status === 404) {
-                        this.setState({ nameValidity: true });
-                    } else {
-                        Alert.error('Error when validating document name');
-                    }
-                })
+                const promise = APIValidation.apiDocument.validate({ id: this.props.apiId, name: value });
+                promise
+                    .then((isDocumentPresent) => {
+                        this.setState({ nameNotDuplicate: !isDocumentPresent });
+                    })
+                    .catch((error) => {
+                        if (error.status === 404) {
+                            this.setState({ nameNotDuplicate: true });
+                        } else {
+                            Alert.error('Error when validating document name');
+                        }
+                    });
             } else {
-                this.setState({ nameValidity: true })
+                this.setState({ nameNotDuplicate: true });
+            }
+
+            if (value === '') {
+                this.setState({ nameEmpty: true });
+            } else {
+                this.setState({ nameEmpty: false });
+            }
+        } else if (field === 'summery') {
+            if (value === '') {
+                this.setState({ summeryEmpty: true });
+            } else {
+                this.setState({ summeryEmpty: false });
             }
         }
     }
@@ -261,9 +278,45 @@ class CreateEditForm extends React.Component {
             this.setState({ disableName: true });
         }
     }
+    showNameHelper() {
+        const { nameEmpty, nameNotDuplicate } = this.state;
+        if (nameNotDuplicate && !nameEmpty) {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Documents.CreateEditForm.document.name.helper.text'
+                    defaultMessage='Provide the name for the document'
+                />
+            );
+        } else if (nameEmpty) {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Documents.CreateEditForm.empty.document.name.helper.text'
+                    defaultMessage='Document name can not be empty'
+                />
+            );
+        } else {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Documents.CreateEditForm.duplicate.document.name.helper.text'
+                    defaultMessage='Duplicate document name'
+                />
+            );
+        }
+    }
     render() {
         const {
-            name, type, summary, sourceType, sourceUrl, file, disableName, otherTypeName, urlValidity, nameValidity
+            name,
+            type,
+            summary,
+            sourceType,
+            sourceUrl,
+            file,
+            disableName,
+            otherTypeName,
+            urlValidity,
+            nameNotDuplicate,
+            nameEmpty,
+            summeryEmpty,
         } = this.state;
         const { classes } = this.props;
         return (
@@ -273,7 +326,7 @@ class CreateEditForm extends React.Component {
                         fullWidth
                         InputProps={{
                             onBlur: ({ target: { value } }) => {
-                                this.validate("name", value);
+                                this.validate('name', value);
                             },
                         }}
                         label={
@@ -282,17 +335,7 @@ class CreateEditForm extends React.Component {
                                 defaultMessage='Name *'
                             />
                         }
-                        helperText={ nameValidity ?
-                            <FormattedMessage
-                                id='Apis.Details.Documents.CreateEditForm.document.name.helper.text'
-                                defaultMessage='Provide the name for the document'
-                            />
-                            :
-                            <FormattedMessage
-                                id='Apis.Details.Documents.CreateEditForm.duplicate.document.name.helper.text'
-                                defaultMessage='Duplicate document name'
-                            />
-                        }
+                        helperText={this.showNameHelper()}
                         type='text'
                         variant='outlined'
                         name='name'
@@ -304,13 +347,18 @@ class CreateEditForm extends React.Component {
                         }}
                         autoFocus
                         disabled={disableName}
-                        error={!nameValidity}
+                        error={!nameNotDuplicate || nameEmpty}
                     />
                 </FormControl>
                 <FormControl margin='normal' className={classes.FormControlOdd}>
                     <TextField
                         fullWidth
                         multiline
+                        InputProps={{
+                            onBlur: ({ target: { value } }) => {
+                                this.validate('summary', value);
+                            },
+                        }}
                         margin='normal'
                         variant='outlined'
                         label={
@@ -320,10 +368,17 @@ class CreateEditForm extends React.Component {
                             />
                         }
                         helperText={
-                            <FormattedMessage
-                                id='Apis.Details.Documents.CreateEditForm.document.summary.helper.text'
-                                defaultMessage='Provide a brief description for the document'
-                            />
+                            summeryEmpty ? (
+                                <FormattedMessage
+                                    id='Apis.Details.Documents.CreateEditForm.document.summary.error.empty'
+                                    defaultMessage='Document summary can not be empty'
+                                />
+                            ) : (
+                                <FormattedMessage
+                                    id='Apis.Details.Documents.CreateEditForm.document.summary.helper.text'
+                                    defaultMessage='Provide a brief description for the document'
+                                />
+                            )
                         }
                         type='text'
                         name='summary'
@@ -333,6 +388,7 @@ class CreateEditForm extends React.Component {
                         InputLabelProps={{
                             shrink: true,
                         }}
+                        error={summeryEmpty}
                     />
                 </FormControl>
                 <FormControl component='fieldset' className={classes.formControlFirst}>
@@ -541,16 +597,18 @@ class CreateEditForm extends React.Component {
                                     defaultMessage='URL'
                                 />
                             }
-                            helperText={ urlValidity ?
-                                <FormattedMessage
-                                    id='Apis.Details.Documents.CreateEditForm.source.url.helper.text.error'
-                                    defaultMessage='Enter a valid URL to the source'
-                                />
-                                :
-                                <FormattedMessage
-                                    id='Apis.Details.Documents.CreateEditForm.source.url.helper.text'
-                                    defaultMessage='Provide the URL to the source'
-                                />
+                            helperText={
+                                urlValidity ? (
+                                    <FormattedMessage
+                                        id='Apis.Details.Documents.CreateEditForm.source.url.helper.text.error'
+                                        defaultMessage='Enter a valid URL to the source'
+                                    />
+                                ) : (
+                                    <FormattedMessage
+                                        id='Apis.Details.Documents.CreateEditForm.source.url.helper.text'
+                                        defaultMessage='Provide the URL to the source'
+                                    />
+                                )
                             }
                             type='text'
                             name='sourceUrl'

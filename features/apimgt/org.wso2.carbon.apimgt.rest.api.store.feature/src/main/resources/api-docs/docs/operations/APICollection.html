@@ -3,7 +3,7 @@
 
             <hr/>
             <h4 class="operation-heading"><a name="apisGet"></a>Retrieve/Search APIs
-</h4> <code>GET https://apis.wso2.com/api/am/store/v0.14/apis</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v0.15/apis</code>
             <p class="marked"></p>
 
             <p class="marked">This operation provides you a list of available APIs qualifying under a given search condition.
@@ -27,7 +27,7 @@ This operation supports retriving APIs of other tenants. The required tenant dom
                 </h4>
             </div>
 
-                <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.14/apis
+                <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.15/apis
 </code></div>
 
             <div class="pointer" data-toggle="collapse" data-target="#response-apisGet">
@@ -75,11 +75,11 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl https://localhost:9443/api/am/store/v0.14/apis</code></div>
+                <div class="pre"><code class="bash">curl https://localhost:9443/api/am/store/v0.15/apis</code></div>
 
             <h4 class="section-heading">Sample CURL - for tenant</h4>
-            <div class="pre"><code class="bash">curl -k -H &quot;X-WSO2-Tenant:test.com&quot; https://localhost:9443/api/am/store/v0.14/apis</code></div>
-         
+            <div class="pre"><code class="bash">curl -k -H &quot;X-WSO2-Tenant:test.com&quot; https://localhost:9443/api/am/store/v0.15/apis</code></div>
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -101,16 +101,16 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-                            
+
                             <span class="param-in">Query </span>
-                            
-                            
-                            
+
+
+
                         </td>
                         <td class="param-name">
                             <p>limit</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -129,16 +129,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
+
                             <span class="param-in">Query </span>
-                            
-                            
-                            
+
+
+
                         </td>
                         <td class="param-name">
                             <p>offset</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -157,16 +157,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>X-WSO2-Tenant</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -186,16 +186,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
+
                             <span class="param-in">Query </span>
-                            
-                            
-                            
+
+
+
                         </td>
                         <td class="param-name">
                             <p>query</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -230,16 +230,16 @@ given query string against API Name.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -258,16 +258,16 @@ given query string against API Name.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -317,7 +317,7 @@ variant of the resource.
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+
                             </span>
                         </td>
                     </tr>
