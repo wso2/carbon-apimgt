@@ -52,6 +52,7 @@ export default function Resources(props) {
         disableRateLimiting,
         hideAPIDefinitionLink,
         disableMultiSelect,
+        disableAddOperation,
     } = props;
     /**
      *
@@ -325,12 +326,14 @@ Resources.defaultProps = {
     disableRateLimiting: false,
     disableMultiSelect: false,
     hideAPIDefinitionLink: false,
+    disableAddOperation: false,
 };
 
 Resources.propTypes = {
     disableRateLimiting: PropTypes.bool,
     hideAPIDefinitionLink: PropTypes.bool,
     disableMultiSelect: PropTypes.bool,
+    disableAddOperation: PropTypes.bool,
     operationProps: PropTypes.shape({
         disableUpdate: PropTypes.bool,
         disableDelete: PropTypes.bool,

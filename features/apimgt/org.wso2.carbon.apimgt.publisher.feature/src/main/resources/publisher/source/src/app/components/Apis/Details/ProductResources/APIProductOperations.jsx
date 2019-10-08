@@ -62,6 +62,7 @@ export default function APIProductOperations() {
                         disableDelete: true,
                     }}
                     disableMultiSelect
+                    disableAddOperation
                 />
             </Grid>
         </Grid>
