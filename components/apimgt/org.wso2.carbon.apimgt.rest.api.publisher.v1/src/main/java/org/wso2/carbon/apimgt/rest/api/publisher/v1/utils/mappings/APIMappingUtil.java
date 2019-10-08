@@ -722,7 +722,7 @@ public class APIMappingUtil {
         if (!APIDTO.TypeEnum.WS.toString().equals(model.getType())) {
             List<APIOperationsDTO> apiOperationsDTO;
             String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
-            apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
+            apiOperationsDTO = getOperationsFromAPI(model);
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(scopeDTOS);
@@ -1504,29 +1504,18 @@ public class APIMappingUtil {
     }
 
     /**
-     * Returns a set of operations from a given swagger definition
+     * Returns a set of operations from a API
      *
      * @param api               API object
-     * @param swaggerDefinition Swagger definition
      * @return a set of operations from a given swagger definition
-     * @throws APIManagementException error while trying to retrieve URI templates of the given API
      */
-    private static List<APIOperationsDTO> getOperationsFromSwaggerDef(API api, String swaggerDefinition)
-            throws APIManagementException {
-        APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerDefinition);
-        Set<URITemplate> uriTemplates;
-        if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-            uriTemplates = api.getUriTemplates();
-        } else {
-            uriTemplates = apiDefinition.getURITemplates(swaggerDefinition);
-        }
+    private static List<APIOperationsDTO> getOperationsFromAPI(API api) {
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
 
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
-        if (!StringUtils.isEmpty(swaggerDefinition)) {
-            for (URITemplate uriTemplate : uriTemplates) {
-                APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate);
-                operationsDTOList.add(operationsDTO);
-            }
+        for (URITemplate uriTemplate : uriTemplates) {
+            APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate);
+            operationsDTOList.add(operationsDTO);
         }
 
         return operationsDTOList;
@@ -1561,6 +1550,17 @@ public class APIMappingUtil {
             }});
         }
         operationsDTO.setThrottlingPolicy(uriTemplate.getThrottlingTier());
+        Set<APIProductIdentifier> usedByProducts = uriTemplate.getUsedByProducts();
+        List<String> usedProductIds = new ArrayList<>();
+
+        for (APIProductIdentifier usedByProduct : usedByProducts) {
+            usedProductIds.add(usedByProduct.getUUID());
+        }
+
+        if (!usedProductIds.isEmpty()) {
+            operationsDTO.setUsedProductIds(usedProductIds);
+        }
+
         return operationsDTO;
     }
 
