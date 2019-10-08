@@ -321,13 +321,11 @@ Resources.defaultProps = {
     disableRateLimiting: false,
     disableMultiSelect: false,
     hideAPIDefinitionLink: false,
-    disableAddOperation: false,
 };
 
 Resources.propTypes = {
     disableRateLimiting: PropTypes.bool,
     hideAPIDefinitionLink: PropTypes.bool,
-    disableAddOperation: PropTypes.bool,
     disableMultiSelect: PropTypes.bool,
     operationProps: PropTypes.shape({
         disableUpdate: PropTypes.bool,
