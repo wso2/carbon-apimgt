@@ -189,7 +189,7 @@ export default function DefaultAPIForm(props) {
                 <Grid container spacing={2}>
                     {!isAPIProduct ? (
                         <React.Fragment>
-                            <Grid item md={8}>
+                            <Grid item md={8} xs={6}>
                                 <TextField
                                     fullWidth
                                     id='outlined-name'
@@ -219,7 +219,7 @@ export default function DefaultAPIForm(props) {
                                     variant='outlined'
                                 />
                             </Grid>
-                            <Grid item md={4}>
+                            <Grid item md={4} xs={6}>
                                 <TextField
                                     fullWidth
                                     error={validity.version}

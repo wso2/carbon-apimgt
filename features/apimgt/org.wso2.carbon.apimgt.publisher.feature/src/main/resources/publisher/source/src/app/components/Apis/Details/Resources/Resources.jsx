@@ -24,6 +24,7 @@ import cloneDeep from 'lodash.clonedeep';
 import Swagger from 'swagger-client';
 import isEmpty from 'lodash/isEmpty';
 import Alert from 'AppComponents/Shared/Alert';
+import Banner from 'AppComponents/Shared/Banner';
 import API from 'AppData/api';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
@@ -34,7 +35,7 @@ import SpecErrors from './components/SpecErrors';
 import AddOperation from './components/AddOperation';
 import GoToDefinitionLink from './components/GoToDefinitionLink';
 import APIRateLimiting from './components/APIRateLimiting';
-import { getTaggedOperations } from './operationUtils';
+import { getTaggedOperations, extractPathParameters } from './operationUtils';
 import OperationsSelector from './components/OperationsSelector';
 
 
@@ -70,6 +71,7 @@ export default function Resources(props) {
         return openAPISpec;
     }
     const [api, updateAPI] = useAPI();
+    const [pageError, setPageError] = useState(false);
     const [operationRateLimits, setOperationRateLimits] = useState([]);
     const [specErrors, setSpecErrors] = useState([]);
     const [selectedOperations, setSelectedOperation] = useState({});
@@ -115,7 +117,12 @@ export default function Resources(props) {
         return api
             .updateSwagger(spec)
             .then(response => resolveAndUpdateSpec(response.body))
-            .then(() => updateAPI());
+            .then(() => updateAPI())
+            .catch((error) => {
+                console.error(error);
+                Alert.error('Error while updating the operation with ' +
+                        `path ${targetOperation.target} verb ${targetOperation.verb} `);
+            });
     }
 
     /**
@@ -151,44 +158,29 @@ export default function Resources(props) {
                 copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()] = spec;
                 return updateSwagger(data, copyOfOpenAPI).then(() => updateAPIOperations(data, apiOperation));
             case 'add': {
-                if (copyOfOpenAPI.paths[data.target] && copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()]) {
-                    const message = 'Operation already exist !!';
-                    Alert.error(message);
-                    return Promise.reject(new Error(message));
-                } else if (!copyOfOpenAPI.paths[data.target]) {
+                const parameters = extractPathParameters(data.target, copyOfOpenAPI.openapi || copyOfOpenAPI.swagger);
+                if (!copyOfOpenAPI.paths[data.target]) {
                     // If target is not there add an empty object
                     copyOfOpenAPI.paths[data.target] = {};
                 }
-                const regEx = /[^{}]+(?=})/g;
-                const params = data.target.match(regEx);
-                let parameters;
-                if (copyOfOpenAPI.openapi) {
-                    parameters = params ? params.map((para) => {
-                        const paraObj = {};
-                        paraObj.name = para;
-                        paraObj.in = 'path';
-                        paraObj.required = true;
-                        paraObj.schema = {
-                            type: 'string',
-                            format: 'string',
+                let alreadyExistCount = 0;
+                for (const verb of data.verbs) {
+                    if (copyOfOpenAPI.paths[data.target][verb.toLowerCase()]) {
+                        const message = `Operation already exist with ${data.target} and ${verb}`;
+                        Alert.error(message);
+                        console.warn(message);
+                        alreadyExistCount++;
+                    } else {
+                        // use else condition because continue is not allowed by es-lint rules
+                        copyOfOpenAPI.paths[data.target][verb.toLowerCase()] = {
+                            responses: { 200: { description: 'ok' } },
+                            parameters,
                         };
-                        return paraObj;
-                    }) : [];
-                } else {
-                    parameters = params ? params.map((para) => {
-                        const paraObj = {};
-                        paraObj.name = para;
-                        paraObj.in = 'path';
-                        paraObj.required = true;
-                        paraObj.type = 'string';
-                        paraObj.format = 'string';
-                        return paraObj;
-                    }) : [];
+                    }
                 }
-                copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()] = {
-                    responses: { 200: { description: 'ok' } },
-                    parameters,
-                };
+                if (alreadyExistCount === data.verbs.length) {
+                    return Promise.reject(new Error('Operation(s) already exist!'));
+                }
                 return updateSwagger(data, copyOfOpenAPI);
             }
             case 'delete':
@@ -217,9 +209,16 @@ export default function Resources(props) {
 
     useEffect(() => {
         // Update the Swagger spec object when API object gets changed
-        api.getSwagger().then((response) => {
-            resolveAndUpdateSpec(response.body);
-        });
+        api.getSwagger()
+            .then((response) => {
+                resolveAndUpdateSpec(response.body);
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                    setPageError(error.response.body);
+                }
+            });
 
         // Fetch API level throttling policies only when the page get mounted for the first time `componentDidMount`
         API.policies('api').then((response) => {
@@ -234,6 +233,10 @@ export default function Resources(props) {
             setTaggedOperations(newTaggedOperations);
         }
     }, [api, openAPI]);
+
+    if (pageError) {
+        return <Banner type='error' message={pageError} />;
+    }
 
     // Note: Make sure not to use any hooks after/within this condition , because it returns conditionally
     // If you do so, You will probably get `Rendered more hooks than during the previous render.` exception
@@ -259,7 +262,7 @@ export default function Resources(props) {
                     />
                 </Grid>
             )}
-            {!isRestricted(['apim:api_create'], api) && !api.isAPIProduct() && (
+            {!isRestricted(['apim:api_create'], api) && !disableAddOperation && (
                 <Grid item md={12}>
                     <AddOperation updateOpenAPI={updateOpenAPI} />
                 </Grid>

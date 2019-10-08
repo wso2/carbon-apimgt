@@ -15,10 +15,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useReducer, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
+import Box from '@material-ui/core/Box';
 import Paper from '@material-ui/core/Paper';
 import AddIcon from '@material-ui/icons/Add';
 import { FormattedMessage } from 'react-intl';
@@ -31,6 +32,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Fab from '@material-ui/core/Fab';
 import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import ClearIcon from '@material-ui/icons/Clear';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -52,7 +54,9 @@ const useStyles = makeStyles(() => ({
  * @returns
  */
 function VerbElement(props) {
-    const { verb, onClick, isButton } = props;
+    const {
+        verb, onClick, isButton, checked,
+    } = props;
 
     const useMenuStyles = makeStyles((theme) => {
         const backgroundColor = theme.custom.resourceChipColors[verb.toLowerCase()];
@@ -60,11 +64,14 @@ function VerbElement(props) {
             customMenu: {
                 '&:hover': { backgroundColor },
                 backgroundColor,
+                color: theme.palette.getContrastText(backgroundColor),
             },
             customButton: {
                 '&:hover': { backgroundColor },
                 backgroundColor,
                 width: theme.spacing(12),
+                marginLeft: theme.spacing(1),
+                color: theme.palette.getContrastText(backgroundColor),
             },
         };
     });
@@ -78,6 +85,7 @@ function VerbElement(props) {
     } else {
         return (
             <MenuItem dense className={classes.customMenu} onClick={onClick}>
+                <Checkbox checked={checked} />
                 {verb}
             </MenuItem>
         );
@@ -97,7 +105,29 @@ export default function AddOperation(props) {
     const inputLabel = useRef(null);
     const [labelWidth, setLabelWidth] = useState(0);
     const [isAdding, setIsAdding] = useState(false);
-    const [operation, setOperation] = useState({ });
+
+    /**
+     *
+     *
+     * @param {*} state
+     * @param {*} action
+     * @returns
+     */
+    function operationsReducer(state, action) {
+        const { type, value } = action;
+        switch (type) {
+            case 'target':
+            case 'verbs':
+                return { ...state, [type]: value };
+            case 'clear':
+                return { verbs: [], target: '' };
+            case 'error':
+                return { ...state, error: value };
+            default:
+                return state;
+        }
+    }
+    const [operations, operationsDispatcher] = useReducer(operationsReducer, { verbs: [] });
     React.useEffect(() => {
         setLabelWidth(inputLabel.current.offsetWidth);
     }, []);
@@ -108,7 +138,7 @@ export default function AddOperation(props) {
      *
      */
     function clearInputs() {
-        setOperation({ target: '', verb: '' });
+        operationsDispatcher({ type: 'clear' });
     }
     /**
      *
@@ -116,83 +146,127 @@ export default function AddOperation(props) {
      */
     function addOperation() {
         if (
-            APIValidation.operationTarget.validate(operation.target).error !== null ||
-            APIValidation.operationVerb.validate(operation.verb).error !== null
+            APIValidation.operationTarget.validate(operations.target).error !== null ||
+            APIValidation.operationVerbs.validate(operations.verbs).error !== null
         ) {
-            Alert.warning("Operation target or operation verb can't be empty");
+            Alert.warning("Operation target or operation verb(s) can't be empty");
             return;
         }
         setIsAdding(true);
-        updateOpenAPI('add', operation)
+        updateOpenAPI('add', operations)
             .then(clearInputs)
+            .catch(error => operationsDispatcher({ type: 'error', value: error.message }))
             .finally(() => setIsAdding(false));
     }
     return (
         <Paper style={{ marginTop: '12px' }}>
-            <Grid container direction='row' spacing={3} justify='center' alignItems='center'>
-                <Grid item md={2}>
+            <Grid container direction='row' spacing={0} justify='center' alignItems='center'>
+                <Grid item xs={1} />
+                <Grid item md={4} xs={11}>
                     <FormControl margin='dense' variant='outlined' className={classes.formControl}>
                         <InputLabel ref={inputLabel} htmlFor='outlined-age-simple'>
                             HTTP Verb
                         </InputLabel>
 
                         <Select
-                            renderValue={verb => <VerbElement isButton verb={verb} />}
-                            value={operation.verb}
-                            onChange={({ target: { name, value } }) => setOperation({ ...operation, [name]: value })}
+                            multiple
+                            renderValue={(verbs) => {
+                                const remaining = [];
+                                const verbElements = verbs.map((verb, index) => {
+                                    if (index < 2) {
+                                        return <VerbElement isButton verb={verb} />;
+                                    }
+                                    remaining.push(verb.toUpperCase());
+                                    return null;
+                                });
+                                const allSelected = verbs.length === SUPPORTED_VERBS.length;
+                                return (
+                                    <Fragment>
+                                        {verbElements}
+                                        {remaining.length > 0 && (
+                                            <Tooltip title={remaining.join(', ')} placement='top'>
+                                                <Box display='inline' color='text.hint' m={1} fontSize='subtitle1'>
+                                                    {allSelected ? 'All selected' : `${verbs.length - 2} more`}
+                                                </Box>
+                                            </Tooltip>
+                                        )}
+                                    </Fragment>
+                                );
+                            }}
+                            value={operations.verbs}
+                            onChange={({ target: { name, value } }) => operationsDispatcher({ type: name, value })}
                             labelWidth={labelWidth}
                             inputProps={{
-                                name: 'verb',
+                                name: 'verbs',
                                 id: 'operation-verb',
+                            }}
+                            MenuProps={{
+                                getContentAnchorEl: null,
+                                anchorOrigin: {
+                                    vertical: 'bottom',
+                                    horizontal: 'left',
+                                },
                             }}
                         >
                             {SUPPORTED_VERBS.map(verb => (
-                                <VerbElement value={verb.toLowerCase()} verb={verb} />
+                                <VerbElement
+                                    checked={operations.verbs.includes(verb.toLowerCase())}
+                                    value={verb.toLowerCase()}
+                                    verb={verb}
+                                />
                             ))}
                         </Select>
 
                         <FormHelperText id='my-helper-text'>
-                            {operation.verb && operation.verb.toLowerCase() === 'option' ? (
+                            {operations.verbs.includes('option') && (
                                 // TODO: Add i18n to tooltip text ~tmkb
                                 <Tooltip
                                     title={
-                                        'Select the OPTIONS method to send OPTIONS calls to the backend.' +
+                                        'Select the OPTION method to send OPTIONS calls to the backend.' +
                                         ' If the OPTIONS method is not selected, OPTIONS calls will be returned ' +
                                         'from the Gateway with allowed methods.'
                                     }
                                     placement='bottom'
                                 >
                                     <Badge color='error' variant='dot'>
-                                        Select a Verb
+                                        OPTION
                                     </Badge>
                                 </Tooltip>
-                            ) : (
-                                'Select a Verb'
                             )}
                         </FormHelperText>
                     </FormControl>
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={0} xs={1} />
+                <Grid item md={5} xs={9}>
                     <TextField
                         id='operation-target'
                         label='URI Pattern'
+                        error={Boolean(operations.error)}
                         autoFocus
                         name='target'
-                        value={operation.target}
+                        value={operations.target}
                         onChange={({ target: { name, value } }) =>
-                            setOperation({ ...operation, [name]: value.startsWith('/') ? value : `/${value}` })
+                            operationsDispatcher({ type: name, value: value.startsWith('/') ? value : `/${value}` })
                         }
                         placeholder='Enter the URI pattern'
-                        helperText='Enter URI pattern'
+                        helperText={operations.error || 'Enter URI pattern'}
                         fullWidth
                         margin='dense'
                         variant='outlined'
                         InputLabelProps={{
                             shrink: true,
                         }}
+                        onKeyPress={(event) => {
+                            if (event.key === 'Enter') {
+                                // key code 13 is for `Enter` key
+                                event.preventDefault(); // To prevent form submissions
+                                addOperation();
+                            }
+                        }}
+                        disabled={isAdding}
                     />
                 </Grid>
-                <Grid item md={2}>
+                <Grid item md={1} xs={2}>
                     <Tooltip
                         title={
                             <FormattedMessage
