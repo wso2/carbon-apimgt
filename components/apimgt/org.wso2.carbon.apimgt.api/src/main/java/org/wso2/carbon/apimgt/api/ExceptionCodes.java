@@ -179,6 +179,7 @@ public enum ExceptionCodes implements ErrorHandler {
     OPENAPI_URL_NO_200(900757, "OpenAPI definition retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
     INVALID_OAS2_FOUND(900761, "Invalid OpenAPI V2 definition found", 400, "Invalid OpenAPI V2 definition found"),
     INVALID_OAS3_FOUND(900762, "Invalid OpenAPI V3 definition found", 400, "Invalid OpenAPI V3 definition found"),
+    NO_RESOURCES_FOUND(900763, "No resources found", 404, "API must have at least one resource defined"),
 
 
     // REST API related codes

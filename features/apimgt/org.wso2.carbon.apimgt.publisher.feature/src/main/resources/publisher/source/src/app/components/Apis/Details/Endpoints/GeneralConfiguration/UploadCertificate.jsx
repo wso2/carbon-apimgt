@@ -233,6 +233,7 @@ export default function UploadCertificate(props) {
                                 />
                             }
                             fullWidth
+                            inputProps={{ maxLength: 45 }}
                         />
                         <Dropzone
                             multiple={false}

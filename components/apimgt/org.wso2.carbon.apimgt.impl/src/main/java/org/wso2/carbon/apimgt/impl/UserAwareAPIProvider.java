@@ -289,9 +289,17 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
+    public void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException {
+        checkPublishPermission();
+        apiMgtDAO.updateSubscription(subscribedAPI);
+    }
+
+    @Override
     public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
-        checkCreatePermission();
-        return super.getSubscriptionByUUID(uuid);
+        if (checkCreateOrPublishPermission()) {
+            return super.getSubscriptionByUUID(uuid);
+        }
+        return null;
     }
 
     public void checkCreatePermission() throws APIManagementException {
@@ -304,6 +312,11 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     public void checkPublishPermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_PUBLISH);
+    }
+
+    public boolean checkCreateOrPublishPermission() throws APIManagementException {
+        return APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_CREATE) ||
+                APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_PUBLISH);
     }
 
     public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus)

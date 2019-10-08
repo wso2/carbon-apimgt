@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -564,6 +565,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (!errorMessage.isEmpty()) {
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
+            }
+            // Validate if resources are empty
+            if (body.getOperations() == null || body.getOperations().isEmpty()) {
+                RestApiUtil.handleBadRequest(ExceptionCodes.NO_RESOURCES_FOUND, log);
             }
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
             validateScopes(apiToUpdate);
@@ -2299,6 +2304,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (APIManagementException e) {
             // catch APIManagementException inside again to capture validation error
             RestApiUtil.handleBadRequest(e.getMessage(), log);
+        }
+        if(uriTemplates == null || uriTemplates.isEmpty()) {
+            RestApiUtil.handleBadRequest(ExceptionCodes.NO_RESOURCES_FOUND, log);
         }
         Set<Scope> scopes = oasParser.getScopes(apiDefinition);
         //validating scope roles
