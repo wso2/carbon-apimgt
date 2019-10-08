@@ -1916,8 +1916,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             HashMap monetizationDataMap = new Gson().fromJson(api.getMonetizationProperties().toString(), HashMap.class);
             boolean isMonetizationStateChangeSuccessful = false;
             if (MapUtils.isEmpty(monetizationDataMap)) {
-                String errorMessage = "Monetization data map is empty for API ID " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, log);
+                String errorMessage = "Monetization is not configured. Monetization data is empty for API ID " + apiId;
+                RestApiUtil.handleBadRequest(errorMessage, log);
             }
             try {
                 if (monetizationEnabled) {
