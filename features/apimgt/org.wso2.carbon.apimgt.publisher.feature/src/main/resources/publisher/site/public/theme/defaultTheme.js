@@ -41,7 +41,7 @@ const Configurations = {
             custom: {
                 starColor: '#f2c73a',
                 disableColor: '#D3D3D3',
-                leftMenuWidth: 200,
+                leftMenuWidth: 210,
                 contentAreaWidth: 1240,
                 drawerWidth: 200,
                 logo: APP_CONTEXT + '/site/public/images/logo.png',
