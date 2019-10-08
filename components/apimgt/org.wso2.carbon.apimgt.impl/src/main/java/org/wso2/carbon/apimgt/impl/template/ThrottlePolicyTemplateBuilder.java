@@ -439,11 +439,11 @@ public class ThrottlePolicyTemplateBuilder {
                 conditionJson = new JSONObject();
             }
             tempCondition.put(condition.getType().toLowerCase(), conditionJson);
-            if (condition instanceof IPCondition) {
+            if (PolicyConstants.IP_SPECIFIC_TYPE.equals(condition.getType())) {
                 IPCondition ipCondition = (IPCondition) condition;
                 conditionJson.put("specificIp", ipCondition.ipToLong(ipCondition.getSpecificIP()));
-            } else if (condition instanceof IPRangeCondition) {
-                IPRangeCondition ipRangeCondition = (IPRangeCondition) condition;
+            } else if (PolicyConstants.IP_RANGE_TYPE.equals(condition.getType())) {
+                IPCondition ipRangeCondition = (IPCondition) condition;
                 conditionJson.put("startingIp", ipRangeCondition.ipToLong(ipRangeCondition.getStartingIP()));
                 conditionJson.put("endingIp", ipRangeCondition.ipToLong(ipRangeCondition.getEndingIP()));
             } else if (condition instanceof QueryParameterCondition) {
