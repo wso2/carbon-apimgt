@@ -73,10 +73,18 @@ const useStyles = makeStyles(theme => ({
  */
 export default function SimpleSelect(props) {
     const classes = useStyles();
-    const { updateAPI } = props;
+    const { api, updateAPI } = props;
     const [tenantList, setTenantList] = React.useState([]);
+    let currentAvailability;
+    if (api.subscriptionAvailability === null || api.subscriptionAvailability === 'CURRENT_TENANT') {
+        currentAvailability = 'currentTenant';
+    } else if (api.subscriptionAvailability === 'ALL_TENANTS') {
+        currentAvailability = 'allTenants';
+    } else if (api.subscriptionAvailability === 'SPECIFIC_TENANTS') {
+        currentAvailability = 'specificTenants';
+    }
     const [values, setValues] = React.useState({
-        availability: 'currentTenant',
+        availability: currentAvailability,
     });
     const inputLabel = React.useRef(null);
     const [labelWidth, setLabelWidth] = React.useState(0);
@@ -124,7 +132,7 @@ export default function SimpleSelect(props) {
     }
     return (
         <Paper className={classes.subscriptionAvailabilityPaper}>
-            <form className={classes.root} autoComplete='off'>
+            <form className={classes.root} autoComplete='off' onSubmit={(e) => { e.preventDefault(); }}>
                 <Grid container spacing={1} className={classes.grid}>
                     <Grid item xs={4} className={classes.gridLabel}>
                         <FormLabel>
@@ -164,7 +172,7 @@ export default function SimpleSelect(props) {
                     </Grid>
                     {isSpecificTenants ? (
                         <Grid item xs={8} >
-                            <TenantAutocomplete setTenantList={setTenantList} />
+                            <TenantAutocomplete setTenantList={setTenantList} api={api} />
                         </Grid>
                     ) : <Grid item xs={8} />}
                 </Grid>

@@ -335,7 +335,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
 
     @Override
     public boolean canProcess(URL url) {
-        return APIUtil.isURLContentContainsString(url, WSDL11_NAMESPACE);
+        return APIUtil.isURLContentContainsString(url, WSDL11_NAMESPACE, MAX_URL_READ_LINES);
     }
 
     @Override

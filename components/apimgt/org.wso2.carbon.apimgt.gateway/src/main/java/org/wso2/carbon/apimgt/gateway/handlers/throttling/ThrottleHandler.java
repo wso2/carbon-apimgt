@@ -61,6 +61,7 @@ import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -193,7 +194,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         apiContext = apiContext != null ? apiContext : "";
         apiVersion = apiVersion != null ? apiVersion : "";
-
+        String clientIp = getClientIp(synCtx);
         String subscriberTenantDomain = "";
         String apiTenantDomain = getTenantDomain();
         ConditionGroupDTO[] conditionGroupDTOs;
@@ -206,7 +207,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
             //Do blocking if there are blocking conditions present
             if (getThrottleDataHolder().isBlockingConditionsPresent()) {
-                ipLevelBlockingKey = apiTenantDomain + ":" + getClientIp(synCtx);
+                ipLevelBlockingKey = apiTenantDomain + ":" + clientIp;
                 appLevelBlockingKey = authContext.getSubscriber() + ":" + authContext.getApplicationName();
                 Timer timer = getTimer(MetricManager.name(
                         APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), BLOCKED_TEST));
@@ -391,7 +392,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                     if (!keyTemplatesAvailable || !validateCustomPolicy(authorizedUser,
                                             applicationLevelThrottleKey, resourceLevelThrottleKey, apiLevelThrottleKey,
                                             subscriptionLevelThrottleKey, apiContext, apiVersion, subscriberTenantDomain,
-                                            apiTenantDomain, applicationId, getThrottleDataHolder().getKeyTemplateMap(),
+                                            apiTenantDomain, applicationId, clientIp,
+                                            getThrottleDataHolder().getKeyTemplateMap(),
                                             synCtx)) {
                                         //Pass message context and continue to avoid performance issue.
                                         //Did not throttled at any level. So let message go and publish event.
@@ -948,7 +950,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      */
     public boolean validateCustomPolicy(String userID, String appKey, String resourceKey, String apiKey,
                                         String subscriptionKey, String apiContext, String apiVersion, String appTenant,
-                                        String apiTenant, String appId, Map<String, String> keyTemplateMap,
+                                        String apiTenant, String appId, String clientIp,
+                                        Map<String, String> keyTemplateMap,
                                         MessageContext messageContext) {
         if (keyTemplateMap != null && keyTemplateMap.size() > 0) {
             for (String key : keyTemplateMap.keySet()) {
@@ -959,6 +962,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 key = key.replaceAll("\\$appTenant", appTenant);
                 key = key.replaceAll("\\$apiTenant", apiTenant);
                 key = key.replaceAll("\\$appId", appId);
+                key = key.replaceAll("\\$clientIp", Long.valueOf(APIUtil.ipToLong(clientIp)).toString());
                 if (getThrottleDataHolder().isThrottled(key)) {
                     long timestamp = getThrottleDataHolder().getThrottleNextAccessTimestamp(key);
                     messageContext.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP, timestamp);
