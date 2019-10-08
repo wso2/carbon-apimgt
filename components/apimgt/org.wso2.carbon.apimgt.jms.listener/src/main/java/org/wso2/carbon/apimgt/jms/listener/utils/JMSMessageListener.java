@@ -260,7 +260,7 @@ public class JMSMessageListener implements MessageListener {
             // Get expiry time of JWT token
             Long expiryTime = APIUtil.getExpiryifJWT(revokedToken);
             revokedToken = APIUtil.getSignatureIfJWT(revokedToken); //JWT signature is the cache key
-            RevokedJWTDataHolder.addRevokedJWTToMap(revokedToken, expiryTime);  // Add revoked token to revoked JWT map
+            RevokedJWTDataHolder.getInstance().addRevokedJWTToMap(revokedToken, expiryTime);  // Add revoked token to revoked JWT map
         }
 
         //Find the actual tenant domain on which the access token was cached. It is stored as a reference in

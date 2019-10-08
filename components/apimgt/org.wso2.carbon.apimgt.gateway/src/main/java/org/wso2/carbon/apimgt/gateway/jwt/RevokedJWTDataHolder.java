@@ -32,7 +32,7 @@ public class RevokedJWTDataHolder {
     private static Map<String, Long> revokedJWTMap = new ConcurrentHashMap<>();
     private static RevokedJWTDataHolder instance = new RevokedJWTDataHolder();
 
-    public static void addRevokedJWTToMap(String key, Long value) {
+    public void addRevokedJWTToMap(String key, Long value) {
         if (key != null && value != null) {
             log.debug("Adding revoked JWT key, value pair to the revoked map :" + key + " , " + value);
             revokedJWTMap.put(key, value);
@@ -45,6 +45,10 @@ public class RevokedJWTDataHolder {
 
     private RevokedJWTDataHolder() {
 
+    }
+
+    Map<String, Long> getRevokedJWTMap() {
+        return revokedJWTMap;
     }
 
     public static RevokedJWTDataHolder getInstance() {

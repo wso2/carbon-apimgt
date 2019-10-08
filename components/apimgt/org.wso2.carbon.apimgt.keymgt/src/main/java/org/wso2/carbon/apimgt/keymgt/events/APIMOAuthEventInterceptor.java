@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.ExpiredJWTCleaner;
 import org.wso2.carbon.apimgt.keymgt.token.TokenRevocationNotifier;
 import org.wso2.carbon.identity.oauth.event.AbstractOAuthEventInterceptor;
 import org.wso2.carbon.identity.oauth2.ResponseHeader;
@@ -177,6 +178,10 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
         try {
             String tokenSignature = APIUtil.getSignatureIfJWT(token);
             apiMgtDAO.addRevokedJWTSignature(tokenSignature, expiryTime);
+
+            Runnable runnable = new ExpiredJWTCleaner();
+            Thread cleanupThread = new Thread(runnable);
+            cleanupThread.start();
         } catch (APIManagementException e) {
             log.error("Unable to add revoked JWT signature to the database");
         }

@@ -3640,5 +3640,7 @@ public class SQLConstants {
 
         public static final String ADD_JWT_SIGNATURE = "INSERT INTO AM_REVOKED_JWT (SIGNATURE," +
                 "EXPIRY_TIMESTAMP) VALUES(?,?)";
+        public static final String FETCH_REVOKED_JWT = "SELECT SIGNATURE, EXPIRY_TIMESTAMP FROM AM_REVOKED_JWT";
+        public static final String DELETE_SIGNATURE = "DELETE FROM AM_REVOKED_JWT WHERE SIGNATURE IN ($paramList)";
     }
 }

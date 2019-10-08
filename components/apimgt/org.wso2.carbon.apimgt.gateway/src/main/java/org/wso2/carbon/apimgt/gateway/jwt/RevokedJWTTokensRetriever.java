@@ -50,9 +50,7 @@ public class RevokedJWTTokensRetriever extends TimerTask {
     @Override
     public void run() {
 
-        if (log.isDebugEnabled()) {
-            log.debug("Starting web service based revoked JWT tokens retrieving process.");
-        }
+        log.debug("Starting web service based revoked JWT tokens retrieving process.");
         loadRevokedJWTTokensFromWebService();
     }
 
@@ -112,9 +110,16 @@ public class RevokedJWTTokensRetriever extends TimerTask {
     private void loadRevokedJWTTokensFromWebService() {
 
         RevokedJWTTokensDTO[] revokedJWTTokensDTOs = retrieveRevokedJWTTokensData();
-        for (RevokedJWTTokensDTO revokedJWTToken : revokedJWTTokensDTOs) {
-            RevokedJWTDataHolder.getInstance().addRevokedJWTToMap(revokedJWTToken.getSignature(),
-                    revokedJWTToken.getExpiryTime());
+        if(revokedJWTTokensDTOs != null) {
+            for (RevokedJWTTokensDTO revokedJWTToken : revokedJWTTokensDTOs) {
+                RevokedJWTDataHolder.getInstance().addRevokedJWTToMap(revokedJWTToken.getSignature(),
+                        revokedJWTToken.getExpiryTime());
+                if(log.isDebugEnabled()) {
+                    log.debug("JWT signature : " + revokedJWTToken.getSignature() + " added to the revoke map.");
+                }
+            }
+        } else {
+            log.debug("No revoked JWT tokens are retrieved via web service");
         }
     }
 
