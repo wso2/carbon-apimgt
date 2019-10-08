@@ -6,6 +6,7 @@ import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import { withStyles } from '@material-ui/core/styles';
+import AuthManager from 'AppData/AuthManager';
 
 const styles = theme => ({
     root: {
@@ -74,6 +75,7 @@ class MenuButton extends React.Component {
         return (
             <React.Fragment>
                 <Button
+                    disabled={AuthManager.isNotCreator()}
                     buttonRef={(node) => {
                         this.anchorEl = node;
                     }}
