@@ -30,7 +30,6 @@ import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 import ApiContext from '../components/ApiContext';
 
-
 const styles = theme => ({
     contentWrapper: {
         marginTop: theme.spacing(2),
@@ -38,7 +37,6 @@ const styles = theme => ({
         overflowY: 'auto',
     },
 });
-
 
 /**
  *
