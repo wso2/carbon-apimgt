@@ -435,7 +435,7 @@ function Overview(props) {
                                             <Typography>
                                                 <FormattedMessage
                                                     id='Apis.Details.Overview.sdk.generation.description'
-                                                    defaultMessage='If you wants to create a software application to consume the subscribed APIs, you can generate client side SDK for a supported language/framework and use it as a start point to write the software application.'
+                                                    defaultMessage='If you want to create a software application to consume the subscribed APIs, you can generate client side SDK for a supported language/framework and use it as a start point to write the software application.'
                                                 />
                                             </Typography>
                                         </Grid>
