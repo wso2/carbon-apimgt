@@ -22,6 +22,8 @@ import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
 import { FormattedMessage } from 'react-intl';
 import Box from '@material-ui/core/Box';
+import { Link } from 'react-router-dom';
+import LaunchIcon from '@material-ui/icons/Launch';
 
 import Typography from '@material-ui/core/Typography';
 import Api from 'AppData/api';
@@ -65,6 +67,10 @@ const styles = {
     },
     heading: {
         marginRight: 20,
+    },
+    contentWrapper: {
+        maxHeight: '250px',
+        overflowY: 'auto',
     },
 };
 
@@ -156,6 +162,20 @@ class Resources extends React.Component {
                             })}
                         </div>
                     </div>
+                    <Link to={'/apis/' + api.id + '/resources'}>
+                        <Typography
+                            className={classes.subHeading}
+                            color='primary'
+                            display='inline'
+                            variant='caption'
+                        >
+                            <FormattedMessage
+                                id='Apis.Details.NewOverview.Operations.ShowMore'
+                                defaultMessage='Show More'
+                            />
+                            <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
+                        </Typography>
+                    </Link>
                 </Box>
             </React.Fragment>
         );
