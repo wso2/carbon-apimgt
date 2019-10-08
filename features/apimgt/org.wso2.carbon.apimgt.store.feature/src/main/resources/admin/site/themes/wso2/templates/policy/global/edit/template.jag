@@ -3,7 +3,7 @@
     var policyName = request.getParameter("policyName");
     var pageTitle = i18n.localize("Add Custom Policy");
     var nameFieldDisableStatus = "";
-    var streamParameters = "apiContext,apiVersion,resourceKey,userId,appId,apiTenant,appTenant";
+    var streamParameters = "apiContext,apiVersion,resourceKey,userId,appId,apiTenant,appTenant,clientIp";
 
     if(policyName != null) {
         pageTitle = i18n.localize("Edit Custom Policy");

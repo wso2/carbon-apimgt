@@ -35,7 +35,9 @@ function MethodView(props) {
         <Chip
             label={method}
             className={className || ''}
-            style={{ backgroundColor: chipColor, color: chipTextColor, height: 20 }}
+            style={{
+                backgroundColor: chipColor, color: chipTextColor, height: 20, width: 65,
+            }}
         />
     );
 }
