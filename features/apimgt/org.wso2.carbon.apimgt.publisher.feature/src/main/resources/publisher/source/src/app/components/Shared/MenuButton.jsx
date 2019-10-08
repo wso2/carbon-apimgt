@@ -75,7 +75,7 @@ class MenuButton extends React.Component {
         return (
             <React.Fragment>
                 <Button
-                    disabled={AuthManager.isNotCreator()}
+                    disabled={!AuthManager.getUser().scopes.includes('apim:api_create')}
                     buttonRef={(node) => {
                         this.anchorEl = node;
                     }}
