@@ -42,7 +42,7 @@ export default function SelectEndpoint(props) {
             error={isEndpointEmpty || endpoints.length === 0}
             helperText={endpoints.length === 0 ? <FormattedMessage
                 id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint.empty.error'
-                defaultMessage='Save endpoints before adding certificate'
+                defaultMessage='Save endpoints before adding the certificate'
             /> : iff(isEndpointEmpty, <FormattedMessage
                 id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint.error'
                 defaultMessage='Endpoint should not be empty'
