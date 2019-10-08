@@ -404,6 +404,8 @@ class ApiTableView extends React.Component {
             options.download = false;
             options.viewColumns = false;
             options.customToolbar = false;
+        } else {
+            options.filter = false;
         }
         if (page === 0 && this.count <= rowsPerPage) {
             options.pagination = false;
