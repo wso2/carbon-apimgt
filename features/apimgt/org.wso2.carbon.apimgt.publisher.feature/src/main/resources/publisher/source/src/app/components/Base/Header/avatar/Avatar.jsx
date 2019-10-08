@@ -53,6 +53,7 @@ class Avatar extends Component {
             profileIcon: null,
         };
         this.toggleMenu = this.toggleMenu.bind(this);
+        this.handleClose = this.handleClose.bind(this);
     }
 
     /**
@@ -68,6 +69,17 @@ class Avatar extends Component {
                 profileIcon: event.currentTarget,
             });
         }
+    }
+
+    /**
+     * Hanlde outside click event
+     * @param {*} event
+     */
+    handleClose(event) {
+        if (this.state.profileIcon.current && this.state.profileIcon.current.contains(event.target)) {
+            return;
+        }
+        this.setState({ openMenu: false });
     }
 
     /**
@@ -108,7 +120,7 @@ class Avatar extends Component {
                     {({ TransitionProps }) => (
                         <Fade in={openMenu} {...TransitionProps} id='profile-menu-appbar'>
                             <Paper>
-                                <ClickAwayListener onClickAway={this.toggleMenu}>
+                                <ClickAwayListener onClickAway={this.handleClose}>
                                     <MenuList>
                                         {/* TODO: uncomment when component run without errors */}
                                         {/* <MenuItem onClick={this.toggleMenu}>Profile</MenuItem>

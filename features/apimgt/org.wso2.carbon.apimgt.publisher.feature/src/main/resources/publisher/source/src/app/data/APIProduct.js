@@ -23,14 +23,14 @@ import Resource from './Resource';
  * An abstract representation of an API Product
  */
 class APIProduct extends Resource {
-    constructor(name, version, context, kwargs) {
+    constructor(name, context, kwargs) {
         super();
         let properties = kwargs;
         if (name instanceof Object) {
             properties = name;
         } else {
             this.name = name;
-            this.version = version;
+            this.version = '1.0.0';
             this.context = context;
             this.isDefaultVersion = false;
             this.gatewayEnvironments = ['Production and Sandbox'];

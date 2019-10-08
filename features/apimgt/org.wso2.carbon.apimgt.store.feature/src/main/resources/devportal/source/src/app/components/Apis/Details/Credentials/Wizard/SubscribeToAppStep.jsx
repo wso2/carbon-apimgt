@@ -42,8 +42,10 @@ const subscribeToAppStep = (props) => {
 
     const subscribeToApplication = () => {
         const api = new API();
-        api.subscribe(subscriptionRequest.apiId, subscriptionRequest.applicationId,
-            subscriptionRequest.throttlingPolicy)
+        api.subscribe(
+            subscriptionRequest.apiId, subscriptionRequest.applicationId,
+            subscriptionRequest.throttlingPolicy,
+        )
             .then((response) => {
                 if (response.body.status === SUBSCRIPTION_STATES.UNBLOCKED) {
                     console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);

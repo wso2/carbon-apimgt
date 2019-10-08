@@ -59,7 +59,7 @@ const Configurations = {
                     post: '#8ac149',
                     put: '#ff9700',
                     delete: '#fd5621',
-                    option: '#5f7c8a',
+                    options: '#5f7c8a',
                     patch: '#785446',
                     head: '#785446',
                 },

@@ -14,7 +14,6 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
-import org.hibernate.validator.constraints.NotEmpty;
 
 
 
@@ -37,7 +36,6 @@ public class OpenAPIDefinitionValidationResponseDTO   {
   @ApiModelProperty(example = "true", required = true, value = "This attribute declares whether this definition is valid or not. ")
   @JsonProperty("isValid")
   @NotNull
-  @NotEmpty
   public Boolean isIsValid() {
     return isValid;
   }

@@ -3,7 +3,7 @@
 
             <hr/>
             <h4 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdContentGet"></a>Get the content of an API document
-</h4> <code>GET https://apis.wso2.com/api/am/store/v0.14/apis/{apiId}/documents/{documentId}/content</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v0.15/apis/{apiId}/documents/{documentId}/content</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve the content of an API&#39;s document.
@@ -35,7 +35,7 @@ The document can be of 3 types. In each cases responses are different.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsDocumentIdContentGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content
+                <div id="request-apisApiIdDocumentsDocumentIdContentGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.15/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content
 </code></div>
 
             <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdDocumentsDocumentIdContentGet">
@@ -61,11 +61,11 @@ startxref
 %%EOF</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl &quot;https://localhost:9443/api/am/store/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content&quot; &gt; sample.pdf</code></div>
+                <div class="pre"><code class="bash">curl &quot;https://localhost:9443/api/am/store/v0.15/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content&quot; &gt; sample.pdf</code></div>
 
             <h4 class="section-heading">Sample CURL - for tenant</h4>
-            <div class="pre"><code class="bash">curl -k -H &quot;X-WSO2-Tenant:test.com&quot; &quot;https://localhost:9443/api/am/store/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content&quot; &gt; sample.pdf</code></div>
-         
+            <div class="pre"><code class="bash">curl -k -H &quot;X-WSO2-Tenant:test.com&quot; &quot;https://localhost:9443/api/am/store/v0.15/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content&quot; &gt; sample.pdf</code></div>
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -87,17 +87,17 @@ startxref
                 </thead>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>apiId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -117,17 +117,17 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>documentId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -145,16 +145,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>X-WSO2-Tenant</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -174,16 +174,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -202,16 +202,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -231,16 +231,16 @@ variant of the resource.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-Modified-Since</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -281,7 +281,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">OK. File or inline content returned. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+
                             </span>
                         </td>
                     </tr>
@@ -290,7 +290,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">See Other. Source can be retrived from the URL specified at the Location header. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+
                             </span>
                         </td>
                     </tr>
@@ -299,7 +299,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+
                             </span>
                         </td>
                     </tr>
@@ -325,7 +325,7 @@ formerly retrieved variant of the resource (Will be supported in future).
             </table>
             <hr/>
             <h4 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdGet"></a>Get a document of an API
-</h4> <code>GET https://apis.wso2.com/api/am/store/v0.14/apis/{apiId}/documents/{documentId}</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v0.15/apis/{apiId}/documents/{documentId}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve a particular document&#39;s metadata associated with an API.
@@ -346,7 +346,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsDocumentIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.14/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c
+                <div id="request-apisApiIdDocumentsDocumentIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.15/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c
 </code></div>
 
             <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdDocumentsDocumentIdGet">
@@ -369,11 +369,11 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl &quot;https://localhost:9443/api/am/store/v0.14/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c&quot;</code></div>
+                <div class="pre"><code class="bash">curl &quot;https://localhost:9443/api/am/store/v0.15/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c&quot;</code></div>
 
             <h4 class="section-heading">Sample CURL - for tenant</h4>
-            <div class="pre"><code class="bash">curl -k -H &quot;X-WSO2-Tenant:test.com&quot; https://localhost:9443/api/am/store/v0.14/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c</code></div>
-         
+            <div class="pre"><code class="bash">curl -k -H &quot;X-WSO2-Tenant:test.com&quot; https://localhost:9443/api/am/store/v0.15/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c</code></div>
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -395,17 +395,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>apiId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -425,17 +425,17 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
+
+
                             <span class="param-in">Path </span>
-                            
-                            
+
+
                         </td>
                         <td class="param-name">
                             <p>documentId</p>
                             <p class="param-required">
                                 required
-                                
+
                             </p>
                         </td>
                         <td>
@@ -453,16 +453,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>X-WSO2-Tenant</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -482,16 +482,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -510,16 +510,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -539,16 +539,16 @@ variant of the resource.
                     </tr>
                     <tr>
                         <td class="parameter">
-                            
-                            
-                            
+
+
+
                             <span class="param-in">Header </span>
-                            
+
                         </td>
                         <td class="param-name">
                             <p>If-Modified-Since</p>
                             <p class="param-required">
-                                
+
                                 optional
                             </p>
                         </td>
@@ -598,7 +598,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+
                             </span>
                         </td>
                     </tr>
