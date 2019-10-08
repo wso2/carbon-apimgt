@@ -38,6 +38,9 @@ const Configurations = {
                     fontSize: '1.3rem',
                 },
             },
+            zIndex: {
+                apiCreateMenu: 1250,
+            },
             custom: {
                 starColor: '#f2c73a',
                 disableColor: '#D3D3D3',
