@@ -480,8 +480,8 @@ class Details extends Component {
                         {!isAPIProduct && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
-                                    id: 'Apis.Details.index.gateways',
-                                    defaultMessage: 'gateways',
+                                    id: 'Apis.Details.index.environments',
+                                    defaultMessage: 'environments',
                                 })}
                                 route='environments'
                                 to={pathPrefix + 'environments'}

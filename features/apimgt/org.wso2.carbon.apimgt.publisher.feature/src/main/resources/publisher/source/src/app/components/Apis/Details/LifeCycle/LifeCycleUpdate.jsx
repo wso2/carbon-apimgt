@@ -108,7 +108,7 @@ class LifeCycleUpdate extends Component {
                     }));
                 } else {
                     Alert.info(intl.formatMessage({
-                        id: 'Apis.Details.LifeCycle.LifeCycleUpdate.success',
+                        id: 'Apis.Details.LifeCycle.LifeCycleUpdate.success.updated',
                         defaultMessage: 'Lifecycle state updated successfully',
                     }));
                 }
