@@ -2051,4 +2051,24 @@ public class APIUtilTest {
         Assert.assertFalse(APIUtil.isRoleExistForUser(userName, "test"));
         */
     }
+
+    @Test
+    public void getSignatureIfJWT() {
+        final String opaqueTokenWithNoDots = "aaaabbbcccdddeeefff";
+        final String opaqueTokenWithTwoDots = "aaaa.bbbcccdddeee.fff";
+        final String opaqueTokenWithMoreDots = "aaaa.bbb.ccc.ddd.eee.fff";
+        final String jwtTokenWithoutSignature = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0";
+        final String signature = "iOiJIUzI1NiIs3erfRd";
+        final String jwtTokenWithSignature = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0." + signature;
+
+
+        //the same token should be returned
+        Assert.assertEquals(opaqueTokenWithNoDots, APIUtil.getSignatureIfJWT(opaqueTokenWithNoDots));
+        Assert.assertEquals(opaqueTokenWithTwoDots, APIUtil.getSignatureIfJWT(opaqueTokenWithTwoDots));
+        Assert.assertEquals(opaqueTokenWithMoreDots, APIUtil.getSignatureIfJWT(opaqueTokenWithMoreDots));
+        Assert.assertEquals(jwtTokenWithoutSignature, APIUtil.getSignatureIfJWT(jwtTokenWithoutSignature));
+
+        //signature should be returned
+        Assert.assertEquals(signature, APIUtil.getSignatureIfJWT(jwtTokenWithSignature));
+    }
 }

@@ -34,7 +34,9 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-
+/**
+ * DB util class to fetch revoked JWTs
+ */
 public final class RevokedJWTDBUtil {
     private static final Log log = LogFactory.getLog(RevokedJWTDBUtil.class);
 
@@ -92,6 +94,10 @@ public final class RevokedJWTDBUtil {
         }
     }
 
+    /**
+     * Fetches all revoked JWTs from DB.
+     * @return
+     */
     public static RevokedJWTListDTO getRevokedJWTs() {
         Connection conn = null;
         PreparedStatement ps = null;
@@ -118,6 +124,12 @@ public final class RevokedJWTDBUtil {
         return revokedJWTListDTO;
     }
 
+    /**
+     *  Closes all connections.
+     * @param preparedStatement prepared statement to be closed.
+     * @param connection connection to be closed.
+     * @param resultSet resultset to be closed.
+     */
     public static void closeAllConnections(PreparedStatement preparedStatement, Connection connection,
                                            ResultSet resultSet) {
         closeConnection(connection);

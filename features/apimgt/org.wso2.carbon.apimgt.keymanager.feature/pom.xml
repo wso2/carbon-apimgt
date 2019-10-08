@@ -169,7 +169,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>copy</id>
+                        <id>copy-revokedjwt-webapp</id>
                         <phase>package</phase>
                         <goals>
                             <goal>copy</goal>
