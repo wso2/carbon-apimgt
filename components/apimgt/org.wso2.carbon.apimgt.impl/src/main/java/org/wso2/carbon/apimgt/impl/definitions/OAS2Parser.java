@@ -216,7 +216,7 @@ public class OAS2Parser extends APIDefinition {
         return scopeList;
     }
 
-    public Set<Scope> sortScopes(Set<Scope> scopeSet){
+    private Set<Scope> sortScopes(Set<Scope> scopeSet){
         List<Scope> scopesSortedlist = new ArrayList<>(scopeSet);
         scopesSortedlist.sort(Comparator.comparing(Scope::getName));
         return new LinkedHashSet<>(scopesSortedlist);
