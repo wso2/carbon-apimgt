@@ -200,6 +200,7 @@ public class OAS3Parser extends APIDefinition {
         scopesSortedlist.sort(Comparator.comparing(Scope::getName));
         return new LinkedHashSet(scopesSortedlist);
     }
+
     /**
      * This method generates API definition to the given api
      *
