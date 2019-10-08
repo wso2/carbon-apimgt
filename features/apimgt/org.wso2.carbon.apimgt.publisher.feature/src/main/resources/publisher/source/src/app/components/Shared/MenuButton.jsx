@@ -15,7 +15,7 @@ const styles = theme => ({
         marginRight: theme.spacing.unit * 2,
     },
     position: {
-        zIndex: 1,
+        zIndex: 101,
     },
 });
 

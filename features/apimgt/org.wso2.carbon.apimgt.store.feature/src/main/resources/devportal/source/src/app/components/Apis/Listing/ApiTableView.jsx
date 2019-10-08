@@ -247,7 +247,7 @@ class ApiTableView extends React.Component {
                 name: 'name',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.name',
-                    defaultMessage: 'name',
+                    defaultMessage: 'Name',
                 }),
                 options: {
                     customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
@@ -287,14 +287,14 @@ class ApiTableView extends React.Component {
                 name: 'version',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.version',
-                    defaultMessage: 'version',
+                    defaultMessage: 'Version',
                 }),
             },
             {
                 name: 'context',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.context',
-                    defaultMessage: 'context',
+                    defaultMessage: 'Context',
                 }),
                 options: {
                     sort: false,
@@ -304,7 +304,7 @@ class ApiTableView extends React.Component {
                 name: 'provider',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.provider',
-                    defaultMessage: 'provider',
+                    defaultMessage: 'Provider',
                 }),
                 options: {
                     sort: false,
@@ -314,7 +314,7 @@ class ApiTableView extends React.Component {
                 name: 'type',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.type',
-                    defaultMessage: 'type',
+                    defaultMessage: 'Type',
                 }),
                 options: {
                     sort: false,
@@ -324,7 +324,7 @@ class ApiTableView extends React.Component {
                 name: 'rating',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.rating',
-                    defaultMessage: 'rating',
+                    defaultMessage: 'Rating',
                 }),
                 options: {
                     customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
