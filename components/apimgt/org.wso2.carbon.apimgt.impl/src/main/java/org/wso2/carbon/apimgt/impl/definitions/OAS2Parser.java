@@ -216,7 +216,14 @@ public class OAS2Parser extends APIDefinition {
         return scopeList;
     }
 
-    private Set<Scope> sortScopes(Set<Scope> scopeSet){
+    /**
+     * Sort scopes by name.
+     * This method was added to display scopes in publisher in a sorted manner.
+     *
+     * @param scopeSet
+     * @return Scope set
+     */
+    private Set<Scope> sortScopes(Set<Scope> scopeSet) {
         List<Scope> scopesSortedlist = new ArrayList<>(scopeSet);
         scopesSortedlist.sort(Comparator.comparing(Scope::getName));
         return new LinkedHashSet<>(scopesSortedlist);
