@@ -4805,7 +4805,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                         WorkflowResponse workflowResponse = apiStateWFExecutor.execute(apiStateWorkflow);
                         response.setWorkflowResponse(workflowResponse);
-                    } catch (Exception e) {
+                    } catch (WorkflowException e) {
                         handleException("Failed to execute workflow for life cycle status change : " + e.getMessage(),
                                 e);
                     }
@@ -4816,6 +4816,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     if (wfDTO != null) {
                         apiWFState = wfDTO.getStatus();
                         response.setStateChangeStatus(apiWFState.toString());
+                    } else {
+                        response.setStateChangeStatus(WorkflowStatus.APPROVED.toString());
                     }
                 }
 

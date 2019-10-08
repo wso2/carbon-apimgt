@@ -489,10 +489,12 @@ public class OASParserUtil {
      */
     private static void populateLoadBalanceConfig(ObjectNode endpointResult, JSONObject endpointConfig,
             boolean isProd) {
-        JSONArray primaryProdEndpoints;
-        if (isProd) {
+        JSONArray primaryProdEndpoints = new JSONArray();
+        if (isProd && endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) &&
+                endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) instanceof JSONArray) {
             primaryProdEndpoints = endpointConfig.getJSONArray(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
-        } else {
+        } else if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) &&
+                endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) instanceof JSONArray) {
             primaryProdEndpoints = endpointConfig.getJSONArray(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
         }
 
@@ -522,10 +524,10 @@ public class OASParserUtil {
      */
     private static void setPrimaryConfig(ObjectNode endpointResult, JSONObject endpointConfig, boolean isProd,
             String type) {
-        JSONObject primaryEndpoints;
-        if (isProd) {
+        JSONObject primaryEndpoints = new JSONObject();
+        if (isProd && endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
             primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
-        } else {
+        } else if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
             primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
         }
         if (primaryEndpoints != null && primaryEndpoints.has(APIConstants.ENDPOINT_URL)) {
