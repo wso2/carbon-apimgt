@@ -29,6 +29,7 @@ import { Link } from 'react-router-dom';
 import { List, ListItem, ListItemText } from '@material-ui/core';
 import AddCircle from '@material-ui/icons/AddCircle';
 import MUIDataTable from 'mui-datatables';
+import Icon from '@material-ui/core/Icon';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Grid from '@material-ui/core/Grid';
 import { isRestricted } from 'AppData/AuthManager';
@@ -105,6 +106,7 @@ class Scopes extends React.Component {
         const urlPrefix = (api.apiType === 'APIProduct') ? 'api-products' : 'apis';
         const { scopes } = api;
         const url = `/${urlPrefix}/${api.id}/scopes/create`;
+        const editUrl = `/${urlPrefix}/${api.id}/scopes/edit`;
         const columns = [
             intl.formatMessage({
                 id: 'Apis.Details.Scopes.Scopes.table.header.name',
@@ -167,6 +169,31 @@ class Scopes extends React.Component {
                             return (
                                 <table className={classes.actionTable}>
                                     <tr>
+                                        <td>
+                                            <Link
+                                                to={
+                                                    !isRestricted(['apim:api_create'], api) && {
+                                                        pathname: editUrl,
+                                                        state: {
+                                                            scopeName,
+                                                        },
+                                                    }
+                                                }
+                                            >
+                                                <Button
+                                                    disabled={isRestricted(
+                                                        ['apim:api_create'],
+                                                        api,
+                                                    )}
+                                                >
+                                                    <Icon>edit</Icon>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Documents.Edit.documents.text.editor.edit'
+                                                        defaultMessage='Edit'
+                                                    />
+                                                </Button>
+                                            </Link>
+                                        </td>
                                         <td>
                                             <Delete scopeName={scopeName} api={api} isAPIProduct />
                                         </td>
