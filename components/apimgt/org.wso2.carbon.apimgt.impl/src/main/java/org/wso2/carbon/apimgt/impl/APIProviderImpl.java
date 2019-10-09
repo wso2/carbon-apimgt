@@ -6806,7 +6806,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void deleteAPIProduct(APIProductIdentifier identifier) throws APIManagementException {
+    public void deleteAPIProduct(APIProductIdentifier identifier, String apiProductUUID) throws APIManagementException {
         //this is the product resource collection path
         String productResourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
@@ -6849,22 +6849,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             GenericArtifact apiProductArtifact = artifactManager.getGenericArtifact(apiArtifactResourceUUID);
             String environments = apiProductArtifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
-            //Delete the dependencies associated  with the api product artifact
-            GovernanceArtifact[] dependenciesArray = apiProductArtifact.getDependencies();
-            if (dependenciesArray.length > 0) {
-                for (GovernanceArtifact artifact : dependenciesArray) {
-                    registry.delete(artifact.getPath());
-                }
-            }
-
-            //delete registry resources
-            artifactManager.removeGenericArtifact(productResourceUUID);
 
             APIManagerConfiguration config = getAPIManagerConfiguration();
             boolean gatewayExists = !config.getApiGatewayEnvironments().isEmpty();
             String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
             APIProduct apiProduct = new APIProduct(identifier);
+            apiProduct.setUuid(apiProductUUID);
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse
             if (gatewayExists && "Synapse".equals(gatewayType)) {
@@ -6876,6 +6867,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else {
                 log.debug("Gateway is not existed for the current API Provider");
             }
+
+            //Delete the dependencies associated  with the api product artifact
+            GovernanceArtifact[] dependenciesArray = apiProductArtifact.getDependencies();
+            if (dependenciesArray.length > 0) {
+                for (GovernanceArtifact artifact : dependenciesArray) {
+                    registry.delete(artifact.getPath());
+                }
+            }
+
+            //delete registry resources
+            artifactManager.removeGenericArtifact(productResourceUUID);
 
             apiMgtDAO.deleteAPIProduct(identifier);
             if (log.isDebugEnabled()) {
