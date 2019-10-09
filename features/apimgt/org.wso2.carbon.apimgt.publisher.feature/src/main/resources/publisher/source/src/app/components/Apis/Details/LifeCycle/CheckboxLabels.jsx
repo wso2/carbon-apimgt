@@ -125,7 +125,7 @@ export default function CheckboxLabels(props) {
                             ) : (
                                 <CloseIcon className={classes.iconFalse} />
                             )}
-                            <Typography variant='h10'>Tiers selected</Typography>
+                            <Typography variant='h10'>Business Plan(s) selected</Typography>
                             <Link to={'/apis/' + api.id + '/subscriptions'}>
                                 <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
                             </Link>

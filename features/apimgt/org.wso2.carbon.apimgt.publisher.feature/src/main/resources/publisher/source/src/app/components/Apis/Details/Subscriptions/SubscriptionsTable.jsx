@@ -118,12 +118,9 @@ const styles = theme => ({
     },
     mainTitle: {
         paddingLeft: 0,
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(3),
     },
     titleWrapper: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
         marginBottom: theme.spacing(3),
     },
 });
@@ -660,7 +657,7 @@ class SubscriptionsTable extends Component {
         } = this.state;
         const { classes, intl } = this.props;
         return (
-            <div>
+            <React.Fragment>
                 <Dialog open={showPopup} onClose={this.handleClose} class={classes.dialog} fullWidth='true'>
                     <DialogTitle id='simple-dialog-title' className={classes.popupHeadline} >
                         <Typography gutterBottom variant='headline' component='h3' text-align='center'>
@@ -882,7 +879,7 @@ class SubscriptionsTable extends Component {
                         )
                     }
                 </Paper>
-            </div>
+            </React.Fragment>
         );
     }
 }
