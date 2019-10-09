@@ -191,7 +191,6 @@ const ApplicationCreate = (props) => {
             <TextField
                 margin='normal'
                 variant='outlined'
-                autoFocus
                 fullWidth
                 value={applicationRequest.description}
                 label={intl.formatMessage({

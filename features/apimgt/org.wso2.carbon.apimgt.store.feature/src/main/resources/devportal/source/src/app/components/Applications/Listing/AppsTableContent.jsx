@@ -146,7 +146,7 @@ class AppsTableContent extends Component {
                                     >
                                         {app.status === this.APPLICATION_STATES.APPROVED && (
                                             <Tooltip title='Edit'>
-                                                <Link to={'application/edit/' + app.applicationId}>
+                                                <Link to={`/applications/${app.applicationId}/edit/`}>
                                                     <IconButton>
                                                         <Icon aria-label={(
                                                             <FormattedMessage

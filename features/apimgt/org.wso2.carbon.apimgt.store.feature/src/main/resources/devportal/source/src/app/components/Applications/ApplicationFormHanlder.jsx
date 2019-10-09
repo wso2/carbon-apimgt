@@ -27,16 +27,17 @@ import API from 'AppData/api';
 import ApplicationCreateForm from 'AppComponents/Shared/AppsAndKeys/ApplicationCreateForm';
 import Alert from 'AppComponents/Shared/Alert';
 import Settings from 'AppComponents/Shared/SettingsContext';
+import Application from 'AppData/Application';
 import { Link } from 'react-router-dom';
-import ApplicationCreateBase from './ApplicationCreateBase';
+import ApplicationCreateBase from './Create/ApplicationCreateBase';
 
 /**
  * Component used to handle application creation
- * @class NewApp
+ * @class ApplicationFormHanlder
  * @extends {React.Component}
  * @param {any} value @inheritDoc
  */
-class NewApp extends React.Component {
+class ApplicationFormHanlder extends React.Component {
     static contextType = Settings;
 
     /**
@@ -57,6 +58,7 @@ class NewApp extends React.Component {
             throttlingPolicyList: [],
             allAppAttributes: null,
             isApplicationSharingEnabled: true,
+            isEdit: false,
         };
         this.handleAddChip = this.handleAddChip.bind(this);
         this.handleDeleteChip = this.handleDeleteChip.bind(this);
@@ -65,17 +67,22 @@ class NewApp extends React.Component {
     /**
      * Get all the throttling Policies from backend and
      * update the state
-     * @memberof NewApp
+     * @memberof ApplicationFormHanlder
      */
     componentDidMount() {
-        this.initApplicationState();
+        const { match: { params } } = this.props;
+        if (params.application_id) {
+            this.initiApplicationEditState(params.application_id);
+        } else {
+            this.initApplicationCreateState();
+        }
         this.isApplicationGroupSharingEnabled();
     }
 
     /**
      * @param {object} name application attribute name
      * @returns {Object} attribute value
-     * @memberof NewApp
+     * @memberof ApplicationFormHanlder
      */
     getAttributeValue = (name) => {
         const { applicationRequest } = this.state;
@@ -83,11 +90,49 @@ class NewApp extends React.Component {
     };
 
     /**
-     * Used to initialize the component state
-     * @param {boolean} reset should it be reset to initial state or not
-     * @memberof NewApp
+     * Initilaize the component if it is in applicatioin edit state
+     * @param {String} applicationId application id
+     * @memberof ApplicationFormHanlder
      */
-    initApplicationState = () => {
+    initiApplicationEditState = (applicationId) => {
+        const { applicationRequest } = this.state;
+        const promisedApplication = Application.get(applicationId);
+        // Get all the tires to populate the drop down.
+        const api = new API();
+        const promiseTiers = api.getAllTiers('application');
+        const promisedAttributes = api.getAllApplicationAttributes();
+        Promise.all([promisedApplication, promiseTiers, promisedAttributes])
+            .then((response) => {
+                const [application, tierResponse, allAttributes] = response;
+                const throttlingPolicyList = tierResponse.body.list.map(item => item.name);
+                const allAppAttributes = allAttributes.body.list;
+                const newRequest = { ...applicationRequest };
+                newRequest.applicationId = application.applicationId;
+                newRequest.name = application.name;
+                newRequest.throttlingPolicy = application.throttlingPolicy;
+                newRequest.description = application.description;
+                newRequest.groups = application.groups;
+                newRequest.tokenType = application.tokenType;
+                newRequest.attributes = application.attributes;
+                this.setState({
+                    isEdit: true, applicationRequest: newRequest, throttlingPolicyList, allAppAttributes,
+                });
+            })
+            .catch((error) => {
+                console.log(error);
+                const { status } = error;
+                if (status === 404) {
+                    // eslint-disable-next-line react/no-unused-state
+                    this.setState({ notFound: true });
+                }
+            });
+        this.isApplicationGroupSharingEnabled();
+    }
+    /**
+     * Used to initialize the component state
+     * @memberof ApplicationFormHanlder
+     */
+    initApplicationCreateState = () => {
         // Get all the tiers to populate the drop down.
         const api = new API();
         const promiseTiers = api.getAllTiers('application');
@@ -129,7 +174,7 @@ class NewApp extends React.Component {
     /**
      * @param {object} name application attribute name
      * @returns {void}
-     * @memberof NewApp
+     * @memberof ApplicationFormHanlder
      */
     handleAttributesChange = name => (event) => {
         const { applicationRequest } = this.state;
@@ -140,7 +185,7 @@ class NewApp extends React.Component {
     /**
      * @param {object} name application attribute name
      * @returns {void}
-     * @memberof NewApp
+     * @memberof ApplicationFormHanlder
      */
     isRequiredAttribute = (name) => {
         const { allAppAttributes } = this.state;
@@ -190,7 +235,7 @@ class NewApp extends React.Component {
     /**
      * Validate and send the application create
      * request to the backend
-     * @memberof NewApp
+     * @memberof ApplicationFormHanlder
      */
     saveApplication = () => {
         const { applicationRequest } = this.state;
@@ -199,20 +244,21 @@ class NewApp extends React.Component {
         this.validateName(applicationRequest.name)
             .then(() => this.validateAttributes(applicationRequest.attributes))
             .then(() => api.createApplication(applicationRequest))
-            .then(() => {
+            .then((response) => {
                 console.log('Application created successfully.');
                 Alert.info(intl.formatMessage({
-                    id: 'Applications.Create.NewApp.Application.created.successfully',
+                    id: 'Applications.Create.ApplicationFormHanlder.Application.created.successfully',
                     defaultMessage: 'Application created successfully.',
                 }));
-                history.push('/applications');
+                const appId = response.body.applicationId;
+                history.push(`/applications/${appId}`);
             })
             .catch((error) => {
                 const { response } = error;
                 if (response && response.body) {
                     const message = response.body.description || intl.formatMessage({
                         defaultMessage: 'Error while creating the application',
-                        id: 'Applications.Create.NewApp.error.while.creating.the.application',
+                        id: 'Applications.Create.ApplicationFormHanlder.error.while.creating.the.application',
                     });
                     Alert.error(message);
                 } else {
@@ -222,13 +268,46 @@ class NewApp extends React.Component {
             });
     };
 
+    /**
+     *  Save edited application
+     * @memberof EditApp
+     */
+    saveEdit = () => {
+        const { applicationRequest } = this.state;
+        const {
+            history, intl,
+        } = this.props;
+        const api = new API();
+        this.validateName(applicationRequest.name)
+            .then(() => this.validateAttributes(applicationRequest.attributes))
+            .then(() => api.updateApplication(applicationRequest, null))
+            .then((response) => {
+                const appId = response.body.applicationId;
+                history.push(`/applications/${appId}`);
+                Alert.info(intl.formatMessage({
+                    id: 'Applications.ApplicationFormHanlder.app.updated.success',
+                    defaultMessage: 'Application updated successfully',
+                }));
+                console.log('Application updated successfully.');
+            })
+            .catch((error) => {
+                const { response } = error;
+                if (response && response.body) {
+                    const message = response.body.description || 'Error while updating the application';
+                    Alert.error(message);
+                } else {
+                    Alert.error(error.message);
+                }
+                console.error('Error while updating the application');
+            });
+    };
 
     validateName = (value) => {
         const { intl } = this.props;
         if (!value || value.trim() === '') {
             this.setState({ isNameValid: false });
             return Promise.reject(new Error(intl.formatMessage({
-                id: 'Applications.Create.NewApp.app.name.required',
+                id: 'Applications.Create.ApplicationFormHanlder.app.name.required',
                 defaultMessage: 'Application name is required',
             })));
         }
@@ -278,23 +357,24 @@ class NewApp extends React.Component {
 
     /**
      * @inheritdoc
-     * @memberof NewApp
+     * @memberof ApplicationFormHanlder
      */
     render() {
         const {
             throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes, isApplicationSharingEnabled,
+            isEdit,
         } = this.state;
         const pageTitle = (
             <React.Fragment>
                 <Typography variant='h5'>
                     <FormattedMessage
-                        id='Applications.Create.NewApp.application.heading'
+                        id='Applications.Create.ApplicationFormHanlder.application.heading'
                         defaultMessage='Create an application'
                     />
                 </Typography>
                 <Typography variant='caption'>
                     <FormattedMessage
-                        id='Applications.Create.NewApp.application.sub.heading'
+                        id='Applications.Create.ApplicationFormHanlder.application.sub.heading'
                         defaultMessage={
                             'Create an application providing name, quota and token type parameters' +
                             ' and optionally descriptions'
@@ -326,10 +406,10 @@ class NewApp extends React.Component {
                                 <Button
                                     variant='contained'
                                     color='primary'
-                                    onClick={this.saveApplication}
+                                    onClick={isEdit ? this.saveEdit : this.saveApplication}
                                 >
                                     <FormattedMessage
-                                        id='Applications.Create.NewApp.save'
+                                        id='Applications.Create.ApplicationFormHanlder.save'
                                         defaultMessage='save'
                                     />
                                 </Button>
@@ -338,7 +418,7 @@ class NewApp extends React.Component {
                                 <Link to='/applications/'>
                                     <Button variant='text'>
                                         <FormattedMessage
-                                            id='Applications.Create.NewApp.cancel'
+                                            id='Applications.Create.ApplicationFormHanlder.cancel'
                                             defaultMessage='Cancel'
                                         />
                                     </Button>
@@ -352,13 +432,18 @@ class NewApp extends React.Component {
     }
 }
 
-NewApp.propTypes = {
+ApplicationFormHanlder.propTypes = {
     intl: PropTypes.shape({
         formatMessage: PropTypes.func.isRequired,
     }).isRequired,
     history: PropTypes.shape({
         push: PropTypes.func.isRequired,
     }).isRequired,
+    match: PropTypes.shape({
+        params: PropTypes.shape({
+            application_id: PropTypes.string.isRequired,
+        }).isRequired,
+    }).isRequired,
 };
 
-export default injectIntl(NewApp);
+export default injectIntl(ApplicationFormHanlder);

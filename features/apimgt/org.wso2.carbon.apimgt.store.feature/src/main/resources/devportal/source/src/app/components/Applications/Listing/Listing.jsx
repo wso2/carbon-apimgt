@@ -206,7 +206,7 @@ class Listing extends Component {
     };
 
     /**
-     * @memberof NewApp
+     * @memberof Listing
      */
     handleClose = () => {
         this.setState({ open: false });
@@ -320,7 +320,7 @@ class Listing extends Component {
                                         color='primary'
                                     >
                                         <FormattedMessage
-                                            id='Applications.Create.NewApp.add.new.application'
+                                            id='Applications.Create.Listing.add.new.application'
                                             defaultMessage='Add New Application'
                                         />
                                     </Button>
