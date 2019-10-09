@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,20 +16,23 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import CustomIcon from './CustomIcon';
-/**
- * Main style object provided as input to react component
- *
- * @param {*} theme
- */
+
 const styles = theme => ({
     leftLInkText: {
         color: theme.palette.getContrastText(theme.custom.leftMenu.background),
+        textTransform: 'capitalize',
+        width: '100%',
+        textAlign: 'left',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
     },
     leftLInkText_IconLeft: {
         paddingLeft: 10,
@@ -51,8 +54,14 @@ const styles = theme => ({
         paddingRight: theme.spacing.unit,
         fontSize: theme.typography.caption.fontSize,
         cursor: 'pointer',
+        textDecoration: 'none',
         display: 'flex',
         alignItems: 'center',
+        justifyContent: 'center',
+    },
+    leftLink_Icon: {
+        color: theme.palette.getContrastText(theme.custom.leftMenu.background),
+        fontSize: theme.custom.leftMenu.iconSize + 'px',
     },
     leftLink_IconLeft: {
         display: 'flex',
@@ -65,72 +74,104 @@ const styles = theme => ({
         display: 'none',
     },
 });
-/**
- * Individual component for left
- *
- * @class LeftMenuItem
- * @extends {React.Component}
- */
-class LeftMenuItem extends React.Component {
-    constructor(props) {
-        super(props);
-    }
+function LeftMenuItem(props) {
+    const [selected, setSelected] = useState(false);
 
-    render() {
-        const {
-            classes, theme, text, active, handleMenuSelect,
-        } = this.props;
-        const { leftMenu } = theme.custom;
-        const strokeColor = leftMenu.background.indexOf('#') !== -1 ? theme.palette.getContrastText(leftMenu.background) : '#000';
-        const iconSize = leftMenu.iconSize || 24;
+    const {
+        classes, theme, Icon, to, history, text, route,
+    } = props;
+    const routeToCheck = route || text;
+    const { leftMenu } = theme.custom;
+    const strokeColor = theme.palette.getContrastText(leftMenu.background);
+    const iconSize = leftMenu.iconSize;
+    const ditectCurrentMenu = (location) => {
+        const { pathname } = location;
+        const test1 = new RegExp('/' + routeToCheck + '$', 'g');
+        const test2 = new RegExp('/' + routeToCheck + '/', 'g');
+        if (pathname.match(test1) || pathname.match(test2)) {
+            setSelected(true);
+        } else {
+            setSelected(false);
+        }
+    };
+    useEffect(() => {
+        const { location } = history;
+        ditectCurrentMenu(location);
+    }, []);
+    history.listen((location) => {
+        ditectCurrentMenu(location);
+    });
 
-        return (
-            <div
-                className={classNames(
-                    classes.leftLInk,
-                    {
-                        [classes.leftLink_IconLeft]: leftMenu === 'icon left',
-                    },
-                    'leftLInk',
+    return (
+        <Link
+            className={classNames(
+                classes.leftLInk,
+                {
+                    [classes.leftLink_IconLeft]: leftMenu === 'icon left',
+                },
+                'leftLInk',
+            )}
+            to={to}
+            style={{ backgroundColor: selected ? leftMenu.leftMenuActive : '' }}
+        >
+            {// If the icon pro ( which is comming from the React Material library )
+            // is coming we add css class and render.
+            // If leftMenu='no icon' at the theme object we hide the icon. Also we add static classes to
+            // allow customers theme
+            // the product without compiling.
+                Icon ? (
+                    React.cloneElement(Icon, {
+                        className: classNames(
+                            classes.leftLink_Icon,
+                            {
+                                [classes.noIcon]: leftMenu.style === 'no icon',
+                            },
+                            'leftLink_Icon',
+                        ),
+                    })
+                ) : (
+                // We can also add custom icons
+                    <CustomIcon
+                        strokeColor={strokeColor}
+                        width={iconSize}
+                        height={iconSize}
+                        icon={props.text}
+                        className={classNames(
+                            classes.leftLInk,
+                            {
+                                [classes.noIcon]: leftMenu.style === 'no icon',
+                            },
+                            'leftLink_Icon',
+                        )}
+                    />
                 )}
-                onClick={() => handleMenuSelect(text)}
-                style={{ backgroundColor: active === text ? leftMenu.activeBackground : '' }}
+            <Typography
+                className={classNames(
+                    classes.leftLInkText,
+                    {
+                        [classes.leftLInkText_IconLeft]: leftMenu.style === 'icon left',
+                        [classes.leftLInkText_NoText]: leftMenu.style === 'no text',
+                    },
+                    'leftLInkText',
+                )}
             >
-                <CustomIcon
-                    strokeColor={strokeColor}
-                    width={iconSize}
-                    height={iconSize}
-                    icon={text}
-                    className={classNames(
-                        classes.leftLInk,
-                        {
-                            [classes.noIcon]: leftMenu.style === 'no icon',
-                        },
-                        'leftLink_Icon',
-                    )}
-                />
-                <Typography
-                    className={classNames(
-                        classes.leftLInkText,
-                        {
-                            [classes.leftLInkText_IconLeft]: leftMenu.style === 'icon left',
-                            [classes.leftLInkText_NoText]: leftMenu.style === 'no text',
-                        },
-                        'leftLInkText',
-                    )}
-                    style={{ textTransform: leftMenu.leftMenuTextStyle }}
-                >
-                    {text}
-                </Typography>
-            </div>
-        );
-    }
+                {props.text}
+            </Typography>
+        </Link>
+    );
 }
-LeftMenuItem.propTypes = {
-    classes: PropTypes.instanceOf(Object).isRequired,
-    theme: PropTypes.instanceOf(Object).isRequired,
-    text: PropTypes.instanceOf(Object).isRequired,
-    active: PropTypes.instanceOf(Object).isRequired,
-    handleMenuSelect: PropTypes.func.isRequired,
+LeftMenuItem.defaultProps = {
+    route: null,
 };
-export default withStyles(styles, { withTheme: true })(LeftMenuItem);
+LeftMenuItem.propTypes = {
+    classes: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
+    Icon: PropTypes.element.isRequired,
+    text: PropTypes.string.isRequired,
+    to: PropTypes.string.isRequired,
+    route: PropTypes.string,
+    history: PropTypes.shape({
+        location: PropTypes.string.isRequired,
+    }).isRequired,
+};
+export default withRouter(withStyles(styles, { withTheme: true })(LeftMenuItem));
