@@ -103,6 +103,7 @@ class SubscriptionTableData extends React.Component {
         promisedApi.then((response) => {
             if (response && response.data) {
                 const apiData = JSON.parse(response.data);
+                debugger;
                 this.setState({isMonetizedAPI: apiData.monetization.enabled});
             }
         });
@@ -124,6 +125,7 @@ class SubscriptionTableData extends React.Component {
                     promisedPolicy.then((policyResponse) => {
                         const policyData = JSON.parse(policyResponse.data);
                         if (policyData.monetizationAttributes.billingType && (policyData.monetizationAttributes.billingType === 'DYNAMICRATE')) {
+                            debugger;
                             this.setState({isDynamicUsagePolicy: true});
                         }
                     });
@@ -144,10 +146,10 @@ class SubscriptionTableData extends React.Component {
     render() {
         const {
             subscription: {
-                apiInfo, status, throttlingPolicy, subscriptionId, apiId, isMonetizedAPI, isDynamicUsagePolicy,
+                apiInfo, status, throttlingPolicy, subscriptionId, apiId,
             },
         } = this.props;
-        const { openMenu } = this.state;
+        const { openMenu, isMonetizedAPI, isDynamicUsagePolicy } = this.state;
         const link = <Link to={'/apis/' + apiId}>{apiInfo.name}</Link>;
 
         return (

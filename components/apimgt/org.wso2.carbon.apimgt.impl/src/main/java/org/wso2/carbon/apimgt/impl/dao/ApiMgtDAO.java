@@ -612,7 +612,7 @@ public class ApiMgtDAO {
                 monetizationUsagePublishInfo.setState(rs.getString("STATE"));
                 monetizationUsagePublishInfo.setStatus(rs.getString("STATUS"));
                 monetizationUsagePublishInfo.setStartedTime(rs.getLong("STARTED_TIME"));
-                monetizationUsagePublishInfo.setLastPublishTime(rs.getLong("LAST_PUBLISHED_TIME"));
+                monetizationUsagePublishInfo.setLastPublishTime(rs.getLong("PUBLISHED_TIME"));
                 return monetizationUsagePublishInfo;
             }
         } catch (SQLException e) {
