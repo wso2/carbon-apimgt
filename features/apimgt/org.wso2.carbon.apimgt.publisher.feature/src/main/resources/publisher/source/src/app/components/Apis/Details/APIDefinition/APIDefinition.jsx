@@ -213,7 +213,7 @@ class APIDefinition extends React.Component {
      */
     validateAndImportSchema(file) {
         const { api, intl } = this.props;
-        const promisedValidation = api.validateGraphQLFile(file);
+        const promisedValidation = API.validateGraphQLFile(file);
         promisedValidation
             .then((response) => {
                 const { isValid, graphQLInfo } = response.obj;

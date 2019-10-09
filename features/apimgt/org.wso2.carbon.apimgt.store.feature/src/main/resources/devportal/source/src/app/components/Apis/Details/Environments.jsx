@@ -186,13 +186,13 @@ class Environments extends React.Component {
                                             || endpoint.URLs.https !== null
                                             || endpoint.URLs.ws !== null
                                             || endpoint.URLs.wss !== null) && (
-                                            <Typography className={classes.heading}>
-                                                <FormattedMessage
-                                                    id='Apis.Details.InfoBar.gateway.urls'
-                                                    defaultMessage='Gateway URLs'
-                                                />
-                                            </Typography>
-                                        )}
+                                                <Typography className={classes.heading}>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.InfoBar.gateway.urls'
+                                                        defaultMessage='Gateway URLs'
+                                                    />
+                                                </Typography>
+                                            )}
                                         {endpoint.URLs.http !== null && (
                                             <Grid item xs={12}>
                                                 <TextField
@@ -317,7 +317,8 @@ class Environments extends React.Component {
                                                 </Tooltip>
                                             </Grid>
                                         )}
-                                        {(endpoint.defaultVersionURLs.http !== null
+                                        {endpoint.defaultVersionURLs !== null &&
+                                            (endpoint.defaultVersionURLs.http !== null
                                             || endpoint.defaultVersionURLs.https !== null
                                             || endpoint.defaultVersionURLs.ws !== null
                                             || endpoint.defaultVersionURLs.wss !== null) && (
@@ -328,7 +329,8 @@ class Environments extends React.Component {
                                                 />
                                             </Typography>
                                         )}
-                                        {endpoint.defaultVersionURLs.http !== null && (
+                                        {endpoint.defaultVersionURLs !== null &&
+                                            endpoint.defaultVersionURLs.http !== null && (
                                             <Grid item xs={12}>
                                                 <TextField
                                                     defaultValue={endpoint.defaultVersionURLs.http}
@@ -359,7 +361,8 @@ class Environments extends React.Component {
                                                 </Tooltip>
                                             </Grid>
                                         )}
-                                        {endpoint.defaultVersionURLs.https !== null && (
+                                        {endpoint.defaultVersionURLs !== null &&
+                                            endpoint.defaultVersionURLs.https !== null && (
                                             <Grid item xs={12}>
                                                 <TextField
                                                     defaultValue={endpoint.defaultVersionURLs.https}
@@ -390,7 +393,8 @@ class Environments extends React.Component {
                                                 </Tooltip>
                                             </Grid>
                                         )}
-                                        {endpoint.defaultVersionURLs.ws !== null && (
+                                        {endpoint.defaultVersionURLs !== null &&
+                                            endpoint.defaultVersionURLs.ws !== null && (
                                             <Grid item xs={12}>
                                                 <TextField
                                                     defaultValue={endpoint.defaultVersionURLs.ws}
@@ -421,7 +425,8 @@ class Environments extends React.Component {
                                                 </Tooltip>
                                             </Grid>
                                         )}
-                                        {endpoint.defaultVersionURLs.wss !== null && (
+                                        {endpoint.defaultVersionURLs !== null &&
+                                            endpoint.defaultVersionURLs.wss !== null && (
                                             <Grid item xs={12}>
                                                 <TextField
                                                     defaultValue={endpoint.defaultVersionURLs.wss}

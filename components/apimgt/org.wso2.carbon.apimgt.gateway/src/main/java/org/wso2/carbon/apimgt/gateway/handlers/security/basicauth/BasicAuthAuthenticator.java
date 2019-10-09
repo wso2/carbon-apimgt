@@ -17,14 +17,17 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security.basicauth;
 
 import io.swagger.v3.oas.models.OpenAPI;
+import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.rest.RESTConstants;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.util.Base64;
+import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
@@ -116,17 +119,29 @@ public class BasicAuthAuthenticator implements Authenticator {
         // Extract basic authorization header while removing it from the authorization header
         String basicAuthHeader = extractBasicAuthHeader(synCtx);
 
+        String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
+        String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
+                getProperty(Constants.Configuration.HTTP_METHOD);
+        String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+
         // Check for resource level authentication
         String authenticationScheme;
 
         List<VerbInfoDTO> verbInfoList;
+        //set default condition group
+        ConditionGroupDTO[] conditionGroups = new ConditionGroupDTO[1];
+        ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
+        defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
+        conditionGroups[0] = defaultGroup;
+
         if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
             HashMap<String, Boolean> operationAuthSchemeMappingList =
                     (HashMap<String, Boolean>) synCtx.getProperty(APIConstants.OPERATION_AUTH_SCHEME_MAPPING);
             HashMap<String, String> operationThrottlingMappingList =
                     (HashMap<String, String>) synCtx.getProperty(APIConstants.OPERATION_THROTTLING_MAPPING);
 
-            String[] operationList = ((String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE)).split(",");
+            String[] operationList = matchingResource.split(",");
             verbInfoList = new ArrayList<>(1);
             authenticationScheme = APIConstants.AUTH_NO_AUTHENTICATION;
             for (String operation: operationList) {
@@ -139,6 +154,8 @@ public class BasicAuthAuthenticator implements Authenticator {
                     verbInfoDTO.setAuthType(APIConstants.AUTH_NO_AUTHENTICATION);
                 }
                 verbInfoDTO.setThrottling(operationThrottlingMappingList.get(operation));
+                verbInfoDTO.setRequestKey(apiContext + "/" + apiVersion + operation + ":" + httpMethod);
+                verbInfoDTO.setConditionGroups(conditionGroups);
                 verbInfoList.add(verbInfoDTO);
             }
         } else {
@@ -147,6 +164,8 @@ public class BasicAuthAuthenticator implements Authenticator {
             VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
             verbInfoDTO.setAuthType(authenticationScheme);
             verbInfoDTO.setThrottling(OpenAPIUtils.getResourceThrottlingTier(openAPI, synCtx));
+            verbInfoDTO.setRequestKey(apiContext + "/" + apiVersion + matchingResource + ":" + httpMethod);
+            verbInfoDTO.setConditionGroups(conditionGroups);
             verbInfoList.add(verbInfoDTO);
         }
 
@@ -195,10 +214,9 @@ public class BasicAuthAuthenticator implements Authenticator {
             authContext.setConsumerKey(null);
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, null);
 
-            if (log.isDebugEnabled()) {
-                String apiElectedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+            if (log.isDebugEnabled()) {;
                 log.debug("Basic Authentication: Authentication succeeded by ignoring auth headers for API resource: "
-                        .concat(apiElectedResource));
+                        .concat(matchingResource));
             }
             return new AuthenticationResponse(true, isMandatory, false, 0, null);
         }

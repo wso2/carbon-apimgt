@@ -581,6 +581,15 @@ public class APIGatewayManager {
                             undeployCustomSequences(client, api, tenantDomain, environment);
                         }
                     }
+
+                    String localEntryUUId = apiProduct.getUuid();
+
+                    if (localEntryUUId != null && !localEntryUUId.isEmpty()) {
+                        LocalEntryAdminClient localEntryAdminClient = new LocalEntryAdminClient(environment,
+                                tenantDomain == null ?
+                                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
+                        localEntryAdminClient.deleteEntry(localEntryUUId);
+                    }
                 } catch (AxisFault | EndpointAdminException | CertificateManagementException e) {
                     /*
                     didn't throw this exception to handle multiple gateway publishing

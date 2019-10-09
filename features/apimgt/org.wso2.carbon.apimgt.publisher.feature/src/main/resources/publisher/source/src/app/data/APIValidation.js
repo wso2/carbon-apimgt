@@ -84,7 +84,7 @@ const documentSchema = Joi.extend(joi => ({
 const definition = {
     apiName: Joi.string().regex(/^[a-zA-Z0-9]{1,50}$/),
     apiVersion: Joi.string().regex(/^[a-zA-Z0-9.]{1,30}$/),
-    apiContext: Joi.string().regex(/^[a-zA-Z0-9{}/]{1,50}$/),
+    apiContext: Joi.string().regex(/(?!.*\/t\/.*|.*\/t$)^[/a-zA-Z0-9/]{1,50}$/),
     role: roleSchema.systemRole().role(),
     url: Joi.string().uri(),
     userRole: userRoleSchema.userRole().role(),
