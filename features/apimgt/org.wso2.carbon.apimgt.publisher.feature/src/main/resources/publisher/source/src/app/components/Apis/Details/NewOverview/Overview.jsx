@@ -122,7 +122,7 @@ const styles = theme => ({
         color: 'rgba(0, 0, 0, 0.40)',
     },
     url: {
-        width: 250,
+        maxWidth: '100%',
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
