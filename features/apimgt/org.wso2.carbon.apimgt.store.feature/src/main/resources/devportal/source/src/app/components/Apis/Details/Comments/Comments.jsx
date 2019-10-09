@@ -41,6 +41,7 @@ const styles = theme => ({
     paper: {
         margin: theme.spacing(3),
         paddingBottom: theme.spacing(3),
+        paddingRight: theme.spacing(2),
     },
     contentWrapper: {
         paddingLeft: theme.spacing.unit * 2,
@@ -220,10 +221,12 @@ class Comments extends Component {
         return (
             <ApiContext.Consumer>
                 {({ api }) => (
-                    <div className={classNames(
-                        { [classes.contentWrapper]: !isOverview },
-                        { [classes.contentWrapperOverview]: isOverview },
-                    )}>
+                    <div
+                        className={classNames(
+                            { [classes.contentWrapper]: !isOverview },
+                            { [classes.contentWrapperOverview]: isOverview },
+                        )}
+                    >
                         {!showLatest && (
                             <div className={classes.root}>
                                 <Typography variant='h4' className={classes.titleSub}>
@@ -231,13 +234,6 @@ class Comments extends Component {
                                 </Typography>
                             </div>
                         )}
-                            <Comment
-                                comments={comments}
-                                apiId={api.id}
-                                commentsUpdate={this.updateCommentList}
-                                allComments={allComments}
-                                isOverview={isOverview}
-                            />
                         {!showLatest && (
                             <Paper className={classes.paper}>
                                 <CommentAdd
@@ -249,6 +245,13 @@ class Comments extends Component {
                                 />
                             </Paper>
                         )}
+                        <Comment
+                            comments={comments}
+                            apiId={api.id}
+                            commentsUpdate={this.updateCommentList}
+                            allComments={allComments}
+                            isOverview={isOverview}
+                        />
                         {startCommentsToDisplay !== 0 && (
                             <div className={classes.contentWrapper}>
                                 <Grid container spacing={4} className={classes.root}>
