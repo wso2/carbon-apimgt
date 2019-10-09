@@ -8744,6 +8744,11 @@ public final class APIUtil {
                 replace(REVOKE, TOKEN);
     }
 
+    public static String getStoreUrl() throws APIManagementException {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_URL);
+    }
+
     public static Map<String, Environment> getEnvironments(){
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                         .getAPIManagerConfiguration().getApiGatewayEnvironments();
