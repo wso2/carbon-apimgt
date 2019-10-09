@@ -52,14 +52,14 @@ const styles = theme => ({
     },
     input: {
         width: '300px',
-        background: theme.palette.getContrastText(theme.palette.background.appBar),
+        background: theme.palette.getContrastText(theme.custom.appBar.background),
         '-webkit-transition': 'all .35s ease-in-out',
         transition: 'all .35s ease-in-out',
         padding: '5px 5px 5px 5px',
     },
     inputFocused: {
         width: '400px',
-        background: theme.palette.getContrastText(theme.palette.background.appBar),
+        background: theme.palette.getContrastText(theme.custom.appBar.background),
         padding: '5px 5px 5px 5px',
     },
     searchBox: {
