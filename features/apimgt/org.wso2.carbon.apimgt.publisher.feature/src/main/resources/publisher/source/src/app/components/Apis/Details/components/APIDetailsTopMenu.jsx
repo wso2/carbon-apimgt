@@ -112,8 +112,8 @@ const APIDetailsTopMenu = (props) => {
             </div>
             <VerticalDivider height={70} />
             <GoTo api={api} isAPIProduct={isAPIProduct} />
-            {isVisibleInStore && <VerticalDivider height={70} />}
-            {isVisibleInStore && (
+            {(isVisibleInStore || isAPIProduct) && <VerticalDivider height={70} />}
+            {(isVisibleInStore || isAPIProduct) && (
                 <a
                     target='_blank'
                     rel='noopener noreferrer'

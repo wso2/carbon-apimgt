@@ -115,12 +115,7 @@ export default function Resources(props) {
         return api
             .updateSwagger(spec)
             .then(response => resolveAndUpdateSpec(response.body))
-            .then(() => updateAPI())
-            .catch((error) => {
-                console.error(error);
-                Alert.error('Error while updating the operation with ' +
-                        `path ${targetOperation.target} verb ${targetOperation.verb} `);
-            });
+            .then(() => updateAPI());
     }
 
     /**

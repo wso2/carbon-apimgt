@@ -125,6 +125,11 @@ class TableView extends React.Component {
                         backgroundColor: 'transparent',
                     },
                 },
+                MUIDataTableHeadCell: {
+                    fixedHeader: {
+                        zIndex: -1,
+                    },
+                },
             },
         };
         if (listType === 'grid') {
@@ -395,7 +400,7 @@ class TableView extends React.Component {
         } else {
             options.customRowRender = null;
             options.title = true;
-            options.filter = true;
+            options.filter = false;
             options.print = true;
             options.download = true;
             options.viewColumns = true;

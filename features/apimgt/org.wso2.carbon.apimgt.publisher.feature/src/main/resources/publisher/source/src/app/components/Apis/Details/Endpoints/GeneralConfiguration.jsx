@@ -213,7 +213,7 @@ function GeneralConfiguration(props) {
                 const endpoints = endpointsToList(epConfig);
                 const filteredCertificates = certificates.filter((cert) => {
                     for (const endpoint of endpoints) {
-                        if (endpoint.url.indexOf(cert.endpoint) !== -1) {
+                        if (endpoint && endpoint.url.indexOf(cert.endpoint) !== -1) {
                             return true;
                         }
                     }
