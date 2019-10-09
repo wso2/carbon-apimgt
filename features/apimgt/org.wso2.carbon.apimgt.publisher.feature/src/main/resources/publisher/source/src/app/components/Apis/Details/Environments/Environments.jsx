@@ -174,7 +174,7 @@ export default function Environments() {
                 <Grid item>
                     <Button
                         className={classes.saveButton}
-                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api) && isUpdating}
+                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api) || isUpdating}
                         type='submit'
                         variant='contained'
                         color='primary'
@@ -198,6 +198,19 @@ export default function Environments() {
                     </Link>
                 </Grid>
             </Grid>
+            {isRestricted(['apim:api_create'], api) && (
+                <Grid item>
+                    <Typography variant='body2' color='primary'>
+                        <FormattedMessage
+                            id='Apis.Details.Environments.Environments.update.not.allowed'
+                            defaultMessage={
+                                '* You are not authorized to update particular fields of' +
+                                ' the API due to insufficient permissions'
+                            }
+                        />
+                    </Typography>
+                </Grid>
+            )}
         </React.Fragment>
     );
 }
