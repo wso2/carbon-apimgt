@@ -25,6 +25,8 @@ import API from 'AppData/api';
 * arguments to custom Joi schema validate function.
 * Ref: https://hapi.dev/family/joi/?v=15.1.1#extendextension
 */
+const illegalNameChars = '(~ ! @ #  ; : % ^ & * + = { } () | &lt; &gt;, \' " \\ $)';
+const illegalVersionChars = '( [ ] { } ( ) ` ~ ! @ #  ; % ^ & * + = | &lt; &gt;, \' " \\)';
 const roleSchema = Joi.extend(joi => ({
     base: joi.string(),
     name: 'systemRole',
@@ -82,8 +84,30 @@ const documentSchema = Joi.extend(joi => ({
 }));
 
 const definition = {
-    apiName: Joi.string().regex(/^[a-zA-Z0-9]{1,50}$/),
-    apiVersion: Joi.string().regex(/^[a-zA-Z0-9.]{1,30}$/),
+    apiName: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/).error((errors) => {
+        return errors.map((error) => {
+            switch (error.type) {
+                case 'any.empty':
+                    return { message: 'Name is not allowed to be empty' };
+                default:
+                    return {
+                        message: 'Name contains one or more illegal characters ' + illegalNameChars + ' .',
+                    };
+            }
+        });
+    }),
+    apiVersion: Joi.string().regex(/^[^\][{}()`~!@#;%^&*+=|\\<>"'/,]+$/).error((errors) => {
+        return errors.map((error) => {
+            switch (error.type) {
+                case 'any.empty':
+                    return { message: 'Version is not allowed to be empty' };
+                default:
+                    return {
+                        message: 'Version contains one or more illegal characters ' + illegalVersionChars + ' .',
+                    };
+            }
+        });
+    }),
     apiContext: Joi.string().regex(/(?!.*\/t\/.*|.*\/t$)^[/a-zA-Z0-9/]{1,50}$/),
     role: roleSchema.systemRole().role(),
     url: Joi.string().uri(),
