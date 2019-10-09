@@ -49,4 +49,14 @@ export default class Resource {
     isAPIProduct() {
         return this.apiType === 'APIProduct';
     }
+
+    /**
+     * Check whether current api is of type WebSocket
+     *
+     * @returns {boolean} condition
+     * @memberof Resource
+     */
+    isWebSocket() {
+        return this.type === 'WS';
+    }
 }

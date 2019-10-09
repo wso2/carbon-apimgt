@@ -20,17 +20,23 @@ import React from 'react';
 import { withStyles, withTheme } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
+import LaunchIcon from '@material-ui/icons/Launch';
+import Box from '@material-ui/core/Box';
 import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import Table from '@material-ui/core/Table';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-
-import classNames from 'classnames';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
 import ApiContext from '../components/ApiContext';
+
+const styles = theme => ({
+    contentWrapper: {
+        marginTop: theme.spacing(2),
+        maxHeight: '250px',
+        overflowY: 'auto',
+    },
+});
 
 /**
  *
@@ -38,19 +44,22 @@ import ApiContext from '../components/ApiContext';
  */
 function RenderMethodBase(props) {
     const { theme, method } = props;
+    const methodLower = method.toLowerCase();
     let chipColor = theme.custom.operationChipColor ?
-        theme.custom.operationChipColor[method]
+        theme.custom.operationChipColor[methodLower]
         : null;
     let chipTextColor = '#000000';
     if (!chipColor) {
         console.log('Check the theme settings. The resourceChipColors is not populated properlly');
         chipColor = '#cccccc';
     } else {
-        chipTextColor = theme.palette.getContrastText(theme.custom.operationChipColor[method]);
+        chipTextColor = theme.palette.getContrastText(theme.custom.operationChipColor[methodLower]);
     }
     return (<Chip
-        label={method.toUpperCase()}
-        style={{ backgroundColor: chipColor, color: chipTextColor, height: 20 }}
+        label={method}
+        style={{
+            backgroundColor: chipColor, color: chipTextColor, height: 20, fontSize: 9,
+        }}
     />);
 }
 
@@ -61,29 +70,16 @@ RenderMethodBase.propTypes = {
 };
 
 const RenderMethod = withTheme(RenderMethodBase);
-
-const styles = {
-    root: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    heading: {
-        marginRight: 20,
-    },
-};
-
 /**
  *
  * @param {*} props
  */
 function Operations(props) {
-    const { parentClasses } = props;
+    const { classes, parentClasses } = props;
     return (
         <ApiContext.Consumer>
             {({ api }) => (
-                <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
+                <React.Fragment>
                     <div className={parentClasses.titleWrapper}>
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
                             <FormattedMessage
@@ -91,34 +87,42 @@ function Operations(props) {
                                 defaultMessage='Operations'
                             />
                         </Typography>
-                        <Link to={'/apis/' + api.id + '/operations'}>
-                            <Button variant='contained' color='default'>
-                                <FormattedMessage
-                                    id='Apis.Details.NewOverview.Operations.edit'
-                                    defaultMessage='Edit'
-                                />
-                            </Button>
-                        </Link>
                     </div>
-                    <div className={parentClasses.contentWrapper}>
+                    <div className={classes.contentWrapper}>
                         <Table>
                             {api.operations
                             && api.operations.length !== 0
                             && api.operations.map(item => (
                                 <TableRow style={{ borderStyle: 'hidden' }}>
-                                    <TableCell>
+                                    <TableCell style={{ padding: 8 }}>
                                         <Typography className={parentClasses.heading} component='p' variant='body1'>
                                             {item.target}
                                         </Typography>
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell style={{ padding: 8 }}>
                                         <RenderMethod method={item.verb} />
                                     </TableCell>
                                 </TableRow>
                             ))}
                         </Table>
                     </div>
-                </Paper>
+                    <Box py={2} style={{ marginLeft: 400 }}>
+                        <Link to={'/apis/' + api.id + '/operations'}>
+                            <Typography
+                                className={classes.subHeading}
+                                color='primary'
+                                display='inline'
+                                variant='caption'
+                            >
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Operations.ShowMore'
+                                    defaultMessage='Show More'
+                                />
+                                <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
+                            </Typography>
+                        </Link>
+                    </Box>
+                </React.Fragment>
             )}
         </ApiContext.Consumer>
     );
@@ -126,6 +130,7 @@ function Operations(props) {
 
 Operations.propTypes = {
     parentClasses: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(Operations);

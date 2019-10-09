@@ -72,6 +72,23 @@ include("/jagg/jagg.jag");
             }
             print(obj);
 
+        } else if (action === "validateRoles") {
+              mod = jagg.module("policy");
+              var user=jagg.getUser().username;
+              var roles = request.getParameter("roles");
+              result = mod.validateRoles(roles,user);
+              if (result.error) {
+                  obj = {
+                      error:true,
+                      message:msg.error.backendError(action)
+                  };
+              } else {
+                  obj = {
+                      error:false,
+                      response:result.valid
+                  }
+              }
+              print(obj);
         }
     }
  }());

@@ -423,7 +423,6 @@ public final class APIUtil {
             api.addAvailableTiers(availableTier);
             api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
 
-
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             // We set the context template here
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
@@ -431,57 +430,30 @@ public final class APIUtil {
             api.setEnableSchemaValidation(Boolean.parseBoolean(
                     artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
 
-
-            Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
-            List<String> uriTemplateNames = new ArrayList<String>();
-
             Set<Scope> scopes = ApiMgtDAO.getInstance().getAPIScopes(api.getId());
             api.setScopes(scopes);
 
-            HashMap<String, String> urlPatternsSet;
-            urlPatternsSet = ApiMgtDAO.getInstance().getURITemplatesPerAPIAsString(api.getId());
+            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
+                    api.getUrl(), api.getSandboxUrl());
 
             HashMap<String, String> resourceScopesMap;
             resourceScopesMap = ApiMgtDAO.getInstance().getResourceToScopeMapping(api.getId());
 
-            Set<String> urlPatternsKeySet = urlPatternsSet.keySet();
-            String resourceScopeKey;
-            for (String urlPattern : urlPatternsKeySet) {
-                URITemplate uriTemplate = new URITemplate();
-                String[] urlPatternComponents = urlPattern.split("::");
-                String uTemplate = (urlPatternComponents.length >= 1) ? urlPatternComponents[0] : null;
-                String method = (urlPatternComponents.length >= 2) ? urlPatternComponents[1] : null;
-                String authType = (urlPatternComponents.length >= 3) ? urlPatternComponents[2] : null;
-                String throttlingTier = (urlPatternComponents.length >= 4) ? urlPatternComponents[3] : null;
-                String mediationScript = (urlPatternComponents.length >= 5) ? urlPatternComponents[4] : null;
-                uriTemplate.setHTTPVerb(method);
-                uriTemplate.setAuthType(authType);
-                uriTemplate.setThrottlingTier(throttlingTier);
-                uriTemplate.setHttpVerbs(method);
-                uriTemplate.setAuthTypes(authType);
-                uriTemplate.setUriTemplate(uTemplate);
-                uriTemplate.setResourceURI(api.getUrl());
-                uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
-                uriTemplate.setThrottlingTiers(throttlingTier);
-                uriTemplate.setMediationScript(mediationScript);
-                resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
-                uriTemplate.setScopes(findScopeByKey(scopes, resourceScopesMap.get(resourceScopeKey)));
-                //Checking for duplicate uri template names
-                if (uriTemplateNames.contains(uTemplate)) {
-                    for (URITemplate tmp : uriTemplates) {
-                        if (uTemplate.equals(tmp.getUriTemplate())) {
-                            tmp.setHttpVerbs(method);
-                            tmp.setAuthTypes(authType);
-                            tmp.setThrottlingTiers(throttlingTier);
-                            resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
-                            tmp.setScopes(findScopeByKey(scopes, resourceScopesMap.get(resourceScopeKey)));
-                            break;
-                        }
-                    }
-                } else {
-                    uriTemplates.add(uriTemplate);
+            for (URITemplate uriTemplate : uriTemplates) {
+                String uTemplate = uriTemplate.getUriTemplate();
+                String method = uriTemplate.getHTTPVerb();
+                String resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
+                Scope scope = findScopeByKey(scopes, resourceScopesMap.get(resourceScopeKey));
+                uriTemplate.setScope(scope);
+                uriTemplate.setScopes(scope);
+
+                Set<APIProductIdentifier> usedByProducts = uriTemplate.getUsedByProducts();
+                for (APIProductIdentifier usedByProduct : usedByProducts) {
+                    String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);
+                    Resource productResource = registry.get(apiProductPath);
+                    String artifactId = productResource.getUUID();
+                    usedByProduct.setUUID(artifactId);
                 }
-                uriTemplateNames.add(uTemplate);
             }
             api.setUriTemplates(uriTemplates);
             api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
@@ -628,61 +600,30 @@ public final class APIUtil {
             api.setEnableSchemaValidation(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
 
-            Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
-            List<String> uriTemplateNames = new ArrayList<String>();
-
             Set<Scope> scopes = ApiMgtDAO.getInstance().getAPIScopes(api.getId());
             api.setScopes(scopes);
 
-            HashMap<String, String> urlPatternsSet;
-            urlPatternsSet = ApiMgtDAO.getInstance().getURITemplatesPerAPIAsString(api.getId());
             HashMap<String, String> resourceScopes;
             resourceScopes = ApiMgtDAO.getInstance().getResourceToScopeMapping(api.getId());
 
-            Set<String> urlPatternsKeySet = urlPatternsSet.keySet();
-            String resourceScopeKey;
-            for (String urlPattern : urlPatternsKeySet) {
-                URITemplate uriTemplate = new URITemplate();
-                String[] urlPatternComponents = urlPattern.split("::");
-                String uTemplate = (urlPatternComponents.length >= 1) ? urlPatternComponents[0] : null;
-                String method = (urlPatternComponents.length >= 2) ? urlPatternComponents[1] : null;
-                String authType = (urlPatternComponents.length >= 3) ? urlPatternComponents[2] : null;
-                String throttlingTier = (urlPatternComponents.length >= 4) ? urlPatternComponents[3] : null;
-                String mediationScript = (urlPatternComponents.length >= 5) ? urlPatternComponents[4] : null;
-                uriTemplate.setHTTPVerb(method);
-                uriTemplate.setAuthType(authType);
-                uriTemplate.setThrottlingTier(throttlingTier);
-                uriTemplate.setHttpVerbs(method);
-                uriTemplate.setAuthTypes(authType);
-                uriTemplate.setUriTemplate(uTemplate);
-                uriTemplate.setResourceURI(api.getUrl());
-                uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
-                uriTemplate.setThrottlingTiers(throttlingTier);
-                uriTemplate.setMediationScript(mediationScript);
-                uriTemplate.setMediationScripts(method, mediationScript);
-                resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
+            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
+                    api.getUrl(), api.getSandboxUrl());
+
+            for (URITemplate uriTemplate : uriTemplates) {
+                String uTemplate = uriTemplate.getUriTemplate();
+                String method = uriTemplate.getHTTPVerb();
+                String resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
                 Scope scope = findScopeByKey(scopes, resourceScopes.get(resourceScopeKey));
                 uriTemplate.setScope(scope);
                 uriTemplate.setScopes(scope);
-                //Checking for duplicate uri template names
 
-                if (uriTemplateNames.contains(uTemplate)) {
-                    for (URITemplate tmp : uriTemplates) {
-                        if (uTemplate.equals(tmp.getUriTemplate())) {
-                            tmp.setHttpVerbs(method);
-                            tmp.setAuthTypes(authType);
-                            tmp.setThrottlingTiers(throttlingTier);
-                            tmp.setMediationScripts(method, mediationScript);
-                            resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
-                            tmp.setScopes(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
-                            tmp.setScope(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
-                            break;
-                        }
-                    }
-                } else {
-                    uriTemplates.add(uriTemplate);
+                Set<APIProductIdentifier> usedByProducts = uriTemplate.getUsedByProducts();
+                for (APIProductIdentifier usedByProduct : usedByProducts) {
+                    String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);
+                    Resource productResource = registry.get(apiProductPath);
+                    String artifactId = productResource.getUUID();
+                    usedByProduct.setUUID(artifactId);
                 }
-                uriTemplateNames.add(uTemplate);
             }
 
             if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
@@ -4636,6 +4577,22 @@ public final class APIUtil {
         return true;
     }
 
+    /**
+     * Returns whether Product REST APIs' token cache is enabled
+     *
+     * @return true if token cache is enabled
+     */
+    public static boolean isRESTAPITokenCacheEnabled() {
+        try {
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
+            String cacheEnabled = config.getFirstProperty(APIConstants.REST_API_TOKEN_CACHE_ENABLED);
+            return Boolean.parseBoolean(cacheEnabled);
+        } catch (Exception e) {
+            log.error("Did not found valid API Validation Information cache configuration. Use default configuration" + e);
+        }
+        return true;
+    }
 
     public static Cache getAPIContextCache() {
         CacheManager contextCacheManager = Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).
@@ -9172,19 +9129,20 @@ public final class APIUtil {
         }
         jwtTokenInfoDTO.setSubscribedApiDTOList(subscribedApiDTOList);
 
-        SubscriptionPolicy[] subscriptionPolicies = ApiMgtDAO.getInstance()
-                .getSubscriptionPolicies(subscriptionTiers.toArray(new String[0]), APIUtil.getTenantId(appOwner));
+        if (subscriptionTiers.size() > 0) {
+            SubscriptionPolicy[] subscriptionPolicies = ApiMgtDAO.getInstance()
+                    .getSubscriptionPolicies(subscriptionTiers.toArray(new String[0]), APIUtil.getTenantId(appOwner));
 
-        Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<>();
-        for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies) {
-            SubscriptionPolicyDTO subscriptionPolicyDTO = new SubscriptionPolicyDTO();
-            subscriptionPolicyDTO.setSpikeArrestLimit(subscriptionPolicy.getRateLimitCount());
-            subscriptionPolicyDTO.setSpikeArrestUnit(subscriptionPolicy.getRateLimitTimeUnit());
-            subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicy.isStopOnQuotaReach());
-            subscriptionPolicyDTOList.put(subscriptionPolicy.getPolicyName(), subscriptionPolicyDTO);
+            Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<>();
+            for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies) {
+                SubscriptionPolicyDTO subscriptionPolicyDTO = new SubscriptionPolicyDTO();
+                subscriptionPolicyDTO.setSpikeArrestLimit(subscriptionPolicy.getRateLimitCount());
+                subscriptionPolicyDTO.setSpikeArrestUnit(subscriptionPolicy.getRateLimitTimeUnit());
+                subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicy.isStopOnQuotaReach());
+                subscriptionPolicyDTOList.put(subscriptionPolicy.getPolicyName(), subscriptionPolicyDTO);
+            }
+            jwtTokenInfoDTO.setSubscriptionPolicyDTOList(subscriptionPolicyDTOList);
         }
-        jwtTokenInfoDTO.setSubscriptionPolicyDTOList(subscriptionPolicyDTOList);
-
         return jwtTokenInfoDTO;
     }
 

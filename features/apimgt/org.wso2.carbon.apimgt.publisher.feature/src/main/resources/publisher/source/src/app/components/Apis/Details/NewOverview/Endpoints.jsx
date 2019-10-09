@@ -122,7 +122,7 @@ function Endpoints(props) {
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
-                            {api.endpointSecurity && <React.Fragment>{api.endpoint}</React.Fragment>}
+                            {api.endpointSecurity && <React.Fragment>{api.endpointSecurity.type}</React.Fragment>}
                         </Typography>
                         <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
                             {!api.endpointSecurity &&

@@ -71,6 +71,9 @@ public enum ExceptionCodes implements ErrorHandler {
     APPLICATION_EXPORT_ERROR(900338, "Application Export Error", 500, "Error while exporting the given Application"),
     APPLICATION_IMPORT_ERROR(900339, "Application Import Error", 500, "Error while importing the given Application"),
     NO_READ_PERMISSIONS(900340, "No permissions to read API.", 403, "No permissions to read API."),
+    API_PRODUCT_DUPLICATE_RESOURCE(900341, "Cannot create API Product with duplicate resource",
+            400, "Cannot create API Product with duplicate resource: %s , verb: %s combination"),
+
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
     RESOURCE_NOT_FOUND(900401, "Resource not found", 404, "Requested resource not found"),
@@ -179,6 +182,7 @@ public enum ExceptionCodes implements ErrorHandler {
     OPENAPI_URL_NO_200(900757, "OpenAPI definition retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
     INVALID_OAS2_FOUND(900761, "Invalid OpenAPI V2 definition found", 400, "Invalid OpenAPI V2 definition found"),
     INVALID_OAS3_FOUND(900762, "Invalid OpenAPI V3 definition found", 400, "Invalid OpenAPI V3 definition found"),
+    NO_RESOURCES_FOUND(900763, "No resources found", 404, "API must have at least one resource defined"),
 
 
     // REST API related codes
