@@ -93,11 +93,6 @@ const styles = theme => ({
         padding: theme.spacing.unit * 2,
         marginTop: 50,
     },
-    contentWrapper: {
-        maxWidth: theme.custom.contentAreaWidth,
-        paddingLeft: theme.spacing(3),
-        paddingTop: theme.spacing(3),
-    },
     titleSub: {
         marginLeft: theme.spacing(2),
         paddingTop: theme.spacing(2),
@@ -134,9 +129,6 @@ const styles = theme => ({
         position: 'relative',
         background: '#fff9',
         paddingLeft: 20,
-    },
-    docsWrapper: {
-        marginRight: 0,
     },
     docContainer: {
         display: 'flex',
@@ -285,7 +277,7 @@ function FullWidthGrid(props) {
         setOpen(!open);
     };
     return (
-        <Grid container className={classes.docsWrapper}>
+        <Grid container className={classes.contentWrapper}>
             <Grid item md={12} lg={12}>
                 <Grid container spacing={5}>
                     <Grid item md={12}>
