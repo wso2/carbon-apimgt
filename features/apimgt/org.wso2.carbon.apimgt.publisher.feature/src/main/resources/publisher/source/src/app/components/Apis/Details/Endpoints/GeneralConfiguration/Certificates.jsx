@@ -89,6 +89,13 @@ const useStyles = makeStyles(theme => ({
             fontSize: 30,
         },
     },
+    deleteIcon: {
+        color: theme.palette.error.dark,
+        cursor: 'pointer',
+    },
+    deleteIconDisable: {
+        color: theme.palette.disabled,
+    },
 }));
 /**
  * TODO: Generalize this component to work in Configuration page , upload mutual SSL certificates action
@@ -195,10 +202,12 @@ function Certificates(props) {
                                             <Icon>info</Icon>
                                         </IconButton>
                                         <IconButton
+                                            disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                             onClick={() => setCertificateToDelete({ open: true, alias: cert.alias })}
                                         >
-                                            <Icon color='error'>
-                                                delete
+                                            <Icon className={isRestricted(['apim:api_create'], apiFromContext) ?
+                                                classes.deleteIconDisable : classes.deleteIcon}
+                                            > delete
                                             </Icon>
                                         </IconButton>
                                     </ListItemSecondaryAction>
