@@ -229,7 +229,7 @@ export default function UploadCertificate(props) {
                                 defaultMessage='Alias should not be empty'
                             /> : iff(aliasList.includes(alias), <FormattedMessage
                                 id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint.error'
-                                defaultMessage='Duplicate alias'
+                                defaultMessage='Alias already exists'
                             />, <FormattedMessage
                                 id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias.helpertext'
                                 defaultMessage='Alias for the certificate'
