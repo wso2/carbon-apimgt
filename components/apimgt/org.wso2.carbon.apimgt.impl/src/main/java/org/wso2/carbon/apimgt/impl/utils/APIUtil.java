@@ -9231,6 +9231,11 @@ public final class APIUtil {
         return jwtParts[2];
     }
 
+    /**
+     * Extracts the tenant domain of the subject in a given JWT
+     * @param token jwt token
+     * @return tenant domain of the the sub claim
+     */
     public static String getTenantDomainIfJWT(String token) {
 
         String[] jwtParts = token.split("\\.");
