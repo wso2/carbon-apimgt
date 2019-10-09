@@ -18,53 +18,18 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import Icon from '@material-ui/core/Icon';
-import Slide from '@material-ui/core/Slide';
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import ApplicationCreateForm from 'AppComponents/Shared/AppsAndKeys/ApplicationCreateForm';
 import Alert from 'AppComponents/Shared/Alert';
-import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 import Settings from 'AppComponents/Shared/SettingsContext';
+import { Link } from 'react-router-dom';
+import ApplicationCreateBase from './ApplicationCreateBase';
 
-/**
- *
- * @inheritdoc
- * @param {*} theme theme object
- */
-const styles = theme => ({
-    appBar: {
-        position: 'relative',
-        backgroundColor: theme.custom.appBar.background,
-        color: theme.palette.getContrastText(theme.custom.appBar.background),
-    },
-    flex: {
-        flex: 1,
-    },
-    button: {
-        marginRight: theme.spacing.unit * 2,
-    },
-    buttonWrapper: {
-        paddingLeft: theme.spacing.unit * 7,
-    },
-    createFormWrapper: {
-        paddingLeft: theme.spacing.unit * 5,
-    },
-});
-/**
- * @param {*} props properties
- * @returns {Component}
- */
-function Transition(props) {
-    return <Slide direction='up' {...props} />;
-}
 /**
  * Component used to handle application creation
  * @class NewApp
@@ -108,6 +73,16 @@ class NewApp extends React.Component {
     }
 
     /**
+     * @param {object} name application attribute name
+     * @returns {Object} attribute value
+     * @memberof NewApp
+     */
+    getAttributeValue = (name) => {
+        const { applicationRequest } = this.state;
+        return applicationRequest.attributes[name];
+    };
+
+    /**
      * Used to initialize the component state
      * @param {boolean} reset should it be reset to initial state or not
      * @memberof NewApp
@@ -140,9 +115,7 @@ class NewApp extends React.Component {
                 this.setState({ applicationRequest: newRequest, throttlingPolicyList, allAppAttributes });
             })
             .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
+                console.log(error);
                 const { status } = error;
                 if (status === 404) {
                     // eslint-disable-next-line react/no-unused-state
@@ -168,16 +141,6 @@ class NewApp extends React.Component {
         const { applicationRequest } = this.state;
         applicationRequest.attributes[name] = event.target.value;
         this.setState({ applicationRequest });
-    };
-
-    /**
-     * @param {object} name application attribute name
-     * @returns {Object} attribute value
-     * @memberof NewApp
-     */
-    getAttributeValue = (name) => {
-        const { applicationRequest } = this.state;
-        return applicationRequest.attributes[name];
     };
 
     /**
@@ -237,15 +200,13 @@ class NewApp extends React.Component {
      */
     saveApplication = () => {
         const { applicationRequest } = this.state;
-        const { updateApps, handleClose, intl } = this.props;
+        const { intl } = this.props;
         const api = new API();
         this.validateName(applicationRequest.name)
             .then(() => this.validateAttributes(applicationRequest.attributes))
             .then(() => api.createApplication(applicationRequest))
             .then(() => {
                 console.log('Application created successfully.');
-                handleClose();
-                updateApps();
                 this.initApplicationState(true);
             })
             .catch((error) => {
@@ -325,100 +286,77 @@ class NewApp extends React.Component {
         const {
             throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes, isApplicationSharingEnabled,
         } = this.state;
-        const {
-            classes, open, handleClickOpen, handleClose,
-        } = this.props;
-        return (
+        const pageTitle = (
             <React.Fragment>
-                <ScopeValidation resourcePath={resourcePaths.APPLICATIONS} resourceMethod={resourceMethods.POST}>
-                    <Button
-                        variant='contained'
-                        color='primary'
-                        className={classes.button}
-                        onClick={handleClickOpen}
-                    >
-                        <FormattedMessage
-                            id='Applications.Create.NewApp.add.new.application'
-                            defaultMessage='ADD NEW APPLICATION'
-                        />
-                    </Button>
-                </ScopeValidation>
-                <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
-                    <AppBar className={classes.appBar}>
-                        <Toolbar>
-                            <IconButton color='inherit' onClick={handleClose} aria-label='Close'>
-                                <Icon>close</Icon>
-                            </IconButton>
-                            <Typography variant='h6' color='inherit' className={classes.flex}>
-                                <FormattedMessage
-                                    id='Applications.Create.NewApp.create.new.application'
-                                    defaultMessage='Create New Application'
-                                />
-                            </Typography>
-                            <Button color='inherit' onClick={handleClose}>
-                                <FormattedMessage
-                                    id='Applications.Create.NewApp.save'
-                                    defaultMessage='save'
-                                />
-                            </Button>
-                        </Toolbar>
-                    </AppBar>
-                    <div className={classes.createFormWrapper}>
-                        <ApplicationCreateForm
-                            throttlingPolicyList={throttlingPolicyList}
-                            applicationRequest={applicationRequest}
-                            updateApplicationRequest={this.updateApplicationRequest}
-                            validateName={this.validateName}
-                            isNameValid={isNameValid}
-                            allAppAttributes={allAppAttributes}
-                            handleAttributesChange={this.handleAttributesChange}
-                            isRequiredAttribute={this.isRequiredAttribute}
-                            getAttributeValue={this.getAttributeValue}
-                            isApplicationSharingEnabled={isApplicationSharingEnabled}
-                            handleDeleteChip={this.handleDeleteChip}
-                            handleAddChip={this.handleAddChip}
-                        />
-                    </div>
-                    <div className={classes.buttonWrapper}>
-                        <Button variant='outlined' className={classes.button} onClick={handleClose}>
-                            <FormattedMessage
-                                id='Applications.Create.NewApp.cancel'
-                                defaultMessage='Cancel'
-                            />
-                        </Button>
-                        <Button
-                            variant='contained'
-                            color='primary'
-                            className={classes.button}
-                            onClick={this.saveApplication}
-                        >
-                            <FormattedMessage
-                                id='Applications.Create.NewApp.add.new.application.button'
-                                defaultMessage='ADD NEW APPLICATION'
-                            />
-                        </Button>
-                    </div>
-                </Dialog>
+                <Typography variant='h5'>
+                    <FormattedMessage
+                        id='Applications.Create.NewApp.application.heading'
+                        defaultMessage='Create an application'
+                    />
+                </Typography>
+                <Typography variant='caption'>
+                    <FormattedMessage
+                        id='Applications.Create.NewApp.application.sub.heading'
+                        defaultMessage={
+                            'Create an application providing name, quota and token type parameters' +
+                            ' and optionally descriptions'
+                        }
+                    />
+                </Typography>
             </React.Fragment>
+        );
+        return (
+            <ApplicationCreateBase title={pageTitle}>
+                <Box py={4}>
+                    <Box display='flex' justifyContent='center'>
+                        <Grid item xs={10} md={9}>
+                            <ApplicationCreateForm
+                                throttlingPolicyList={throttlingPolicyList}
+                                applicationRequest={applicationRequest}
+                                updateApplicationRequest={this.updateApplicationRequest}
+                                validateName={this.validateName}
+                                isNameValid={isNameValid}
+                                allAppAttributes={allAppAttributes}
+                                handleAttributesChange={this.handleAttributesChange}
+                                isRequiredAttribute={this.isRequiredAttribute}
+                                getAttributeValue={this.getAttributeValue}
+                                isApplicationSharingEnabled={isApplicationSharingEnabled}
+                                handleDeleteChip={this.handleDeleteChip}
+                                handleAddChip={this.handleAddChip}
+                            />
+                            <Box justifyContent='flex-start' mt={4}>
+                                <Button
+                                    variant='contained'
+                                    color='primary'
+                                    onClick={this.saveApplication}
+                                >
+                                    <FormattedMessage
+                                        id='Applications.Create.NewApp.save'
+                                        defaultMessage='save'
+                                    />
+                                </Button>
+
+                                <Link to='/applications/'>
+                                    <Button variant='text'>
+                                        <FormattedMessage
+                                            id='Applications.Create.NewApp.cancel'
+                                            defaultMessage='Cancel'
+                                        />
+                                    </Button>
+                                </Link>
+                            </Box>
+                        </Grid>
+                    </Box>
+                </Box>
+            </ApplicationCreateBase>
         );
     }
 }
 
 NewApp.propTypes = {
-    classes: PropTypes.shape({
-        appBar: PropTypes.string,
-        flex: PropTypes.string,
-        createFormWrapper: PropTypes.string,
-        buttonWrapper: PropTypes.string,
-        button: PropTypes.string,
-    }).isRequired,
-    updateApps: PropTypes.func.isRequired,
-    handleClose: PropTypes.func.isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func.isRequired,
     }).isRequired,
-    handleClickOpen: PropTypes.func.isRequired,
-    open: PropTypes.bool.isRequired,
 };
 
-export default injectIntl(withStyles(styles)(NewApp));
+export default injectIntl(NewApp);

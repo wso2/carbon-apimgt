@@ -16,19 +16,21 @@
  * under the License.
  */
 
-import React, { Component, useContext } from 'react';
+import React, { Component } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
 import TablePagination from '@material-ui/core/TablePagination';
+import Button from '@material-ui/core/Button';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import { Link } from 'react-router-dom';
+import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import Application from 'AppData/Application';
-import NewApp from 'AppComponents/Applications/Create/NewApp';
 import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
 import Settings from 'AppComponents/Shared/SettingsContext';
 import AppsTableContent from './AppsTableContent';
@@ -308,12 +310,22 @@ class Listing extends Component {
                     </div>
                     {(data.size !== 0 || open) && (
                         <div className={classes.createLinkWrapper}>
-                            <NewApp
-                                updateApps={this.updateApps}
-                                open={open}
-                                handleClickOpen={this.handleClickOpen}
-                                handleClose={this.handleClose}
-                            />
+                            <ScopeValidation
+                                resourcePath={resourcePaths.APPLICATIONS}
+                                resourceMethod={resourceMethods.POST}
+                            >
+                                <Link to='/applications/create'>
+                                    <Button
+                                        variant='contained'
+                                        color='primary'
+                                    >
+                                        <FormattedMessage
+                                            id='Applications.Create.NewApp.add.new.application'
+                                            defaultMessage='Add New Application'
+                                        />
+                                    </Button>
+                                </Link>
+                            </ScopeValidation>
                         </div>
                     )}
                 </div>

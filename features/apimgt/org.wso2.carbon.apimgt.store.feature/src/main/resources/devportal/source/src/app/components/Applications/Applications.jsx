@@ -18,6 +18,7 @@
 
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
+import ApplicationCreateForm from 'AppComponents/Applications/Create/NewApp';
 import Listing from './Listing/Listing';
 import Details from './Details/index';
 import { PageNotFound } from '../Base/Errors';
@@ -32,6 +33,7 @@ const applications = () => {
     return (
         <Switch>
             <Route exact path='/applications' component={Listing} />
+            <Route exact path='/applications/create/' component={ApplicationCreateForm} />
             <Route path='/applications/:application_uuid/' component={Details} />
             <Route component={PageNotFound} />
         </Switch>
