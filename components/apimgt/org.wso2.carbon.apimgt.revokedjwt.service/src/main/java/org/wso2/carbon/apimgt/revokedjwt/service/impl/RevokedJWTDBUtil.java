@@ -28,7 +28,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
-import java.util.Set;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -37,16 +36,12 @@ import javax.sql.DataSource;
 /**
  * DB util class to fetch revoked JWTs
  */
-public final class RevokedJWTDBUtil {
+final class RevokedJWTDBUtil {
     private static final Log log = LogFactory.getLog(RevokedJWTDBUtil.class);
 
     private static volatile DataSource dataSource = null;
-    private  static volatile RevokedJWTDTO[] revokedJWTDTOS = null;
-    private static volatile Set<String> throttledEvents ;
-    private static long lastAccessed;
-    private static long timeBetweenUpdates = 10000;
 
-    public static void initialize() throws Exception {
+    private static void initialize() throws Exception {
 
         if (dataSource != null) {
             return;
@@ -80,7 +75,7 @@ public final class RevokedJWTDBUtil {
      * @return Connection
      * @throws SQLException if failed to get Connection
      */
-    public static Connection getConnection() throws SQLException {
+    private static Connection getConnection() throws SQLException {
         if (dataSource != null) {
             return dataSource.getConnection();
         } else {
@@ -96,9 +91,9 @@ public final class RevokedJWTDBUtil {
 
     /**
      * Fetches all revoked JWTs from DB.
-     * @return
+     * @return list fo revoked JWTs
      */
-    public static RevokedJWTListDTO getRevokedJWTs() {
+      static RevokedJWTListDTO getRevokedJWTs() {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -117,7 +112,7 @@ public final class RevokedJWTDBUtil {
                 revokedJWTListDTO.add(revokedJWTDTO);
             }
         } catch (SQLException e) {
-            log.error("Error while executing SQL", e);
+            log.error("Error while fetching revoked JWTs from database. ", e);
         } finally {
             closeAllConnections(ps, conn, rs);
         }
@@ -130,7 +125,7 @@ public final class RevokedJWTDBUtil {
      * @param connection connection to be closed.
      * @param resultSet resultset to be closed.
      */
-    public static void closeAllConnections(PreparedStatement preparedStatement, Connection connection,
+    private static void closeAllConnections(PreparedStatement preparedStatement, Connection connection,
                                            ResultSet resultSet) {
         closeConnection(connection);
         closeResultSet(resultSet);
@@ -175,7 +170,7 @@ public final class RevokedJWTDBUtil {
      *
      * @param preparedStatement PreparedStatement
      */
-    public static void closeStatement(PreparedStatement preparedStatement) {
+    private static void closeStatement(PreparedStatement preparedStatement) {
         if (preparedStatement != null) {
             try {
                 preparedStatement.close();

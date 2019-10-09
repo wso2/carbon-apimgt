@@ -36,7 +36,6 @@ public class RevokedJWTMapCleaner extends TimerTask {
     public void run() {
 
         log.debug("Starting revoked JWT map cleaner task.");
-
         cleanJWTRevokedMap();
     }
 
@@ -63,7 +62,7 @@ public class RevokedJWTMapCleaner extends TimerTask {
     }
 
     /**
-     *  Starts the timer task to clean the JWT revoke map
+     * Starts the timer task to clean the JWT revoke map
      */
     public void startJWTRevokedMapCleaner() {
         //todo set appropriate initdelay and interval

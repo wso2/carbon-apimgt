@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -38,10 +38,13 @@ public class ExpiredJWTCleaner implements Runnable {
 
     @Override
     public void run() {
+
         long currentTime = System.currentTimeMillis();
-        // Only run the cleanup if the last run time was more than 1 hour ago
-        if(currentTime - lastUpdatedTime >  DURATION) {
-            cleanExpiredTokens();
+        synchronized (this) {
+            // Only run the cleanup if the last cleanup was was performed more than 1 hour ago
+            if (currentTime - lastUpdatedTime > DURATION) {
+                cleanExpiredTokens();
+            }
         }
     }
 
@@ -52,9 +55,9 @@ public class ExpiredJWTCleaner implements Runnable {
             long currentTimestamp = System.currentTimeMillis();
             Map<String, Long> revokedJWTs = apiMgtDAO.getRevokedJWTs();
             List<String> listOfExpiredJWTSignatures = new ArrayList<>();
-            for(Map.Entry<String, Long> entry : revokedJWTs.entrySet()) {
-                long expiryTime =  entry.getValue() * 1000;
-                if(currentTimestamp > expiryTime) {
+            for (Map.Entry<String, Long> entry : revokedJWTs.entrySet()) {
+                long expiryTime = entry.getValue() * 1000;
+                if (currentTimestamp > expiryTime) {
                     listOfExpiredJWTSignatures.add("'" + entry.getKey() + "'");
                 }
             }
@@ -63,6 +66,12 @@ public class ExpiredJWTCleaner implements Runnable {
             //Remove expired JWTs from revoke table
             apiMgtDAO.removeExpiredJWTs(commaSeparatedExpiredList);
             lastUpdatedTime = System.currentTimeMillis();
+            if (log.isDebugEnabled()) {
+                log.debug("Number of expired tokens removed from revoked table : " +
+                        listOfExpiredJWTSignatures.size());
+                log.debug("Last JWT token cleanup performed at :" + new Date(lastUpdatedTime));
+
+            }
         } catch (APIManagementException e) {
             log.error("Unable to cleanup expired JWT tokens from revoke table", e);
         }
