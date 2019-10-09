@@ -339,16 +339,20 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 //Revoke the Old Access Token
                 httpRevokePost.setEntity(new UrlEncodedFormEntity(revokeParams, "UTF-8"));
                 int statusCode;
+                String responseBody;
                 try {
                     HttpResponse revokeResponse = executeHTTPrequest(revokeEndpointPort, revokeEndpointProtocol, 
                                                                      httpRevokePost);
                     statusCode = revokeResponse.getStatusLine().getStatusCode();
+                    responseBody = EntityUtils.toString(revokeResponse.getEntity());
                 } finally {
                     httpRevokePost.reset();
                 }
 
                 if (statusCode != 200) {
-                    throw new APIManagementException("Token revoke failed : HTTP error code : " + statusCode);
+                    String errorReason = "Token revoke failed : HTTP error code : " + statusCode +
+                                                                                             ". Reason " + responseBody;
+                    throw new APIManagementException(errorReason);
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug("Successfully submitted revoke request for old application token. HTTP status : 200");
