@@ -27,7 +27,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
-
+import { isRestricted } from 'AppData/AuthManager';
 import Operation from './components/Operation';
 import GroupOfOperations from './components/GroupOfOperations';
 import SpecErrors from './components/SpecErrors';
@@ -36,6 +36,7 @@ import GoToDefinitionLink from './components/GoToDefinitionLink';
 import APIRateLimiting from './components/APIRateLimiting';
 import { getTaggedOperations } from './operationUtils';
 import OperationsSelector from './components/OperationsSelector';
+
 
 /**
  * This component handles the Resource page in API details though it's written in a sharable way
@@ -46,7 +47,6 @@ import OperationsSelector from './components/OperationsSelector';
  */
 export default function Resources(props) {
     const {
-        disableAddOperation,
         operationProps,
         disableRateLimiting,
         hideAPIDefinitionLink,
@@ -115,12 +115,7 @@ export default function Resources(props) {
         return api
             .updateSwagger(spec)
             .then(response => resolveAndUpdateSpec(response.body))
-            .then(() => updateAPI())
-            .catch((error) => {
-                console.error(error);
-                Alert.error('Error while updating the operation with ' +
-                        `path ${targetOperation.target} verb ${targetOperation.verb} `);
-            });
+            .then(() => updateAPI());
     }
 
     /**
@@ -258,7 +253,7 @@ export default function Resources(props) {
                     />
                 </Grid>
             )}
-            {!disableAddOperation && (
+            {!isRestricted(['apim:api_create'], api) && (
                 <Grid item md={12}>
                     <AddOperation updateOpenAPI={updateOpenAPI} />
                 </Grid>
@@ -321,13 +316,11 @@ Resources.defaultProps = {
     disableRateLimiting: false,
     disableMultiSelect: false,
     hideAPIDefinitionLink: false,
-    disableAddOperation: false,
 };
 
 Resources.propTypes = {
     disableRateLimiting: PropTypes.bool,
     hideAPIDefinitionLink: PropTypes.bool,
-    disableAddOperation: PropTypes.bool,
     disableMultiSelect: PropTypes.bool,
     operationProps: PropTypes.shape({
         disableUpdate: PropTypes.bool,

@@ -2,6 +2,7 @@
   "time": {
     "apim.cache.jwt_claim.expiry_time" : "s",
     "apim.cache.token_expiry_time" : "s",
+    "apim.cache.restapi_token.expiry_time" : "s",
     "apim.cache.resource.expiry_time": "s",
     "apim.cache.tags.expiry_time" : "ms",
     "apim.monetization.publish_duration" : "d",

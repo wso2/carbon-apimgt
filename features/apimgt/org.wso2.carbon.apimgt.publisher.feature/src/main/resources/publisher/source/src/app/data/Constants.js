@@ -17,7 +17,7 @@
 const CONSTS = {
     API: 'API',
     APIProduct: 'APIProduct',
-    HTTP_METHODS: ['get', 'put', 'post', 'delete', 'patch', 'head'],
+    HTTP_METHODS: ['get', 'put', 'post', 'delete', 'patch', 'head', 'options'],
     errorCodes: {
         INSUFFICIENT_PREVILEGES: '900403: Insufficient privileges to login',
         INVALID_TOKEN: '900401: Invalid token',

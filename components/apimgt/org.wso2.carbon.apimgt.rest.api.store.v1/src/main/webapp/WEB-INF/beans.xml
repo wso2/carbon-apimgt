@@ -33,6 +33,7 @@
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper" />
+            <ref bean="cors-filter" />
         </jaxrs:providers>
     </jaxrs:server>
 
@@ -45,6 +46,15 @@
     <bean id="ETagInInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.eTag.ETagInInterceptor"/>
     <bean id="ETagOutInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.eTag.ETagOutInterceptor"/>
     <bean id="TokenMergeInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor" />
+    <bean id="cors-filter" class="org.apache.cxf.rs.security.cors.CrossOriginResourceSharingFilter">
+        <property name="allowHeaders">
+            <list>
+                <value>Authorization</value>
+                <value>X-WSO2-Tenant</value>
+            </list>
+        </property>
+        <property name="allowCredentials" value="true"/>
+    </bean>
     <cxf:bus>
         <cxf:inInterceptors>
             <ref bean="TokenMergeInterceptor"/>

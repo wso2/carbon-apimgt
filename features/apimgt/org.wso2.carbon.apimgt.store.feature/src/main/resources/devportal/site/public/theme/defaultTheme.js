@@ -40,7 +40,7 @@ const Configurations = {
                 drawerWidth: 200,
                 logo: '/devportal/site/public/images/logo.png',
                 backgroundImage: '/devportal/site/public/images/back-light.png',
-                title: 'WSO2 Developer Portal',
+                title: 'WSO2 APIM Developer Portal',
                 defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
                 showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
                 leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
@@ -59,7 +59,7 @@ const Configurations = {
                     post: '#8ac149',
                     put: '#ff9700',
                     delete: '#fd5621',
-                    option: '#5f7c8a',
+                    options: '#5f7c8a',
                     patch: '#785446',
                     head: '#785446',
                 },

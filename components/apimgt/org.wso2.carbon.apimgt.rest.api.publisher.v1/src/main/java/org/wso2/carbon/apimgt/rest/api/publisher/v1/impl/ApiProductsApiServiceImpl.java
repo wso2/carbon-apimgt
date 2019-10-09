@@ -86,7 +86,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 RestApiUtil.handleConflict("Cannot remove the API " + apiProductIdentifier + " as active subscriptions exist", log);
             }
 
-            apiProvider.deleteAPIProduct(apiProduct.getId());
+            apiProvider.deleteAPIProduct(apiProduct.getId(), apiProductId);
             return Response.ok().build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting API Product : " + apiProductId;

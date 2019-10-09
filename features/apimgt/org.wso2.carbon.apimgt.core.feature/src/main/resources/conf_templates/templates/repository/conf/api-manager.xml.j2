@@ -146,6 +146,8 @@
         cache. However, if the system is in a state, where the role addition and deletion happens seamlessly, the
         cache will be in in-valid state.-->
         <EnablePublisherRoleCache>{{apim.cache.publisher_roles.enable}}</EnablePublisherRoleCache>
+        <!-- Enable/Disable token caching at the Product REST APIs-->
+        <EnableRESTAPITokenCache>{{apim.cache.restapi_token.enable}}</EnableRESTAPITokenCache>
 	    <!-- JWT claims Cache expiry in seconds -->
         {% if apim.cache.jwt_claim.expiry_time is defined %}
         <JWTClaimCacheExpiry>{{apim.cache.jwt_claim.expiry_time}}</JWTClaimCacheExpiry>
@@ -157,6 +159,10 @@
         <!-- Expiry time for the resource cache  -->
         {% if apim.cache.resource.expiry_time is defined %}
         <GatewayResourceCacheExpiry>{{apim.cache.resource.expiry_time}}</GatewayResourceCacheExpiry>
+        {% endif %}
+        <!-- Expiry time for the apim REST API token cache -->
+        {% if apim.cache.restapi_token.expiry_time is defined %}
+        <RESTAPITokenCacheExpiry>{{apim.cache.restapi_token.expiry_time}}</RESTAPITokenCacheExpiry>
         {% endif %}
         <!-- This parameter specifies the expiration time of the TagCache. TagCache will
              only be created when this element is uncommented. When the specified

@@ -319,7 +319,7 @@ export default function CustomizedSteppers() {
                                     )}
                                     <Typography variant='h7'>
                                         <FormattedMessage
-                                            id='Apis.Details.Overview.CustomizedStepper.business.plan'
+                                            id='Apis.Details.Overview.CustomizedStepper.business.plan.endpoint'
                                             defaultMessage='Endpoint'
                                         />
                                     </Typography>
@@ -337,7 +337,7 @@ export default function CustomizedSteppers() {
                                     )}
                                     <Typography variant='h7'>
                                         <FormattedMessage
-                                            id='Apis.Details.Overview.CustomizedStepper.business.plan'
+                                            id='Apis.Details.Overview.CustomizedStepper.business.plan.businessPlans'
                                             defaultMessage=' Business plans'
                                         />
                                     </Typography>

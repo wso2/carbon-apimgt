@@ -88,7 +88,11 @@ function ProductResourcesEdit() {
                 </Typography>
             </div>
             <div className={classes.contentWrapper}>
-                <ProductResourcesEditWorkspace apiResources={apiResources} setApiResources={setApiResources} />
+                <ProductResourcesEditWorkspace
+                    apiResources={apiResources}
+                    setApiResources={setApiResources}
+                    api={api}
+                />
                 <div className={classes.buttonWrapper}>
                     <Grid container direction='row' alignItems='flex-start' spacing={4}>
                         <Grid item>

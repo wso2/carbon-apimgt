@@ -317,6 +317,6 @@
     "Applications" : "Applications",
     "Application Name" : "Application Name",
     "Owner" : "Owner",
-    "Change Application Owner" : "Change Application Owner"
-
+    "Change Application Owner" : "Change Application Owner",
+    "Invalid role name" : "Invalid role name"
 }

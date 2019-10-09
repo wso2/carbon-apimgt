@@ -25,6 +25,12 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
@@ -35,8 +41,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
-import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
-import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -54,8 +59,6 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
-import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterFactory;
-import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterSchema;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
@@ -84,6 +87,7 @@ import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
+
 import javax.cache.Cache;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -93,15 +97,9 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 
 @Component(
-         name = "org.wso2.apimgt.impl.services", 
+         name = "org.wso2.apimgt.impl.services",
          immediate = true)
 public class APIManagerComponent {
 
@@ -227,6 +225,9 @@ public class APIManagerComponent {
                 log.error("Error while activating UserPostSelfRegistration handler component.", e);
             }
 
+            //Initialize product REST API token caches
+            CacheProvider.createRESTAPITokenCache();
+            CacheProvider.createRESTAPIInvalidTokenCache();
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {
@@ -245,10 +246,10 @@ public class APIManagerComponent {
     }
 
     @Reference(
-             name = "registry.service", 
-             service = org.wso2.carbon.registry.core.service.RegistryService.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
+             name = "registry.service",
+             service = org.wso2.carbon.registry.core.service.RegistryService.class,
+             cardinality = ReferenceCardinality.MANDATORY,
+             policy = ReferencePolicy.DYNAMIC,
              unbind = "unsetRegistryService")
     protected void setRegistryService(RegistryService registryService) {
         if (registryService != null && log.isDebugEnabled()) {
@@ -262,10 +263,10 @@ public class APIManagerComponent {
     }
 
     @Reference(
-             name = "tenant.indexloader", 
-             service = org.wso2.carbon.registry.indexing.service.TenantIndexingLoader.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
+             name = "tenant.indexloader",
+             service = org.wso2.carbon.registry.indexing.service.TenantIndexingLoader.class,
+             cardinality = ReferenceCardinality.MANDATORY,
+             policy = ReferencePolicy.DYNAMIC,
              unbind = "unsetIndexLoader")
     protected void setIndexLoader(TenantIndexingLoader indexLoader) {
         if (indexLoader != null && log.isDebugEnabled()) {
@@ -279,10 +280,10 @@ public class APIManagerComponent {
     }
 
     @Reference(
-             name = "user.realm.service", 
-             service = org.wso2.carbon.user.core.service.RealmService.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
+             name = "user.realm.service",
+             service = org.wso2.carbon.user.core.service.RealmService.class,
+             cardinality = ReferenceCardinality.MANDATORY,
+             policy = ReferencePolicy.DYNAMIC,
              unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if (realmService != null && log.isDebugEnabled()) {
@@ -296,10 +297,10 @@ public class APIManagerComponent {
     }
 
     @Reference(
-             name = "listener.manager.service", 
-             service = org.apache.axis2.engine.ListenerManager.class, 
-             cardinality = ReferenceCardinality.OPTIONAL, 
-             policy = ReferencePolicy.DYNAMIC, 
+             name = "listener.manager.service",
+             service = org.apache.axis2.engine.ListenerManager.class,
+             cardinality = ReferenceCardinality.OPTIONAL,
+             policy = ReferencePolicy.DYNAMIC,
              unbind = "unsetListenerManager")
     protected void setListenerManager(ListenerManager listenerManager) {
         // address and port numbers properly.
@@ -583,10 +584,10 @@ public class APIManagerComponent {
     }
 
     @Reference(
-             name = "config.context.service", 
-             service = org.wso2.carbon.utils.ConfigurationContextService.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
+             name = "config.context.service",
+             service = org.wso2.carbon.utils.ConfigurationContextService.class,
+             cardinality = ReferenceCardinality.MANDATORY,
+             policy = ReferencePolicy.DYNAMIC,
              unbind = "unsetConfigurationContextService")
     protected void setConfigurationContextService(ConfigurationContextService contextService) {
         ServiceReferenceHolder.setContextService(contextService);
@@ -597,10 +598,10 @@ public class APIManagerComponent {
     }
 
     @Reference(
-             name = "tenant.registryloader", 
-             service = org.wso2.carbon.registry.core.service.TenantRegistryLoader.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
+             name = "tenant.registryloader",
+             service = org.wso2.carbon.registry.core.service.TenantRegistryLoader.class,
+             cardinality = ReferenceCardinality.MANDATORY,
+             policy = ReferencePolicy.DYNAMIC,
              unbind = "unsetTenantRegistryLoader")
     protected void setTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
         this.tenantRegistryLoader = tenantRegistryLoader;
@@ -620,10 +621,10 @@ public class APIManagerComponent {
      * @param outputEventAdapterService Output EventAdapter Service reference
      */
     @Reference(
-             name = "event.output.adapter.service", 
-             service = org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
+             name = "event.output.adapter.service",
+             service = org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService.class,
+             cardinality = ReferenceCardinality.MANDATORY,
+             policy = ReferencePolicy.DYNAMIC,
              unbind = "unsetOutputEventAdapterService")
     protected void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(outputEventAdapterService);
