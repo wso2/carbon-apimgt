@@ -30,7 +30,7 @@ const Configurations = {
             },
             custom: {
                 contentAreaWidth: 1240,
-                backgroundImage: '/devportal/site/public/images/back-light.png',
+                backgroundImage: '', // Add a watermark background to the content area of the page. Example ( '/devportal/site/public/images/back-light.png')
                 defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
                 page: {
                     style: 'fluid', // Set the page style ( Other values available 'fixed', 'fluid')
