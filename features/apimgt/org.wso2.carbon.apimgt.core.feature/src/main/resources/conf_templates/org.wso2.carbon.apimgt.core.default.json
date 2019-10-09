@@ -55,7 +55,7 @@
     "openid"
   ],
   "apim.store.login_username_case_insensitive": true,
-  "apim.store.url": "https://localhost:${mgt.transport.https.port}/store",
+  "apim.store.url": "https://localhost:${mgt.transport.https.port}/devportal",
   "apim.store.enable_application_sharing": false,
   "apim.store.display_multiple_versions": false,
   "apim.store.display_deprecated_apis": false,
