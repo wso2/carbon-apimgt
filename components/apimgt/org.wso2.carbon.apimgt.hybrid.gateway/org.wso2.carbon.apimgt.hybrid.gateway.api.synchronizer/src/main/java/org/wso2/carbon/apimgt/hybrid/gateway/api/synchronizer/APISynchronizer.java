@@ -730,7 +730,7 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
         } catch (XMLStreamException e) {
             throw new APISynchronizationException("There was an error in reading XML Stream of the file " + seqFileName,
                     e);
-        }catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             throw new APISynchronizationException("The file " + seqFileName + " could not be located.", e);
         } catch (IOException e) {
             throw new APISynchronizationException("An error occurred while reading the file " + seqFileName);
