@@ -35,6 +35,7 @@ import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
 import Settings from 'AppComponents/Shared/SettingsContext';
 import AppsTableContent from './AppsTableContent';
 import ApplicationTableHead from './ApplicationTableHead';
+import DeleteConfirmation from './DeleteConfirmation';
 
 /**
  *
@@ -126,6 +127,7 @@ class Listing extends Component {
             rowsPerPage: 10,
             open: false,
             isApplicationSharingEnabled: true,
+            isDeleteOpen: false,
         };
         this.handleAppDelete = this.handleAppDelete.bind(this);
     }
@@ -223,26 +225,43 @@ class Listing extends Component {
      * @param {*} event event
      * @memberof Listing
      */
-    handleAppDelete(event) {
-        const { data } = this.state;
+    handleAppDelete() {
+        const { data, deletingId } = this.state;
         const { intl } = this.props;
-        const id = event.currentTarget.getAttribute('data-appId');
         const newData = new Map([...data]);
-        const app = newData.get(id);
+        const app = newData.get(deletingId);
         app.deleting = true;
         this.setState({ data: newData });
 
-        const message = intl.formatMessage({
+        let message = intl.formatMessage({
             defaultMessage: 'Application {name} deleted successfully!',
             id: 'Applications.Listing.Listing.application.deleted.successfully',
         }, { name: app.name });
-        const promisedDelete = Application.deleteApp(id);
+        const promisedDelete = Application.deleteApp(deletingId);
         promisedDelete.then((ok) => {
             if (ok) {
-                newData.delete(id);
+                newData.delete(deletingId);
                 Alert.info(message);
+                this.toggleDeleteConfirmation();
                 this.setState({ data: newData });
             }
+        }).catch((error) => {
+            console.log(error);
+            message = intl.formatMessage({
+                defaultMessage: 'Error while deleting application {name}',
+                id: 'Applications.Listing.Listing.application.deleting.error',
+            }, { name: app.name });
+            Alert.error(message);
+        });
+    }
+
+    toggleDeleteConfirmation = (event) => {
+        let id = '';
+        if (event) {
+            id = event.currentTarget.getAttribute('data-appId');
+        }
+        this.setState(({ isDeleteOpen }) => {
+            return { isDeleteOpen: !isDeleteOpen, deletingId: id };
         });
     }
 
@@ -252,6 +271,7 @@ class Listing extends Component {
     render() {
         const {
             data, order, orderBy, rowsPerPage, page, open, isApplicationSharingEnabled,
+            isDeleteOpen,
         } = this.state;
         if (!data) {
             return <Loading />;
@@ -356,6 +376,7 @@ class Listing extends Component {
                                         order={order}
                                         orderBy={orderBy}
                                         isApplicationSharingEnabled={isApplicationSharingEnabled}
+                                        toggleDeleteConfirmation={this.toggleDeleteConfirmation}
                                     />
                                 </Table>
                                 <TablePagination
@@ -394,6 +415,11 @@ class Listing extends Component {
                                 })}
                             />
                         )}
+                        <DeleteConfirmation
+                            handleAppDelete={this.handleAppDelete}
+                            isDeleteOpen={isDeleteOpen}
+                            toggleDeleteConfirmation={this.toggleDeleteConfirmation}
+                        />
                     </Grid>
                 </Grid>
             </main>
