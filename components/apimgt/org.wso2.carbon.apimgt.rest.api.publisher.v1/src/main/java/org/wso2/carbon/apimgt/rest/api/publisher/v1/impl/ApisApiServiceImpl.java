@@ -361,6 +361,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
 
+        if (body.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED && body.getVisibleRoles().isEmpty()) {
+            RestApiUtil.handleBadRequest("Valid roles should be added under 'visibleRoles' to restrict " +
+                    "the visibility", log);
+        }
+
         //Get all existing versions of  api been adding
         List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
         if (apiVersions.size() > 0) {
