@@ -16,11 +16,13 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import APIValidation from 'AppData/APIValidation';
+import { FormattedMessage } from 'react-intl';
 
 /**
  *
@@ -32,6 +34,12 @@ import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 export default function Description(props) {
     const { api, configDispatcher } = props;
     const [apiFromContext] = useAPI();
+    const [validity, setValidity] = useState(true);
+
+    const validate = (value) => {
+        const descriptionValidity = APIValidation.apiDescription.validate(value).error;
+        setValidity(descriptionValidity === null);
+    };
 
     return (
         <TextField
@@ -45,6 +53,18 @@ export default function Description(props) {
             variant='outlined'
             onChange={e => configDispatcher({ action: 'description', value: e.target.value })}
             disabled={isRestricted(['apim:api_create'], apiFromContext)}
+            InputProps={{
+                onBlur: ({ target: { value } }) => {
+                    validate(value);
+                },
+            }}
+            helperText={!validity &&
+                <FormattedMessage
+                    id='Apis.Description.Invalid'
+                    defaultMessage='Description cannot exceed 20000 characters'
+                />
+            }
+            error={!validity}
         />
     );
 }

@@ -94,6 +94,7 @@ const definition = {
     operationTarget: Joi.string().required(),
     name: Joi.string().min(1).max(255),
     email: Joi.string().email({ tlds: true }).required(),
+    apiDescription: Joi.string().optional().allow('').max(20000),
 };
 
 export default definition;
