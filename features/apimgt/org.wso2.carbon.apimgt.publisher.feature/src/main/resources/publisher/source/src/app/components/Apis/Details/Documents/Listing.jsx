@@ -31,6 +31,7 @@ import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import { isRestricted } from 'AppData/AuthManager';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import Create from './Create';
 import MarkdownEditor from './MarkdownEditor';
@@ -172,6 +173,8 @@ class Listing extends React.Component {
         const { docs, showAddDocs } = this.state;
         const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
         const url = `/${urlPrefix}/${api.id}/documents/create`;
+        const showActionsColumn =
+            isRestricted(['apim:api_publish','apim:api_create'], api) ? 'excluded' : true;
         const options = {
             selectableRows: false,
             title: false,
@@ -241,6 +244,7 @@ class Listing extends React.Component {
                     />
                 ),
                 options: {
+                    display: showActionsColumn,
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
                             const docName = tableMeta.rowData[1];

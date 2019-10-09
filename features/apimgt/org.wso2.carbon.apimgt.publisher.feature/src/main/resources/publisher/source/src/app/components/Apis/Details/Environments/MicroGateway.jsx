@@ -39,21 +39,21 @@ const useStyles = makeStyles(theme => ({
         flexWrap: 'wrap',
     },
     mainTitle: {
-        paddingTop: theme.spacing.unit * 3,
+        paddingTop: theme.spacing(3),
     },
     gatewayPaper: {
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
     },
     content: {
-        marginTop: theme.spacing.unit * 2,
-        margin: `${theme.spacing.unit * 2}px 0 ${theme.spacing.unit * 2}px 0`,
+        marginTop: theme.spacing(2),
+        margin: `${theme.spacing(2)}px 0 ${theme.spacing(2)}px 0`,
     },
     emptyBox: {
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
-        paddingLeft: theme.spacing.unit * 3,
+        paddingLeft: theme.spacing(3),
     },
 }));
 
