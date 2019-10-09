@@ -326,21 +326,6 @@ class InfoBar extends React.Component {
                                         ) : (null)
                                     ))}
                                     <div className={classes.infoItem}>
-                                        {application.status === 'APPROVED' ? (
-                                            <Icon>check_circle</Icon>
-                                        ) : (
-                                            <Typography variant='subtitle1' gutterBottom>
-                                                {application.status}
-                                            </Typography>
-                                        )}
-                                        <Typography variant='caption' gutterBottom align='left'>
-                                            <FormattedMessage
-                                                id='Applications.Details.InfoBar.lifecycle.status'
-                                                defaultMessage='Lifecycle Status '
-                                            />
-                                        </Typography>
-                                    </div>
-                                    <div className={classes.infoItem}>
                                         <Link
                                             to={`/applications/${applicationId}/edit/`}
                                             className={classes.button}

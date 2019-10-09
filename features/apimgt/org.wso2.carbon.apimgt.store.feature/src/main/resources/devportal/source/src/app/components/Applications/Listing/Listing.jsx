@@ -294,35 +294,12 @@ class Listing extends Component {
                         </Typography>
                         {data && (
                             <Typography variant='caption' gutterBottom align='left'>
-                                {data.count === 0 ? (
+                                {data.count === 0 && (
                                     <React.Fragment>
                                         <FormattedMessage
                                             id='Applications.Listing.Listing.no.applications.created'
                                             defaultMessage='No Applications created'
                                         />
-                                    </React.Fragment>
-                                ) : (
-                                    <React.Fragment>
-                                        <FormattedMessage
-                                            id='Applications.Listing.Listing.displaying'
-                                            defaultMessage='Displaying'
-                                        />
-                                        {' '}
-                                        {data.count}
-                                        {' '}
-                                        {data.count === 1
-                                            ? (
-                                                <FormattedMessage
-                                                    id='Applications.Listing.Listing.displaying.application'
-                                                    defaultMessage='Application'
-                                                />
-                                            )
-                                            : (
-                                                <FormattedMessage
-                                                    id='Applications.Listing.Listing.displaying.applications'
-                                                    defaultMessage='Applications'
-                                                />
-                                            )}
                                     </React.Fragment>
                                 )}
                             </Typography>
@@ -358,7 +335,7 @@ class Listing extends Component {
                                         id='Applications.Listing.Listing.logical.description'
                                         defaultMessage={`An application is a logical collection of APIs. 
                                         Applications allow you to use a single access token to invoke a
-                                         collection of APIs and to subscribe to one API multiple times pre-created
+                                         collection of APIs and to subscribe to one API multiple times
                                           and allows unlimited access by default.`}
                                     />
                                 </Typography>
