@@ -65,7 +65,7 @@ const styles = theme => ({
         'text-align-last': 'center',
     },
     contentWrapper: {
-        width: theme.custom.contentAreaWidth - theme.custom.leftMenuWidth,
+        maxWidth: theme.custom.contentAreaWidth - theme.custom.leftMenu.width,
     },
     root: {
         marginTop: 20,

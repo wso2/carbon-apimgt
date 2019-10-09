@@ -17,7 +17,7 @@ const Configurations = {
                 },
                 background: {
                     default: '#efefef',
-                    paper: '#ffffff',
+                    paper: '#415a85',
                     drawer: '#1a1f2f',
                 },
             },
@@ -40,39 +40,39 @@ const Configurations = {
                 },
                 appBar: {
                     logo: '/devportal/site/public/images/logo.png',
-                    background: '#1d344f',
-                    activeBackground: '#347eff',
+                    background: '#207bb0',
+                    activeBackground: '#f62921',
                     showSearch: true,
                     drawerWidth: 200,
                 },
                 leftMenu: {
                     position: 'vertical-left', // Sets the position of the left menu ( 'horizontal', 'vertical-left', 'vertical-right')
-                    style: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
+                    style: 'no text', //  other values ('icon top', 'icon left', 'no icon', 'no text')
                     iconSize: 24,
                     leftMenuTextStyle: 'uppercase',
-                    width: 180,
-                    background: '#1a1f2f',
+                    width: 60,
+                    background: '#051d46',
                     leftMenuActive: '#254061',
-                    activeBackground: 'rgb(29, 52, 79)',
-                    rootIconVisible: true,
+                    activeBackground: '#347eff',
+                    rootIconVisible: false,
                     rootIconSize: 42,
                     rootIconTextVisible: false,
                     rootBackground: '#204d6a',
                 },
                 infoBar: {
                     height: 70,
-                    background: '#ffffff',
+                    background: '#000',
                     showBackIcon: true,
                     showThumbnail: true,
                     starColor: '#f6bf21', // By default the opasite color of infoBar.background is derived. From here you can override it.
-                    sliderBackground: '#ffffff',
+                    sliderBackground: '#000',
                     iconOddColor: '#347eff',
                     iconEvenColor: '#89b4ff',
                     listGridSelectedColor: '#347eff', // Defines color of the selected icon ( grid/ list ) view of the api listing page
                 },
                 listView: {
                     tableHeadBackground: '#fff',
-                    tableBodyOddBackgrund: '#efefef',
+                    tableBodyOddBackgrund: '#444',
                     tableBodyEvenBackgrund: '#fff',
                 },
                 overview: {
@@ -91,7 +91,7 @@ const Configurations = {
                     post: '#8ac149',
                     put: '#ff9700',
                     delete: '#fd5621',
-                    options: '#5f7c8a',
+                    option: '#5f7c8a',
                     patch: '#785446',
                     head: '#785446',
                 },

@@ -263,7 +263,7 @@ class CreateEditForm extends React.Component {
             } else {
                 this.setState({ nameEmpty: false });
             }
-        } else if (field === 'summery') {
+        } else if (field === 'summary') {
             if (value === '') {
                 this.setState({ summeryEmpty: true });
             } else {
