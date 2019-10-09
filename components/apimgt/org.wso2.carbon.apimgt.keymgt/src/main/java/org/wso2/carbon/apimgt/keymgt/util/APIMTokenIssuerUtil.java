@@ -70,19 +70,20 @@ public class APIMTokenIssuerUtil {
         }
         jwtTokenInfoDTO.setSubscribedApiDTOList(subscribedApiDTOList);
 
-        SubscriptionPolicy[] subscriptionPolicies = ApiMgtDAO.getInstance()
-                .getSubscriptionPolicies(subscriptionTiers.toArray(new String[0]), APIUtil.getTenantId(appOwner));
+        if (subscriptionTiers.size() > 0) {
+            SubscriptionPolicy[] subscriptionPolicies = ApiMgtDAO.getInstance()
+                    .getSubscriptionPolicies(subscriptionTiers.toArray(new String[0]), APIUtil.getTenantId(appOwner));
 
-        Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<>();
-        for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies) {
-            SubscriptionPolicyDTO subscriptionPolicyDTO = new SubscriptionPolicyDTO();
-            subscriptionPolicyDTO.setSpikeArrestLimit(subscriptionPolicy.getRateLimitCount());
-            subscriptionPolicyDTO.setSpikeArrestUnit(subscriptionPolicy.getRateLimitTimeUnit());
-            subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicy.isStopOnQuotaReach());
-            subscriptionPolicyDTOList.put(subscriptionPolicy.getPolicyName(), subscriptionPolicyDTO);
+            Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<>();
+            for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies) {
+                SubscriptionPolicyDTO subscriptionPolicyDTO = new SubscriptionPolicyDTO();
+                subscriptionPolicyDTO.setSpikeArrestLimit(subscriptionPolicy.getRateLimitCount());
+                subscriptionPolicyDTO.setSpikeArrestUnit(subscriptionPolicy.getRateLimitTimeUnit());
+                subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicy.isStopOnQuotaReach());
+                subscriptionPolicyDTOList.put(subscriptionPolicy.getPolicyName(), subscriptionPolicyDTO);
+            }
+            jwtTokenInfoDTO.setSubscriptionPolicyDTOList(subscriptionPolicyDTOList);
         }
-        jwtTokenInfoDTO.setSubscriptionPolicyDTOList(subscriptionPolicyDTOList);
-
         return jwtTokenInfoDTO;
     }
 }

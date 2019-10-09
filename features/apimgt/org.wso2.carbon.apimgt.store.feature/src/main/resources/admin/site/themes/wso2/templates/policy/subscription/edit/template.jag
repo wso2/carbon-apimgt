@@ -94,6 +94,7 @@
          <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid' value='<%=i18n.localize("Invalid")%>'/>
          <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar' value='<%=i18n.localize("Name contains one or more illegal characters ")%> ( [ ~ ! & @ # ; % ^ & * + = { } | <> &quot;  , ] ).'/>
          <input type='hidden' id='errorMessageSpaces' name='errorMessageSpaces' value='<%=i18n.localize("Name contains spaces")%>'/>
+         <input type='hidden' id='invalidRoleMsg' name='invalidRoleMsg' value='<%=i18n.localize("Invalid role name")%>'/>
 
          <form class="form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data"
                     action="/admin/site/blocks/policy/subscription/edit/ajax/subscription-policy-edit.jag">

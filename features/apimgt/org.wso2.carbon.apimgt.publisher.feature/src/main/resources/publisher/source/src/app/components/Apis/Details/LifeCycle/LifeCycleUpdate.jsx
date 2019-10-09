@@ -103,12 +103,12 @@ class LifeCycleUpdate extends Component {
 
                 if (workflowStatus === this.WORKFLOW_STATUS.CREATED) {
                     Alert.info(intl.formatMessage({
-                        id: 'Apis.Details.LifeCycle.LifeCycleUpdate.success',
+                        id: 'Apis.Details.LifeCycle.LifeCycleUpdate.success.createStatus',
                         defaultMessage: 'Lifecycle state change request has been sent',
                     }));
                 } else {
                     Alert.info(intl.formatMessage({
-                        id: 'Apis.Details.LifeCycle.LifeCycleUpdate.success',
+                        id: 'Apis.Details.LifeCycle.LifeCycleUpdate.success.otherStatus',
                         defaultMessage: 'Lifecycle state updated successfully',
                     }));
                 }

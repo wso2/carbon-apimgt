@@ -31,6 +31,7 @@ import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import { isRestricted } from 'AppData/AuthManager';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import Create from './Create';
 import MarkdownEditor from './MarkdownEditor';
@@ -100,7 +101,7 @@ const styles = theme => ({
     },
 });
 function LinkGenerator(props) {
-    return props.apiType === API.CONSTS.APIProduct ? (
+    return props.isAPIProduct ? (
         <Link to={'/api-products/' + props.apiId + '/documents/' + props.docId + '/view'}>{props.docName}</Link>
     ) : (
         <Link to={'/apis/' + props.apiId + '/documents/' + props.docId + '/view'}>{props.docName}</Link>
@@ -130,7 +131,6 @@ class Listing extends React.Component {
      */
     getDocumentsList() {
         const { api, intl } = this.props;
-
         if (api.apiType === API.CONSTS.APIProduct) {
             const apiProduct = new APIProduct();
             const docs = apiProduct.getDocuments(api.id);
@@ -173,6 +173,8 @@ class Listing extends React.Component {
         const { docs, showAddDocs } = this.state;
         const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
         const url = `/${urlPrefix}/${api.id}/documents/create`;
+        const showActionsColumn =
+            isRestricted(['apim:api_publish','apim:api_create'], api) ? 'excluded' : true;
         const options = {
             selectableRows: false,
             title: false,
@@ -242,6 +244,7 @@ class Listing extends React.Component {
                     />
                 ),
                 options: {
+                    display: showActionsColumn,
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
                             const docName = tableMeta.rowData[1];
@@ -256,6 +259,7 @@ class Listing extends React.Component {
                                             </td>
                                             <td>
                                                 <Edit
+                                                    apiType={api.apiType}
                                                     docName={docName}
                                                     docId={docId}
                                                     apiId={this.apiId}
@@ -288,6 +292,7 @@ class Listing extends React.Component {
                                             </td>
                                             <td>
                                                 <Edit
+                                                    apiType={api.apiType}
                                                     docName={docName}
                                                     docId={docId}
                                                     apiId={this.apiId}
@@ -321,6 +326,7 @@ class Listing extends React.Component {
                                             </td>
                                             <td>
                                                 <Edit
+                                                    apiType={api.apiType}
                                                     docName={docName}
                                                     docId={docId}
                                                     apiId={this.apiId}
@@ -348,6 +354,7 @@ class Listing extends React.Component {
                                             </td>
                                             <td>
                                                 <Edit
+                                                    apiType={api.apiType}
                                                     docName={docName}
                                                     docId={docId}
                                                     apiId={this.apiId}

@@ -84,7 +84,7 @@ function VerbElement(props) {
     }
 }
 
-const SUPPORTED_VERBS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTION'];
+const SUPPORTED_VERBS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
 /**
  *
  *
@@ -206,7 +206,7 @@ export default function AddOperation(props) {
                     >
                         <Fab
                             disabled={isAdding}
-                            style={{ marginLeft: '20px', marginBottom: '15px' }}
+                            style={{ marginLeft: '20px', marginBottom: '15px', marginRight: '20px' }}
                             size='small'
                             color='primary'
                             aria-label='add'
