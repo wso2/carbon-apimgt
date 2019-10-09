@@ -125,7 +125,12 @@ export default function CheckboxLabels(props) {
                             ) : (
                                 <CloseIcon className={classes.iconFalse} />
                             )}
-                            <Typography variant='h10'>Business Plan(s) selected</Typography>
+                            <Typography variant='h10'>
+                                <FormattedMessage
+                                    id='Apis.Details.LifeCycle.CheckboxLabels.business.plans.selected'
+                                    defaultMessage='Business Plan(s) selected'
+                                />
+                            </Typography>
                             <Link to={'/apis/' + api.id + '/subscriptions'}>
                                 <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
                             </Link>
