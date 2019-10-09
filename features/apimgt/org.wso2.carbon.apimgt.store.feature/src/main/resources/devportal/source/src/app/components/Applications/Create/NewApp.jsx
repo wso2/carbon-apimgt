@@ -87,7 +87,7 @@ class NewApp extends React.Component {
      * @param {boolean} reset should it be reset to initial state or not
      * @memberof NewApp
      */
-    initApplicationState = (reset = false) => {
+    initApplicationState = () => {
         // Get all the tiers to populate the drop down.
         const api = new API();
         const promiseTiers = api.getAllTiers('application');
@@ -105,12 +105,6 @@ class NewApp extends React.Component {
                 allAttributes.body.list.map(item => allAppAttributes.push(item));
                 if (allAttributes.length > 0) {
                     newRequest.attributes = allAppAttributes.filter(item => !item.hidden);
-                }
-                if (reset) {
-                    newRequest.name = '';
-                    newRequest.description = '';
-                    newRequest.tokenType = 'OAUTH';
-                    newRequest.groups = null;
                 }
                 this.setState({ applicationRequest: newRequest, throttlingPolicyList, allAppAttributes });
             })
@@ -200,14 +194,18 @@ class NewApp extends React.Component {
      */
     saveApplication = () => {
         const { applicationRequest } = this.state;
-        const { intl } = this.props;
+        const { intl, history } = this.props;
         const api = new API();
         this.validateName(applicationRequest.name)
             .then(() => this.validateAttributes(applicationRequest.attributes))
             .then(() => api.createApplication(applicationRequest))
             .then(() => {
                 console.log('Application created successfully.');
-                this.initApplicationState(true);
+                Alert.info(intl.formatMessage({
+                    id: 'Applications.Create.NewApp.Application.created.successfully',
+                    defaultMessage: 'Application created successfully.',
+                }));
+                history.push('/applications');
             })
             .catch((error) => {
                 const { response } = error;
@@ -307,24 +305,24 @@ class NewApp extends React.Component {
         );
         return (
             <ApplicationCreateBase title={pageTitle}>
-                <Box py={4}>
-                    <Box display='flex' justifyContent='center'>
-                        <Grid item xs={10} md={9}>
-                            <ApplicationCreateForm
-                                throttlingPolicyList={throttlingPolicyList}
-                                applicationRequest={applicationRequest}
-                                updateApplicationRequest={this.updateApplicationRequest}
-                                validateName={this.validateName}
-                                isNameValid={isNameValid}
-                                allAppAttributes={allAppAttributes}
-                                handleAttributesChange={this.handleAttributesChange}
-                                isRequiredAttribute={this.isRequiredAttribute}
-                                getAttributeValue={this.getAttributeValue}
-                                isApplicationSharingEnabled={isApplicationSharingEnabled}
-                                handleDeleteChip={this.handleDeleteChip}
-                                handleAddChip={this.handleAddChip}
-                            />
-                            <Box justifyContent='flex-start' mt={4}>
+                <Box py={4} display='flex' justifyContent='center'>
+                    <Grid item xs={10} md={9}>
+                        <ApplicationCreateForm
+                            throttlingPolicyList={throttlingPolicyList}
+                            applicationRequest={applicationRequest}
+                            updateApplicationRequest={this.updateApplicationRequest}
+                            validateName={this.validateName}
+                            isNameValid={isNameValid}
+                            allAppAttributes={allAppAttributes}
+                            handleAttributesChange={this.handleAttributesChange}
+                            isRequiredAttribute={this.isRequiredAttribute}
+                            getAttributeValue={this.getAttributeValue}
+                            isApplicationSharingEnabled={isApplicationSharingEnabled}
+                            handleDeleteChip={this.handleDeleteChip}
+                            handleAddChip={this.handleAddChip}
+                        />
+                        <Box display='flex' justifyContent='flex-start' mt={4} spacing={1}>
+                            <Box>
                                 <Button
                                     variant='contained'
                                     color='primary'
@@ -335,7 +333,8 @@ class NewApp extends React.Component {
                                         defaultMessage='save'
                                     />
                                 </Button>
-
+                            </Box>
+                            <Box ml={1}>
                                 <Link to='/applications/'>
                                     <Button variant='text'>
                                         <FormattedMessage
@@ -345,8 +344,8 @@ class NewApp extends React.Component {
                                     </Button>
                                 </Link>
                             </Box>
-                        </Grid>
-                    </Box>
+                        </Box>
+                    </Grid>
                 </Box>
             </ApplicationCreateBase>
         );
@@ -356,6 +355,9 @@ class NewApp extends React.Component {
 NewApp.propTypes = {
     intl: PropTypes.shape({
         formatMessage: PropTypes.func.isRequired,
+    }).isRequired,
+    history: PropTypes.shape({
+        push: PropTypes.func.isRequired,
     }).isRequired,
 };
 
