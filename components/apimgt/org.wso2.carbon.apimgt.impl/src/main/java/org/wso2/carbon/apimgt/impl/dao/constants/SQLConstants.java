@@ -2282,6 +2282,26 @@ public class SQLConstants {
             " ORDER BY " +
             "   URL_MAPPING_ID ASC ";
 
+    public static final String GET_URL_TEMPLATES_OF_API_SQL =
+            " SELECT " +
+            "   AUM.URL_PATTERN," +
+            "   AUM.HTTP_METHOD," +
+            "   AUM.AUTH_SCHEME," +
+            "   AUM.THROTTLING_TIER, " +
+            "   AUM.MEDIATION_SCRIPT, " +
+            "   PROD.API_PRODUCT_PROVIDER, " +
+            "   PROD.API_PRODUCT_NAME, " +
+            "   PROD.API_PRODUCT_VERSION " +
+            " FROM " +
+            "   AM_API_URL_MAPPING AUM " +
+            " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+            " LEFT JOIN AM_API_PRODUCT_MAPPING APM ON AUM.URL_MAPPING_ID = APM.URL_MAPPING_ID" +
+            " LEFT JOIN AM_API_PRODUCT PROD ON PROD.API_PRODUCT_ID = APM.API_PRODUCT_ID" +
+            " WHERE " +
+            "  API.API_PROVIDER = ? AND " +
+            "  API.API_NAME = ? AND " +
+            "  API.API_VERSION = ? ";
+
     public static final String GET_AUTHORIZED_DOMAINS_PREFIX =
             "SELECT AKDM.AUTHZ_DOMAIN FROM AM_APP_KEY_DOMAIN_MAPPING AKDM, ";
 

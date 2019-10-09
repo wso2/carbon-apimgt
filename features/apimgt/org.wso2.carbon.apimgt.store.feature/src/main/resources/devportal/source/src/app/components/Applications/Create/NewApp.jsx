@@ -42,8 +42,8 @@ import Settings from 'AppComponents/Shared/SettingsContext';
 const styles = theme => ({
     appBar: {
         position: 'relative',
-        backgroundColor: theme.palette.background.appBar,
-        color: theme.palette.getContrastText(theme.palette.background.appBar),
+        backgroundColor: theme.custom.appBar.background,
+        color: theme.palette.getContrastText(theme.custom.appBar.background),
     },
     flex: {
         flex: 1,

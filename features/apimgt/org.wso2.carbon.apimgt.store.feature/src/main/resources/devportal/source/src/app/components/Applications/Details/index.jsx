@@ -42,8 +42,8 @@ import InfoBar from './InfoBar';
  */
 const styles = theme => ({
     LeftMenu: {
-        backgroundColor: theme.palette.background.leftMenu,
-        width: theme.custom.leftMenuWidth,
+        backgroundColor: theme.custom.leftMenu.background,
+        width: theme.custom.leftMenu.width,
         textAlign: 'center',
         fontFamily: theme.typography.fontFamily,
         position: 'absolute',
@@ -52,12 +52,12 @@ const styles = theme => ({
         top: 0,
     },
     leftLInkMain: {
-        borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
+        borderRight: 'solid 1px ' + theme.custom.leftMenu.background,
         paddingBottom: theme.spacing.unit,
         paddingTop: theme.spacing.unit,
         cursor: 'pointer',
-        backgroundColor: theme.palette.background.leftMenuActive,
-        color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
+        backgroundColor: theme.custom.leftMenu.leftMenuActive,
+        color: theme.palette.getContrastText(theme.custom.leftMenu.leftMenuActive),
         textDecoration: 'none',
     },
     detailsContent: {
@@ -68,11 +68,11 @@ const styles = theme => ({
         display: 'flex',
         flex: 1,
         flexDirection: 'column',
-        marginLeft: theme.custom.leftMenuWidth,
+        marginLeft: theme.custom.leftMenu.width,
         paddingBottom: theme.spacing.unit * 3,
     },
     contentDown: {
-        width: theme.custom.contentAreaWidth,
+        maxWidth: theme.custom.contentAreaWidth,
     },
 });
 /**
@@ -202,8 +202,8 @@ class Details extends Component {
                             <CustomIcon width={52} height={52} icon='applications' />
                         </div>
                     </Link>
-                    <LeftMenuItem text='productionkeys' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    <LeftMenuItem text='sandBoxkeys' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    <LeftMenuItem text='production keys' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    <LeftMenuItem text='sandbox keys' handleMenuSelect={this.handleMenuSelect} active={active} />
                     <LeftMenuItem text='subscriptions' handleMenuSelect={this.handleMenuSelect} active={active} />
                 </div>
                 <div className={classes.content}>

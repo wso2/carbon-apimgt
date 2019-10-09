@@ -130,7 +130,7 @@ class Scopes extends React.Component {
                     label: (
                         <FormattedMessage
                             id='Apis.Details.Scopes.Scopes.table.header.roles'
-                            defaultMessage='Applying Roles'
+                            defaultMessage='Roles'
                         />
                     ),
                 },

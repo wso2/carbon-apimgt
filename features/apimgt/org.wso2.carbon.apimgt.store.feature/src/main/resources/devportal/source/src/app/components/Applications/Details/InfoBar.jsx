@@ -115,7 +115,7 @@ const styles = theme => ({
         width: 100,
     },
     contentWrapper: {
-        width: theme.custom.contentAreaWidth - theme.custom.leftMenuWidth,
+        maxWidth: theme.custom.contentAreaWidth - theme.custom.leftMenu.width,
         alignItems: 'center',
     },
     ratingBoxWrapper: {
@@ -124,14 +124,14 @@ const styles = theme => ({
         alignItems: 'center',
     },
     ratingBox: {
-        backgroundColor: theme.palette.background.leftMenu,
+        backgroundColor: theme.custom.leftMenu.background,
         border: '1px solid rgb(71, 211, 244)',
         borderRadius: '5px',
         display: 'flex',
         position: 'absolute',
         top: 14,
         height: '40px',
-        color: theme.palette.getContrastText(theme.palette.background.leftMenu),
+        color: theme.palette.getContrastText(theme.custom.leftMenu.background),
         alignItems: 'center',
         left: '0',
         paddingLeft: '5px',
