@@ -370,8 +370,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             HttpPost httpTokpost = new HttpPost(tokenEndpoint);
             List<NameValuePair> tokParams = new ArrayList<>(3);
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_VALUE));
-            tokParams.add(new BasicNameValuePair(GRANT_TYPE_PARAM_VALIDITY,
-                    Long.toString(tokenRequest.getValidityPeriod())));
+            if(tokenRequest.getValidityPeriod() != 0) {
+                tokParams.add(new BasicNameValuePair(GRANT_TYPE_PARAM_VALIDITY,
+                        Long.toString(tokenRequest.getValidityPeriod())));
+            }
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
 
