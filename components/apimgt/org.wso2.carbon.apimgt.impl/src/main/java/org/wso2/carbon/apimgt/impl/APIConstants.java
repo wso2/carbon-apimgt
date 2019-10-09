@@ -1216,7 +1216,7 @@ public final class APIConstants {
     public static final String X_WSO2_SANDBOX_ENDPOINTS = "x-wso2-sandbox-endpoints";
     public static final String X_WSO2_BASEPATH = "x-wso2-basePath";
     public static final String X_WSO2_TRANSPORTS = "x-wso2-transports";
-    public static final String X_WSO2_ENDPOINT_TYPE = "endpoint_type";
+    public static final String X_WSO2_ENDPOINT_TYPE = "type";
 
     //API Constants
     public static final String API_DATA_NAME = "name";
@@ -1254,6 +1254,7 @@ public final class APIConstants {
     public static final String ENDPOINT_SANDBOX_FAILOVERS = "sandbox_failovers";
     public static final String ENDPOINT_PRODUCTION_ENDPOINTS = "production_endpoints";
     public static final String ENDPOINT_SANDBOX_ENDPOINTS = "sandbox_endpoints";
+    public static final String ENDPOINT_URLS = "urls";
     public static final String ENDPOINT_URL = "url";
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
