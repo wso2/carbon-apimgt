@@ -29,6 +29,7 @@ import PropTypes from 'prop-types';
 import Select from '@material-ui/core/Select';
 import TenantAutocomplete from 'AppComponents/Apis/Details/Subscriptions/TenantAutocomplete';
 import Alert from 'AppComponents/Shared/Alert';
+import { isRestricted } from 'AppData/AuthManager';
 
 
 const useStyles = makeStyles(theme => ({
@@ -89,6 +90,7 @@ export default function SimpleSelect(props) {
     const inputLabel = React.useRef(null);
     const [labelWidth, setLabelWidth] = React.useState(0);
     const isSpecificTenants = values.availability === 'specificTenants';
+    const isUIElementDisabled = isRestricted(['apim:api_publish', 'apim:api_create'], api);
 
     React.useEffect(() => {
         setLabelWidth(inputLabel.current.offsetWidth);
@@ -143,7 +145,7 @@ export default function SimpleSelect(props) {
                         </FormLabel>
                     </Grid>
                     <Grid item xs={8} justify='space-between' spacing={32}>
-                        <FormControl variant='outlined' className={classes.formControl}>
+                        <FormControl variant='outlined' className={classes.formControl} disabled={isUIElementDisabled}>
                             <InputLabel ref={inputLabel} htmlFor='outlined-age-simple' />
                             <Select
                                 value={values.availability}
@@ -166,6 +168,7 @@ export default function SimpleSelect(props) {
                             color='primary'
                             onClick={subscriptionAvailableTenants}
                             className={classes.saveButton}
+                            disabled={isUIElementDisabled}
                         >
                             <FormattedMessage id='Apis.Details.Scopes.CreateScope.save' defaultMessage='Save' />
                         </Button>
