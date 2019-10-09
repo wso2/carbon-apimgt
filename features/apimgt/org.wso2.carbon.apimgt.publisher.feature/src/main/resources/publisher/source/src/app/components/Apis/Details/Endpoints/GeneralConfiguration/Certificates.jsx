@@ -106,7 +106,7 @@ const useStyles = makeStyles(theme => ({
  */
 function Certificates(props) {
     const {
-        certificates, uploadCertificate, deleteCertificate, isMutualSSLEnabled, apiId, endpoints,
+        certificates, uploadCertificate, deleteCertificate, isMutualSSLEnabled, apiId, endpoints, aliasList,
     } = props;
     const [certificateList, setCertificateList] = useState([]);
     const [openCertificateDetails, setOpenCertificateDetails] = useState({ open: false, anchor: null, details: {} });
@@ -325,6 +325,7 @@ function Certificates(props) {
                 isMutualSSLEnabled={isMutualSSLEnabled}
                 setUploadCertificateOpen={setUploadCertificateOpen}
                 uploadCertificateOpen={uploadCertificateOpen}
+                aliasList={aliasList}
             />
         </Grid>
     );
@@ -346,5 +347,6 @@ Certificates.propTypes = {
     apiId: PropTypes.string,
     isMutualSSLEnabled: PropTypes.bool,
     endpoints: PropTypes.shape([]).isRequired,
+    aliasList: PropTypes.shape([]).isRequired,
 };
 export default injectIntl((Certificates));
