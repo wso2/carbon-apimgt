@@ -23,7 +23,7 @@ import MUIDataTable from 'mui-datatables';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import queryString from 'query-string';
 import API from 'AppData/api';
-import CONSTS from 'AppData/Constants';
+import { withTheme } from '@material-ui/styles';
 import Configurations from 'Config';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import Loading from 'AppComponents/Base/Loading/Loading';
@@ -68,7 +68,7 @@ class ApiTableView extends React.Component {
     }
 
     getMuiTheme = () => {
-        const { gridView } = this.props;
+        const { gridView, theme } = this.props;
         let themeAdditions = {};
         let muiTheme = {
             overrides: {
@@ -92,7 +92,20 @@ class ApiTableView extends React.Component {
                             paddingRight: 10,
                         },
                         '& tr:nth-child(even)': {
-                            backgroundColor: '#fff',
+                            backgroundColor: theme.custom.listView.tableBodyEvenBackgrund,
+                            '& td': {
+                                color: theme.palette.getContrastText(theme.custom.listView.tableBodyEvenBackgrund),
+                            }
+                        },
+                        '& tr:nth-child(odd)': {
+                            backgroundColor: theme.custom.listView.tableBodyOddBackgrund,
+                            '& td': {
+                                color: theme.palette.getContrastText(theme.custom.listView.tableBodyOddBackgrund),
+                            }
+                        },
+                        '& th': {
+                            backgroundColor: theme.custom.listView.tableHeadBackground,
+                            color: theme.palette.getContrastText(theme.custom.listView.tableHeadBackground),
                         },
                     },
                 },
@@ -112,7 +125,7 @@ class ApiTableView extends React.Component {
                             '& tbody': {
                                 display: 'flex',
                                 flexWrap: 'wrap',
-                                marginLeft: 40,
+                                marginLeft: 0,
                             },
                             '& thead': {
                                 display: 'none',
@@ -426,4 +439,4 @@ class ApiTableView extends React.Component {
 
 ApiTableView.contextType = ApiContext;
 
-export default injectIntl(withStyles(styles)(ApiTableView));
+export default injectIntl(withTheme(withStyles(styles)(ApiTableView)));

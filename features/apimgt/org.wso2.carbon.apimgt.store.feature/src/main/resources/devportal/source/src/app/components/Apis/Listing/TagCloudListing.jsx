@@ -42,7 +42,7 @@ const styles = theme => ({
     ListingWrapper: {
         paddingTop: 10,
         paddingLeft: 35,
-        width: theme.custom.contentAreaWidth,
+        maxWidth: theme.custom.contentAreaWidth,
     },
     root: {
         height: 70,

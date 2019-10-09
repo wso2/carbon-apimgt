@@ -94,7 +94,7 @@ const styles = theme => ({
     appContent: {
         paddingLeft: theme.spacing.unit * 4,
         paddingTop: theme.spacing.unit,
-        width: theme.custom.contentAreaWidth,
+        maxWidth: theme.custom.contentAreaWidth,
     },
     dialogContainer: {
         width: 1000,
