@@ -297,9 +297,6 @@ public class SequenceGenerator {
         StringWriter stringWriter = new StringWriter();
 
         try {
-            transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
             Transformer transformer = transformerFactory.newTransformer();
             docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.newDocument();
@@ -434,9 +431,6 @@ public class SequenceGenerator {
         String property = SOAPToRESTConstants.EMPTY_STRING;
         String argument = SOAPToRESTConstants.EMPTY_STRING;
         try {
-            transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
             Transformer transformer = transformerFactory.newTransformer();
             docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.newDocument();
