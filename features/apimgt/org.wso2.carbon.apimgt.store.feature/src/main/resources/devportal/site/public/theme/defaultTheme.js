@@ -10,8 +10,8 @@ const Configurations = {
                     // contrastText: will be calculated to contrast with palette.primary.main
                 },
                 secondary: {
-                    light: '#0066ff',
-                    main: '#99c573',
+                    light: '#347eff',
+                    main: '#415a85',
                     // dark: will be calculated from palette.secondary.main,
                     contrastText: '#ffcc00',
                 },
@@ -36,7 +36,7 @@ const Configurations = {
                     style: 'fluid', // Set the page style ( Other values available 'fixed', 'fluid')
                     width: 1240, // This value is effected only when the page.style = 'fixed'
                     emptyAreadBackground: '#1e2129', // This value is effected only when the page.style = 'fixed' and window size is greater than page.width
-                    border: 'solid 1px #cccccc',
+                    border: 'none', // It can be something like 'solid 1px #cccccc' for fixed layouts
                 },
                 appBar: {
                     logo: '/devportal/site/public/images/logo.png',

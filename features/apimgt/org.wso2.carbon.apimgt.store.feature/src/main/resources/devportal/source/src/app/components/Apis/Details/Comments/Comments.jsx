@@ -19,6 +19,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
+import Paper from '@material-ui/core/Paper';
 import { Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
@@ -36,8 +37,10 @@ const styles = theme => ({
         paddingTop: theme.spacing.unit * 2,
         paddingBottom: theme.spacing.unit * 2,
     },
+    paper: {
+        marginRight: theme.spacing(3),
+    },
     contentWrapper: {
-        maxWidth: theme.custom.contentAreaWidth,
         paddingLeft: theme.spacing.unit * 2,
         paddingTop: theme.spacing.unig,
     },
@@ -210,14 +213,8 @@ class Comments extends Component {
                     <div className={classes.contentWrapper}>
                         {!showLatest && (
                             <div className={classes.root}>
-                                <Icon
-                                    onClick={this.handleExpandClick}
-                                    aria-expanded={expanded}
-                                >
-                                    arrow_drop_down_circle
-                                </Icon>
+                                
                                 <Typography
-                                    onClick={this.handleExpandClick}
                                     variant='h4'
                                     className={classes.titleSub}
                                 >
@@ -225,6 +222,7 @@ class Comments extends Component {
                                 </Typography>
                             </div>
                         )}
+                        <Paper className={classes.paper}>
                         <Comment
                             comments={comments}
                             apiId={api.id}
@@ -278,6 +276,7 @@ class Comments extends Component {
                                 </Grid>
                             </div>
                         )}
+                        </Paper>
                     </div>
                 )}
             </ApiContext.Consumer>

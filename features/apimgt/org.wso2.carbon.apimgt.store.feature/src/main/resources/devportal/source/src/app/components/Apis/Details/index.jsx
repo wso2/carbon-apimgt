@@ -297,7 +297,6 @@ class Details extends React.Component {
         this.state = {
             active: 'overview',
             overviewHiden: false,
-            handleMenuSelect: this.handleMenuSelect,
             updateSubscriptionData: this.updateSubscriptionData,
             api: null,
             applications: null,
@@ -309,18 +308,6 @@ class Details extends React.Component {
         this.setDetailsAPI = this.setDetailsAPI.bind(this);
         this.api_uuid = this.props.match.params.api_uuid;
     }
-
-    /**
-     *
-     *
-     * @memberof Details
-     */
-    handleMenuSelect = (menuLink) => {
-        const path = '/apis/';
-        this.props.history.push({ pathname: path + this.props.match.params.api_uuid + '/' + menuLink });
-        menuLink === 'overview' ? this.infoBar.toggleOverview(true) : this.infoBar.toggleOverview(false);
-        this.setState({ active: menuLink });
-    };
 
     /**
      *
@@ -338,22 +325,7 @@ class Details extends React.Component {
      * @memberof Details
      */
     componentDidMount() {
-        this.updateActiveLink();
         this.updateSubscriptionData();
-    }
-
-    /**
-     *
-     * Selects the active link for the side panel based on the URL
-     * @memberof Details
-     */
-    updateActiveLink() {
-        const { active } = this.state;
-        const currentLink = this.props.location.pathname.match(/[^\/]+(?=\/$|$)/g);
-
-        if (currentLink && currentLink.length > 0 && active !== currentLink[0]) {
-            this.setState({ active: currentLink[0] });
-        }
     }
 
     /**
@@ -363,13 +335,12 @@ class Details extends React.Component {
      * @memberof Details
      */
     render() {
-        this.updateActiveLink();
 
         const {
-            classes, theme, intl, apiType, match,
+            classes, theme, intl, match,
         } = this.props;
         const { apiUuid } = match.params;
-        const { active, api } = this.state;
+        const { api } = this.state;
         const {
             custom: {
                 leftMenu: {
@@ -378,6 +349,8 @@ class Details extends React.Component {
             },
         } = theme;
         const globalStyle = 'body{ font-family: ' + theme.typography.fontFamily + '}';
+        const pathPrefix = '/apis/' + this.api_uuid + '/';
+
         return api ? (
             <ApiContext.Provider value={this.state}>
                 <style>{globalStyle}</style>
@@ -406,19 +379,17 @@ class Details extends React.Component {
                             )}
                         </Link>
                     )}
-                    <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    <LeftMenuItem text='overview' route='overview' to={pathPrefix + 'overview'} />
                     {!api.advertiseInfo.advertised && (
                         <React.Fragment>
-                            <LeftMenuItem text='credentials' handleMenuSelect={this.handleMenuSelect} active={active} />
-                            <LeftMenuItem text='comments' handleMenuSelect={this.handleMenuSelect} active={active} />
-                            {api.type !== 'WS' && (
-                                <LeftMenuItem text='test' handleMenuSelect={this.handleMenuSelect} active={active} />
-                            )}
+                            <LeftMenuItem text='credentials' route='credentials' to={pathPrefix + 'credentials'} />
+                            <LeftMenuItem text='comments' route='comments' to={pathPrefix + 'comments'} />
+                            {api.type !== 'WS' && <LeftMenuItem text='test' route='test' to={pathPrefix + 'test'} />}
                         </React.Fragment>
                     )}
-                    <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    <LeftMenuItem text='docs' route='docs' to={pathPrefix + 'docs'} />
                     {!api.advertiseInfo.advertised && api.type !== 'WS' && (
-                        <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
+                        <LeftMenuItem text='sdk' route='sdk' to={pathPrefix + 'sdk'} />
                     )}
                 </div>
                 <div className={classes.content}>
