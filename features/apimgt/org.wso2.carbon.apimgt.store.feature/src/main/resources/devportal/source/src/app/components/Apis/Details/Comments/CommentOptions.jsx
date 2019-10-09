@@ -17,7 +17,8 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import Grid from '@material-ui/core/Grid/Grid';
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
 import { Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
@@ -34,7 +35,9 @@ const styles = theme => ({
         marginTop: theme.spacing.unit * 0.3,
     },
     verticalSpace: {
-        marginTop: theme.spacing.unit * 0.2,
+        marginTop: theme.spacing(1),
+        display: 'flex',
+        alignItems: 'center',        
     },
     disable: {
         color: theme.palette.grey[200],
@@ -148,8 +151,8 @@ class CommentOptions extends React.Component {
                 {(comment.createdBy === AuthManager.getUser().name
                     || AuthManager.getUser().name === theme.custom.adminRole) && [
                         <Grid item key='key-delete'>
-                            <Typography
-                                component='a'
+                            <Button
+                                variant="outlined" size="small"
                                 className={editIndex === -1 ? classes.link : classes.disable}
                                 onClick={() => this.handleClickOpen(comment)}
                             >
@@ -157,7 +160,7 @@ class CommentOptions extends React.Component {
                                     id='Apis.Details.Comments.CommentOptions.delete'
                                     defaultMessage='Delete'
                                 />
-                            </Typography>
+                            </Button>
                         </Grid>,
                         <Grid item key='key-delete-vertical-divider'>
                             <VerticalDivider height={15} />
