@@ -62,8 +62,9 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
         if (revokedToken != null) {
 
             //handle JWT tokens
-            revokedToken = APIUtil.getSignatureIfJWT(revokedToken); //JWT signature is the cache key
-
+            if(revokedToken.contains(APIConstants.DOT) && APIUtil.isValidJWT(revokedToken)) {
+                revokedToken = APIUtil.getSignatureIfJWT(revokedToken); //JWT signature is the cache key
+            }
             //Find the actual tenant domain on which the access token was cached. It is stored as a reference in
             //the super tenant cache.
             String cachedTenantDomain = getCachedTenantDomain(revokedToken);

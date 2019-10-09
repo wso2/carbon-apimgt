@@ -22,6 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.wso2.carbon.throttle.service.dto.BlockConditionsDTO;
+import org.wso2.carbon.throttle.service.dto.RevokedJWTDTO;
+import org.wso2.carbon.throttle.service.dto.RevokedJWTListDTO;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -235,5 +237,35 @@ public final class BlockConditionDBUtil {
             BlockConditionDBUtil.closeAllConnections(ps, conn, rs);
         }
         return keyTemplates;
+    }
+
+    /**
+     * Fetches all revoked JWTs from DB.
+     * @return list fo revoked JWTs
+     */
+    static RevokedJWTListDTO getRevokedJWTs() {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        RevokedJWTListDTO revokedJWTListDTO = new RevokedJWTListDTO();
+        String sqlQuery = "select SIGNATURE,EXPIRY_TIMESTAMP from AM_REVOKED_JWT";
+        try {
+            conn = BlockConditionDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                String signature = rs.getString("SIGNATURE");
+                Long expiryTimestamp = rs.getLong("EXPIRY_TIMESTAMP");
+                RevokedJWTDTO revokedJWTDTO = new RevokedJWTDTO();
+                revokedJWTDTO.setJwtSignature(signature);
+                revokedJWTDTO.setExpiryTime(expiryTimestamp);
+                revokedJWTListDTO.add(revokedJWTDTO);
+            }
+        } catch (SQLException e) {
+            log.error("Error while fetching revoked JWTs from database. ", e);
+        } finally {
+            closeAllConnections(ps, conn, rs);
+        }
+        return revokedJWTListDTO;
     }
 }

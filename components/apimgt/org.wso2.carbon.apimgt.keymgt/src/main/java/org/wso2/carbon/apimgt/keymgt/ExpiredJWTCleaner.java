@@ -22,10 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 /**
  *  Class responsible for removing expired revoked tokens from DB
@@ -52,23 +49,10 @@ public class ExpiredJWTCleaner implements Runnable {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
-            long currentTimestamp = System.currentTimeMillis();
-            Map<String, Long> revokedJWTs = apiMgtDAO.getRevokedJWTs();
-            List<String> listOfExpiredJWTSignatures = new ArrayList<>();
-            for (Map.Entry<String, Long> entry : revokedJWTs.entrySet()) {
-                long expiryTime = entry.getValue() * 1000;
-                if (currentTimestamp > expiryTime) {
-                    listOfExpiredJWTSignatures.add("'" + entry.getKey() + "'");
-                }
-            }
-
-            String commaSeparatedExpiredList = String.join(",", listOfExpiredJWTSignatures);
             //Remove expired JWTs from revoke table
-            apiMgtDAO.removeExpiredJWTs(commaSeparatedExpiredList);
+            apiMgtDAO.removeExpiredJWTs();
             lastUpdatedTime = System.currentTimeMillis();
             if (log.isDebugEnabled()) {
-                log.debug("Number of expired tokens removed from revoked table : " +
-                        listOfExpiredJWTSignatures.size());
                 log.debug("Last JWT token cleanup performed at :" + new Date(lastUpdatedTime));
 
             }

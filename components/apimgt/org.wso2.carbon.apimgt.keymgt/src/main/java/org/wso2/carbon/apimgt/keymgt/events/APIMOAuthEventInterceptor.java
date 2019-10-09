@@ -18,8 +18,11 @@
 
 package org.wso2.carbon.apimgt.keymgt.events;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -35,6 +38,7 @@ import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
 import org.wso2.carbon.identity.oauth2.model.RefreshTokenValidationDataDO;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Base64;
 import java.util.Map;
 import java.util.Properties;
 
@@ -117,8 +121,9 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
             }
             String revokedToken = revokeRequestDTO.getToken();
             // Persist only if the token is JWT
-            if (revokedToken.contains(APIConstants.DOT)) {
+            if (revokedToken.contains(APIConstants.DOT) && APIUtil.isValidJWT(revokedToken)) {
                 Long expiryTime = APIUtil.getExpiryifJWT(revokedToken);
+                // Persist revoked JWT token to database.
                 persistRevokedJWTSignature(revokedToken, expiryTime);
             }
         }
@@ -153,13 +158,12 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
                 log.debug("Persistent message sending isn't enabled or configured properly");
             }
             String revokedToken = accessTokenDO.getTokenId();
-            if (revokedToken.contains(APIConstants.DOT)) {
+            if (revokedToken.contains(APIConstants.DOT) && APIUtil.isValidJWT(revokedToken)) {
                 Long expiryTime = APIUtil.getExpiryifJWT(revokedToken);
                 // Persist revoked JWT token to database.
                 persistRevokedJWTSignature(revokedToken, expiryTime);
             }
         }
-
     }
 
     /**
@@ -177,7 +181,8 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
             String tokenSignature = APIUtil.getSignatureIfJWT(token);
-            apiMgtDAO.addRevokedJWTSignature(tokenSignature, expiryTime);
+            String tenantDomain = APIUtil.getTenantDomainIfJWT(token);
+            apiMgtDAO.addRevokedJWTSignature(tokenSignature, expiryTime, tenantDomain);
 
             // Cleanup expired revoked tokens from db.
             Runnable expiredJWTCleaner = new ExpiredJWTCleaner();
@@ -187,4 +192,6 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
             log.error("Unable to add revoked JWT signature to the database");
         }
     }
+
+
 }

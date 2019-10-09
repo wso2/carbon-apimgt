@@ -95,8 +95,16 @@ public class JWTValidator {
             if (cacheToken != null) {
                 log.debug("Token retrieved from the token cache.");
                 isVerified = true;
+            } else if (getInvalidTokenCache().get(tokenSignature) != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Token retrieved from the invalid token cache. Token: " + GatewayUtils
+                            .getMaskedToken(splitToken));
+                }
+                log.error("Invalid JWT token.");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Invalid JWT token");
             }
-            // For JWT tokens, invalid cache isn't checked since invalid tokens will anyway be in revoked jwt map
+            // Check revoked map.
             else if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
@@ -108,7 +116,6 @@ public class JWTValidator {
             }
         }
 
-        // Not found in cache or revoked map
         if (!isVerified) {
             log.debug("Token not found in the cache or revoked jwt token map.");
             try {

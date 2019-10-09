@@ -14367,9 +14367,10 @@ public class ApiMgtDAO {
      * Persist revoked jwt signatures to database.
      *
      * @param jwtSignature signature of jwt token.
+     * @param tenantDomain tenant domain of the jwt subject.
      * @param expiryTime   expiry time of the token.
      */
-    public void addRevokedJWTSignature(String jwtSignature, Long expiryTime) throws APIManagementException {
+    public void addRevokedJWTSignature(String jwtSignature, Long expiryTime, String tenantDomain) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -14379,8 +14380,10 @@ public class ApiMgtDAO {
             conn.setAutoCommit(false);
             String addJwtSignature = SQLConstants.RevokedJWTConstants.ADD_JWT_SIGNATURE;
             ps = conn.prepareStatement(addJwtSignature);
-            ps.setString(1, jwtSignature);
-            ps.setLong(2, expiryTime);
+            ps.setString(1, UUID.randomUUID().toString());
+            ps.setString(2, jwtSignature);
+            ps.setLong(3, expiryTime);
+            ps.setString(4, tenantDomain);
             ps.execute();
             conn.commit();
         } catch (SQLException e) {
@@ -14398,50 +14401,20 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Fetches all revoked JWTs from database.
-     * @return Map of revoked JWTs with signature, expiryTime.
-     * @throws APIManagementException
-     */
-    public Map<String, Long> getRevokedJWTs() throws APIManagementException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        Map<String, Long> revokedJWTs = new ConcurrentHashMap<>();
-        String sqlQuery = SQLConstants.RevokedJWTConstants.FETCH_REVOKED_JWT;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                String signature = rs.getString("SIGNATURE");
-                Long expiryTimestamp = rs.getLong("EXPIRY_TIMESTAMP");
-                revokedJWTs.put(signature, expiryTimestamp);
-            }
-        } catch (SQLException e) {
-            handleException("Error while fetching revoked JWTs from database : " + e.getMessage(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return revokedJWTs;
-    }
-
-    /**
      * Removes expired JWTs from revoke table.
-     * @param expiredSignatures signature list.
      * @throws APIManagementException
      */
-    public void removeExpiredJWTs(String expiredSignatures) throws APIManagementException {
+    public void removeExpiredJWTs() throws APIManagementException {
 
-        String deleteQuery = SQLConstants.RevokedJWTConstants.DELETE_SIGNATURE;
+        String deleteQuery = SQLConstants.RevokedJWTConstants.DELETE_REVOKED_JWT;
         PreparedStatement ps = null;
         Connection connection = null;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-            deleteQuery = deleteQuery.replace("$paramList", expiredSignatures);
             ps = connection.prepareStatement(deleteQuery);
+            ps.setLong(1,System.currentTimeMillis()/1000);
             ps.executeUpdate();
-
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while deleting expired JWTs from revoke table.", e);

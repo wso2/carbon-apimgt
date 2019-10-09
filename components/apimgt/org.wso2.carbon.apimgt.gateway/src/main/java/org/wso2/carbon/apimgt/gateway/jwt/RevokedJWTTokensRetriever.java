@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.gateway.dto.RevokedJWTTokensDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
@@ -62,15 +63,14 @@ public class RevokedJWTTokensRetriever extends TimerTask {
     private RevokedJWTTokensDTO[] retrieveRevokedJWTTokensData() {
 
         try {
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfiguration();
-            String serviceURL = "https://" + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
-                    System.getProperty(APIConstants.KEYMANAGER_PORT) + "/revokedjwt/data/v1";
-            String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-            String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
-            String url = serviceURL + "/revokedjwt";
-            byte[] credentials = Base64.encodeBase64((username + ":" + password).getBytes(StandardCharsets.UTF_8));
+            // The resource resides in the throttle web app. Hence reading throttle configs
+            ThrottleProperties.BlockCondition blockConditionRetrieverConfiguration = getThrottleProperties()
+                    .getBlockCondition();
+            String url = blockConditionRetrieverConfiguration.getServiceUrl() + "/revokedjwt";
             HttpGet method = new HttpGet(url);
+            byte[] credentials = Base64.encodeBase64((blockConditionRetrieverConfiguration.getUsername() + ":" +
+                    blockConditionRetrieverConfiguration.getPassword()).getBytes
+                    (StandardCharsets.UTF_8));
             method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
             URL keyMgtURL = new URL(url);
             int keyMgtPort = keyMgtURL.getPort();
@@ -128,8 +128,13 @@ public class RevokedJWTTokensRetriever extends TimerTask {
      *  Timer task will not run after the retry count is completed.
      */
     public void startRevokedJWTTokensRetriever() {
-        //todo init delay configurable?
-        new Timer().schedule(this, 60000);
+        //using same initDelay as in keytemplates,blocking conditions retriever
+        new Timer().schedule(this, getThrottleProperties().getBlockCondition().getInitDelay());
+    }
+
+    protected ThrottleProperties getThrottleProperties() {
+        return ServiceReferenceHolder
+                .getInstance().getThrottleProperties();
     }
 
 }

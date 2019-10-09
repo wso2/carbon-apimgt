@@ -254,10 +254,8 @@ public class JMSMessageListener implements MessageListener {
             return;
         }
 
-        boolean isTokenJWT = revokedToken.contains(APIConstants.DOT);
         //handle JWT tokens
-        if (isTokenJWT) {
-            // Get expiry time of JWT token
+        if (revokedToken.contains(APIConstants.DOT) && APIUtil.isValidJWT(revokedToken)) {
             Long expiryTime = APIUtil.getExpiryifJWT(revokedToken);
             revokedToken = APIUtil.getSignatureIfJWT(revokedToken); //JWT signature is the cache key
             RevokedJWTDataHolder.getInstance().addRevokedJWTToMap(revokedToken, expiryTime);  // Add revoked token to revoked JWT map

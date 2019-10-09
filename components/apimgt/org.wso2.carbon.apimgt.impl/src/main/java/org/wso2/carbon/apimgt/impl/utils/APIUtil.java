@@ -9181,43 +9181,62 @@ public final class APIUtil {
     }
 
     /**
-     * Get expiry time of a given jwt token.
+     * Get expiry time of a given jwt token. This method should be called only after validating whether the token is
+     * JWT via isValidJWT method.
      * @param token jwt token.
      * @return the expiry time.
      */
     public static Long getExpiryifJWT(String token) {
+
         String[] jwtParts = token.split("\\.");
-        org.json.JSONObject jwtHeader = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().decode(jwtParts[0])));
-        // Check if the decoded header contains type as 'JWT'.
-        if (APIConstants.JWT.equals(jwtHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))) {
-            if (jwtParts[1] != null) {
-                org.json.JSONObject jwtPayload = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().decode(jwtParts[1])));
-                return jwtPayload.getLong("exp"); // extract expiry time and return
-            }
-        }
-        return 0L;
+        org.json.JSONObject jwtPayload = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().
+                decode(jwtParts[1])));
+        return jwtPayload.getLong("exp"); // extract expiry time and return
     }
 
     /**
-     * Get signature of  given JWT token.
+     * Checks whether the given token is a valid JWT by parsing header and validating the
+     * header,payload,signature format
+     * @param token the token to be validated
+     * @return true if valid JWT
+     */
+    public static boolean isValidJWT(String token) {
+
+        boolean isJwtToken = false;
+        try {
+            org.json.JSONObject decodedHeader = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder()
+                    .decode(token.split("\\.")[0])));
+            // Check if the decoded header contains type as 'JWT'.
+            if (APIConstants.JWT.equals(decodedHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))
+                    && (StringUtils.countMatches(token, APIConstants.DOT) == 2)) {
+                isJwtToken = true;
+            } else {
+                log.debug("Not a valid JWT token.");
+            }
+        } catch (JSONException | IllegalArgumentException e) {
+            isJwtToken = false;
+            log.debug("Not a valid JWT token.", e);
+        }
+        return isJwtToken;
+    }
+    /**
+     * Get signature of  given JWT token. This method should be called only after validating whether the token is
+     * JWT via isValidJWT method.
      * @param token jwt token.
      * @return signature of the jwt token.
      */
     public static String getSignatureIfJWT(String token) {
-        if (token.contains(APIConstants.DOT)) {
-            try {
-                String[] jwtParts = token.split("\\.");
-                org.json.JSONObject jwtHeader = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().decode(jwtParts[0])));
-                // Check if the decoded header contains type as 'JWT'.
-                if (APIConstants.JWT.equals(jwtHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))) {
-                    if (jwtParts.length == 3) {
-                        return jwtParts[2]; //JWT signature available
-                    }
-                }
-            } catch (JSONException | IllegalArgumentException e) {
-                log.debug("Not a JWT token. Failed to decode the token header.", e);
-            }
-        }
-        return token; //Not a JWT. Treat as an opaque token
+
+        String[] jwtParts = token.split("\\.");
+        return jwtParts[2];
+    }
+
+    public static String getTenantDomainIfJWT(String token) {
+
+        String[] jwtParts = token.split("\\.");
+        org.json.JSONObject jwtPayload = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().
+                decode(jwtParts[1])));
+        String jwtSubClaim = jwtPayload.getString("sub"); // extract sub claim from payload
+        return MultitenantUtils.getTenantDomain(jwtSubClaim);
     }
 }
