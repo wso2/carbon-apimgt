@@ -205,13 +205,10 @@ function Certificates(props) {
                                             disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                             onClick={() => setCertificateToDelete({ open: true, alias: cert.alias })}
                                         >
-                                            {isRestricted(['apim:api_create'], apiFromContext) ? (
-                                                <Icon className={classes.deleteIconDisable} > delete
-                                                </Icon>
-                                            ) : (
-                                                <Icon className={classes.deleteIcon} >  delete
-                                                </Icon>
-                                            )}
+                                            <Icon className={isRestricted(['apim:api_create'], apiFromContext) ?
+                                                classes.deleteIconDisable : classes.deleteIcon}
+                                            > delete
+                                            </Icon>
                                         </IconButton>
                                     </ListItemSecondaryAction>
                                 </ListItem>
