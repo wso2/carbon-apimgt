@@ -56,7 +56,7 @@ const RenderMethod = withTheme(RenderMethodBase);
  *
  * @param {*} theme
  */
-const styles = {
+const styles = theme => ({
     root: {
         display: 'flex',
         flexDirection: 'row',
@@ -65,8 +65,9 @@ const styles = {
     },
     heading: {
         marginRight: 20,
+        color: theme.palette.getContrastText(theme.custom.infoBar.sliderBackground),
     },
-};
+});
 /**
  *
  *
@@ -146,8 +147,9 @@ class Resources extends React.Component {
                                     {key}
                                 </Typography>
                                 {Object.keys(path).map((innerKey) => {
-                                    return CONSTS.HTTP_METHODS.includes(innerKey)
-                                        ? <RenderMethod method={innerKey} /> : null;
+                                    return CONSTS.HTTP_METHODS.includes(innerKey) ? (
+                                        <RenderMethod method={innerKey} />
+                                    ) : null;
                                 })}
                             </div>
                         );

@@ -37,7 +37,7 @@ const styles = theme => ({
         marginTop: theme.spacing.unit * 0.2,
     },
     disable: {
-        color: theme.custom.disableColor,
+        color: theme.palette.grey[200],
     },
     commentIcon: {
         color: theme.palette.getContrastText(theme.palette.background.default),

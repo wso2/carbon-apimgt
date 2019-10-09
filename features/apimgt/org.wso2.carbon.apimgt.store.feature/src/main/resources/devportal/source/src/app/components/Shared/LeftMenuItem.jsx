@@ -29,14 +29,14 @@ import CustomIcon from './CustomIcon';
  */
 const styles = theme => ({
     leftLInkText: {
-        color: theme.palette.getContrastText(theme.palette.background.leftMenu),
+        color: theme.palette.getContrastText(theme.custom.leftMenu.background),
     },
     leftLInkText_IconLeft: {
         paddingLeft: 10,
     },
     LeftMenu: {
-        backgroundColor: theme.palette.background.leftMenu,
-        width: theme.custom.leftMenuWidth,
+        backgroundColor: theme.custom.leftMenu.background,
+        width: theme.custom.leftMenu.width,
         textAlign: 'center',
         fontFamily: theme.typography.fontFamily,
         position: 'absolute',
@@ -51,6 +51,8 @@ const styles = theme => ({
         paddingRight: theme.spacing.unit,
         fontSize: theme.typography.caption.fontSize,
         cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
     },
     leftLink_IconLeft: {
         display: 'flex',
@@ -60,7 +62,7 @@ const styles = theme => ({
         display: 'none',
     },
     leftLInkText_NoText: {
-        diplay: 'none',
+        display: 'none',
     },
 });
 /**
@@ -78,9 +80,9 @@ class LeftMenuItem extends React.Component {
         const {
             classes, theme, text, active, handleMenuSelect,
         } = this.props;
-        const leftMenu = theme.custom.leftMenu;
-        const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
-        const iconSize = theme.custom.leftMenuIconSize;
+        const { leftMenu } = theme.custom;
+        const strokeColor = leftMenu.background.indexOf('#') !== -1 ? theme.palette.getContrastText(leftMenu.background) : '#000';
+        const iconSize = leftMenu.iconSize || 24;
 
         return (
             <div
@@ -92,7 +94,7 @@ class LeftMenuItem extends React.Component {
                     'leftLInk',
                 )}
                 onClick={() => handleMenuSelect(text)}
-                style={{ backgroundColor: active === text ? theme.palette.background.appBar : '' }}
+                style={{ backgroundColor: active === text ? leftMenu.activeBackground : '' }}
             >
                 <CustomIcon
                     strokeColor={strokeColor}
@@ -102,7 +104,7 @@ class LeftMenuItem extends React.Component {
                     className={classNames(
                         classes.leftLInk,
                         {
-                            [classes.noIcon]: leftMenu === 'no icon',
+                            [classes.noIcon]: leftMenu.style === 'no icon',
                         },
                         'leftLink_Icon',
                     )}
@@ -111,12 +113,12 @@ class LeftMenuItem extends React.Component {
                     className={classNames(
                         classes.leftLInkText,
                         {
-                            [classes.leftLInkText_IconLeft]: leftMenu === 'icon left',
-                            [classes.leftLInkText_NoText]: leftMenu === 'no text',
+                            [classes.leftLInkText_IconLeft]: leftMenu.style === 'icon left',
+                            [classes.leftLInkText_NoText]: leftMenu.style === 'no text',
                         },
                         'leftLInkText',
                     )}
-                    style={{ textTransform: 'uppercase' }}
+                    style={{ textTransform: leftMenu.leftMenuTextStyle }}
                 >
                     {text}
                 </Typography>
