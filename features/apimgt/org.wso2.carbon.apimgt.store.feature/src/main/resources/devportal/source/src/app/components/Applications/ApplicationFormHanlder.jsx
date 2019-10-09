@@ -364,27 +364,46 @@ class ApplicationFormHanlder extends React.Component {
             throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes, isApplicationSharingEnabled,
             isEdit,
         } = this.state;
-        const pageTitle = (
+        const CreatePageTitle = (
             <React.Fragment>
                 <Typography variant='h5'>
                     <FormattedMessage
-                        id='Applications.Create.ApplicationFormHanlder.application.heading'
+                        id='Applications.Create.ApplicationFormHanlder.create.application.heading'
                         defaultMessage='Create an application'
                     />
                 </Typography>
                 <Typography variant='caption'>
                     <FormattedMessage
-                        id='Applications.Create.ApplicationFormHanlder.application.sub.heading'
+                        id='Applications.Create.ApplicationFormHanlder.create.application.sub.heading'
                         defaultMessage={
                             'Create an application providing name, quota and token type parameters' +
-                            ' and optionally descriptions'
+                            ' and optionally description'
+                        }
+                    />
+                </Typography>
+            </React.Fragment>
+        );
+        const EditPageTitle = (
+            <React.Fragment>
+                <Typography variant='h5'>
+                    <FormattedMessage
+                        id='Applications.Create.ApplicationFormHanlder.edit.application.heading'
+                        defaultMessage='Edit application'
+                    />
+                </Typography>
+                <Typography variant='caption'>
+                    <FormattedMessage
+                        id='Applications.Create.ApplicationFormHanlder.edit.application.sub.heading'
+                        defaultMessage={
+                            'Edit this application. Name, quota and token type are madatory parameters' +
+                            ' and description is optional'
                         }
                     />
                 </Typography>
             </React.Fragment>
         );
         return (
-            <ApplicationCreateBase title={pageTitle}>
+            <ApplicationCreateBase title={isEdit ? EditPageTitle : CreatePageTitle}>
                 <Box py={4} display='flex' justifyContent='center'>
                     <Grid item xs={10} md={9}>
                         <ApplicationCreateForm
