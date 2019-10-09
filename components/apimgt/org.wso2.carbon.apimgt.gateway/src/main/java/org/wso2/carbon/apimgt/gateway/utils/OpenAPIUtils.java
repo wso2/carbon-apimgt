@@ -88,29 +88,54 @@ public class OpenAPIUtils {
     }
 
     /**
-     * Return the scope-role mapping of an API
+     * Return the roles of a given scope attached to a resource using the API swagger.
      *
      * @param openAPI OpenAPI of the API
      * @param synCtx  The message containing resource request
-     * @return the scope-role mapping
+     * @param resourceScope  The scope of the resource
+     * @return the roles of the scope in the comma separated format
      */
-    public static ArrayList<LinkedHashMap> getScopeToRoleMappingOfApi(OpenAPI openAPI, MessageContext synCtx) {
-        Map<String, Object> vendorExtensions = getPathItemExtensions(synCtx, openAPI);
+    public static String getRolesOfScope(OpenAPI openAPI, MessageContext synCtx, String resourceScope) {
+        String resourceRoles = null;
 
+        Map<String, Object> vendorExtensions = getPathItemExtensions(synCtx, openAPI);
         if (vendorExtensions != null) {
-            String resourceScope = getScopesOfResource(openAPI, synCtx);
             if (StringUtils.isNotBlank(resourceScope)) {
-                LinkedHashMap swaggerWSO2Security = (LinkedHashMap) openAPI.getExtensions()
-                        .get(APIConstants.SWAGGER_X_WSO2_SECURITY);
-                if (swaggerWSO2Security != null) {
-                    LinkedHashMap swaggerObjectAPIM = (LinkedHashMap) swaggerWSO2Security
-                            .get(APIConstants.SWAGGER_OBJECT_NAME_APIM);
-                    if (swaggerObjectAPIM != null) {
-                        return (ArrayList<LinkedHashMap>) swaggerObjectAPIM.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
+                if (openAPI.getExtensions() != null &&
+                        openAPI.getExtensions().get(APIConstants.SWAGGER_X_WSO2_SECURITY) != null) {
+                    LinkedHashMap swaggerWSO2Security = (LinkedHashMap) openAPI.getExtensions()
+                            .get(APIConstants.SWAGGER_X_WSO2_SECURITY);
+                    if (swaggerWSO2Security != null &&
+                            swaggerWSO2Security.get(APIConstants.SWAGGER_OBJECT_NAME_APIM) != null) {
+                        LinkedHashMap swaggerObjectAPIM = (LinkedHashMap) swaggerWSO2Security
+                                .get(APIConstants.SWAGGER_OBJECT_NAME_APIM);
+                        if (swaggerObjectAPIM != null && swaggerObjectAPIM.get(APIConstants.SWAGGER_X_WSO2_SCOPES) != null) {
+                            ArrayList<LinkedHashMap> apiScopes =
+                                    (ArrayList<LinkedHashMap>) swaggerObjectAPIM.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
+                            for (LinkedHashMap scope: apiScopes) {
+                                if (resourceScope.equals(scope.get(APIConstants.SWAGGER_SCOPE_KEY))) {
+                                    resourceRoles = (String) scope.get(APIConstants.SWAGGER_ROLES);
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
+
+        if (resourceRoles == null) {
+            Map<String, Object> extensions = openAPI.getComponents().getSecuritySchemes()
+                    .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY).getExtensions();
+            if (extensions != null && extensions.get(APIConstants.SWAGGER_X_SCOPES_BINDINGS) != null) {
+                LinkedHashMap<String, Object> scopeBindings =
+                        (LinkedHashMap<String, Object>) extensions.get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+                if (scopeBindings != null) {
+                    return (String) scopeBindings.get(resourceScope);
+                }
+            }
+        }
+
         return null;
     }
 
