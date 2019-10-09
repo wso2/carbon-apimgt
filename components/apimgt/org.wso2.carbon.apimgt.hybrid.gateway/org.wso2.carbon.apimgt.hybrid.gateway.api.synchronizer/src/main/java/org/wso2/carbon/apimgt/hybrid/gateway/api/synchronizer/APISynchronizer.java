@@ -35,8 +35,6 @@ import org.w3c.dom.Node;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 import org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.dto.APIDTO;
 import org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.dto.APIListDTO;
@@ -86,6 +84,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -678,6 +678,7 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
             APISynchronizationException {
         String seqFileName = APISynchronizationConstants.EMPTY_STRING;
         String tenantDomain = APISynchronizationConstants.EMPTY_STRING;
+        String name = APISynchronizationConstants.NAME;
         try {
             String type = sequenceInfo.getType().name();
             String xmlStr = sequenceInfo.getConfig();
@@ -705,8 +706,8 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
             }
             OMElement element = AXIOMUtil.stringToOM(xmlStr);
 
-            String originalSeqName =  element.getAttributeValue(new QName("name"));
-            String newXML = xmlStr.replace(originalSeqName,seqElementName);
+            String originalSeqName = element.getAttributeValue(new QName(name));
+            String newXML = xmlStr.replace(originalSeqName, seqElementName);
 
             APIManagerConfiguration apimConfig = ServiceDataHolder.getInstance().
                     getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -726,8 +727,8 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
         } catch (UserStoreException e) {
             throw new APISynchronizationException("An error occurred while obtaining tenant identifier of " +
                     "tenant domain " + tenantDomain, e);
-        }  catch (XMLStreamException e) {
-            throw new APISynchronizationException("There was an error in reading XML Stream of the file " +seqFileName,
+        } catch (XMLStreamException e) {
+            throw new APISynchronizationException("There was an error in reading XML Stream of the file " + seqFileName,
                     e);
         }catch (FileNotFoundException e) {
             throw new APISynchronizationException("The file " + seqFileName + " could not be located.", e);
