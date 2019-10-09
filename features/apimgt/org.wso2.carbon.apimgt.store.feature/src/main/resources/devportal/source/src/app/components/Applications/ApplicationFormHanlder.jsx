@@ -429,7 +429,7 @@ class ApplicationFormHanlder extends React.Component {
                                 >
                                     <FormattedMessage
                                         id='Applications.Create.ApplicationFormHanlder.save'
-                                        defaultMessage='save'
+                                        defaultMessage='SAVE'
                                     />
                                 </Button>
                             </Box>
@@ -438,7 +438,7 @@ class ApplicationFormHanlder extends React.Component {
                                     <Button variant='text'>
                                         <FormattedMessage
                                             id='Applications.Create.ApplicationFormHanlder.cancel'
-                                            defaultMessage='Cancel'
+                                            defaultMessage='CANCEL'
                                         />
                                     </Button>
                                 </Link>

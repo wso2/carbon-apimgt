@@ -175,7 +175,7 @@ const ApplicationCreate = (props) => {
                 onChange={handleChange}
                 SelectProps={throttlingPolicyList}
                 helperText={<FormattedMessage
-                    defaultMessage='select token type'
+                    defaultMessage='Select token type'
                     id='Shared.AppsAndKeys.ApplicationCreateForm.select.token.type'
                 />}
                 margin='normal'
