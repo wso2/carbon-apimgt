@@ -18,12 +18,20 @@
 const suggestions = {
     common: [
         {
+            label: 'Overview',
+            route: 'overview',
+        },
+        {
+            label: 'MetaData',
+            route: 'overview',
+        },
+        {
             label: 'Transport Level Security',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'Mutual SSL',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'Manage SSL Certificates',
@@ -31,31 +39,35 @@ const suggestions = {
         },
         {
             label: 'HTTP HTTPS enable disable',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'Application Level Security',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'Enable/Disable OAuth2',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'Enable/Disable Basic Auth',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'Enable/Disable Api Key',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'Authorization Headers',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'CORS',
-            route: 'configuration',
+            route: 'runtime-configuration',
+        },
+        {
+            label: 'Backend Throughput',
+            route: 'runtime-configuration',
         },
         {
             label: 'Access Control Allow Origins',
@@ -71,18 +83,18 @@ const suggestions = {
         },
         {
             label: 'Schema validation',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'Response caching',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'Access control',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
-            label: 'Store Visibility',
+            label: 'Developer Portal Visibility',
             route: 'configuration',
         },
         {
@@ -150,11 +162,7 @@ const suggestions = {
             route: 'endpoints',
         },
         {
-            label: 'FailoLoad balance Endpoint',
-            route: 'endpoints',
-        },
-        {
-            label: 'FailoLoad balance Endpoint',
+            label: 'Load Balance Endpoint',
             route: 'endpoints',
         },
         {
@@ -190,7 +198,7 @@ const suggestions = {
             route: 'resources',
         },
         {
-            label: 'Rate limiting',
+            label: 'Rate Limiting',
             route: 'resources',
         },
         {
@@ -271,10 +279,54 @@ const suggestions = {
             label: 'Deploy as a Prototype API',
             route: 'lifecycle',
         },
+        {
+            label: 'Requirements',
+            route: 'lifecycle',
+        },
+        {
+            label: 'Subscriptions',
+            route: 'subscriptions',
+        },
+        {
+            label: 'Subscription Policies',
+            route: 'subscriptions',
+        },
+        {
+            label: 'Subscription Availability',
+            route: 'subscriptions',
+        },
+        {
+            label: 'Mediation Policies',
+            route: 'mediation policies',
+        },
+        {
+            label: 'In Flow',
+            route: 'mediation policies',
+        },
+        {
+            label: 'Out Flow',
+            route: 'mediation policies',
+        },
+        {
+            label: 'Fault Flow',
+            route: 'mediation policies',
+        },
+        {
+            label: 'Monetization',
+            route: 'monetization',
+        },
+        {
+            label: 'Monetization Properties',
+            route: 'monetization',
+        },
+        {
+            label: 'Commercial Policies',
+            route: 'monetization',
+        },
     ],
     productOnly: [
         {
-            label: 'product only feature',
+            label: 'Product only feature',
             route: 'configuration',
         },
     ],

@@ -36,87 +36,6 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import suggestions from './RouteMappings';
 
-function renderInput(inputProps) {
-    const {
-        InputProps, classes, ref, ...other
-    } = inputProps;
-
-    return (
-        <TextField
-            autoFocus
-            InputProps={{
-                inputRef: ref,
-                classes: {
-                    root: classes.inputRoot,
-                    input: classes.inputInput,
-                },
-                ...InputProps,
-            }}
-            {...other}
-        />
-    );
-}
-
-renderInput.propTypes = {
-    /**
-     * Override or extend the styles applied to the component.
-     */
-    classes: PropTypes.shape({}).isRequired,
-    InputProps: PropTypes.shape({}).isRequired,
-};
-
-function renderSuggestion(suggestionProps) {
-    const {
-        suggestion, index, itemProps, highlightedIndex, api, isAPIProduct, handleClickAway,
-    } = suggestionProps;
-    const isHighlighted = highlightedIndex === index;
-    const route = isAPIProduct ? `/api-products/${api.id}/${suggestion.route}` : `/apis/${api.id}/${suggestion.route}`;
-    return (
-        <ListItem
-            key={suggestion.label}
-            {...itemProps}
-            selected={isHighlighted}
-            button
-            aria-haspopup='true'
-            aria-controls='lock-menu'
-            aria-label='when device is locked'
-        >
-            <Link to={route} onClick={handleClickAway}>
-                <ListItemText primary={suggestion.label} secondary={suggestion.route} />
-            </Link>
-        </ListItem>
-    );
-}
-
-renderSuggestion.propTypes = {
-    highlightedIndex: PropTypes.oneOfType([PropTypes.oneOf([null]), PropTypes.number]).isRequired,
-    index: PropTypes.number.isRequired,
-    itemProps: PropTypes.shape({}).isRequired,
-    selectedItem: PropTypes.string.isRequired,
-    suggestion: PropTypes.shape({
-        label: PropTypes.string.isRequired,
-    }).isRequired,
-};
-
-function getSuggestions(value, isAPIProduct, { showEmpty = false } = {}) {
-    const inputValue = deburr(value.trim()).toLowerCase();
-    const inputLength = inputValue.length;
-    let count = 0;
-    const newSuggestions = [...suggestions.common];
-    isAPIProduct ? newSuggestions.push(...suggestions.productOnly) : newSuggestions.push(...suggestions.apiOnly);
-    return inputLength === 0 && !showEmpty
-        ? []
-        : newSuggestions.filter((suggestion) => {
-            const keep = count < 5 && suggestion.label.slice(0, inputLength).toLowerCase() === inputValue;
-
-            if (keep) {
-                count += 1;
-            }
-
-            return keep;
-        });
-}
-
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -168,12 +87,115 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
+/**
+ * Method to render the input of the user
+ * @param {*} inputProps inputProps
+ * @returns {*} TextField
+ */
+function renderInput(inputProps) {
+    const {
+        InputProps, classes, ref, ...other
+    } = inputProps;
+
+    return (
+        <TextField
+            autoFocus
+            InputProps={{
+                inputRef: ref,
+                classes: {
+                    root: classes.inputRoot,
+                    input: classes.inputInput,
+                },
+                ...InputProps,
+            }}
+            {...other}
+        />
+    );
+}
+
+renderInput.propTypes = {
+    /**
+     * Override or extend the styles applied to the component.
+     */
+    classes: PropTypes.shape({}).isRequired,
+    InputProps: PropTypes.shape({}).isRequired,
+};
 
 /**
- *
- *
- * @param {*} props
- * @returns
+ * Method to render the suggestions
+ * @param {*} suggestionProps suggestionProps
+ * @returns {*} ListItem list of suggestions
+ */
+function renderSuggestion(suggestionProps) {
+    const {
+        suggestion, index, itemProps, highlightedIndex, api, isAPIProduct, handleClickAway,
+    } = suggestionProps;
+    const isHighlighted = highlightedIndex === index;
+
+    const route = (isAPIProduct ?
+        (`/api-products/${api.id}/${suggestion.route}`)
+        : (`/apis/${api.id}/${suggestion.route}`));
+    return (
+        <Link
+            to={route}
+            onClick={handleClickAway}
+        >
+            <ListItem
+                key={suggestion.label}
+                {...itemProps}
+                selected={isHighlighted}
+                button
+                aria-haspopup='true'
+                aria-controls='lock-menu'
+                aria-label='when device is locked'
+            >
+                <ListItemText primary={suggestion.label} secondary={suggestion.route} />
+            </ListItem>
+        </Link>
+    );
+}
+
+renderSuggestion.propTypes = {
+    highlightedIndex: PropTypes.oneOfType([PropTypes.oneOf([null]), PropTypes.number]).isRequired,
+    index: PropTypes.number.isRequired,
+    itemProps: PropTypes.shape({}).isRequired,
+    selectedItem: PropTypes.string.isRequired,
+    suggestion: PropTypes.shape({
+        label: PropTypes.string.isRequired,
+    }).isRequired,
+};
+
+/**
+ * Method to retrieve suggestions
+ * @param {*} value Value of suggestion
+ * @param {*} isAPIProduct Boolean to check if it is an APIProduct
+ * @param {*} param2 showEmpty
+ * @returns {*} filter
+ */
+function getSuggestions(value, isAPIProduct, { showEmpty = false } = {}) {
+    const inputValue = deburr(value.trim()).toLowerCase();
+    const inputLength = inputValue.length;
+    let count = 0;
+    const newSuggestions = [...suggestions.common];
+    isAPIProduct ? newSuggestions.push(...suggestions.productOnly) : newSuggestions.push(...suggestions.apiOnly);
+    return inputLength === 0 && !showEmpty
+        ? []
+        : newSuggestions.filter((suggestion) => {
+            const keep = count < 5 && suggestion.label.slice(0, inputLength).toLowerCase() === inputValue;
+
+            if (keep) {
+                count += 1;
+            }
+
+            return keep;
+        });
+}
+
+
+/**
+ * Method to render the GoTo search feature
+ * @param {*} props props param
+ * @returns {*} Downshift element
  */
 function GoTo(props) {
     const { isAPIProduct } = props;
@@ -185,6 +207,7 @@ function GoTo(props) {
     const handleClickAway = () => {
         setShowSearch(false);
     };
+
     return (
         <ClickAwayListener onClickAway={handleClickAway}>
             <div className={classes.goToWrapper}>
