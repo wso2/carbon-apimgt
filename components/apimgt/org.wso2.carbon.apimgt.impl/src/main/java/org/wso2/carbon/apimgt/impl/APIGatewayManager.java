@@ -1290,27 +1290,33 @@ public class APIGatewayManager {
     private String[] websocketEndpointConfig(API api, String urlType) throws JSONException {
         JSONObject obj = new JSONObject(api.getEndpointConfig());
         JSONObject endpointObj = null;
+
         if (ENDPOINT_PRODUCTION.equalsIgnoreCase(urlType)) {
-            if (obj.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).get("config") instanceof JSONObject) {
+            JSONObject prodEP = obj.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
+            if (prodEP.has("config") && prodEP.get("config") instanceof JSONObject) {
                 //if config is not a JSONObject(happens when save the api without changing enpoint config at very first time)
-                endpointObj = obj.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).getJSONObject("config");
+                endpointObj = prodEP.getJSONObject("config");
             } else {
                 return new String[]{"", "", ""};
             }
         } else if (ENDPOINT_SANDBOX.equalsIgnoreCase(urlType)) {
-            if (obj.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).get("config") instanceof JSONObject) {
+            JSONObject sandEP = obj.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS);
+            if (sandEP.has("config") && sandEP.get("config") instanceof JSONObject) {
                 //if config is not a JSONObject(happens when save the api without changing enpoint config at very first time)
-                endpointObj = obj.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getJSONObject("config");
+                endpointObj = sandEP.getJSONObject("config");
             } else {
                 return new String[]{"", "", ""};
             }
         }
-        String duration = endpointObj.has("actionDuration") ? "\t\t<duration>" + endpointObj.get("actionDuration") + "</duration>\n" : "";
-        String responseAction = endpointObj.has("actionSelect") ? "\t\t<responseAction>" + endpointObj.get("actionSelect") + "</responseAction>\n" : "";
+        String duration = validateJSONObjKey("actionDuration", endpointObj) ? "\t\t<duration>" +
+                endpointObj.get("actionDuration") + "</duration>\n" : "";
+        String responseAction = validateJSONObjKey("actionSelect", endpointObj) ? "\t\t<responseAction>" +
+                endpointObj.get("actionSelect") + "</responseAction>\n" : "";
         String timeout = duration + "\n" + responseAction;
         String retryErrorCode;
         String suspendErrorCode ;
-        if (endpointObj.has("suspendDuration")) {
+
+        if (validateJSONObjKey("suspendDuration", endpointObj)) {
             //Avoid suspending the endpoint when suspend duration is zero
             if (Integer.parseInt(endpointObj.get("suspendDuration").toString()) == 0) {
                 String suspendOnFailure = "\t\t<errorCodes>-1</errorCodes>\n" +
@@ -1321,41 +1327,61 @@ public class APIGatewayManager {
                 return new String[]{timeout, suspendOnFailure, markForSuspension};
             }
         }
-        if (endpointObj.has("suspendErrorCode")) {
-            //When there are/is multiple/single suspend error codes
-            if (endpointObj.get("suspendErrorCode") instanceof JSONArray) {
-                String suspendCodeList = "";
-                for (int i = 0; i < endpointObj.getJSONArray("suspendErrorCode").length(); i++) {
-                    suspendCodeList = suspendCodeList + endpointObj.getJSONArray("suspendErrorCode").get(i).toString() + ",";
-                }
-                suspendErrorCode = "\t\t<errorCodes>" + suspendCodeList.substring(0, suspendCodeList.length() - 1) + "</errorCodes>";
-            } else {
-                suspendErrorCode = "\t\t<errorCodes>" + endpointObj.get("suspendErrorCode") + "</errorCodes>";
-            }
-        } else {
-            suspendErrorCode = "";
-        }
-        String suspendDuration = endpointObj.has("suspendDuration") ? "\t\t<initialDuration>" + endpointObj.get("suspendDuration").toString() + "</initialDuration>" : "";
-        String suspendMaxDuration = endpointObj.has("suspendMaxDuration") ? "\t\t<maximumDuration>" + endpointObj.get("suspendMaxDuration") + "</maximumDuration>" : "";
-        String factor = endpointObj.has("factor") ? "\t\t<progressionFactor>" + endpointObj.get("factor") + "</progressionFactor>" : "";
+        suspendErrorCode = parseWsEndpointConfigErrorCodes(endpointObj, "suspendErrorCode");
+        String suspendDuration = validateJSONObjKey("suspendDuration", endpointObj) ? "\t\t<initialDuration>" +
+                endpointObj.get("suspendDuration").toString() + "</initialDuration>" : "";
+        String suspendMaxDuration = validateJSONObjKey("suspendMaxDuration", endpointObj) ?
+                "\t\t<maximumDuration>" + endpointObj.get("suspendMaxDuration") + "</maximumDuration>" : "";
+        String factor = validateJSONObjKey("factor", endpointObj) ? "\t\t<progressionFactor>" +
+                endpointObj.get("factor") + "</progressionFactor>" : "";
         String suspendOnFailure = suspendErrorCode + "\n" + suspendDuration + "\n" + suspendMaxDuration + "\n" + factor;
-        if (endpointObj.has("retryErroCode")) {
-            //When there are/is multiple/single retry error codes
-            if (endpointObj.get("retryErroCode") instanceof JSONArray) {
-                String retryCodeList = "";
-                for (int i = 0; i < endpointObj.getJSONArray("retryErroCode").length(); i++) {
-                    retryCodeList = retryCodeList + endpointObj.getJSONArray("retryErroCode").get(i).toString() + ",";
-                }
-                retryErrorCode = "\t\t<errorCodes>" + retryCodeList.substring(0, retryCodeList.length() - 1) + "</errorCodes>";
-            } else {
-                retryErrorCode = "\t\t<errorCodes>" + endpointObj.get("retryErroCode") + "</errorCodes>";
-            }
-        } else {
-            retryErrorCode = "";
-        }
-        String retryTimeOut = endpointObj.has("retryTimeOut") ? "\t\t<retriesBeforeSuspension>" + endpointObj.get("retryTimeOut") + "</retriesBeforeSuspension>" : "";
-        String retryDelay = endpointObj.has("retryDelay") ? "\t\t<retryDelay>" + endpointObj.get("retryDelay") + "</retryDelay>" : "";
+
+        retryErrorCode = parseWsEndpointConfigErrorCodes(endpointObj,
+                "retryErroCode"); //todo: fix typo retryErroCode from client side
+        String retryTimeOut = validateJSONObjKey("retryTimeOut", endpointObj) ? "\t\t<retriesBeforeSuspension>" +
+                endpointObj.get("retryTimeOut") + "</retriesBeforeSuspension>" : "";
+        String retryDelay = validateJSONObjKey("retryDelay", endpointObj) ? "\t\t<retryDelay>" +
+                endpointObj.get("retryDelay") + "</retryDelay>" : "";
         String markForSuspension = retryErrorCode + "\n" + retryTimeOut + "\n" + retryDelay;
         return new String[]{timeout, suspendOnFailure, markForSuspension};
+    }
+
+    /**
+     * Parse the error codes defined in the WebSocket endpoint config
+     *
+     * @param endpointObj   WebSocket endpoint config JSONObject
+     * @param errorCodeType The error code type (retryErroCode/suspendErrorCode)
+     * @return The parsed error codes
+     *
+     */
+    private String parseWsEndpointConfigErrorCodes(JSONObject endpointObj, String errorCodeType) {
+        if (endpointObj.has(errorCodeType)) {
+            //When there are/is multiple/single retry error codes
+            if (endpointObj.get(errorCodeType) instanceof JSONArray &&
+                    ((JSONArray)endpointObj.get(errorCodeType)).length() != 0) {
+                StringBuilder codeListBuilder = new StringBuilder();
+                for (int i = 0; i < endpointObj.getJSONArray(errorCodeType).length(); i++) {
+                    codeListBuilder.append(endpointObj.getJSONArray(errorCodeType).get(i).toString()).append(",");
+                }
+                String codeList = codeListBuilder.toString();
+                return "\t\t<errorCodes>" + codeList.substring(0, codeList.length() - 1) + "</errorCodes>";
+            } else if (endpointObj.get(errorCodeType) instanceof String) {
+                return "\t\t<errorCodes>" + endpointObj.get(errorCodeType) + "</errorCodes>";
+            }
+        }
+        return "";
+    }
+
+    /**
+     * Checks if a given key is available in the endpoint config and if it's value is a valid String
+     *
+     * @param key Key that needs to be validated
+     * @param endpointObj Endpoint config JSON object
+     * @return True if the given key is available with a valid String value
+     *
+     */
+    private boolean validateJSONObjKey(String key, JSONObject endpointObj) {
+        return endpointObj.has(key) && endpointObj.get(key) instanceof String &&
+                StringUtils.isNotEmpty(endpointObj.getString(key));
     }
 }

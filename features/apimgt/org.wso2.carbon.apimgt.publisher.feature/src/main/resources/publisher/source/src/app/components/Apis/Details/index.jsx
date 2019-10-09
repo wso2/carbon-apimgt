@@ -396,10 +396,6 @@ class Details extends Component {
      */
     render() {
         const { api, apiNotFound, isAPIProduct } = this.state;
-        let isWebsocket = false;
-        if (api) {
-            isWebsocket = (api.type === 'WS');
-        }
         const {
             classes,
             theme,
@@ -530,7 +526,7 @@ class Details extends Component {
                                 Icon={<PersonPinCircleOutlinedIcon />}
                             />
                         )}
-                        {!isWebsocket && !isAPIProduct && (
+                        {!api.isWebSocket() && !isAPIProduct && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.left.menu.scope',
@@ -564,7 +560,7 @@ class Details extends Component {
                             to={pathPrefix + 'documents'}
                             Icon={<DocumentsIcon />}
                         />
-                        {!isAPIProduct && !isWebsocket && !isRestricted(['apim:api_publish'], api) && (
+                        {!isAPIProduct && !api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.monetization',
@@ -574,7 +570,7 @@ class Details extends Component {
                                 Icon={<MonetizationIcon />}
                             />
                         )}
-                        {!isAPIProduct && !isWebsocket && (
+                        {!isAPIProduct && !api.isWebSocket() && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.left.menu.mediation.policies',
