@@ -45,6 +45,8 @@ public class AuthenticationContext {
     private boolean stopOnQuotaReach;
     private String productName;
     private String productProvider;
+    private String apiName;
+    private String apiPublisher;
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
@@ -207,5 +209,21 @@ public class AuthenticationContext {
 
     public String getProductProvider() {
         return productProvider;
+    }
+
+    public String getApiName() {
+        return apiName;
+    }
+
+    public void setApiName(String apiName) {
+        this.apiName = apiName;
+    }
+
+    public String getApiPublisher() {
+        return apiPublisher;
+    }
+
+    public void setApiPublisher(String apiPublisher) {
+        this.apiPublisher = apiPublisher;
     }
 }
