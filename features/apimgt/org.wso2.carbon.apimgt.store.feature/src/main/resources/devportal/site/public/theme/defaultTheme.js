@@ -41,7 +41,7 @@ const Configurations = {
                 appBar: {
                     logo: '/devportal/site/public/images/logo.png',
                     background: '#1d344f',
-                    activeBackground: '#347eff',
+                    activeBackground: '#254061',
                     showSearch: true,
                     drawerWidth: 200,
                 },

@@ -229,9 +229,9 @@ class Details extends Component {
      * @memberof Details
      */
     render() {
-        const { classes, match, theme, } = this.props;
+        const { classes, match, theme } = this.props;
         const { notFound, application, active } = this.state;
-        const pathPrefix = '/applications/' + match.params.application_uuid + '/';
+        const pathPrefix = '/applications/' + match.params.application_uuid;
         const redirectUrl = pathPrefix + '/productionkeys';
         const {
             custom: {

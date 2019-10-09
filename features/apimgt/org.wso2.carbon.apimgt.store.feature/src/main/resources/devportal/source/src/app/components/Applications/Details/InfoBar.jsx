@@ -342,7 +342,7 @@ class InfoBar extends React.Component {
                                     </div>
                                     <div className={classes.infoItem}>
                                         <Link
-                                            to={'/application/edit/' + applicationId}
+                                            to={`/applications/${applicationId}/edit/`}
                                             className={classes.button}
                                         >
                                             <Button

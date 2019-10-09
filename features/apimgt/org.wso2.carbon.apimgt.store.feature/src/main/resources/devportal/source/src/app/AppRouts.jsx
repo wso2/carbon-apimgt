@@ -18,15 +18,14 @@ import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { withStyles } from '@material-ui/core';
 import TagCloudListing from 'AppComponents/Apis/Listing/TagCloudListing';
-import Apis from './components/Apis/Apis';
-import Applications from './components/Applications/Applications';
-import Landing from './components/LandingPage/Landing';
-import ApplicationCreate from './components/Shared/AppsAndKeys/ApplicationCreateForm';
-import { PageNotFound, ScopeNotFound } from './components/Base/Errors';
-import RedirectToLogin from './components/Login/RedirectToLogin';
-import EditApp from './components/Applications/Edit/EditApp';
-import SettingsBase from './components/Settings/SettingsBase';
-
+import Apis from 'AppComponents/Apis/Apis';
+import Landing from 'AppComponents/LandingPage/Landing';
+import ApplicationFormHanlder from 'AppComponents/Applications/ApplicationFormHanlder';
+import { PageNotFound, ScopeNotFound } from 'AppComponents/Base/Errors';
+import RedirectToLogin from 'AppComponents/Login/RedirectToLogin';
+import SettingsBase from 'AppComponents/Settings/SettingsBase';
+import Listing from 'AppComponents/Applications/Listing/Listing';
+import Details from 'AppComponents/Applications/Details/index';
 /**
  * Handle redirection
  * @param {*} theme configuration
@@ -58,28 +57,27 @@ function AppRouts(props) {
             <Route path='/api-groups' component={TagCloudListing} />
             <Route path='/(apis|api-products)' component={Apis} />
             {isAuthenticated ? (
-                <React.Fragment>
-                    <Route path='/settings' component={SettingsBase} />
-                    <Route path='/applications' component={Applications} />
-                    <Route path='/application/create' component={ApplicationCreate} />
-                    <Route path='/application/edit/:application_id' component={EditApp} />
-                </React.Fragment>
+                [
+                    <Route path='/settings' component={SettingsBase} />,
+                    <Route exact path='/applications' component={Listing} />,
+                    <Route path='/applications/create' component={ApplicationFormHanlder} />,
+                    <Route path='/applications/:application_id/edit' component={ApplicationFormHanlder} />,
+                    <Route path='/applications/:application_uuid/' component={Details} />,
+                ]
             ) : (
                 [
                     isUserFound ? (
-                        <React.Fragment>
-                            <Route path='/settings' component={RedirectToLogin} />
-                            <Route path='/applications' component={ScopeNotFound} />
-                            <Route path='/application/create' component={ScopeNotFound} />
-                            <Route path='/application/edit/:application_id' component={ScopeNotFound} />
-                        </React.Fragment>
+                        [
+                            <Route path='/settings' component={RedirectToLogin} />,
+                            <Route path='/applications' component={ScopeNotFound} />,
+                            <Route path='/application/create' component={ScopeNotFound} />,
+
+                        ]
                     ) : (
-                        <React.Fragment>
-                            <Route path='/settings' component={RedirectToLogin} />
-                            <Route path='/applications' component={RedirectToLogin} />
-                            <Route path='/application/create' component={RedirectToLogin} />
-                            <Route path='/application/edit/:application_id' component={RedirectToLogin} />
-                        </React.Fragment>
+                        [
+                            <Route path='/settings' component={RedirectToLogin} />,
+                            <Route path='/applications' component={RedirectToLogin} />,
+                        ]
                     ),
                 ]
             )}
