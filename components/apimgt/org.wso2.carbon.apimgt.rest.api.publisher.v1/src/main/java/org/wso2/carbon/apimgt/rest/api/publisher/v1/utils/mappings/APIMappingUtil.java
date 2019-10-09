@@ -1550,7 +1550,7 @@ public class APIMappingUtil {
             }});
         }
         operationsDTO.setThrottlingPolicy(uriTemplate.getThrottlingTier());
-        Set<APIProductIdentifier> usedByProducts = uriTemplate.getUsedByProducts();
+        Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
         List<String> usedProductIds = new ArrayList<>();
 
         for (APIProductIdentifier usedByProduct : usedByProducts) {

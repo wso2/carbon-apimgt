@@ -236,7 +236,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -447,7 +446,7 @@ public final class APIUtil {
                 uriTemplate.setScope(scope);
                 uriTemplate.setScopes(scope);
 
-                Set<APIProductIdentifier> usedByProducts = uriTemplate.getUsedByProducts();
+                Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
                 for (APIProductIdentifier usedByProduct : usedByProducts) {
                     String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);
                     Resource productResource = registry.get(apiProductPath);
@@ -617,7 +616,7 @@ public final class APIUtil {
                 uriTemplate.setScope(scope);
                 uriTemplate.setScopes(scope);
 
-                Set<APIProductIdentifier> usedByProducts = uriTemplate.getUsedByProducts();
+                Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
                 for (APIProductIdentifier usedByProduct : usedByProducts) {
                     String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);
                     Resource productResource = registry.get(apiProductPath);
