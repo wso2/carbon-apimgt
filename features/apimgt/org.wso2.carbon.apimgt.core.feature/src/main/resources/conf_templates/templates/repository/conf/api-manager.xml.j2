@@ -391,7 +391,7 @@
     </TierManagement>
 
     <!-- API Developer Portal Related Configurations -->
-    <APIDeveloperPortal>
+    <APIStore>
         {% if apim.devportal.enable_application_sharing%}
             {% if apim.devportal.application_sharing_impl is defined %}
         <GroupingExtractor>{{apim.devportal.application_sharing_impl}}</GroupingExtractor>
@@ -437,7 +437,7 @@
 
         <!--This parameter specifies whether Provisioning Out-of-Band OAuth Clients is enabled-->
         <MapExistingAuthApps>{{apim.devportal.enable_map_auth}}</MapExistingAuthApps>
-    </APIDeveloper Portal>
+    </APIStore>
 
     <APIPublisher>
         <DisplayURL>false</DisplayURL>
