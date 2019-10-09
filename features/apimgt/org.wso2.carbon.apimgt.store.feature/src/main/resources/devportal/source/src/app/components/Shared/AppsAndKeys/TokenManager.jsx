@@ -431,7 +431,7 @@ class TokenManager extends React.Component {
                                     keys.size > 0 && keys.get(keyType)
                                         ? (
                                             <FormattedMessage
-                                                defaultMessage='Update Configuration'
+                                                defaultMessage='Key Configurations'
                                                 id='Shared.AppsAndKeys.TokenManager.update.configuration'
                                             />
                                         )

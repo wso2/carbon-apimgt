@@ -274,9 +274,9 @@ class Details extends Component {
                             )}
                         </Link>
                     )}
-                    <LeftMenuItem text='production keys' route='productionkeys' to={pathPrefix + 'productionkeys'} />
-                    <LeftMenuItem text='sandbox keys' route='sandBoxkeys' to={pathPrefix + 'sandBoxkeys'} />
-                    <LeftMenuItem text='subscriptions' route='subscriptions' to={pathPrefix + 'subscriptions'} />
+                    <LeftMenuItem text='production keys' route='productionkeys' to={pathPrefix + '/productionkeys'} />
+                    <LeftMenuItem text='sandbox keys' route='sandBoxkeys' to={pathPrefix + '/sandBoxkeys'} />
+                    <LeftMenuItem text='subscriptions' route='subscriptions' to={pathPrefix + '/subscriptions'} />
                 </div>
                 <div className={classes.content}>
                     <InfoBar applicationId={match.params.application_uuid} innerRef={node => (this.infoBar = node)} />
