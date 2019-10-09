@@ -118,7 +118,7 @@ const definition = {
         });
         return tmpErrors;
     }),
-    apiContext: Joi.string().regex(/^[a-zA-Z0-9{}/]{1,50}$/).required().error((errors) => {
+    apiContext: Joi.string().regex(/(?!.*\/t\/.*|.*\/t$)^[/a-zA-Z0-9/]{1,50}$/).required().error((errors) => {
         const tmpErrors = [...errors];
         errors.forEach((err, index) => {
             const tmpError = { ...err };
