@@ -386,6 +386,11 @@ public class URITemplate implements Serializable{
         return usedByProducts;
     }
 
+    public Set<APIProductIdentifier> getUsedByProducts() {
+        return usedByProducts;
+    }
+
+
     public void addUsedByProduct(APIProductIdentifier usedByProduct) {
         usedByProducts.add(usedByProduct);
     }
