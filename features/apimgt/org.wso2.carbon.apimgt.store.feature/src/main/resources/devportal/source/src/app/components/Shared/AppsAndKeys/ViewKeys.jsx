@@ -385,10 +385,7 @@ class ViewKeys extends React.Component {
                                                         text={consumerSecret}
                                                         onCopy={() => this.onCopy('secretCopied')}
                                                     >
-                                                        <Icon
-                                                            color='secondary'
-                                                        >description
-                                                        </Icon>
+                                                        <Icon color='secondary'>description</Icon>
                                                     </CopyToClipboard>
                                                 </Tooltip>
                                             </InputAdornment>
@@ -414,18 +411,31 @@ class ViewKeys extends React.Component {
                                     />
                                 </InputLabel>
                                 <div className={classes.copyWrapper}>
-                                    <Input
-                                        inputProps={{ readOnly: true }}
+                                    <TextField
                                         id='access-token'
                                         value={accessToken}
                                         margin='normal'
+                                        variant='outlined'
                                         fullWidth
+                                        InputProps={{
+                                            readOnly: true,
+                                            endAdornment: (
+                                                <InputAdornment position='end'>
+                                                    <Tooltip
+                                                        title={tokenCopied ? 'Copied' : 'Copy to clipboard'}
+                                                        placement='right'
+                                                    >
+                                                        <CopyToClipboard
+                                                            text={accessToken}
+                                                            onCopy={() => this.onCopy('tokenCopied')}
+                                                        >
+                                                            <Icon color='secondary'>description</Icon>
+                                                        </CopyToClipboard>
+                                                    </Tooltip>
+                                                </InputAdornment>
+                                            ),
+                                        }}
                                     />
-                                    <Tooltip title={tokenCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
-                                        <CopyToClipboard text={accessToken} onCopy={() => this.onCopy('tokenCopied')}>
-                                            <Icon color='secondary'>file_copy</Icon>
-                                        </CopyToClipboard>
-                                    </Tooltip>
                                 </div>
                                 <FormControl>
                                     <FormHelperText id='access-token-helper-text'>
