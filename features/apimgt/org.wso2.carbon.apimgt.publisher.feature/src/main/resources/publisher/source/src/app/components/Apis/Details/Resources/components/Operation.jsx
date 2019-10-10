@@ -133,7 +133,7 @@ function Operation(props) {
             <ExpansionPanel
                 expanded={isExpanded}
                 onChange={handleExpansion}
-                disabled={disableUpdate || markAsDelete}
+                disabled={markAsDelete}
                 className={classes.paperStyles}
             >
                 <ExpansionPanelSummary
