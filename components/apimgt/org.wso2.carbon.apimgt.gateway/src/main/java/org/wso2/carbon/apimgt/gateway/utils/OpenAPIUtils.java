@@ -71,35 +71,71 @@ public class OpenAPIUtils {
     public static String getScopesOfResource(OpenAPI openAPI, MessageContext synCtx) {
         Map<String, Object> vendorExtensions = getPathItemExtensions(synCtx, openAPI);
         if (vendorExtensions != null) {
-            return (String) vendorExtensions.get(APIConstants.SWAGGER_X_SCOPE);
+            String resourceScope = (String) vendorExtensions.get(APIConstants.SWAGGER_X_SCOPE);
+            if (resourceScope == null) {
+                // If x-scope not found in swagger, check for the scopes in security
+                ArrayList<String> securityScopes = getPathItemSecurityScopes(synCtx, openAPI);
+                if (securityScopes == null || securityScopes.isEmpty()) {
+                    return null;
+                } else {
+                    return securityScopes.get(0);
+                }
+            } else {
+                return resourceScope;
+            }
         }
         return null;
     }
 
     /**
-     * Return the scope-role mapping of an API
+     * Return the roles of a given scope attached to a resource using the API swagger.
      *
      * @param openAPI OpenAPI of the API
      * @param synCtx  The message containing resource request
-     * @return the scope-role mapping
+     * @param resourceScope  The scope of the resource
+     * @return the roles of the scope in the comma separated format
      */
-    public static ArrayList<LinkedHashMap> getScopeToRoleMappingOfApi(OpenAPI openAPI, MessageContext synCtx) {
-        Map<String, Object> vendorExtensions = getPathItemExtensions(synCtx, openAPI);
+    public static String getRolesOfScope(OpenAPI openAPI, MessageContext synCtx, String resourceScope) {
+        String resourceRoles = null;
 
+        Map<String, Object> vendorExtensions = getPathItemExtensions(synCtx, openAPI);
         if (vendorExtensions != null) {
-            String resourceScope = getScopesOfResource(openAPI, synCtx);
             if (StringUtils.isNotBlank(resourceScope)) {
-                LinkedHashMap swaggerWSO2Security = (LinkedHashMap) openAPI.getExtensions()
-                        .get(APIConstants.SWAGGER_X_WSO2_SECURITY);
-                if (swaggerWSO2Security != null) {
-                    LinkedHashMap swaggerObjectAPIM = (LinkedHashMap) swaggerWSO2Security
-                            .get(APIConstants.SWAGGER_OBJECT_NAME_APIM);
-                    if (swaggerObjectAPIM != null) {
-                        return (ArrayList<LinkedHashMap>) swaggerObjectAPIM.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
+                if (openAPI.getExtensions() != null &&
+                        openAPI.getExtensions().get(APIConstants.SWAGGER_X_WSO2_SECURITY) != null) {
+                    LinkedHashMap swaggerWSO2Security = (LinkedHashMap) openAPI.getExtensions()
+                            .get(APIConstants.SWAGGER_X_WSO2_SECURITY);
+                    if (swaggerWSO2Security != null &&
+                            swaggerWSO2Security.get(APIConstants.SWAGGER_OBJECT_NAME_APIM) != null) {
+                        LinkedHashMap swaggerObjectAPIM = (LinkedHashMap) swaggerWSO2Security
+                                .get(APIConstants.SWAGGER_OBJECT_NAME_APIM);
+                        if (swaggerObjectAPIM != null && swaggerObjectAPIM.get(APIConstants.SWAGGER_X_WSO2_SCOPES) != null) {
+                            ArrayList<LinkedHashMap> apiScopes =
+                                    (ArrayList<LinkedHashMap>) swaggerObjectAPIM.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
+                            for (LinkedHashMap scope: apiScopes) {
+                                if (resourceScope.equals(scope.get(APIConstants.SWAGGER_SCOPE_KEY))) {
+                                    resourceRoles = (String) scope.get(APIConstants.SWAGGER_ROLES);
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
+
+        if (resourceRoles == null) {
+            Map<String, Object> extensions = openAPI.getComponents().getSecuritySchemes()
+                    .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY).getExtensions();
+            if (extensions != null && extensions.get(APIConstants.SWAGGER_X_SCOPES_BINDINGS) != null) {
+                LinkedHashMap<String, Object> scopeBindings =
+                        (LinkedHashMap<String, Object>) extensions.get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+                if (scopeBindings != null) {
+                    return (String) scopeBindings.get(resourceScope);
+                }
+            }
+        }
+
         return null;
     }
 
@@ -146,6 +182,43 @@ public class OpenAPIUtils {
                         return path.getOptions().getExtensions();
                     case APIConstants.HTTP_PATCH:
                         return path.getPatch().getExtensions();
+                }
+            }
+        }
+        return null;
+    }
+
+    private static ArrayList<String> getPathItemSecurityScopes(MessageContext synCtx, OpenAPI openAPI) {
+        if (openAPI != null) {
+            String apiElectedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+            org.apache.axis2.context.MessageContext axis2MessageContext =
+                    ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+            String httpMethod = (String) axis2MessageContext.getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD);
+            PathItem path = openAPI.getPaths().get(apiElectedResource);
+
+            if (path != null) {
+                switch (httpMethod) {
+                    case APIConstants.HTTP_GET:
+                        return (ArrayList<String>) path.getGet().getSecurity().get(0)
+                                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
+                    case APIConstants.HTTP_POST:
+                        return (ArrayList<String>) path.getPost().getSecurity().get(0)
+                                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
+                    case APIConstants.HTTP_PUT:
+                        return (ArrayList<String>) path.getPut().getSecurity().get(0)
+                                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
+                    case APIConstants.HTTP_DELETE:
+                        return (ArrayList<String>) path.getDelete().getSecurity().get(0)
+                                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
+                    case APIConstants.HTTP_HEAD:
+                        return (ArrayList<String>) path.getHead().getSecurity().get(0)
+                                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
+                    case APIConstants.HTTP_OPTIONS:
+                        return (ArrayList<String>) path.getOptions().getSecurity().get(0)
+                                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
+                    case APIConstants.HTTP_PATCH:
+                        return (ArrayList<String>) path.getPatch().getSecurity().get(0)
+                                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
                 }
             }
         }

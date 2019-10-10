@@ -30,6 +30,8 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.RESTDispatcher;
+import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
@@ -39,6 +41,8 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
@@ -80,6 +84,8 @@ public class APIKeyValidator {
     private boolean isGatewayAPIResourceValidationEnabled = true;
 
     protected Log log = LogFactory.getLog(getClass());
+
+    private ArrayList<URITemplate> uriTemplates = null;
 
     public APIKeyValidator(AxisConfiguration axisConfig) {
         //check the client type from config
@@ -294,7 +300,7 @@ public class APIKeyValidator {
                 for (VerbInfoDTO verb : verbInfoList) {
                     authType = verb.getAuthType();
                     if (authType == null) {
-                        authType = StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase());;
+                        authType = StringUtils.capitalize(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.toLowerCase());
                     }
                     if (!StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase()).equals(authType)) {
                         break;
@@ -461,9 +467,9 @@ public class APIKeyValidator {
             String apiType = (String) synCtx.getProperty(APIMgtGatewayConstants.API_TYPE);
 
             if (APIConstants.ApiTypes.PRODUCT_API.name().equalsIgnoreCase(apiType)) {
-                apiInfoDTO = doGetAPIProductInfo(apiContext, apiVersion);
+                apiInfoDTO = doGetAPIProductInfo(synCtx, apiContext, apiVersion);
             } else {
-                apiInfoDTO = doGetAPIInfo(apiContext, apiVersion);
+                apiInfoDTO = doGetAPIInfo(synCtx, apiContext, apiVersion);
             }
 
             if (Util.tracingEnabled()) {
@@ -539,15 +545,15 @@ public class APIKeyValidator {
     }
 
     @MethodStats
-    private APIInfoDTO doGetAPIInfo(String context, String apiVersion) throws APISecurityException {
-        ArrayList<URITemplate> uriTemplates = getAllURITemplates(context, apiVersion);
+    private APIInfoDTO doGetAPIInfo(MessageContext messageContext, String context, String apiVersion) throws APISecurityException {
+        ArrayList<URITemplate> uriTemplates = getAllURITemplates(messageContext, context, apiVersion);
 
         return mapToAPIInfo(uriTemplates, context, apiVersion);
     }
 
     @MethodStats
-    private APIInfoDTO doGetAPIProductInfo(String context, String apiVersion) throws APISecurityException {
-        ArrayList<URITemplate> uriTemplates = getAPIProductURITemplates(context, apiVersion);
+    private APIInfoDTO doGetAPIProductInfo(MessageContext messageContext, String context, String apiVersion) throws APISecurityException {
+        ArrayList<URITemplate> uriTemplates = getAPIProductURITemplates(messageContext, context, apiVersion);
 
         return mapToAPIInfo(uriTemplates, context, apiVersion);
     }
@@ -589,13 +595,14 @@ public class APIKeyValidator {
     }
 
     /**
+     * @param messageContext     The message context
      * @param context     API context of API
      * @param apiVersion  Version of API
      * @param requestPath Incoming request path
      * @param httpMethod  http method of request
      * @return verbInfoDTO which contains throttling tier for given resource and verb+resource key
      */
-    public VerbInfoDTO getVerbInfoDTOFromAPIData(String context, String apiVersion, String requestPath, String httpMethod)
+    public VerbInfoDTO getVerbInfoDTOFromAPIData(MessageContext messageContext, String context, String apiVersion, String requestPath, String httpMethod)
             throws APISecurityException {
 
         String cacheKey = context + ':' + apiVersion;
@@ -604,7 +611,7 @@ public class APIKeyValidator {
             apiInfoDTO = (APIInfoDTO) getResourceCache().get(cacheKey);
         }
         if (apiInfoDTO == null) {
-            apiInfoDTO = doGetAPIInfo(context, apiVersion);
+            apiInfoDTO = doGetAPIInfo(messageContext, context, apiVersion);
             if (isGatewayAPIResourceValidationEnabled) {
                 getResourceCache().put(cacheKey, apiInfoDTO);
             }
@@ -701,15 +708,53 @@ public class APIKeyValidator {
 
 
     @MethodStats
-    protected ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion)
+    protected ArrayList<URITemplate> getAllURITemplates(MessageContext messageContext, String context, String apiVersion)
             throws APISecurityException {
-        return dataStore.getAllURITemplates(context, apiVersion);
+        if (uriTemplates == null) {
+            synchronized (this) {
+                if (uriTemplates == null) {
+                    String swagger = (String) messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_STRING);
+                    if (swagger != null) {
+                        APIDefinition oasParser;
+                        try {
+                            oasParser = OASParserUtil.getOASParser(swagger);
+                            uriTemplates = new ArrayList<>();
+                            uriTemplates.addAll(oasParser.getURITemplates(swagger));
+                            return uriTemplates;
+                        } catch (APIManagementException e) {
+                            log.error("Error while parsing swagger content to get URI Templates", e);
+                        }
+                    }
+                    uriTemplates = dataStore.getAllURITemplates(context, apiVersion);
+                }
+            }
+        }
+        return uriTemplates;
     }
 
     @MethodStats
-    protected ArrayList<URITemplate> getAPIProductURITemplates(String context, String apiVersion)
+    protected ArrayList<URITemplate> getAPIProductURITemplates(MessageContext messageContext, String context, String apiVersion)
             throws APISecurityException {
-        return dataStore.getAPIProductURITemplates(context, apiVersion);
+        if (uriTemplates == null) {
+            synchronized (this) {
+                if (uriTemplates == null) {
+                    String swagger = (String) messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_STRING);
+                    if (swagger != null) {
+                        APIDefinition oasParser;
+                        try {
+                            oasParser = OASParserUtil.getOASParser(swagger);
+                            uriTemplates = new ArrayList<>();
+                            uriTemplates.addAll(oasParser.getURITemplates(swagger));
+                            return uriTemplates;
+                        } catch (APIManagementException e) {
+                            log.error("Error while parsing swagger content to get URI Templates", e);
+                        }
+                    }
+                    uriTemplates = dataStore.getAPIProductURITemplates(context, apiVersion);
+                }
+            }
+        }
+        return uriTemplates;
     }
 
     protected void setGatewayAPIResourceValidationEnabled(boolean gatewayAPIResourceValidationEnabled) {

@@ -416,7 +416,8 @@ public class APIKeyValidatorTestCase {
         Mockito.when(APIUtil.getAPIInfoDTOCacheKey("", "1.0")).thenReturn("abc");
         Mockito.when((VerbInfoDTO) CacheProvider.getResourceCache().get("abc"))
                 .thenReturn(verbInfoDTO1);
-        VerbInfoDTO verbInfoDTOFromAPIData = apiKeyValidator.getVerbInfoDTOFromAPIData(context, apiVersion,
+        MessageContext messageContext = Mockito.mock(MessageContext.class);
+        VerbInfoDTO verbInfoDTOFromAPIData = apiKeyValidator.getVerbInfoDTOFromAPIData(messageContext, context, apiVersion,
                 requestPath, httpMethod);
         Assert.assertEquals("", verbDTO, verbInfoDTOFromAPIData);
 
@@ -460,8 +461,10 @@ public class APIKeyValidatorTestCase {
         Mockito.when(APIUtil.getAPIInfoDTOCacheKey("", "1.0")).thenReturn("abc");
         Mockito.when((VerbInfoDTO) CacheProvider.getResourceCache().get("abc"))
                 .thenReturn(verbInfoDTO1);
+        MessageContext messageContext = Mockito.mock(MessageContext.class);
+
         Assert.assertEquals("", verbDTO,
-                apiKeyValidator.getVerbInfoDTOFromAPIData(context, apiVersion, requestPath, httpMethod));
+                apiKeyValidator.getVerbInfoDTOFromAPIData(messageContext, context, apiVersion, requestPath, httpMethod));
 
     }
 
@@ -495,8 +498,9 @@ public class APIKeyValidatorTestCase {
         PowerMockito.when(cacheProvider.getDefaultCacheTimeout()).thenReturn((long) 900);
 
         Mockito.when(CacheProvider.getResourceCache()).thenReturn(cache);
+        MessageContext messageContext = Mockito.mock(MessageContext.class);
         Assert.assertEquals("", null,
-                apiKeyValidator.getVerbInfoDTOFromAPIData(context, apiVersion, requestPath, httpMethod));
+                apiKeyValidator.getVerbInfoDTOFromAPIData(messageContext, context, apiVersion, requestPath, httpMethod));
 
     }
 
@@ -621,7 +625,7 @@ public class APIKeyValidatorTestCase {
             }
 
             @Override
-            protected ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion) throws
+            protected ArrayList<URITemplate> getAllURITemplates(MessageContext messageContext, String context, String apiVersion) throws
                     APISecurityException {
                 return urlTemplates;
             }
