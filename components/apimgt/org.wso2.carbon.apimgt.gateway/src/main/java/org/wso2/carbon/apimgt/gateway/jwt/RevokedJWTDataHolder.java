@@ -32,6 +32,11 @@ public class RevokedJWTDataHolder {
     private static Map<String, Long> revokedJWTMap = new ConcurrentHashMap<>();
     private static RevokedJWTDataHolder instance = new RevokedJWTDataHolder();
 
+    /**
+     * Adds a given key,value pair to the revoke map.
+     * @param key key to be added.
+     * @param value value to be added.
+     */
     public void addRevokedJWTToMap(String key, Long value) {
         if (key != null && value != null) {
             log.debug("Adding revoked JWT key, value pair to the revoked map :" + key + " , " + value);
@@ -39,6 +44,11 @@ public class RevokedJWTDataHolder {
         }
     }
 
+    /**
+     * Checks whether a given signature is in the map.
+     * @param jwtSignature signature to be checked.
+     * @return true if it exists and false otherwise.
+     */
     public static boolean isJWTTokenSignatureExistsInRevokedMap(String jwtSignature) {
         return revokedJWTMap.containsKey(jwtSignature);
     }
@@ -47,10 +57,18 @@ public class RevokedJWTDataHolder {
 
     }
 
+    /**
+     * Fetches the revoke map.
+     * @return
+     */
     Map<String, Long> getRevokedJWTMap() {
         return revokedJWTMap;
     }
 
+    /**
+     * This method can be used to get the singleton instance of this class.
+     * @return the singleton instance.
+     */
     public static RevokedJWTDataHolder getInstance() {
         return instance;
     }
