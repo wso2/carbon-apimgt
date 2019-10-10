@@ -167,7 +167,9 @@ class LifeCycleUpdate extends Component {
                 if (item.event === 'Publish') {
                     return {
                         ...item,
-                        disabled: api.endpointConfig == null || api.policies.length === 0,
+                        disabled: api.endpointConfig == null ||
+                            api.policies.length === 0 ||
+                            api.endpointConfig.implementation_status === 'prototyped',
                     };
                 }
                 return {
