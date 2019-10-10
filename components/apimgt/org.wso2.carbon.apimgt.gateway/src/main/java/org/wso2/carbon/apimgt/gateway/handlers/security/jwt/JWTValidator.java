@@ -100,7 +100,8 @@ public class JWTValidator {
                     log.debug("Token retrieved from the invalid token cache. Token: " + GatewayUtils
                             .getMaskedToken(splitToken));
                 }
-                log.error("Invalid JWT token.");
+                log.error("Invalid JWT token. " + GatewayUtils
+                        .getMaskedToken(splitToken));
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
@@ -110,7 +111,8 @@ public class JWTValidator {
                     log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
                             getMaskedToken(splitToken));
                 }
-                log.debug("Invalid JWT token.");
+                log.error("Invalid JWT token. " + GatewayUtils
+                        .getMaskedToken(splitToken));
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
