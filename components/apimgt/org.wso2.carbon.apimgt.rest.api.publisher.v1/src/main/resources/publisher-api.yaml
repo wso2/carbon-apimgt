@@ -541,7 +541,15 @@ paths:
           name: apiDefinition
           description: Swagger definition of the API
           type: string
-          required: true
+        - in: formData
+          name: url
+          description: Swagger definition URL of the API
+          type: string
+        - in: formData
+          name: file
+          description: Swagger definitio as a file
+          type: file
+          required: false
         - $ref: '#/parameters/If-Match'
       tags:
         - APIs
