@@ -65,7 +65,7 @@ public class RevokedJWTMapCleaner extends TimerTask {
      * Starts the timer task to clean the JWT revoke map
      */
     public void startJWTRevokedMapCleaner() {
-        //todo set appropriate initdelay and interval
-        new Timer().schedule(this, 12000, 120000);
+        // Thread starts after 2 mins and runs every 30 minutes
+        new Timer().schedule(this, 120000, 1800000);
     }
 }
