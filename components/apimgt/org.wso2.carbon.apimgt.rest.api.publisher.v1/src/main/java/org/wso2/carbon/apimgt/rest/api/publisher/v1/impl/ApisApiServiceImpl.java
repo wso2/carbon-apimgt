@@ -52,7 +52,6 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -149,7 +148,6 @@ import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -359,6 +357,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         if (body.getAuthorizationHeader() == null) {
             body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
+        }
+
+        if (body.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED && body.getVisibleRoles().isEmpty()) {
+            RestApiUtil.handleBadRequest("Valid roles should be added under 'visibleRoles' to restrict " +
+                    "the visibility", log);
         }
 
         //Get all existing versions of  api been adding
@@ -671,7 +674,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         for (URITemplate existingUriTemplate : existingUriTemplates) {
 
             // If existing URITemplate is used by any API Products
-            if (!existingUriTemplate.getUsedByProducts().isEmpty()) {
+            if (!existingUriTemplate.retrieveUsedByProducts().isEmpty()) {
                 String existingVerb = existingUriTemplate.getHTTPVerb();
                 String existingPath = existingUriTemplate.getUriTemplate();
                 boolean isReusedResourceRemoved = true;
@@ -714,7 +717,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         for (URITemplate existingUriTemplate : existingUriTemplates) {
 
             // If existing URITemplate is used by any API Products
-            if (!existingUriTemplate.getUsedByProducts().isEmpty()) {
+            if (!existingUriTemplate.retrieveUsedByProducts().isEmpty()) {
                 String existingVerb = existingUriTemplate.getHTTPVerb();
                 String existingPath = existingUriTemplate.getUriTemplate();
                 boolean isReusedResourceRemoved = true;
@@ -1145,7 +1148,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         for (URITemplate uriTemplate : uriTemplates) {
             // If existing URITemplate is used by any API Products
-            if (!uriTemplate.getUsedByProducts().isEmpty()) {
+            if (!uriTemplate.retrieveUsedByProducts().isEmpty()) {
                 APIResource apiResource = new APIResource(uriTemplate.getHTTPVerb(), uriTemplate.getUriTemplate());
                 usedProductResources.add(apiResource);
             }
@@ -3580,10 +3583,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                             .handleBadRequest("Scope " + scope.getName() + " is already assigned by another API", log);
                 }
             }
-            //todo: validate with migrations
-//            if (StringUtils.isBlank(scope.getDescription())) {
-//                RestApiUtil.handleBadRequest("Scope cannot have empty description", log);
-//            }
+            //set description as empty if it is not provided
+            if (StringUtils.isBlank(scope.getDescription())) {
+                scope.setDescription("");
+            }
             if (scope.getRoles() != null) {
                 for (String aRole : scope.getRoles().split(",")) {
                     boolean isValidRole = APIUtil.isRoleNameExist(apiId.getProviderName(), aRole);

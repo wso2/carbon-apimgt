@@ -18,7 +18,6 @@
 
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
@@ -70,7 +69,7 @@ class AppsTableContent extends Component {
      */
     render() {
         const {
-            apps, handleAppDelete, page, rowsPerPage, order, orderBy, isApplicationSharingEnabled,
+            apps, toggleDeleteConfirmation, page, rowsPerPage, order, orderBy,
         } = this.props;
         const { notFound } = this.state;
         const emptyRowsPerPage = rowsPerPage - Math.min(rowsPerPage, apps.size - page * rowsPerPage);
@@ -146,7 +145,7 @@ class AppsTableContent extends Component {
                                     >
                                         {app.status === this.APPLICATION_STATES.APPROVED && (
                                             <Tooltip title='Edit'>
-                                                <Link to={'application/edit/' + app.applicationId}>
+                                                <Link to={`/applications/${app.applicationId}/edit/`}>
                                                     <IconButton>
                                                         <Icon aria-label={(
                                                             <FormattedMessage
@@ -176,7 +175,7 @@ class AppsTableContent extends Component {
                                             <IconButton
                                                 disabled={app.deleting}
                                                 data-appId={app.applicationId}
-                                                onClick={handleAppDelete}
+                                                onClick={toggleDeleteConfirmation}
                                                 color='default'
                                                 aria-label={(
                                                     <FormattedMessage
@@ -204,12 +203,11 @@ class AppsTableContent extends Component {
     }
 }
 AppsTableContent.propTypes = {
-    handleAppDelete: PropTypes.func.isRequired,
+    toggleDeleteConfirmation: PropTypes.func.isRequired,
     page: PropTypes.number.isRequired,
     rowsPerPage: PropTypes.number.isRequired,
     order: PropTypes.string.isRequired,
     orderBy: PropTypes.string.isRequired,
-    isApplicationSharingEnabled: PropTypes.func.isRequired,
     apps: PropTypes.instanceOf(Map).isRequired,
 };
 export default AppsTableContent;

@@ -36,6 +36,9 @@ const styles = theme => ({
     buttonGap: {
         marginLeft: 20,
     },
+    select: {
+        width: 100,
+    },
 });
 
 /**
@@ -81,6 +84,7 @@ class SubscriptionPolicySelect extends React.Component {
             && (
                 <div className={classes.root}>
                     <Select
+                        className={classes.select}
                         value={selectedPolicy}
                         onChange={(e) => {
                             this.setState({ selectedPolicy: e.target.value });
