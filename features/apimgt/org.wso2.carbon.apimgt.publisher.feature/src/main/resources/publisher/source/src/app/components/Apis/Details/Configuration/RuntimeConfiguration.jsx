@@ -22,7 +22,6 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import { Link } from 'react-router-dom';
-import Container from '@material-ui/core/Container';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import { FormattedMessage } from 'react-intl';
@@ -30,7 +29,8 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Alert from 'AppComponents/Shared/Alert';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import LaunchIcon from '@material-ui/icons/Launch';
+import isEmpty from 'lodash/isEmpty';
+import cloneDeep from 'lodash.clonedeep';
 
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { isRestricted } from 'AppData/AuthManager';
@@ -38,6 +38,8 @@ import ResponseCaching from './components/ResponseCaching';
 import CORSConfiguration from './components/CORSConfiguration';
 import SchemaValidation from './components/SchemaValidation';
 import MaxBackendTps from './components/MaxBackendTps';
+import Flow from './components/Flow';
+import Endpoints from './components/Endpoints';
 
 import APISecurity, {
     DEFAULT_API_SECURITY_OAUTH2,
@@ -265,12 +267,43 @@ export default function RuntimeConfiguration() {
     const [isUpdating, setIsUpdating] = useState(false);
     const [apiConfig, configDispatcher] = useReducer(configReducer, copyAPIConfig(api));
     const classes = useStyles();
+    const mediationPolicies = cloneDeep(api.mediationPolicies || []);
+    const [inPolicy, setInPolicy] = useState(mediationPolicies.filter(seq => seq.type === 'IN')[0]);
+    const [outPolicy, setOutPolicy] = useState(mediationPolicies.filter(seq => seq.type === 'OUT')[0]);
+    const [faultPolicy, setFaultPolicy] = useState(mediationPolicies.filter(seq => seq.type === 'FAULT')[0]);
+    const getMediationPoliciesToSave = () => {
+        const NONE = 'none';
+        const newMediationPolicies = [];
+        if (!(isEmpty(inPolicy) || inPolicy.name === NONE)) {
+            newMediationPolicies.push(inPolicy);
+        }
+        if (!(isEmpty(outPolicy) || outPolicy.name === NONE)) {
+            newMediationPolicies.push(outPolicy);
+        }
+        if (!(isEmpty(faultPolicy) || faultPolicy.name === NONE)) {
+            newMediationPolicies.push(faultPolicy);
+        }
+        return newMediationPolicies;
+    };
+    const updateInMediationPolicy = (policy) => {
+        setInPolicy({ id: policy.id, name: policy.name, type: policy.type });
+    };
+    const updateOutMediationPolicy = (policy) => {
+        setOutPolicy({ id: policy.id, name: policy.name, type: policy.type });
+    };
+    const updateFaultMediationPolicy = (policy) => {
+        setFaultPolicy({ id: policy.id, name: policy.name, type: policy.type });
+    };
     /**
      *
      * Handle the configuration view save button action
      */
     function handleSave() {
         setIsUpdating(true);
+        const newMediationPolicies = getMediationPoliciesToSave();
+        if (!api.isAPIProduct()) {
+            apiConfig.mediationPolicies = newMediationPolicies;
+        }
         updateAPI(apiConfig)
             .catch((error) => {
                 if (error.response) {
@@ -282,141 +315,158 @@ export default function RuntimeConfiguration() {
 
     return (
         <React.Fragment>
-            <Container maxWidth='lg'>
-                <Box pb={3}>
-                    <Typography variant='h5'>
-                        <FormattedMessage
-                            id='Apis.Details.Configuration.RuntimeConfiguration.topic.header'
-                            defaultMessage='Runtime Configurations'
-                        />
-                    </Typography>
-                    <Typography variant='caption'>
-                        <FormattedMessage
-                            id='Apis.Details.Configuration.RuntimeConfiguration.sub.heading'
-                            defaultMessage='On this page you can change runtime configurations'
-                        />
-                    </Typography>
-                </Box>
-                <div className={classes.contentWrapper}>
-                    <Grid container direction='row' justify='space-around' alignItems='stretch' spacing={8}>
-                        <Grid item xs={8}>
+            <Box pb={3}>
+                <Typography variant='h5'>
+                    <FormattedMessage
+                        id='Apis.Details.Configuration.RuntimeConfiguration.topic.header'
+                        defaultMessage='Runtime Configurations'
+                    />
+                </Typography>
+            </Box>
+            <div className={classes.contentWrapper}>
+                <Grid container direction='row' justify='space-around' alignItems='stretch' spacing={8}>
+                    <Grid item xs={12} md={7}>
+                        <Typography className={classes.heading} variant='h6'>
+                            <FormattedMessage
+                                id='Apis.Details.Configuration.Configuration.section.request'
+                                defaultMessage='Request'
+                            />
+                        </Typography>
+                        <Grid
+                            direction=' column'
+                            justify='space-between'
+                            alignItems='stretch'
+                            spacing={6}
+                        >
+                            <Grid item xs={12} style={{ marginBottom: 30, position: 'relative' }}>
+                                <Paper className={classes.paper} elevation={0}>
+                                    <APISecurity api={apiConfig} configDispatcher={configDispatcher} />
+                                    <CORSConfiguration api={apiConfig} configDispatcher={configDispatcher} />
+                                    {api.type !== 'GRAPHQL' &&
+                                        <SchemaValidation api={apiConfig} configDispatcher={configDispatcher} />
+                                    }
+                                    {!api.isAPIProduct() && (
+                                        <React.Fragment>
+                                            <Flow
+                                                api={apiConfig}
+                                                type='IN'
+                                                updateMediationPolicy={updateInMediationPolicy}
+                                                selectedMediationPolicy={inPolicy}
+                                            />
+                                        </React.Fragment>
+                                    )}
+                                </Paper>
+                                <ArrowForwardIcon className={classes.arrowForwardIcon} />
+                            </Grid>
                             <Typography className={classes.heading} variant='h6'>
                                 <FormattedMessage
-                                    id='Apis.Details.Configuration.Configuration.section.request'
-                                    defaultMessage='Request'
+                                    id='Apis.Details.Configuration.Configuration.section.response'
+                                    defaultMessage='Response'
                                 />
                             </Typography>
-                            <Grid
-                                direction=' column'
-                                justify='space-between'
-                                alignItems='stretch'
-                                spacing={6}
-                            >
-                                <Grid item xs={12} style={{ marginBottom: 30, position: 'relative' }}>
+                            <Grid item xs={12} style={{ position: 'relative' }}>
+                                <Box mb={3}>
                                     <Paper className={classes.paper} elevation={0}>
-                                        <APISecurity api={apiConfig} configDispatcher={configDispatcher} />
-                                        <CORSConfiguration api={apiConfig} configDispatcher={configDispatcher} />
-                                        {api.type !== 'GRAPHQL' &&
-                                            <SchemaValidation api={apiConfig} configDispatcher={configDispatcher} />
-                                        }
-                                    </Paper>
-                                    <ArrowForwardIcon className={classes.arrowForwardIcon} />
-                                </Grid>
-                                {
-                                    // TODO:
-                                    // Add Mediation Policies
-                                }
-                                <Typography className={classes.heading} variant='h6'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Configuration.Configuration.section.response'
-                                        defaultMessage='Response'
-                                    />
-                                </Typography>
-                                <Grid item xs={12} style={{ position: 'relative' }}>
-                                    <Paper className={classes.paper} elevation={0}>
+                                        {!api.isAPIProduct() && (
+                                            <React.Fragment>
+                                                <Box mb={3}>
+                                                    <Flow
+                                                        api={apiConfig}
+                                                        type='OUT'
+                                                        updateMediationPolicy={updateOutMediationPolicy}
+                                                        selectedMediationPolicy={outPolicy}
+                                                    />
+                                                </Box>
+                                            </React.Fragment>
+                                        )}
                                         <ResponseCaching api={apiConfig} configDispatcher={configDispatcher} />
                                     </Paper>
                                     <ArrowBackIcon className={classes.arrowBackIcon} />
-                                </Grid>
+                                </Box>
                             </Grid>
-                        </Grid>
-                        <Grid item xs={4}>
-                            <Typography className={classes.heading} variant='h6'>
-                                <FormattedMessage
-                                    id='Apis.Details.Configuration.Configuration.section.backend'
-                                    defaultMessage='Backend'
-                                />
-                            </Typography>
-                            <Paper className={classes.paper} style={{ height: 'calc(100% - 75px)' }} elevation={0}>
-                                {!api.isAPIProduct() && (
-                                    <React.Fragment>
-                                        <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
-                                        <Box py={2}>
-                                            <Link to={'/apis/' + api.id + '/endpoints'}>
-                                                <Typography
-                                                    className={classes.subHeading}
-                                                    color='primary'
-                                                    display='inline'
-                                                    variant='caption'
-                                                >
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Configuration.Configuration.endpoints'
-                                                        defaultMessage='Endpoints'
-                                                    />
-                                                    <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
-                                                </Typography>
-                                            </Link>
-                                        </Box>
-                                    </React.Fragment>
-                                )}
-                            </Paper>
-                        </Grid>
-                    </Grid>
-                    <Grid container>
-                        <Grid container direction='row' alignItems='center' spacing={1} style={{ marginTop: 20 }}>
-                            <Grid item>
-                                <Button
-                                    disabled={isUpdating ||
-                                    ((apiConfig.visibility === 'RESTRICTED' && apiConfig.visibleRoles.length === 0))}
-                                    type='submit'
-                                    variant='contained'
-                                    color='primary'
-                                    onClick={handleSave}
-                                >
-                                    <FormattedMessage
-                                        id='Apis.Details.Configuration.Configuration.save'
-                                        defaultMessage='Save'
-                                    />
-                                    {isUpdating && <CircularProgress size={15} />}
-                                </Button>
-                            </Grid>
-                            <Grid item>
-                                <Link to={'/apis/' + api.id + '/overview'}>
-                                    <Button>
+                            {!api.isAPIProduct() && (
+                                <React.Fragment>
+                                    <Typography className={classes.heading} variant='h6'>
                                         <FormattedMessage
-                                            id='Apis.Details.Configuration.Configuration.cancel'
-                                            defaultMessage='Cancel'
-                                        />
-                                    </Button>
-                                </Link>
-                            </Grid>
-                            {isRestricted(['apim:api_create'], api) && (
-                                <Grid item>
-                                    <Typography variant='body2' color='primary'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Configuration.Configuration.update.not.allowed'
-                                            defaultMessage={
-                                                '* You are not authorized to update particular fields of' +
-                                                ' the API due to insufficient permissions'
-                                            }
+                                            id='Apis.Details.Configuration.RuntimeConfiguration.section.fault'
+                                            defaultMessage='Fault'
                                         />
                                     </Typography>
-                                </Grid>
+                                    <Grid item xs={12} style={{ position: 'relative' }}>
+                                        <Paper className={classes.paper} elevation={0}>
+                                            <Flow
+                                                api={apiConfig}
+                                                type='FAULT'
+                                                updateMediationPolicy={updateFaultMediationPolicy}
+                                                selectedMediationPolicy={faultPolicy}
+                                            />
+                                        </Paper>
+                                    </Grid>
+                                </React.Fragment>
                             )}
                         </Grid>
                     </Grid>
-                </div>
-            </Container>
+                    <Grid item xs={12} md={5}>
+                        <Typography className={classes.heading} variant='h6'>
+                            <FormattedMessage
+                                id='Apis.Details.Configuration.Configuration.section.backend'
+                                defaultMessage='Backend'
+                            />
+                        </Typography>
+                        <Paper className={classes.paper} style={{ height: 'calc(100% - 75px)' }} elevation={0}>
+                            {!api.isAPIProduct() && (
+                                <React.Fragment>
+                                    <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
+                                    <Endpoints api={api} />
+                                </React.Fragment>
+                            )}
+                        </Paper>
+                    </Grid>
+                </Grid>
+                <Grid container>
+                    <Grid container direction='row' alignItems='center' spacing={1} style={{ marginTop: 20 }}>
+                        <Grid item>
+                            <Button
+                                disabled={isUpdating ||
+                                ((apiConfig.visibility === 'RESTRICTED' && apiConfig.visibleRoles.length === 0))}
+                                type='submit'
+                                variant='contained'
+                                color='primary'
+                                onClick={handleSave}
+                            >
+                                <FormattedMessage
+                                    id='Apis.Details.Configuration.Configuration.save'
+                                    defaultMessage='Save'
+                                />
+                                {isUpdating && <CircularProgress size={15} />}
+                            </Button>
+                        </Grid>
+                        <Grid item>
+                            <Link to={'/apis/' + api.id + '/overview'}>
+                                <Button>
+                                    <FormattedMessage
+                                        id='Apis.Details.Configuration.Configuration.cancel'
+                                        defaultMessage='Cancel'
+                                    />
+                                </Button>
+                            </Link>
+                        </Grid>
+                        {isRestricted(['apim:api_create'], api) && (
+                            <Grid item>
+                                <Typography variant='body2' color='primary'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Configuration.Configuration.update.not.allowed'
+                                        defaultMessage={
+                                            '* You are not authorized to update particular fields of' +
+                                            ' the API due to insufficient permissions'
+                                        }
+                                    />
+                                </Typography>
+                            </Grid>
+                        )}
+                    </Grid>
+                </Grid>
+            </div>
         </React.Fragment>
     );
 }

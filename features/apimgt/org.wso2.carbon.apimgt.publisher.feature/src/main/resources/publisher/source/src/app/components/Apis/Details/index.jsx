@@ -66,7 +66,6 @@ import Scope from './Scopes';
 import Security from './Security';
 import APIDefinition from './APIDefinition/APIDefinition';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
-import MediationPoliciesOverview from './MediationPolicies/Overview';
 import BusinessInformation from './BusinessInformation/BusinessInformation';
 import Properties from './Properties/Properties';
 import Monetization from './Monetization';
@@ -574,16 +573,6 @@ class Details extends Component {
                                 Icon={<MonetizationIcon />}
                             />
                         )}
-                        {!isAPIProduct && !api.isWebSocket() && (
-                            <LeftMenuItem
-                                text={intl.formatMessage({
-                                    id: 'Apis.Details.index.left.menu.mediation.policies',
-                                    defaultMessage: 'mediation policies',
-                                })}
-                                to={pathPrefix + 'mediation policies'}
-                                Icon={<ScopesIcon />}
-                            />
-                        )}
                         {settingsContext.externalStoresEnabled && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
@@ -699,14 +688,6 @@ class Details extends Component {
                                     component={() => <Monetization api={api} />}
                                 />
                                 <Route path={Details.subPaths.EXTERNAL_STORES} component={ExternalStores} />
-                                <Route
-                                    path={Details.subPaths.MEDIATION_POLICIES}
-                                    component={MediationPoliciesOverview}
-                                />
-                                <Route
-                                    path={Details.subPaths.MEDIATION_POLICIES_PRODUCT}
-                                    component={MediationPoliciesOverview}
-                                />
                             </Switch>
                         </div>
                     </div>
@@ -740,7 +721,6 @@ Details.subPaths = {
     RESOURCES_PRODUCT: '/api-products/:apiprod_uuid/resources',
     RESOURCES_PRODUCT_EDIT: '/api-products/:apiprod_uuid/resources/edit',
     SCOPES: '/apis/:api_uuid/scopes',
-    MEDIATION_POLICIES_PRODUCT: '/api-products/:apiprod_uuid/mediation policies',
     DOCUMENTS: '/apis/:api_uuid/documents',
     DOCUMENTS_PRODUCT: '/api-products/:apiprod_uuid/documents',
     SUBSCRIPTIONS_PRODUCT: '/api-products/:apiprod_uuid/subscriptions',
@@ -753,7 +733,6 @@ Details.subPaths = {
     PROPERTIES_PRODUCT: '/api-products/:apiprod_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
     MONETIZATION: '/apis/:api_uuid/monetization',
-    MEDIATION_POLICIES: '/apis/:api_uuid/mediation policies',
     EXTERNAL_STORES: '/apis/:api_uuid/external-stores',
 };
 

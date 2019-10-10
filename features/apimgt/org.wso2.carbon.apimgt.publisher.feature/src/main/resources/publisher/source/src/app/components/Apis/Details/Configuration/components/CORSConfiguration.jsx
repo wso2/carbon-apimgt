@@ -46,14 +46,14 @@ const useStyles = makeStyles(theme => ({
         marginLeft: theme.spacing(0.5),
     },
     actionSpace: {
-        margin: 'auto',
+        margin: '-7px auto',
     },
     subHeading: {
         fontSize: '1rem',
         fontWeight: 400,
         margin: 0,
         display: 'inline-flex',
-        lineHeight: '38px',
+        lineHeight: 1.5,
     },
 }));
 
