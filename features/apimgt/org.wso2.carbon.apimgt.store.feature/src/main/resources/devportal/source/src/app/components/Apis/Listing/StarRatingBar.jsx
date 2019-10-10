@@ -35,7 +35,7 @@ import StarRatingSummary from 'AppComponents/Apis/Details/StarRatingSummary';
 const styles = theme => ({
     starRate: {
         fontSize: 30,
-        color: theme.custom.starColor,
+        color: theme.custom.infoBar.starColor,
     },
     noStarRate: {
         fontSize: 30,

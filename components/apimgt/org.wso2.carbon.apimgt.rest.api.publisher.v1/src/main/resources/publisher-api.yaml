@@ -9006,6 +9006,9 @@ definitions:
   Settings:
     title: SettingsDTO
     properties:
+      storeUrl:
+        type: string
+        description: Store URL
       environment:
         type: array
         items:
