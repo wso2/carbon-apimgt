@@ -32,7 +32,7 @@ import API from '../../../data/api';
 const styles = theme => ({
     root: {
         padding: theme.spacing.unit * 3,
-        width: theme.custom.contentAreaWidth,
+        maxWidth: theme.custom.contentAreaWidth,
     },
     iconClass: {
         marginRight: 10,

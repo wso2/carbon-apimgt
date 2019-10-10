@@ -29,7 +29,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Icon from '@material-ui/core/Icon';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
-import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
@@ -104,7 +104,7 @@ const styles = theme => ({
         paddingBottom: theme.spacing(2),
     },
     genericMessageWrapper: {
-        marginLeft: theme.spacing(2),
+        margin: theme.spacing(2),
     },
     typeText: {
         color: '#000',
@@ -143,7 +143,7 @@ const styles = theme => ({
         flex: 1,
     },
     listItemRoot: {
-        minWidth: 30, 
+        minWidth: 30,
     },
 });
 window.requestAnimFrame = (function () {
@@ -216,7 +216,7 @@ function FullWidthGrid(props) {
     const [selectedDoc, changeSelectedDoc] = useState(null);
     const [open, setOpen] = useState(false);
     const [width, height] = useWindowSize();
-    const [showDocList, setShowDocList] = useState(width < 1400 ? false: true);
+    const [showDocList, setShowDocList] = useState(!(width < 1400));
     const toggleDocList = () => {
         setShowDocList(!showDocList);
     };
@@ -228,7 +228,7 @@ function FullWidthGrid(props) {
     };
     const apiId = props.match.params.apiUuid;
     useEffect(() => {
-         width < 1400 ? setShowDocList(false) : setShowDocList(true);
+        width < 1400 ? setShowDocList(false) : setShowDocList(true);
     }, [width]);
     useEffect(() => {
         const restApi = new API();
@@ -272,166 +272,140 @@ function FullWidthGrid(props) {
                 }
             });
     }, []);
-   
+
     const toggleOpen = () => {
         setOpen(!open);
     };
     return (
-        <Grid container className={classes.contentWrapper}>
-            <Grid item md={12} lg={12}>
-                <Grid container spacing={5}>
-                    <Grid item md={12}>
-                        <Typography variant='h4' className={classes.titleSub}>
+        <React.Fragment>
+            <Typography variant='h4' className={classes.titleSub}>
+                <FormattedMessage id='Apis.Details.Documents.Documentation.title' defaultMessage='Documentation' />
+            </Typography>
+            {!documentList || (documentList && documentList.length === 0) ? (
+                <div className={classes.genericMessageWrapper}>
+                    <InlineMessage type='info' className={classes.dialogContainer}>
+                        <Typography variant='h5' component='h3'>
                             <FormattedMessage
-                                id='Apis.Details.Documents.Documentation.title'
-                                defaultMessage='Documentation'
+                                id='Apis.Details.Documents.Documentation.no.docs'
+                                defaultMessage='No Documents Yet'
                             />
                         </Typography>
-                        {!documentList || (documentList && documentList.length === 0) ? (
-                            <div className={classes.genericMessageWrapper}>
-                                <GenericDisplayDialog
-                                    classes={classes}
-                                    heading={intl.formatMessage({
-                                        defaultMessage: 'No Documents Yet',
-                                        id: 'Apis.Details.Documents.Documentation.no.docs',
-                                    })}
-                                    caption={intl.formatMessage({
-                                        defaultMessage: 'No documents available for this API yet',
-                                        id: 'Apis.Details.Documents.Documentation.no.docs.content',
-                                    })}
-                                />
-                            </div>
-                        ) : (
-                            <div className={classes.docContainer}>
-                                {showDocList && (
-                                    <div className={classes.docListWrapper}>
-                                        <Paper className={classes.paperMenu}>
-                                            <List component='nav' className={classes.listRoot}>
-                                                {documentList.map((type, indexA) => (
-                                                    <React.Fragment>
-                                                        <ListItem className={classes.parentListItem}>
-                                                            <ListItemIcon classes={{root: classes.listItemRoot}}>
-                                                                <CustomIcon
-                                                                    strokeColor='#444'
-                                                                    width={24}
-                                                                    height={24}
-                                                                    icon='docs'
-                                                                />
+                        <Typography component='p'>
+                            <FormattedMessage
+                                id='Apis.Details.Documents.Documentation.no.docs.content'
+                                defaultMessage='No documents available for this API yet'
+                            />
+                        </Typography>
+                    </InlineMessage>
+                </div>
+            ) : (
+                <div className={classes.docContainer}>
+                    {showDocList && (
+                        <div className={classes.docListWrapper}>
+                            <Paper className={classes.paperMenu}>
+                                <List component='nav' className={classes.listRoot}>
+                                    {documentList.map((type, indexA) => (
+                                        <React.Fragment>
+                                            <ListItem className={classes.parentListItem}>
+                                                <ListItemIcon classes={{ root: classes.listItemRoot }}>
+                                                    <CustomIcon strokeColor='#444' width={24} height={24} icon='docs' />
+                                                </ListItemIcon>
+                                                <ListItemText
+                                                    primary={type.docType}
+                                                    classes={{ root: classes.typeText }}
+                                                />
+                                            </ListItem>
+                                            {type.docs.length > 0 && (
+                                                <List component='div' className={classes.childList}>
+                                                    {type.docs.map((doc, indexB) => (
+                                                        <ListItem
+                                                            button
+                                                            className={classes.nested}
+                                                            classes={{
+                                                                selected: classes.selected,
+                                                            }}
+                                                            selected={
+                                                                selectedIndexA === indexA && selectedIndexB === indexB
+                                                            }
+                                                            onClick={event =>
+                                                                handleListItemClick(event, indexA, indexB, doc)
+                                                            }
+                                                        >
+                                                            <ListItemIcon classes={{ root: classes.listItemRoot }}>
+                                                                {doc.sourceType === 'MARKDOWN' && <Icon>code</Icon>}
+                                                                {doc.sourceType === 'INLINE' && (
+                                                                    <Icon>description</Icon>
+                                                                )}
+                                                                {doc.sourceType === 'URL' && <Icon>open_in_new</Icon>}
+                                                                {doc.sourceType === 'FILE' && (
+                                                                    <Icon>arrow_downward</Icon>
+                                                                )}
                                                             </ListItemIcon>
                                                             <ListItemText
-                                                                primary={type.docType}
-                                                                classes={{ root: classes.typeText }}
+                                                                inset
+                                                                primary={doc.name}
+                                                                classes={{ root: classes.docLinkRoot }}
                                                             />
                                                         </ListItem>
-                                                        {type.docs.length > 0 && (
-                                                            <List component='div' className={classes.childList}>
-                                                                {type.docs.map((doc, indexB) => (
-                                                                    <ListItem
-                                                                        button
-                                                                        className={classes.nested}
-                                                                        classes={{
-                                                                            selected: classes.selected,
-                                                                        }}
-                                                                        selected={
-                                                                            selectedIndexA === indexA &&
-                                                                            selectedIndexB === indexB
-                                                                        }
-                                                                        onClick={event =>
-                                                                            handleListItemClick(
-                                                                                event,
-                                                                                indexA,
-                                                                                indexB,
-                                                                                doc,
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        <ListItemIcon classes={{root: classes.listItemRoot}}>
-                                                                            {doc.sourceType === 'MARKDOWN' && (
-                                                                                <Icon>code</Icon>
-                                                                            )}
-                                                                            {doc.sourceType === 'INLINE' && (
-                                                                                <Icon>description</Icon>
-                                                                            )}
-                                                                            {doc.sourceType === 'URL' && (
-                                                                                <Icon>open_in_new</Icon>
-                                                                            )}
-                                                                            {doc.sourceType === 'FILE' && (
-                                                                                <Icon>arrow_downward</Icon>
-                                                                            )}
-                                                                        </ListItemIcon>
-                                                                        <ListItemText
-                                                                            inset
-                                                                            primary={doc.name}
-                                                                            classes={{ root: classes.docLinkRoot }}
-                                                                        />
-                                                                    </ListItem>
-                                                                ))}
-                                                            </List>
-                                                        )}
-                                                    </React.Fragment>
-                                                ))}
-                                            </List>
-                                        </Paper>
-                                    </div>
-                                )}
-                                <div className={classes.toggleWrapper}>
-                                    <a className={classes.toggler} onClick={toggleDocList}>
-                                        <div className={classes.togglerTextParent}>
-                                            <div className={classes.togglerText}>
-                                                {showDocList ? (
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Documents.Documentation.hide'
-                                                        defaultMessage='HIDE'
-                                                    />
-                                                ) : (
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Documents.Documentation.show'
-                                                        defaultMessage='SHOW'
-                                                    />
-                                                )}
-                                            </div>
-                                        </div>
-                                        {showDocList ? (
-                                            <Icon>keyboard_arrow_left</Icon>
-                                        ) : (
-                                            <Icon>keyboard_arrow_right</Icon>
-                                        )}
-                                    </a>
-                                </div>
-                                <div className={classes.docView}>
-                                    {selectedDoc && (
-                                        <React.Fragment>
-                                            <Paper className={classes.paper}>
-                                                {(selectedDoc.sourceType === 'MARKDOWN' ||
-                                                    selectedDoc.sourceType === 'INLINE') && (
-                                                    <Icon className={classes.fullView} onClick={toggleOpen}>
-                                                        launch
-                                                    </Icon>
-                                                )}
-                                                <View doc={selectedDoc} apiId={apiId} fullScreen={open} />
-                                            </Paper>
-                                            <Dialog fullScreen open={open} onClose={toggleOpen}>
-                                                <Paper square className={classes.popupHeader}>
-                                                    <IconButton color='inherit' onClick={toggleOpen} aria-label='Close'>
-                                                        <Icon>close</Icon>
-                                                    </IconButton>
-                                                    <Typography variant='h4' className={classes.docName}>
-                                                        {selectedDoc.name}
-                                                    </Typography>
-                                                </Paper>
-                                                <div className={classes.viewWrapper}>
-                                                    <View doc={selectedDoc} apiId={apiId} fullScreen={open} />
-                                                </div>
-                                            </Dialog>
+                                                    ))}
+                                                </List>
+                                            )}
                                         </React.Fragment>
+                                    ))}
+                                </List>
+                            </Paper>
+                        </div>
+                    )}
+                    <div className={classes.toggleWrapper}>
+                        <a className={classes.toggler} onClick={toggleDocList}>
+                            <div className={classes.togglerTextParent}>
+                                <div className={classes.togglerText}>
+                                    {showDocList ? (
+                                        <FormattedMessage
+                                            id='Apis.Details.Documents.Documentation.hide'
+                                            defaultMessage='HIDE'
+                                        />
+                                    ) : (
+                                        <FormattedMessage
+                                            id='Apis.Details.Documents.Documentation.show'
+                                            defaultMessage='SHOW'
+                                        />
                                     )}
                                 </div>
                             </div>
+                            {showDocList ? <Icon>keyboard_arrow_left</Icon> : <Icon>keyboard_arrow_right</Icon>}
+                        </a>
+                    </div>
+                    <div className={classes.docView}>
+                        {selectedDoc && (
+                            <React.Fragment>
+                                <Paper className={classes.paper}>
+                                    {(selectedDoc.sourceType === 'MARKDOWN' || selectedDoc.sourceType === 'INLINE') && (
+                                        <Icon className={classes.fullView} onClick={toggleOpen}>
+                                            launch
+                                        </Icon>
+                                    )}
+                                    <View doc={selectedDoc} apiId={apiId} fullScreen={open} />
+                                </Paper>
+                                <Dialog fullScreen open={open} onClose={toggleOpen}>
+                                    <Paper square className={classes.popupHeader}>
+                                        <IconButton color='inherit' onClick={toggleOpen} aria-label='Close'>
+                                            <Icon>close</Icon>
+                                        </IconButton>
+                                        <Typography variant='h4' className={classes.docName}>
+                                            {selectedDoc.name}
+                                        </Typography>
+                                    </Paper>
+                                    <div className={classes.viewWrapper}>
+                                        <View doc={selectedDoc} apiId={apiId} fullScreen={open} />
+                                    </div>
+                                </Dialog>
+                            </React.Fragment>
                         )}
-                    </Grid>
-                </Grid>
-            </Grid>
-        </Grid>
+                    </div>
+                </div>
+            )}
+        </React.Fragment>
     );
 }
 

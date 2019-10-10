@@ -144,10 +144,10 @@ class SubscriptionTableData extends React.Component {
     render() {
         const {
             subscription: {
-                apiInfo, status, throttlingPolicy, subscriptionId, apiId, isMonetizedAPI, isDynamicUsagePolicy,
+                apiInfo, status, throttlingPolicy, subscriptionId, apiId,
             },
         } = this.props;
-        const { openMenu } = this.state;
+        const { openMenu, isMonetizedAPI, isDynamicUsagePolicy } = this.state;
         const link = <Link to={'/apis/' + apiId}>{apiInfo.name}</Link>;
 
         return (
