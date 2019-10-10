@@ -227,6 +227,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 if (requestMap.containsKey(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT)) {
                     req.headers().add(HttpHeaders.AUTHORIZATION, APIConstants.CONSUMER_KEY_SEGMENT + ' '
                                     + requestMap.get(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT).get(0));
+                    requestMap.remove(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT);
                 } else {
                     log.error("No Authorization Header or access_token query parameter present");
                     return false;
