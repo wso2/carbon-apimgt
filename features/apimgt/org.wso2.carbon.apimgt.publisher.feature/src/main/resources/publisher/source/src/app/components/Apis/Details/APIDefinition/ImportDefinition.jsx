@@ -43,7 +43,8 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
-export default function ImportDefinition() {
+export default function ImportDefinition(props) {
+    const { setSchemaDefinition } = props;
     const classes = useStyles();
     const [openAPIDefinitionImport, setOpenAPIDefinitionImport] = React.useState(false);
     const [api] = useAPI();
@@ -109,6 +110,8 @@ export default function ImportDefinition() {
                     id: 'Apis.Details.APIDefinition.APIDefinition.api.definition.updated.successfully',
                     defaultMessage: 'API Definition Updated Successfully',
                 }));
+                setOpenAPIDefinitionImport(false);
+                setSchemaDefinition(inputValue);
             })
             .catch((error) => {
                 console.error(error);
@@ -132,6 +135,8 @@ export default function ImportDefinition() {
                     id: 'Apis.Details.APIDefinition.APIDefinition.graphQLDefinition.updated.successfully',
                     defaultMessage: 'Schema Definition Updated Successfully',
                 }));
+                setOpenAPIDefinitionImport(false);
+                setSchemaDefinition(null, graphQLSchema);
             })
             .catch((err) => {
                 console.log(err);
@@ -157,7 +162,7 @@ export default function ImportDefinition() {
                 const { isValid, graphQLInfo } = response.obj;
                 if (isValid === true) {
                     api.operations = graphQLInfo.operations;
-                    updateGraphQLAPIDefinition(api, graphQLInfo.graphQLSchema.schemaDefinition);
+                    updateGraphQLAPIDefinition(graphQLInfo.graphQLSchema.schemaDefinition);
                 }
             })
             .catch((err) => {
@@ -207,7 +212,7 @@ export default function ImportDefinition() {
                     defaultMessage='Import Definition'
                 />
             </Button>
-            <Dialog open={openAPIDefinitionImport}>
+            <Dialog onBackdropClick={setOpenAPIDefinitionImport} open={openAPIDefinitionImport}>
                 <DialogTitle>
                     <Typography className={classes.importDefinitionDialogHeader}>
                         {isGraphQL ? (

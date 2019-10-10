@@ -164,6 +164,14 @@ class APIDefinition extends React.Component {
         this.setState({ swagger: formattedString, format: convertTo, convertTo: format });
     }
 
+    setSchemaDefinition=(swagger, graphQL) => {
+        if (swagger) {
+            this.setState({ swagger });
+        }
+        if (graphQL) {
+            this.setState({ graphQL });
+        }
+    }
     /**
      * Util function to get the format which the definition can be converted to.
      * @param {*} format : The current format of definition.
@@ -349,7 +357,7 @@ class APIDefinition extends React.Component {
                                 />
                             </Button>
                         )}
-                        <ImportDefinition />
+                        <ImportDefinition setSchemaDefinition={this.setSchemaDefinition} />
                         <a className={classes.downloadLink} href={downloadLink} download={fileName}>
                             <Button size='small' className={classes.button}>
                                 <CloudDownloadRounded className={classes.buttonIcon} />
