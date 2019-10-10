@@ -299,10 +299,10 @@ public class APIKeyValidator {
             if (verbInfoList != null && verbInfoList.toArray().length > 0) {
                 for (VerbInfoDTO verb : verbInfoList) {
                     authType = verb.getAuthType();
-                    if (authType == null) {
-                        authType = StringUtils.capitalize(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.toLowerCase());
-                    }
-                    if (!StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase()).equals(authType)) {
+                    if (authType == null || !StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase())
+                            .equals(authType)) {
+                        authType = StringUtils.capitalize(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN
+                                .toLowerCase());
                         break;
                     }
                 }
