@@ -9211,14 +9211,15 @@ public final class APIUtil {
                     && (StringUtils.countMatches(token, APIConstants.DOT) == 2)) {
                 isJwtToken = true;
             } else {
-                log.debug("Not a valid JWT token. ");
+                log.debug("Not a valid JWT token. " + getMaskedToken(token));
             }
         } catch (JSONException | IllegalArgumentException e) {
             isJwtToken = false;
-            log.debug("Not a valid JWT token.", e);
+            log.debug("Not a valid JWT token. " + getMaskedToken(token), e);
         }
         return isJwtToken;
     }
+
     /**
      * Get signature of  given JWT token. This method should be called only after validating whether the token is
      * JWT via isValidJWT method.
@@ -9243,5 +9244,20 @@ public final class APIUtil {
                 decode(jwtParts[1])));
         String jwtSubClaim = jwtPayload.getString("sub"); // extract sub claim from payload
         return MultitenantUtils.getTenantDomain(jwtSubClaim);
+    }
+
+    /**
+     * Returns a masked token for a given token.
+     *
+     * @param token token to be masked
+     * @return masked token.
+     */
+    public static String getMaskedToken(String token) {
+
+        if (token.length() >= 10) {
+            return "XXXXX" + token.substring(token.length() - 10);
+        } else {
+            return "XXXXX" + token.substring(token.length() / 2);
+        }
     }
 }
