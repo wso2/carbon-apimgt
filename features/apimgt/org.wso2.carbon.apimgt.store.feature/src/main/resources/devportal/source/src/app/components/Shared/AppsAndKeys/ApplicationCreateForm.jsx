@@ -44,9 +44,15 @@ const styles = theme => ({
     quotaHelp: {
         position: 'relative',
     },
-    mandatoryStar: {
-        color: theme.palette.error.main,
-        marginLeft: theme.spacing(0.1),
+    mandatoryStarSelect: {
+        '& label>span:nth-child(2)': {
+            color: 'red',
+        },
+    },
+    mandatoryStarText: {
+        '& label>span:nth-child(1)': {
+            color: 'red',
+        },
     },
 });
 
@@ -108,6 +114,9 @@ const ApplicationCreate = (props) => {
     return (
         <form noValidate autoComplete='off'>
             <TextField
+                classes={{
+                    root: classes.mandatoryStarText,
+                }}
                 margin='normal'
                 variant='outlined'
                 autoFocus
@@ -134,6 +143,9 @@ const ApplicationCreate = (props) => {
                 error={!isNameValid}
             />
             <TextField
+                classes={{
+                    root: classes.mandatoryStarSelect,
+                }}
                 required
                 fullWidth
                 id='outlined-select-currency'
@@ -162,6 +174,9 @@ const ApplicationCreate = (props) => {
                 ))}
             </TextField>
             <TextField
+                classes={{
+                    root: classes.mandatoryStarSelect,
+                }}
                 required
                 fullWidth
                 id='outlined-select-currency'
@@ -213,6 +228,9 @@ const ApplicationCreate = (props) => {
                 Object.entries(allAppAttributes).map(item => (
                     item[1].hidden === 'false' ? (
                         <TextField
+                            classes={{
+                                root: classes.mandatoryStarText,
+                            }}
                             margin='normal'
                             variant='outlined'
                             required={isRequiredAttribute(item[1].attribute)}
