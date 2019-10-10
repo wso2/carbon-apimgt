@@ -248,7 +248,7 @@ public final class BlockConditionDBUtil {
         PreparedStatement ps = null;
         ResultSet rs = null;
         RevokedJWTListDTO revokedJWTListDTO = new RevokedJWTListDTO();
-        String sqlQuery = "select SIGNATURE,EXPIRY_TIMESTAMP from AM_REVOKED_JWT";
+        String sqlQuery = "SELECT SIGNATURE,EXPIRY_TIMESTAMP FROM AM_REVOKED_JWT";
         try {
             conn = BlockConditionDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);

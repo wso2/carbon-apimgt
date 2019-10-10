@@ -7,8 +7,7 @@ public class RevokedjwtApiServiceFactory {
 
    private final static RevokedjwtApiService service = new RevokedjwtApiServiceImpl();
 
-   public static RevokedjwtApiService getRevokedjwtApi()
-   {
+   public static RevokedjwtApiService getRevokedjwtApi() {
       return service;
    }
 }

@@ -9211,7 +9211,7 @@ public final class APIUtil {
                     && (StringUtils.countMatches(token, APIConstants.DOT) == 2)) {
                 isJwtToken = true;
             } else {
-                log.debug("Not a valid JWT token.");
+                log.debug("Not a valid JWT token. ");
             }
         } catch (JSONException | IllegalArgumentException e) {
             isJwtToken = false;

@@ -26,7 +26,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
-import org.wso2.carbon.apimgt.gateway.dto.RevokedJWTTokensDTO;
+import org.wso2.carbon.apimgt.gateway.dto.RevokedJWTTokenDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -58,7 +58,7 @@ public class RevokedJWTTokensRetriever extends TimerTask {
      *
      * @return List of RevokedJWTTokensDTOs.
      */
-    private RevokedJWTTokensDTO[] retrieveRevokedJWTTokensData() {
+    private RevokedJWTTokenDTO[] retrieveRevokedJWTTokensData() {
 
         try {
             // The resource resides in the throttle web app. Hence reading throttle configs
@@ -97,7 +97,7 @@ public class RevokedJWTTokensRetriever extends TimerTask {
 
             String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
             if (responseString != null && !responseString.isEmpty()) {
-                return new Gson().fromJson(responseString, RevokedJWTTokensDTO[].class);
+                return new Gson().fromJson(responseString, RevokedJWTTokenDTO[].class);
             }
         } catch (IOException | InterruptedException e) {
             log.error("Exception when retrieving revoked JWT tokens from remote endpoint ", e);
@@ -107,9 +107,9 @@ public class RevokedJWTTokensRetriever extends TimerTask {
 
     private void loadRevokedJWTTokensFromWebService() {
 
-        RevokedJWTTokensDTO[] revokedJWTTokensDTOs = retrieveRevokedJWTTokensData();
-        if(revokedJWTTokensDTOs != null) {
-            for (RevokedJWTTokensDTO revokedJWTToken : revokedJWTTokensDTOs) {
+        RevokedJWTTokenDTO[] revokedJWTTokenDTOS = retrieveRevokedJWTTokensData();
+        if(revokedJWTTokenDTOS != null) {
+            for (RevokedJWTTokenDTO revokedJWTToken : revokedJWTTokenDTOS) {
                 RevokedJWTDataHolder.getInstance().addRevokedJWTToMap(revokedJWTToken.getSignature(),
                         revokedJWTToken.getExpiryTime());
                 if(log.isDebugEnabled()) {

@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.gateway.dto;
 /**
  *  DTO of revoked JWT token
  */
-public class RevokedJWTTokensDTO {
+public class RevokedJWTTokenDTO {
 
     private String jwtSignature;
     private Long expiryTime;
