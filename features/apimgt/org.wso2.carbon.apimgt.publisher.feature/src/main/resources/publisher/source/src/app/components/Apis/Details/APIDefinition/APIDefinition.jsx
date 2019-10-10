@@ -16,9 +16,9 @@
  * under the License.
  */
 
-import React, {Suspense} from 'react';
+import React, { Suspense } from 'react';
 import PropTypes from 'prop-types';
-import {withStyles} from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import EditRounded from '@material-ui/icons/EditRounded';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
@@ -26,8 +26,8 @@ import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
 import Paper from '@material-ui/core/Paper';
-import {FormattedMessage, injectIntl} from 'react-intl';
-import {Progress} from 'AppComponents/Shared';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import { Progress } from 'AppComponents/Shared';
 import Typography from '@material-ui/core/Typography';
 import Slide from '@material-ui/core/Slide';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -38,11 +38,11 @@ import MonacoEditor from 'react-monaco-editor';
 import yaml from 'js-yaml';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api.js';
-import {doRedirectToLogin} from 'AppComponents/Shared/RedirectToLogin';
+import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import json2yaml from 'json2yaml';
-import {isRestricted} from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
-import ImportDefinition from "./ImportDefinition";
+import ImportDefinition from './ImportDefinition';
 
 const EditorDialog = React.lazy(() => import('./SwaggerEditorDrawer'));
 
@@ -349,7 +349,7 @@ class APIDefinition extends React.Component {
                                 />
                             </Button>
                         )}
-                        <ImportDefinition/>
+                        <ImportDefinition />
                         <a className={classes.downloadLink} href={downloadLink} download={fileName}>
                             <Button size='small' className={classes.button}>
                                 <CloudDownloadRounded className={classes.buttonIcon} />

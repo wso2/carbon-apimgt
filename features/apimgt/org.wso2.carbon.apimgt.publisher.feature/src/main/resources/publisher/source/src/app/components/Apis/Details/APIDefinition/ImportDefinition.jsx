@@ -15,24 +15,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, {useReducer} from 'react';
-import {makeStyles} from '@material-ui/core/styles';
+import React, { useReducer } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import {FormattedMessage, useIntl} from 'react-intl';
-import {Typography} from "@material-ui/core";
-import ProvideOpenAPI from "../../Create/OpenAPI/Steps/ProvideOpenAPI";
+import { FormattedMessage, useIntl } from 'react-intl';
+import { Typography } from '@material-ui/core';
 import CloudUploadRounded from '@material-ui/icons/CloudUploadRounded';
-import ProvideGraphQL from "../../Create/GraphQL/Steps/ProvideGraphQL";
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api.js';
-import {isRestricted} from 'AppData/AuthManager';
-import {useAPI} from 'AppComponents/Apis/Details/components/ApiContext';
+import { isRestricted } from 'AppData/AuthManager';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import ProvideOpenAPI from '../../Create/OpenAPI/Steps/ProvideOpenAPI';
 
-const useStyles = makeStyles(theme => ({
+import ProvideGraphQL from '../../Create/GraphQL/Steps/ProvideGraphQL';
+
+
+const useStyles = makeStyles(() => ({
     importDefinitionDialogHeader: {
         fontWeight: '600',
     },
@@ -57,7 +59,7 @@ export default function ImportDefinition() {
     };
 
     function apiInputsReducer(currentState, inputAction) {
-        const {action, value} = inputAction;
+        const { action, value } = inputAction;
         switch (action) {
             case 'type':
             case 'inputValue':
@@ -67,9 +69,9 @@ export default function ImportDefinition() {
             case 'context':
             case 'policies':
             case 'isFormValid':
-                return {...currentState, [action]: value};
+                return { ...currentState, [action]: value };
             case 'inputType':
-                return {...currentState, [action]: value, inputValue: value === 'url' ? '' : null};
+                return { ...currentState, [action]: value, inputValue: value === 'url' ? '' : null };
             case 'preSetAPI':
                 return {
                     ...currentState,
@@ -90,26 +92,6 @@ export default function ImportDefinition() {
     });
 
     /**
-     * Handles definition input change
-     * @param event
-     */
-    function handleOnChange(event) {
-        const {name: action, value} = event.target;
-        inputsDispatcher({action, value});
-    }
-
-    /**
-     * Handles API definition import
-     */
-    function importDefinition() {
-        if (isGraphQL) {
-            updateGraphQLSchema();
-        } else {
-            updateOASDefinition();
-        }
-    }
-
-    /**
      * Updates OpenAPI definition
      */
     function updateOASDefinition() {
@@ -122,45 +104,17 @@ export default function ImportDefinition() {
             inputType === 'file' ? newAPI.updateAPIDefinitionByFile(api.id, inputValue) :
                 newAPI.updateAPIDefinitionByUrl(api.id, inputValue);
         promisedResponse
-            .then((api) => {
+            .then(() => {
                 Alert.success(intl.formatMessage({
                     id: 'Apis.Details.APIDefinition.APIDefinition.api.definition.updated.successfully',
                     defaultMessage: 'API Definition Updated Successfully',
                 }));
-
             })
             .catch((error) => {
                 console.error(error);
                 Alert.error(intl.formatMessage({
                     id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
                     defaultMessage: 'Error while updating the API Definition',
-                }));
-            });
-
-    }
-
-    /**
-     * Updates GraphQL schema definition
-     */
-    function updateGraphQLSchema() {
-        const {
-            inputValue,
-        } = apiInputs;
-
-        const promisedValidation = API.validateGraphQLFile(inputValue);
-        promisedValidation
-            .then((response) => {
-                const {isValid, graphQLInfo} = response.obj;
-                if (isValid === true) {
-                    api.operations = graphQLInfo.operations;
-                    updateGraphQLAPIDefinition(api, graphQLInfo.graphQLSchema.schemaDefinition);
-                }
-            })
-            .catch((err) => {
-                console.log(err);
-                Alert.error(intl.formatMessage({
-                    id: 'Error.while.validating.the.imported.graphQLSchema',
-                    defaultMessage: 'Error while validating imported schema',
                 }));
             });
     }
@@ -170,10 +124,10 @@ export default function ImportDefinition() {
      * @param {*}  api
      * @param {*}  graphQLInfo
      */
-    function updateGraphQLAPIDefinition(api, graphQLSchema) {
+    function updateGraphQLAPIDefinition(graphQLSchema) {
         const promisedAPI = api.updateGraphQLAPIDefinition(api.id, graphQLSchema);
         promisedAPI
-            .then((response) => {
+            .then(() => {
                 Alert.success(intl.formatMessage({
                     id: 'Apis.Details.APIDefinition.APIDefinition.graphQLDefinition.updated.successfully',
                     defaultMessage: 'Schema Definition Updated Successfully',
@@ -188,6 +142,44 @@ export default function ImportDefinition() {
             });
     }
 
+
+    /**
+     * Updates GraphQL schema definition
+     */
+    function updateGraphQLSchema() {
+        const {
+            inputValue,
+        } = apiInputs;
+
+        const promisedValidation = API.validateGraphQLFile(inputValue);
+        promisedValidation
+            .then((response) => {
+                const { isValid, graphQLInfo } = response.obj;
+                if (isValid === true) {
+                    api.operations = graphQLInfo.operations;
+                    updateGraphQLAPIDefinition(api, graphQLInfo.graphQLSchema.schemaDefinition);
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+                Alert.error(intl.formatMessage({
+                    id: 'Error.while.validating.the.imported.graphQLSchema',
+                    defaultMessage: 'Error while validating imported schema',
+                }));
+            });
+    }
+
+
+    /**
+     * Handles API definition import
+     */
+    function importDefinition() {
+        if (isGraphQL) {
+            updateGraphQLSchema();
+        } else {
+            updateOASDefinition();
+        }
+    }
     /**
      *
      * Set the validity of the API definition imports
@@ -209,7 +201,7 @@ export default function ImportDefinition() {
                 onClick={handleAPIDefinitionImportOpen}
                 disabled={isRestricted(['apim:api_create'], api)}
             >
-                <CloudUploadRounded className={classes.buttonIcon}/>
+                <CloudUploadRounded className={classes.buttonIcon} />
                 <FormattedMessage
                     id='Apis.Details.APIDefinition.APIDefinition.import.definition'
                     defaultMessage='Import Definition'
@@ -222,12 +214,13 @@ export default function ImportDefinition() {
                             <FormattedMessage
                                 id='Apis.Details.APIDefinition.APIDefinition.import.definition.graphql'
                                 defaultMessage='Import GraphQL Schema Definition'
-                            />) : (
-                            <FormattedMessage
-                                id='Apis.Details.APIDefinition.APIDefinition.import.definition.oas'
-                                defaultMessage='Import OpenAPI Definition'
-                            />
-                        )}
+                            />) :
+                            (
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.APIDefinition.import.definition.oas'
+                                    defaultMessage='Import OpenAPI Definition'
+                                />
+                            )}
                     </Typography>
                 </DialogTitle>
                 <DialogContent>
