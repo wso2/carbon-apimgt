@@ -258,7 +258,6 @@ public class APIInfoDTO   {
     this.businessInformation = businessInformation;
   }
 
-
   @Override
   public boolean equals(java.lang.Object o) {
     if (this == o) {
@@ -285,7 +284,8 @@ public class APIInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, type, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies, advertiseInfo, businessInformation);
+    return Objects.hash(id, name, description, context, version, type, provider, lifeCycleStatus, thumbnailUri,
+            avgRating, throttlingPolicies, advertiseInfo, businessInformation);
   }
 
   @Override

@@ -202,7 +202,8 @@ class InfoBar extends React.Component {
 
     getProvider(api) {
         let { provider } = api;
-        if (api.businessInformation && api.businessInformation.businessOwner && api.businessInformation.businessOwner.trim() !== '') {
+        if (api.businessInformation && api.businessInformation.businessOwner
+            && api.businessInformation.businessOwner.trim() !== '') {
             provider = api.businessInformation.businessOwner;
         }
         return provider;
