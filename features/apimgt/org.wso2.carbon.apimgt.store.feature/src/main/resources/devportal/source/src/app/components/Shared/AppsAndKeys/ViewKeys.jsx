@@ -74,9 +74,6 @@ const styles = theme => ({
     margin: {
         marginRight: theme.spacing.unit * 2,
     },
-    noKeyMessageBox: {
-        padding: theme.spacing.unit * 2,
-    },
 });
 
 /**
@@ -222,9 +219,11 @@ class ViewKeys extends React.Component {
     generateAccessToken = () => {
         const { accessTokenRequest } = this.state;
         this.applicationPromise
-            .then(application => application.generateToken(accessTokenRequest.keyType,
+            .then(application => application.generateToken(
+                accessTokenRequest.keyType,
                 accessTokenRequest.timeout,
-                accessTokenRequest.scopesSelected))
+                accessTokenRequest.scopesSelected,
+            ))
             .then((response) => {
                 console.log('token generated successfully ' + response);
                 this.setState({
@@ -418,7 +417,7 @@ class ViewKeys extends React.Component {
                                                     subscriptionScopes={subscriptionScopes}
                                                 />
                                             )}
-                                            {showToken && <ViewToken token={{...tokenResponse, isOauth: true}}/>}
+                                            {showToken && <ViewToken token={{ ...tokenResponse, isOauth: true }} />}
                                         </DialogContentText>
                                     )}
                                     {showCurl && (
@@ -428,7 +427,7 @@ class ViewKeys extends React.Component {
                                     )}
                                     {(isKeyJWT && tokenDetails) && (
                                         <DialogContentText>
-                                            <ViewToken token={{...tokenDetails, isOauth: true}} />
+                                            <ViewToken token={{ ...tokenDetails, isOauth: true }} />
                                         </DialogContentText>
                                     )}
                                 </DialogContent>
@@ -481,8 +480,8 @@ class ViewKeys extends React.Component {
             </React.Fragment>
         ) : (
             <React.Fragment>
-                <Typography variant='caption' gutterBottom className={classes.noKeyMessageBox}>
-                    {keyType + ' '}
+                <Typography variant='caption' gutterBottom >
+                    {keyType === 'PRODUCTION' ? 'Production ' : 'Sandbox '}
                     <FormattedMessage
                         id='Shared.AppsAndKeys.ViewKeys.key.secret.title'
                         defaultMessage='Key and Secret is not generated for this application'

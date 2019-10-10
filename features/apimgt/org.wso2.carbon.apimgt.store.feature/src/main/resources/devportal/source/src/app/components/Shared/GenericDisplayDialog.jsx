@@ -35,16 +35,6 @@ const genericDisplayDialog = (props) => {
                 <Typography component='p'>
                     {caption}
                 </Typography>
-                <ScopeValidation resourcePath={resourcePaths.APPLICATIONS} resourceMethod={resourceMethods.POST}>
-                    <Button
-                        variant='contained'
-                        color='primary'
-                        className={classes.button}
-                        onClick={handleClick}
-                    >
-                        {buttonText}
-                    </Button>
-                </ScopeValidation>
             </InlineMessage>
         </div>
     );

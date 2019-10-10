@@ -20,6 +20,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Route, Switch, Redirect, Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
 import { PageNotFound } from 'AppComponents/Base/Errors/index';
 import Loading from 'AppComponents/Base/Loading/Loading';
@@ -28,7 +30,7 @@ import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
 import TokenManager from 'AppComponents/Shared/AppsAndKeys/TokenManager';
 import ApiKeyManager from 'AppComponents/Shared/AppsAndKeys/ApiKeyManager';
-import AppBar from '@material-ui/core/AppBar';
+import classNames from 'classnames';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Paper from '@material-ui/core/Paper';
@@ -40,41 +42,84 @@ import InfoBar from './InfoBar';
  * @param {*} theme theme details
  * @returns {Object}
  */
-const styles = theme => ({
-    LeftMenu: {
-        backgroundColor: theme.custom.leftMenu.background,
-        width: theme.custom.leftMenu.width,
-        textAlign: 'center',
-        fontFamily: theme.typography.fontFamily,
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        top: 0,
-    },
-    leftLInkMain: {
-        borderRight: 'solid 1px ' + theme.custom.leftMenu.background,
-        paddingBottom: theme.spacing.unit,
-        paddingTop: theme.spacing.unit,
-        cursor: 'pointer',
-        backgroundColor: theme.custom.leftMenu.leftMenuActive,
-        color: theme.palette.getContrastText(theme.custom.leftMenu.leftMenuActive),
-        textDecoration: 'none',
-    },
-    detailsContent: {
-        display: 'flex',
-        flex: 1,
-    },
-    content: {
-        display: 'flex',
-        flex: 1,
-        flexDirection: 'column',
-        marginLeft: theme.custom.leftMenu.width,
-        paddingBottom: theme.spacing.unit * 3,
-    },
-    contentDown: {
-        maxWidth: theme.custom.contentAreaWidth,
-    },
-});
+const styles = (theme) => {
+    const {
+        custom: {
+            leftMenu: { width, position },
+        },
+    } = theme;
+    const shiftToLeft = position === 'vertical-left' ? width : 0;
+    const shiftToRight = position === 'vertical-right' ? width : 0;
+    const leftMenuPaddingLeft = position === 'horizontal' ? theme.spacing(3) : 0;
+
+    return {
+        LeftMenu: {
+            backgroundColor: theme.custom.leftMenu.background,
+            textAlign: 'left',
+            fontFamily: theme.typography.fontFamily,
+            position: 'absolute',
+            bottom: 0,
+            boxShadow: '11px -1px 15px -8px rgba(115,115,115,1)',
+            paddingLeft: leftMenuPaddingLeft,
+        },
+        leftMenuHorizontal: {
+            top: theme.custom.infoBar.height,
+            width: '100%',
+            overflowX: 'auto',
+            height: 60,
+            display: 'flex',
+            left: 0,
+        },
+        leftMenuVerticalLeft: {
+            width: theme.custom.leftMenu.width,
+            top: 0,
+            left: 0,
+            overflowY: 'auto',
+        },
+        leftMenuVerticalRight: {
+            width: theme.custom.leftMenu.width,
+            top: 0,
+            right: 0,
+            overflowY: 'auto',
+        },
+        leftLInkMain: {
+            borderRight: 'solid 1px ' + theme.custom.leftMenu.background,
+            cursor: 'pointer',
+            background: theme.custom.leftMenu.rootBackground,
+            color: theme.palette.getContrastText(theme.custom.leftMenu.rootBackground),
+            textDecoration: 'none',
+            alignItems: 'center',
+            justifyContent: 'center',
+            display: 'flex',
+            height: theme.custom.infoBar.height,
+            textDecoration: 'none',
+        },
+        leftLInkMainText: {
+            fontSize: 18,
+            color: theme.palette.grey[500],
+            textDecoration: 'none',
+            paddingLeft: theme.spacing.unit * 2,
+        },
+        detailsContent: {
+            display: 'flex',
+            flex: 1,
+        },
+        content: {
+            display: 'flex',
+            flex: 1,
+            flexDirection: 'column',
+            marginLeft: shiftToLeft,
+            marginRight: shiftToRight,
+            paddingBottom: theme.spacing.unit * 3,
+        },
+        contentLoader: {
+            paddingTop: theme.spacing(3),
+        },
+        contentLoaderRightMenu: {
+            paddingRight: theme.custom.leftMenu.width,
+        },
+    };
+};
 /**
  *
  *
@@ -186,9 +231,17 @@ class Details extends Component {
      * @memberof Details
      */
     render() {
-        const { classes, match } = this.props;
+        const { classes, match, theme } = this.props;
         const { notFound, application, active } = this.state;
-        const redirectUrl = '/applications/' + match.params.application_uuid + '/productionkeys';
+        const pathPrefix = '/applications/' + match.params.application_uuid;
+        const redirectUrl = pathPrefix + '/productionkeys';
+        const {
+            custom: {
+                leftMenu: {
+                    rootIconSize, rootIconTextVisible, rootIconVisible, position,
+                },
+            },
+        } = theme;
         if (notFound) {
             return <ResourceNotFound />;
         } else if (!application) {
@@ -196,15 +249,34 @@ class Details extends Component {
         }
         return (
             <React.Fragment>
-                <div className={classes.LeftMenu}>
-                    <Link to='/applications'>
-                        <div className={classes.leftLInkMain}>
-                            <CustomIcon width={52} height={52} icon='applications' />
-                        </div>
-                    </Link>
-                    <LeftMenuItem text='production keys' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    <LeftMenuItem text='sandbox keys' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    <LeftMenuItem text='subscriptions' handleMenuSelect={this.handleMenuSelect} active={active} />
+                <div
+                    className={classNames(
+                        classes.LeftMenu,
+                        {
+                            [classes.leftMenuHorizontal]: position === 'horizontal',
+                        },
+                        {
+                            [classes.leftMenuVerticalLeft]: position === 'vertical-left',
+                        },
+                        {
+                            [classes.leftMenuVerticalRight]: position === 'vertical-right',
+                        },
+                        'left-menu',
+                    )}
+                >
+                    {rootIconVisible && (
+                        <Link to='/applications' className={classes.leftLInkMain}>
+                            <CustomIcon width={rootIconSize} height={rootIconSize} icon='applications' />
+                            {rootIconTextVisible && (
+                                <Typography className={classes.leftLInkMainText}>
+                                    <FormattedMessage id='Apis.Details.index.all.apis' defaultMessage='ALL APPs' />
+                                </Typography>
+                            )}
+                        </Link>
+                    )}
+                    <LeftMenuItem text='production keys' route='productionkeys' to={pathPrefix + '/productionkeys'} />
+                    <LeftMenuItem text='sandbox keys' route='sandBoxkeys' to={pathPrefix + '/sandBoxkeys'} />
+                    <LeftMenuItem text='subscriptions' route='subscriptions' to={pathPrefix + '/subscriptions'} />
                 </div>
                 <div className={classes.content}>
                     <InfoBar applicationId={match.params.application_uuid} innerRef={node => (this.infoBar = node)} />

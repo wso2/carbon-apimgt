@@ -115,6 +115,10 @@ const styles = theme => ({
         backgroundSize: 'cover',
         minHeight: 192,
     },
+    commentRoot: {
+        height: '100%',
+        minHeight: 192,
+    },
     noDocumentRoot: {
         backgroundImage: `url(${theme.custom.overviewPage.documentsBackground})`,
         height: '100%',
@@ -384,7 +388,7 @@ function Overview(props) {
                                 </Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails
-                                classes={{ root: classNames({ [classes.noCommentRoot]: totalComments === 0 }) }}
+                                classes={{ root: classNames({ [classes.noCommentRoot]: totalComments === 0 }, { [classes.commentRoot]: totalComments !== 0 }) }}
                             >
                                 {api && <Comments apiId={api.id} showLatest isOverview setCount={setCount} />}
                                 {totalComments === 0 && (
