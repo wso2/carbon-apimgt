@@ -478,15 +478,17 @@ class Details extends Component {
                             to={pathPrefix + 'configuration'}
                             Icon={<ConfigurationIcon />}
                         />
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.runtime.configs',
-                                defaultMessage: 'Runtime Configurations',
-                            })}
-                            route='runtime-configuration'
-                            to={pathPrefix + 'runtime-configuration'}
-                            Icon={<RuntimeConfigurationIcon />}
-                        />
+                        {!api.isWebSocket() && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.runtime.configs',
+                                    defaultMessage: 'Runtime Configurations',
+                                })}
+                                route='runtime-configuration'
+                                to={pathPrefix + 'runtime-configuration'}
+                                Icon={<RuntimeConfigurationIcon />}
+                            />
+                        )}
                         {this.getLeftMenuItemForResourcesByType(api.type)}
                         {!isAPIProduct && (
                             <LeftMenuItem
