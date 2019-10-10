@@ -21,9 +21,7 @@ import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
 import classNames from 'classnames';
 import Icon from '@material-ui/core/Icon';
-import {
-    ListItemIcon, List, withStyles, ListItem, ListItemText,
-} from '@material-ui/core';
+import { ListItemIcon, List, withStyles, ListItem, ListItemText } from '@material-ui/core';
 import CustomIcon from '../../Shared/CustomIcon';
 
 /**
@@ -132,7 +130,7 @@ function GlobalNavBar(props) {
                     </Link>
                 ) }
             <Link
-                to={theme.custom.tagWiseMode ? '/api-groups' : '/apis'}
+                to={theme.custom.tagWiseMode ? '/api-groups' : '/'}
                 className={classNames({ [classes.selected]: selected === 'apis', [classes.links]: true })}
             >
                 <ListItem button>
