@@ -21,10 +21,11 @@ import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import Tooltip from '@material-ui/core/Tooltip';
 import Box from '@material-ui/core/Box';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
-const showEndpoint = function (api, type) {
+const showEndpoint = (api, type) => {
     if (api.endpointConfig) {
         if (type === 'prod') {
             return api.getProductionEndpoint();
@@ -69,10 +70,21 @@ function Endpoints(props) {
                         </Typography>
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
-                        <Typography component='p' variant='body1'>
-                            {showEndpoint(api, 'prod') &&
-                                <React.Fragment>{showEndpoint(api, 'prod')}</React.Fragment>}
-                        </Typography>
+                        <Tooltip
+                            placement='top'
+                            classes={{
+                                tooltip: parentClasses.htmlTooltip,
+                            }}
+                            title={
+                                showEndpoint(api, 'prod') &&
+                                <React.Fragment>{showEndpoint(api, 'prod')}</React.Fragment>
+                            }
+                        >
+                            <Typography component='p' variant='body1' className={parentClasses.url}>
+                                {showEndpoint(api, 'prod') &&
+                                    <React.Fragment>{showEndpoint(api, 'prod')}</React.Fragment>}
+                            </Typography>
+                        </Tooltip>
                         <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
                             {!showEndpoint(api, 'prod') && (
                                 <React.Fragment>
@@ -95,10 +107,21 @@ function Endpoints(props) {
                         </Typography>
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
-                        <Typography component='p' variant='body1'>
-                            {showEndpoint(api, 'sand') &&
-                                <React.Fragment>{showEndpoint(api, 'sand')}</React.Fragment>}
-                        </Typography>
+                        <Tooltip
+                            placement='top'
+                            classes={{
+                                tooltip: parentClasses.htmlTooltip,
+                            }}
+                            title={
+                                showEndpoint(api, 'sand') &&
+                                <React.Fragment>{showEndpoint(api, 'sand')}</React.Fragment>
+                            }
+                        >
+                            <Typography component='p' variant='body1' className={parentClasses.url}>
+                                {showEndpoint(api, 'sand') &&
+                                    <React.Fragment>{showEndpoint(api, 'sand')}</React.Fragment>}
+                            </Typography>
+                        </Tooltip>
                         <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
                             {!showEndpoint(api, 'sand') && (
                                 <React.Fragment>
