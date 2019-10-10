@@ -221,7 +221,8 @@ class Listing extends Component {
      * @memberof Listing
      */
     handleClickOpen = () => {
-        this.setState({ open: true });
+        const { history } = this.props;
+        history.push('/applications/create');
     };
 
     /**
@@ -428,6 +429,9 @@ Listing.propTypes = {
     }).isRequired,
     theme: PropTypes.shape({}).isRequired,
     intl: PropTypes.func.isRequired,
+    history: PropTypes.shape({
+        push: PropTypes.func,
+    }).isRequired,
 };
 
 export default injectIntl(withStyles(styles, { withTheme: true })(Listing));
