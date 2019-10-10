@@ -42,7 +42,7 @@ const styles = theme => ({
     },
     textField: {
         marginTop: 0,
-        marginRight: 10,
+        marginRight: 5,
         width: '100%',
     },
     commentAddWrapper: {
