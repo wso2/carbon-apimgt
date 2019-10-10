@@ -368,6 +368,7 @@ public final class APIConstants {
     public static final String API_LEVEL_POLICY = "APILevelPolicy";
     public static final String CERTIFICATE_INFORMATION = "CertificateInformation";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
+    public static final String AUTHORIZATION_QUERY_PARAM_DEFAULT = "access_token";
     public static final String API_KEY_HEADER_QUERY_PARAM = "apikey";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE = "RemoveOAuthHeadersFromOutMessage";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT = "true";
