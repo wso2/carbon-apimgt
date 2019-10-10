@@ -111,6 +111,7 @@ export default function UploadCertificate(props) {
     const [isEndpointEmpty, setIsEndpointEmpty] = useState(false);
     const [isAliasEmpty, setIsAliasEmpty] = useState(false);
     const classes = useStyles();
+    const [isRejected, setIsRejected] = useState(false);
 
     const closeCertificateUpload = () => {
         setUploadCertificateOpen(false);
@@ -153,6 +154,11 @@ export default function UploadCertificate(props) {
      * */
     const onDrop = (file) => {
         const certificateFile = file[0];
+        const rejectedFiles = ['pem', 'txt', 'jks', 'key', 'ca-bundle'];
+        const extension = certificateFile.name.split('.');
+        if (rejectedFiles.includes(extension[1])) {
+            setIsRejected(true);
+        }
         if (certificateFile) {
             setCertificate({ name: certificateFile.name, content: certificateFile });
         }
@@ -279,13 +285,33 @@ export default function UploadCertificate(props) {
                                                     />
                                                 </Typography>
                                             </div>
-                                        ) : (
+                                        ) : iff(
+                                            isRejected,
+                                            <div classNames={classes.uploadedFile}>
+                                                <InsertDriveFileIcon color='error' fontSize='large' />
+                                                <Box fontSize='h6.fontSize' color='error' fontWeight='fontWeightLight'>
+                                                    <Grid xs={12}>
+                                                        {certificate.name}
+                                                    </Grid>
+                                                    <Grid xs={12}>
+                                                        <Typography variant='caption' color='error'>
+                                                            <FormattedMessage
+                                                                id={
+                                                                    'Apis.Details.Endpoints.GeneralConfiguration' +
+                                                            '.UploadCertificate.invalid.file'
+                                                                }
+                                                                defaultMessage='Invalid file type'
+                                                            />
+                                                        </Typography>
+                                                    </Grid>
+                                                </Box>
+                                            </div>,
                                             <div className={classes.uploadedFile}>
                                                 <InsertDriveFileIcon color='primary' fontSize='large' />
                                                 <Box fontSize='h6.fontSize' fontWeight='fontWeightLight'>
                                                     {certificate.name}
                                                 </Box>
-                                            </div>
+                                            </div>,
                                         )}
                                     </div>
                                 </div>
@@ -311,7 +337,7 @@ export default function UploadCertificate(props) {
                             (!isMutualSSLEnabled && endpoint === '') ||
                             certificate.name === '' ||
                             (isMutualSSLEnabled && policy === '') ||
-                            isSaving || aliasList.includes(alias)
+                            isSaving || aliasList.includes(alias) || isRejected
                     }
                 >
                     <FormattedMessage
