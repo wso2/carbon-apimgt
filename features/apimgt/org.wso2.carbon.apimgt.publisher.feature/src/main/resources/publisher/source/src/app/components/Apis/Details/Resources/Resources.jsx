@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useReducer, useEffect, useState } from 'react';
+import React, { useReducer, useEffect, useState, useCallback } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
@@ -24,6 +24,7 @@ import cloneDeep from 'lodash.clonedeep';
 import Swagger from 'swagger-client';
 import isEmpty from 'lodash/isEmpty';
 import Alert from 'AppComponents/Shared/Alert';
+import Banner from 'AppComponents/Shared/Banner';
 import API from 'AppData/api';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
@@ -34,9 +35,9 @@ import SpecErrors from './components/SpecErrors';
 import AddOperation from './components/AddOperation';
 import GoToDefinitionLink from './components/GoToDefinitionLink';
 import APIRateLimiting from './components/APIRateLimiting';
-import { getTaggedOperations } from './operationUtils';
+import { extractPathParameters, isSelectAll } from './operationUtils';
 import OperationsSelector from './components/OperationsSelector';
-
+import SaveOperations from './components/SaveOperations';
 
 /**
  * This component handles the Resource page in API details though it's written in a sharable way
@@ -51,46 +52,113 @@ export default function Resources(props) {
         disableRateLimiting,
         hideAPIDefinitionLink,
         disableMultiSelect,
+        disableUpdate,
+        disableAddOperation,
     } = props;
-    /**
-     *
-     * Reducer to handle actions related to OpenAPI specification
-     * @param {Object} openAPISpec Contains the /apis/{apiId}/swagger response body
-     * @param {Object} triggeredAction action triggered by
-     * @returns {Object} Next state
-     */
-    function openAPIActionsReducer(openAPISpec, triggeredAction) {
-        const { action, event } = triggeredAction;
-        switch (action) {
-            case 'initState':
-                return event.value;
-            default:
-                break;
-        }
-        return openAPISpec;
-    }
+
     const [api, updateAPI] = useAPI();
+    const [pageError, setPageError] = useState(false);
     const [operationRateLimits, setOperationRateLimits] = useState([]);
     const [specErrors, setSpecErrors] = useState([]);
-    const [selectedOperations, setSelectedOperation] = useState({});
-    const [taggedOperations, setTaggedOperations] = useState([]);
-    const [openAPI, openAPIActionsDispatcher] = useReducer(openAPIActionsReducer, {});
+    const [markedOperations, setSelectedOperation] = useState({});
+    const [openAPISpec, setOpenAPISpec] = useState({});
 
+    /**
+     *
+     *
+     * @param {*} currenPaths
+     * @param {*} action
+     */
+    function operationsReducer(currentOperations, operationAction) {
+        const { action, data } = operationAction;
+        const { target, verb, value } = data;
+        let updatedOperation;
+        let addedOperations;
+        if (target && verb) {
+            updatedOperation = cloneDeep(currentOperations[target][verb]);
+        } else {
+            addedOperations = cloneDeep(currentOperations);
+        }
+
+        switch (action) {
+            case 'init':
+                return data;
+            case 'description':
+            case 'summary':
+                updatedOperation[action] = value;
+                break;
+            case 'authType':
+                updatedOperation['x-auth-type'] = value ? 'Any' : 'None';
+                break;
+            case 'throttlingPolicy':
+                updatedOperation['x-throttling-tier'] = value;
+                break;
+            case 'scopes':
+                if (!updatedOperation.security) {
+                    updatedOperation.security = { default: {} };
+                } else if (!updatedOperation.security.default) {
+                    updatedOperation.security.default = {};
+                }
+                updatedOperation.security.default = [value];
+                break;
+            case 'add': {
+                const parameters = extractPathParameters(data.target, openAPISpec);
+                if (!addedOperations[data.target]) {
+                    // If target is not there add an empty object
+                    addedOperations[data.target] = {};
+                }
+                let alreadyExistCount = 0;
+                for (const currentVerb of data.verbs) {
+                    if (addedOperations[data.target][currentVerb]) {
+                        const message = `Operation already exist with ${data.target} and ${currentVerb}`;
+                        Alert.warning(message);
+                        console.warn(message);
+                        alreadyExistCount++;
+                    } else {
+                        // use else condition because continue is not allowed by es-lint rules
+                        addedOperations[data.target][currentVerb] = {
+                            responses: { 200: { description: 'ok' } },
+                            parameters,
+                        };
+                    }
+                }
+                if (alreadyExistCount === data.verbs.length) {
+                    Alert.error('Operation(s) already exist!');
+                    return currentOperations;
+                }
+                return addedOperations;
+            }
+            default:
+                return currentOperations;
+        }
+        return { ...currentOperations, [target]: { ...currentOperations[target], [verb]: updatedOperation } };
+    }
+    const [operations, operationsDispatcher] = useReducer(operationsReducer, {});
     /**
      *
      *
      * @param {*} operation
      * @param {*} checked
      */
-    function onOperationSelect(operation, checked) {
+    function onOperationSelectM(operation, checked) {
         const { target, verb } = operation;
-        const nextSelectedOperations = cloneDeep(selectedOperations);
-        if (!nextSelectedOperations[target]) {
-            nextSelectedOperations[target] = {};
-        }
-        nextSelectedOperations[target][verb.toLowerCase()] = checked;
-        setSelectedOperation(nextSelectedOperations);
+        setSelectedOperation((currentSelections) => {
+            const nextSelectedOperations = cloneDeep(currentSelections);
+            if (!nextSelectedOperations[target]) {
+                nextSelectedOperations[target] = {};
+            }
+            if (checked) {
+                nextSelectedOperations[target][verb] = checked;
+            } else {
+                delete nextSelectedOperations[target][verb];
+            }
+            if (isEmpty(nextSelectedOperations[target])) {
+                delete nextSelectedOperations[target];
+            }
+            return nextSelectedOperations;
+        });
     }
+    const onMarkAsDelete = useCallback(onOperationSelectM, [setSelectedOperation]);
     /**
      *
      *
@@ -101,7 +169,9 @@ export default function Resources(props) {
         return Swagger.resolve({ spec: rawSpec }).then(({ spec, errors }) => {
             const value = spec;
             delete value.$$normalized;
-            openAPIActionsDispatcher({ action: 'initState', event: { value } });
+            operationsDispatcher({ action: 'init', data: value.paths });
+            delete value.paths; // Remove paths from passed spec
+            setOpenAPISpec(value);
             setSpecErrors(errors);
         });
     }
@@ -111,28 +181,20 @@ export default function Resources(props) {
      *
      * @param {*} data
      */
-    function updateSwagger(targetOperation, spec) {
+    function updateSwagger(spec) {
         return api
             .updateSwagger(spec)
             .then(response => resolveAndUpdateSpec(response.body))
-            .then(() => updateAPI());
+            .then(updateAPI)
+            .catch((error) => {
+                console.error(error);
+                Alert.error('Error while updating the definition');
+            })
+            .finally(() => {
+                setSelectedOperation({});
+            });
     }
 
-    /**
-     *
-     *
-     * @param {*} data
-     */
-    function updateAPIOperations(targetOperation, apiOperation) {
-        const updatedOperations = api.operations.map((operation) => {
-            if (operation.target === targetOperation.target && operation.verb === targetOperation.verb) {
-                return apiOperation;
-            } else {
-                return operation;
-            }
-        });
-        updateAPI({ operations: updatedOperations });
-    }
     /**
      *
      * Save the OpenAPI changes using REST API, type parameter is required to
@@ -143,83 +205,42 @@ export default function Resources(props) {
      * @param {Object} data Data object
      * @returns {Promise|null} A promise object which resolve to Swagger PUT response body.
      */
-    function updateOpenAPI(type, data) {
-        const copyOfOpenAPI = cloneDeep(openAPI);
-        const { spec, ...apiOperation } = data;
+    function updateOpenAPI(type) {
+        const copyOfOperations = cloneDeep(operations);
         switch (type) {
-            case 'operation':
-                copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()] = spec;
-                return updateSwagger(data, copyOfOpenAPI).then(() => updateAPIOperations(data, apiOperation));
-            case 'add': {
-                if (copyOfOpenAPI.paths[data.target] && copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()]) {
-                    const message = 'Operation already exist !!';
-                    Alert.error(message);
+            case 'save':
+                if (isSelectAll(markedOperations, copyOfOperations)) {
+                    const message = "Can't delete all the operations, Please keep at least one operation.";
+                    Alert.warning(message);
                     return Promise.reject(new Error(message));
-                } else if (!copyOfOpenAPI.paths[data.target]) {
-                    // If target is not there add an empty object
-                    copyOfOpenAPI.paths[data.target] = {};
                 }
-                const regEx = /[^{}]+(?=})/g;
-                const params = data.target.match(regEx);
-                let parameters;
-                if (copyOfOpenAPI.openapi) {
-                    parameters = params ? params.map((para) => {
-                        const paraObj = {};
-                        paraObj.name = para;
-                        paraObj.in = 'path';
-                        paraObj.required = true;
-                        paraObj.schema = {
-                            type: 'string',
-                            format: 'string',
-                        };
-                        return paraObj;
-                    }) : [];
-                } else {
-                    parameters = params ? params.map((para) => {
-                        const paraObj = {};
-                        paraObj.name = para;
-                        paraObj.in = 'path';
-                        paraObj.required = true;
-                        paraObj.type = 'string';
-                        paraObj.format = 'string';
-                        return paraObj;
-                    }) : [];
-                }
-                copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()] = {
-                    responses: { 200: { description: 'ok' } },
-                    parameters,
-                };
-                return updateSwagger(data, copyOfOpenAPI);
-            }
-            case 'delete':
-                delete copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()];
-                if (isEmpty(copyOfOpenAPI.paths[data.target])) {
-                    delete copyOfOpenAPI.paths[data.target];
-                }
-                return updateSwagger(data, copyOfOpenAPI);
-            case 'deleteAll':
-                for (const [target, verbs] of Object.entries(selectedOperations)) {
-                    for (const [verb, info] of Object.entries(verbs)) {
-                        if (info) {
-                            delete copyOfOpenAPI.paths[target][verb.toLowerCase()];
+                for (const [target, verbs] of Object.entries(markedOperations)) {
+                    for (const verb of Object.keys(verbs)) {
+                        delete copyOfOperations[target][verb];
+                        if (isEmpty(copyOfOperations[target])) {
+                            delete copyOfOperations[target];
                         }
                     }
-                    if (isEmpty(verbs)) {
-                        delete copyOfOpenAPI.paths[target];
-                    }
                 }
-                return updateSwagger(data, copyOfOpenAPI);
-            default:
                 break;
+            default:
+                return Promise.reject(new Error('Unsupported resource operation!'));
         }
-        return Promise.reject(new Error());
+        return updateSwagger({ ...openAPISpec, paths: copyOfOperations });
     }
 
     useEffect(() => {
         // Update the Swagger spec object when API object gets changed
-        api.getSwagger().then((response) => {
-            resolveAndUpdateSpec(response.body);
-        });
+        api.getSwagger()
+            .then((response) => {
+                resolveAndUpdateSpec(response.body);
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                    setPageError(error.response.body);
+                }
+            });
 
         // Fetch API level throttling policies only when the page get mounted for the first time `componentDidMount`
         API.policies('api').then((response) => {
@@ -228,19 +249,21 @@ export default function Resources(props) {
         // TODO: need to handle the error cases through catch ~tmkb
     }, [api]);
 
-    useEffect(() => {
-        if (!isEmpty(openAPI)) {
-            const newTaggedOperations = getTaggedOperations(api, openAPI);
-            setTaggedOperations(newTaggedOperations);
-        }
-    }, [api, openAPI]);
+    if (pageError) {
+        return <Banner type='error' message={pageError} />;
+    }
 
     // Note: Make sure not to use any hooks after/within this condition , because it returns conditionally
     // If you do so, You will probably get `Rendered more hooks than during the previous render.` exception
-    if (isEmpty(openAPI)) {
-        return <CircularProgress />;
+    if (isEmpty(openAPISpec)) {
+        return (
+            <Grid container direction='row' justify='center' alignItems='center'>
+                <Grid item>
+                    <CircularProgress disableShrink />
+                </Grid>
+            </Grid>
+        );
     }
-
     return (
         <Grid container direction='row' justify='flex-start' spacing={2} alignItems='stretch'>
             {!disableRateLimiting && (
@@ -253,9 +276,9 @@ export default function Resources(props) {
                     />
                 </Grid>
             )}
-            {!isRestricted(['apim:api_create'], api) && (
+            {!isRestricted(['apim:api_create'], api) && !disableAddOperation && (
                 <Grid item md={12}>
-                    <AddOperation updateOpenAPI={updateOpenAPI} />
+                    <AddOperation operationsDispatcher={operationsDispatcher} />
                 </Grid>
             )}
             {specErrors.length > 0 && <SpecErrors specErrors={specErrors} />}
@@ -263,67 +286,73 @@ export default function Resources(props) {
                 <Paper>
                     {!disableMultiSelect && (
                         <OperationsSelector
-                            openAPI={openAPI}
-                            selectedOperations={selectedOperations}
+                            operations={operations}
+                            selectedOperations={markedOperations}
                             setSelectedOperation={setSelectedOperation}
-                            updateOpenAPI={updateOpenAPI}
                         />
                     )}
-                    {Object.entries(taggedOperations).map(([tag, operations]) =>
-                        !!operations.length && (
-                            <Grid key={tag} item md={12}>
-                                <GroupOfOperations updateOpenAPI={updateOpenAPI} openAPI={openAPI} tag={tag}>
-                                    <Grid
-                                        container
-                                        direction='column'
-                                        justify='flex-start'
-                                        spacing={1}
-                                        alignItems='stretch'
-                                    >
-                                        {operations.map((operation) => {
-                                            const { target, verb } = operation;
-                                            return (
-                                                <Grid key={`${target}/${verb}`} item>
-                                                    <Operation
-                                                        highlight
-                                                        updateOpenAPI={updateOpenAPI}
-                                                        openAPI={openAPI}
-                                                        operation={operation}
-                                                        operationRateLimits={operationRateLimits}
-                                                        api={api}
-                                                        selected={Boolean(selectedOperations[target] &&
-                                                                    selectedOperations[target][verb.toLowerCase()])}
-                                                        onOperationSelect={onOperationSelect}
-                                                        {...{ ...operationProps, disableMultiSelect }}
-                                                    />
-                                                </Grid>
-                                            );
-                                        })}
-                                    </Grid>
-                                </GroupOfOperations>
-                            </Grid>
-                        ))}
+                    {Object.entries(operations).map(([target, verbObject]) => (
+                        <Grid key={target} item md={12}>
+                            <GroupOfOperations openAPI={openAPISpec} tag={target}>
+                                <Grid
+                                    container
+                                    direction='column'
+                                    justify='flex-start'
+                                    spacing={1}
+                                    alignItems='stretch'
+                                >
+                                    {Object.entries(verbObject).map(([verb, operation]) => {
+                                        return (
+                                            <Grid key={`${target}/${verb}`} item>
+                                                <Operation
+                                                    target={target}
+                                                    verb={verb}
+                                                    highlight
+                                                    operationsDispatcher={operationsDispatcher}
+                                                    spec={openAPISpec}
+                                                    operation={operation}
+                                                    operationRateLimits={operationRateLimits}
+                                                    api={api}
+                                                    markAsDelete={Boolean(markedOperations[target]
+                                                        && markedOperations[target][verb])}
+                                                    onMarkAsDelete={onMarkAsDelete}
+                                                    disableUpdate={disableUpdate}
+                                                    disableDelete={operationProps.disableDelete}
+                                                    disableMultiSelect={disableMultiSelect}
+                                                />
+                                            </Grid>
+                                        );
+                                    })}
+                                </Grid>
+                            </GroupOfOperations>
+                        </Grid>
+                    ))}
                 </Paper>
+                <Grid container direction='row' justify='space-between' alignItems='center'>
+                    {!disableUpdate && <SaveOperations updateOpenAPI={updateOpenAPI} />}
+                    {!hideAPIDefinitionLink && <GoToDefinitionLink api={api} />}
+                </Grid>
             </Grid>
-
-            {!hideAPIDefinitionLink && <GoToDefinitionLink api={api} />}
         </Grid>
     );
 }
 
 Resources.defaultProps = {
-    operationProps: { disableUpdate: false, disableDelete: false },
+    operationProps: { disableDelete: false },
+    disableUpdate: false,
     disableRateLimiting: false,
     disableMultiSelect: false,
     hideAPIDefinitionLink: false,
+    disableAddOperation: false,
 };
 
 Resources.propTypes = {
     disableRateLimiting: PropTypes.bool,
     hideAPIDefinitionLink: PropTypes.bool,
     disableMultiSelect: PropTypes.bool,
+    disableAddOperation: PropTypes.bool,
+    disableUpdate: PropTypes.bool,
     operationProps: PropTypes.shape({
-        disableUpdate: PropTypes.bool,
         disableDelete: PropTypes.bool,
     }),
 };

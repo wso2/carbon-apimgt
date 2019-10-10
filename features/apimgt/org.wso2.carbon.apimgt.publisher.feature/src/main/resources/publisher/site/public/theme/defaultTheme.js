@@ -38,13 +38,19 @@ const Configurations = {
                     fontSize: '1.3rem',
                 },
             },
+            zIndex: {
+                apiCreateMenu: 1250,
+                operationDeleteUndo: 1600,
+            },
             custom: {
                 starColor: '#f2c73a',
                 disableColor: '#D3D3D3',
                 leftMenuWidth: 210,
                 contentAreaWidth: 1240,
                 drawerWidth: 200,
-                logo: APP_CONTEXT + '/site/public/images/logo.png',
+                logo: APP_CONTEXT + '/site/public/images/logo.svg',
+                logoHeight: 40,
+                logoWidth: 222,
                 backgroundImage: APP_CONTEXT + '/site/public/images/back-light.png',
                 title: 'WSO2 APIM Publisher',
                 defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )

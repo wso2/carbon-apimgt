@@ -128,6 +128,13 @@ function GeneralConfiguration(props) {
                         id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.alias.exist',
                         defaultMessage: 'Adding Certificate Failed. Certificate alias exists.',
                     }));
+                } else if (err.response) {
+                    Alert.error(err.response.body.description);
+                } else {
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.error',
+                        defaultMessage: 'Something went wrong while adding the certificate.',
+                    }));
                 }
             });
     };

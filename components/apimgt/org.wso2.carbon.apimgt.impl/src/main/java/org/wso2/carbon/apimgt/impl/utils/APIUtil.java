@@ -1,20 +1,20 @@
 /*
-*  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package org.wso2.carbon.apimgt.impl.utils;
 
@@ -61,6 +61,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.xerces.util.SecurityManager;
+import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -239,6 +240,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
@@ -409,7 +411,6 @@ public final class APIUtil {
                     .getTenantId(tenantDomainName);
 
             boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
-
 
             if (isGlobalThrottlingEnabled) {
                 String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
@@ -692,7 +693,7 @@ public final class APIUtil {
     /**
      * This method return the gateway labels of an API
      *
-     * @param artifact API artifact
+     * @param artifact        API artifact
      * @param apiProviderName name of API provider
      * @return List<Label> list of gateway labels
      */
@@ -726,7 +727,7 @@ public final class APIUtil {
      * This method used to extract environment list configured with non empty URLs.
      *
      * @param endpointConfigs (Eg: {"production_endpoints":{"url":"http://www.test.com/v1/xxx","config":null,
-     *                              "template_not_supported":false},"endpoint_type":"http"})
+     *                        "template_not_supported":false},"endpoint_type":"http"})
      * @return Set<String>
      */
     public static Set<String> extractEnvironmentListForAPI(String endpointConfigs)
@@ -1040,6 +1041,7 @@ public final class APIUtil {
         }
         return api;
     }
+
     /**
      * This method used to get Provider from provider artifact
      *
@@ -1526,7 +1528,6 @@ public final class APIUtil {
         return (state != null) ? state.toUpperCase() : null;
     }
 
-
     /**
      * Prepends the Tenant Prefix to a registry path. ex: /t/test1.com
      *
@@ -1620,6 +1621,7 @@ public final class APIUtil {
 
     /**
      * Utility method to get OpenAPI registry path for API product
+     *
      * @param identifier product identifier
      * @return path path to the
      */
@@ -1884,7 +1886,6 @@ public final class APIUtil {
         }
     }
 
-
     public static ApplicationManagementServiceClient getApplicationManagementServiceClient() throws APIManagementException {
         try {
             return new ApplicationManagementServiceClient();
@@ -2043,7 +2044,7 @@ public final class APIUtil {
             setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                     wsdlResourcePath);
 
-            if(isZip) {
+            if (isZip) {
                 //Delete any WSDL file if exists
                 if (registry.resourceExists(wsdlResourcePathFile)) {
                     registry.delete(wsdlResourcePathFile);
@@ -2157,7 +2158,7 @@ public final class APIUtil {
         Map<String, Environment> gatewayEnvironments = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiGatewayEnvironments();
         Environment environment = gatewayEnvironments.get(environmentName);
-        if(environment.getType().equals(environmentType)) {
+        if (environment.getType().equals(environmentType)) {
             gatewayURLs = environment.getApiGatewayEndpoint();
             gatewayEndpoint = extractHTTPSEndpoint(gatewayURLs, transports);
             if (log.isDebugEnabled()) {
@@ -2473,7 +2474,6 @@ public final class APIUtil {
         }
     }
 
-
     /**
      * Returns a map of API availability tiers as defined in the underlying governance
      * registry.
@@ -2579,7 +2579,6 @@ public final class APIUtil {
         }
     }
 
-
     /**
      * Retrieves unfiltered list of all available tiers from registry.
      * Result will contains all the tiers including unauthenticated tier which is
@@ -2646,7 +2645,6 @@ public final class APIUtil {
                             + ex.getMessage());
                     continue;
                 }
-
 
                 // Get all the attributes of the tier.
                 Map<String, Object> tierAttributes = APIDescriptionGenUtil.getTierAttributes(policy);
@@ -2891,8 +2889,6 @@ public final class APIUtil {
         }
     }
 
-
-
     /**
      * Checks whether the specified user has the specified permission.
      *
@@ -3062,11 +3058,10 @@ public final class APIUtil {
         return null;
     }
 
-
     /**
      * Retrieves the role list of a user
      *
-     * @param username        A username
+     * @param username A username
      * @param username A username
      * @throws APIManagementException If an error occurs
      */
@@ -3257,7 +3252,6 @@ public final class APIUtil {
             Map<String, Tier> definedTiers = getTiers(tenantId);
             Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, apiName);
             api.addAvailableTiers(availableTier);
-
 
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
@@ -3894,6 +3888,47 @@ public final class APIUtil {
         }
     }
 
+    /**
+     * Loads tenant-conf.json (tenant config) to registry from the tenant-conf.json available in the file system.
+     * If any REST API scopes are added to the local tenant-conf.json, they will be updated in the registry.
+     *
+     * @param tenantID tenant Id
+     * @throws APIManagementException when error occurred while loading the tenant-conf to registry
+     */
+    public static void loadAndSyncTenantConf(int tenantID) throws APIManagementException {
+        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+        try {
+            UserRegistry registry = registryService.getConfigSystemRegistry(tenantID);
+            byte[] data = getLocalTenantConfFileData();
+            if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                log.debug("Tenant conf already uploaded to the registry");
+                Optional<Byte[]> migratedTenantConf = migrateTenantConfScopes(tenantID);
+                if (migratedTenantConf.isPresent()) {
+                    log.debug("Detected new additions to tenant-conf");
+                    data = ArrayUtils.toPrimitive(migratedTenantConf.get());
+                } else {
+                    log.debug("No changes required in tenant-conf.json");
+                    return;
+                }
+            }
+            log.debug("Adding tenant config to the registry");
+            Resource resource = registry.newResource();
+            resource.setMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            resource.setContent(data);
+            registry.put(APIConstants.API_TENANT_CONF_LOCATION, resource);
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error while saving tenant conf to the registry", e);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading tenant conf file content", e);
+        }
+    }
+
+    /**
+     * Loads tenant-conf.json (tenant config) to registry from the tenant-conf.json available in the file system.
+     *
+     * @param tenantID tenant Id
+     * @throws APIManagementException when error occurred while loading the tenant-conf to registry
+     */
     public static void loadTenantConf(int tenantID) throws APIManagementException {
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         try {
@@ -3902,33 +3937,99 @@ public final class APIUtil {
                 log.debug("Tenant conf already uploaded to the registry");
                 return;
             }
-
-            String tenantConfLocation = CarbonUtils.getCarbonHome() + File.separator +
-                    APIConstants.RESOURCE_FOLDER_LOCATION + File.separator +
-                    APIConstants.API_TENANT_CONF;
-
-            File tenantConfFile = new File(tenantConfLocation);
-
-            byte[] data;
-
-            if (tenantConfFile.exists()) { // Load conf from resources directory in pack if it exists
-                FileInputStream fileInputStream = new FileInputStream(tenantConfFile);
-                data = IOUtils.toByteArray(fileInputStream);
-            } else { // Fallback to loading the conf that is stored at jar level if file does not exist in pack
-                InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/tenant/" + APIConstants.API_TENANT_CONF);
-                data = IOUtils.toByteArray(inputStream);
-            }
-
+            byte[] data = getLocalTenantConfFileData();
             log.debug("Adding tenant config to the registry");
             Resource resource = registry.newResource();
             resource.setMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             resource.setContent(data);
-
             registry.put(APIConstants.API_TENANT_CONF_LOCATION, resource);
         } catch (RegistryException e) {
             throw new APIManagementException("Error while saving tenant conf to the registry", e);
         } catch (IOException e) {
             throw new APIManagementException("Error while reading tenant conf file content", e);
+        }
+    }
+
+    /**
+     * Gets the byte content of the local tenant-conf.json
+     *
+     * @return byte content of the local tenant-conf.json
+     * @throws IOException error while reading local tenant-conf.json
+     */
+    private static byte[] getLocalTenantConfFileData() throws IOException {
+        String tenantConfLocation = CarbonUtils.getCarbonHome() + File.separator +
+                APIConstants.RESOURCE_FOLDER_LOCATION + File.separator +
+                APIConstants.API_TENANT_CONF;
+        File tenantConfFile = new File(tenantConfLocation);
+        byte[] data;
+        if (tenantConfFile.exists()) { // Load conf from resources directory in pack if it exists
+            FileInputStream fileInputStream = new FileInputStream(tenantConfFile);
+            data = IOUtils.toByteArray(fileInputStream);
+        } else { // Fallback to loading the conf that is stored at jar level if file does not exist in pack
+            InputStream inputStream =
+                    APIManagerComponent.class.getResourceAsStream("/tenant/" + APIConstants.API_TENANT_CONF);
+            data = IOUtils.toByteArray(inputStream);
+        }
+        return data;
+    }
+
+    /**
+     * Migrate the newly added scopes to the tenant-conf which is already in the registry identified with tenantId and
+     * its byte content is returned. If there were no changes done, an empty Optional will be returned.
+     *
+     * @param tenantId Tenant Id
+     * @return Optional byte content
+     * @throws APIManagementException when error occurred while updating the updating the tenant-conf with scopes.
+     */
+    private static Optional<Byte[]> migrateTenantConfScopes(int tenantId) throws APIManagementException {
+        JSONObject tenantConf = getTenantConfig(tenantId);
+        JSONObject scopesConfigTenant = getRESTAPIScopesFromTenantConfig(tenantConf);
+        JSONObject scopeConfigLocal = getRESTAPIScopesConfigFromFileSystem();
+        Map<String, String> scopesTenant = getRESTAPIScopesFromConfig(scopesConfigTenant);
+        Map<String, String> scopesLocal = getRESTAPIScopesFromConfig(scopeConfigLocal);
+        JSONArray tenantScopesArray = (JSONArray)scopesConfigTenant.get(APIConstants.REST_API_SCOPE);
+
+        Set<String> scopes = scopesLocal.keySet();
+        //Find any scopes that are not added to tenant conf which is available in local tenant-conf
+        scopes.removeAll(scopesTenant.keySet());
+        if (!scopes.isEmpty()) {
+            for (String scope: scopes) {
+                JSONObject scopeJson = new JSONObject();
+                scopeJson.put(APIConstants.REST_API_SCOPE_NAME, scope);
+                scopeJson.put(APIConstants.REST_API_SCOPE_ROLE, scopesLocal.get(scope));
+                tenantScopesArray.add(scopeJson);
+            }
+            return Optional.of(ArrayUtils.toObject(tenantConf.toJSONString().getBytes()));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Returns the REST API scopes JSONObject from the tenant-conf.json in the file system
+     *
+     * @return REST API scopes JSONObject from the tenant-conf.json in the file system
+     * @throws APIManagementException when error occurred while retrieving local REST API scopes.
+     */
+    private static JSONObject getRESTAPIScopesConfigFromFileSystem() throws APIManagementException {
+        try {
+            byte[] tenantConfData = getLocalTenantConfFileData();
+            String tenantConfDataStr = new String(tenantConfData, Charset.defaultCharset());
+            JSONParser parser = new JSONParser();
+            JSONObject tenantConfJson = (JSONObject) parser.parse(tenantConfDataStr);
+            if (tenantConfJson == null) {
+                throw new APIManagementException("tenant-conf.json (in file system) content cannot be null");
+            }
+            JSONObject restAPIScopes = getRESTAPIScopesFromTenantConfig(tenantConfJson);
+            if (restAPIScopes == null) {
+                throw new APIManagementException("tenant-conf.json (in file system) should have RESTAPIScopes config");
+            }
+            return restAPIScopes;
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading tenant conf file content from file system", e);
+        } catch (ParseException e) {
+            throw new APIManagementException("ParseException thrown when parsing tenant config json from string " +
+                    "content", e);
         }
     }
 
@@ -4258,7 +4359,6 @@ public final class APIUtil {
                 resource.setContent(rxt.getBytes(Charset.defaultCharset()));
                 resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
                 registry.put(govRelativePath, resource);
-
 
                 authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
 
@@ -4633,6 +4733,7 @@ public final class APIUtil {
 
     /**
      * Get tenants by state
+     *
      * @param state state of the tenant
      * @return set of tenants
      * @throws UserStoreException
@@ -4768,7 +4869,7 @@ public final class APIUtil {
         boolean foundUserRole = false;
         String[] userRoleList = APIUtil.getListOfRoles(userName);
         String[] inputRoles = roleName.split(",");
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("isRoleExistForUser(): User Roles " + Arrays.toString(userRoleList));
             log.debug("isRoleExistForUser(): InputRoles Roles " + Arrays.toString(inputRoles));
         }
@@ -4782,7 +4883,6 @@ public final class APIUtil {
         }
         return foundUserRole;
     }
-
 
     /**
      * Create API Definition in JSON
@@ -4999,7 +5099,6 @@ public final class APIUtil {
         return builder.getDocumentElement();
     }
 
-
     /**
      * Get stored in sequences, out sequences and fault sequences from the governanceSystem registry
      *
@@ -5107,7 +5206,6 @@ public final class APIUtil {
                 }
             }
 
-
         } catch (RegistryException e) {
             String msg = "Error while retrieving registry for tenant " + tenantId;
             log.error(msg);
@@ -5209,7 +5307,7 @@ public final class APIUtil {
      * @throws APIManagementException If failed to get the uuid of the mediation sequence
      */
     public static Map<String, String> getMediationPolicyAttributes(String policyName, int tenantId, String direction,
-                                           APIIdentifier identifier) throws APIManagementException {
+                                                                   APIIdentifier identifier) throws APIManagementException {
         org.wso2.carbon.registry.api.Collection seqCollection = null;
         String seqCollectionPath = "";
         Map<String, String> mediationPolicyAttributes = new HashMap<>(3);
@@ -5451,7 +5549,6 @@ public final class APIUtil {
         return null;
     }
 
-
     public static boolean isSandboxEndpointsExists(String endpointConfig) {
         JSONParser parser = new JSONParser();
         JSONObject config = null;
@@ -5550,7 +5647,6 @@ public final class APIUtil {
         return apiContext + "/" + apiVersion + resourceUri + ":" + httpMethod;
     }
 
-
     /**
      * Get the key of the Resource ( used in scopes)
      *
@@ -5618,7 +5714,6 @@ public final class APIUtil {
                                                 String resourceUri, String httpVerb, String authLevel) {
         return accessToken + ':' + apiContext + '/' + apiVersion + resourceUri + ':' + httpVerb + ':' + authLevel;
     }
-
 
     /**
      * Resolves system properties and replaces in given in text
@@ -5809,7 +5904,6 @@ public final class APIUtil {
         return apiDocMap;
     }
 
-
     public static Map<String, Object> searchAPIsByURLPattern(Registry registry, String searchTerm, int start, int end)
             throws APIManagementException {
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
@@ -5924,7 +6018,7 @@ public final class APIUtil {
     /**
      * Returns whether the provided URL content contains the string to match
      *
-     * @param url URL
+     * @param url   URL
      * @param match string to match
      * @return whether the provided URL content contains the string to match
      */
@@ -5934,7 +6028,7 @@ public final class APIUtil {
             String inputLine;
             StringBuilder urlContent = new StringBuilder();
             while ((inputLine = in.readLine()) != null && maxLines > 0) {
-                maxLines --;
+                maxLines--;
                 urlContent.append(inputLine);
                 if (urlContent.indexOf(match) > 0) {
                     return true;
@@ -6437,14 +6531,13 @@ public final class APIUtil {
     }
 
     /*
-    *  Util method to convert a java object to a json object
-    *
-    */
+     *  Util method to convert a java object to a json object
+     *
+     */
     public static String convertToString(Object obj) {
         Gson gson = new Gson();
         return gson.toJson(obj);
     }
-
 
     public static String getSequencePath(APIIdentifier identifier, String pathFlow) {
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
@@ -6584,7 +6677,6 @@ public final class APIUtil {
 
         return tierMap.get(tierName);
     }
-
 
     public static void clearTiersCache(String tenantDomain) {
         try {
@@ -6785,40 +6877,58 @@ public final class APIUtil {
         }
     }
 
-
     /**
      * @param tenantDomain Tenant domain to be used to get configurations for REST API scopes
      * @return JSON object which contains configuration for REST API scopes
      * @throws APIManagementException
      */
     public static JSONObject getTenantRESTAPIScopesConfig(String tenantDomain) throws APIManagementException {
-        JSONObject apiTenantConfig = null;
         JSONObject restAPIConfigJSON = null;
-        try {
-            String content = new APIMRegistryServiceImpl().getConfigRegistryResourceContent(tenantDomain,
-                    APIConstants.API_TENANT_CONF_LOCATION);
-
-            if (content != null) {
-                JSONParser parser = new JSONParser();
-                apiTenantConfig = (JSONObject) parser.parse(content);
-                if (apiTenantConfig != null) {
-                    Object value = apiTenantConfig.get(APIConstants.REST_API_SCOPES_CONFIG);
-                    if (value != null) {
-                        restAPIConfigJSON = (JSONObject) value;
-                    } else {
-                        throw new APIManagementException("RESTAPIScopes" + " config does not exist for tenant "
-                                + tenantDomain);
-                    }
-                }
+        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
+        JSONObject tenantConfJson = getTenantConfig(tenantId);
+        if (tenantConfJson != null) {
+            restAPIConfigJSON = getRESTAPIScopesFromTenantConfig(tenantConfJson);
+            if (restAPIConfigJSON == null) {
+                throw new APIManagementException("RESTAPIScopes config does not exist for tenant "
+                        + tenantDomain);
             }
-        } catch (UserStoreException e) {
-            handleException("UserStoreException thrown when getting API tenant config from registry", e);
-        } catch (RegistryException e) {
-            handleException("RegistryException thrown when getting API tenant config from registry", e);
-        } catch (ParseException e) {
-            handleException("ParseException thrown when passing API tenant config from registry", e);
         }
         return restAPIConfigJSON;
+    }
+
+    /**
+     * Returns the tenant-conf.json in JSONObject format for the given tenant(id) from the registry.
+     *
+     * @param tenantId tenant ID
+     * @return tenant-conf.json in JSONObject format for the given tenant(id)
+     * @throws APIManagementException when tenant-conf.json is not available in registry
+     */
+    private static JSONObject getTenantConfig(int tenantId) throws APIManagementException {
+        try {
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+            UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
+            Resource resource;
+            if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
+            } else {
+                loadTenantConf(tenantId);
+                if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                    resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
+                } else {
+                    throw new APIManagementException("Failed to add tenant-conf.json to tenant: " + tenantId);
+                }
+            }
+            String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+            JSONParser parser = new JSONParser();
+            return (JSONObject) parser.parse(content);
+        } catch (RegistryException | ParseException e) {
+            throw new APIManagementException("Error while getting tenant config from registry for tenant: "
+                    + tenantId, e);
+        }
+    }
+
+    private static JSONObject getRESTAPIScopesFromTenantConfig(JSONObject tenantConf) {
+        return (JSONObject) tenantConf.get(APIConstants.REST_API_SCOPES_CONFIG);
     }
 
     /**
@@ -8040,6 +8150,7 @@ public final class APIUtil {
 
     /**
      * Used to reconstruct the input get APIs query as sub context and doc content doesn't support AND search
+     *
      * @param query Input apis get query
      * @return Reconstructed new apis get query
      * @throws APIManagementException If there is an error in the search query
@@ -8055,7 +8166,6 @@ public final class APIUtil {
     }
 
     /**
-     *
      * @param inputSearchQuery search Query
      * @return Reconstructed new search query
      * @throws APIManagementException If there is an error in the search query
@@ -8121,7 +8231,7 @@ public final class APIUtil {
      *
      * @param targetTenantDomain Tenant domain of which resources are requested
      * @param username           Logged in user name
-     * @throws APIMgtInternalException  When internal error occurred
+     * @throws APIMgtInternalException When internal error occurred
      */
     public static boolean hasUserAccessToTenant(String username, String targetTenantDomain)
             throws APIMgtInternalException {
@@ -8214,7 +8324,7 @@ public final class APIUtil {
     /**
      * To set the resource properties to the API Product.
      *
-     * @param apiProduct          API Product that need to set the resource properties.
+     * @param apiProduct   API Product that need to set the resource properties.
      * @param registry     Registry to get the resource from.
      * @param artifactPath Path of the API Product artifact.
      * @return Updated API.
@@ -8333,14 +8443,14 @@ public final class APIUtil {
     public static String getOAuthConfigurationFromAPIMConfig(String property)
             throws APIManagementException {
 
-            //If tenant registry doesn't have the configuration, then read it from api-manager.xml
-            APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            String oAuthConfiguration = apimConfig.getFirstProperty(APIConstants.OAUTH_CONFIGS + property);
+        //If tenant registry doesn't have the configuration, then read it from api-manager.xml
+        APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String oAuthConfiguration = apimConfig.getFirstProperty(APIConstants.OAUTH_CONFIGS + property);
 
-            if (!StringUtils.isBlank(oAuthConfiguration)) {
-                return oAuthConfiguration;
-            }
+        if (!StringUtils.isBlank(oAuthConfiguration)) {
+            return oAuthConfiguration;
+        }
 
         return null;
     }
@@ -8383,11 +8493,10 @@ public final class APIUtil {
         return 0;
     }
 
-
     /**
      * This method is used to get application from client id.
      *
-     * @param clientId  client id
+     * @param clientId client id
      * @return application object.
      * @throws APIManagementException
      */
@@ -8489,7 +8598,7 @@ public final class APIUtil {
      * @param tenantId The Tenant Id
      * @return JSONObject The Application Attributes read from tenant registry or else null
      * @throws APIManagementException Throws if the registry resource doesn't exist
-     * or the content cannot be parsed to JSON
+     *                                or the content cannot be parsed to JSON
      */
     public static JSONObject getAppAttributeKeysFromRegistry(int tenantId) throws APIManagementException {
 
@@ -8545,7 +8654,7 @@ public final class APIUtil {
      * Util method to call SP rest api to invoke queries.
      *
      * @param appName SP app name that the query should run against
-     * @param query query
+     * @param query   query
      * @return jsonObj JSONObject of the response
      * @throws APIManagementException
      */
@@ -8623,7 +8732,7 @@ public final class APIUtil {
      * @param e throwable
      * @return the root cause of 'e' if the root cause exists, otherwise returns 'e' itself
      */
-    private static Throwable getPossibleErrorCause (Throwable e) {
+    private static Throwable getPossibleErrorCause(Throwable e) {
         Throwable rootCause = ExceptionUtils.getRootCause(e);
         rootCause = rootCause == null ? e : rootCause;
         return rootCause;
@@ -8632,6 +8741,7 @@ public final class APIUtil {
     /**
      * Notify document artifacts if an api state change occured. This change is required to re-trigger the document
      * indexer so that the documnet indexes will be updated with the new associated api status.
+     *
      * @param apiArtifact
      * @param registry
      * @throws RegistryException
@@ -8748,14 +8858,14 @@ public final class APIUtil {
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_URL);
     }
 
-    public static Map<String, Environment> getEnvironments(){
+    public static Map<String, Environment> getEnvironments() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                        .getAPIManagerConfiguration().getApiGatewayEnvironments();
+                .getAPIManagerConfiguration().getApiGatewayEnvironments();
     }
+
     private static QName getQNameWithIdentityNS(String localPart) {
         return new QName(IdentityCoreConstants.IDENTITY_DEFAULT_NAMESPACE, localPart);
     }
-
 
     /**
      * Return autogenerated product scope when product ID is given
@@ -8868,10 +8978,11 @@ public final class APIUtil {
 
     /**
      * Return the admin username read from the user-mgt.xml
+     *
      * @return
      * @throws APIMgtInternalException
      */
-    public static String getAdminUsername () throws APIMgtInternalException {
+    public static String getAdminUsername() throws APIMgtInternalException {
         String adminName = "admin";
         try {
             String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -8895,10 +9006,11 @@ public final class APIUtil {
 
     /**
      * Return the admin password read from the user-mgt.xml
+     *
      * @return
      * @throws APIMgtInternalException
      */
-    public static String getAdminPassword () throws APIMgtInternalException {
+    public static String getAdminPassword() throws APIMgtInternalException {
         String adminPassword = "admin";
         try {
             String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -8922,16 +9034,17 @@ public final class APIUtil {
 
     /**
      * This method returns the base64 encoded for the given username and password
+     *
      * @return base64 encoded username and password
      */
     public static String getBase64EncodedAdminCredentials() throws APIMgtInternalException {
         String credentials = getAdminUsername() + ":" + getAdminPassword();
         byte[] encodedCredentials = Base64.encodeBase64(
-                credentials.getBytes(Charset.forName( "UTF-8")));
+                credentials.getBytes(Charset.forName("UTF-8")));
         return new String(encodedCredentials, Charset.forName("UTF-8"));
     }
 
-     /* Utility method to get api identifier from api path.
+    /* Utility method to get api identifier from api path.
      *
      * @param productPath Path of the API Product in registry
      * @return relevant API Product Identifier
@@ -8949,7 +9062,7 @@ public final class APIUtil {
     /**
      * Utility method to get product documentation content file path
      *
-     * @param productId             APIProductIdentifier
+     * @param productId         APIProductIdentifier
      * @param documentationName String
      * @return Doc content path
      */
@@ -8999,8 +9112,8 @@ public final class APIUtil {
     /**
      * Utility method to sign a JWT assertion with a particular signature algorithm
      *
-     * @param assertion valid JWT assertion
-     * @param privateKey private key which use to sign the JWT assertion
+     * @param assertion          valid JWT assertion
+     * @param privateKey         private key which use to sign the JWT assertion
      * @param signatureAlgorithm signature algorithm which use to sign the JWT assertion
      * @return byte array of the JWT signature
      * @throws APIManagementException
@@ -9032,7 +9145,7 @@ public final class APIUtil {
     /**
      * Utility method to generate JWT header with public certificate thumbprint for signature verification.
      *
-     * @param publicCert - The public certificate which needs to include in the header as thumbprint
+     * @param publicCert         - The public certificate which needs to include in the header as thumbprint
      * @param signatureAlgorithm signature algorithm which needs to include in the header
      * @throws APIManagementException
      */
@@ -9070,17 +9183,16 @@ public final class APIUtil {
 
     /**
      * Get the JWS compliant signature algorithm code of the algorithm used to sign the JWT.
+     *
      * @param signatureAlgorithm - The algorithm used to sign the JWT. If signing is disabled, the value will be NONE.
      * @return - The JWS Compliant algorithm code of the signature algorithm.
      */
-    public static String getJWSCompliantAlgorithmCode(String signatureAlgorithm){
-        if (signatureAlgorithm == null || NONE.equals(signatureAlgorithm)){
+    public static String getJWSCompliantAlgorithmCode(String signatureAlgorithm) {
+        if (signatureAlgorithm == null || NONE.equals(signatureAlgorithm)) {
             return JWTSignatureAlg.NONE.getJwsCompliantCode();
-        }
-        else if(SHA256_WITH_RSA.equals(signatureAlgorithm)){
+        } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
             return JWTSignatureAlg.SHA256_WITH_RSA.getJwsCompliantCode();
-        }
-        else{
+        } else {
             return signatureAlgorithm;
         }
     }
@@ -9177,5 +9289,86 @@ public final class APIUtil {
         WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
                 WorkflowConstants.WF_TYPE_AM_API_STATE);
         return wfDTO;
+    }
+
+    /**
+     * Get expiry time of a given jwt token. This method should be called only after validating whether the token is
+     * JWT via isValidJWT method.
+     * @param token jwt token.
+     * @return the expiry time.
+     */
+    public static Long getExpiryifJWT(String token) {
+
+        String[] jwtParts = token.split("\\.");
+        org.json.JSONObject jwtPayload = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().
+                decode(jwtParts[1])));
+        return jwtPayload.getLong("exp"); // extract expiry time and return
+    }
+
+    /**
+     * Checks whether the given token is a valid JWT by parsing header and validating the
+     * header,payload,signature format
+     * @param token the token to be validated
+     * @return true if valid JWT
+     */
+    public static boolean isValidJWT(String token) {
+
+        boolean isJwtToken = false;
+        try {
+            org.json.JSONObject decodedHeader = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder()
+                    .decode(token.split("\\.")[0])));
+            // Check if the decoded header contains type as 'JWT'.
+            if (APIConstants.JWT.equals(decodedHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))
+                    && (StringUtils.countMatches(token, APIConstants.DOT) == 2)) {
+                isJwtToken = true;
+            } else {
+                log.debug("Not a valid JWT token. " + getMaskedToken(token));
+            }
+        } catch (JSONException | IllegalArgumentException e) {
+            isJwtToken = false;
+            log.debug("Not a valid JWT token. " + getMaskedToken(token), e);
+        }
+        return isJwtToken;
+    }
+
+    /**
+     * Get signature of  given JWT token. This method should be called only after validating whether the token is
+     * JWT via isValidJWT method.
+     * @param token jwt token.
+     * @return signature of the jwt token.
+     */
+    public static String getSignatureIfJWT(String token) {
+
+        String[] jwtParts = token.split("\\.");
+        return jwtParts[2];
+    }
+
+    /**
+     * Extracts the tenant domain of the subject in a given JWT
+     * @param token jwt token
+     * @return tenant domain of the the sub claim
+     */
+    public static String getTenantDomainIfJWT(String token) {
+
+        String[] jwtParts = token.split("\\.");
+        org.json.JSONObject jwtPayload = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().
+                decode(jwtParts[1])));
+        String jwtSubClaim = jwtPayload.getString("sub"); // extract sub claim from payload
+        return MultitenantUtils.getTenantDomain(jwtSubClaim);
+    }
+
+    /**
+     * Returns a masked token for a given token.
+     *
+     * @param token token to be masked
+     * @return masked token.
+     */
+    public static String getMaskedToken(String token) {
+
+        if (token.length() >= 10) {
+            return "XXXXX" + token.substring(token.length() - 10);
+        } else {
+            return "XXXXX" + token.substring(token.length() / 2);
+        }
     }
 }

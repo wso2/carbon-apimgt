@@ -58,7 +58,7 @@ function RenderMethodBase(props) {
     return (<Chip
         label={method}
         style={{
-            backgroundColor: chipColor, color: chipTextColor, height: 20, fontSize: 9,
+            backgroundColor: chipColor, color: chipTextColor, height: 20, fontSize: 9, width: 75,
         }}
     />);
 }
@@ -89,7 +89,7 @@ function Operations(props) {
                         </Typography>
                     </div>
                     <div className={classes.contentWrapper}>
-                        <Table>
+                        <Table style={{ padding: 20 }}>
                             {api.operations
                             && api.operations.length !== 0
                             && api.operations.map(item => (
@@ -106,7 +106,7 @@ function Operations(props) {
                             ))}
                         </Table>
                     </div>
-                    <Box py={2} style={{ marginLeft: 400 }}>
+                    <Box py={2} style={{ marginLeft: 500 }}>
                         <Link to={'/apis/' + api.id + '/operations'}>
                             <Typography
                                 className={classes.subHeading}

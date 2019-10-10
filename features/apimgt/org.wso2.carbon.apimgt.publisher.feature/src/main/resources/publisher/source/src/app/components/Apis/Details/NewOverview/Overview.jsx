@@ -121,6 +121,12 @@ const styles = theme => ({
     notConfigured: {
         color: 'rgba(0, 0, 0, 0.40)',
     },
+    url: {
+        maxWidth: '100%',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+    },
 });
 
 /**

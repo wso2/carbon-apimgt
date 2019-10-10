@@ -390,7 +390,9 @@ function Overview(props) {
                             <ExpansionPanelDetails
                                 classes={{ root: classNames({ [classes.noCommentRoot]: totalComments === 0 }, { [classes.commentRoot]: totalComments !== 0 }) }}
                             >
-                                {api && <Comments apiId={api.id} showLatest isOverview setCount={setCount} />}
+                                {api && totalComments !== 0 &&
+                                    <Comments apiId={api.id} showLatest isOverview setCount={setCount} />
+                                }
                                 {totalComments === 0 && (
                                     <Grid container className={classes.root} spacing={2}>
                                         <Grid item xs={12}>
@@ -488,6 +490,17 @@ function Overview(props) {
                             <OverviewDocuments apiId={api.id} />
                         </Grid>
                     </ExpansionPanelDetails>
+                    <Divider />
+                    <ExpansionPanelActions className={classes.actionPanel}>
+                        <Link to={'/apis/' + api.id + '/docs'} className={classes.button}>
+                            <Button size='small' color='primary'>
+                                <FormattedMessage
+                                    id='Apis.Details.Overview.comments.show.more'
+                                    defaultMessage='Show More >>'
+                                />
+                            </Button>
+                        </Link>
+                    </ExpansionPanelActions>
                 </ExpansionPanel>
             </Grid>
         </Grid>

@@ -20,7 +20,9 @@
 package org.wso2.carbon.apimgt.impl.definitions;
 
 import io.swagger.models.Swagger;
+import io.swagger.parser.OpenAPIParser;
 import io.swagger.parser.SwaggerParser;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -77,38 +79,34 @@ public class GraphQLSchemaDefinition {
         StringBuilder operationAuthSchemeMappingBuilder = new StringBuilder();
         StringBuilder operationThrottlingMappingBuilder = new StringBuilder();
 
-        SwaggerParser parser = new SwaggerParser();
         String swaggerDef = api.getSwaggerDefinition();
+        OpenAPI openAPI = null;
+        LinkedHashMap<String, Object> scopeBindings = null;
 
         if (swaggerDef != null) {
-            swagger = parser.parse(swaggerDef);
+            OpenAPIParser parser = new OpenAPIParser();
+            openAPI = parser.readContents(swaggerDef, null, null).getOpenAPI();
         }
 
-        if (swagger != null) {
-            Map<String, Object> vendorExtensions = swagger.getVendorExtensions();
-            if (vendorExtensions != null) {
-                LinkedHashMap swaggerWSO2Security = (LinkedHashMap) swagger.getVendorExtensions()
-                        .get(APIConstants.SWAGGER_X_WSO2_SECURITY);
-                if (swaggerWSO2Security != null) {
-                    LinkedHashMap swaggerObjectAPIM = (LinkedHashMap) swaggerWSO2Security
-                            .get(APIConstants.SWAGGER_OBJECT_NAME_APIM);
-                    if (swaggerObjectAPIM != null) {
-                        @SuppressWarnings("unchecked")
-                        ArrayList<LinkedHashMap> scopes = (ArrayList<LinkedHashMap>) swaggerObjectAPIM
-                                .get(APIConstants.SWAGGER_X_WSO2_SCOPES);
-                        for (LinkedHashMap scope : scopes) {
-                            for (URITemplate template : api.getUriTemplates()) {
-                                String scopeInURITemplate = template.getScope() != null ?
-                                        template.getScope().getName() : null;
-                                if (scopeInURITemplate != null && scopeInURITemplate.
-                                        equals(scope.get(APIConstants.SWAGGER_SCOPE_KEY))) {
-                                    operationScopeMap.put(template.getUriTemplate(), scopeInURITemplate);
-                                    if (!scopeRoleMap.containsKey(scopeInURITemplate)) {
-                                        scopeRoleMap.put(scopeInURITemplate,
-                                                scope.get(APIConstants.SWAGGER_ROLES).toString());
-                                    }
-                                }
-                            }
+        Map<String, Object> extensions = null;
+        if (openAPI != null) {
+            extensions = openAPI.getComponents().getSecuritySchemes().get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY).
+                    getFlows().getImplicit().getExtensions();
+        }
+        if (extensions != null) {
+            scopeBindings = (LinkedHashMap<String, Object>) openAPI.getComponents().getSecuritySchemes().
+                    get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY).getFlows().getImplicit().getExtensions().
+                    get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+        }
+
+        if (swaggerDef != null) {
+            for (URITemplate template : api.getUriTemplates()) {
+                String scopeInURITemplate = template.getScope() != null ? template.getScope().getName() : null;
+                if (scopeInURITemplate != null) {
+                    operationScopeMap.put(template.getUriTemplate(), scopeInURITemplate);
+                    if (!scopeRoleMap.containsKey(scopeInURITemplate)) {
+                        if (scopeBindings != null) {
+                            scopeRoleMap.put(scopeInURITemplate, scopeBindings.get(scopeInURITemplate).toString());
                         }
                     }
                 }

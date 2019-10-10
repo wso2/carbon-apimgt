@@ -39,7 +39,9 @@ const Configurations = {
                     border: 'none', // It can be something like 'solid 1px #cccccc' for fixed layouts
                 },
                 appBar: {
-                    logo: '/devportal/site/public/images/logo.png',
+                    logo: '/devportal/site/public/images/logo.svg',
+                    logoHeight: 19,
+                    logoWidth: 208,
                     background: '#1d344f',
                     activeBackground: '#254061',
                     showSearch: true,

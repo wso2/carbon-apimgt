@@ -1,21 +1,12 @@
 import React, { Component } from 'react';
 import {
     IconButton,
-    Popper,
-    Paper,
-    ClickAwayListener,
+    Menu,
     MenuItem,
-    MenuList,
-    Fade,
-    // ListItemIcon,
-    // ListItemText,
-    // Divider,
 } from '@material-ui/core';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-// import NightMode from '@material-ui/icons/Brightness2';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
-// import qs from 'qs';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
@@ -48,38 +39,28 @@ class Avatar extends Component {
      */
     constructor(props) {
         super(props);
-        this.state = {
-            openMenu: false,
-            profileIcon: null,
-        };
-        this.toggleMenu = this.toggleMenu.bind(this);
+        this.state = { anchorEl: null };
+        this.handleClick = this.handleClick.bind(this);
         this.handleClose = this.handleClose.bind(this);
     }
 
     /**
      *
-     * Open and Close (Toggle) Avatar dropdown menu
+     * Open Avatar dropdown menu
      * @param {React.SyntheticEvent} event `click` event on Avatar
      * @memberof Avatar
      */
-    toggleMenu(event) {
-        if (event.currentTarget.type === 'button') {
-            this.setState({
-                openMenu: !this.state.openMenu,
-                profileIcon: event.currentTarget,
-            });
-        }
+    handleClick(event) {
+        this.setState({ anchorEl: event.currentTarget });
     }
 
     /**
-     * Hanlde outside click event
-     * @param {*} event
+     *
+     * Close Avatar dropdown menu
+     * @memberof Avatar
      */
-    handleClose(event) {
-        if (this.state.profileIcon.current && this.state.profileIcon.current.contains(event.target)) {
-            return;
-        }
-        this.setState({ openMenu: false });
+    handleClose() {
+        this.setState({ anchorEl: null });
     }
 
     /**
@@ -99,11 +80,7 @@ class Avatar extends Component {
      */
     render() {
         const { classes, user } = this.props;
-        // const { pathname } = window.location;
-        // const params = qs.stringify({
-        //     referrer: pathname.split('/').reduce((acc, cv, ci) => (ci <= 1 ? '' : acc + '/' + cv)),
-        // });
-        const { openMenu, profileIcon } = this.state;
+        const { anchorEl } = this.state;
         return (
             <React.Fragment>
                 <IconButton
@@ -111,42 +88,37 @@ class Avatar extends Component {
                     aria-owns='profile-menu-appbar'
                     aria-haspopup='true'
                     color='inherit'
-                    onClick={this.toggleMenu}
+                    onClick={this.handleClick}
                     className={classes.userLink}
                 >
                     <AccountCircle className={classes.accountIcon} /> {user.name}
                 </IconButton>
-                <Popper className={classes.profileMenu} open={openMenu} anchorEl={profileIcon} transition>
-                    {({ TransitionProps }) => (
-                        <Fade in={openMenu} {...TransitionProps} id='profile-menu-appbar'>
-                            <Paper>
-                                <ClickAwayListener onClickAway={this.handleClose}>
-                                    <MenuList>
-                                        {/* TODO: uncomment when component run without errors */}
-                                        {/* <MenuItem onClick={this.toggleMenu}>Profile</MenuItem>
-                                         <MenuItem onClick={this.toggleMenu}>My account</MenuItem> */}
-                                        <Link to={{ pathname: '/services/logout' }}>
-                                            <MenuItem onClick={this.doOIDCLogout} id='logout'>
-                                                <FormattedMessage
-                                                    id='Base.Header.avatar.Avatar.logout'
-                                                    defaultMessage='Logout'
-                                                />
-                                            </MenuItem>
-                                        </Link>
-                                        {/* TODO: uncomment when component run without errors */}
-                                        {/* <Divider />
-                                         <MenuItem className={classes.menuItem} onClick={this.props.toggleTheme}>
-                                         <ListItemText primary='Night Mode' />
-                                         <ListItemIcon className={classes.icon}>
-                                         <NightMode />
-                                         </ListItemIcon>
-                                         </MenuItem> */}
-                                    </MenuList>
-                                </ClickAwayListener>
-                            </Paper>
-                        </Fade>
-                    )}
-                </Popper>
+                <Menu
+                    id='logout-menu'
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={Boolean(anchorEl)}
+                    onClose={this.handleClose}
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'center',
+                    }}
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'center',
+                    }}
+                    className={classes.profileMenu}
+                >
+                    <Link to={{ pathname: '/services/logout' }}>
+                        <MenuItem onClick={this.doOIDCLogout} id='logout'>
+                            <FormattedMessage
+                                id='Base.Header.avatar.Avatar.logout'
+                                defaultMessage='Logout'
+                            />
+                        </MenuItem>
+                    </Link>
+                </Menu>
             </React.Fragment>
         );
     }

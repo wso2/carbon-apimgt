@@ -31,7 +31,9 @@ import Typography from '@material-ui/core/Typography';
  * @returns
  */
 export default function DescriptionAndSummary(props) {
-    const { operation, operationActionsDispatcher, disableUpdate } = props;
+    const {
+        operation, operationsDispatcher, disableUpdate, target, verb,
+    } = props;
     return (
         <Fragment>
             <Grid item md={12}>
@@ -49,10 +51,10 @@ export default function DescriptionAndSummary(props) {
                     multiline
                     disabled={disableUpdate}
                     rows='4'
-                    value={operation.spec.description}
+                    value={operation.description}
                     variant='outlined'
                     onChange={({ target: { value } }) =>
-                        operationActionsDispatcher({ action: 'description', event: { operation, value } })
+                        operationsDispatcher({ action: 'description', data: { target, verb, value } })
                     }
                 />
             </Grid>
@@ -64,9 +66,9 @@ export default function DescriptionAndSummary(props) {
                     variant='outlined'
                     fullWidth
                     disabled={disableUpdate}
-                    value={operation.spec.summary}
+                    value={operation.summary}
                     onChange={({ target: { value } }) =>
-                        operationActionsDispatcher({ action: 'summary', event: { operation, value } })
+                        operationsDispatcher({ action: 'summary', data: { target, verb, value } })
                     }
                 />
             </Grid>
@@ -81,7 +83,9 @@ DescriptionAndSummary.propTypes = {
         verb: PropTypes.string.isRequired,
         spec: PropTypes.shape({}).isRequired,
     }).isRequired,
-    operationActionsDispatcher: PropTypes.func.isRequired,
+    operationsDispatcher: PropTypes.func.isRequired,
+    target: PropTypes.string.isRequired,
+    verb: PropTypes.string.isRequired,
 };
 
 DescriptionAndSummary.defaultProps = {

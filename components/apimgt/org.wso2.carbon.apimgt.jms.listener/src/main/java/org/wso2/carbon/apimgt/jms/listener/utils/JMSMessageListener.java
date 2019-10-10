@@ -26,6 +26,7 @@ import org.json.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
+import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottleConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -247,13 +248,18 @@ public class JMSMessageListener implements MessageListener {
         }
     }
 
-    private void handleRevokedTokenMessage(String revokedToken){
+    private void handleRevokedTokenMessage(String revokedToken) {
+
         if (StringUtils.isEmpty(revokedToken)) {
             return;
         }
 
         //handle JWT tokens
-        revokedToken = getSignatureIfJWT(revokedToken); //JWT signature is the cache key
+        if (revokedToken.contains(APIConstants.DOT) && APIUtil.isValidJWT(revokedToken)) {
+            Long expiryTime = APIUtil.getExpiryifJWT(revokedToken);
+            revokedToken = APIUtil.getSignatureIfJWT(revokedToken); //JWT signature is the cache key
+            RevokedJWTDataHolder.getInstance().addRevokedJWTToMap(revokedToken, expiryTime);  // Add revoked token to revoked JWT map
+        }
 
         //Find the actual tenant domain on which the access token was cached. It is stored as a reference in
         //the super tenant cache.
@@ -266,11 +272,8 @@ public class JMSMessageListener implements MessageListener {
             if (cachedTenantDomain == null) { //the token is not in cache
                 return;
             }
-            //Remove the super-tenant cache entry if the token is a not a super-tenant one
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(cachedTenantDomain)) {
-                Utils.removeCacheEntryFromGatewayCache(revokedToken);
-                Utils.putInvalidTokenEntryIntoInvalidTokenCache(revokedToken, cachedTenantDomain);
-            }
+            Utils.removeCacheEntryFromGatewayCache(revokedToken);
+            Utils.putInvalidTokenEntryIntoInvalidTokenCache(revokedToken, cachedTenantDomain);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -278,23 +281,5 @@ public class JMSMessageListener implements MessageListener {
         //Remove token from the token's own tenant's cache.
         Utils.removeTokenFromTenantTokenCache(revokedToken, cachedTenantDomain);
         Utils.putInvalidTokenIntoTenantInvalidTokenCache(revokedToken, cachedTenantDomain);
-    }
-
-    protected String getSignatureIfJWT(String token) {
-        if (token.contains(APIConstants.DOT)) {
-            try {
-                String[] jwtParts = token.split("\\.");
-                JSONObject jwtHeader = new JSONObject(new String(Base64.getUrlDecoder().decode(jwtParts[0])));
-                // Check if the decoded header contains type as 'JWT'.
-                if (APIConstants.JWT.equals(jwtHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))) {
-                    if (jwtParts.length == 3) {
-                        return jwtParts[2]; //JWT signature available
-                    }
-                }
-            } catch (JSONException | IllegalArgumentException e) {
-                log.debug("Not a JWT token. Failed to decode the token header.", e);
-            }
-        }
-        return token; //Not a JWT. Treat as an opaque token
     }
 }

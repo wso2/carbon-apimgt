@@ -57,11 +57,10 @@ export default function APIProductOperations() {
             <Grid item md={12}>
                 <Resources
                     hideAPIDefinitionLink
-                    operationProps={{
-                        disableUpdate: true,
-                        disableDelete: true,
-                    }}
+                    disableUpdate
+                    operationProps={{ disableDelete: true }}
                     disableMultiSelect
+                    disableAddOperation
                 />
             </Grid>
         </Grid>

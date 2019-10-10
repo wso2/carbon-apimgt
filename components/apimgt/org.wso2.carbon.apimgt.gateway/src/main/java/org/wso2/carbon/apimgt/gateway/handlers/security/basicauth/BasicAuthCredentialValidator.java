@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
-import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.um.ws.api.stub.RemoteUserStoreManagerServiceStub;
 import org.wso2.carbon.um.ws.api.stub.RemoteUserStoreManagerServiceUserStoreExceptionException;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -55,7 +54,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 /**
  * This class will validate the basic auth credentials.
@@ -188,15 +186,7 @@ public class BasicAuthCredentialValidator {
             String resourceRoles = null;
             String resourceScope = OpenAPIUtils.getScopesOfResource(openAPI, synCtx);
             if (resourceScope != null) {
-                ArrayList<LinkedHashMap> apiScopes = OpenAPIUtils.getScopeToRoleMappingOfApi(openAPI, synCtx);
-                if (apiScopes != null) {
-                    for (LinkedHashMap scope : apiScopes) {
-                        if (resourceScope.equals(scope.get(APIConstants.SWAGGER_SCOPE_KEY))) {
-                            resourceRoles = (String) scope.get(APIConstants.SWAGGER_ROLES);
-                            break;
-                        }
-                    }
-                }
+                resourceRoles = OpenAPIUtils.getRolesOfScope(openAPI, synCtx, resourceScope);
             }
 
             if (StringUtils.isNotBlank(resourceRoles)) {

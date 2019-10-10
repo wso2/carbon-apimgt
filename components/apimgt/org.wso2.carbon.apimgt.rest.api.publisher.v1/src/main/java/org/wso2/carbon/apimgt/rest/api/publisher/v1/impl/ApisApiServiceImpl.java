@@ -620,7 +620,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
             // Validate if resources are empty
-            if (body.getOperations() == null || body.getOperations().isEmpty()) {
+            if (!isWSAPI && (body.getOperations() == null || body.getOperations().isEmpty())) {
                 RestApiUtil.handleBadRequest(ExceptionCodes.NO_RESOURCES_FOUND, log);
             }
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());

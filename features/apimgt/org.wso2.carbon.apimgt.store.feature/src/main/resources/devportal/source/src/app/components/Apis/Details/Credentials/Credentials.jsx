@@ -318,7 +318,7 @@ class Credentials extends React.Component {
                                     !wizardOn && (
                                         <GenericDisplayDialog
                                             classes={classes}
-                                            handleClick={this.startStopWizard}
+                                            handleClick={() => this.handleClickToggle('openNew')}
                                             heading={intl.formatMessage({
                                                 defaultMessage: 'Generate Credentials',
                                                 id: 'Apis.Details.Credentials.Credentials.generate.credentials',
@@ -472,26 +472,26 @@ class Credentials extends React.Component {
                                                 </table>
                                             </React.Fragment>
                                         )}
-                                        {/*
+                                    </React.Fragment>
+                                )}
+                                {/*
                                         ***************************************
                                         Subscribe with new Mode
                                         ***************************************
                                         */}
-                                        <Dialog
-                                            fullScreen
-                                            open={openNew}
-                                            onClose={() => this.handleClickToggle('openNew', updateSubscriptionData)}
-                                            TransitionComponent={Transition}
-                                        >
-                                            <Wizard
-                                                updateSubscriptionData={updateSubscriptionData}
-                                                apiId={api.id}
-                                                handleClickToggle={this.handleClickToggle}
-                                                throttlingPolicyList={throttlingPolicyList}
-                                            />
-                                        </Dialog>
-                                    </React.Fragment>
-                                )}
+                                <Dialog
+                                    fullScreen
+                                    open={openNew}
+                                    onClose={() => this.handleClickToggle('openNew', updateSubscriptionData)}
+                                    TransitionComponent={Transition}
+                                >
+                                    <Wizard
+                                        updateSubscriptionData={updateSubscriptionData}
+                                        apiId={api.id}
+                                        handleClickToggle={this.handleClickToggle}
+                                        throttlingPolicyList={throttlingPolicyList}
+                                    />
+                                </Dialog>
                             </Paper>
                         </Grid>
                     </Grid>

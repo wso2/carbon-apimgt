@@ -532,31 +532,6 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return null;
     }
 
-    @Override public Response apiProductsApiProductIdSwaggerPut(String apiProductId, String apiDefinition,
-            String ifMatch, MessageContext messageContext) {
-        try {
-            String username = RestApiUtil.getLoggedInUsername();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getProvider(username);
-            APIProduct retrievedProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
-            if (retrievedProduct == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
-            }
-
-            apiProvider.updateAPIDefinitionOfAPIProduct(apiDefinition, retrievedProduct);
-            String apiSwagger = apiProvider.getAPIDefinitionOfAPIProduct(retrievedProduct);
-
-            if (StringUtils.isEmpty(apiSwagger)) {
-                apiSwagger = "";
-            }
-            return Response.ok().entity(apiSwagger).build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving API Product from Id  : " + apiProductId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return null;
-    }
-
     @Override
     public Response apiProductsApiProductIdThumbnailGet(String apiProductId, String accept,
             String ifNoneMatch, MessageContext messageContext) {

@@ -32,7 +32,6 @@ import GlobalNavBar from './navbar/GlobalNavBar';
 
 const styles = theme => ({
     appBar: {
-        // zIndex: theme.zIndex.modal + 1,
         position: 'relative',
         background: theme.palette.background.appBar,
     },
@@ -105,10 +104,7 @@ class Header extends React.Component {
     render() {
         const { openNavBar, smScreen } = this.state;
         const {
-            classes,
-            avatar,
-            settings,
-            theme,
+            classes, avatar, settings, theme,
         } = this.props;
         return (
             <React.Fragment>
@@ -120,7 +116,11 @@ class Header extends React.Component {
                             </IconButton>
                         </Hidden>
                         <Link to='/'>
-                            <img src={theme.custom.logo} alt={theme.custom.title} />
+                            <img
+                                src={theme.custom.logo}
+                                alt={theme.custom.title}
+                                style={{ height: theme.custom.logoHeight, width: theme.custom.logoWidth }}
+                            />
                         </Link>
                         <GlobalNavBar toggleGlobalNavBar={this.toggleGlobalNavBar} open={openNavBar} />
                         <VerticalDivider height={32} />

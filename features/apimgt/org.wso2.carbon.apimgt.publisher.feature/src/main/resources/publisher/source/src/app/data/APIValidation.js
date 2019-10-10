@@ -100,7 +100,7 @@ const documentSchema = Joi.extend(joi => ({
 }));
 
 const definition = {
-    apiName: Joi.string().regex(/^[a-zA-Z0-9]{1,50}$/).required().error((errors) => {
+    apiName: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/).required().error((errors) => {
         const tmpErrors = [...errors];
         errors.forEach((err, index) => {
             const tmpError = { ...err };
@@ -109,7 +109,7 @@ const definition = {
         });
         return tmpErrors;
     }),
-    apiVersion: Joi.string().regex(/^[a-zA-Z0-9.]{1,30}$/).required().error((errors) => {
+    apiVersion: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/).required().error((errors) => {
         const tmpErrors = [...errors];
         errors.forEach((err, index) => {
             const tmpError = { ...err };
@@ -132,7 +132,7 @@ const definition = {
     userRole: userRoleSchema.userRole().role(),
     apiParameter: apiSchema.api().isAPIParameterExist(),
     apiDocument: documentSchema.document().isDocumentPresent(),
-    operationVerb: Joi.string().required(),
+    operationVerbs: Joi.array().items(Joi.string()).min(1).unique(),
     operationTarget: Joi.string().required(),
     name: Joi.string().min(1).max(255),
     email: Joi.string().email({ tlds: true }).required(),

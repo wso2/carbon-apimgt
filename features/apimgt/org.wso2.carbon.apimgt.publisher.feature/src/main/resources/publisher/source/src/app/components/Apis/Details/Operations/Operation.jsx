@@ -66,7 +66,6 @@ const styles = theme => ({
         background: theme.palette.background.active,
         minWidth: 100,
         borderRadius: theme.shape.borderRadius,
-        cursor: 'pointer',
     },
     paper: {
         padding: 20,

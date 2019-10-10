@@ -6996,57 +6996,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public boolean isProductExist(String productName, String provider, String tenantDomain)
-            throws APIManagementException {
-        return apiMgtDAO.isProductExist(productName, provider, tenantDomain);
-    }
-
-    @Override
-    public void updateAPIDefinitionOfAPIProduct(String definition, APIProduct product)
-            throws APIManagementException {
-        try {
-            String resourcePath = APIUtil.getAPIProductOpenAPIDefinitionFilePath(product.getId());
-            resourcePath = resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
-            Resource resource;
-            if (!registry.resourceExists(resourcePath)) {
-                resource = registry.newResource();
-            } else {
-                resource = registry.get(resourcePath);
-            }
-            resource.setContent(definition);
-            resource.setMediaType("application/json");
-            registry.put(resourcePath, resource);
-
-            String[] visibleRoles = null;
-            if (product.getVisibleRoles() != null) {
-                visibleRoles = product.getVisibleRoles().split(",");
-            }
-
-            // Need to set anonymous if the visibility is public
-            APIUtil.clearResourcePermissions(resourcePath, product.getId(), ((UserRegistry) registry).getTenantId());
-            APIUtil.setResourcePermissions(product.getId().getProviderName(), product.getVisibility(), visibleRoles,
-                    resourcePath);
-
-        } catch (RegistryException e) {
-            handleException("Error while adding Swagger Definition for " + product.getId().getName() + '-'
-                    + product.getId().getProviderName(), e);
-        }
-
-    }
-
-    @Override
-    public void removeAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException {
-        String apiDefinitionFilePath = APIUtil.getAPIProductOpenAPIDefinitionFilePath(product.getId());
-        try {
-            if (registry.resourceExists(apiDefinitionFilePath)) {
-                registry.delete(apiDefinitionFilePath);
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to remove the Definition from : " + apiDefinitionFilePath, e);
-        }
-    }
-
-    @Override
     public List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException {
         return apiMgtDAO.getResourcePathsOfAPI(apiId);
     }
