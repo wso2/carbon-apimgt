@@ -151,7 +151,9 @@ public class APIGatewayManager {
                     template.setUriTemplate("/*");
                     uriTemplates.add(template);
                     api.setUriTemplates(uriTemplates);
-                } else if (api.getType() != null && APIConstants.APITransportType.HTTP.toString().equals(api.getType())) {
+                } else if (api.getType() != null && (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
+                        || APIConstants.API_TYPE_SOAP.equals(api.getType())
+                        || APIConstants.API_TYPE_SOAPTOREST.equals(api.getType()))) {
                     definition = api.getSwaggerDefinition();
                     localEntryAdminClient.deleteEntry(api.getUUID());
                     localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "\">" +
