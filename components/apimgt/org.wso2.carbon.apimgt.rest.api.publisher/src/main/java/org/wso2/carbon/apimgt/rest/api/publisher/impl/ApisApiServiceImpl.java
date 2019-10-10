@@ -929,11 +929,12 @@ public class ApisApiServiceImpl extends ApisApiService {
             //attach micro-geteway labels
             apiToUpdate = assignLabelsToDTO(body,apiToUpdate);
 
-            apiProvider.updateAPI(apiToUpdate);
-
             if (!isWSAPI) {
                 apiProvider.saveSwagger20Definition(apiToUpdate.getId(), body.getApiDefinition());
             }
+
+            apiProvider.updateAPI(apiToUpdate);
+
             API updatedApi = apiProvider.getAPI(apiIdentifier);
             updatedApiDTO = APIMappingUtil.fromAPItoDTO(updatedApi);
             return Response.ok().entity(updatedApiDTO).build();
@@ -1852,9 +1853,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             existingAPI.setUriTemplates(uriTemplates);
             existingAPI.setScopes(scopes);
 
+            apiProvider.saveSwagger20Definition(existingAPI.getId(), apiDefinition);
             //Update API is called to update URITemplates and scopes of the API
             apiProvider.updateAPI(existingAPI);
-            apiProvider.saveSwagger20Definition(existingAPI.getId(), apiDefinition);
             //retrieves the updated swagger definition
             String apiSwagger = apiProvider.getOpenAPIDefinition(existingAPI.getId());
             return Response.ok().entity(apiSwagger).build();
