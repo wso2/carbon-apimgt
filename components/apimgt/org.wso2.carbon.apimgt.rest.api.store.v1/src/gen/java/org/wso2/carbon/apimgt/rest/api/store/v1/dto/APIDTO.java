@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
@@ -47,7 +48,7 @@ public class APIDTO   {
     private Map<String, String> additionalProperties = new HashMap<>();
     private APIMonetizationInfoDTO monetization = null;
     private List<APIEndpointURLsDTO> endpointURLs = new ArrayList<>();
-    private Object businessInformation = null;
+    private APIBusinessInformationDTO businessInformation = null;
     private List<LabelDTO> labels = new ArrayList<>();
     private List<String> environmentList = new ArrayList<>();
     private List<ScopeInfoDTO> scopes = new ArrayList<>();
@@ -433,7 +434,7 @@ public class APIDTO   {
 
   /**
    **/
-  public APIDTO businessInformation(Object businessInformation) {
+  public APIDTO businessInformation(APIBusinessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
     return this;
   }
@@ -441,10 +442,10 @@ public class APIDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("businessInformation")
-  public Object getBusinessInformation() {
+  public APIBusinessInformationDTO getBusinessInformation() {
     return businessInformation;
   }
-  public void setBusinessInformation(Object businessInformation) {
+  public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
   }
 

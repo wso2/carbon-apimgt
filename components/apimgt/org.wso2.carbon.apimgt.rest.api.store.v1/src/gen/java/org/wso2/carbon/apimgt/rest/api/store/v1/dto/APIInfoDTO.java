@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
 import javax.validation.constraints.*;
 
@@ -30,7 +31,7 @@ public class APIInfoDTO   {
     private String avgRating = null;
     private List<String> throttlingPolicies = new ArrayList<>();
     private AdvertiseInfoDTO advertiseInfo = null;
-    private Object businessInformation = null;
+    private APIBusinessInformationDTO businessInformation = null;
 
   /**
    **/
@@ -242,7 +243,7 @@ public class APIInfoDTO   {
 
   /**
    **/
-  public APIInfoDTO businessInformation(Object businessInformation) {
+  public APIInfoDTO businessInformation(APIBusinessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
     return this;
   }
@@ -250,10 +251,10 @@ public class APIInfoDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("businessInformation")
-  public Object getBusinessInformation() {
+  public APIBusinessInformationDTO getBusinessInformation() {
     return businessInformation;
   }
-  public void setBusinessInformation(Object businessInformation) {
+  public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
   }
 

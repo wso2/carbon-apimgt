@@ -3703,8 +3703,7 @@ definitions:
         description: The advertise info of the API
         $ref: '#/definitions/AdvertiseInfo'
       businessInformation:
-        allOf:
-          - $ref: '#/definitions/APIBusinessInformation'
+        $ref: '#/definitions/APIBusinessInformation'
 
 #-----------------------------------------------------
 # The Standard API resource
@@ -3879,8 +3878,7 @@ definitions:
                   description: WSS environment default URL
                   example: "ws://localhost:9099/phoneverify/"
       businessInformation:
-        allOf:
-          - $ref: '#/definitions/APIBusinessInformation'
+        $ref: '#/definitions/APIBusinessInformation'
       labels:
         description: |
           Labels of micro-gateway environments attached to the API.
