@@ -88,8 +88,11 @@ public class GraphQLSchemaDefinition {
             openAPI = parser.readContents(swaggerDef, null, null).getOpenAPI();
         }
 
-        Map<String, Object> extensions = openAPI != null && openAPI.getComponents().getSecuritySchemes()
-                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY).getFlows().getImplicit().getExtensions();
+        Map<String, Object> extensions = null;
+        if (openAPI != null) {
+            extensions = openAPI != null && openAPI.getComponents().getSecuritySchemes()
+                    .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY).getFlows().getImplicit().getExtensions();
+        }
         if (extensions != null) {
             scopeBindings = (LinkedHashMap<String, Object>) openAPI.getComponents().getSecuritySchemes().
                     get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY).getFlows().getImplicit().getExtensions().
