@@ -100,11 +100,10 @@ const SUPPORTED_VERBS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIO
  * @param {*} props
  * @returns
  */
-export default function AddOperation(props) {
-    const { updateOpenAPI } = props;
+function AddOperation(props) {
+    const { operationsDispatcher } = props;
     const inputLabel = useRef(null);
     const [labelWidth, setLabelWidth] = useState(0);
-    const [isAdding, setIsAdding] = useState(false);
 
     /**
      *
@@ -113,7 +112,7 @@ export default function AddOperation(props) {
      * @param {*} action
      * @returns
      */
-    function operationsReducer(state, action) {
+    function newOperationsReducer(state, action) {
         const { type, value } = action;
         switch (type) {
             case 'target':
@@ -127,7 +126,7 @@ export default function AddOperation(props) {
                 return state;
         }
     }
-    const [operations, operationsDispatcher] = useReducer(operationsReducer, { verbs: [] });
+    const [newOperations, newOperationsDispatcher] = useReducer(newOperationsReducer, { verbs: [] });
     React.useEffect(() => {
         setLabelWidth(inputLabel.current.offsetWidth);
     }, []);
@@ -138,7 +137,7 @@ export default function AddOperation(props) {
      *
      */
     function clearInputs() {
-        operationsDispatcher({ type: 'clear' });
+        newOperationsDispatcher({ type: 'clear' });
     }
     /**
      *
@@ -146,17 +145,14 @@ export default function AddOperation(props) {
      */
     function addOperation() {
         if (
-            APIValidation.operationTarget.validate(operations.target).error !== null ||
-            APIValidation.operationVerbs.validate(operations.verbs).error !== null
+            APIValidation.operationTarget.validate(newOperations.target).error !== null ||
+            APIValidation.operationVerbs.validate(newOperations.verbs).error !== null
         ) {
             Alert.warning("Operation target or operation verb(s) can't be empty");
             return;
         }
-        setIsAdding(true);
-        updateOpenAPI('add', operations)
-            .then(clearInputs)
-            .catch(error => operationsDispatcher({ type: 'error', value: error.message }))
-            .finally(() => setIsAdding(false));
+        operationsDispatcher({ action: 'add', data: newOperations });
+        clearInputs();
     }
     return (
         <Paper style={{ marginTop: '12px' }}>
@@ -193,8 +189,8 @@ export default function AddOperation(props) {
                                     </Fragment>
                                 );
                             }}
-                            value={operations.verbs}
-                            onChange={({ target: { name, value } }) => operationsDispatcher({ type: name, value })}
+                            value={newOperations.verbs}
+                            onChange={({ target: { name, value } }) => newOperationsDispatcher({ type: name, value })}
                             labelWidth={labelWidth}
                             inputProps={{
                                 name: 'verbs',
@@ -210,7 +206,7 @@ export default function AddOperation(props) {
                         >
                             {SUPPORTED_VERBS.map(verb => (
                                 <VerbElement
-                                    checked={operations.verbs.includes(verb.toLowerCase())}
+                                    checked={newOperations.verbs.includes(verb.toLowerCase())}
                                     value={verb.toLowerCase()}
                                     verb={verb}
                                 />
@@ -218,7 +214,7 @@ export default function AddOperation(props) {
                         </Select>
 
                         <FormHelperText id='my-helper-text'>
-                            {operations.verbs.includes('option') && (
+                            {newOperations.verbs.includes('option') && (
                                 // TODO: Add i18n to tooltip text ~tmkb
                                 <Tooltip
                                     title={
@@ -241,15 +237,15 @@ export default function AddOperation(props) {
                     <TextField
                         id='operation-target'
                         label='URI Pattern'
-                        error={Boolean(operations.error)}
+                        error={Boolean(newOperations.error)}
                         autoFocus
                         name='target'
-                        value={operations.target}
+                        value={newOperations.target}
                         onChange={({ target: { name, value } }) =>
-                            operationsDispatcher({ type: name, value: value.startsWith('/') ? value : `/${value}` })
+                            newOperationsDispatcher({ type: name, value: value.startsWith('/') ? value : `/${value}` })
                         }
                         placeholder='Enter the URI pattern'
-                        helperText={operations.error || 'Enter URI pattern'}
+                        helperText={newOperations.error || 'Enter URI pattern'}
                         fullWidth
                         margin='dense'
                         variant='outlined'
@@ -263,7 +259,6 @@ export default function AddOperation(props) {
                                 addOperation();
                             }
                         }}
-                        disabled={isAdding}
                     />
                 </Grid>
                 <Grid item md={1} xs={2}>
@@ -278,19 +273,18 @@ export default function AddOperation(props) {
                         placement='bottom'
                         interactive
                     >
-                        <Fab
-                            disabled={isAdding}
-                            style={{ marginLeft: '20px', marginBottom: '15px', marginRight: '20px' }}
-                            size='small'
-                            color='primary'
-                            aria-label='add'
-                            onClick={addOperation}
-                        >
-                            {!isAdding && <AddIcon />}
-                            {isAdding && <CircularProgress size={24} />}
-                        </Fab>
+                        <span>
+                            <Fab
+                                style={{ marginLeft: '20px', marginBottom: '15px', marginRight: '20px' }}
+                                size='small'
+                                color='primary'
+                                aria-label='add'
+                                onClick={addOperation}
+                            >
+                                <AddIcon />
+                            </Fab>
+                        </span>
                     </Tooltip>
-
                     <sup>
                         <Tooltip
                             title={
@@ -303,9 +297,11 @@ export default function AddOperation(props) {
                             placement='bottom'
                             interactive
                         >
-                            <IconButton disabled={isAdding} onClick={clearInputs} size='small'>
-                                <ClearIcon />
-                            </IconButton>
+                            <span>
+                                <IconButton onClick={clearInputs} size='small'>
+                                    <ClearIcon />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                     </sup>
                 </Grid>
@@ -315,5 +311,7 @@ export default function AddOperation(props) {
 }
 
 AddOperation.propTypes = {
-    updateOpenAPI: PropTypes.func.isRequired,
+    operationsDispatcher: PropTypes.func.isRequired,
 };
+
+export default React.memo(AddOperation);

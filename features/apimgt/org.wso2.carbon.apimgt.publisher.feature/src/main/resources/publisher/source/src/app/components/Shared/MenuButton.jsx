@@ -12,7 +12,7 @@ const styles = theme => ({
         display: 'flex',
     },
     paper: {
-        marginRight: theme.spacing.unit * 2,
+        marginRight: theme.spacing(2),
     },
     position: {
         zIndex: theme.zIndex.apiCreateMenu,

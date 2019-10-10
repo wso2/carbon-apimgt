@@ -32,7 +32,7 @@ import Typography from '@material-ui/core/Typography';
 export default function GoToDefinitionLink(props) {
     const { api, message } = props;
     return (
-        <Box width='100%' textAlign='right' m={1}>
+        <Box m={1}>
             <Link to={`/apis/${api.id}/api definition`}>
                 <Typography style={{ marginLeft: '10px' }} color='primary' display='inline' variant='caption'>
                     {message}

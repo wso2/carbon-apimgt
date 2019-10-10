@@ -40,6 +40,7 @@ const Configurations = {
             },
             zIndex: {
                 apiCreateMenu: 1250,
+                operationDeleteUndo: 1600,
             },
             custom: {
                 starColor: '#f2c73a',

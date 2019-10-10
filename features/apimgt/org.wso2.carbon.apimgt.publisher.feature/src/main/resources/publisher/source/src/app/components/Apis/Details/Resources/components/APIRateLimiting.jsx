@@ -46,7 +46,7 @@ const RateLimitingLevels = {
  * @param {*} props
  * @returns
  */
-export default function APIRateLimiting(props) {
+function APIRateLimiting(props) {
     const {
         updateAPI, operationRateLimits, onChange, value: currentApiThrottlingPolicy, isAPIProduct,
     } = props;
@@ -228,3 +228,5 @@ APIRateLimiting.propTypes = {
     value: PropTypes.string.isRequired,
     isAPIProduct: PropTypes.bool,
 };
+
+export default React.memo(APIRateLimiting);
