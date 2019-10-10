@@ -7463,8 +7463,12 @@ public class ApiMgtDAO {
                         uriTemplate.setUriTemplate(urlPattern);
                         uriTemplate.setHTTPVerb(verb);
                         uriTemplate.setHttpVerbs(verb);
-                        uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
-                        uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
+                        String authType = rs.getString("AUTH_SCHEME");
+                        String throttlingTier = rs.getString("THROTTLING_TIER");
+                        uriTemplate.setAuthType(authType);
+                        uriTemplate.setAuthTypes(authType);
+                        uriTemplate.setThrottlingTier(throttlingTier);
+                        uriTemplate.setThrottlingTiers(throttlingTier);
                         uriTemplate.setResourceURI(productionURL);
                         uriTemplate.setResourceSandboxURI(sandboxURL);
                         InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
