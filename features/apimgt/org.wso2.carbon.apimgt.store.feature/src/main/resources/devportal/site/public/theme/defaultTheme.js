@@ -105,7 +105,7 @@ const Configurations = {
                 thumbnail: {
                     width: 240,
                     contentPictureOverlap: false,
-                    iconColor: '#ffffff',
+                    iconColor: 'rgba(0, 0, 0, 0.38)',
                     listViewIconSize: 20,
                     contentBackgroundColor: 'rgba(239, 239, 239, 0.5)',
                     defaultApiImage: false, // put false to render the system generated and user provided image.

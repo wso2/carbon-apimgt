@@ -47,6 +47,8 @@ const styles = theme => ({
 class ViewCurl extends React.Component {
     state = {
         showReal: false,
+        api: null,
+        endpointURL: '',
     };
 
     onCopy = name => (event) => {
@@ -119,7 +121,7 @@ class ViewCurl extends React.Component {
                                 text={
                                     'curl -k -d "grant_type=password&username=Username&password=Password" "Authorization: Basic '
                                     + bas64Encoded
-                                    + '" https://10.100.1.24:8248/token'
+                                    + '" https://localhost:8248/token'
                                 }
                                 onCopy={this.onCopy('tokenCopied')}
                             >
@@ -150,7 +152,7 @@ class ViewCurl extends React.Component {
                             " \
                         </div>
                         <div>
-                            <span className={classes.command}>https://10.100.1.24:8248/token</span>
+                            <span className={classes.command}>https://localhost:8248/token</span>
                         </div>
                     </div>
                     <div>
@@ -159,7 +161,7 @@ class ViewCurl extends React.Component {
                                 text={
                                     'curl -k -d "grant_type=client_credentials" "Authorization: Basic '
                                     + bas64Encoded
-                                    + '" https://10.100.1.24:8248/token'
+                                    + '" https://localhost:8248/token'
                                 }
                                 onCopy={this.onCopy('tokenCopied')}
                             >

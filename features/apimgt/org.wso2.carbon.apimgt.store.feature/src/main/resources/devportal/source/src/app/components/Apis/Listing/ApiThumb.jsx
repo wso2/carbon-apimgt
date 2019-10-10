@@ -86,6 +86,7 @@ const styles = theme => ({
         textDecoration: 'none',
     },
     imageWrapper: {
+        color: theme.custom.thumbnail.iconColor,
         width: theme.custom.thumbnail.width,
         display: 'flex',
         alignItems: 'center',
