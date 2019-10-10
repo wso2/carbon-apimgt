@@ -21,6 +21,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.apache.axiom.util.UIDGenerator;
@@ -28,7 +29,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -55,8 +55,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.nio.charset.Charset;
-import java.util.Base64;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -152,13 +152,11 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             }
 
             String useragent = req.headers().get(HttpHeaders.USER_AGENT);
-            String authorization = req.headers().get(HttpHeaders.AUTHORIZATION);
 
             // '-' is used for empty values to avoid possible errors in DAS side.
             // Required headers are stored one by one as validateOAuthHeader()
             // removes some of the headers from the request
             useragent = useragent != null ? useragent : "-";
-            headers.add(HttpHeaders.AUTHORIZATION, authorization);
             headers.add(HttpHeaders.USER_AGENT, useragent);
 
             if (validateOAuthHeader(req)) {
@@ -187,7 +185,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                         .setIPOverride(ctx.channel().remoteAddress().toString());
                 APIMgtGoogleAnalyticsUtils gaUtils = new APIMgtGoogleAnalyticsUtils();
                 gaUtils.init(tenantDomain);
-                gaUtils.publishGATrackingData(gaData, req.headers().get(HttpHeaders.USER_AGENT), authorization);
+                gaUtils.publishGATrackingData(gaData, req.headers().get(HttpHeaders.USER_AGENT),
+                        headers.get(HttpHeaders.AUTHORIZATION));
             } else {
                 ctx.writeAndFlush(new TextWebSocketFrame(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE));
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
@@ -223,10 +222,20 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             version = getVersionFromUrl(uri);
             APIKeyValidationInfoDTO info;
             if (!req.headers().contains(HttpHeaders.AUTHORIZATION)) {
-                log.error("No Authorization Header Present");
-                return false;
+                QueryStringDecoder decoder = new QueryStringDecoder(req.getUri());
+                Map<String, List<String>> requestMap = decoder.parameters();
+                if (requestMap.containsKey(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT)) {
+                    req.headers().add(HttpHeaders.AUTHORIZATION, APIConstants.CONSUMER_KEY_SEGMENT + ' '
+                                    + requestMap.get(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT).get(0));
+                    requestMap.remove(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT);
+                } else {
+                    log.error("No Authorization Header or access_token query parameter present");
+                    return false;
+                }
             }
-            String[] auth = req.headers().get(HttpHeaders.AUTHORIZATION).split(" ");
+            String authorizationHeader = req.headers().get(HttpHeaders.AUTHORIZATION);
+            headers.add(HttpHeaders.AUTHORIZATION, authorizationHeader);
+            String[] auth = authorizationHeader.split(" ");
             if (APIConstants.CONSUMER_KEY_SEGMENT.equals(auth[0])) {
                 String cacheKey;
                 boolean isJwtToken = false;
