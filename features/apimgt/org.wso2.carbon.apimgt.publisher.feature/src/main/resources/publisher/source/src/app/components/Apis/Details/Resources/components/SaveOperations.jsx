@@ -17,6 +17,7 @@
  */
 
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -49,3 +50,6 @@ export default function SaveOperations(props) {
         </Box>
     );
 }
+SaveOperations.propTypes = {
+    updateOpenAPI: PropTypes.func.isRequired,
+};

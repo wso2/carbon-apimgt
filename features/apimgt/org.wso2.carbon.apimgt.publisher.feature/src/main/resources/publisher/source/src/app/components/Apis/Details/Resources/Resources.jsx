@@ -289,12 +289,11 @@ export default function Resources(props) {
                             operations={operations}
                             selectedOperations={markedOperations}
                             setSelectedOperation={setSelectedOperation}
-                            updateOpenAPI={updateOpenAPI}
                         />
                     )}
                     {Object.entries(operations).map(([target, verbObject]) => (
                         <Grid key={target} item md={12}>
-                            <GroupOfOperations updateOpenAPI={updateOpenAPI} openAPI={openAPISpec} tag={target}>
+                            <GroupOfOperations openAPI={openAPISpec} tag={target}>
                                 <Grid
                                     container
                                     direction='column'
