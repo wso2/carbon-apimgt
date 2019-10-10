@@ -50,7 +50,7 @@ export default function OperationsSelector(props) {
         <Grid container direction='row' justify='space-between' alignItems='center'>
             <Grid item />
             <Grid item>
-                <Box mr={19}>
+                <Box mr={17.25}>
                     <Tooltip title={isIndeterminate ? 'Clear selections' : 'Mark all for delete'}>
                         <div>
                             <IconButton onClick={handleSelector} aria-label='delete all' size='large'>

@@ -32,6 +32,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Utils from 'AppData/Utils';
 import DeleteIcon from '@material-ui/icons/Delete';
 import IconButton from '@material-ui/core/IconButton';
+import Badge from '@material-ui/core/Badge';
 // splitted operation components
 
 import { isRestricted } from 'AppData/AuthManager';
@@ -147,15 +148,16 @@ function Operation(props) {
                 >
                     <Grid container direction='row' justify='space-between' alignItems='center' spacing={0}>
                         <Grid item md={10}>
-                            <Button
-                                disableFocusRipple
-                                variant='contained'
-                                size='small'
-                                className={classes.customButton}
-                            >
-                                {verb}
-                            </Button>
-
+                            <Badge invisible={!operation['x-wso2-new']} color='error' variant='dot'>
+                                <Button
+                                    disableFocusRipple
+                                    variant='contained'
+                                    size='small'
+                                    className={classes.customButton}
+                                >
+                                    {verb}
+                                </Button>
+                            </Badge>
                             <Typography display='inline' style={{ margin: '0px 30px' }} variant='h6' gutterBottom>
                                 {target}
 

@@ -16,11 +16,16 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 /**
  *
@@ -30,8 +35,9 @@ import CircularProgress from '@material-ui/core/CircularProgress';
  * @returns
  */
 export default function SaveOperations(props) {
-    const { updateOpenAPI } = props;
+    const { updateOpenAPI, operationsDispatcher } = props;
     const [isSaving, setIsSaving] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
     /**
      * Handle the Save button event,
      *
@@ -41,15 +47,47 @@ export default function SaveOperations(props) {
         updateOpenAPI('save').finally(() => setIsSaving(false));
     }
     return (
-        <Box>
-            <Button disabled={isSaving} onClick={saveChanges} variant='contained' color='primary'>
-                Save
-                {isSaving && <CircularProgress size={24} />}
-            </Button>
-            <Button onClick={() => {}}>Reset</Button>
-        </Box>
+        <Fragment>
+            <Box>
+                <Button disabled={isSaving} onClick={saveChanges} variant='contained' color='primary'>
+                    Save
+                    {isSaving && <CircularProgress size={24} />}
+                </Button>
+                <Box display='inline' ml={1}>
+                    <Button onClick={() => setIsOpen(true)}>Reset</Button>
+                </Box>
+            </Box>
+            <Dialog
+                open={isOpen}
+                aria-labelledby='bulk-delete-dialog-title'
+                aria-describedby='bulk-delete-dialog-description'
+                onBackdropClick={() => setIsOpen(false)}
+            >
+                <DialogTitle id='bulk-delete-dialog-title'>Discard changes</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id='bulk-delete-dialog-description'>
+                        Please confirm the discard all changes action
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setIsOpen(false)}>CLOSE</Button>
+                    <Box ml={1}>
+                        <Button
+                            onClick={() => {
+                                operationsDispatcher({ action: 'init' });
+                                setIsOpen(false);
+                            }}
+                            color='error'
+                        >
+                        REST
+                        </Button>
+                    </Box>
+                </DialogActions>
+            </Dialog>
+        </Fragment>
     );
 }
 SaveOperations.propTypes = {
     updateOpenAPI: PropTypes.func.isRequired,
+    operationsDispatcher: PropTypes.func.isRequired,
 };
