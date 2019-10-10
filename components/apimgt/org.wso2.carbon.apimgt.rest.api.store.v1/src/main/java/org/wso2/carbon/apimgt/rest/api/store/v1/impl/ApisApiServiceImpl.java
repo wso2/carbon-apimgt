@@ -138,7 +138,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.rootCauseMessageMatches(e, "start index seems to be greater than the limit count")) {
-                //this is not an error of the user as he does not know the total number of apis available. Thus sends 
+                //this is not an error of the user as he does not know the total number of apis available. Thus sends
                 //  an empty response
                 apiListDTO.setCount(0);
                 apiListDTO.setPagination(new PaginationDTO());
@@ -538,7 +538,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Retrieves the swagger document of an API
-     * 
+     *
      * @param apiId API identifier
      * @param labelName name of the gateway label
      * @param environmentName name of the gateway environment
@@ -560,9 +560,18 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
 
-            //gets the first available environment if neither label nor environment is not provided
+            // gets the first available environment if neither label nor environment is not provided
             if (StringUtils.isEmpty(labelName) && StringUtils.isEmpty(environmentName)) {
-                environmentName = api.getEnvironments().iterator().next();
+                if (!api.getEnvironments().isEmpty()) {
+                    environmentName = api.getEnvironments().iterator().next();
+                } else {
+                    // if there are no environments in the API, take a random environment from the existing ones.
+                    // This is to make sure the swagger doesn't have invalid endpoints
+                    Map<String, Environment> environments = APIUtil.getEnvironments();
+                    if (!environments.keySet().isEmpty()) {
+                        environmentName = environments.keySet().iterator().next();
+                    }
+                }
             }
 
             if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
@@ -575,6 +584,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironment(api.getId(), environmentName);
             } else if (StringUtils.isNotEmpty(labelName)) {
                 apiSwagger = apiConsumer.getOpenAPIDefinitionForLabel(api.getId(), labelName);
+            } else {
+                apiSwagger = apiConsumer.getOpenAPIDefinition(api.getId());
             }
 
             return Response.ok().entity(apiSwagger).header("Content-Disposition",
