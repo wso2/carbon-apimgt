@@ -383,6 +383,12 @@ paths:
             The resource to be updated does not exist.
           schema:
             $ref: '#/definitions/Error'
+        409:
+          description: |
+            Conflict.
+            The request could not be completed due to a conflict with the current state of the target resource.
+          schema:
+            $ref: '#/definitions/Error'
         412:
           description: |
             Precondition Failed.
@@ -425,6 +431,12 @@ paths:
           description: |
             Not Found.
             Resource to be deleted does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        409:
+          description: |
+            Conflict.
+            The request could not be completed due to a conflict with the current state of the target resource.
           schema:
             $ref: '#/definitions/Error'
         412:
@@ -8293,6 +8305,11 @@ definitions:
         type: array
         items:
           type: string
+      usedProductIds:
+        type: array
+        items:
+          type: string
+
 
 #-----------------------------------------------------
 # The Scope List resource
@@ -8989,6 +9006,9 @@ definitions:
   Settings:
     title: SettingsDTO
     properties:
+      storeUrl:
+        type: string
+        description: Store URL
       environment:
         type: array
         items:

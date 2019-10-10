@@ -44,7 +44,7 @@ const useStyles = makeStyles(theme => ({
         flexWrap: 'wrap',
     },
     saveButton: {
-        marginTop: theme.spacing.unit * 3,
+        marginTop: theme.spacing(3),
     },
 }));
 
@@ -61,10 +61,6 @@ export default function Environments() {
     const [selectedMgLabel, setSelectedMgLabel] = useState([...api.labels]);
 
     const [isUpdating, setUpdating] = useState(false);
-    let isWebsocket = false;
-    if (api) {
-        isWebsocket = (api.type === 'WS');
-    }
 
     /**
      *
@@ -104,7 +100,7 @@ export default function Environments() {
                             <TableCell>Name</TableCell>
                             <TableCell align='right'>Type</TableCell>
                             <TableCell align='right'>ServerURL</TableCell>
-                            {isWebsocket ? (
+                            {api.isWebSocket() ? (
                                 <React.Fragment>
                                     <TableCell align='right'>WS</TableCell>
                                     <TableCell align='right'>WSS</TableCell>
@@ -144,7 +140,7 @@ export default function Environments() {
                                 <TableCell align='right'>{row.type}</TableCell>
                                 <TableCell align='right'>{row.serverUrl}</TableCell>
 
-                                {isWebsocket ? (
+                                {api.isWebSocket() ? (
                                     <React.Fragment>
                                         <TableCell align='right'>{row.endpoints.ws}</TableCell>
                                         <TableCell align='right'>{row.endpoints.wss}</TableCell>
@@ -161,7 +157,7 @@ export default function Environments() {
                 </Table>
             </Paper>
 
-            {!isWebsocket &&
+            {!api.isWebSocket() &&
                 <MicroGateway
                     selectedMgLabel={selectedMgLabel}
                     setSelectedMgLabel={setSelectedMgLabel}
@@ -178,7 +174,7 @@ export default function Environments() {
                 <Grid item>
                     <Button
                         className={classes.saveButton}
-                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api) && isUpdating}
+                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api) || isUpdating}
                         type='submit'
                         variant='contained'
                         color='primary'
@@ -202,6 +198,19 @@ export default function Environments() {
                     </Link>
                 </Grid>
             </Grid>
+            {isRestricted(['apim:api_create'], api) && (
+                <Grid item>
+                    <Typography variant='body2' color='primary'>
+                        <FormattedMessage
+                            id='Apis.Details.Environments.Environments.update.not.allowed'
+                            defaultMessage={
+                                '* You are not authorized to update particular fields of' +
+                                ' the API due to insufficient permissions'
+                            }
+                        />
+                    </Typography>
+                </Grid>
+            )}
         </React.Fragment>
     );
 }

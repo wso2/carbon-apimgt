@@ -16,23 +16,26 @@
  * under the License.
  */
 
-import React, { Component, useContext } from 'react';
+import React, { Component } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
 import TablePagination from '@material-ui/core/TablePagination';
+import Button from '@material-ui/core/Button';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import { Link } from 'react-router-dom';
+import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import Application from 'AppData/Application';
-import NewApp from 'AppComponents/Applications/Create/NewApp';
 import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
 import Settings from 'AppComponents/Shared/SettingsContext';
 import AppsTableContent from './AppsTableContent';
 import ApplicationTableHead from './ApplicationTableHead';
+import DeleteConfirmation from './DeleteConfirmation';
 
 /**
  *
@@ -94,7 +97,7 @@ const styles = theme => ({
     appContent: {
         paddingLeft: theme.spacing.unit * 4,
         paddingTop: theme.spacing.unit,
-        width: theme.custom.contentAreaWidth,
+        maxWidth: theme.custom.contentAreaWidth,
     },
     dialogContainer: {
         width: 1000,
@@ -124,6 +127,7 @@ class Listing extends Component {
             rowsPerPage: 10,
             open: false,
             isApplicationSharingEnabled: true,
+            isDeleteOpen: false,
         };
         this.handleAppDelete = this.handleAppDelete.bind(this);
     }
@@ -204,7 +208,7 @@ class Listing extends Component {
     };
 
     /**
-     * @memberof NewApp
+     * @memberof Listing
      */
     handleClose = () => {
         this.setState({ open: false });
@@ -221,26 +225,43 @@ class Listing extends Component {
      * @param {*} event event
      * @memberof Listing
      */
-    handleAppDelete(event) {
-        const { data } = this.state;
+    handleAppDelete() {
+        const { data, deletingId } = this.state;
         const { intl } = this.props;
-        const id = event.currentTarget.getAttribute('data-appId');
         const newData = new Map([...data]);
-        const app = newData.get(id);
+        const app = newData.get(deletingId);
         app.deleting = true;
         this.setState({ data: newData });
 
-        const message = intl.formatMessage({
+        let message = intl.formatMessage({
             defaultMessage: 'Application {name} deleted successfully!',
             id: 'Applications.Listing.Listing.application.deleted.successfully',
         }, { name: app.name });
-        const promisedDelete = Application.deleteApp(id);
+        const promisedDelete = Application.deleteApp(deletingId);
         promisedDelete.then((ok) => {
             if (ok) {
-                newData.delete(id);
+                newData.delete(deletingId);
                 Alert.info(message);
+                this.toggleDeleteConfirmation();
                 this.setState({ data: newData });
             }
+        }).catch((error) => {
+            console.log(error);
+            message = intl.formatMessage({
+                defaultMessage: 'Error while deleting application {name}',
+                id: 'Applications.Listing.Listing.application.deleting.error',
+            }, { name: app.name });
+            Alert.error(message);
+        });
+    }
+
+    toggleDeleteConfirmation = (event) => {
+        let id = '';
+        if (event) {
+            id = event.currentTarget.getAttribute('data-appId');
+        }
+        this.setState(({ isDeleteOpen }) => {
+            return { isDeleteOpen: !isDeleteOpen, deletingId: id };
         });
     }
 
@@ -250,6 +271,7 @@ class Listing extends Component {
     render() {
         const {
             data, order, orderBy, rowsPerPage, page, open, isApplicationSharingEnabled,
+            isDeleteOpen,
         } = this.state;
         if (!data) {
             return <Loading />;
@@ -272,35 +294,12 @@ class Listing extends Component {
                         </Typography>
                         {data && (
                             <Typography variant='caption' gutterBottom align='left'>
-                                {data.count === 0 ? (
+                                {data.count === 0 && (
                                     <React.Fragment>
                                         <FormattedMessage
                                             id='Applications.Listing.Listing.no.applications.created'
                                             defaultMessage='No Applications created'
                                         />
-                                    </React.Fragment>
-                                ) : (
-                                    <React.Fragment>
-                                        <FormattedMessage
-                                            id='Applications.Listing.Listing.displaying'
-                                            defaultMessage='Displaying'
-                                        />
-                                        {' '}
-                                        {data.count}
-                                        {' '}
-                                        {data.count === 1
-                                            ? (
-                                                <FormattedMessage
-                                                    id='Applications.Listing.Listing.displaying.application'
-                                                    defaultMessage='Application'
-                                                />
-                                            )
-                                            : (
-                                                <FormattedMessage
-                                                    id='Applications.Listing.Listing.displaying.applications'
-                                                    defaultMessage='Applications'
-                                                />
-                                            )}
                                     </React.Fragment>
                                 )}
                             </Typography>
@@ -308,12 +307,22 @@ class Listing extends Component {
                     </div>
                     {(data.size !== 0 || open) && (
                         <div className={classes.createLinkWrapper}>
-                            <NewApp
-                                updateApps={this.updateApps}
-                                open={open}
-                                handleClickOpen={this.handleClickOpen}
-                                handleClose={this.handleClose}
-                            />
+                            <ScopeValidation
+                                resourcePath={resourcePaths.APPLICATIONS}
+                                resourceMethod={resourceMethods.POST}
+                            >
+                                <Link to='/applications/create'>
+                                    <Button
+                                        variant='contained'
+                                        color='primary'
+                                    >
+                                        <FormattedMessage
+                                            id='Applications.Create.Listing.add.new.application'
+                                            defaultMessage='Add New Application'
+                                        />
+                                    </Button>
+                                </Link>
+                            </ScopeValidation>
                         </div>
                     )}
                 </div>
@@ -326,7 +335,7 @@ class Listing extends Component {
                                         id='Applications.Listing.Listing.logical.description'
                                         defaultMessage={`An application is a logical collection of APIs. 
                                         Applications allow you to use a single access token to invoke a
-                                         collection of APIs and to subscribe to one API multiple times pre-created
+                                         collection of APIs and to subscribe to one API multiple times
                                           and allows unlimited access by default.`}
                                     />
                                 </Typography>
@@ -344,6 +353,7 @@ class Listing extends Component {
                                         order={order}
                                         orderBy={orderBy}
                                         isApplicationSharingEnabled={isApplicationSharingEnabled}
+                                        toggleDeleteConfirmation={this.toggleDeleteConfirmation}
                                     />
                                 </Table>
                                 <TablePagination
@@ -382,6 +392,11 @@ class Listing extends Component {
                                 })}
                             />
                         )}
+                        <DeleteConfirmation
+                            handleAppDelete={this.handleAppDelete}
+                            isDeleteOpen={isDeleteOpen}
+                            toggleDeleteConfirmation={this.toggleDeleteConfirmation}
+                        />
                     </Grid>
                 </Grid>
             </main>

@@ -16,10 +16,9 @@
  * under the License.
  */
 
-import React, { useState, useRef } from 'react';
-import intl, { FormattedMessage, injectIntl } from 'react-intl';
+import React, { useState } from 'react';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -31,35 +30,9 @@ import APIProduct from 'AppData/APIProduct';
 import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
 
-const styles = {
-    appBar: {
-        position: 'relative',
-    },
-    flex: {
-        flex: 1,
-    },
-    popupHeader: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    splitWrapper: {
-        padding: 0,
-    },
-    docName: {
-        alignItems: 'center',
-        display: 'flex',
-    },
-    button: {
-        height: 30,
-        marginLeft: 30,
-    },
-};
-
 function Delete(props) {
     const { intl } = props;
     const [open, setOpen] = useState(false);
-    const createEditForm = useRef(null);
 
     const runAction = (action) => {
         if (action === 'yes') {
@@ -97,17 +70,12 @@ function Delete(props) {
             });
     };
 
-    const {
-        classes, docId, apiId, apiName,
-    } = props;
+    const { apiName } = props;
     return (
         <div>
             <Button onClick={toggleOpen}>
                 <Icon>delete_forever</Icon>
-                <FormattedMessage
-                    id='Apis.Details.Documents.Delete.document.delete'
-                    defaultMessage='Delete'
-                />
+                <FormattedMessage id='Apis.Details.Documents.Delete.document.delete' defaultMessage='Delete' />
             </Button>
             <Dialog
                 open={open}
@@ -118,20 +86,22 @@ function Delete(props) {
                 <DialogTitle id='alert-dialog-title'>
                     <FormattedMessage
                         id='Apis.Details.Documents.Delete.document.listing.delete.confirm.title'
-                        defaultMessage='Are you sure to delete?'
+                        defaultMessage='Delete Document'
                     />
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id='alert-dialog-description'>
-                        <strong>{apiName}</strong>
                         <FormattedMessage
                             id='Apis.Details.Documents.Delete.document.listing.delete.confirm.body'
-                            defaultMessage=' will be permernently deleted. Are you sure?'
+                            defaultMessage={
+                                'Selected document will be deleted from the API.' +
+                                'You will not be able to undo this action.'
+                            }
                         />
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => runAction('no')} color='primary'>
+                    <Button onClick={() => runAction('no')} color='default'>
                         <FormattedMessage
                             id='Apis.Details.Documents.Delete.document.listing.delete.cancel'
                             defaultMessage='Cancel'
@@ -149,7 +119,6 @@ function Delete(props) {
     );
 }
 Delete.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
     apiId: PropTypes.shape({}).isRequired,
     apiType: PropTypes.string.isRequired,
     docId: PropTypes.shape({}).isRequired,
@@ -157,4 +126,4 @@ Delete.propTypes = {
     intl: PropTypes.shape({}).isRequired,
 };
 
-export default injectIntl(withStyles(styles)(Delete));
+export default injectIntl(Delete);

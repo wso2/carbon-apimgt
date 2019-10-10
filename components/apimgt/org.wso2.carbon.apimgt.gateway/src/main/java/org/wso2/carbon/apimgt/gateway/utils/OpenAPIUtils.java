@@ -57,7 +57,8 @@ public class OpenAPIUtils {
             }
             return authType;
         }
-        return APIConstants.NO_MATCHING_AUTH_SCHEME;
+        //Return 'Any' type (meaning security is on) if the authType is null or empty.
+        return APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
     }
 
     /**

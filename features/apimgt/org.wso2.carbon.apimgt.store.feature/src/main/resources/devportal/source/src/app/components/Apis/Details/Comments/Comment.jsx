@@ -21,7 +21,10 @@ import { Typography } from '@material-ui/core/';
 import { withStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
+import Divider from '@material-ui/core/Divider';
+import Paper from '@material-ui/core/Paper';
 import { injectIntl } from 'react-intl';
+import classNames from 'classnames';
 import Alert from '../../../Shared/Alert';
 import ConfirmDialog from '../../../Shared/ConfirmDialog';
 import CommentAdd from './CommentAdd';
@@ -49,9 +52,24 @@ const styles = theme => ({
         marginTop: theme.spacing.unit * 2.5,
     },
     contentWrapper: {
-        maxWidth: theme.custom.contentAreaWidth,
         paddingLeft: theme.spacing.unit * 2,
-        paddingTop: theme.spacing.unig,
+        paddingTop: theme.spacing.unit,
+    },
+    contentWrapperOverview: {
+        background: 'transparent',
+        width: '100%',
+    },
+    divider: {
+        marginTop: theme.spacing.unit,
+    },
+    paper: {
+        margin: theme.spacing(3),
+        paddingBottom: theme.spacing(3),
+    },
+    cleanBack: {
+        background: 'transparent',
+        width: '100%',
+        boxShadow: 'none',
     },
 });
 
@@ -195,12 +213,13 @@ class Comment extends React.Component {
         // const parentCommentIdOfCommentToDelete = deleteComment.parentCommentId;
         this.handleClose();
 
-        apiClient.deleteComment(apiId, commentIdOfCommentToDelete)
+        apiClient
+            .deleteComment(apiId, commentIdOfCommentToDelete)
             .then((result) => {
                 // if (parentCommentIdOfCommentToDelete === undefined) {
                 const remainingComments = allComments.filter(this.filterRemainingComments);
                 commentsUpdate(remainingComments);
-                Alert.message("Comment" + commentIdOfCommentToDelete + "has been successfully deleted");
+                Alert.message('Comment' + commentIdOfCommentToDelete + 'has been successfully deleted');
                 // } else {
                 //     const index = allComments.findIndex(this.filterCommentToDelete);
                 //     const remainingReplies = allComments[index].replies.filter(this.filterRemainingComments);
@@ -213,7 +232,7 @@ class Comment extends React.Component {
                 if (error.response) {
                     Alert.error(error.response.body.message);
                 }
-                //else {
+                // else {
                 //     Alert.error(
                 //         intl.formatMessage({
                 //             defaultMessage: 'Something went wrong while deleting comment',
@@ -233,52 +252,59 @@ class Comment extends React.Component {
      */
     render() {
         const {
-            classes, comments, apiId, allComments, commentsUpdate,
+            classes, comments, apiId, allComments, commentsUpdate, isOverview,
         } = this.props;
+
         const { editIndex, replyIndex, openDialog } = this.state;
         return [
-            comments
-            && comments
-                .slice(0)
-                .reverse()
-                .map((comment, index) => (
-                    <div key={comment.commentId + '-' + index} className={classes.contentWrapper}>
-                        <Grid container spacing={1} className={classes.root}>
-                            <Grid item>
-                                <Icon className={classes.commentIcon}>
-                                    account_box
-                                    </Icon>
-                            </Grid>
-                            <Grid item xs zeroMinWidth>
-                                <Typography noWrap className={classes.commentText} >
-                                    {comment.createdBy}
-                                </Typography>
-
-                                {index !== editIndex && (
-                                    <Typography className={classes.commentText}>{comment.content}</Typography>
+            <Paper className={classNames({ [classes.paper]: !isOverview && comments.length > 0 }, { [classes.cleanBack]: isOverview })}>
+                {comments &&
+                    comments
+                        .slice(0)
+                        .reverse()
+                        .map((comment, index) => (
+                            <div
+                                key={comment.commentId + '-' + index}
+                                className={classNames(
+                                    { [classes.contentWrapper]: !isOverview },
+                                    { [classes.contentWrapperOverview]: isOverview },
                                 )}
+                            >
+                                {index !== 0 && <Divider className={classes.divider} />}
+                                <Grid container spacing={1} className={classNames({ [classes.root]: !isOverview })}>
+                                    <Grid item>
+                                        <Icon className={classes.commentIcon}>account_box</Icon>
+                                    </Grid>
+                                    <Grid item xs zeroMinWidth>
+                                        <Typography noWrap className={classes.commentText}>
+                                            {comment.createdBy}
+                                        </Typography>
 
-                                {index === editIndex && (
-                                    <CommentEdit
-                                        apiId={apiId}
-                                        allComments={allComments}
-                                        commentsUpdate={commentsUpdate}
-                                        comment={comment}
-                                        toggleShowEdit={this.handleShowEdit}
-                                    />
-                                )}
+                                        {index !== editIndex && (
+                                            <Typography className={classes.commentText}>{comment.content}</Typography>
+                                        )}
 
-                                <CommentOptions
-                                    classes={classes}
-                                    comment={comment}
-                                    editIndex={editIndex}
-                                    index={index}
-                                    showAddComment={this.showAddComment}
-                                    handleClickOpen={this.handleClickOpen}
-                                    showEditComment={this.showEditComment}
-                                />
+                                        {index === editIndex && (
+                                            <CommentEdit
+                                                apiId={apiId}
+                                                allComments={allComments}
+                                                commentsUpdate={commentsUpdate}
+                                                comment={comment}
+                                                toggleShowEdit={this.handleShowEdit}
+                                            />
+                                        )}
 
-                                {/* {index === replyIndex && (
+                                        <CommentOptions
+                                            classes={classes}
+                                            comment={comment}
+                                            editIndex={editIndex}
+                                            index={index}
+                                            showAddComment={this.showAddComment}
+                                            handleClickOpen={this.handleClickOpen}
+                                            showEditComment={this.showEditComment}
+                                        />
+
+                                        {/* {index === replyIndex && (
                                         <CommentAdd
                                             apiId={apiId}
                                             //parentCommentId={comment.commentId}
@@ -296,10 +322,11 @@ class Comment extends React.Component {
                                             allComments={allComments}
                                         />
                                     )} */}
-                            </Grid>
-                        </Grid>
-                    </div>
-                )),
+                                    </Grid>
+                                </Grid>
+                            </div>
+                        ))}
+            </Paper>,
             <ConfirmDialog
                 key='key-dialog'
                 labelCancel='Cancel'
@@ -319,6 +346,7 @@ Comment.propTypes = {
     allComments: PropTypes.instanceOf(Array).isRequired,
     commentsUpdate: PropTypes.func.isRequired,
     comments: PropTypes.instanceOf(Array).isRequired,
+    isOverview: PropTypes.bool.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Comment));

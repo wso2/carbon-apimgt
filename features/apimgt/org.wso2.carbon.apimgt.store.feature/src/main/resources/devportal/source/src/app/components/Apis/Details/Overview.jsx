@@ -50,14 +50,13 @@ import OverviewDocuments from './OverviewDocuments';
 const styles = theme => ({
     root: {
         padding: theme.spacing.unit * 3,
+        color: theme.palette.getContrastText(theme.palette.background.paper),
     },
     iconClass: {
         marginRight: 10,
-        color: theme.palette.secondary.main,
     },
     boxBadge: {
         background: theme.palette.grey.A400,
-        color: theme.palette.getContrastText(theme.palette.grey.A400),
         fontSize: theme.typography.h5.fontSize,
         padding: theme.spacing.unit,
         width: 30,
@@ -116,6 +115,10 @@ const styles = theme => ({
         backgroundSize: 'cover',
         minHeight: 192,
     },
+    commentRoot: {
+        height: '100%',
+        minHeight: 192,
+    },
     noDocumentRoot: {
         backgroundImage: `url(${theme.custom.overviewPage.documentsBackground})`,
         height: '100%',
@@ -126,7 +129,7 @@ const styles = theme => ({
     },
     emptyBox: {
         background: '#ffffff55',
-        color: '#444',
+        color: theme.palette.getContrastText(theme.palette.background.paper),
         border: 'solid 1px #fff',
         padding: theme.spacing(2),
         marginTop: 50,
@@ -134,6 +137,9 @@ const styles = theme => ({
     paper: {
         margin: theme.spacing(2),
         padding: theme.spacing(2),
+    },
+    heading: {
+        color: theme.palette.getContrastText(theme.palette.background.paper),
     },
 });
 const ExpansionPanelSummary = withStyles({
@@ -215,6 +221,8 @@ function Overview(props) {
             </React.Fragment>
         );
     }
+    const titleIconColor = theme.custom.overview.titleIconColor;
+    const titleIconSize = theme.custom.overview.titleIconSize;
     return (
         <Grid container className={classes.root} spacing={2}>
             {!api.advertiseInfo.advertised && (
@@ -222,10 +230,10 @@ function Overview(props) {
                     <ExpansionPanel defaultExpanded>
                         <ExpansionPanelSummary>
                             <CustomIcon
-                                strokeColor={theme.palette.secondary.main}
+                                strokeColor={titleIconColor}
                                 className={classes.iconClass}
-                                width={24}
-                                height={24}
+                                width={titleIconSize}
+                                height={titleIconSize}
                                 icon='credentials'
                             />
                             <Typography className={classes.heading} variant='h6'>
@@ -326,14 +334,15 @@ function Overview(props) {
                     <ExpansionPanel defaultExpanded>
                         <ExpansionPanelSummary>
                             <CustomIcon
-                                strokeColor={theme.palette.secondary.main}
+                                strokeColor={titleIconColor}
                                 className={classes.iconClass}
-                                width={24}
-                                height={24}
+                                width={titleIconSize}
+                                height={titleIconSize}
                                 icon='credentials'
                             />
-                            {getTitleForAPIOperationType(api.type)}
-                            <Typography className={classes.heading} variant='h6' />
+                            <Typography className={classes.heading} variant='h6'>
+                                {getTitleForAPIOperationType(api.type)}
+                            </Typography>
                         </ExpansionPanelSummary>
                         <ExpansionPanelDetails className={classes.resourceWrapper}>
                             {getResourcesForAPIs(api.type, api)}
@@ -362,10 +371,10 @@ function Overview(props) {
                         <ExpansionPanel defaultExpanded>
                             <ExpansionPanelSummary>
                                 <CustomIcon
-                                    strokeColor={theme.palette.secondary.main}
+                                    strokeColor={titleIconColor}
                                     className={classes.iconClass}
-                                    width={24}
-                                    height={24}
+                                    width={titleIconSize}
+                                    height={titleIconSize}
                                     icon='comments'
                                 />
                                 <Typography className={classes.heading} variant='h6'>
@@ -379,7 +388,7 @@ function Overview(props) {
                                 </Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails
-                                classes={{ root: classNames({ [classes.noCommentRoot]: totalComments === 0 }) }}
+                                classes={{ root: classNames({ [classes.noCommentRoot]: totalComments === 0 }, { [classes.commentRoot]: totalComments !== 0 }) }}
                             >
                                 {api && <Comments apiId={api.id} showLatest isOverview setCount={setCount} />}
                                 {totalComments === 0 && (
@@ -415,10 +424,10 @@ function Overview(props) {
                             <ExpansionPanel defaultExpanded>
                                 <ExpansionPanelSummary>
                                     <CustomIcon
-                                        strokeColor={theme.palette.secondary.main}
+                                        strokeColor={titleIconColor}
                                         className={classes.iconClass}
-                                        width={24}
-                                        height={24}
+                                        width={titleIconSize}
+                                        height={titleIconSize}
                                         icon='sdk'
                                     />
                                     <Typography className={classes.heading} variant='h6'>
@@ -435,7 +444,7 @@ function Overview(props) {
                                             <Typography>
                                                 <FormattedMessage
                                                     id='Apis.Details.Overview.sdk.generation.description'
-                                                    defaultMessage='If you wants to create a software application to consume the subscribed APIs, you can generate client side SDK for a supported language/framework and use it as a start point to write the software application.'
+                                                    defaultMessage='If you want to create a software application to consume the subscribed APIs, you can generate client side SDK for a supported language/framework and use it as a start point to write the software application.'
                                                 />
                                             </Typography>
                                         </Grid>
@@ -461,10 +470,10 @@ function Overview(props) {
                 <ExpansionPanel defaultExpanded>
                     <ExpansionPanelSummary>
                         <CustomIcon
-                            strokeColor={theme.palette.secondary.main}
+                            strokeColor={titleIconColor}
                             className={classes.iconClass}
-                            width={24}
-                            height={24}
+                            width={titleIconSize}
+                            height={titleIconSize}
                             icon='docs'
                         />
 

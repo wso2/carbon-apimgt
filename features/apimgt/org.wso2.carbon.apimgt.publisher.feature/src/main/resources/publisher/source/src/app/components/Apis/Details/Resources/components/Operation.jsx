@@ -164,7 +164,13 @@ export default function Operation(props) {
     function deleteOperation(event) {
         event.stopPropagation();
         setIsDeleting(true);
-        updateOpenAPI('delete', operation).then(() => Alert.info('Operation deleted successfully'));
+        updateOpenAPI('delete', operation)
+            .then(() => Alert.info('Operation deleted successfully'))
+            .catch((error) => {
+                console.error(error);
+                Alert.error(error.response.body.description);
+                setIsDeleting(false);
+            });
     }
     const classes = useStyles();
     const closedWithUnsavedChanges = !isCollapsed && isNotSaved;

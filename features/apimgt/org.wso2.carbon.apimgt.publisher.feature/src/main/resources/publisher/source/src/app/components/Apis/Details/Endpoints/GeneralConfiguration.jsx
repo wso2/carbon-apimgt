@@ -100,6 +100,7 @@ function GeneralConfiguration(props) {
     const [endpointCertificates, setEndpointCertificates] = useState([]);
     const [epTypeSubHeading, setEpTypeSubHeading] = useState('Single HTTP/ REST');
     const { api } = useContext(APIContext);
+    const [aliasList, setAliasList] = useState([]);
 
     /**
      * Method to upload the certificate content by calling the rest api.
@@ -211,15 +212,18 @@ function GeneralConfiguration(props) {
             .then((resp) => {
                 const { certificates } = resp.obj;
                 const endpoints = endpointsToList(epConfig);
+                const aliases = [];
                 const filteredCertificates = certificates.filter((cert) => {
+                    aliases.push(cert.alias);
                     for (const endpoint of endpoints) {
-                        if (endpoint.url.indexOf(cert.endpoint) !== -1) {
+                        if (endpoint && endpoint.url.indexOf(cert.endpoint) !== -1) {
                             return true;
                         }
                     }
                     return false;
                 });
                 setEndpointCertificates(filteredCertificates);
+                setAliasList(aliases);
             })
             .catch((err) => {
                 console.error(err);
@@ -372,6 +376,7 @@ function GeneralConfiguration(props) {
                                 certificates={endpointCertificates}
                                 uploadCertificate={saveCertificate}
                                 deleteCertificate={deleteCertificate}
+                                aliasList={aliasList}
                             />
                         </Grid>
                     </Grid>

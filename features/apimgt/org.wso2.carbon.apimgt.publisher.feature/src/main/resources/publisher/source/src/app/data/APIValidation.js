@@ -19,6 +19,24 @@
 import Joi from '@hapi/joi';
 import API from 'AppData/api';
 
+/**
+ * Get the base error message for error types.
+ * This error overrides the default error messages of joi and adds simple error messages.
+ *
+ * @param {string} errorType The joi error type
+ * @return {string} simplified error message.
+ * */
+function getMessage(errorType) {
+    switch (errorType) {
+        case 'any.empty':
+            return 'should not be empty';
+        case 'string.regex.base':
+            return 'should not contain spaces or special characters';
+        default:
+            return 'should not be empty';
+    }
+}
+
 /*
 * eslint validation rule for no-unused-vars has been disabled in this component.
 * According to the Joi extension, it is required to provide required four input
@@ -82,9 +100,33 @@ const documentSchema = Joi.extend(joi => ({
 }));
 
 const definition = {
-    apiName: Joi.string().regex(/^[a-zA-Z0-9]{1,50}$/),
-    apiVersion: Joi.string().regex(/^[a-zA-Z0-9.]{1,30}$/),
-    apiContext: Joi.string().regex(/^[a-zA-Z0-9{}/]{1,50}$/),
+    apiName: Joi.string().regex(/^[a-zA-Z0-9]{1,50}$/).required().error((errors) => {
+        const tmpErrors = [...errors];
+        errors.forEach((err, index) => {
+            const tmpError = { ...err };
+            tmpError.message = 'API Name ' + getMessage(err.type);
+            tmpErrors[index] = tmpError;
+        });
+        return tmpErrors;
+    }),
+    apiVersion: Joi.string().regex(/^[a-zA-Z0-9.]{1,30}$/).required().error((errors) => {
+        const tmpErrors = [...errors];
+        errors.forEach((err, index) => {
+            const tmpError = { ...err };
+            tmpError.message = 'API Version ' + getMessage(err.type);
+            tmpErrors[index] = tmpError;
+        });
+        return tmpErrors;
+    }),
+    apiContext: Joi.string().regex(/(?!.*\/t\/.*|.*\/t$)^[/a-zA-Z0-9/]{1,50}$/).required().error((errors) => {
+        const tmpErrors = [...errors];
+        errors.forEach((err, index) => {
+            const tmpError = { ...err };
+            tmpError.message = 'API Context ' + getMessage(err.type);
+            tmpErrors[index] = tmpError;
+        });
+        return tmpErrors;
+    }),
     role: roleSchema.systemRole().role(),
     url: Joi.string().uri(),
     userRole: userRoleSchema.userRole().role(),
@@ -92,6 +134,8 @@ const definition = {
     apiDocument: documentSchema.document().isDocumentPresent(),
     operationVerb: Joi.string().required(),
     operationTarget: Joi.string().required(),
+    name: Joi.string().min(1).max(255),
+    email: Joi.string().email({ tlds: true }).required(),
 };
 
 export default definition;

@@ -217,9 +217,9 @@ class Operation extends React.Component {
                 </TableCell>
                 <TableCell>
                     <Chip
-                        label={operation.verb.toLowerCase()}
+                        label={operation.verb}
                         style={{
-                            backgroundColor: chipColor, color: chipTextColor, height: 20, width: 40,
+                            backgroundColor: chipColor, color: chipTextColor, height: 20, width: 40, fontSize: 9,
                         }}
                         className={classes.chipActive}
                     />

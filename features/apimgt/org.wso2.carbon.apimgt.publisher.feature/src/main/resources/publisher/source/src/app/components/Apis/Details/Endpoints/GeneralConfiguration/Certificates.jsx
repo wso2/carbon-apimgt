@@ -89,6 +89,13 @@ const useStyles = makeStyles(theme => ({
             fontSize: 30,
         },
     },
+    deleteIcon: {
+        color: theme.palette.error.dark,
+        cursor: 'pointer',
+    },
+    deleteIconDisable: {
+        color: theme.palette.disabled,
+    },
 }));
 /**
  * TODO: Generalize this component to work in Configuration page , upload mutual SSL certificates action
@@ -99,7 +106,7 @@ const useStyles = makeStyles(theme => ({
  */
 function Certificates(props) {
     const {
-        certificates, uploadCertificate, deleteCertificate, isMutualSSLEnabled, apiId, endpoints,
+        certificates, uploadCertificate, deleteCertificate, isMutualSSLEnabled, apiId, endpoints, aliasList,
     } = props;
     const [certificateList, setCertificateList] = useState([]);
     const [openCertificateDetails, setOpenCertificateDetails] = useState({ open: false, anchor: null, details: {} });
@@ -195,10 +202,12 @@ function Certificates(props) {
                                             <Icon>info</Icon>
                                         </IconButton>
                                         <IconButton
+                                            disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                             onClick={() => setCertificateToDelete({ open: true, alias: cert.alias })}
                                         >
-                                            <Icon color='error'>
-                                                delete
+                                            <Icon className={isRestricted(['apim:api_create'], apiFromContext) ?
+                                                classes.deleteIconDisable : classes.deleteIcon}
+                                            > delete
                                             </Icon>
                                         </IconButton>
                                     </ListItemSecondaryAction>
@@ -316,6 +325,7 @@ function Certificates(props) {
                 isMutualSSLEnabled={isMutualSSLEnabled}
                 setUploadCertificateOpen={setUploadCertificateOpen}
                 uploadCertificateOpen={uploadCertificateOpen}
+                aliasList={aliasList}
             />
         </Grid>
     );
@@ -337,5 +347,6 @@ Certificates.propTypes = {
     apiId: PropTypes.string,
     isMutualSSLEnabled: PropTypes.bool,
     endpoints: PropTypes.shape([]).isRequired,
+    aliasList: PropTypes.shape([]).isRequired,
 };
 export default injectIntl((Certificates));

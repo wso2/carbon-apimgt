@@ -28,6 +28,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
@@ -116,6 +117,7 @@ public class OAuthAuthenticator implements Authenticator {
 
         if (headers != null) {
             requestOrigin = (String) headers.get("Origin");
+
             apiKey = extractCustomerKeyFromAuthHeader(headers);
             if (log.isDebugEnabled()) {
                 log.debug(apiKey != null ? "Received Token ".concat(apiKey) : "No valid Authorization header found");
@@ -213,6 +215,12 @@ public class OAuthAuthenticator implements Authenticator {
                             "JWT authentication cannot be performed.");
                 }
                 List<VerbInfoDTO> verbInfoList;
+                //set default condition group
+                ConditionGroupDTO[] conditionGroups = new ConditionGroupDTO[1];
+                ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
+                defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
+                conditionGroups[0] = defaultGroup;
+
                 if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
                     HashMap<String, Boolean> operationAuthSchemeMappingList =
                             (HashMap<String, Boolean>) synCtx.getProperty(APIConstants.OPERATION_AUTH_SCHEME_MAPPING);
@@ -234,6 +242,7 @@ public class OAuthAuthenticator implements Authenticator {
                         verbInfoDTO.setHttpVerb(httpMethod);
                         verbInfoDTO.setThrottling(operationThrottlingMappingList.get(operation));
                         verbInfoDTO.setRequestKey(apiContext + "/" + apiVersion + operation + ":" + httpMethod);
+                        verbInfoDTO.setConditionGroups(conditionGroups);
                         verbInfoList.add(verbInfoDTO);
                     }
                 } else {
@@ -244,6 +253,7 @@ public class OAuthAuthenticator implements Authenticator {
                     verbInfoDTO.setAuthType(authenticationScheme);
                     verbInfoDTO.setThrottling(OpenAPIUtils.getResourceThrottlingTier(openAPI, synCtx));
                     verbInfoDTO.setRequestKey(apiContext + "/" + apiVersion + matchingResource + ":" + httpMethod);
+                    verbInfoDTO.setConditionGroups(conditionGroups);
                     verbInfoList.add(verbInfoDTO);
                 }
 

@@ -2150,6 +2150,7 @@ public abstract class AbstractAPIManager implements APIManager {
             if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant store anonymous mode
                 tenantIDLocal = getTenantManager()
                         .getTenantId(requestedTenantDomain);
+                APIUtil.loadTenantRegistry(tenantIDLocal);
                 userRegistry = getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantIDLocal);
                 userNameLocal = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
             } else {

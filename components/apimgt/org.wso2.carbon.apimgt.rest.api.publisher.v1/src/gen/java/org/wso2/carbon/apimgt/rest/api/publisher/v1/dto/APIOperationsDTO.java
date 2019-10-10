@@ -23,6 +23,7 @@ public class APIOperationsDTO   {
     private String authType = "Any";
     private String throttlingPolicy = null;
     private List<String> scopes = new ArrayList<>();
+    private List<String> usedProductIds = new ArrayList<>();
 
   /**
    **/
@@ -126,6 +127,23 @@ public class APIOperationsDTO   {
     this.scopes = scopes;
   }
 
+  /**
+   **/
+  public APIOperationsDTO usedProductIds(List<String> usedProductIds) {
+    this.usedProductIds = usedProductIds;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("usedProductIds")
+  public List<String> getUsedProductIds() {
+    return usedProductIds;
+  }
+  public void setUsedProductIds(List<String> usedProductIds) {
+    this.usedProductIds = usedProductIds;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -141,12 +159,13 @@ public class APIOperationsDTO   {
         Objects.equals(verb, apIOperations.verb) &&
         Objects.equals(authType, apIOperations.authType) &&
         Objects.equals(throttlingPolicy, apIOperations.throttlingPolicy) &&
-        Objects.equals(scopes, apIOperations.scopes);
+        Objects.equals(scopes, apIOperations.scopes) &&
+        Objects.equals(usedProductIds, apIOperations.usedProductIds);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes);
+    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds);
   }
 
   @Override
@@ -160,6 +179,7 @@ public class APIOperationsDTO   {
     sb.append("    authType: ").append(toIndentedString(authType)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
+    sb.append("    usedProductIds: ").append(toIndentedString(usedProductIds)).append("\n");
     sb.append("}");
     return sb.toString();
   }

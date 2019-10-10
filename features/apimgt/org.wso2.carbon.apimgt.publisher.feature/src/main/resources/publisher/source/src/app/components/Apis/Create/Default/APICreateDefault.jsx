@@ -235,16 +235,6 @@ function APICreateDefault(props) {
                 <Grid item md={9}>
                     <Grid container direction='row' justify='flex-start' alignItems='center' spacing={2}>
                         <Grid item>
-                            <Button
-                                variant='contained'
-                                color='primary'
-                                disabled={!apiInputs.isFormValid || isCreating}
-                                onClick={createAPI}
-                            >
-                                Create {isCreating && <CircularProgress size={24} />}
-                            </Button>
-                        </Grid>
-                        <Grid item>
                             <Link to='/apis/'>
                                 <Button variant='text'>
                                     <FormattedMessage
@@ -253,6 +243,16 @@ function APICreateDefault(props) {
                                     />
                                 </Button>
                             </Link>
+                        </Grid>
+                        <Grid item>
+                            <Button
+                                variant='contained'
+                                color='primary'
+                                disabled={!apiInputs.isFormValid || isCreating}
+                                onClick={createAPI}
+                            >
+                                Create {isCreating && <CircularProgress size={24} />}
+                            </Button>
                         </Grid>
                     </Grid>
                 </Grid>
