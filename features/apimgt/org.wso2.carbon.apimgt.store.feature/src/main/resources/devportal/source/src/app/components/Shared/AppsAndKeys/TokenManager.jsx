@@ -58,9 +58,6 @@ const styles = theme => ({
     margin: {
         marginRight: theme.spacing.unit * 2,
     },
-    keyTitle: {
-        textTransform: 'uppercase',
-    },
     keyConfigWrapper: {
         flexDirection: 'column',
         marginBottom: 0,
@@ -413,8 +410,8 @@ class TokenManager extends React.Component {
 
         return (
             <div className={classes.root}>
-                <Typography variant='h5' className={classes.keyTitle}>
-                    {keyType + ' '}
+                <Typography variant='h5'>
+                    {keyType === 'PRODUCTION' ? 'Production ' : 'Sandbox '}
                     <FormattedMessage
                         defaultMessage='Key and Secret'
                         id='Shared.AppsAndKeys.TokenManager.key.and.secret'
@@ -434,7 +431,7 @@ class TokenManager extends React.Component {
                                     keys.size > 0 && keys.get(keyType)
                                         ? (
                                             <FormattedMessage
-                                                defaultMessage='Update Configuration'
+                                                defaultMessage='Key Configurations'
                                                 id='Shared.AppsAndKeys.TokenManager.update.configuration'
                                             />
                                         )

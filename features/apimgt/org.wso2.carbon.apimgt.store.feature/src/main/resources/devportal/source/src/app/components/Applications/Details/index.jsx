@@ -20,6 +20,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Route, Switch, Redirect, Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
 import { PageNotFound } from 'AppComponents/Base/Errors/index';
 import Loading from 'AppComponents/Base/Loading/Loading';
@@ -229,9 +231,9 @@ class Details extends Component {
      * @memberof Details
      */
     render() {
-        const { classes, match, theme, } = this.props;
+        const { classes, match, theme } = this.props;
         const { notFound, application, active } = this.state;
-        const pathPrefix = '/applications/' + match.params.application_uuid + '/';
+        const pathPrefix = '/applications/' + match.params.application_uuid;
         const redirectUrl = pathPrefix + '/productionkeys';
         const {
             custom: {
@@ -272,9 +274,9 @@ class Details extends Component {
                             )}
                         </Link>
                     )}
-                    <LeftMenuItem text='production keys' route='productionkeys' to={pathPrefix + 'productionkeys'} />
-                    <LeftMenuItem text='sandbox keys' route='sandBoxkeys' to={pathPrefix + 'sandBoxkeys'} />
-                    <LeftMenuItem text='subscriptions' route='subscriptions' to={pathPrefix + 'subscriptions'} />
+                    <LeftMenuItem text='production keys' route='productionkeys' to={pathPrefix + '/productionkeys'} />
+                    <LeftMenuItem text='sandbox keys' route='sandBoxkeys' to={pathPrefix + '/sandBoxkeys'} />
+                    <LeftMenuItem text='subscriptions' route='subscriptions' to={pathPrefix + '/subscriptions'} />
                 </div>
                 <div className={classes.content}>
                     <InfoBar applicationId={match.params.application_uuid} innerRef={node => (this.infoBar = node)} />

@@ -21,8 +21,8 @@ const applicationTableHead = (props) => {
             numeric: false,
             disablePadding: true,
             label: (<FormattedMessage
-                id='Applications.Listing.ApplicationTableHead.edit.app'
-                defaultMessage='Edit Application'
+                id='Applications.Listing.ApplicationTableHead.name'
+                defaultMessage='Name'
             />),
             sorting: true,
         },
