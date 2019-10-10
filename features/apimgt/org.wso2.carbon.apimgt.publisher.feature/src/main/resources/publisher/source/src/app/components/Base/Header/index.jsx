@@ -32,7 +32,6 @@ import GlobalNavBar from './navbar/GlobalNavBar';
 
 const styles = theme => ({
     appBar: {
-        // zIndex: theme.zIndex.modal + 1,
         position: 'relative',
         background: theme.palette.background.appBar,
     },

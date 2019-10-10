@@ -16,21 +16,14 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import Checkbox from '@material-ui/core/Checkbox';
 import DeleteSweepIcon from '@material-ui/icons/DeleteSweep';
 import isEmpty from 'lodash.isempty';
 import IconButton from '@material-ui/core/IconButton';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Button from '@material-ui/core/Button';
+import ClearAllIcon from '@material-ui/icons/ClearAll';
 import Tooltip from '@material-ui/core/Tooltip';
 
 /**
@@ -40,89 +33,33 @@ import Tooltip from '@material-ui/core/Tooltip';
  * @returns
  */
 export default function OperationsSelector(props) {
-    const {
-        selectedOperations, setSelectedOperation, openAPI, updateOpenAPI,
-    } = props;
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const { selectedOperations, setSelectedOperation, operations } = props;
 
     // TODO: Following logic introduce a limitation in showing `indeterminate` icon state if user
     // select all -> unchecked one operation -> recheck same operation again ~tmkb
-    const isSelectAll = Object.is(selectedOperations, openAPI.paths);
-    const isIndeterminate = !isSelectAll && !isEmpty(selectedOperations);
-
+    const isIndeterminate = !isEmpty(selectedOperations);
     /**
      *
      *
      * @param {*} event
      */
-    function handleMultiDelete() {
-        setIsDeleting(true);
-        updateOpenAPI('deleteAll', {})
-            .then(() => setSelectedOperation({}))
-            .finally(() => {
-                setIsDeleting(false);
-                setIsConfirmOpen(false);
-            });
-    }
-    /**
-     *
-     *
-     * @param {*} event
-     */
-    function handleSelector(event) {
-        const {
-            target: { checked },
-        } = event;
-        setSelectedOperation(!checked || isIndeterminate ? {} : openAPI.paths);
+    function handleSelector() {
+        setSelectedOperation(isIndeterminate ? {} : operations);
     }
     return (
         <Grid container direction='row' justify='space-between' alignItems='center'>
-            <Grid item>
-                <Box ml={6}>
-                    <Checkbox
-                        checked={isSelectAll}
-                        indeterminate={!isSelectAll && !isEmpty(selectedOperations)}
-                        onChange={handleSelector}
-                        value='all'
-                        inputProps={{
-                            'aria-label': 'primary checkbox',
-                        }}
-                    />
-                </Box>
-            </Grid>
+            <Grid item />
             <Grid item>
                 <Box mr={19}>
-                    <Tooltip title='Delete selected operations'>
-                        <IconButton
-                            onClick={() => setIsConfirmOpen(true)}
-                            disabled={!(isIndeterminate || isSelectAll) || isDeleting}
-                            aria-label='delete all'
-                            size='small'
-                        >
-                            {isDeleting ? <CircularProgress size={24} thickness={3} /> : <DeleteSweepIcon />}
-                        </IconButton>
+                    <Tooltip title={isIndeterminate ? 'Clear selections' : 'Mark all for delete'}>
+                        <div>
+                            <IconButton onClick={handleSelector} aria-label='delete all' size='large'>
+                                {isIndeterminate ? <ClearAllIcon /> : <DeleteSweepIcon />}
+                            </IconButton>
+                        </div>
                     </Tooltip>
                 </Box>
             </Grid>
-            <Dialog
-                open={isConfirmOpen}
-                aria-labelledby='bulk-delete-dialog-title'
-                aria-describedby='bulk-delete-dialog-description'
-            >
-                <DialogTitle id='bulk-delete-dialog-title'>Confirm Bulk Delete</DialogTitle>
-                <DialogContent>
-                    <DialogContentText id='bulk-delete-dialog-description'>
-                        Please confirm the bulk delete action
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setIsConfirmOpen(false)}>CLOSE</Button>
-                    <Button disabled={isDeleting} onClick={handleMultiDelete} color='error'>
-                        DELETE {isDeleting && <CircularProgress size={20} />}
-                    </Button>
-                </DialogActions>
-            </Dialog>
         </Grid>
     );
 }
@@ -132,6 +69,5 @@ OperationsSelector.defaultProps = {};
 OperationsSelector.propTypes = {
     selectedOperations: PropTypes.shape({}).isRequired,
     setSelectedOperation: PropTypes.func.isRequired,
-    openAPI: PropTypes.shape({}).isRequired,
-    updateOpenAPI: PropTypes.func.isRequired,
+    operations: PropTypes.shape({}).isRequired,
 };

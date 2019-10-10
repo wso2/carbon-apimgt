@@ -16,6 +16,10 @@
  * under the License.
  */
 
+const VERSIONS = {
+    V3: ['3.0.0', '3.0.1', '3.0.2'],
+    V2: ['2.0'],
+};
 /**
  *
  *
@@ -85,4 +89,97 @@ function getTaggedOperations(api, openAPI) {
     }
 }
 
-export { getTaggedOperations, getAPIProductTaggedOperations };
+
+/**
+ * Return the definition version given the parsed spec object
+ *
+ * @param {SwaggerObject} spec
+ * @returns {String} version
+ */
+function getVersion(spec) {
+    return spec.openapi || spec.swagger;
+}
+/**
+ *Extract the path parameters from URI template. User has to give the Open API spec version as well
+ * https://github.com/OAI/OpenAPI-Specification/tree/master/versions
+ * @param {String} target URI template
+ * @param {String} openAPIVersion Should be a valid Open API specification version (i:e "2.0", "3.0.0")
+ * @returns {Array} List of parameter objects according to the given spec version
+ */
+function extractPathParameters(target, spec) {
+    const regEx = /[^{}]+(?=})/g;
+    const params = target.match(regEx) || [];
+    let parameters = [];
+    const openAPIVersion = getVersion(spec);
+    if (VERSIONS.V3.includes(openAPIVersion)) {
+        parameters = params.map((para) => {
+            const paraObj = {};
+            paraObj.name = para;
+            paraObj.in = 'path';
+            paraObj.required = true;
+            paraObj.schema = {
+                type: 'string',
+                format: 'string',
+            };
+            return paraObj;
+        });
+    } else if (VERSIONS.V2.includes(openAPIVersion)) {
+        parameters = params.map((para) => {
+            const paraObj = {};
+            paraObj.name = para;
+            paraObj.in = 'path';
+            paraObj.required = true;
+            paraObj.type = 'string';
+            paraObj.format = 'string';
+            return paraObj;
+        });
+    }
+
+    return parameters;
+}
+
+
+/**
+ *
+ *
+ * @param {*} operation
+ * @param {*} openAPIVersion
+ */
+function getOperationScopes(operation, spec) {
+    const openAPIVersion = getVersion(spec);
+    let scopes = [];
+    if (VERSIONS.V3.includes(openAPIVersion)) {
+        if (operation.security && operation.security.default) {
+            scopes = operation.security.default;
+        }
+    } else if (VERSIONS.V2.includes(openAPIVersion)) {
+        if (operation.security && operation.security.default) {
+            scopes = operation.security.default;
+        }
+    }
+    return scopes;
+}
+
+
+/**
+ *
+ *
+ * @param {*} selectedOperations
+ * @param {*} operations
+ * @returns
+ */
+function isSelectAll(selectedOperations, operations) {
+    for (const path in operations) {
+        if (Object.prototype.hasOwnProperty.call(operations, path)) {
+            const verbs = operations[path];
+            if (
+                !selectedOperations[path] ||
+                Object.keys(selectedOperations[path]).length !== Object.keys(verbs).length
+            ) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+export { getTaggedOperations, getAPIProductTaggedOperations, extractPathParameters, getOperationScopes, isSelectAll };

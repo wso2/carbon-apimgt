@@ -201,9 +201,9 @@ export default function ApiCreateOpenAPI(props) {
             </Box>
 
             <Grid container spacing={3}>
-                <Grid item md={12} />
-                <Grid item md={1} />
-                <Grid item md={11}>
+                <Grid item xs={12} />
+                <Grid item xs={1} />
+                <Grid item xs={11}>
                     {wizardStep === 0 && (
                         <ProvideOpenAPI
                             onValidate={handleOnValidate}
@@ -212,15 +212,11 @@ export default function ApiCreateOpenAPI(props) {
                         />
                     )}
                     {wizardStep === 1 && (
-                        <DefaultAPIForm
-                            onValidate={handleOnValidate}
-                            onChange={handleOnChange}
-                            api={apiInputs}
-                        />
+                        <DefaultAPIForm onValidate={handleOnValidate} onChange={handleOnChange} api={apiInputs} />
                     )}
                 </Grid>
-                <Grid item md={1} />
-                <Grid item md={9}>
+                <Grid item xs={1} />
+                <Grid item xs={11}>
                     <Grid container direction='row' justify='flex-start' alignItems='center' spacing={2}>
                         <Grid item>
                             {wizardStep === 0 && (

@@ -132,7 +132,7 @@ const definition = {
     userRole: userRoleSchema.userRole().role(),
     apiParameter: apiSchema.api().isAPIParameterExist(),
     apiDocument: documentSchema.document().isDocumentPresent(),
-    operationVerb: Joi.string().required(),
+    operationVerbs: Joi.array().items(Joi.string()).min(1).unique(),
     operationTarget: Joi.string().required(),
     name: Joi.string().min(1).max(255),
     email: Joi.string().email({ tlds: true }).required(),

@@ -18,7 +18,6 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
-import Loadable from 'react-loadable';
 import AuthManager from 'AppData/AuthManager';
 import CONSTS from 'AppData/Constants';
 import qs from 'qs';
@@ -27,20 +26,11 @@ import Logout from 'AppComponents/Logout';
 import Progress from 'AppComponents/Shared/Progress';
 import PublisherRootErrorBoundary from 'AppComponents/Shared/PublisherRootErrorBoundary';
 import Configurations from 'Config';
+import { IntlProvider } from 'react-intl';
+import ProtectedApp from './app/ProtectedApp';
 
 // Localization
-import { IntlProvider } from 'react-intl';
 import LoginDenied from './app/LoginDenied';
-
-const LoadableProtectedApp = Loadable({
-    loader: () =>
-        // eslint-disable-next-line function-paren-newline
-        import(
-            /* webpackChunkName: "ProtectedApp" */
-            /* webpackPrefetch: true */
-            './app/ProtectedApp'),
-    loading: Progress,
-});
 
 /**
  * Language.
@@ -78,9 +68,6 @@ class Publisher extends React.Component {
         };
         this.updateUser = this.updateUser.bind(this);
         this.loadLocale = this.loadLocale.bind(this);
-        /* TODO: Do not need to preload if webpack magic comment `webpackPrefetch` working accordingly ,remove preload
-        once it's fixed  */
-        LoadableProtectedApp.preload();
     }
 
     /**
@@ -170,7 +157,7 @@ class Publisher extends React.Component {
                                     if (notEnoughPermission) {
                                         return <LoginDenied />;
                                     }
-                                    return <LoadableProtectedApp user={user} />;
+                                    return <ProtectedApp user={user} />;
                                 }}
                             />
                         </Switch>
