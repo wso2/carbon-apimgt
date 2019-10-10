@@ -1652,7 +1652,7 @@ public final class APIUtil {
      */
     public static String getAPIProductPath(APIProductIdentifier identifier) {
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                replaceEmailDomain(identifier.getProviderName()) + RegistryConstants.PATH_SEPARATOR +
                 identifier.getName() + RegistryConstants.PATH_SEPARATOR +
                 identifier.getVersion() + APIConstants.API_RESOURCE_NAME;
     }
