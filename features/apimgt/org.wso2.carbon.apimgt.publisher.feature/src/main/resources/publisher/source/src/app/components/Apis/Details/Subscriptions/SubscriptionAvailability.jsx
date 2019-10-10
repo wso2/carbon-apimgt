@@ -158,9 +158,24 @@ export default function SimpleSelect(props) {
                                     id: 'outlined-availabi;ity-simple',
                                 }}
                             >
-                                <MenuItem value='currentTenant'>Available to current tenant only</MenuItem>
-                                <MenuItem value='allTenants'>Available to all the tenants</MenuItem>
-                                <MenuItem value='specificTenants'>Available to specific tenants</MenuItem>
+                                <MenuItem value='currentTenant'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Subscriptions.SubscriptionAvailability.current.tenant.only'
+                                        defaultMessage='Available to current tenant only'
+                                    />
+                                </MenuItem>
+                                <MenuItem value='allTenants'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Subscriptions.SubscriptionAvailability.all.tenants'
+                                        defaultMessage='Available to all the tenants'
+                                    />
+                                </MenuItem>
+                                <MenuItem value='specificTenants'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Subscriptions.SubscriptionAvailability.specific.tenants'
+                                        defaultMessage='Available to specific tenants'
+                                    />
+                                </MenuItem>
                             </Select>
                         </FormControl>
                         <Button
