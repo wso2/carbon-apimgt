@@ -135,6 +135,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14241,6 +14242,49 @@ public class ApiMgtDAO {
             handleException("Failed to delete alert email data.", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, rs);
+        }
+    }
+
+    /**
+     * Persist revoked jwt signatures to database.
+     *
+     * @param jwtSignature signature of jwt token.
+     * @param tenantDomain tenant domain of the jwt subject.
+     * @param expiryTime   expiry time of the token.
+     */
+    public void addRevokedJWTSignature(String jwtSignature, Long expiryTime, String tenantDomain) throws APIManagementException {
+
+        String addJwtSignature = SQLConstants.RevokedJWTConstants.ADD_JWT_SIGNATURE;
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement
+                     (addJwtSignature)) {
+            conn.setAutoCommit(false);
+            ps.setString(1, UUID.randomUUID().toString());
+            ps.setString(2, jwtSignature);
+            ps.setLong(3, expiryTime);
+            ps.setString(4, tenantDomain);
+            ps.execute();
+            conn.commit();
+        } catch (SQLException e) {
+            handleException("Error in adding revoked jwt signature to database : " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Removes expired JWTs from revoke table.
+     * @throws APIManagementException
+     */
+    public void removeExpiredJWTs() throws APIManagementException {
+
+        String deleteQuery = SQLConstants.RevokedJWTConstants.DELETE_REVOKED_JWT;
+        try (Connection connection = APIMgtDBUtil.getConnection(); PreparedStatement ps =
+                connection.prepareStatement(deleteQuery)) {
+            connection.setAutoCommit(false);
+            ps.setLong(1, System.currentTimeMillis() / 1000);
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while deleting expired JWTs from revoke table.", e);
         }
     }
 }

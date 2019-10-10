@@ -61,6 +61,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.xerces.util.SecurityManager;
+import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -9177,5 +9178,86 @@ public final class APIUtil {
         WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
                 WorkflowConstants.WF_TYPE_AM_API_STATE);
         return wfDTO;
+    }
+
+    /**
+     * Get expiry time of a given jwt token. This method should be called only after validating whether the token is
+     * JWT via isValidJWT method.
+     * @param token jwt token.
+     * @return the expiry time.
+     */
+    public static Long getExpiryifJWT(String token) {
+
+        String[] jwtParts = token.split("\\.");
+        org.json.JSONObject jwtPayload = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().
+                decode(jwtParts[1])));
+        return jwtPayload.getLong("exp"); // extract expiry time and return
+    }
+
+    /**
+     * Checks whether the given token is a valid JWT by parsing header and validating the
+     * header,payload,signature format
+     * @param token the token to be validated
+     * @return true if valid JWT
+     */
+    public static boolean isValidJWT(String token) {
+
+        boolean isJwtToken = false;
+        try {
+            org.json.JSONObject decodedHeader = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder()
+                    .decode(token.split("\\.")[0])));
+            // Check if the decoded header contains type as 'JWT'.
+            if (APIConstants.JWT.equals(decodedHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))
+                    && (StringUtils.countMatches(token, APIConstants.DOT) == 2)) {
+                isJwtToken = true;
+            } else {
+                log.debug("Not a valid JWT token. " + getMaskedToken(token));
+            }
+        } catch (JSONException | IllegalArgumentException e) {
+            isJwtToken = false;
+            log.debug("Not a valid JWT token. " + getMaskedToken(token), e);
+        }
+        return isJwtToken;
+    }
+
+    /**
+     * Get signature of  given JWT token. This method should be called only after validating whether the token is
+     * JWT via isValidJWT method.
+     * @param token jwt token.
+     * @return signature of the jwt token.
+     */
+    public static String getSignatureIfJWT(String token) {
+
+        String[] jwtParts = token.split("\\.");
+        return jwtParts[2];
+    }
+
+    /**
+     * Extracts the tenant domain of the subject in a given JWT
+     * @param token jwt token
+     * @return tenant domain of the the sub claim
+     */
+    public static String getTenantDomainIfJWT(String token) {
+
+        String[] jwtParts = token.split("\\.");
+        org.json.JSONObject jwtPayload = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().
+                decode(jwtParts[1])));
+        String jwtSubClaim = jwtPayload.getString("sub"); // extract sub claim from payload
+        return MultitenantUtils.getTenantDomain(jwtSubClaim);
+    }
+
+    /**
+     * Returns a masked token for a given token.
+     *
+     * @param token token to be masked
+     * @return masked token.
+     */
+    public static String getMaskedToken(String token) {
+
+        if (token.length() >= 10) {
+            return "XXXXX" + token.substring(token.length() - 10);
+        } else {
+            return "XXXXX" + token.substring(token.length() / 2);
+        }
     }
 }

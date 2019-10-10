@@ -133,6 +133,22 @@ paths:
            description: Unexpected error
            schema:
              $ref: '#/definitions/Error'
+  /revokedjwt:
+    get:
+      summary: JTIs of revoked jwt tokens
+      description: |
+        This will provide access to JTIs of revoked JWT tokens in database.
+      responses:
+        200:
+          description: An array of shops around you
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/RevokedJWTList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
   ThrottledEvent:
     properties:
@@ -178,3 +194,16 @@ definitions:
           type: array
           items:
            type: string
+  RevokedJWTList:
+    type: array
+    items:
+      $ref: '#/definitions/RevokedJWT'
+  RevokedJWT:
+    properties:
+      jwt_signature:
+        type: string
+        description: signature of the JWT token.
+      expiry_time:
+        type: integer
+        format: int64
+        description: expiry timestamp.
