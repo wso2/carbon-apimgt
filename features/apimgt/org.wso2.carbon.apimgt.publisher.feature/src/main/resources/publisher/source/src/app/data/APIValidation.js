@@ -19,14 +19,30 @@
 import Joi from '@hapi/joi';
 import API from 'AppData/api';
 
+/**
+ * Get the base error message for error types.
+ * This error overrides the default error messages of joi and adds simple error messages.
+ *
+ * @param {string} errorType The joi error type
+ * @return {string} simplified error message.
+ * */
+function getMessage(errorType) {
+    switch (errorType) {
+        case 'any.empty':
+            return 'should not be empty';
+        case 'string.regex.base':
+            return 'should not contain spaces or special characters';
+        default:
+            return 'should not be empty';
+    }
+}
+
 /*
 * eslint validation rule for no-unused-vars has been disabled in this component.
 * According to the Joi extension, it is required to provide required four input
 * arguments to custom Joi schema validate function.
 * Ref: https://hapi.dev/family/joi/?v=15.1.1#extendextension
 */
-const illegalNameChars = '(~ ! @ #  ; : % ^ & * + = { } () | &lt; &gt;, \' " \\ $)';
-const illegalVersionChars = '( [ ] { } ( ) ` ~ ! @ #  ; % ^ & * + = | &lt; &gt;, \' " \\)';
 const roleSchema = Joi.extend(joi => ({
     base: joi.string(),
     name: 'systemRole',
@@ -84,31 +100,33 @@ const documentSchema = Joi.extend(joi => ({
 }));
 
 const definition = {
-    apiName: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/).error((errors) => {
-        return errors.map((error) => {
-            switch (error.type) {
-                case 'any.empty':
-                    return { message: 'Name is not allowed to be empty' };
-                default:
-                    return {
-                        message: 'Name contains one or more illegal characters ' + illegalNameChars + ' .',
-                    };
-            }
+    apiName: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/).required().error((errors) => {
+        const tmpErrors = [...errors];
+        errors.forEach((err, index) => {
+            const tmpError = { ...err };
+            tmpError.message = 'API Name ' + getMessage(err.type);
+            tmpErrors[index] = tmpError;
         });
+        return tmpErrors;
     }),
-    apiVersion: Joi.string().regex(/^[^\][{}()`~!@#;%^&*+=|\\<>"'/,]+$/).error((errors) => {
-        return errors.map((error) => {
-            switch (error.type) {
-                case 'any.empty':
-                    return { message: 'Version is not allowed to be empty' };
-                default:
-                    return {
-                        message: 'Version contains one or more illegal characters ' + illegalVersionChars + ' .',
-                    };
-            }
+    apiVersion: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/).required().error((errors) => {
+        const tmpErrors = [...errors];
+        errors.forEach((err, index) => {
+            const tmpError = { ...err };
+            tmpError.message = 'API Version ' + getMessage(err.type);
+            tmpErrors[index] = tmpError;
         });
+        return tmpErrors;
     }),
-    apiContext: Joi.string().regex(/(?!.*\/t\/.*|.*\/t$)^[/a-zA-Z0-9/]{1,50}$/),
+    apiContext: Joi.string().regex(/(?!.*\/t\/.*|.*\/t$)^[/a-zA-Z0-9/]{1,50}$/).required().error((errors) => {
+        const tmpErrors = [...errors];
+        errors.forEach((err, index) => {
+            const tmpError = { ...err };
+            tmpError.message = 'API Context ' + getMessage(err.type);
+            tmpErrors[index] = tmpError;
+        });
+        return tmpErrors;
+    }),
     role: roleSchema.systemRole().role(),
     url: Joi.string().uri(),
     userRole: userRoleSchema.userRole().role(),

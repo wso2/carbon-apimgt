@@ -145,7 +145,7 @@ const styles = theme => ({
         height: theme.spacing.unit * 2,
     },
     searchWrapper: {
-        backgroundColor: theme.palette.getContrastText(theme.palette.background.appBar),
+        backgroundColor: theme.palette.getContrastText(theme.custom.appBar.background),
         width: 300,
         flexGrow: 1,
     },

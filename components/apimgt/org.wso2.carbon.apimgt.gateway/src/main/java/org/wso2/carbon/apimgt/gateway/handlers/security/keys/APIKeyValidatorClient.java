@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.utils.CarbonUtils;
 
+import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -140,10 +141,18 @@ public class APIKeyValidatorClient {
                     _getServiceClient().getLastOperationContext().getServiceContext();
             cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
             return toDTO(dto);
+        } catch (RemoteException e) {
+            if (Util.tracingEnabled()) {
+                Util.setTag(span, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.API_KEY_VALIDATOR_ERROR);
+            }
+            log.error("Error while accessing backend services for API key validation", e);
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Error while accessing backend services for API key validation", e);
         } catch (Exception e) {
             if (Util.tracingEnabled()) {
                 Util.setTag(span, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.API_KEY_VALIDATOR_ERROR);
             }
+            log.error("Error while accessing backend services for API key validation", e);
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                                            "Error while accessing backend services for API key validation", e);
         } finally {
@@ -225,7 +234,12 @@ public class APIKeyValidatorClient {
                 templates.add(temp);
             }
             return templates;
+        } catch (RemoteException e) {
+            log.error("Error while accessing backend services for get URI templates", e);
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Error while accessing backend services for API key validation", e);
         } catch (Exception e) {
+            log.error("Error while accessing backend services for get URI templates", e);
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                                            "Error while accessing backend services for API key validation", e);
         }
@@ -270,7 +284,12 @@ public class APIKeyValidatorClient {
                 templates.add(temp);
             }
             return templates;
+        } catch (RemoteException e) {
+            log.error("Error while accessing backend services for get product URI templates", e);
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Error while accessing backend services for API key validation", e);
         } catch (Exception e) {
+            log.error("Error while accessing backend services for get product URI templates", e);
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Error while accessing backend services for API key validation", e);
         }

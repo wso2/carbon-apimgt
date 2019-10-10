@@ -19,10 +19,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
+import Paper from '@material-ui/core/Paper';
 import { Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import CONSTS from 'AppData/Constants';
+import classNames from 'classnames';
 import AuthManager from 'AppData/AuthManager';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
@@ -36,10 +38,19 @@ const styles = theme => ({
         paddingTop: theme.spacing.unit * 2,
         paddingBottom: theme.spacing.unit * 2,
     },
+    paper: {
+        margin: theme.spacing(3),
+        paddingBottom: theme.spacing(3),
+        paddingRight: theme.spacing(2),
+    },
     contentWrapper: {
-        maxWidth: theme.custom.contentAreaWidth,
         paddingLeft: theme.spacing.unit * 2,
         paddingTop: theme.spacing.unig,
+    },
+    contentWrapperOverview: {
+        padding: 0,
+        width: '100%',
+        boxShadow: 'none',
     },
     titleSub: {
         cursor: 'pointer',
@@ -109,7 +120,10 @@ class Comments extends Component {
                     }
                     this.setState({ allComments: commentList, totalComments: commentList.length });
                     if (commentList.length < theme.custom.commentsLimit) {
-                        this.setState({ startCommentsToDisplay: 0, comments: commentList.slice(0, commentList.length) });
+                        this.setState({
+                            startCommentsToDisplay: 0,
+                            comments: commentList.slice(0, commentList.length),
+                        });
                     } else {
                         this.setState({
                             startCommentsToDisplay: commentList.length - theme.custom.commentsLimit,
@@ -200,47 +214,44 @@ class Comments extends Component {
      * @memberof Comments
      */
     render() {
-        const { classes, showLatest } = this.props;
+        const { classes, showLatest, isOverview } = this.props;
         const {
             comments, expanded, allComments, startCommentsToDisplay, totalComments, commentsUpdate,
         } = this.state;
         return (
             <ApiContext.Consumer>
                 {({ api }) => (
-                    <div className={classes.contentWrapper}>
+                    <div
+                        className={classNames(
+                            { [classes.contentWrapper]: !isOverview },
+                            { [classes.contentWrapperOverview]: isOverview },
+                        )}
+                    >
                         {!showLatest && (
                             <div className={classes.root}>
-                                <Icon
-                                    onClick={this.handleExpandClick}
-                                    aria-expanded={expanded}
-                                >
-                                    arrow_drop_down_circle
-                                </Icon>
-                                <Typography
-                                    onClick={this.handleExpandClick}
-                                    variant='h4'
-                                    className={classes.titleSub}
-                                >
+                                <Typography variant='h4' className={classes.titleSub}>
                                     <FormattedMessage id='Apis.Details.Comments.title' defaultMessage='Comments' />
                                 </Typography>
                             </div>
+                        )}
+                        {!showLatest && (
+                            <Paper className={classes.paper}>
+                                <CommentAdd
+                                    apiId={api.id}
+                                    commentsUpdate={this.updateCommentList}
+                                    allComments={allComments}
+                                    parentCommentId={null}
+                                    cancelButton
+                                />
+                            </Paper>
                         )}
                         <Comment
                             comments={comments}
                             apiId={api.id}
                             commentsUpdate={this.updateCommentList}
                             allComments={allComments}
+                            isOverview={isOverview}
                         />
-                        {!showLatest && (
-                            <CommentAdd
-                                apiId={api.id}
-                                commentsUpdate={this.updateCommentList}
-                                allComments={allComments}
-                                parentCommentId={null}
-                                cancelButton
-                            />
-                        )}
-
                         {startCommentsToDisplay !== 0 && (
                             <div className={classes.contentWrapper}>
                                 <Grid container spacing={4} className={classes.root}>
@@ -284,7 +295,6 @@ class Comments extends Component {
         );
     }
 }
-
 
 Comments.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,

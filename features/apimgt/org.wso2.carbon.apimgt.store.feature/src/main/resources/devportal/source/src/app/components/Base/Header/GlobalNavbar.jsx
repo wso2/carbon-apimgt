@@ -42,7 +42,7 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.drawer),
     },
     listTextSmall: {
-        color: theme.palette.getContrastText(theme.palette.background.appBar),
+        color: theme.palette.getContrastText(theme.custom.appBar.background),
     },
     smallIcon: {
         marginRight: 5,
@@ -53,13 +53,13 @@ const styles = theme => ({
         height: 64,
     },
     selected: {
-        background: theme.palette.background.activeMenuItem,
+        background: theme.custom.appBar.activeBackground,
         alignItems: 'center',
         textDecoration: 'none',
-        color: theme.palette.getContrastText(theme.palette.background.activeMenuItem),
+        color: theme.palette.getContrastText(theme.custom.appBar.activeBackground),
     },
     selectedText: {
-        color: theme.palette.getContrastText(theme.palette.background.activeMenuItem),
+        color: theme.palette.getContrastText(theme.custom.appBar.activeBackground),
     },
 });
 /**
@@ -93,11 +93,11 @@ function GlobalNavBar(props) {
         ditectCurrentMenu(location);
     });
 
-    let strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
+    let strokeColor = theme.palette.getContrastText(theme.custom.leftMenu.background);
     let iconWidth = 32;
     if (smallView) {
         iconWidth = 16;
-        strokeColor = theme.palette.getContrastText(theme.palette.background.appBar);
+        strokeColor = theme.palette.getContrastText(theme.custom.appBar.background);
     }
     const linkTextClasses = classNames({ [classes.small]: smallView });
     return (

@@ -99,7 +99,7 @@ class Monetization extends Component {
         }).catch((error) => {
             console.error(error);
             if (error.response) {
-                Alert.error(error.response.body.message);
+                Alert.error(error.response.body.description);
             } else {
                 Alert.error(intl.formatMessage({
                     id: 'Apis.Details.Monetization.Index.something.went.wrong.while.configuring.monetization',

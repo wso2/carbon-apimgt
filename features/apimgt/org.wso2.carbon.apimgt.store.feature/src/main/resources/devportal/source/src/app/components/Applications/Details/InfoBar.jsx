@@ -115,7 +115,7 @@ const styles = theme => ({
         width: 100,
     },
     contentWrapper: {
-        width: theme.custom.contentAreaWidth - theme.custom.leftMenuWidth,
+        maxWidth: theme.custom.contentAreaWidth - theme.custom.leftMenu.width,
         alignItems: 'center',
     },
     ratingBoxWrapper: {
@@ -124,14 +124,14 @@ const styles = theme => ({
         alignItems: 'center',
     },
     ratingBox: {
-        backgroundColor: theme.palette.background.leftMenu,
+        backgroundColor: theme.custom.leftMenu.background,
         border: '1px solid rgb(71, 211, 244)',
         borderRadius: '5px',
         display: 'flex',
         position: 'absolute',
         top: 14,
         height: '40px',
-        color: theme.palette.getContrastText(theme.palette.background.leftMenu),
+        color: theme.palette.getContrastText(theme.custom.leftMenu.background),
         alignItems: 'center',
         left: '0',
         paddingLeft: '5px',
@@ -326,23 +326,8 @@ class InfoBar extends React.Component {
                                         ) : (null)
                                     ))}
                                     <div className={classes.infoItem}>
-                                        {application.status === 'APPROVED' ? (
-                                            <Icon>check_circle</Icon>
-                                        ) : (
-                                            <Typography variant='subtitle1' gutterBottom>
-                                                {application.status}
-                                            </Typography>
-                                        )}
-                                        <Typography variant='caption' gutterBottom align='left'>
-                                            <FormattedMessage
-                                                id='Applications.Details.InfoBar.lifecycle.status'
-                                                defaultMessage='Lifecycle Status '
-                                            />
-                                        </Typography>
-                                    </div>
-                                    <div className={classes.infoItem}>
                                         <Link
-                                            to={'/application/edit/' + applicationId}
+                                            to={`/applications/${applicationId}/edit/`}
                                             className={classes.button}
                                         >
                                             <Button

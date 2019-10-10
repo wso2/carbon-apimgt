@@ -613,7 +613,7 @@ public class ApiMgtDAO {
                 monetizationUsagePublishInfo.setState(rs.getString("STATE"));
                 monetizationUsagePublishInfo.setStatus(rs.getString("STATUS"));
                 monetizationUsagePublishInfo.setStartedTime(rs.getLong("STARTED_TIME"));
-                monetizationUsagePublishInfo.setLastPublishTime(rs.getLong("LAST_PUBLISHED_TIME"));
+                monetizationUsagePublishInfo.setLastPublishTime(rs.getLong("PUBLISHED_TIME"));
                 return monetizationUsagePublishInfo;
             }
         } catch (SQLException e) {
@@ -7441,7 +7441,7 @@ public class ApiMgtDAO {
 
         try (Connection conn = APIMgtDBUtil.getConnection();
             PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_SQL)) {
-            ps.setString(1, identifier.getProviderName());
+            ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             ps.setString(2, identifier.getName());
             ps.setString(3, identifier.getVersion());
             try (ResultSet rs = ps.executeQuery()) {
@@ -7471,6 +7471,7 @@ public class ApiMgtDAO {
                         if (mediationScriptBlob != null) {
                             String script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
                             uriTemplate.setMediationScript(script);
+                            uriTemplate.setMediationScripts(verb, script);
                         }
 
                         Optional<APIProductIdentifier> productId = getProductIdIfExists(rs);
