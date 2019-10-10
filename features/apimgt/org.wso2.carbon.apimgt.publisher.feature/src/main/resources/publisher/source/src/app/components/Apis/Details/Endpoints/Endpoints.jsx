@@ -80,15 +80,14 @@ function Endpoints(props) {
         const tmpEndpointConfig = cloneDeep(initState.endpointConfig);
         const { action, value } = configAction;
         switch (action) {
-            case 'production_endpoints': {
-                return { ...initState, endpointConfig: { ...tmpEndpointConfig, [action]: value } };
-            }
+            case 'production_endpoints':
             case 'sandbox_endpoints': {
                 return { ...initState, endpointConfig: { ...tmpEndpointConfig, [action]: value } };
             }
-            case 'add_endpoint': {
-                return { ...initState, endpointConfig: { ...value } };
-            }
+            case 'select_endpoint_category':
+            case 'set_lb_config':
+            case 'add_endpoint':
+            case 'set_advance_config':
             case 'remove_endpoint': {
                 return { ...initState, endpointConfig: { ...value } };
             }
@@ -114,12 +113,9 @@ function Endpoints(props) {
                 );
                 return { ...initState, endpointConfig: { ...config } };
             }
-            case 'set_lb_config': {
-                return { ...initState, endpointConfig: { ...value } };
-            }
             case 'set_inline': {
-                const { endpointImplementationType } = value;
-                return { ...initState, endpointConfig: null, endpointImplementationType };
+                const { endpointImplementationType, endpointConfig } = value;
+                return { ...initState, endpointConfig, endpointImplementationType };
             }
             case 'set_prototyped': {
                 const { endpointImplementationType, endpointConfig } = value;
@@ -128,12 +124,6 @@ function Endpoints(props) {
                     endpointImplementationType,
                     endpointConfig,
                 };
-            }
-            case 'select_endpoint_category': {
-                return { ...initState, endpointConfig: { ...value } };
-            }
-            case 'set_advance_config': {
-                return { ...initState, endpointConfig: { ...value } };
             }
             case 'select_endpoint_type': {
                 const { endpointImplementationType, endpointConfig } = value;

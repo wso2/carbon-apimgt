@@ -87,7 +87,7 @@ function GenericEndpoint(props) {
                 placeholder={!serviceUrl ? 'http://appserver/resource' : ''}
                 onChange={event => setServiceUrl(event.target.value)}
                 onBlur={() => editEndpoint(index, category, serviceUrl)}
-                // variant='outlined'
+                variant='outlined'
                 margin='normal'
                 required
                 InputProps={{

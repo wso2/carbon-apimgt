@@ -29,8 +29,11 @@ import {
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
-import cloneDeep from 'lodash.clonedeep';
+import LaunchIcon from '@material-ui/icons/Launch';
+import { Link } from 'react-router-dom';
 
+import cloneDeep from 'lodash.clonedeep';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import InlineEndpoints from 'AppComponents/Apis/Details/Endpoints/Prototype/InlineEndpoints';
 import {
     getEndpointTypeProperty,
@@ -175,6 +178,7 @@ function EndpointOverview(props) {
             return availableEndpoints.endpoint_type !== undefined ? endpointTypes[1] : endpointTypes[0];
         }
     };
+
     useEffect(() => {
         const epType = getEndpointType(api);
         if (epType.key !== 'INLINE') {
@@ -187,17 +191,6 @@ function EndpointOverview(props) {
         setEndpointType(epType);
         setEndpointSecurityInfo(endpointSecurity);
     }, [props]);
-    //
-    // useEffect(() => {
-    //     onChangeAPI({ ...api, endpointSecurity: endpointSecurityInfo });
-    // }, [endpointSecurityInfo]);
-    //
-    // useEffect(() => {
-    //     onChangeAPI({ ...api, endpointConfig: epConfig });
-    // }, [epConfig]);
-    //
-    // useEffect(() => {
-    // }, [endpointType]);
 
     const getEndpoints = (type) => {
         if (epConfig[type]) {
@@ -321,9 +314,11 @@ function EndpointOverview(props) {
     const handleEndpointTypeSelect = (event) => {
         const selectedKey = event.target.value;
         if (selectedKey === 'INLINE') {
+            const tmpConfig = createEndpointConfig('prototyped');
             endpointsDispatcher({
                 action: 'set_inline',
                 value: {
+                    endpointConfig: tmpConfig,
                     endpointImplementationType: 'INLINE',
                 },
             });
@@ -464,7 +459,7 @@ function EndpointOverview(props) {
 
     return (
         <div className={classes.overviewWrapper}>
-            <Grid container direction='column'>
+            <Grid container direction='column' spacing={2}>
                 <Grid item>
                     <FormControl component='fieldset' className={classes.formControl}>
                         <RadioGroup
@@ -520,47 +515,69 @@ function EndpointOverview(props) {
                     {endpointType.key === 'INLINE' ?
                         <InlineEndpoints paths={swaggerDef.paths} updatePaths={updatePaths} /> :
                         <Paper className={classes.endpointContainer}>
-                            <React.Fragment>
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            disabled={endpointType.key === 'default'}
-                                            checked={endpointCategory.prod}
-                                            value='prod'
-                                            color='primary'
-                                            onChange={event => handleOnChangeEndpointCategoryChange('prod', event)}
-                                        />
-                                    }
-                                    label={<FormattedMessage
-                                        id='Apis.Details.Endpoints.EndpointOverview.production.endpoint'
-                                        defaultMessage='Production Endpoint'
-                                    />}
-                                />
-                                <Collapse in={endpointCategory.prod && endpointType.key !== 'default'}>
-                                    <GenericEndpoint
-                                        autoFocus
-                                        name='Production Endpoint'
-                                        className={classes.defaultEndpointWrapper}
-                                        endpointURL={getEndpoints('production_endpoints')}
-                                        type=''
-                                        index={0}
-                                        category='production_endpoints'
-                                        editEndpoint={editEndpoint}
-                                        setAdvancedConfigOpen={toggleAdvanceConfig}
+                            {endpointType.key === 'default' ?
+                                <InlineMessage>
+                                    <div className={classes.contentWrapper}>
+                                        <Typography component='p' className={classes.content}>
+                                            <FormattedMessage
+                                                id='Apis.Details.Endpoints.EndpointOverview.upload.mediation.message'
+                                                defaultMessage={'Please upload a mediation sequence file to Message' +
+                                                ' Mediation Policies, which sets the endpoints.'}
+                                            />
+                                            <Link to={'/apis/' + api.id + '/mediation policies'}>
+                                                <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
+                                            </Link>
+                                        </Typography>
+                                    </div>
+                                </InlineMessage> :
+                                <React.Fragment>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={endpointCategory.prod}
+                                                value='prod'
+                                                color='primary'
+                                                onChange={event => handleOnChangeEndpointCategoryChange('prod', event)}
+                                            />
+                                        }
+                                        label={
+                                            endpointType.key === 'prototyped' ?
+                                                <FormattedMessage
+                                                    id='Apis.Details.Endpoints.EndpointOverview.production.endpoint'
+                                                    defaultMessage='Prototype Endpoint'
+                                                /> :
+                                                <FormattedMessage
+                                                    id='Apis.Details.Endpoints.EndpointOverview.production.endpoint'
+                                                    defaultMessage='Production Endpoint'
+                                                />}
                                     />
-                                </Collapse>
-                            </React.Fragment>
-                            {endpointType.key === 'prototyped' ?
+                                    <Collapse in={endpointCategory.prod && endpointType.key !== 'default'}>
+                                        <GenericEndpoint
+                                            autoFocus
+                                            name={endpointType.key === 'prototyped' ?
+                                                'Prototype Endpoint' : 'Production Endpoint'}
+                                            className={classes.defaultEndpointWrapper}
+                                            endpointURL={getEndpoints('production_endpoints')}
+                                            type=''
+                                            index={0}
+                                            category='production_endpoints'
+                                            editEndpoint={editEndpoint}
+                                            setAdvancedConfigOpen={toggleAdvanceConfig}
+                                        />
+                                    </Collapse>
+                                </React.Fragment>}
+                            {endpointType.key === 'prototyped' || endpointType.key === 'default' ?
                                 <div /> :
                                 <React.Fragment>
                                     <FormControlLabel
                                         control={
                                             <Checkbox
-                                                disabled={endpointType.key === 'default' || endpointType.key === 'INLINE'}
+                                                disabled={endpointType.key === 'default'}
                                                 checked={endpointCategory.sandbox}
                                                 value='sandbox'
                                                 color='primary'
-                                                onChange={event => handleOnChangeEndpointCategoryChange('sandbox', event)}
+                                                onChange={event =>
+                                                    handleOnChangeEndpointCategoryChange('sandbox', event)}
                                             />
                                         }
                                         label={
