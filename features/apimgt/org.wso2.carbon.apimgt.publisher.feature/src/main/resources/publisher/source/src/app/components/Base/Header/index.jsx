@@ -119,7 +119,7 @@ class Header extends React.Component {
                             <img
                                 src={theme.custom.logo}
                                 alt={theme.custom.title}
-                                style={{ height: theme.custom.logoHeight }}
+                                style={{ height: theme.custom.logoHeight, width: theme.custom.logoWidth }}
                             />
                         </Link>
                         <GlobalNavBar toggleGlobalNavBar={this.toggleGlobalNavBar} open={openNavBar} />
