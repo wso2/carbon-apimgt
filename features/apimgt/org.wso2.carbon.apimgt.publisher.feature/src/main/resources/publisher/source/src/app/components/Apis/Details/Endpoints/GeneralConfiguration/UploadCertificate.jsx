@@ -229,11 +229,11 @@ export default function UploadCertificate(props) {
                             onBlur={event => handleAliasOnChange(event.target.value)}
                             margin='normal'
                             variant='outlined'
-                            error={isAliasEmpty || aliasList.includes(alias)}
+                            error={isAliasEmpty || (aliasList && aliasList.includes(alias))}
                             helperText={isAliasEmpty ? <FormattedMessage
                                 id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias.error'
                                 defaultMessage='Alias should not be empty'
-                            /> : iff(aliasList.includes(alias), <FormattedMessage
+                            /> : iff(aliasList && aliasList.includes(alias), <FormattedMessage
                                 id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint.error'
                                 defaultMessage='Alias already exists'
                             />, <FormattedMessage
@@ -337,7 +337,7 @@ export default function UploadCertificate(props) {
                             (!isMutualSSLEnabled && endpoint === '') ||
                             certificate.name === '' ||
                             (isMutualSSLEnabled && policy === '') ||
-                            isSaving || aliasList.includes(alias) || isRejected
+                            isSaving || (aliasList && aliasList.includes(alias)) || isRejected
                     }
                 >
                     <FormattedMessage
