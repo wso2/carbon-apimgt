@@ -193,19 +193,19 @@ const suggestions = {
         },
         {
             label: 'Mediation Policies',
-            route: 'mediation policies',
+            route: 'runtime-configuration',
         },
         {
             label: 'In Flow',
-            route: 'mediation policies',
+            route: 'runtime-configuration',
         },
         {
             label: 'Out Flow',
-            route: 'mediation policies',
+            route: 'runtime-configuration',
         },
         {
             label: 'Fault Flow',
-            route: 'mediation policies',
+            route: 'runtime-configuration',
         },
         {
             label: 'Monetization',
