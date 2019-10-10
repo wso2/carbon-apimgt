@@ -256,7 +256,7 @@ class Layout extends React.Component {
                                 </IconButton>
                             </Hidden>
                             <Link to='/'>
-                                <img src={theme.custom.appBar.logo} />
+                                <img src={theme.custom.appBar.logo} style={{height: theme.custom.appBar.logoHeight}} />
                             </Link>
                             <Hidden smDown>
                                 <VerticalDivider height={32} />
@@ -362,33 +362,11 @@ class Layout extends React.Component {
                                                 <Paper>
                                                     <ClickAwayListener onClickAway={this.handleCloseUserMenu}>
                                                         <MenuList>
-                                                            <MenuItem onClick={this.handleCloseUserMenu}>
-                                                                <FormattedMessage
-                                                                    id='Base.index.profile'
-                                                                    defaultMessage='Profile'
-                                                                />
-                                                            </MenuItem>
-                                                            <MenuItem onClick={this.handleCloseUserMenu}>
-                                                                <FormattedMessage
-                                                                    id='Base.index.my.account'
-                                                                    defaultMessage='My account'
-                                                                />
-                                                            </MenuItem>
                                                             <MenuItem onClick={this.doOIDCLogout}>
                                                                 <FormattedMessage
                                                                     id='Base.index.logout'
                                                                     defaultMessage='Logout'
                                                                 />
-                                                            </MenuItem>
-                                                            <Divider />
-                                                            <MenuItem
-                                                                className={classes.menuItem}
-                                                                onClick={this.handleCloseUserMenu}
-                                                            >
-                                                                <ListItemText primary='Night Mode' />
-                                                                <ListItemIcon className={classes.icon}>
-                                                                    <Icon>brightness_low</Icon>
-                                                                </ListItemIcon>
                                                             </MenuItem>
                                                         </MenuList>
                                                     </ClickAwayListener>

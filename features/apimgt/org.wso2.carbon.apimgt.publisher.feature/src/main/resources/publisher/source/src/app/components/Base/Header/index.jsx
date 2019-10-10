@@ -105,10 +105,7 @@ class Header extends React.Component {
     render() {
         const { openNavBar, smScreen } = this.state;
         const {
-            classes,
-            avatar,
-            settings,
-            theme,
+            classes, avatar, settings, theme,
         } = this.props;
         return (
             <React.Fragment>
@@ -120,7 +117,11 @@ class Header extends React.Component {
                             </IconButton>
                         </Hidden>
                         <Link to='/'>
-                            <img src={theme.custom.logo} alt={theme.custom.title} />
+                            <img
+                                src={theme.custom.logo}
+                                alt={theme.custom.title}
+                                style={{ height: theme.custom.logoHeight }}
+                            />
                         </Link>
                         <GlobalNavBar toggleGlobalNavBar={this.toggleGlobalNavBar} open={openNavBar} />
                         <VerticalDivider height={32} />
