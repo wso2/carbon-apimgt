@@ -17,6 +17,7 @@
  */
 import React, { useReducer } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -268,3 +269,7 @@ export default function ImportDefinition(props) {
         </React.Fragment>
     );
 }
+
+ImportDefinition.propTypes = {
+    setSchemaDefinition: PropTypes.func.isRequired,
+};
