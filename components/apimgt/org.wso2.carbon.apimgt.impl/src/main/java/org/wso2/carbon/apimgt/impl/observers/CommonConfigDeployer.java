@@ -126,7 +126,7 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         }
 
         try {
-            APIUtil.loadTenantConf(tenantId);
+            APIUtil.loadAndSyncTenantConf(tenantId);
         } catch (APIManagementException e) {
             log.error("Failed to load " + APIConstants.API_TENANT_CONF + " for tenant " + tenantDomain, e);
         } catch (Exception e) { // The generic Exception is handled explicitly so execution does not stop during config deployment

@@ -3895,7 +3895,7 @@ public final class APIUtil {
      * @param tenantID tenant Id
      * @throws APIManagementException when error occurred while loading the tenant-conf to registry
      */
-    public static void loadTenantConf(int tenantID) throws APIManagementException {
+    public static void loadAndSyncTenantConf(int tenantID) throws APIManagementException {
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         try {
             UserRegistry registry = registryService.getConfigSystemRegistry(tenantID);
@@ -3911,6 +3911,33 @@ public final class APIUtil {
                     return;
                 }
             }
+            log.debug("Adding tenant config to the registry");
+            Resource resource = registry.newResource();
+            resource.setMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            resource.setContent(data);
+            registry.put(APIConstants.API_TENANT_CONF_LOCATION, resource);
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error while saving tenant conf to the registry", e);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading tenant conf file content", e);
+        }
+    }
+
+    /**
+     * Loads tenant-conf.json (tenant config) to registry from the tenant-conf.json available in the file system.
+     *
+     * @param tenantID tenant Id
+     * @throws APIManagementException when error occurred while loading the tenant-conf to registry
+     */
+    public static void loadTenantConf(int tenantID) throws APIManagementException {
+        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+        try {
+            UserRegistry registry = registryService.getConfigSystemRegistry(tenantID);
+            if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                log.debug("Tenant conf already uploaded to the registry");
+                return;
+            }
+            byte[] data = getLocalTenantConfFileData();
             log.debug("Adding tenant config to the registry");
             Resource resource = registry.newResource();
             resource.setMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
@@ -3955,8 +3982,7 @@ public final class APIUtil {
      * @throws APIManagementException when error occurred while updating the updating the tenant-conf with scopes.
      */
     private static Optional<Byte[]> migrateTenantConfScopes(int tenantId) throws APIManagementException {
-        String tenantDomain = getTenantDomainFromTenantId(tenantId);
-        JSONObject tenantConf = getTenantConfig(tenantDomain);
+        JSONObject tenantConf = getTenantConfig(tenantId);
         JSONObject scopesConfigTenant = getRESTAPIScopesFromTenantConfig(tenantConf);
         JSONObject scopeConfigLocal = getRESTAPIScopesConfigFromFileSystem();
         Map<String, String> scopesTenant = getRESTAPIScopesFromConfig(scopesConfigTenant);
@@ -6858,7 +6884,8 @@ public final class APIUtil {
      */
     public static JSONObject getTenantRESTAPIScopesConfig(String tenantDomain) throws APIManagementException {
         JSONObject restAPIConfigJSON = null;
-        JSONObject tenantConfJson = getTenantConfig(tenantDomain);
+        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
+        JSONObject tenantConfJson = getTenantConfig(tenantId);
         if (tenantConfJson != null) {
             restAPIConfigJSON = getRESTAPIScopesFromTenantConfig(tenantConfJson);
             if (restAPIConfigJSON == null) {
@@ -6869,15 +6896,34 @@ public final class APIUtil {
         return restAPIConfigJSON;
     }
 
-    private static JSONObject getTenantConfig(String tenantDomain) throws APIManagementException {
+    /**
+     * Returns the tenant-conf.json in JSONObject format for the given tenant(id) from the registry.
+     *
+     * @param tenantId tenant ID
+     * @return tenant-conf.json in JSONObject format for the given tenant(id)
+     * @throws APIManagementException when tenant-conf.json is not available in registry
+     */
+    private static JSONObject getTenantConfig(int tenantId) throws APIManagementException {
         try {
-            String content = new APIMRegistryServiceImpl().getConfigRegistryResourceContent(tenantDomain,
-                    APIConstants.API_TENANT_CONF_LOCATION);
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+            UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
+            Resource resource;
+            if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
+            } else {
+                loadTenantConf(tenantId);
+                if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                    resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
+                } else {
+                    throw new APIManagementException("Failed to add tenant-conf.json to tenant: " + tenantId);
+                }
+            }
+            String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
             JSONParser parser = new JSONParser();
             return (JSONObject) parser.parse(content);
-        } catch (UserStoreException | RegistryException | ParseException e) {
+        } catch (RegistryException | ParseException e) {
             throw new APIManagementException("Error while getting tenant config from registry for tenant: "
-                    + tenantDomain, e);
+                    + tenantId, e);
         }
     }
 
