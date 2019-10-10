@@ -24,6 +24,10 @@ import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
 import TablePagination from '@material-ui/core/TablePagination';
 import Button from '@material-ui/core/Button';
+import Paper from '@material-ui/core/Paper';
+import TableFooter from '@material-ui/core/TableFooter';
+import TableRow from '@material-ui/core/TableRow';
+import Box from '@material-ui/core/Box';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
@@ -77,31 +81,30 @@ const styles = theme => ({
         flexGrow: 1,
     },
     root: {
-        height: 70,
+        height: 80,
         background: theme.palette.background.paper,
         borderBottom: 'solid 1px ' + theme.palette.grey.A200,
-        display: 'flex',
-        alignItems: 'center',
+        display: 'block',
     },
     mainIconWrapper: {
-        paddingTop: 13,
-        paddingLeft: 35,
-        paddingRight: 20,
+        paddingTop: theme.spacing(1.5),
+        paddingLeft: theme.spacing(3),
+        paddingRight: theme.spacing(2.5),
     },
-    mainTitle: {
-        paddingTop: 10,
+    mainTitleWrapper: {
+        display: 'flex',
     },
     createLinkWrapper: {
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
     },
     appContent: {
-        paddingLeft: theme.spacing.unit * 4,
-        paddingTop: theme.spacing.unit,
-        maxWidth: theme.custom.contentAreaWidth,
+        paddingTop: theme.spacing(4),
+        maxWidth: '95%',
+        margin: 'auto',
     },
     dialogContainer: {
         width: 1000,
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
     },
 });
 
@@ -281,97 +284,106 @@ class Listing extends Component {
         return (
             <main className={classes.content}>
                 <div className={classes.root}>
-                    <div className={classes.mainIconWrapper}>
-                        <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='applications' />
-                    </div>
-                    <div className={classes.mainTitleWrapper}>
-                        <Typography variant='h4' className={classes.mainTitle}>
-                            <FormattedMessage
-                                id='Applications.Listing.Listing.applications'
-                                defaultMessage='Applications'
-                            />
-
-                        </Typography>
-                        {data && (
-                            <Typography variant='caption' gutterBottom align='left'>
-                                {data.count === 0 && (
-                                    <React.Fragment>
-                                        <FormattedMessage
-                                            id='Applications.Listing.Listing.no.applications.created'
-                                            defaultMessage='No Applications created'
-                                        />
-                                    </React.Fragment>
-                                )}
-                            </Typography>
-                        )}
-                    </div>
-                    {(data.size !== 0 || open) && (
-                        <div className={classes.createLinkWrapper}>
-                            <ScopeValidation
-                                resourcePath={resourcePaths.APPLICATIONS}
-                                resourceMethod={resourceMethods.POST}
-                            >
-                                <Link to='/applications/create'>
-                                    <Button
-                                        variant='contained'
-                                        color='primary'
-                                    >
-                                        <FormattedMessage
-                                            id='Applications.Create.Listing.add.new.application'
-                                            defaultMessage='Add New Application'
-                                        />
-                                    </Button>
-                                </Link>
-                            </ScopeValidation>
+                    <Box display='flex' flexDirection='row' justifyContent='flex-start' alignItems='center'>
+                        <div className={classes.mainIconWrapper}>
+                            <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='applications' />
                         </div>
-                    )}
+                        <div className={classes.mainTitleWrapper}>
+                            <Typography variant='h4' className={classes.mainTitle}>
+                                <FormattedMessage
+                                    id='Applications.Listing.Listing.applications'
+                                    defaultMessage='Applications'
+                                />
+                            </Typography>
+                            {(data.size !== 0 || open) && (
+                                <div className={classes.createLinkWrapper}>
+                                    <ScopeValidation
+                                        resourcePath={resourcePaths.APPLICATIONS}
+                                        resourceMethod={resourceMethods.POST}
+                                    >
+                                        <Link to='/applications/create'>
+                                            <Button
+                                                variant='contained'
+                                                color='primary'
+                                            >
+                                                <FormattedMessage
+                                                    id='Applications.Create.Listing.add.new.application'
+                                                    defaultMessage='Add New Application'
+                                                />
+                                            </Button>
+                                        </Link>
+                                    </ScopeValidation>
+                                </div>
+                            )}
+                            {data && (
+                                <Typography variant='caption' gutterBottom align='left'>
+                                    {data.count === 0 && (
+                                        <React.Fragment>
+                                            <FormattedMessage
+                                                id='Applications.Listing.Listing.no.applications.created'
+                                                defaultMessage='No Applications created'
+                                            />
+                                        </React.Fragment>
+                                    )}
+                                </Typography>
+                            )}
+                        </div>
+                    </Box>
+                    <Box display='flex' pl={3}>
+                        <Typography variant='caption' gutterBottom align='left'>
+                            <FormattedMessage
+                                id='Applications.Listing.Listing.logical.description'
+                                defaultMessage={`An application is a logical collection of APIs. 
+                                        Applications allow you to use a single access token to invoke a
+                                         collection of APIs and to subscribe to one API multiple times
+                                          and allows unlimited access by default.`}
+                            />
+                        </Typography>
+                    </Box>
                 </div>
                 <Grid container spacing={0} justify='center'>
                     <Grid item xs={12}>
                         {data.size > 0 ? (
                             <div className={classes.appContent}>
-                                <Typography variant='caption' gutterBottom align='left'>
-                                    <FormattedMessage
-                                        id='Applications.Listing.Listing.logical.description'
-                                        defaultMessage={`An application is a logical collection of APIs. 
-                                        Applications allow you to use a single access token to invoke a
-                                         collection of APIs and to subscribe to one API multiple times
-                                          and allows unlimited access by default.`}
-                                    />
-                                </Typography>
-                                <Table>
-                                    <ApplicationTableHead
-                                        order={order}
-                                        orderBy={orderBy}
-                                        onRequestSort={this.handleRequestSort}
-                                    />
-                                    <AppsTableContent
-                                        handleAppDelete={this.handleAppDelete}
-                                        apps={data}
-                                        page={page}
-                                        rowsPerPage={rowsPerPage}
-                                        order={order}
-                                        orderBy={orderBy}
-                                        isApplicationSharingEnabled={isApplicationSharingEnabled}
-                                        toggleDeleteConfirmation={this.toggleDeleteConfirmation}
-                                    />
-                                </Table>
-                                <TablePagination
-                                    component='div'
-                                    count={data.size}
-                                    rowsPerPage={rowsPerPage}
-                                    rowsPerPageOptions={[5, 10, 15]}
-                                    labelRowsPerPage='Show'
-                                    page={page}
-                                    backIconButtonProps={{
-                                        'aria-label': 'Previous Page',
-                                    }}
-                                    nextIconButtonProps={{
-                                        'aria-label': 'Next Page',
-                                    }}
-                                    onChangePage={this.handleChangePage}
-                                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                                />
+                                <Paper>
+                                    <Table>
+                                        <ApplicationTableHead
+                                            order={order}
+                                            orderBy={orderBy}
+                                            onRequestSort={this.handleRequestSort}
+                                        />
+                                        <AppsTableContent
+                                            handleAppDelete={this.handleAppDelete}
+                                            apps={data}
+                                            page={page}
+                                            rowsPerPage={rowsPerPage}
+                                            order={order}
+                                            orderBy={orderBy}
+                                            isApplicationSharingEnabled={isApplicationSharingEnabled}
+                                            toggleDeleteConfirmation={this.toggleDeleteConfirmation}
+                                        />
+                                    </Table>
+                                    <TableFooter>
+                                        <TableRow>
+                                            <TablePagination
+                                                component='div'
+                                                count={data.size}
+                                                rowsPerPage={rowsPerPage}
+                                                rowsPerPageOptions={[5, 10, 15]}
+                                                labelRowsPerPage='Show'
+                                                page={page}
+                                                backIconButtonProps={{
+                                                    'aria-label': 'Previous Page',
+                                                }}
+                                                nextIconButtonProps={{
+                                                    'aria-label': 'Next Page',
+                                                }}
+                                                onChangePage={this.handleChangePage}
+                                                onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                                            />
+                                        </TableRow>
+                                    </TableFooter>
+                                </Paper>
                             </div>
                         ) : (
                             <GenericDisplayDialog
