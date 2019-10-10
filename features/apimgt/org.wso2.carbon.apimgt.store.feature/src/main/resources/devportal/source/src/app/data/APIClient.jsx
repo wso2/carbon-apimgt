@@ -47,19 +47,19 @@ class APIClient {
         SwaggerClient.http.withCredentials = true;
         const promisedResolve = SwaggerClient.resolve({ url: Utils.getSwaggerURL(), requestInterceptor: (request) => { request.headers.Accept = 'text/yaml'; } });
         APIClient.spec = promisedResolve;
-        this._client = promisedResolve.then(
-            (resolved) => {
-                const argsv = Object.assign(args,
-                    {
-                        spec: this._fixSpec(resolved.spec),
-                        authorizations,
-                        requestInterceptor: this._getRequestInterceptor(),
-                        responseInterceptor: this._getResponseInterceptor(),
-                    });
-                SwaggerClient.http.withCredentials = true;
-                return new SwaggerClient(argsv);
-            },
-        );
+        this._client = promisedResolve.then((resolved) => {
+            const argsv = Object.assign(
+                args,
+                {
+                    spec: this._fixSpec(resolved.spec),
+                    authorizations,
+                    requestInterceptor: this._getRequestInterceptor(),
+                    responseInterceptor: this._getResponseInterceptor(),
+                },
+            );
+            SwaggerClient.http.withCredentials = true;
+            return new SwaggerClient(argsv);
+        } );
         this._client.catch(AuthManager.unauthorizedErrorHandler);
         this.mutex = new Mutex();
     }
@@ -101,11 +101,9 @@ class APIClient {
             SwaggerClient.http.withCredentials = true;
             APIClient.spec = SwaggerClient.resolve({ url: Utils.getSwaggerURL() });
         }
-        return APIClient.spec.then(
-            (resolved) => {
-                return resolved.spec.paths[resourcePath] && resolved.spec.paths[resourcePath][resourceMethod] && resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0];
-            },
-        );
+        return APIClient.spec.then((resolved) => {
+            return resolved.spec.paths[resourcePath] && resolved.spec.paths[resourcePath][resourceMethod] && resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0];
+        } );
     }
 
     /**
