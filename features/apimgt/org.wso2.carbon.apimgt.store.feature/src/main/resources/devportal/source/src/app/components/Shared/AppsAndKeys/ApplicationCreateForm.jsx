@@ -218,6 +218,7 @@ const ApplicationCreate = (props) => {
                             key={item[1].attribute}
                         >
                             <TextField
+                                variant='outlined'
                                 required={isRequiredAttribute(item[1].attribute)}
                                 label={item[1].attribute}
                                 value={getAttributeValue(item[1].attribute)}
@@ -235,25 +236,26 @@ const ApplicationCreate = (props) => {
                     ) : (null)))
             )}
             {isApplicationSharingEnabled && (
-                <FormControl margin='normal' className={classes.FormControl}>
-                    <FormLabel component='legend'>
-                        <FormHelperText>
-                            <FormattedMessage
-                                defaultMessage='Application Groups'
-                                id='Shared.AppsAndKeys.ApplicationCreateForm.add.groups.label'
-                            />
-                        </FormHelperText>
-                    </FormLabel>
-                    <ChipInput
-                        {...applicationRequest}
-                        value={applicationRequest.groups || []}
-                        onAdd={chip => handleAddChip(chip, applicationRequest.groups)}
-                        onDelete={(chip, index) => handleDeleteChip(
-                            chip,
-                            index, applicationRequest.groups,
-                        )}
-                    />
-                </FormControl>
+                <ChipInput
+                    label={<FormattedMessage
+                        defaultMessage='Application Groups'
+                        id='Shared.AppsAndKeys.ApplicationCreateForm.add.groups.label'
+                    />}
+                    helperText={intl.formatMessage({
+                        defaultMessage: 'Type a group and enter',
+                        id: 'Shared.AppsAndKeys.ApplicationCreateForm.type.a.group.and.enter',
+                    })}
+                    margin='normal'
+                    variant='outlined'
+                    fullWidth
+                    {...applicationRequest}
+                    value={applicationRequest.groups || []}
+                    onAdd={chip => handleAddChip(chip, applicationRequest.groups)}
+                    onDelete={(chip, index) => handleDeleteChip(
+                        chip,
+                        index, applicationRequest.groups,
+                    )}
+                />
             )}
         </form>
     );
