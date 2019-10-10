@@ -541,9 +541,10 @@ function EndpointOverview(props) {
                                         <div className={classes.contentWrapper}>
                                             <Typography component='p' className={classes.content}>
                                                 <FormattedMessage
-                                                    id='Apis.Details.Endpoints.EndpointOverview.upload.mediation.message'
-                                                    defaultMessage={'Please upload a mediation sequence file to Message' +
-                                                ' Mediation Policies, which sets the endpoints.'}
+                                                    id={'Apis.Details.Endpoints.EndpointOverview.upload' +
+                                                    '.mediation.message'}
+                                                    defaultMessage={'Please upload a mediation sequence file to ' +
+                                                    'Message Mediation Policies, which sets the endpoints.'}
                                                 />
                                                 <Link to={'/apis/' + api.id + '/mediation policies'}>
                                                     <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
@@ -572,7 +573,8 @@ function EndpointOverview(props) {
                                                 label={
                                                     <Typography>
                                                         <FormattedMessage
-                                                            id='Apis.Details.Endpoints.EndpointOverview.production.endpoint'
+                                                            id={'Apis.Details.Endpoints.EndpointOverview' +
+                                                            '.production.endpoint'}
                                                             defaultMessage='Production Endpoint'
                                                         />
                                                     </Typography>}
@@ -651,25 +653,29 @@ function EndpointOverview(props) {
                             />
                         </Grid>
                     }
-                    {endpointType.key === 'INLINE' || endpointType.key === 'default' || endpointType.key === 'prototyped' ?
-                        <div /> :
-                        <Grid item xs={12}>
-                            <Typography variant='h4' align='left' className={classes.titleWrapper} gutterBottom>
-                                <FormattedMessage
-                                    id='Apis.Details.Endpoints.EndpointOverview.lb.failover.endpoints.header'
-                                    defaultMessage='Load balance and Failover Configuration'
+                    {
+                        endpointType.key === 'INLINE' ||
+                        endpointType.key === 'default' ||
+                        endpointType.key === 'prototyped' ?
+                            <div />
+                            :
+                            <Grid item xs={12}>
+                                <Typography variant='h4' align='left' className={classes.titleWrapper} gutterBottom>
+                                    <FormattedMessage
+                                        id='Apis.Details.Endpoints.EndpointOverview.lb.failover.endpoints.header'
+                                        defaultMessage='Load balance and Failover Configuration'
+                                    />
+                                </Typography>
+                                <LoadbalanceFailoverConfig
+                                    toggleAdvanceConfig={toggleAdvanceConfig}
+                                    endpointsDispatcher={endpointsDispatcher}
+                                    epConfig={(cloneDeep(epConfig))}
+                                    endpointSecurityInfo={endpointSecurityInfo}
+                                    handleEndpointTypeSelect={handleEndpointTypeSelect}
+                                    globalEpType={endpointType}
+                                    apiType={api.type}
                                 />
-                            </Typography>
-                            <LoadbalanceFailoverConfig
-                                toggleAdvanceConfig={toggleAdvanceConfig}
-                                endpointsDispatcher={endpointsDispatcher}
-                                epConfig={(cloneDeep(epConfig))}
-                                endpointSecurityInfo={endpointSecurityInfo}
-                                handleEndpointTypeSelect={handleEndpointTypeSelect}
-                                globalEpType={endpointType}
-                                apiType={api.type}
-                            />
-                        </Grid>
+                            </Grid>
                     }
                 </Grid>
             }

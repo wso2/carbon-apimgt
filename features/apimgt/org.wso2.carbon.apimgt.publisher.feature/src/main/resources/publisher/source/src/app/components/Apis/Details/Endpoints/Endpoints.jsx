@@ -154,17 +154,18 @@ function Endpoints(props) {
      */
     const saveAPI = () => {
         setUpdating(true);
-        if (apiObject !== {}) {
-            updateAPI(apiObject).finally(() => { setUpdating(false); });
-        }
         if (api.type !== 'WS') {
-            console.log('Updating swagger...');
-            setUpdating(true);
-            api.updateSwagger(swagger).then((resp) => {
+            const promisedAPIUpdate = updateAPI(apiObject);
+            const promisedSwaggerUpdate = api.updateSwagger(swagger);
+            Promise.all([promisedAPIUpdate, promisedSwaggerUpdate]).then((resp) => {
                 console.log('success', resp);
             }).catch((err) => {
                 console.log(err);
             }).finally(() => {
+                setUpdating(false);
+            });
+        } else {
+            updateAPI(apiObject).finally(() => {
                 setUpdating(false);
             });
         }

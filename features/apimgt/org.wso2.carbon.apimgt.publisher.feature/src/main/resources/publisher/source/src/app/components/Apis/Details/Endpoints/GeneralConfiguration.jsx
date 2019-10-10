@@ -127,44 +127,6 @@ function GeneralConfiguration(props) {
     };
 
     /**
-     * Method to get the endpoint type heading.
-     * Ex: Load Balance REST/ HTTP, Fail Over SOAP/ HTTP
-     *
-     * @return {string} The endpoint type string.
-     * */
-    const getEndpointTypeSubHeading = () => {
-        let type = '';
-        const epType = epConfig.endpoint_type;
-        const endpointTypeKey = endpointType.key;
-
-        if (endpointTypeKey === 'default') {
-            return 'Dynamic Endpoints';
-        }
-
-        if (endpointTypeKey === 'awslambda') {
-            return 'AWS Lambda Endpoint';
-        }
-
-        switch (epType) {
-            case 'load_balance':
-                type = 'Load Balance';
-                break;
-            case 'failover':
-                type = 'Fail Over';
-                break;
-            default:
-                type = 'Single';
-                break;
-        }
-        if (endpointTypeKey === 'address') {
-            type = type.concat(' HTTP/ SOAP');
-        } else {
-            type = type.concat(' HTTP/ REST');
-        }
-        return type;
-    };
-
-    /**
      * Method to delete the selected certificate.
      *
      * @param {string} alias The alias of the certificate to be deleted.
