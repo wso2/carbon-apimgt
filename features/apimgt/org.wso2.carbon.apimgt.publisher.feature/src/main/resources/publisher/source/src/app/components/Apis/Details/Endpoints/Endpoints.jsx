@@ -80,14 +80,24 @@ function Endpoints(props) {
         const tmpEndpointConfig = cloneDeep(initState.endpointConfig);
         const { action, value } = configAction;
         switch (action) {
-            case 'production_endpoints':
+            case 'production_endpoints': {
+                return { ...initState, endpointConfig: { ...tmpEndpointConfig, [action]: value } };
+            }
             case 'sandbox_endpoints': {
                 return { ...initState, endpointConfig: { ...tmpEndpointConfig, [action]: value } };
             }
-            case 'select_endpoint_category':
-            case 'set_lb_config':
-            case 'add_endpoint':
-            case 'set_advance_config':
+            case 'select_endpoint_category': {
+                return { ...initState, endpointConfig: { ...value } };
+            }
+            case 'set_lb_config': {
+                return { ...initState, endpointConfig: { ...value } };
+            }
+            case 'add_endpoint': {
+                return { ...initState, endpointConfig: { ...value } };
+            }
+            case 'set_advance_config': {
+                return { ...initState, endpointConfig: { ...value } };
+            }
             case 'remove_endpoint': {
                 return { ...initState, endpointConfig: { ...value } };
             }
@@ -147,7 +157,7 @@ function Endpoints(props) {
         if (apiObject !== {}) {
             updateAPI(apiObject).finally(() => { setUpdating(false); });
         }
-        if (Object.getOwnPropertyNames(defaultSwagger).length !== Object.getOwnPropertyNames(swagger).length) {
+        if (api.type !== 'WS') {
             console.log('Updating swagger...');
             setUpdating(true);
             api.updateSwagger(swagger).then((resp) => {
@@ -253,11 +263,13 @@ function Endpoints(props) {
     };
 
     useEffect(() => {
-        api.getSwagger(apiObject.id).then((resp) => {
-            setSwagger(resp.obj);
-        }).catch((err) => {
-            console.err(err);
-        });
+        if (api.type !== 'WS') {
+            api.getSwagger(apiObject.id).then((resp) => {
+                setSwagger(resp.obj);
+            }).catch((err) => {
+                console.err(err);
+            });
+        }
     }, []);
 
     useEffect(() => {

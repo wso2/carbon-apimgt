@@ -247,7 +247,6 @@ function GeneralConfiguration(props) {
                                 defaultMessage='Endpoint Security'
                             />
                             : {endpointSecurityInfo !== null ? endpointSecurityInfo.type : 'NONE'}
-                            {' | '}
                         </Typography>
                     )}
                     {apiType !== 'HTTP' || endpointType.key === 'default' || endpointType.key === 'awslambda' ? (
@@ -259,6 +258,7 @@ function GeneralConfiguration(props) {
                                 apiType !== 'HTTP' || endpointType.key === 'default' || endpointType.key === 'awslambda'
                             }
                         >
+                            {' | '}
                             <FormattedMessage
                                 id='Apis.Details.Endpoints.GeneralConfiguration.certificates.sub.heading'
                                 defaultMessage='Certificates'
@@ -272,7 +272,7 @@ function GeneralConfiguration(props) {
                         {apiType !== 'HTTP' ? (
                             <div />
                         ) : (
-                            <Grid container item xs={8}>
+                            <Grid container item xs={6}>
                                 {apiType !== 'HTTP' ? (
                                     <div />
                                 ) : (
@@ -315,7 +315,7 @@ function GeneralConfiguration(props) {
                         )}
                         <Grid
                             item
-                            xs
+                            xs={6}
                             className={classes.endpointConfigSection}
                             hidden={endpointType.key === 'default' || endpointType.key === 'awslambda'}
                         >

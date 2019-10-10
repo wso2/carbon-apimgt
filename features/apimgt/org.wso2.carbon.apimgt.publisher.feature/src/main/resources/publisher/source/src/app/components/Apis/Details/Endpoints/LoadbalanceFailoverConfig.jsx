@@ -157,6 +157,17 @@ function LoadbalanceFailoverConfig(props) {
         setLBConfigOpen(false);
     };
 
+    const getEndpointTypeHeading = () => {
+        switch (endpointType) {
+            case 'none':
+                return 'None';
+            case 'failover':
+                return 'Fail Over';
+            default:
+                return 'Load Balance';
+        }
+    };
+
     /**
      * Method to remove the selected endpoint from the endpoints list.
      *
@@ -195,11 +206,8 @@ function LoadbalanceFailoverConfig(props) {
                     id='panel1bh-header'
                     className={classes.configHeaderContainer}
                 >
-                    <Typography className={classes.heading}>
-                        <FormattedMessage
-                            id='Apis.Details.Endpoints.LoadbalanceFailoverConfig.lb.failover.configuration.heading'
-                            defaultMessage='Load Balance/ Failover Configuration'
-                        />
+                    <Typography className={classes.secondaryHeading}>
+                        {getEndpointTypeHeading()}
                     </Typography>
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails className={classes.generalConfigContent}>
@@ -343,6 +351,7 @@ LoadbalanceFailoverConfig.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     endpointsDispatcher: PropTypes.func.isRequired,
     toggleAdvanceConfig: PropTypes.func.isRequired,
+    globalEpType: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
 };
 

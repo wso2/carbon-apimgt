@@ -80,6 +80,7 @@ function EndpointSecurity(props) {
                         disabled={isRestricted(['apim:api_create'], api)}
                         fullwidth
                         value={endpointSecurityInfo.type}
+                        variant='outlined'
                         onChange={(event) => { onChangeEndpointAuth(event, 'type'); }}
                         inputProps={{
                             name: 'key',
@@ -95,10 +96,11 @@ function EndpointSecurity(props) {
                 </FormControl>
             </Grid>
             <Grid item container xs={12}>
-                <Grid item xs>
+                <Grid item>
                     <TextField
                         disabled={isRestricted(['apim:api_create'], api)}
                         required
+                        variant='outlined'
                         id='auth-userName'
                         label={(
                             <FormattedMessage
@@ -112,10 +114,11 @@ function EndpointSecurity(props) {
                         onBlur={(event) => { onChangeEndpointAuth(event, 'username'); }}
                     />
                 </Grid>
-                <Grid item xs>
+                <Grid item>
                     <TextField
                         disabled={isRestricted(['apim:api_create'], api)}
                         required
+                        variant='outlined'
                         type='password'
                         id='auth-password'
                         label={(
