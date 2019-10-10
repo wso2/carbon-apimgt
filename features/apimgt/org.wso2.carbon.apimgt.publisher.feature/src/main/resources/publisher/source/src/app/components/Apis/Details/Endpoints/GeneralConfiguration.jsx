@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
     Collapse,
     ExpansionPanel,
     ExpansionPanelDetails,
     ExpansionPanelSummary,
-    FormControl,
     FormControlLabel,
     Grid,
-    InputLabel,
-    MenuItem,
-    Select,
     Switch,
     Typography,
     withStyles,
@@ -71,13 +67,6 @@ const styles = theme => ({
     },
 });
 
-const endpointTypes = [
-    { key: 'http', value: 'HTTP/REST Endpoint' },
-    { key: 'address', value: 'HTTP/SOAP Endpoint' },
-    { key: 'default', value: 'Dynamic Endpoints' },
-    { key: 'awslambda', value: 'AWS Lambda Endpoint' },
-];
-
 /**
  * The component which holds the general configurations of the endpoints.
  *
@@ -91,14 +80,12 @@ function GeneralConfiguration(props) {
         endpointSecurityInfo,
         handleToggleEndpointSecurity,
         handleEndpointSecurityChange,
-        handleEndpointTypeSelect,
         endpointType,
         classes,
         apiType,
     } = props;
-    const [isConfigExpanded, setConfigExpand] = useState(true);
+    const [isConfigExpanded, setConfigExpand] = useState(false);
     const [endpointCertificates, setEndpointCertificates] = useState([]);
-    const [epTypeSubHeading, setEpTypeSubHeading] = useState('Single HTTP/ REST');
     const { api } = useContext(APIContext);
     const [aliasList, setAliasList] = useState([]);
 
@@ -208,11 +195,6 @@ function GeneralConfiguration(props) {
             });
     };
 
-    useEffect(() => {
-        const heading = getEndpointTypeSubHeading();
-        setEpTypeSubHeading(heading);
-    }, [props]);
-
     // Get the certificates from backend.
     useEffect(() => {
         API.getEndpointCertificates()
@@ -251,24 +233,6 @@ function GeneralConfiguration(props) {
                     id='panel1bh-header'
                     className={classes.configHeaderContainer}
                 >
-                    <Typography className={classes.heading}>
-                        <FormattedMessage
-                            id='Apis.Details.Endpoints.GeneralConfiguration.general.configuration.heading'
-                            defaultMessage='General Configuration'
-                        />
-                    </Typography>
-                    {apiType !== 'HTTP' ? (
-                        <div />
-                    ) : (
-                        <Typography className={classes.secondaryHeading}>
-                            <FormattedMessage
-                                id='Apis.Details.Endpoints.GeneralConfiguration.endpoint.type.sub.heading'
-                                defaultMessage='Endpoint Type'
-                            />{' '}
-                            : {epTypeSubHeading}
-                            {' | '}
-                        </Typography>
-                    )}
                     {apiType !== 'HTTP' || endpointType.key === 'awslambda' ? (
                         <div />
                     ) : (
@@ -309,29 +273,6 @@ function GeneralConfiguration(props) {
                             <div />
                         ) : (
                             <Grid container item xs={8}>
-                                <Grid item xs className={classes.endpointConfigSection}>
-                                    <FormControl className={classes.endpointTypeSelect}>
-                                        <InputLabel htmlFor='endpoint-type-select'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Endpoints.EndpointOverview.endpointType'
-                                                defaultMessage='Endpoint Type'
-                                            />
-                                        </InputLabel>
-                                        <Select
-                                            disabled={isRestricted(['apim:api_create'], api)}
-                                            value={endpointType.key}
-                                            onChange={handleEndpointTypeSelect}
-                                            inputProps={{
-                                                name: 'key',
-                                                id: 'endpoint-type-select',
-                                            }}
-                                        >
-                                            {endpointTypes.map((type) => {
-                                                return <MenuItem value={type.key}>{type.value}</MenuItem>;
-                                            })}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
                                 {apiType !== 'HTTP' ? (
                                     <div />
                                 ) : (
@@ -398,7 +339,6 @@ GeneralConfiguration.propTypes = {
     endpointSecurityInfo: PropTypes.shape({}).isRequired,
     handleToggleEndpointSecurity: PropTypes.func.isRequired,
     handleEndpointSecurityChange: PropTypes.func.isRequired,
-    handleEndpointTypeSelect: PropTypes.func.isRequired,
     endpointType: PropTypes.shape({}).isRequired,
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,

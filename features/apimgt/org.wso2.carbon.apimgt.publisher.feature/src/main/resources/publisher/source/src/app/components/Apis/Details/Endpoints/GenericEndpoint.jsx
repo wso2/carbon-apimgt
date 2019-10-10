@@ -23,7 +23,6 @@ import {
     TextField,
     withStyles,
 } from '@material-ui/core';
-import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { isRestricted } from 'AppData/AuthManager';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
@@ -68,6 +67,8 @@ function GenericEndpoint(props) {
         deleteEndpoint,
         index,
         readOnly,
+        autoFocus,
+        name,
     } = props;
     const [serviceUrl, setServiceUrl] = useState(endpointURL);
     const { api } = useContext(APIContext);
@@ -80,22 +81,30 @@ function GenericEndpoint(props) {
         <div className={classes.endpointInputWrapper}>
             <TextField
                 disabled={isRestricted(['apim:api_create'], api)}
-                label={<FormattedMessage
-                    id='Apis.Details.Endpoints.GenericEndpoint.service.url.input'
-                    defaultMessage='Service URL'
-                />}
+                label={name}
                 className={classes.textField}
                 value={serviceUrl}
                 placeholder={!serviceUrl ? 'http://appserver/resource' : ''}
                 onChange={event => setServiceUrl(event.target.value)}
                 onBlur={() => editEndpoint(index, category, serviceUrl)}
-                variant='outlined'
+                // variant='outlined'
                 margin='normal'
                 required
                 InputProps={{
                     readOnly,
+                    autoFocus,
                     endAdornment: (
                         <InputAdornment position='end'>
+                            <IconButton
+                                className={classes.iconButton}
+                                aria-label='Settings'
+                                // onClick={() => testEndpoint(index, type, category)}
+                                disabled={(isRestricted(['apim:api_create'], api))}
+                            >
+                                <Icon>
+                                    autorenew
+                                </Icon>
+                            </IconButton>
                             {type === 'prototyped' ?
                                 <div /> :
                                 <IconButton
@@ -132,6 +141,8 @@ function GenericEndpoint(props) {
 
 GenericEndpoint.defaultProps = {
     readOnly: false,
+    autoFocus: false,
+    name: 'Service URL',
 };
 
 GenericEndpoint.propTypes = {
@@ -144,6 +155,8 @@ GenericEndpoint.propTypes = {
     editEndpoint: PropTypes.func.isRequired,
     category: PropTypes.string.isRequired,
     readOnly: PropTypes.bool,
+    autoFocus: PropTypes.bool,
+    name: PropTypes.string,
 };
 
 export default withStyles(styles)(GenericEndpoint);
