@@ -172,12 +172,20 @@ renderSuggestion.propTypes = {
  * @param {*} param2 showEmpty
  * @returns {*} filter
  */
-function getSuggestions(value, isAPIProduct, { showEmpty = false } = {}) {
+function getSuggestions(value, isAPIProduct, isGraphQL, { showEmpty = false } = {}) {
     const inputValue = deburr(value.trim()).toLowerCase();
     const inputLength = inputValue.length;
     let count = 0;
     const newSuggestions = [...suggestions.common];
-    isAPIProduct ? newSuggestions.push(...suggestions.productOnly) : newSuggestions.push(...suggestions.apiOnly);
+
+    if (isAPIProduct) {
+        newSuggestions.push(...suggestions.productOnly);
+    } else if (isGraphQL) {
+        newSuggestions.push(...suggestions.graphqlOnly);
+    } else {
+        newSuggestions.push(...suggestions.apiOnly);
+    }
+
     return inputLength === 0 && !showEmpty
         ? []
         : newSuggestions.filter((suggestion) => {
@@ -198,9 +206,14 @@ function getSuggestions(value, isAPIProduct, { showEmpty = false } = {}) {
  * @returns {*} Downshift element
  */
 function GoTo(props) {
-    const { isAPIProduct } = props;
+    const { isAPIProduct, api } = props;
     const classes = useStyles();
     const [showSearch, setShowSearch] = useState(false);
+    let isGraphQL = false;
+
+    if (api.type === 'GRAPHQL') {
+        isGraphQL = true;
+    }
     const toggleSearch = () => {
         setShowSearch(!showSearch);
     };
@@ -248,16 +261,17 @@ function GoTo(props) {
                                         <div {...getMenuProps()}>
                                             {isOpen ? (
                                                 <Paper className={classes.paper} square>
-                                                    {getSuggestions(inputValue, isAPIProduct).map((suggestion, index) =>
-                                                        renderSuggestion({
-                                                            suggestion,
-                                                            index,
-                                                            itemProps: getItemProps({ item: suggestion.label }),
-                                                            highlightedIndex,
-                                                            selectedItem,
-                                                            handleClickAway: handleClickAway,
-                                                            ...props,
-                                                        }))}
+                                                    {getSuggestions(inputValue, isAPIProduct, isGraphQL)
+                                                        .map((suggestion, index) =>
+                                                            renderSuggestion({
+                                                                suggestion,
+                                                                index,
+                                                                itemProps: getItemProps({ item: suggestion.label }),
+                                                                highlightedIndex,
+                                                                selectedItem,
+                                                                handleClickAway: handleClickAway,
+                                                                ...props,
+                                                            }))}
                                                 </Paper>
                                             ) : null}
                                         </div>
