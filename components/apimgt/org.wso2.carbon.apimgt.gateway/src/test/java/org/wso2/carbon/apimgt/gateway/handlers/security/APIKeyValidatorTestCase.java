@@ -590,7 +590,7 @@ public class APIKeyValidatorTestCase {
         } catch (APISecurityException e) {
             e.printStackTrace();
         }
-        Assert.assertEquals(StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase()), result1);
+        Assert.assertEquals(StringUtils.capitalize(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.toLowerCase()), result1);
     }
 
     /*
