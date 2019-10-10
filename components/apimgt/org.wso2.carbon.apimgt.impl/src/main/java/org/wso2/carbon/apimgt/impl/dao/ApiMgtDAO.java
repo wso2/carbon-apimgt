@@ -7471,6 +7471,7 @@ public class ApiMgtDAO {
                         if (mediationScriptBlob != null) {
                             String script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
                             uriTemplate.setMediationScript(script);
+                            uriTemplate.setMediationScripts(verb, script);
                         }
 
                         Optional<APIProductIdentifier> productId = getProductIdIfExists(rs);
