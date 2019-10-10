@@ -236,24 +236,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 }
 
                 //Initial guess of a JWT token using the presence of a DOT.
-                if (StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT)) {
-                    try {
-                        org.json.JSONObject decodedHeader = new org.json.JSONObject(new String(Base64.getUrlDecoder()
-                                .decode(apiKey.split("\\.")[0]), Charset.defaultCharset()));
-                        // Check if the decoded header contains type as 'JWT'.
-                        if (APIConstants.JWT.equals(decodedHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))) {
-                            isJwtToken = true;
-                            if (StringUtils.countMatches(apiKey, APIConstants.DOT) != 2) {
-                                log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
-                                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                        "Invalid JWT token");
-                            }
-                        }
-                    } catch (JSONException | IllegalArgumentException e) {
-                        isJwtToken = false;
-                        log.debug("Not a JWT token. Failed to decode the token header.", e);
-                    }
-                }
+                isJwtToken = StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT) &&
+                        APIUtil.isValidJWT(apiKey);
                 // Find the authentication scheme based on the token type
                 if (isJwtToken) {
                     log.debug("The token was identified as a JWT token");
