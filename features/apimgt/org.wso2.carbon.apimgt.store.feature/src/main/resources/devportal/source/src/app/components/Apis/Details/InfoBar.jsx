@@ -178,6 +178,7 @@ class InfoBar extends React.Component {
             checked: false,
         };
         this.getSchema = this.getSchema.bind(this);
+        this.getProvider = this.getProvider.bind(this);
     }
 
     /**
@@ -199,6 +200,14 @@ class InfoBar extends React.Component {
         }
     };
 
+    getProvider(api) {
+        let { provider } = api;
+        if (api.businessInformation && api.businessInformation.businessOwner && api.businessInformation.businessOwner.trim() !== '') {
+            provider = api.businessInformation.businessOwner;
+        }
+        return provider;
+    }
+
     getSchema() {
         const newAPI = new API();
         const { api } = this.context;
@@ -209,7 +218,7 @@ class InfoBar extends React.Component {
             const url = windowUrl.createObjectURL(binary);
             const anchor = document.createElement('a');
             anchor.href = url;
-            anchor.download = api.provider + '-' + api.name + '-' + api.version + '.graphql';
+            anchor.download = this.getProvider(api) + '-' + api.name + '-' + api.version + '.graphql';
             anchor.click();
             windowUrl.revokeObjectURL(url);
         });
@@ -261,7 +270,7 @@ class InfoBar extends React.Component {
                             <div style={{ marginLeft: theme.spacing.unit }}>
                                 <Typography variant='h4'>{api.name}</Typography>
                                 <Typography variant='caption' gutterBottom align='left'>
-                                    {api.provider}
+                                    {this.getProvider(api)}
                                 </Typography>
                             </div>
                             <VerticalDivider height={70} />
@@ -337,7 +346,7 @@ class InfoBar extends React.Component {
                                                             </span>
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell>{api.provider}</TableCell>
+                                                    <TableCell>{this.getProvider(api)}</TableCell>
                                                 </TableRow>
                                                 {/* <TableRow>
                                                     <TableCell component='th' scope='row'>

@@ -3702,6 +3702,9 @@ definitions:
       advertiseInfo:
         description: The advertise info of the API
         $ref: '#/definitions/AdvertiseInfo'
+      businessInformation:
+        allOf:
+          - $ref: '#/definitions/APIBusinessInformation'
 
 #-----------------------------------------------------
 # The Standard API resource
@@ -3876,19 +3879,8 @@ definitions:
                   description: WSS environment default URL
                   example: "ws://localhost:9099/phoneverify/"
       businessInformation:
-        properties:
-          businessOwner:
-            type: string
-            example: businessowner
-          businessOwnerEmail:
-            type: string
-            example: businessowner@wso2.com
-          technicalOwner:
-            type: string
-            example: technicalowner
-          technicalOwnerEmail:
-            type: string
-            example: technicalowner@wso2.com
+        allOf:
+          - $ref: '#/definitions/APIBusinessInformation'
       labels:
         description: |
           Labels of micro-gateway environments attached to the API.
@@ -4235,6 +4227,23 @@ definitions:
         #   next: "/subscriptions?limit=1&offset=2&apiId=01234567-0123-0123-0123-012345678901&groupId="
         #   previous: "/subscriptions?limit=1&offset=0&apiId=01234567-0123-0123-0123-012345678901&groupId="
 
+  #-----------------------------------------------------
+  # API Business Information resource
+  #-----------------------------------------------------
+  APIBusinessInformation:
+    properties:
+      businessOwner:
+        type: string
+        example: businessowner
+      businessOwnerEmail:
+        type: string
+        example: businessowner@wso2.com
+      technicalOwner:
+        type: string
+        example: technicalowner
+      technicalOwnerEmail:
+        type: string
+        example: technicalowner@wso2.com
 #-----------------------------------------------------
 # The Subscription resource
 #-----------------------------------------------------

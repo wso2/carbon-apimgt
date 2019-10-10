@@ -30,6 +30,7 @@ public class APIInfoDTO   {
     private String avgRating = null;
     private List<String> throttlingPolicies = new ArrayList<>();
     private AdvertiseInfoDTO advertiseInfo = null;
+    private Object businessInformation = null;
 
   /**
    **/
@@ -239,6 +240,23 @@ public class APIInfoDTO   {
     this.advertiseInfo = advertiseInfo;
   }
 
+  /**
+   **/
+  public APIInfoDTO businessInformation(Object businessInformation) {
+    this.businessInformation = businessInformation;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("businessInformation")
+  public Object getBusinessInformation() {
+    return businessInformation;
+  }
+  public void setBusinessInformation(Object businessInformation) {
+    this.businessInformation = businessInformation;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -260,12 +278,13 @@ public class APIInfoDTO   {
         Objects.equals(thumbnailUri, apIInfo.thumbnailUri) &&
         Objects.equals(avgRating, apIInfo.avgRating) &&
         Objects.equals(throttlingPolicies, apIInfo.throttlingPolicies) &&
-        Objects.equals(advertiseInfo, apIInfo.advertiseInfo);
+        Objects.equals(advertiseInfo, apIInfo.advertiseInfo) &&
+        Objects.equals(businessInformation, apIInfo.businessInformation);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, type, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies, advertiseInfo);
+    return Objects.hash(id, name, description, context, version, type, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies, advertiseInfo, businessInformation);
   }
 
   @Override
@@ -285,6 +304,7 @@ public class APIInfoDTO   {
     sb.append("    avgRating: ").append(toIndentedString(avgRating)).append("\n");
     sb.append("    throttlingPolicies: ").append(toIndentedString(throttlingPolicies)).append("\n");
     sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
+    sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("}");
     return sb.toString();
   }
