@@ -14372,14 +14372,11 @@ public class ApiMgtDAO {
      */
     public void addRevokedJWTSignature(String jwtSignature, Long expiryTime, String tenantDomain) throws APIManagementException {
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
+        String addJwtSignature = SQLConstants.RevokedJWTConstants.ADD_JWT_SIGNATURE;
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement
+                     (addJwtSignature)) {
             conn.setAutoCommit(false);
-            String addJwtSignature = SQLConstants.RevokedJWTConstants.ADD_JWT_SIGNATURE;
-            ps = conn.prepareStatement(addJwtSignature);
             ps.setString(1, UUID.randomUUID().toString());
             ps.setString(2, jwtSignature);
             ps.setLong(3, expiryTime);
@@ -14387,16 +14384,7 @@ public class ApiMgtDAO {
             ps.execute();
             conn.commit();
         } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException e1) {
-                    log.error("Error while rolling back the failed operation", e1);
-                }
-            }
             handleException("Error in adding revoked jwt signature to database : " + e.getMessage(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
     }
 
@@ -14407,19 +14395,14 @@ public class ApiMgtDAO {
     public void removeExpiredJWTs() throws APIManagementException {
 
         String deleteQuery = SQLConstants.RevokedJWTConstants.DELETE_REVOKED_JWT;
-        PreparedStatement ps = null;
-        Connection connection = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
+        try (Connection connection = APIMgtDBUtil.getConnection(); PreparedStatement ps =
+                connection.prepareStatement(deleteQuery)) {
             connection.setAutoCommit(false);
-            ps = connection.prepareStatement(deleteQuery);
-            ps.setLong(1,System.currentTimeMillis()/1000);
+            ps.setLong(1, System.currentTimeMillis() / 1000);
             ps.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while deleting expired JWTs from revoke table.", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, null);
         }
     }
 }
