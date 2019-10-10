@@ -484,6 +484,17 @@ function Overview(props) {
                             <OverviewDocuments apiId={api.id} />
                         </Grid>
                     </ExpansionPanelDetails>
+                    <Divider />
+                    <ExpansionPanelActions className={classes.actionPanel}>
+                        <Link to={'/apis/' + api.id + '/docs'} className={classes.button}>
+                            <Button size='small' color='primary'>
+                                <FormattedMessage
+                                    id='Apis.Details.Overview.comments.show.more'
+                                    defaultMessage='Show More >>'
+                                />
+                            </Button>
+                        </Link>
+                    </ExpansionPanelActions>
                 </ExpansionPanel>
             </Grid>
         </Grid>
