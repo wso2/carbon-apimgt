@@ -28,12 +28,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
-import org.json.simple.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
@@ -52,6 +55,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.util.Base64;
 import java.util.UUID;
 
 /**
@@ -211,8 +216,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
      * @param req Full Http Request
      * @return true if the access token is valid
      */
-    private boolean validateOAuthHeader(FullHttpRequest req)
-            throws APIManagementException, APISecurityException {
+    private boolean validateOAuthHeader(FullHttpRequest req) throws APISecurityException {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -225,46 +229,97 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             String[] auth = req.headers().get(HttpHeaders.AUTHORIZATION).split(" ");
             if (APIConstants.CONSUMER_KEY_SEGMENT.equals(auth[0])) {
                 String cacheKey;
+                boolean isJwtToken = false;
                 String apiKey = auth[1];
                 if (WebsocketUtil.isRemoveOAuthHeadersFromOutMessage()) {
                     req.headers().remove(HttpHeaders.AUTHORIZATION);
                 }
-                //If the key have already been validated
-                if (WebsocketUtil.isGatewayTokenCacheEnabled()) {
-                    cacheKey = WebsocketUtil.getAccessTokenCacheKey(apiKey, uri);
-                    info = WebsocketUtil.validateCache(apiKey, cacheKey);
-                    if (info != null) {
-                        infoDTO = info;
-                        return info.isAuthorized();
+
+                //Initial guess of a JWT token using the presence of a DOT.
+                isJwtToken = StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT) &&
+                        APIUtil.isValidJWT(apiKey);
+                // Find the authentication scheme based on the token type
+                if (isJwtToken) {
+                    log.debug("The token was identified as a JWT token");
+                    AuthenticationContext authenticationContext =
+                            new JWTValidator(null).authenticateForWebSocket(apiKey, uri, version);
+                    if(authenticationContext == null || !authenticationContext.isAuthenticated()) {
+                        return false;
                     }
-                }
-                String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
-                if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
-                    info = getApiKeyDataForWSClient(apiKey);
+                    // The information given by the AuthenticationContext is set to an APIKeyValidationInfoDTO object
+                    // so to feed information analytics and throttle data publishing
+                    info = new APIKeyValidationInfoDTO();
+                    info.setAuthorized(authenticationContext.isAuthenticated());
+                    info.setApplicationTier(authenticationContext.getApplicationTier());
+                    info.setTier(authenticationContext.getTier());
+                    info.setSubscriberTenantDomain(authenticationContext.getSubscriberTenantDomain());
+                    info.setSubscriber(authenticationContext.getSubscriber());
+                    info.setStopOnQuotaReach(authenticationContext.isStopOnQuotaReach());
+                    info.setApiName(authenticationContext.getApiName());
+                    info.setApplicationId(authenticationContext.getApplicationId());
+                    info.setType(authenticationContext.getKeyType());
+                    info.setApiPublisher(authenticationContext.getApiPublisher());
+                    info.setApplicationName(authenticationContext.getApplicationName());
+                    info.setConsumerKey(authenticationContext.getConsumerKey());
+                    info.setEndUserName(authenticationContext.getUsername());
+
+                    //This prefix is added for synapse to dispatch this request to the specific sequence
+                    if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(info.getType())) {
+                        uri = "/_PRODUCTION_" + uri;
+                    } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(info.getType())) {
+                        uri = "/_SANDBOX_" + uri;
+                    }
+
+                    infoDTO = info;
+                    return authenticationContext.isAuthenticated();
                 } else {
-                    return false;
+                    log.debug("The token was identified as an OAuth token");
+                    //If the key have already been validated
+                    if (WebsocketUtil.isGatewayTokenCacheEnabled()) {
+                        cacheKey = WebsocketUtil.getAccessTokenCacheKey(apiKey, uri);
+                        info = WebsocketUtil.validateCache(apiKey, cacheKey);
+                        if (info != null) {
+
+                            //This prefix is added for synapse to dispatch this request to the specific sequence
+                            if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(info.getType())) {
+                                uri = "/_PRODUCTION_" + uri;
+                            } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(info.getType())) {
+                                uri = "/_SANDBOX_" + uri;
+                            }
+
+                            infoDTO = info;
+                            return info.isAuthorized();
+                        }
+                    }
+                    String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
+                    if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
+                        info = getApiKeyDataForWSClient(apiKey);
+                    } else {
+                        return false;
+                    }
+                    if (info == null || !info.isAuthorized()) {
+                        return false;
+                    }
+                    if (info.getApiName() != null && info.getApiName().contains("*")) {
+                        String[] str = info.getApiName().split("\\*");
+                        version = str[1];
+                        uri += "/" + str[1];
+                        info.setApiName(str[0]);
+                    }
+                    if (WebsocketUtil.isGatewayTokenCacheEnabled()) {
+                        cacheKey = WebsocketUtil.getAccessTokenCacheKey(apiKey, uri);
+                        WebsocketUtil.putCache(info, apiKey, cacheKey);
+                    }
+                    //This prefix is added for synapse to dispatch this request to the specific sequence
+                    if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(info.getType())) {
+                        uri = "/_PRODUCTION_" + uri;
+                    } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(info.getType())) {
+                        uri = "/_SANDBOX_" + uri;
+                    }
+                    token = info.getEndUserToken();
+                    infoDTO = info;
+                    return true;
                 }
-                if (info == null || !info.isAuthorized()) {
-                    return false;
-                }
-                if (info.getApiName() != null && info.getApiName().contains("*")) {
-                    String[] str = info.getApiName().split("\\*");
-                    version = str[1];
-                    uri += "/" + str[1];
-                    info.setApiName(str[0]);
-                }
-                if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(info.getType())) {
-                    uri = "/_PRODUCTION_" + uri;
-                } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(info.getType())) {
-                    uri = "/_SANDBOX_" + uri;
-                }
-                if (WebsocketUtil.isGatewayTokenCacheEnabled()) {
-                    cacheKey = WebsocketUtil.getAccessTokenCacheKey(apiKey, uri);
-                    WebsocketUtil.putCache(info, apiKey, cacheKey);
-                }
-                token = info.getEndUserToken();
-                infoDTO = info;
-                return true;
             } else {
                 return false;
             }
@@ -288,8 +343,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
      * @return false if throttled
      * @throws APIManagementException
      */
-    public boolean doThrottle(ChannelHandlerContext ctx, WebSocketFrame msg)
-            throws APIManagementException {
+    public boolean doThrottle(ChannelHandlerContext ctx, WebSocketFrame msg) {
 
         String applicationLevelTier = infoDTO.getApplicationTier();
         String apiLevelTier = infoDTO.getApiTier();

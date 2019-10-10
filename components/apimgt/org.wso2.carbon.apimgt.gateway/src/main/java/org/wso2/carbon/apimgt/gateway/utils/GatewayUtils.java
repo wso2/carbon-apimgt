@@ -492,7 +492,8 @@ public class GatewayUtils {
             authContext.setSubscriberTenantDomain(
                     api.getString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN));
             JSONObject tierInfo = (JSONObject) payload.get(APIConstants.JwtTokenConstants.TIER_INFO);
-
+            authContext.setApiName(api.getString(APIConstants.JwtTokenConstants.API_NAME));
+            authContext.setApiPublisher(api.getString(APIConstants.JwtTokenConstants.API_PUBLISHER));
             if (tierInfo.has(subscriptionTier)) {
                 JSONObject subscriptionTierObj = (JSONObject) tierInfo.get(subscriptionTier);
                 authContext.setStopOnQuotaReach(
