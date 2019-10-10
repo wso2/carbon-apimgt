@@ -71,7 +71,7 @@ export default function Resources(props) {
      */
     function operationsReducer(currentOperations, operationAction) {
         const { action, data } = operationAction;
-        const { target, verb, value } = data;
+        const { target, verb, value } = data || {};
         let updatedOperation;
         let addedOperations;
         if (target && verb) {
@@ -82,7 +82,8 @@ export default function Resources(props) {
 
         switch (action) {
             case 'init':
-                return data;
+                setSelectedOperation({});
+                return data || openAPISpec.paths;
             case 'description':
             case 'summary':
                 updatedOperation[action] = value;
@@ -117,6 +118,7 @@ export default function Resources(props) {
                     } else {
                         // use else condition because continue is not allowed by es-lint rules
                         addedOperations[data.target][currentVerb] = {
+                            'x-wso2-new': true, // This is to identify unsaved newly added operations, Remove when PUT
                             responses: { 200: { description: 'ok' } },
                             parameters,
                         };
@@ -170,7 +172,6 @@ export default function Resources(props) {
             const value = spec;
             delete value.$$normalized;
             operationsDispatcher({ action: 'init', data: value.paths });
-            delete value.paths; // Remove paths from passed spec
             setOpenAPISpec(value);
             setSpecErrors(errors);
         });
@@ -189,9 +190,6 @@ export default function Resources(props) {
             .catch((error) => {
                 console.error(error);
                 Alert.error('Error while updating the definition');
-            })
-            .finally(() => {
-                setSelectedOperation({});
             });
     }
 
@@ -219,6 +217,14 @@ export default function Resources(props) {
                         delete copyOfOperations[target][verb];
                         if (isEmpty(copyOfOperations[target])) {
                             delete copyOfOperations[target];
+                        }
+                    }
+                }
+                // TODO: use better alternative (optimize performance) to identify newly added operations ~tmkb
+                for (const [, verbs] of Object.entries(copyOfOperations)) {
+                    for (const [, verbInfo] of Object.entries(verbs)) {
+                        if (verbInfo['x-wso2-new']) {
+                            delete verbInfo['x-wso2-new'];
                         }
                     }
                 }
@@ -328,8 +334,16 @@ export default function Resources(props) {
                         </Grid>
                     ))}
                 </Paper>
-                <Grid container direction='row' justify='space-between' alignItems='center'>
-                    {!disableUpdate && <SaveOperations updateOpenAPI={updateOpenAPI} />}
+                <Grid
+                    style={{ marginTop: '25px' }}
+                    container
+                    direction='row'
+                    justify='space-between'
+                    alignItems='center'
+                >
+                    {!disableUpdate && (
+                        <SaveOperations operationsDispatcher={operationsDispatcher} updateOpenAPI={updateOpenAPI} />
+                    )}
                     {!hideAPIDefinitionLink && <GoToDefinitionLink api={api} />}
                 </Grid>
             </Grid>

@@ -205,9 +205,11 @@ function APIRateLimiting(props) {
                                     Save
                                     {isSaving && <CircularProgress size={24} />}
                                 </Button>
-                                <Button size='small' onClick={resetChanges}>
-                                    Reset
-                                </Button>
+                                <Box display='inline' ml={1}>
+                                    <Button size='small' onClick={resetChanges}>
+                                        Reset
+                                    </Button>
+                                </Box>
                             </Box>
                         </Grid>
                     </Fragment>
