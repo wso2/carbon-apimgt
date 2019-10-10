@@ -100,7 +100,7 @@ const documentSchema = Joi.extend(joi => ({
 }));
 
 const definition = {
-    apiName: Joi.string().regex(/^[a-zA-Z0-9]{1,50}$/).required().error((errors) => {
+    apiName: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/).required().error((errors) => {
         const tmpErrors = [...errors];
         errors.forEach((err, index) => {
             const tmpError = { ...err };
@@ -109,7 +109,7 @@ const definition = {
         });
         return tmpErrors;
     }),
-    apiVersion: Joi.string().regex(/^[a-zA-Z0-9.]{1,30}$/).required().error((errors) => {
+    apiVersion: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/).required().error((errors) => {
         const tmpErrors = [...errors];
         errors.forEach((err, index) => {
             const tmpError = { ...err };

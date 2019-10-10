@@ -97,18 +97,18 @@ export default function Environments() {
                     <TableHead>
                         <TableRow>
                             <TableCell />
-                            <TableCell>Name</TableCell>
-                            <TableCell align='right'>Type</TableCell>
-                            <TableCell align='right'>ServerURL</TableCell>
+                            <TableCell align='left'>Name</TableCell>
+                            <TableCell align='left'>Type</TableCell>
+                            <TableCell align='left'>Server URL</TableCell>
                             {api.isWebSocket() ? (
                                 <React.Fragment>
-                                    <TableCell align='right'>WS</TableCell>
-                                    <TableCell align='right'>WSS</TableCell>
+                                    <TableCell align='left'>WS Endpoint</TableCell>
+                                    <TableCell align='left'>WSS Endpoint</TableCell>
                                 </React.Fragment>
                             ) : (
                                 <React.Fragment>
-                                    <TableCell align='right'>Http</TableCell>
-                                    <TableCell align='right'>Https</TableCell>
+                                    <TableCell align='left'>HTTP Endpoint</TableCell>
+                                    <TableCell align='left'>HTTPS Endpoint</TableCell>
                                 </React.Fragment>
                             )}
                         </TableRow>
@@ -137,18 +137,18 @@ export default function Environments() {
                                 <TableCell component='th' scope='row'>
                                     {row.name}
                                 </TableCell>
-                                <TableCell align='right'>{row.type}</TableCell>
-                                <TableCell align='right'>{row.serverUrl}</TableCell>
+                                <TableCell align='left'>{row.type}</TableCell>
+                                <TableCell align='left'>{row.serverUrl}</TableCell>
 
                                 {api.isWebSocket() ? (
                                     <React.Fragment>
-                                        <TableCell align='right'>{row.endpoints.ws}</TableCell>
-                                        <TableCell align='right'>{row.endpoints.wss}</TableCell>
+                                        <TableCell align='left'>{row.endpoints.ws}</TableCell>
+                                        <TableCell align='left'>{row.endpoints.wss}</TableCell>
                                     </React.Fragment>
                                 ) : (
                                     <React.Fragment>
-                                        <TableCell align='right'>{row.endpoints.http}</TableCell>
-                                        <TableCell align='right'>{row.endpoints.https}</TableCell>
+                                        <TableCell align='left'>{row.endpoints.http}</TableCell>
+                                        <TableCell align='left'>{row.endpoints.https}</TableCell>
                                     </React.Fragment>
                                 )}
                             </TableRow>

@@ -274,6 +274,7 @@ class Details extends Component {
                                 id: 'Apis.Details.index.schema.definition',
                                 defaultMessage: 'Schema Definition',
                             })}
+                            route='schema definition'
                             to={pathPrefix + 'schema definition'}
                             Icon={<CodeIcon />}
                         />
@@ -289,6 +290,7 @@ class Details extends Component {
                                 id: 'Apis.Details.index.api.definition2',
                                 defaultMessage: 'API definition',
                             })}
+                            route='api definition'
                             to={pathPrefix + 'api definition'}
                             Icon={<CodeIcon />}
                         />
@@ -476,15 +478,17 @@ class Details extends Component {
                             to={pathPrefix + 'configuration'}
                             Icon={<ConfigurationIcon />}
                         />
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.runtime.configs',
-                                defaultMessage: 'Runtime Configurations',
-                            })}
-                            route='runtime-configuration'
-                            to={pathPrefix + 'runtime-configuration'}
-                            Icon={<RuntimeConfigurationIcon />}
-                        />
+                        {!api.isWebSocket() && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.runtime.configs',
+                                    defaultMessage: 'Runtime Configurations',
+                                })}
+                                route='runtime-configuration'
+                                to={pathPrefix + 'runtime-configuration'}
+                                Icon={<RuntimeConfigurationIcon />}
+                            />
+                        )}
                         {this.getLeftMenuItemForResourcesByType(api.type)}
                         {!isAPIProduct && (
                             <LeftMenuItem
@@ -660,7 +664,6 @@ class Details extends Component {
                                 />
 
                                 <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
-                                <Route path={Details.subPaths.SCOPES_PRODUCT} component={() => <Scope api={api} />} />
                                 <Route path={Details.subPaths.DOCUMENTS} component={() => <Documents api={api} />} />
                                 <Route
                                     path={Details.subPaths.DOCUMENTS_PRODUCT}
@@ -737,7 +740,6 @@ Details.subPaths = {
     RESOURCES_PRODUCT: '/api-products/:apiprod_uuid/resources',
     RESOURCES_PRODUCT_EDIT: '/api-products/:apiprod_uuid/resources/edit',
     SCOPES: '/apis/:api_uuid/scopes',
-    SCOPES_PRODUCT: '/api-products/:apiprod_uuid/scopes',
     MEDIATION_POLICIES_PRODUCT: '/api-products/:apiprod_uuid/mediation policies',
     DOCUMENTS: '/apis/:api_uuid/documents',
     DOCUMENTS_PRODUCT: '/api-products/:apiprod_uuid/documents',

@@ -42,6 +42,7 @@ import Application from '../../../data/Application';
 import Tokens from './Tokens';
 import ViewToken from './ViewToken';
 import ViewCurl from './ViewCurl';
+import TextField from '@material-ui/core/TextField';
 
 const styles = theme => ({
     button: {
@@ -59,13 +60,18 @@ const styles = theme => ({
     inputWrapper: {
         display: 'flex',
         flexDirection: 'row',
+        alignItems: 'center',
     },
     copyWrapper: {
         display: 'flex',
         flexDirection: 'row',
+        alignItems: 'center',
     },
     gridWrapper: {
         paddingTop: theme.spacing.unit * 2,
+    },
+    iconStyle: {
+        cursor: 'grab',
     },
     tokenSection: {
         marginTop: theme.spacing.unit * 2,
@@ -288,38 +294,52 @@ class ViewKeys extends React.Component {
                 <div className={classes.inputWrapper}>
                     <Grid container spacing={3} className={classes.gridWrapper}>
                         <Grid item xs={6}>
-                            <InputLabel htmlFor='adornment-amount'>
-                                <FormattedMessage
-                                    id='Shared.AppsAndKeys.ViewKeys.consumer.key'
-                                    defaultMessage='Consumer Key'
-                                />
-                            </InputLabel>
                             <div className={classes.copyWrapper}>
-                                <Input
-                                    inputProps={{ readOnly: true }}
+                                <TextField
                                     id='consumer-key'
                                     value={consumerKey}
                                     margin='normal'
-                                    fullWidth
-                                />
-                                <Tooltip
-                                    title={
-                                        keyCopied
-                                            ? intl.formatMessage({
-                                                defaultMessage: 'Copied',
-                                                id: 'Shared.AppsAndKeys.ViewKeys.copied',
-                                            })
-                                            : intl.formatMessage({
-                                                defaultMessage: 'Copy to clipboard',
-                                                id: 'Shared.AppsAndKeys.ViewKeys.copied',
-                                            })
+                                    label={
+                                        <FormattedMessage
+                                            id='Shared.AppsAndKeys.ViewKeys.consumer.key'
+                                            defaultMessage='Consumer Key'
+                                        />
                                     }
-                                    placement='right'
-                                >
-                                    <CopyToClipboard text={consumerKey} onCopy={() => this.onCopy('keyCopied')}>
-                                        <Icon color='secondary'>file_copy</Icon>
-                                    </CopyToClipboard>
-                                </Tooltip>
+                                    fullWidth
+                                    variant='outlined'
+                                    InputProps={{
+                                        readOnly: true,
+                                        endAdornment: (
+                                            <InputAdornment position='end'>
+                                                <Tooltip
+                                                    title={
+                                                        keyCopied
+                                                            ? intl.formatMessage({
+                                                                defaultMessage: 'Copied',
+                                                                id: 'Shared.AppsAndKeys.ViewKeys.copied',
+                                                            })
+                                                            : intl.formatMessage({
+                                                                defaultMessage: 'Copy to clipboard',
+                                                                id: 'Shared.AppsAndKeys.ViewKeys.copied',
+                                                            })
+                                                    }
+                                                    placement='right'
+                                                    className={classes.iconStyle}
+                                                >
+                                                    <CopyToClipboard
+                                                        text={consumerKey}
+                                                        onCopy={() => this.onCopy('keyCopied')}
+                                                    >
+                                                        <Icon
+                                                            color='secondary'
+                                                        >description
+                                                        </Icon>
+                                                    </CopyToClipboard>
+                                                </Tooltip>
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
                             </div>
                             <FormControl>
                                 <FormHelperText id='consumer-key-helper-text'>
@@ -331,32 +351,50 @@ class ViewKeys extends React.Component {
                             </FormControl>
                         </Grid>
                         <Grid item xs={6}>
-                            <InputLabel htmlFor='adornment-amount'>Consumer Secret</InputLabel>
                             <div className={classes.copyWrapper}>
-                                <Input
-                                    inputProps={{ readOnly: true }}
+                                <TextField
                                     id='consumer-secret'
-                                    label='Consumer Secret'
+                                    label={
+                                        <FormattedMessage
+                                            id='Shared.AppsAndKeys.ViewKeys.consumer.secret'
+                                            defaultMessage='Consumer Secret'
+                                        />
+                                    }
                                     type={showCS || !consumerSecret ? 'text' : 'password'}
                                     value={consumerSecret}
+                                    margin='normal'
                                     fullWidth
-                                    endAdornment={(
-                                        <InputAdornment position='end'>
-                                            <IconButton
-                                                classes=''
-                                                onClick={() => this.handleShowHidden('showCS')}
-                                                onMouseDown={this.handleMouseDownGeneric}
-                                            >
-                                                {showCS ? <Icon>visibility_off</Icon> : <Icon>visibility</Icon>}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    )}
+                                    variant='outlined'
+                                    InputProps={{
+                                        readOnly: true,
+                                        endAdornment: (
+                                            <InputAdornment position='end'>
+                                                <IconButton
+                                                    classes=''
+                                                    onClick={() => this.handleShowHidden('showCS')}
+                                                    onMouseDown={this.handleMouseDownGeneric}
+                                                >
+                                                    {showCS ? <Icon>visibility_off</Icon> : <Icon>visibility</Icon>}
+                                                </IconButton>
+                                                <Tooltip
+                                                    title={secretCopied ? 'Copied' : 'Copy to clipboard'}
+                                                    placement='right'
+                                                    className={classes.iconStyle}
+                                                >
+                                                    <CopyToClipboard
+                                                        text={consumerSecret}
+                                                        onCopy={() => this.onCopy('secretCopied')}
+                                                    >
+                                                        <Icon
+                                                            color='secondary'
+                                                        >description
+                                                        </Icon>
+                                                    </CopyToClipboard>
+                                                </Tooltip>
+                                            </InputAdornment>
+                                        ),
+                                    }}
                                 />
-                                <Tooltip title={secretCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
-                                    <CopyToClipboard text={consumerSecret} onCopy={() => this.onCopy('secretCopied')}>
-                                        <Icon color='secondary'>file_copy</Icon>
-                                    </CopyToClipboard>
-                                </Tooltip>
                             </div>
                             <FormControl>
                                 <FormHelperText id='consumer-secret-helper-text'>

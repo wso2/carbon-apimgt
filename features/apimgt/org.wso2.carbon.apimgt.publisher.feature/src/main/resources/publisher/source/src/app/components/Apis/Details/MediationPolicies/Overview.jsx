@@ -34,6 +34,7 @@ import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import Alert from 'AppComponents/Shared/Alert';
 import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash.clonedeep';
+import { isRestricted } from 'AppData/AuthManager';
 import Flow from './Flow';
 import Diagram from './Diagram';
 
@@ -150,18 +151,21 @@ function Overview(props) {
                         saveAPI={saveAPI}
                         selectedMediationPolicy={inPolicy}
                         type='IN'
+                        api={api}
                     />
                     <Flow
                         updateMediationPolicy={updateOutMediationPolicy}
                         saveAPI={saveAPI}
                         selectedMediationPolicy={outPolicy}
                         type='OUT'
+                        api={api}
                     />
                     <Flow
                         updateMediationPolicy={updateFaultMediationPolicy}
                         saveAPI={saveAPI}
                         selectedMediationPolicy={faultPolicy}
                         type='FAULT'
+                        api={api}
                     />
                 </Grid>
                 <Grid item xs={12} md={8} className={classes.diagramDown}>
@@ -178,7 +182,12 @@ function Overview(props) {
                         >
                             <Grid item>
                                 <div>
-                                    <Button variant='contained' color='primary' onClick={saveAPI} disabled={updating}>
+                                    <Button
+                                        variant='contained'
+                                        color='primary'
+                                        onClick={saveAPI}
+                                        disabled={isRestricted(['apim:api_create'], api) || updating}
+                                    >
                                         {updating ? (
                                             <React.Fragment>
                                                 <FormattedMessage
