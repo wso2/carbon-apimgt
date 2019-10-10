@@ -388,8 +388,8 @@ export default function RuntimeConfiguration() {
                                 <React.Fragment>
                                     <Typography className={classes.heading} variant='h6'>
                                         <FormattedMessage
-                                            id='Apis.Details.Configuration.RuntimeConfiguration.section.fault.flow'
-                                            defaultMessage='Fault Flow'
+                                            id='Apis.Details.Configuration.RuntimeConfiguration.section.fault'
+                                            defaultMessage='Fault'
                                         />
                                     </Typography>
                                     <Grid item xs={12} style={{ position: 'relative' }}>
