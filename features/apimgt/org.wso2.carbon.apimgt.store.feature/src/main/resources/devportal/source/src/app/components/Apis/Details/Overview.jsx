@@ -390,7 +390,9 @@ function Overview(props) {
                             <ExpansionPanelDetails
                                 classes={{ root: classNames({ [classes.noCommentRoot]: totalComments === 0 }, { [classes.commentRoot]: totalComments !== 0 }) }}
                             >
-                                {api && <Comments apiId={api.id} showLatest isOverview setCount={setCount} />}
+                                {api && totalComments !== 0 &&
+                                    <Comments apiId={api.id} showLatest isOverview setCount={setCount} />
+                                }
                                 {totalComments === 0 && (
                                     <Grid container className={classes.root} spacing={2}>
                                         <Grid item xs={12}>
