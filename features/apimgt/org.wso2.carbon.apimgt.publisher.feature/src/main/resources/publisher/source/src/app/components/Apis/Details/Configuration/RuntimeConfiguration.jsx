@@ -316,7 +316,9 @@ export default function RuntimeConfiguration() {
                                     <Paper className={classes.paper} elevation={0}>
                                         <APISecurity api={apiConfig} configDispatcher={configDispatcher} />
                                         <CORSConfiguration api={apiConfig} configDispatcher={configDispatcher} />
-                                        <SchemaValidation api={apiConfig} configDispatcher={configDispatcher} />
+                                        {api.type !== 'GRAPHQL' &&
+                                            <SchemaValidation api={apiConfig} configDispatcher={configDispatcher} />
+                                        }
                                     </Paper>
                                     <ArrowForwardIcon className={classes.arrowForwardIcon} />
                                 </Grid>
