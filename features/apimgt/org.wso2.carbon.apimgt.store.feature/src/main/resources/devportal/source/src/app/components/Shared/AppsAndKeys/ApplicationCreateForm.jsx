@@ -212,27 +212,19 @@ const ApplicationCreate = (props) => {
             {allAppAttributes && (
                 Object.entries(allAppAttributes).map(item => (
                     item[1].hidden === 'false' ? (
-                        <FormControl
+                        <TextField
                             margin='normal'
-                            className={classes.FormControl}
-                            key={item[1].attribute}
-                        >
-                            <TextField
-                                variant='outlined'
-                                required={isRequiredAttribute(item[1].attribute)}
-                                label={item[1].attribute}
-                                value={getAttributeValue(item[1].attribute)}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                helperText={item[1].description}
-                                fullWidth
-                                name={item[1].attribute}
-                                onChange={handleAttributesChange(item[1].attribute)}
-                                placeholder={'Enter ' + item[1].attribute}
-                                className={classes.inputText}
-                            />
-                        </FormControl>
+                            variant='outlined'
+                            required={isRequiredAttribute(item[1].attribute)}
+                            label={item[1].attribute}
+                            value={getAttributeValue(item[1].attribute)}
+                            helperText={item[1].description}
+                            fullWidth
+                            name={item[1].attribute}
+                            onChange={handleAttributesChange(item[1].attribute)}
+                            placeholder={'Enter ' + item[1].attribute}
+                            className={classes.inputText}
+                        />
                     ) : (null)))
             )}
             {isApplicationSharingEnabled && (
