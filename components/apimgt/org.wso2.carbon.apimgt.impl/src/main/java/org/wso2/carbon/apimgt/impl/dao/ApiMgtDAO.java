@@ -7441,7 +7441,7 @@ public class ApiMgtDAO {
 
         try (Connection conn = APIMgtDBUtil.getConnection();
             PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_SQL)) {
-            ps.setString(1, identifier.getProviderName());
+            ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             ps.setString(2, identifier.getName());
             ps.setString(3, identifier.getVersion());
             try (ResultSet rs = ps.executeQuery()) {
