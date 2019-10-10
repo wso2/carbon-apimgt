@@ -234,18 +234,27 @@ public class JWTValidator {
                 isVerified = true;
             } else if (getInvalidTokenCache().get(tokenSignature) != null) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Token retrieved from the invalid token cache. Token: " +
-                            GatewayUtils.getMaskedToken(splitToken));
+                    log.debug("Token retrieved from the invalid token cache. Token: " + GatewayUtils
+                            .getMaskedToken(splitToken));
                 }
-                log.error("Invalid JWT token.");
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Invalid JWT token");
+            }
+            // Check revoked map.
+            else if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
+                            getMaskedToken(splitToken));
+                }
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
         }
 
-        // Not found in cache
         if (!isVerified) {
-            log.debug("Token not found in the cache.");
+            log.debug("Token not found in the caches and revoked jwt token map.");
             try {
                 payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
             } catch (JSONException | IllegalArgumentException e) {
@@ -256,6 +265,7 @@ public class JWTValidator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token. Failed to decode the token.", e);
             }
+            log.debug("Verifying signature of JWT");
             isVerified = GatewayUtils.verifyTokenSignature(splitToken, APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS);
             if (isGatewayTokenCacheEnabled) {
                 // Add token to tenant token cache
