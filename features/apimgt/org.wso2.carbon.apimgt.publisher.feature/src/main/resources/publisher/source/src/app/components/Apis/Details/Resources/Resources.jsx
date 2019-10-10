@@ -253,7 +253,7 @@ export default function Resources(props) {
                     />
                 </Grid>
             )}
-            {!isRestricted(['apim:api_create'], api) && (
+            {!isRestricted(['apim:api_create'], api) && !api.isAPIProduct() && (
                 <Grid item md={12}>
                     <AddOperation updateOpenAPI={updateOpenAPI} />
                 </Grid>
