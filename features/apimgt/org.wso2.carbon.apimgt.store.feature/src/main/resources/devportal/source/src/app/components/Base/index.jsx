@@ -256,7 +256,13 @@ class Layout extends React.Component {
                                 </IconButton>
                             </Hidden>
                             <Link to='/'>
-                                <img src={theme.custom.appBar.logo} style={{height: theme.custom.appBar.logoHeight}} />
+                                <img
+                                    src={theme.custom.appBar.logo}
+                                    style={{
+                                        height: theme.custom.appBar.logoHeight,
+                                        width: theme.custom.appBar.logoWidth,
+                                    }}
+                                />
                             </Link>
                             <Hidden smDown>
                                 <VerticalDivider height={32} />

@@ -40,7 +40,8 @@ const Configurations = {
                 },
                 appBar: {
                     logo: '/devportal/site/public/images/logo.svg',
-                    logoHeight: 40,
+                    logoHeight: 19,
+                    logoWidth: 208,
                     background: '#1d344f',
                     activeBackground: '#254061',
                     showSearch: true,

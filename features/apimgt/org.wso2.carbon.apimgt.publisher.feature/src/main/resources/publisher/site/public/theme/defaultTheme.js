@@ -46,6 +46,7 @@ const Configurations = {
                 drawerWidth: 200,
                 logo: APP_CONTEXT + '/site/public/images/logo.svg',
                 logoHeight: 40,
+                logoWidth: 222,
                 backgroundImage: APP_CONTEXT + '/site/public/images/back-light.png',
                 title: 'WSO2 APIM Publisher',
                 defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
