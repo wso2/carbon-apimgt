@@ -216,7 +216,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                         if (APIConstants.OPERATION_SECURITY_DISABLED.equalsIgnoreCase(type.getName())) {
                             isSecurityEnabled = false;
                         }
-                        operationAuthSchemeMappingList.put(additionalTypeName, isSecurityEnabled);
+                        operationAuthSchemeMappingList.put(base64DecodedAdditionalType, isSecurityEnabled);
                     }
                 }
                 if (!roleArrayList.isEmpty()) {
