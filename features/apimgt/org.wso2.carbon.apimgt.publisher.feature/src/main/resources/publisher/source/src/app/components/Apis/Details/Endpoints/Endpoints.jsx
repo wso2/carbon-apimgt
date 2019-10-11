@@ -270,7 +270,7 @@ function Endpoints(props) {
                                 >
                                     <FormControlLabel
                                         value='managed'
-                                        control={<Radio color='primary' className={classes.implSelectRadio} />}
+                                        control={<Radio className={classes.implSelectRadio} />}
                                         label={<FormattedMessage
                                             id='Apis.Details.Endpoints.Endpoints.managed'
                                             defaultMessage='Managed'
@@ -278,7 +278,7 @@ function Endpoints(props) {
                                     />
                                     <FormControlLabel
                                         value='PROTOTYPED'
-                                        control={<Radio color='primary' className={classes.implSelectRadio} />}
+                                        control={<Radio className={classes.implSelectRadio} />}
                                         label={<FormattedMessage
                                             id='Apis.Details.Endpoints.Endpoints.prototyped'
                                             defaultMessage='Prototyped'

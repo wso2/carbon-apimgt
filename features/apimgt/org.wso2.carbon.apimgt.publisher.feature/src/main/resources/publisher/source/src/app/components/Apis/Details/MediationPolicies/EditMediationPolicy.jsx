@@ -312,7 +312,8 @@ function EditMediationPolicy(props) {
         <Dialog
             disableBackdropClick
             disableEscapeKeyDown
-            maxWidth='xs'
+            maxWidth='sm'
+            fullWidth
             aria-labelledby='confirmation-dialog-title'
             open={editing}
         >
@@ -341,7 +342,7 @@ function EditMediationPolicy(props) {
                             label={(
                                 <FormattedMessage
                                     id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.common.policies'
-                                    defaultMessage='Common Mediation Policies'
+                                    defaultMessage='Common Policies'
                                 />
                             )}
                         />
@@ -350,8 +351,8 @@ function EditMediationPolicy(props) {
                             control={<Radio color='primary' />}
                             label={(
                                 <FormattedMessage
-                                    id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.custom'
-                                    defaultMessage='Custom'
+                                    id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.custom.policies'
+                                    defaultMessage='Custom Policies'
                                 />
                             )}
                         />
@@ -396,9 +397,9 @@ function EditMediationPolicy(props) {
                                     <FormattedMessage
                                         id={
                                             'Apis.Details.Edit.MediationPolicies.' +
-                                            'EditMediationPolicies.custom.in.policies'
+                                            'EditMediationPolicies.custom.mediation.policies'
                                         }
-                                        defaultMessage='Custom IN Mediation Policies'
+                                        defaultMessage='Custom Mediation Policies'
                                     />
                                 </FormLabel>
                                 {seqCustom.map(seq => (
