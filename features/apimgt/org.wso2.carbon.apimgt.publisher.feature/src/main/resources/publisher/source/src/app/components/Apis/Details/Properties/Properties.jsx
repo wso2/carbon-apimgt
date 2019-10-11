@@ -140,6 +140,8 @@ function Properties(props) {
     const [propertyKey, setPropertyKey] = useState(null);
     const [propertyValue, setPropertyValue] = useState(null);
     const [updating, setUpdating] = useState(false);
+    const [editing, setEditing] = useState(false);
+
     const toggleAddProperty = () => {
         setShowAddProperty(!showAddProperty);
     };
@@ -283,6 +285,7 @@ function Properties(props) {
                     handleDelete={handleDelete}
                     apiAdditionalProperties={additionalProperties}
                     {...props}
+                    setEditing={setEditing}
                 />);
             }
         }
@@ -488,7 +491,8 @@ function Properties(props) {
                                             color='primary'
                                             onClick={handleSubmit}
                                             disabled={
-                                                updating || isRestricted(['apim:api_create', 'apim:api_publish'], api)
+                                                editing || updating || isEmpty(additionalProperties)
+                                                || isRestricted(['apim:api_create', 'apim:api_publish'], api)
                                             }
                                         >
                                             {updating && (
