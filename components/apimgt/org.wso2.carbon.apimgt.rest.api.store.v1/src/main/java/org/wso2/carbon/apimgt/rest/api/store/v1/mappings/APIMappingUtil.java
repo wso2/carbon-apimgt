@@ -588,7 +588,12 @@ public class APIMappingUtil {
             throttlingPolicyNames.add(tier.getName());
         }
         apiInfoDTO.setThrottlingPolicies(throttlingPolicyNames);
-
+        APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
+        apiBusinessInformationDTO.setBusinessOwner(apiProduct.getBusinessOwner());
+        apiBusinessInformationDTO.setBusinessOwnerEmail(apiProduct.getBusinessOwnerEmail());
+        apiBusinessInformationDTO.setTechnicalOwner(apiProduct.getTechnicalOwner());
+        apiBusinessInformationDTO.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
+        apiInfoDTO.setBusinessInformation(apiBusinessInformationDTO);
         //Since same APIInfoDTO is used for listing APIProducts in StoreUI set default AdvertisedInfo to the DTO
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(false);
