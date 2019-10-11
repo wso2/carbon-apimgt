@@ -1206,32 +1206,6 @@ public interface APIProvider extends APIManager {
      */
     void updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException;
 
-    /**
-     * Check whether api product exists for the given name and the provider
-     * @param productName product name
-     * @param provider provider name
-     * @param tenantDomain tenant
-     * @return boolean
-     * @throws APIManagementException
-     */
-    boolean isProductExist(String productName, String provider, String tenantDomain) throws APIManagementException;
-
-    /**
-     * Update openapi definition to the product
-     * @param apiDefinition definition to add to the product
-     * @param product product
-     * @throws APIManagementException
-     */
-    void updateAPIDefinitionOfAPIProduct(String apiDefinition, APIProduct product) throws APIManagementException;
-
-    /**
-     * Remove openapi definition of the product
-     * @param product product
-     * @throws APIManagementException
-     */
-    void removeAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException;
-
-
 
     List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException;
 

@@ -22,11 +22,14 @@ import APICreateRoutes from './Create/APICreateRoutes';
 import Listing from './Listing/Listing';
 import Details from './Details/index';
 
+/**
+ * Have used key={Date.now()} for `Route` element in `/apis` and `/api-products`
+ */
 const Apis = () => {
     return (
         <Switch>
-            <Route exact path='/apis' render={props => <Listing {...props} isAPIProduct={false} />} />
-            <Route exact path='/api-products' render={props => <Listing {...props} isAPIProduct />} />
+            <Route exact path='/apis' key={Date.now()} render={props => <Listing {...props} isAPIProduct={false} />} />
+            <Route exact path='/api-products' key={Date.now()} render={props => <Listing {...props} isAPIProduct />} />
             <Route path='/apis/search' render={props => <Listing {...props} isAPIProduct={false} />} />
             <Route path='/apis/create' component={APICreateRoutes} />
             <Route path='/api-products/create' component={APICreateRoutes} />

@@ -73,7 +73,7 @@ const APIDetailsTopMenu = (props) => {
                 <div className={classes.backText}>
                     <FormattedMessage
                         id='Apis.Details.components.APIDetailsTopMenu.back.to.listing'
-                        defaultMessage='BACK TO {break} LISTING'
+                        defaultMessage='BACK TO {break} APIs'
                         values={{ break: <br /> }}
                     />
                 </div>

@@ -70,7 +70,7 @@ function DeleteMultiple(props) {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                     Alert.error(`${intl.formatMessage({
-                        id: 'Apis.Details.Documents.Delete.document.delete.successfully',
+                        id: 'Apis.Details.Documents.Delete.document.delete.error',
                         defaultMessage: 'Error while deleting documents!',
                     })}`);
                 }

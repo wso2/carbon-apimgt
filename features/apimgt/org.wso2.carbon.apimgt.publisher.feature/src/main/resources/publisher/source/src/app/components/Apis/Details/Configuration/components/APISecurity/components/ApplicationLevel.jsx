@@ -65,7 +65,7 @@ const useStyles = makeStyles(theme => ({
         fontWeight: 400,
         margin: 0,
         display: 'inline-flex',
-        lineHeight: '38px',
+        lineHeight: 1.5,
     },
 }));
 

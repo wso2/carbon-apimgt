@@ -24,17 +24,17 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
+import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -44,7 +44,6 @@ import javax.cache.Cache;
 import javax.cache.Caching;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A Validator class to validate JWT tokens in an API request.
@@ -99,17 +98,27 @@ public class JWTValidator {
                 isVerified = true;
             } else if (getInvalidTokenCache().get(tokenSignature) != null) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Token retrieved from the invalid token cache. Token: " + GatewayUtils.getMaskedToken(splitToken));
+                    log.debug("Token retrieved from the invalid token cache. Token: " + GatewayUtils
+                            .getMaskedToken(splitToken));
                 }
-                log.error("Invalid JWT token.");
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Invalid JWT token");
+            }
+            // Check revoked map.
+            else if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
+                            getMaskedToken(splitToken));
+                }
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
         }
 
-        // Not found in cache
         if (!isVerified) {
-            log.debug("Token not found in the cache.");
+            log.debug("Token not found in the caches and revoked jwt token map.");
             try {
                 payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
             } catch (JSONException | IllegalArgumentException e) {
@@ -120,6 +129,7 @@ public class JWTValidator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token. Failed to decode the token.", e);
             }
+            log.debug("Verifying signature of JWT");
             isVerified = GatewayUtils.verifyTokenSignature(splitToken, APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS);
             if (isGatewayTokenCacheEnabled) {
                 // Add token to tenant token cache
@@ -130,6 +140,8 @@ public class JWTValidator {
                 }
 
                 if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    //Add the tenant domain as a reference to the super tenant cache so we know from which tenant cache
+                    //to remove the entry when the need occurs to clear this particular cache entry.
                     try {
                         // Start super tenant flow
                         PrivilegedCarbonContext.startTenantFlow();
@@ -174,6 +186,143 @@ public class JWTValidator {
                 }
                 checkTokenExpiration(tokenSignature, payload, tenantDomain);
                 validateScopes(synCtx, openAPI, payload);
+
+                if (isGatewayTokenCacheEnabled) {
+                    getGatewayKeyCache().put(cacheKey, payload);
+                }
+            }
+
+            JSONObject api = GatewayUtils.validateAPISubscription(apiContext, apiVersion, payload, splitToken, true);
+
+            log.debug("JWT authentication successful.");
+            return GatewayUtils.generateAuthenticationContext(tokenSignature, payload, api, getApiLevelPolicy(), true);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Token signature verification failure. Token: " + GatewayUtils.getMaskedToken(splitToken));
+        }
+        throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                "Invalid JWT token. Signature verification failed.");
+    }
+
+    /**
+     * Authenticates the given WebSocket handshake request with a JWT token to see if an API consumer is allowed to
+     * access a particular API or not.
+     *
+     * @param jwtToken   The JWT token sent with the API request
+     * @param apiContext The context of the invoked API
+     * @param apiVersion The version of the invoked API
+     * @return an AuthenticationContext object which contains the authentication information
+     * @throws APISecurityException in case of authentication failure
+     */
+    @MethodStats
+    public AuthenticationContext authenticateForWebSocket(String jwtToken, String apiContext, String apiVersion)
+            throws APISecurityException {
+
+        String[] splitToken = jwtToken.split("\\.");
+
+        JSONObject payload = null;
+        boolean isVerified = false;
+
+        String tokenSignature = splitToken[2];
+        String tenantDomain = GatewayUtils.getTenantDomain();
+
+        // Validate from cache
+        if (isGatewayTokenCacheEnabled) {
+            String cacheToken = (String) getGatewayTokenCache().get(tokenSignature);
+            if (cacheToken != null) {
+                log.debug("Token retrieved from the token cache.");
+                isVerified = true;
+            } else if (getInvalidTokenCache().get(tokenSignature) != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Token retrieved from the invalid token cache. Token: " + GatewayUtils
+                            .getMaskedToken(splitToken));
+                }
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Invalid JWT token");
+            }
+            // Check revoked map.
+            else if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
+                            getMaskedToken(splitToken));
+                }
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Invalid JWT token");
+            }
+        }
+
+        if (!isVerified) {
+            log.debug("Token not found in the caches and revoked jwt token map.");
+            try {
+                payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
+            } catch (JSONException | IllegalArgumentException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Invalid JWT token. Token: " + GatewayUtils.getMaskedToken(splitToken));
+                }
+                log.error("Invalid JWT token. Failed to decode the token.");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Invalid JWT token. Failed to decode the token.", e);
+            }
+            log.debug("Verifying signature of JWT");
+            isVerified = GatewayUtils.verifyTokenSignature(splitToken, APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS);
+            if (isGatewayTokenCacheEnabled) {
+                // Add token to tenant token cache
+                if (isVerified) {
+                    getGatewayTokenCache().put(tokenSignature, tenantDomain);
+                } else {
+                    getInvalidTokenCache().put(tokenSignature, tenantDomain);
+                }
+
+                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    //Add the tenant domain as a reference to the super tenant cache so we know from which tenant cache
+                    //to remove the entry when the need occurs to clear this particular cache entry.
+                    try {
+                        // Start super tenant flow
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                        // Add token to super tenant token cache
+                        if (isVerified) {
+                            getGatewayTokenCache().put(tokenSignature, tenantDomain);
+                        } else {
+                            getInvalidTokenCache().put(tokenSignature, tenantDomain);
+                        }
+                    } finally {
+                        PrivilegedCarbonContext.endTenantFlow();
+                    }
+
+                }
+            }
+        }
+
+        String cacheKey = WebsocketUtil.getAccessTokenCacheKey(tokenSignature, apiContext);
+
+        // If token signature is verified
+        if (isVerified) {
+            log.debug("Token signature is verified.");
+            if (isGatewayTokenCacheEnabled && getGatewayKeyCache().get(cacheKey) != null) {
+                // Token is found in the key cache
+                payload = (JSONObject) getGatewayKeyCache().get(cacheKey);
+                checkTokenExpiration(tokenSignature, payload, tenantDomain);
+            } else {
+                // Retrieve payload from token
+                log.debug("Token payload not found in the cache.");
+                if (payload == null) {
+                    try {
+                        payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
+                    } catch (JSONException | IllegalArgumentException e) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Token decryption failure when retrieving payload. Token: "
+                                    + GatewayUtils.getMaskedToken(splitToken), e);
+                        }
+                        log.error("Invalid JWT token. Failed to decode the token");
+                        throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                "Invalid JWT token");
+                    }
+                }
+                checkTokenExpiration(tokenSignature, payload, tenantDomain);
 
                 if (isGatewayTokenCacheEnabled) {
                     getGatewayKeyCache().put(cacheKey, payload);

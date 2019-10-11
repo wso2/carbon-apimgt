@@ -20,9 +20,6 @@ import {
     Grid,
     TextField,
     MenuItem,
-    InputLabel,
-    Select,
-    FormControl,
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
@@ -67,38 +64,33 @@ function EndpointSecurity(props) {
     }, [props]);
 
     return (
-        <Grid container direction='column'>
+        <Grid container direction='column' spacing={2}>
             <Grid item xs={12}>
-                <FormControl>
-                    <InputLabel htmlFor='auth-type-select'>
-                        <FormattedMessage
-                            id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.auth.type'
-                            defaultMessage='Auth Type'
-                        />
-                    </InputLabel>
-                    <Select
-                        disabled={isRestricted(['apim:api_create'], api)}
-                        fullwidth
-                        value={endpointSecurityInfo.type}
-                        onChange={(event) => { onChangeEndpointAuth(event, 'type'); }}
-                        inputProps={{
-                            name: 'key',
-                            id: 'auth-type-select',
-                        }}
-                    >
-                        {authTypes.map(type => (
-                            <MenuItem value={type.key}>
-                                {type.value}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                <TextField
+                    disabled={isRestricted(['apim:api_create'], api)}
+                    fullwidth
+                    select
+                    value={endpointSecurityInfo.type}
+                    variant='outlined'
+                    onChange={(event) => { onChangeEndpointAuth(event, 'type'); }}
+                    inputProps={{
+                        name: 'key',
+                        id: 'auth-type-select',
+                    }}
+                >
+                    {authTypes.map(type => (
+                        <MenuItem value={type.key}>
+                            {type.value}
+                        </MenuItem>
+                    ))}
+                </TextField>
             </Grid>
-            <Grid item container xs={12}>
-                <Grid item xs>
+            <Grid item container xs={12} spacing={4}>
+                <Grid item>
                     <TextField
                         disabled={isRestricted(['apim:api_create'], api)}
                         required
+                        variant='outlined'
                         id='auth-userName'
                         label={(
                             <FormattedMessage
@@ -112,10 +104,11 @@ function EndpointSecurity(props) {
                         onBlur={(event) => { onChangeEndpointAuth(event, 'username'); }}
                     />
                 </Grid>
-                <Grid item xs>
+                <Grid item>
                     <TextField
                         disabled={isRestricted(['apim:api_create'], api)}
                         required
+                        variant='outlined'
                         type='password'
                         id='auth-password'
                         label={(

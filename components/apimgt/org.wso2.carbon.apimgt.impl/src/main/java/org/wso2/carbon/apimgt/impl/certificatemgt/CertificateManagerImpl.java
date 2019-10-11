@@ -129,7 +129,7 @@ public class CertificateManagerImpl implements CertificateManager {
                     log.error("Could not add Certificate to Trust Store. Certificate Exists. Rolling back...");
                     certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
                 } else if (responseCode.getResponseCode() == ResponseCode.CERTIFICATE_EXPIRED.getResponseCode()) {
-                    log.error("Could not add Certificate. Certificate expired.");
+                    log.error("Could not add Certificate. Certificate has already expired.");
                     certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
                 } else {
                     log.info("Certificate is successfully added to the Publisher client Trust Store with Alias '"

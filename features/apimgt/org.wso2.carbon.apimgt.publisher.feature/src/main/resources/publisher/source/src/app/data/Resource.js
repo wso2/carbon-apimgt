@@ -59,4 +59,8 @@ export default class Resource {
     isWebSocket() {
         return this.type === 'WS';
     }
+
+    isGraphql() {
+        return this.type === 'GRAPHQL';
+    }
 }

@@ -101,7 +101,7 @@ class Alert {
                     {
                         transitionName: 'move-down',
                         style: {
-                            zIndex: '2000',
+                            zIndex: theme.zIndex.snackbar,
                             top: 0,
                             right: 0,
                             marginLeft: '2%',

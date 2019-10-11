@@ -239,25 +239,6 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         return delegate.apiProductsApiProductIdSwaggerGet(apiProductId, accept, ifNoneMatch, securityContext);
     }
 
-    @PUT
-    @Path("/{apiProductId}/swagger")
-    @Consumes({ "multipart/form-data" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "upload swagger definition", notes = "This operation can be used to create/update the swagger definition of an existing API Product. Swagger definition to be updated is passed as a form data parameter `apiDefinition`. ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
-        })
-    }, tags={ "API Products",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Successful response with updated Swagger definition ", response = Void.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
-        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified. ", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdSwaggerPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @Multipart(value = "apiDefinition")  String apiDefinition, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
-        return delegate.apiProductsApiProductIdSwaggerPut(apiProductId, apiDefinition, ifMatch, securityContext);
-    }
-
     @GET
     @Path("/{apiProductId}/thumbnail")
     @Consumes({ "application/json" })

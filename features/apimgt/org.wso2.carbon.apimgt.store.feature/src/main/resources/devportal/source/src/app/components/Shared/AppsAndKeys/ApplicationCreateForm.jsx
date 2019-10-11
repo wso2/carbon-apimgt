@@ -44,9 +44,15 @@ const styles = theme => ({
     quotaHelp: {
         position: 'relative',
     },
-    mandatoryStar: {
-        color: theme.palette.error.main,
-        marginLeft: theme.spacing(0.1),
+    mandatoryStarSelect: {
+        '& label>span:nth-child(2)': {
+            color: 'red',
+        },
+    },
+    mandatoryStarText: {
+        '& label>span:nth-child(1)': {
+            color: 'red',
+        },
     },
 });
 
@@ -108,6 +114,9 @@ const ApplicationCreate = (props) => {
     return (
         <form noValidate autoComplete='off'>
             <TextField
+                classes={{
+                    root: classes.mandatoryStarText,
+                }}
                 margin='normal'
                 variant='outlined'
                 autoFocus
@@ -134,6 +143,9 @@ const ApplicationCreate = (props) => {
                 error={!isNameValid}
             />
             <TextField
+                classes={{
+                    root: classes.mandatoryStarSelect,
+                }}
                 required
                 fullWidth
                 id='outlined-select-currency'
@@ -162,6 +174,9 @@ const ApplicationCreate = (props) => {
                 ))}
             </TextField>
             <TextField
+                classes={{
+                    root: classes.mandatoryStarSelect,
+                }}
                 required
                 fullWidth
                 id='outlined-select-currency'
@@ -212,48 +227,45 @@ const ApplicationCreate = (props) => {
             {allAppAttributes && (
                 Object.entries(allAppAttributes).map(item => (
                     item[1].hidden === 'false' ? (
-                        <FormControl
+                        <TextField
+                            classes={{
+                                root: classes.mandatoryStarText,
+                            }}
                             margin='normal'
-                            className={classes.FormControl}
-                            key={item[1].attribute}
-                        >
-                            <TextField
-                                required={isRequiredAttribute(item[1].attribute)}
-                                label={item[1].attribute}
-                                value={getAttributeValue(item[1].attribute)}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                helperText={item[1].description}
-                                fullWidth
-                                name={item[1].attribute}
-                                onChange={handleAttributesChange(item[1].attribute)}
-                                placeholder={'Enter ' + item[1].attribute}
-                                className={classes.inputText}
-                            />
-                        </FormControl>
+                            variant='outlined'
+                            required={isRequiredAttribute(item[1].attribute)}
+                            label={item[1].attribute}
+                            value={getAttributeValue(item[1].attribute)}
+                            helperText={item[1].description}
+                            fullWidth
+                            name={item[1].attribute}
+                            onChange={handleAttributesChange(item[1].attribute)}
+                            placeholder={'Enter ' + item[1].attribute}
+                            className={classes.inputText}
+                        />
                     ) : (null)))
             )}
             {isApplicationSharingEnabled && (
-                <FormControl margin='normal' className={classes.FormControl}>
-                    <FormLabel component='legend'>
-                        <FormHelperText>
-                            <FormattedMessage
-                                defaultMessage='Application Groups'
-                                id='Shared.AppsAndKeys.ApplicationCreateForm.add.groups.label'
-                            />
-                        </FormHelperText>
-                    </FormLabel>
-                    <ChipInput
-                        {...applicationRequest}
-                        value={applicationRequest.groups || []}
-                        onAdd={chip => handleAddChip(chip, applicationRequest.groups)}
-                        onDelete={(chip, index) => handleDeleteChip(
-                            chip,
-                            index, applicationRequest.groups,
-                        )}
-                    />
-                </FormControl>
+                <ChipInput
+                    label={<FormattedMessage
+                        defaultMessage='Application Groups'
+                        id='Shared.AppsAndKeys.ApplicationCreateForm.add.groups.label'
+                    />}
+                    helperText={intl.formatMessage({
+                        defaultMessage: 'Type a group and enter',
+                        id: 'Shared.AppsAndKeys.ApplicationCreateForm.type.a.group.and.enter',
+                    })}
+                    margin='normal'
+                    variant='outlined'
+                    fullWidth
+                    {...applicationRequest}
+                    value={applicationRequest.groups || []}
+                    onAdd={chip => handleAddChip(chip, applicationRequest.groups)}
+                    onDelete={(chip, index) => handleDeleteChip(
+                        chip,
+                        index, applicationRequest.groups,
+                    )}
+                />
             )}
         </form>
     );
