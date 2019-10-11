@@ -64,7 +64,7 @@ const styles = theme => ({
 const subscriptionTableRow = (props) => {
     const {
         classes, loadInfo, handleSubscriptionDelete,
-        theme, selectedAppId, updateSubscriptionData, selectedKeyType, app, index,
+        theme, selectedAppId, updateSubscriptionData, selectedKeyType, app, index, applicationOwner,
     } = props;
     return (
         <React.Fragment>
@@ -173,7 +173,7 @@ const subscriptionTableRow = (props) => {
                         <div className={classes.selectedWrapper}>
                             <TokenManager
                                 keyType={selectedKeyType}
-                                selectedApp={{ appId: app.value, label: app.label }}
+                                selectedApp={{ appId: app.value, label: app.label, owner: applicationOwner }}
                                 updateSubscriptionData={updateSubscriptionData}
                             />
                         </div>
@@ -199,6 +199,7 @@ subscriptionTableRow.propTypes = {
     selectedAppId: PropTypes.string.isRequired,
     updateSubscriptionData: PropTypes.func.isRequired,
     selectedKeyType: PropTypes.string.isRequired,
+    applicationOwner: PropTypes.string.isRequired,
     app: PropTypes.shape({
         label: PropTypes.string,
         policy: PropTypes.string,
