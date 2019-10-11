@@ -1332,8 +1332,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         JwtTokenInfoDTO jwtTokenInfoDTO = APIUtil.getJwtTokenInfoDTO(application, userName,
                 MultitenantUtils.getTenantDomain(userName));
 
-        ExtendedApplicationDTO applicationDTO = new ExtendedApplicationDTO();
-        applicationDTO.setUuid(application.getUUID());
+        ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setId(application.getId());
         applicationDTO.setName(application.getName());
         applicationDTO.setOwner(application.getOwner());
