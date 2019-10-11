@@ -207,7 +207,7 @@ function Endpoints(props) {
                     return {
                         isValid: false,
                         message: intl.formatMessage({
-                            id: 'Apis.Details.Endpoints.Endpoints.missing.endpoint.loadbalance',
+                            id: 'Apis.Details.Endpoints.Endpoints.missing.prod.endpoint.loadbalance',
                             defaultMessage: 'Default Production Endpoint should not be empty',
                         }),
                     };
@@ -219,7 +219,7 @@ function Endpoints(props) {
                     return {
                         isValid: false,
                         message: intl.formatMessage({
-                            id: 'Apis.Details.Endpoints.Endpoints.missing.endpoint.loadbalance',
+                            id: 'Apis.Details.Endpoints.Endpoints.missing.sandbox.endpoint.loadbalance',
                             defaultMessage: 'Default Sandbox Endpoint should not be empty',
                         }),
                     };

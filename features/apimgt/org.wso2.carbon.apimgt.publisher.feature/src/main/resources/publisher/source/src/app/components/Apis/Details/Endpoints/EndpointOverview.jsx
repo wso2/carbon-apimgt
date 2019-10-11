@@ -556,7 +556,8 @@ function EndpointOverview(props) {
                                         {endpointType.key === 'prototyped' ?
                                             <Typography>
                                                 <FormattedMessage
-                                                    id='Apis.Details.Endpoints.EndpointOverview.production.endpoint'
+                                                    id={'Apis.Details.Endpoints.EndpointOverview.prototype.endpoint' +
+                                                    '.label'}
                                                     defaultMessage='Prototype Endpoint'
                                                 />
                                             </Typography> :
@@ -574,7 +575,7 @@ function EndpointOverview(props) {
                                                     <Typography>
                                                         <FormattedMessage
                                                             id={'Apis.Details.Endpoints.EndpointOverview' +
-                                                            '.production.endpoint'}
+                                                            '.production.endpoint.label'}
                                                             defaultMessage='Production Endpoint'
                                                         />
                                                     </Typography>}
@@ -584,7 +585,15 @@ function EndpointOverview(props) {
                                             <GenericEndpoint
                                                 autoFocus
                                                 name={endpointType.key === 'prototyped' ?
-                                                    'Prototype Endpoint' : 'Production Endpoint'}
+                                                    <FormattedMessage
+                                                        id={'Apis.Details.Endpoints.EndpointOverview.prototype' +
+                                                        '.endpoint.header'}
+                                                        defaultMessage='Prototype Endpoint'
+                                                    /> : <FormattedMessage
+                                                        id={'Apis.Details.Endpoints.EndpointOverview.production' +
+                                                        '.endpoint.header'}
+                                                        defaultMessage='Production Endpoint'
+                                                    />}
                                                 className={classes.defaultEndpointWrapper}
                                                 endpointURL={getEndpoints('production_endpoints')}
                                                 type=''

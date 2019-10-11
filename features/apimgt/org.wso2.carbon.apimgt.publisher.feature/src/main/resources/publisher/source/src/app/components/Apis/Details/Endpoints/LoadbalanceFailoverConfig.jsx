@@ -219,7 +219,7 @@ function LoadbalanceFailoverConfig(props) {
                             <div className={classes.contentWrapper}>
                                 <Typography component='p' className={classes.content}>
                                     <FormattedMessage
-                                        id='Apis.Details.Endpoints'
+                                        id='Apis.Details.Endpoints.LoadbalanceFailoverConfig.no.endpoints.message'
                                         defaultMessage='Add Production/ Sandbox endpoints to configure.'
                                     />
                                 </Typography>
@@ -327,7 +327,7 @@ function LoadbalanceFailoverConfig(props) {
                 <DialogTitle>
                     <Typography className={classes.configDialogHeader}>
                         <FormattedMessage
-                            id='Apis.Details.Endpoints.EndpointOverview.load.balance.configuration.title'
+                            id='Apis.Details.Endpoints.LoadbalanceFailoverConfig.load.balance.configuration.title'
                             defaultMessage='Load Balance Configuration'
                         />
                     </Typography>

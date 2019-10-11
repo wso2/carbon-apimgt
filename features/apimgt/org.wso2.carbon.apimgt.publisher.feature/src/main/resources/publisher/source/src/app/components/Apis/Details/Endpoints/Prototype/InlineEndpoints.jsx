@@ -45,7 +45,7 @@ function InlineEndpoints(props) {
      * */
     const onScriptChange = (value, path, method) => {
         const tmpPaths = JSON.parse(JSON.stringify(paths));
-        tmpPaths[path][method][xMediationScriptProperty] = value;
+        tmpPaths[path][method][xMediationScriptProperty] = value.trim();
         updatePaths(tmpPaths);
     };
     return (
