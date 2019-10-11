@@ -217,6 +217,7 @@ public class BasicAuthCredentialValidator {
             HashMap<String, ArrayList<String>> scopeRoleMappingList =
                     (HashMap<String, ArrayList<String>>) synCtx.getProperty(APIConstants.SCOPE_ROLE_MAPPING);
             String[] operationList = ((String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE)).split(",");
+            userRoles = getUserRoles(username);
             for (String operation : operationList) {
                 String operationScope = operationScopeMappingList.get(operation);
                 if (operationScope != null) {
