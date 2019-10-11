@@ -126,6 +126,7 @@ const styles = theme => ({
     },
     togglerTextParent: {
         writingMode: 'vertical-rl',
+        transform: 'rotate(180deg)',
     },
     togglerText: {
         textOrientation: 'sideways',
