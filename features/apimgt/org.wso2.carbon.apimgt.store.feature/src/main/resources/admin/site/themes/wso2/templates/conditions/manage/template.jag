@@ -2,8 +2,8 @@
     <div id="listing">
     	<div class="page-header">
             <h2><%= i18n.localize("Blacklisted Items")%></h2>
-        </div>  
-   
+        </div>
+    <div class="content-data" style="overflow-x:auto;">
     <%
           var conditionslist =  outputs.conditions;
             var conditonsArray = conditionslist.toArray();
@@ -78,6 +78,7 @@
 				<p><%=i18n.localize("Blacklisted items are not defined")%></p>
 			</div>
     <%} %>
+</div>
 </div>
 
 <script>
