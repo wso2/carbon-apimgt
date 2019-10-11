@@ -387,9 +387,9 @@ class Details extends React.Component {
                             {api.type !== 'WS' && <LeftMenuItem text='test' route='test' to={pathPrefix + 'test'} />}
                         </React.Fragment>
                     )}
-                    <LeftMenuItem text='docs' route='docs' to={pathPrefix + 'docs'} />
+                    <LeftMenuItem text='Documentation' route='docs' to={pathPrefix + 'docs'} />
                     {!api.advertiseInfo.advertised && api.type !== 'WS' && (
-                        <LeftMenuItem text='sdk' route='sdk' to={pathPrefix + 'sdk'} />
+                        <LeftMenuItem text='SDK' route='sdk' to={pathPrefix + 'sdk'} />
                     )}
                 </div>
                 <div className={classes.content}>
