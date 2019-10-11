@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.api.model;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  * Intermediate model used to store data required for swagger processing
@@ -35,6 +38,7 @@ public class SwaggerData {
         private String authType;
         private String policy;
         private Scope scope;
+        private String amznResourcename;
 
         public String getPath() {
             return path;
@@ -75,6 +79,15 @@ public class SwaggerData {
         public void setScope(Scope scope) {
             this.scope = scope;
         }
+
+        public String getAmznResourcename() {
+            return amznResourcename;
+        }
+
+        public void setAmznResourcename(String arn) {
+            this.amznResourcename = arn;
+        }
+
     }
 
     private String title;
@@ -102,6 +115,16 @@ public class SwaggerData {
 
         Set<URITemplate> uriTemplates = api.getUriTemplates();
 
+        JSONParser parser = new JSONParser();
+        JSONObject endpointConfig = null;
+        try {
+            if (!api.getEndpointConfig().equals("")) {
+                endpointConfig = (JSONObject) parser.parse(api.getEndpointConfig());
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         for (URITemplate uriTemplate : uriTemplates) {
             Resource resource = new Resource();
             resource.path = uriTemplate.getUriTemplate();
@@ -109,7 +132,10 @@ public class SwaggerData {
             resource.authType = uriTemplate.getAuthType();
             resource.policy = uriTemplate.getThrottlingTier();
             resource.scope = uriTemplate.getScope();
-
+            // AWS Lambda: set arn to resource
+            if (endpointConfig != null && endpointConfig.get("endpoint_type").equals("awslambda")) {
+                resource.amznResourcename = uriTemplate.getAmznResourceName();
+            }
             resources.add(resource);
         }
 

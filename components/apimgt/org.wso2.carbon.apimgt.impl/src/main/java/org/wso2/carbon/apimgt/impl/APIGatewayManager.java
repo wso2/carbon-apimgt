@@ -201,7 +201,11 @@ public class APIGatewayManager {
                             client.updateApiForInlineScript(builder, tenantDomain, api.getId());
                         } else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)) {
                             client.updateApi(builder, tenantDomain, api.getId());
-                            client.saveEndpoint(api, builder, tenantDomain);
+                            // AWS Lambda: prevent saving endpoint if endpoint type is awslambda
+                            JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
+                            if (!endpointConfig.get("endpoint_type").equals("awslambda")) {
+                                client.saveEndpoint(api, builder, tenantDomain);
+                            }
                         }
 
                         if (api.isDefaultVersion() || api.isPublishedDefaultVersion()) {//api.isPublishedDefaultVersion() check is used to detect and update when context etc. is changed in the api which is not the default version but has a published default api
@@ -258,7 +262,11 @@ public class APIGatewayManager {
                             } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT
                                     .equalsIgnoreCase(api.getImplementation())) {
                                 client.addApi(builder, tenantDomain, api.getId());
-                                client.saveEndpoint(api, builder, tenantDomain);
+                                // AWS Lambda: prevent adding endpoint if endpoint type is awslambda
+                                JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
+                                if (!endpointConfig.get("endpoint_type").equals("awslambda")) {
+                                    client.saveEndpoint(api, builder, tenantDomain);
+                                }
                             }
 
                             if (api.isDefaultVersion()) {
@@ -498,7 +506,11 @@ public class APIGatewayManager {
                                 client.deleteApi(tenantDomain, api.getId());
                                 undeployCustomSequences(client, api, tenantDomain, environment);
                             } else {
-                                client.deleteEndpoint(api, tenantDomain);
+                                // AWS Lambda: prevent deleting endpoint if endpoint type is awslambda
+                                JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
+                                if (!endpointConfig.get("endpoint_type").equals("awslambda")) {
+                                    client.deleteEndpoint(api, tenantDomain);
+                                }
                                 client.deleteApi(tenantDomain, api.getId());
                                 undeployCustomSequences(client, api, tenantDomain, environment);
                             }

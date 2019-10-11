@@ -1074,6 +1074,11 @@ public class APIMappingUtil {
                 }
 
             }
+            // AWS Lambda: set arn to URI template
+            String amznResourceName = operation.getAmznResourceName();
+            if (amznResourceName != null) {
+                template.setAmznResourceName(amznResourceName);
+            }
             //Only continue for supported operations
             if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase()) ||
                     (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))) {

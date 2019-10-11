@@ -118,6 +118,7 @@ import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -609,6 +610,16 @@ public final class APIUtil {
             Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
                     api.getUrl(), api.getSandboxUrl());
 
+            // AWS Lambda: get paths
+            OASParserUtil oasParserUtil = new OASParserUtil();
+            String resourceConfigsString = oasParserUtil.getAPIDefinition(apiIdentifier, registry);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject paths = null;
+            if (resourceConfigsString != null) {
+                JSONObject resourceConfigsJSON = (JSONObject) jsonParser.parse(resourceConfigsString);
+                paths = (JSONObject) resourceConfigsJSON.get("paths");
+            }
+
             for (URITemplate uriTemplate : uriTemplates) {
                 String uTemplate = uriTemplate.getUriTemplate();
                 String method = uriTemplate.getHTTPVerb();
@@ -616,7 +627,16 @@ public final class APIUtil {
                 Scope scope = findScopeByKey(scopes, resourceScopes.get(resourceScopeKey));
                 uriTemplate.setScope(scope);
                 uriTemplate.setScopes(scope);
-
+                // AWS Lambda: set arn to URI template
+                if (paths != null) {
+                    JSONObject path = (JSONObject) paths.get(uTemplate);
+                    if (path != null) {
+                        JSONObject operation = (JSONObject) path.get(method.toLowerCase());
+                        if (operation.containsKey("x-amzn-resource-name")) {
+                            uriTemplate.setAmznResourceName((String) operation.get("x-amzn-resource-name"));
+                        }
+                    }
+                }
                 Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
                 for (APIProductIdentifier usedByProduct : usedByProducts) {
                     String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);

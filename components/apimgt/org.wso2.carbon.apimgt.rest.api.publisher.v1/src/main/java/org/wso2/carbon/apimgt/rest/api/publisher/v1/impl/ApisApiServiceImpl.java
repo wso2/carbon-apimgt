@@ -18,6 +18,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.lambda.AWSLambda;
+import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
+import com.amazonaws.services.lambda.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import graphql.language.FieldDefinition;
@@ -40,6 +45,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.XML;
 import org.json.simple.JSONObject;
@@ -90,6 +96,8 @@ import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -103,6 +111,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -274,6 +283,18 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest("Endpoint URLs should be valid web socket URLs", log);
             }
 
+            // AWS Lambda: secret key encryption
+            if (body.getEndpointConfig() != null) {
+                LinkedHashMap endpointConfig = (LinkedHashMap) body.getEndpointConfig();
+                if (endpointConfig.containsKey("amznSecretKey")) {
+                    String secretKey = (String) endpointConfig.get("amznSecretKey");
+                    CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                    String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                    endpointConfig.put("amznSecretKey", encryptedSecretKey);
+                    body.setEndpointConfig(endpointConfig);
+                }
+            }
+
             API apiToAdd = prepareToCreateAPIByDTO(body);
             validateScopes(apiToAdd);
             //adding the api
@@ -306,6 +327,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
                     body.getName() + "-" + body.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (CryptoException e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -564,6 +587,16 @@ public class ApisApiServiceImpl implements ApisApiService {
                     APIDTO.class.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
             boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
 
+            // AWS Lambda: secret key encryption
+            LinkedHashMap endpointConfig = (LinkedHashMap) body.getEndpointConfig();
+            if (endpointConfig.containsKey("amznSecretKey")) {
+                String secretKey = (String) endpointConfig.get("amznSecretKey");
+                CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                endpointConfig.put("amznSecretKey", encryptedSecretKey);
+                body.setEndpointConfig(endpointConfig);
+            }
+
             if (!hasClassLevelScope) {
                 // Validate per-field scopes
                 body = getFieldOverriddenAPIDTO(body, originalAPI, tokenScopes);
@@ -657,6 +690,39 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (CryptoException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdAmznResourceNamesGet(String apiId, MessageContext messageContext) throws APIManagementException {
+        try {
+            JSONObject endpointConfig = (JSONObject) getAPIByID(apiId).getEndpointConfig();
+            if (endpointConfig != null) {
+                if (endpointConfig.containsKey("amznAccessKey") && endpointConfig.containsKey("amznSecretKey")) {
+                    String accessKey = (String) endpointConfig.get("amznAccessKey");
+                    String secretKey = (String) endpointConfig.get("amznSecretKey");
+                    BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
+                    AWSStaticCredentialsProvider credentials = new AWSStaticCredentialsProvider(awsCredentials);
+                    AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
+                            .withCredentials(credentials)
+                            .build();
+                    ListFunctionsResult listFunctionsResult = awsLambda.listFunctions();
+                    List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
+                    JSONObject arns = new JSONObject();
+                    arns.put("count", functionConfigurations.size());
+                    JSONArray list = new JSONArray();
+                    for (FunctionConfiguration functionConfiguration : functionConfigurations) {
+                        list.put(functionConfiguration.getFunctionArn());
+                    }
+                    arns.put("list", list);
+                    return Response.ok().entity(arns.toString()).build();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }
