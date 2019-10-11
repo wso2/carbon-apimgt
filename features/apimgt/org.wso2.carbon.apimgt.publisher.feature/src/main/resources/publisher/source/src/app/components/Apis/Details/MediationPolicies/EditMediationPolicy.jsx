@@ -325,9 +325,36 @@ function EditMediationPolicy(props) {
             {globalMediationPolicies && seqCustom && (
                 <DialogContent dividers>
                     <RadioGroup value={provideBy} onChange={handleChangeProvideBy} className={classes.radioWrapper}>
-                        <FormControlLabel value='none' control={<Radio />} label='None' />
-                        <FormControlLabel value='global' control={<Radio />} label='Global Mediation Policies' />
-                        <FormControlLabel value='custom' control={<Radio />} label='Custom' />
+                        <FormControlLabel
+                            value='none'
+                            control={<Radio color='primary' />}
+                            label={(
+                                <FormattedMessage
+                                    id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.none'
+                                    defaultMessage='None'
+                                />
+                            )}
+                        />
+                        <FormControlLabel
+                            value='global'
+                            control={<Radio color='primary' />}
+                            label={(
+                                <FormattedMessage
+                                    id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.common.policies'
+                                    defaultMessage='Common Mediation Policies'
+                                />
+                            )}
+                        />
+                        <FormControlLabel
+                            value='custom'
+                            control={<Radio color='primary' />}
+                            label={(
+                                <FormattedMessage
+                                    id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.custom'
+                                    defaultMessage='Custom'
+                                />
+                            )}
+                        />
                     </RadioGroup>
                     {provideBy === 'custom' && (
                         <React.Fragment>
@@ -390,6 +417,7 @@ function EditMediationPolicy(props) {
                                                         seq_name: seq.name,
                                                         seq_type: seq.type,
                                                     }}
+                                                    color='primary'
                                                 />
                                             }
                                             label={seq.name}
@@ -422,6 +450,7 @@ function EditMediationPolicy(props) {
                                                     seq_name: seq.name,
                                                     seq_type: seq.type,
                                                 }}
+                                                color='primary'
                                             />
                                         }
                                         label={seq.name}
