@@ -61,6 +61,7 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
@@ -124,6 +125,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Map;
 
@@ -131,20 +133,23 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
@@ -152,7 +157,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
@@ -165,7 +169,6 @@ import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -173,6 +176,42 @@ import javax.ws.rs.core.Response;
 public class ApisApiServiceImpl implements ApisApiService {
 
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
+
+    class APIResource {
+        String verb;
+        String path;
+
+        APIResource(String verb, String path) {
+            this.verb = verb;
+            this.path = path;
+        }
+
+        @Override
+        public String toString() {
+            return "{" +
+                    "verb='" + verb + '\'' +
+                    ", path='" + path + '\'' +
+                    '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+
+            if (!(o instanceof APIResource)) {
+                return false;
+            }
+
+            APIResource that = (APIResource) o;
+            return verb.equals(that.verb) &&
+                    path.equals(that.path);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(verb, path);
+        }
+    }
 
     @Override
     public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query,
@@ -334,7 +373,16 @@ public class ApisApiServiceImpl implements ApisApiService {
                     + " already exists.", log);
         }
         if (body.getAuthorizationHeader() == null) {
+            body.setAuthorizationHeader(APIUtil
+                    .getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));
+        }
+        if (body.getAuthorizationHeader() == null) {
             body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
+        }
+
+        if (body.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED && body.getVisibleRoles().isEmpty()) {
+            RestApiUtil.handleBadRequest("Valid roles should be added under 'visibleRoles' to restrict " +
+                    "the visibility", log);
         }
 
         //Get all existing versions of  api been adding
@@ -549,6 +597,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             body.setLifeCycleStatus(originalAPI.getStatus());
             body.setType(APIDTO.TypeEnum.fromValue(originalAPI.getType()));
 
+            List<APIResource> removedProductResources = getRemovedProductResources(body, originalAPI);
+
+            if (!removedProductResources.isEmpty()) {
+                RestApiUtil.handleConflict("Cannot remove following resource paths " +
+                        removedProductResources.toString() + " because they are used by one or more API Products", log);
+            }
+
             // Validate API Security
             List<String> apiSecurity = body.getSecurityScheme();
             if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecurity != null && apiSecurity
@@ -585,13 +640,16 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
             }
+            // Validate if resources are empty
+            if (!isWSAPI && (body.getOperations() == null || body.getOperations().isEmpty())) {
+                RestApiUtil.handleBadRequest(ExceptionCodes.NO_RESOURCES_FOUND, log);
+            }
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
             validateScopes(apiToUpdate);
             apiToUpdate.setThumbnailUrl(originalAPI.getThumbnailUrl());
 
             //attach micro-geteway labels
             assignLabelsToDTO(body, apiToUpdate);
-            apiProvider.manageAPI(apiToUpdate);
 
             if (!isWSAPI) {
                 String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
@@ -600,6 +658,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
                 apiProvider.saveSwagger20Definition(apiToUpdate.getId(), newDefinition);
             }
+
+            apiProvider.manageAPI(apiToUpdate);
+
             API updatedApi = apiProvider.getAPI(apiIdentifier);
             updatedApiDTO = APIMappingUtil.fromAPItoDTO(updatedApi);
             return Response.ok().entity(updatedApiDTO).build();
@@ -790,6 +851,92 @@ public class ApisApiServiceImpl implements ApisApiService {
             ApiMgtDAO.getInstance().addAuditApiMapping(apiIdentifier, auditUuid);
         }
         return auditUuid;
+    }
+
+    /**
+     * Finds resources that have been removed in the updated API URITemplates,
+     * that are currently reused by API Products.
+     *
+     * @param updateUriTemplates Updated URITemplates
+     * @param existingAPI Existing API
+     * @return List of removed resources that are reused among API Products
+     */
+    private List<APIResource> getRemovedProductResources(Set<URITemplate> updateUriTemplates, API existingAPI) {
+        Set<URITemplate> existingUriTemplates = existingAPI.getUriTemplates();
+        List<APIResource> removedReusedResources = new ArrayList<>();
+
+        for (URITemplate existingUriTemplate : existingUriTemplates) {
+
+            // If existing URITemplate is used by any API Products
+            if (!existingUriTemplate.retrieveUsedByProducts().isEmpty()) {
+                String existingVerb = existingUriTemplate.getHTTPVerb();
+                String existingPath = existingUriTemplate.getUriTemplate();
+                boolean isReusedResourceRemoved = true;
+
+                for (URITemplate updatedUriTemplate : updateUriTemplates) {
+                    String updatedVerb = updatedUriTemplate.getHTTPVerb();
+                    String updatedPath = updatedUriTemplate.getUriTemplate();
+
+                    //Check if existing reused resource is among updated resources
+                    if (existingVerb.equalsIgnoreCase(updatedVerb) &&
+                        existingPath.equalsIgnoreCase(updatedPath)) {
+                        isReusedResourceRemoved = false;
+                        break;
+                    }
+                }
+
+                // Existing reused resource is not among updated resources
+                if (isReusedResourceRemoved) {
+                    APIResource removedResource = new APIResource(existingVerb, existingPath);
+                    removedReusedResources.add(removedResource);
+                }
+            }
+        }
+
+        return removedReusedResources;
+    }
+
+    /**
+     * Finds resources that have been removed in the updated API, that are currently reused by API Products.
+     *
+     * @param updatedDTO Updated API
+     * @param existingAPI Existing API
+     * @return List of removed resources that are reused among API Products
+     */
+    private List<APIResource> getRemovedProductResources(APIDTO updatedDTO, API existingAPI) {
+        List<APIOperationsDTO> updatedOperations = updatedDTO.getOperations();
+        Set<URITemplate> existingUriTemplates = existingAPI.getUriTemplates();
+        List<APIResource> removedReusedResources = new ArrayList<>();
+
+        for (URITemplate existingUriTemplate : existingUriTemplates) {
+
+            // If existing URITemplate is used by any API Products
+            if (!existingUriTemplate.retrieveUsedByProducts().isEmpty()) {
+                String existingVerb = existingUriTemplate.getHTTPVerb();
+                String existingPath = existingUriTemplate.getUriTemplate();
+                boolean isReusedResourceRemoved = true;
+
+                for (APIOperationsDTO updatedOperation : updatedOperations) {
+                    String updatedVerb = updatedOperation.getVerb();
+                    String updatedPath = updatedOperation.getTarget();
+
+                    //Check if existing reused resource is among updated resources
+                    if (existingVerb.equalsIgnoreCase(updatedVerb) &&
+                            existingPath.equalsIgnoreCase(updatedPath)) {
+                        isReusedResourceRemoved = false;
+                        break;
+                    }
+                }
+
+                // Existing reused resource is not among updated resources
+                if (isReusedResourceRemoved) {
+                    APIResource removedResource = new APIResource(existingVerb, existingPath);
+                    removedReusedResources.add(removedResource);
+                }
+            }
+        }
+
+        return removedReusedResources;
     }
 
     /**
@@ -1155,6 +1302,15 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
             }
 
+            API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+
+            List<APIResource> usedProductResources = getUsedProductResources(existingAPI);
+
+            if (!usedProductResources.isEmpty()) {
+                RestApiUtil.handleConflict("Cannot remove the API because following resource paths " +
+                        usedProductResources.toString() + " are used by one or more API Products", log);
+            }
+
             //deletes the API
             apiProvider.deleteAPI(apiIdentifier, apiId);
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
@@ -1172,6 +1328,27 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         }
         return null;
+    }
+
+    /**
+     * Get resources of an API that are reused by API Products
+     *
+     * @param api API
+     * @return List of resources reused by API Products
+     */
+    private List<APIResource> getUsedProductResources(API api) {
+        List<APIResource> usedProductResources = new ArrayList<>();
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+
+        for (URITemplate uriTemplate : uriTemplates) {
+            // If existing URITemplate is used by any API Products
+            if (!uriTemplate.retrieveUsedByProducts().isEmpty()) {
+                APIResource apiResource = new APIResource(uriTemplate.getHTTPVerb(), uriTemplate.getUriTemplate());
+                usedProductResources.add(apiResource);
+            }
+        }
+
+        return usedProductResources;
     }
 
     /**
@@ -2107,8 +2284,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             HashMap monetizationDataMap = new Gson().fromJson(api.getMonetizationProperties().toString(), HashMap.class);
             boolean isMonetizationStateChangeSuccessful = false;
             if (MapUtils.isEmpty(monetizationDataMap)) {
-                String errorMessage = "Monetization data map is empty for API ID " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, log);
+                String errorMessage = "Monetization is not configured. Monetization data is empty for API ID " + apiId;
+                RestApiUtil.handleBadRequest(errorMessage, log);
             }
             try {
                 if (monetizationEnabled) {
@@ -2437,12 +2614,26 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param apiId             API identifier
      * @param apiDefinition     Swagger definition
+     * @param url               Swagger definition URL
+     * @param fileInputStream   Swagger definition input file content
+     * @param fileDetail
      * @param ifMatch           If-match header value
      * @return updated swagger document of the API
      */
     @Override
-    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch, MessageContext messageContext) {
+    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String url, InputStream fileInputStream,
+            Attachment fileDetail, String ifMatch, MessageContext messageContext) {
+
+        // Validate and retrieve the OpenAPI definition
+        Map validationResponseMap = null;
         try {
+            //Handle URL and file based definition imports
+            if(url != null || fileInputStream != null) {
+                validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, true);
+                APIDefinitionValidationResponse validationResponse = (APIDefinitionValidationResponse) validationResponseMap
+                        .get(RestApiConstants.RETURN_MODEL);
+                apiDefinition = validationResponse.getJsonContent();
+            }
             String updatedSwagger = updateSwagger(apiId, apiDefinition);
             return Response.ok().entity(updatedSwagger).build();
         } catch (APIManagementException e) {
@@ -2491,6 +2682,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             // catch APIManagementException inside again to capture validation error
             RestApiUtil.handleBadRequest(e.getMessage(), log);
         }
+        if(uriTemplates == null || uriTemplates.isEmpty()) {
+            RestApiUtil.handleBadRequest(ExceptionCodes.NO_RESOURCES_FOUND, log);
+        }
         Set<Scope> scopes = oasParser.getScopes(apiDefinition);
         //validating scope roles
         for (Scope scope : scopes) {
@@ -2506,15 +2700,22 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         }
 
+        List<APIResource> removedProductResources = getRemovedProductResources(uriTemplates, existingAPI);
+
+        if (!removedProductResources.isEmpty()) {
+            RestApiUtil.handleConflict("Cannot remove following resource paths " +
+                    removedProductResources.toString() + " because they are used by one or more API Products", log);
+        }
+
         existingAPI.setUriTemplates(uriTemplates);
         existingAPI.setScopes(scopes);
         validateScopes(existingAPI);
 
         //Update API is called to update URITemplates and scopes of the API
-        apiProvider.updateAPI(existingAPI);
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
         apiProvider.saveSwagger20Definition(existingAPI.getId(), updatedApiDefinition);
+        apiProvider.updateAPI(existingAPI);
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(existingAPI.getId());
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
@@ -2592,7 +2793,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 api.setScopes(scopes);
             }
 
-            apiProvider.updateAPI(api);
+            apiProvider.manageAPI(api);
 
             String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL
                     .replace(RestApiConstants.APIID_PARAM, apiId);
@@ -3590,10 +3791,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                             .handleBadRequest("Scope " + scope.getName() + " is already assigned by another API", log);
                 }
             }
-            //todo: validate with migrations
-//            if (StringUtils.isBlank(scope.getDescription())) {
-//                RestApiUtil.handleBadRequest("Scope cannot have empty description", log);
-//            }
+            //set description as empty if it is not provided
+            if (StringUtils.isBlank(scope.getDescription())) {
+                scope.setDescription("");
+            }
             if (scope.getRoles() != null) {
                 for (String aRole : scope.getRoles().split(",")) {
                     boolean isValidRole = APIUtil.isRoleNameExist(apiId.getProviderName(), aRole);

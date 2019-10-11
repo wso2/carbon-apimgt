@@ -19,11 +19,30 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class SettingsDTO   {
   
+    private String storeUrl = null;
     private List<EnvironmentDTO> environment = new ArrayList<>();
     private List<String> scopes = new ArrayList<>();
     private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<>();
     private Object securityAuditProperties = null;
     private Boolean externalStoresEnabled = null;
+
+  /**
+   * Store URL
+   **/
+  public SettingsDTO storeUrl(String storeUrl) {
+    this.storeUrl = storeUrl;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Store URL")
+  @JsonProperty("storeUrl")
+  public String getStoreUrl() {
+    return storeUrl;
+  }
+  public void setStoreUrl(String storeUrl) {
+    this.storeUrl = storeUrl;
+  }
 
   /**
    **/
@@ -121,7 +140,8 @@ public class SettingsDTO   {
       return false;
     }
     SettingsDTO settings = (SettingsDTO) o;
-    return Objects.equals(environment, settings.environment) &&
+    return Objects.equals(storeUrl, settings.storeUrl) &&
+        Objects.equals(environment, settings.environment) &&
         Objects.equals(scopes, settings.scopes) &&
         Objects.equals(monetizationAttributes, settings.monetizationAttributes) &&
         Objects.equals(securityAuditProperties, settings.securityAuditProperties) &&
@@ -130,7 +150,7 @@ public class SettingsDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled);
+    return Objects.hash(storeUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled);
   }
 
   @Override
@@ -138,6 +158,7 @@ public class SettingsDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class SettingsDTO {\n");
     
+    sb.append("    storeUrl: ").append(toIndentedString(storeUrl)).append("\n");
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    monetizationAttributes: ").append(toIndentedString(monetizationAttributes)).append("\n");

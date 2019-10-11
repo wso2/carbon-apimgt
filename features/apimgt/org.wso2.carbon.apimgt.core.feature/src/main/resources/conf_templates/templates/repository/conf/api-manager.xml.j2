@@ -1,5 +1,5 @@
-<APIManager>
-    <!-- JNDI name of the data source to be used by the API publisher, API store and API
+<APIManager xmlns:svns="http://org.wso2.securevault/configuration">
+    <!-- JNDI name of the data source to be used by the API publisher, API Developer Portal and API
          key manager. This data source should be defined in the master-datasources.xml file
          in conf/datasources directory. -->
     <DataSourceName>{{apim.datasource.name}}</DataSourceName>
@@ -15,7 +15,7 @@
     APIs will be protected with OAuth2 security-->
     <EnableMTLSForAPIs>true</EnableMTLSForAPIs>
 
-    <!-- Authentication manager configuration for API publisher and API store. This is
+    <!-- Authentication manager configuration for API publisher and API Developer Portal. This is
          a required configuration for both web applications as their user authentication
          logic relies on this. -->
     <AuthManager>
@@ -25,7 +25,7 @@
         <Username>${admin.username}</Username>
         <!-- Admin password for the Authentication manager. -->
         <Password>${admin.password}</Password>
-        <!-- Indicates whether the permissions checking of the user (on the Publisher and Store) should be done
+        <!-- Indicates whether the permissions checking of the user (on the Publisher and Developer Portal) should be done
            via a remote service. The check will be done on the local server when false. -->
         <CheckPermissionsRemotely>false</CheckPermissionsRemotely>
     </AuthManager>
@@ -69,7 +69,7 @@
 
     </JWTConfiguration>
 
-    <!-- Primary/secondary login configuration for APIstore. If user likes to keep two login attributes in a distributed setup, to login the APIstore,
+    <!-- Primary/secondary login configuration for API Developer Portal. If user likes to keep two login attributes in a distributed setup, to login the API Developer Portal,
 		he should configure this section. Primary login doesn't have a claimUri associated with it. But secondary login, which is a claim attribute,
 		is associated with a claimuri.-->
     <!--LoginConfig>
@@ -82,7 +82,7 @@
     </LoginConfig-->
 
     <!-- Credentials for the API gateway admin server. This configuration
-         is mainly used by the API publisher and store to connect to the API gateway and
+         is mainly used by the API publisher and API Developer Portal to connect to the API gateway and
          create/update published API configurations. -->
     <APIGateway>
         <!-- The environments to which an API will be published -->
@@ -146,6 +146,8 @@
         cache. However, if the system is in a state, where the role addition and deletion happens seamlessly, the
         cache will be in in-valid state.-->
         <EnablePublisherRoleCache>{{apim.cache.publisher_roles.enable}}</EnablePublisherRoleCache>
+        <!-- Enable/Disable token caching at the Product REST APIs-->
+        <EnableRESTAPITokenCache>{{apim.cache.restapi_token.enable}}</EnableRESTAPITokenCache>
 	    <!-- JWT claims Cache expiry in seconds -->
         {% if apim.cache.jwt_claim.expiry_time is defined %}
         <JWTClaimCacheExpiry>{{apim.cache.jwt_claim.expiry_time}}</JWTClaimCacheExpiry>
@@ -157,6 +159,10 @@
         <!-- Expiry time for the resource cache  -->
         {% if apim.cache.resource.expiry_time is defined %}
         <GatewayResourceCacheExpiry>{{apim.cache.resource.expiry_time}}</GatewayResourceCacheExpiry>
+        {% endif %}
+        <!-- Expiry time for the apim REST API token cache -->
+        {% if apim.cache.restapi_token.expiry_time is defined %}
+        <RESTAPITokenCacheExpiry>{{apim.cache.restapi_token.expiry_time}}</RESTAPITokenCacheExpiry>
         {% endif %}
         <!-- This parameter specifies the expiration time of the TagCache. TagCache will
              only be created when this element is uncommented. When the specified
@@ -282,7 +288,7 @@
     </Analytics>
 
     <!--
-        API key validator configuration used by API key manager (IS), API store and API gateway.
+        API key validator configuration used by API key manager (IS), API Developer Portal and API gateway.
         API gateway uses it to validate and authenticate users against the provided API keys.
     -->
     <APIKeyValidator>
@@ -384,53 +390,53 @@
         <EnableUnlimitedTier>true</EnableUnlimitedTier>
     </TierManagement>
 
-    <!-- API Store Related Configurations -->
+    <!-- API Developer Portal Related Configurations -->
     <APIStore>
-        {% if apim.store.enable_application_sharing%}
-            {% if apim.store.application_sharing_impl is defined %}
-        <GroupingExtractor>{{apim.store.application_sharing_impl}}</GroupingExtractor>
-        <RESTApiGroupingExtractor>{{apim.store.application_sharing_impl}}</RESTApiGroupingExtractor>
+        {% if apim.devportal.enable_application_sharing%}
+            {% if apim.devportal.application_sharing_impl is defined %}
+        <GroupingExtractor>{{apim.devportal.application_sharing_impl}}</GroupingExtractor>
+        <RESTApiGroupingExtractor>{{apim.devportal.application_sharing_impl}}</RESTApiGroupingExtractor>
             {% else %}
         <GroupingExtractor>org.wso2.carbon.apimgt.impl.DefaultGroupIDExtractorImpl</GroupingExtractor>
         <RESTApiGroupingExtractor>org.wso2.carbon.apimgt.impl.DefaultGroupIDExtractorImpl</RESTApiGroupingExtractor>
             {% endif %}
         {% endif %}
-        <DefaultGroupExtractorClaimUri>{{apim.store.application_sharing_claim}}</DefaultGroupExtractorClaimUri>
+        <DefaultGroupExtractorClaimUri>{{apim.devportal.application_sharing_claim}}</DefaultGroupExtractorClaimUri>
         <!--This property is used to indicate how we do user name comparision for token generation https://wso2.org/jira/browse/APIMANAGER-2225-->
-        <CompareCaseInsensitively>{{apim.store.login_username_case_insensitive}}</CompareCaseInsensitively>
+        <CompareCaseInsensitively>{{apim.devportal.login_username_case_insensitive}}</CompareCaseInsensitively>
         <DisplayURL>false</DisplayURL>
-        <URL>{{apim.store.url}}</URL>
+        <URL>{{apim.devportal.url}}</URL>
 
-        <!-- Server URL of the API Store. -->
+        <!-- Server URL of the API Developer Portal. -->
         <ServerURL>https://localhost:${mgt.transport.https.port}${carbon.context}services/</ServerURL>
-        <!-- Admin username for API Store. -->
+        <!-- Admin username for API Developer Portal. -->
         <Username>${admin.username}</Username>
 
-        <!-- Admin password for API Store. -->
+        <!-- Admin password for API Developer Portal. -->
         <Password>${admin.password}</Password>
         <!-- This parameter specifies whether to display multiple versions of same
              API or only showing the latest version of an API. -->
-        <DisplayMultipleVersions>{{apim.store.display_multiple_versions}}</DisplayMultipleVersions>
+        <DisplayMultipleVersions>{{apim.devportal.display_multiple_versions}}</DisplayMultipleVersions>
         <!-- This parameter specifies whether to display all the APIs
              [which are having DEPRECATED/PUBLISHED status] or only display the APIs
              with having their status is as 'PUBLISHED' -->
-        <DisplayAllAPIs>{{apim.store.display_deprecated_apis}}</DisplayAllAPIs>
-        <!-- Uncomment this to limit the number of APIs in api the API Store -->
+        <DisplayAllAPIs>{{apim.devportal.display_deprecated_apis}}</DisplayAllAPIs>
+        <!-- Uncomment this to limit the number of APIs in api the API Developer Portal -->
         <!--APIsPerPage>5</APIsPerPage-->
 
         <!-- This parameter specifies whether to display the comment editing facility or not.
              Default is "true". If user wants to disable, he must set this param as "false" -->
-        <DisplayComments>{{apim.store.enable_comments}}</DisplayComments>
+        <DisplayComments>{{apim.devportal.enable_comments}}</DisplayComments>
 
         <!-- This parameter specifies whether to display the ratings  or not.
              Default is "true". If user wants to disable, he must set this param as "false" -->
-        <DisplayRatings>{{apim.store.enable_ratings}}</DisplayRatings>
+        <DisplayRatings>{{apim.devportal.enable_ratings}}</DisplayRatings>
 
-        <!--set isStoreForumEnabled to false for disable forum in store-->
-        <isStoreForumEnabled>{{apim.store.enable_forum}}</isStoreForumEnabled>
+        <!--set isStoreForumEnabled to false for disable forum in API Developer Portal-->
+        <isStoreForumEnabled>{{apim.devportal.enable_forum}}</isStoreForumEnabled>
 
         <!--This parameter specifies whether Provisioning Out-of-Band OAuth Clients is enabled-->
-        <MapExistingAuthApps>{{apim.store.enable_map_auth}}</MapExistingAuthApps>
+        <MapExistingAuthApps>{{apim.devportal.enable_map_auth}}</MapExistingAuthApps>
     </APIStore>
 
     <APIPublisher>
@@ -463,7 +469,7 @@
         <Enabled>{{apim.cors.enable}}</Enabled>
 
         <!-- The value of the Access-Control-Allow-Origin header. Default values are
-             API Store addresses, which is needed for swagger to function. -->
+             API Developer Portal addresses, which is needed for swagger to function. -->
         <Access-Control-Allow-Origin>{% for origin in apim.cors.allow_origins %}{{origin}}{{ "," if not loop.last }}{% endfor %}</Access-Control-Allow-Origin>
 
         <!-- Configure Access-Control-Allow-Methods -->
@@ -893,10 +899,10 @@
         </APISecurityAudit>
     {% endif %}
 
-    {% if apim.store.application_attributes is defined %}
+    {% if apim.devportal.application_attributes is defined %}
     <ApplicationConfiguration>
         <ApplicationAttributes>
-            {% for attribute in apim.store.application_attributes %}
+            {% for attribute in apim.devportal.application_attributes %}
             <Attribute Required="{{attribute.required}}" Hidden="{{attribute.hidden}}">
                 <Name>{{attribute.name}}</Name>
                 <Description>{{attribute.description}}</Description>

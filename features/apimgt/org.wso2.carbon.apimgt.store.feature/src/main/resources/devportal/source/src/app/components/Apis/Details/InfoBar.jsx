@@ -44,215 +44,116 @@ import Labels from './Labels';
  *
  * @param {*} theme
  */
-const styles = theme => ({
-    table: {
-        minWidth: '100%',
-    },
-    root: {
-        height: 70,
-        background: theme.palette.background.paper,
-        borderBottom: 'solid 1px ' + theme.palette.grey.A200,
-        display: 'flex',
-        alignItems: 'center',
-        paddingLeft: theme.spacing.unit * 2,
-    },
-    backIcon: {
-        color: theme.palette.primary.main,
-        fontSize: 56,
-        cursor: 'pointer',
-    },
-    backText: {
-        color: theme.palette.primary.main,
-        cursor: 'pointer',
-        fontFamily: theme.typography.fontFamily,
-    },
-    apiIcon: {
-        height: 45,
-        marginTop: 10,
-        marginRight: 10,
-    },
-    starRate: {
-        fontSize: 40,
-        color: theme.custom.starColor,
-    },
-    starRateMy: {
-        fontSize: 40,
-        color: theme.palette.primary.main,
-    },
-    rateLink: {
-        cursor: 'pointer',
-        lineHeight: '70px',
-    },
+const styles = (theme) => {
+    const mainBack = theme.custom.infoBar.background || '#ffffff';
+    const infoBarHeight = theme.custom.infoBar.height || 70;
+    const backIconDisplay = theme.custom.infoBar.showBackIcon ? 'flex' : 'none';
+    const starColor = theme.custom.infoBar.starColor || theme.palette.getContrastText(mainBack);
 
-    topBar: {
-        display: 'flex',
-        paddingBottom: theme.spacing.unit * 2,
-    },
-    infoContent: {
-        background: theme.palette.background.paper,
-        padding: theme.spacing.unit * 3,
-    },
-    infoContentBottom: {
-        background: theme.palette.grey['200'],
-        borderBottom: 'solid 1px ' + theme.palette.grey.A200,
-        color: theme.palette.grey['600'],
-    },
-    infoItem: {
-        marginRight: theme.spacing.unit * 4,
-    },
-    bootstrapRoot: {
-        padding: 0,
-        'label + &': {
-            marginTop: theme.spacing.unit * 3,
+    return {
+        table: {
+            minWidth: '100%',
         },
-    },
-    bootstrapInput: {
-        borderRadius: 4,
-        backgroundColor: theme.palette.common.white,
-        border: '1px solid #ced4da',
-        padding: '5px 12px',
-        width: 350,
-        transition: theme.transitions.create(['border-color', 'box-shadow']),
-        fontFamily: [
-            '-apple-system',
-            'BlinkMacSystemFont',
-            '"Segoe UI"',
-            'Roboto',
-            '"Helvetica Neue"',
-            'Arial',
-            'sans-serif',
-            '"Apple Color Emoji"',
-            '"Segoe UI Emoji"',
-            '"Segoe UI Symbol"',
-        ].join(','),
-        '&:focus': {
-            borderColor: '#80bdff',
-            boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
+        root: {
+            height: infoBarHeight,
+            background: mainBack,
+            color: theme.palette.getContrastText(mainBack),
+            borderBottom: 'solid 1px ' + theme.palette.grey.A200,
+            display: 'flex',
+            alignItems: 'center',
+            paddingLeft: theme.spacing.unit * 2,
         },
-    },
-    epWrapper: {
-        display: 'flex',
-    },
-    prodLabel: {
-        lineHeight: '30px',
-        marginRight: 10,
-        width: 100,
-    },
-    contentWrapper: {
-        width: theme.custom.contentAreaWidth - theme.custom.leftMenuWidth,
-        alignItems: 'center',
-    },
-    ratingBoxWrapper: {
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-    },
-    ratingBox: {
-        backgroundColor: theme.palette.background.leftMenu,
-        border: '1px solid rgb(71, 211, 244)',
-        borderRadius: '5px',
-        display: 'flex',
-        position: 'absolute',
-        left: '-310px',
-        top: 14,
-        height: '40px',
-        color: theme.palette.getContrastText(theme.palette.background.leftMenu),
-        alignItems: 'center',
-        paddingLeft: '5px',
-        paddingRight: '5px',
-    },
-    userRating: {
-        display: 'flex',
-        alignItems: 'flex-end',
-    },
-    verticalDividerStar: {
-        borderLeft: 'solid 1px ' + theme.palette.grey.A200,
-        height: 40,
-        marginRight: theme.spacing.unit,
-        marginLeft: theme.spacing.unit,
-    },
-    backLink: {
-        alignItems: 'center',
-        textDecoration: 'none',
-        display: 'flex',
-    },
-    ratingSummery: {
-        alignItems: 'center',
-        flexDirection: 'column',
-        display: 'flex',
-    },
-    infoBarMain: {
-        width: '100%',
-    },
-    buttonView: {
-        textAlign: 'left',
-        justifyContent: 'left',
-        display: 'flex',
-        paddingLeft: theme.spacing.unit * 2,
-        cursor: 'pointer',
-    },
-    buttonOverviewText: {
-        display: 'inline-block',
-        paddingTop: 3,
-    },
-    rootx: {
-        height: 180,
-    },
-    container: {
-        display: 'flex',
-    },
-    paper: {
-        margin: theme.spacing.unit,
-    },
-    svg: {
-        width: 100,
-        height: 100,
-    },
-    polygon: {
-        fill: theme.palette.common.white,
-        stroke: theme.palette.divider,
-        strokeWidth: 1,
-    },
-    leftCol: {
-        width: 200,
-    },
-    iconAligner: {
-        display: 'flex',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-    },
-    iconTextWrapper: {
-        display: 'inline-block',
-        paddingLeft: 20,
-    },
-    iconEven: {
-        color: theme.palette.secondary.light,
-        width: theme.spacing.unit * 3,
-    },
-    iconOdd: {
-        color: theme.palette.secondary.main,
-        width: theme.spacing.unit * 3,
-    },
-    margin: {
-        marginLeft: 30,
-    },
-    downloadLink: {
-        color: 'blue',
-    },
-    contentToTop: {
-        verticlaAlign: 'top',
-    },
-    viewInPubStoreLauncher: {
-        display: 'flex',
-        flexDirection: 'column',
-        color: theme.palette.getContrastText(theme.palette.background.paper),
-        textAlign: 'center',
-        textDecoration: 'none',
-    },
-    linkText: {
-        fontSize: theme.typography.fontSize,
-    },
-});
+        backIcon: {
+            color: theme.palette.primary.main,
+            fontSize: 56,
+            cursor: 'pointer',
+        },
+        backText: {
+            color: theme.palette.primary.main,
+            cursor: 'pointer',
+            fontFamily: theme.typography.fontFamily,
+        },
+        starRate: {
+            fontSize: 40,
+            color: starColor,
+        },
+        infoContent: {
+            color: theme.palette.getContrastText(mainBack),
+            background: mainBack,
+            padding: theme.spacing.unit * 3,
+            '& td, & th': {
+                color: theme.palette.getContrastText(mainBack),
+            },
+        },
+        infoContentBottom: {
+            background: theme.custom.infoBar.sliderBackground,
+            color: theme.palette.getContrastText(theme.custom.infoBar.sliderBackground),
+            borderBottom: 'solid 1px ' + theme.palette.grey.A200,
+        },
+        contentWrapper: {
+            maxWidth: theme.custom.contentAreaWidth - theme.custom.leftMenu.width,
+            alignItems: 'center',
+        },
+        backLink: {
+            alignItems: 'center',
+            textDecoration: 'none',
+            display: backIconDisplay,
+        },
+        infoBarMain: {
+            width: '100%',
+        },
+        buttonView: {
+            textAlign: 'left',
+            justifyContent: 'left',
+            display: 'flex',
+            paddingLeft: theme.spacing(3),
+            cursor: 'pointer',
+        },
+        buttonOverviewText: {
+            display: 'inline-block',
+            paddingTop: 3,
+        },
+        paper: {
+            margin: theme.spacing.unit,
+        },
+        leftCol: {
+            width: 200,
+        },
+        iconAligner: {
+            display: 'flex',
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+        },
+        iconTextWrapper: {
+            display: 'inline-block',
+            paddingLeft: 20,
+        },
+        iconEven: {
+            color: theme.custom.infoBar.iconEvenColor,
+            width: theme.spacing.unit * 3,
+        },
+        iconOdd: {
+            color: theme.custom.infoBar.iconOddColor,
+            width: theme.spacing.unit * 3,
+        },
+        margin: {
+            marginLeft: 30,
+        },
+        contentToTop: {
+            verticlaAlign: 'top',
+        },
+        viewInPubStoreLauncher: {
+            display: 'flex',
+            flexDirection: 'column',
+            color: theme.palette.getContrastText(mainBack),
+            textAlign: 'center',
+            textDecoration: 'none',
+        },
+        linkText: {
+            fontSize: theme.typography.fontSize,
+        },
+    };
+};
 
 /**
  *
@@ -277,6 +178,7 @@ class InfoBar extends React.Component {
             checked: false,
         };
         this.getSchema = this.getSchema.bind(this);
+        this.getProvider = this.getProvider.bind(this);
     }
 
     /**
@@ -284,7 +186,6 @@ class InfoBar extends React.Component {
      *
      * @memberof InfoBar
      */
-
 
     /**
      *
@@ -299,6 +200,15 @@ class InfoBar extends React.Component {
         }
     };
 
+    getProvider(api) {
+        let { provider } = api;
+        if (api.businessInformation && api.businessInformation.businessOwner
+            && api.businessInformation.businessOwner.trim() !== '') {
+            provider = api.businessInformation.businessOwner;
+        }
+        return provider;
+    }
+
     getSchema() {
         const newAPI = new API();
         const { api } = this.context;
@@ -309,7 +219,7 @@ class InfoBar extends React.Component {
             const url = windowUrl.createObjectURL(binary);
             const anchor = document.createElement('a');
             anchor.href = url;
-            anchor.download = api.provider + '-' + api.name + '-' + api.version + '.graphql';
+            anchor.download = this.getProvider(api) + '-' + api.name + '-' + api.version + '.graphql';
             anchor.click();
             windowUrl.revokeObjectURL(url);
         });
@@ -326,6 +236,13 @@ class InfoBar extends React.Component {
         const {
             notFound, showOverview, prodUrlCopied, sandboxUrlCopied, epUrl,
         } = this.state;
+        const {
+            custom: {
+                leftMenu: { position },
+                infoBar: { showThumbnail, sliderPosition, sliderBackground },
+            },
+        } = theme;
+
         const { resourceNotFountMessage } = this.props;
         const user = AuthManager.getUser();
         if (notFound) {
@@ -345,17 +262,22 @@ class InfoBar extends React.Component {
                                     <FormattedMessage id='Apis.Details.InfoBar.listing' defaultMessage='LISTING' />
                                 </div>
                             </Link>
-                            <VerticalDivider height={70} />
-                            <ImageGenerator api={api} width='70' height='50' />
+                            {showThumbnail && (
+                                <React.Fragment>
+                                    <VerticalDivider height={70} />
+                                    <ImageGenerator api={api} width='70' height='50' />
+                                </React.Fragment>
+                            )}
                             <div style={{ marginLeft: theme.spacing.unit }}>
                                 <Typography variant='h4'>{api.name}</Typography>
                                 <Typography variant='caption' gutterBottom align='left'>
-                                    {api.provider}
+                                    {this.getProvider(api)}
                                 </Typography>
                             </div>
                             <VerticalDivider height={70} />
-                            {(!api.advertiseInfo.advertised && user)
-                                && <StarRatingBar apiId={api.id} isEditable={false} showSummary />}
+                            {!api.advertiseInfo.advertised && user && (
+                                <StarRatingBar apiId={api.id} isEditable={false} showSummary />
+                            )}
                             {api.advertiseInfo.advertised && (
                                 <React.Fragment>
                                     <a
@@ -373,7 +295,7 @@ class InfoBar extends React.Component {
                                 </React.Fragment>
                             )}
                         </div>
-
+                        {position === 'horizontal' && <div style={{ height: 60 }} />}
                         {showOverview && (
                             <Collapse in={showOverview}>
                                 <div className={classes.infoContent}>
@@ -384,7 +306,9 @@ class InfoBar extends React.Component {
                                                 <TableRow>
                                                     <TableCell component='th' scope='row' className={classes.leftCol}>
                                                         <div className={classes.iconAligner}>
-                                                            <Icon className={classes.iconOdd}>settings_input_component</Icon>
+                                                            <Icon className={classes.iconOdd}>
+                                                                settings_input_component
+                                                            </Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.list.version'
@@ -393,14 +317,14 @@ class InfoBar extends React.Component {
                                                             </span>
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell>
-                                                        {api.version}
-                                                    </TableCell>
+                                                    <TableCell>{api.version}</TableCell>
                                                 </TableRow>
                                                 <TableRow>
                                                     <TableCell component='th' scope='row'>
                                                         <div className={classes.iconAligner}>
-                                                            <Icon className={classes.iconEven}>account_balance_wallet</Icon>
+                                                            <Icon className={classes.iconEven}>
+                                                                account_balance_wallet
+                                                            </Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.list.context'
@@ -423,7 +347,7 @@ class InfoBar extends React.Component {
                                                             </span>
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell>{api.provider}</TableCell>
+                                                    <TableCell>{this.getProvider(api)}</TableCell>
                                                 </TableRow>
                                                 {/* <TableRow>
                                                     <TableCell component='th' scope='row'>
@@ -439,7 +363,7 @@ class InfoBar extends React.Component {
                                                     </TableCell>
                                                     <TableCell>21 May 2018</TableCell>
                                                 </TableRow> */}
-                                                {(user && !api.advertiseInfo.advertised) && (
+                                                {user && !api.advertiseInfo.advertised && (
                                                     <TableRow>
                                                         <TableCell component='th' scope='row'>
                                                             <div className={classes.iconAligner}>
@@ -486,7 +410,6 @@ class InfoBar extends React.Component {
                                                                     defaultMessage='GraphQL Schema'
                                                                 />
                                                             </Button>
-
                                                         </TableCell>
                                                     </TableRow>
                                                 )}
@@ -568,12 +491,9 @@ class InfoBar extends React.Component {
                                         </Typography>
                                     ) : (
                                         <Typography className={classes.buttonOverviewText}>
-                                            <FormattedMessage
-                                                id='Apis.Details.InfoBar.more'
-                                                defaultMessage='MORE'
-                                                />
+                                            <FormattedMessage id='Apis.Details.InfoBar.more' defaultMessage='MORE' />
                                         </Typography>
-                                        )}
+                                    )}
                                     {showOverview ? <Icon>arrow_drop_up</Icon> : <Icon>arrow_drop_down</Icon>}
                                 </div>
                             </div>

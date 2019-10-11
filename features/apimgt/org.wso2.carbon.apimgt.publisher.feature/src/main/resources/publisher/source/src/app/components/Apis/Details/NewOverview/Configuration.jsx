@@ -51,7 +51,7 @@ function Configuration(props) {
             <div>
                 <Typography variant='h5' component='h3' className={parentClasses.title}>
                     <FormattedMessage
-                        id='Apis.Details.NewOverview.MetaData.metadata'
+                        id='Apis.Details.NewOverview.MetaData.config'
                         defaultMessage='Configuration'
                     />
                 </Typography>

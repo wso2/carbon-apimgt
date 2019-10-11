@@ -66,7 +66,6 @@ import Scope from './Scopes';
 import Security from './Security';
 import APIDefinition from './APIDefinition/APIDefinition';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
-import MediationPoliciesOverview from './MediationPolicies/Overview';
 import BusinessInformation from './BusinessInformation/BusinessInformation';
 import Properties from './Properties/Properties';
 import Monetization from './Monetization';
@@ -259,7 +258,7 @@ class Details extends Component {
             });
     }
 
-    getLeftMenuItemForAPIType(apiType) {
+    getLeftMenuItemForDefinitionByType(apiType) {
         const { isAPIProduct } = this.state;
         const { intl, match } = this.props;
         const uuid = match.params.apiUUID || match.params.api_uuid || match.params.apiProdUUID;
@@ -274,9 +273,41 @@ class Details extends Component {
                                 id: 'Apis.Details.index.schema.definition',
                                 defaultMessage: 'Schema Definition',
                             })}
+                            route='schema definition'
                             to={pathPrefix + 'schema definition'}
                             Icon={<CodeIcon />}
                         />
+                    </React.Fragment>
+                );
+            case 'WS':
+                return '';
+            default:
+                return (
+                    <React.Fragment>
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.api.definition2',
+                                defaultMessage: 'API definition',
+                            })}
+                            route='api definition'
+                            to={pathPrefix + 'api definition'}
+                            Icon={<CodeIcon />}
+                        />
+                    </React.Fragment>
+                );
+        }
+    }
+
+    getLeftMenuItemForResourcesByType(apiType) {
+        const { isAPIProduct } = this.state;
+        const { intl, match } = this.props;
+        const uuid = match.params.apiUUID || match.params.api_uuid || match.params.apiProdUUID;
+        const pathPrefix = '/' + (isAPIProduct ? 'api-products' : 'apis') + '/' + uuid + '/';
+
+        switch (apiType) {
+            case 'GRAPHQL':
+                return (
+                    <React.Fragment>
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.operations',
@@ -292,14 +323,6 @@ class Details extends Component {
             default:
                 return (
                     <React.Fragment>
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.api.definition',
-                                defaultMessage: 'api definition',
-                            })}
-                            to={pathPrefix + 'api definition'}
-                            Icon={<CodeIcon />}
-                        />
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.resources',
@@ -374,10 +397,6 @@ class Details extends Component {
      */
     render() {
         const { api, apiNotFound, isAPIProduct } = this.state;
-        let isWebsocket = false;
-        if (api) {
-            isWebsocket = (api.type === 'WS');
-        }
         const {
             classes,
             theme,
@@ -452,21 +471,24 @@ class Details extends Component {
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.design.configs',
-                                defaultMessage: 'Design Configs',
+                                defaultMessage: 'Design Configurations',
                             })}
                             route='configuration'
                             to={pathPrefix + 'configuration'}
                             Icon={<ConfigurationIcon />}
                         />
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.runtime.configs',
-                                defaultMessage: 'Runtime Configs',
-                            })}
-                            route='runtime-configuration'
-                            to={pathPrefix + 'runtime-configuration'}
-                            Icon={<RuntimeConfigurationIcon />}
-                        />
+                        {!api.isWebSocket() && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.runtime.configs',
+                                    defaultMessage: 'Runtime Configurations',
+                                })}
+                                route='runtime-configuration'
+                                to={pathPrefix + 'runtime-configuration'}
+                                Icon={<RuntimeConfigurationIcon />}
+                            />
+                        )}
+                        {this.getLeftMenuItemForResourcesByType(api.type)}
                         {!isAPIProduct && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
@@ -477,18 +499,14 @@ class Details extends Component {
                                 Icon={<EndpointIcon />}
                             />
                         )}
-                        {!isAPIProduct && (
-                            <LeftMenuItem
-                                text={intl.formatMessage({
-                                    id: 'Apis.Details.index.gateways',
-                                    defaultMessage: 'gateways',
-                                })}
-                                route='environments'
-                                to={pathPrefix + 'environments'}
-                                Icon={<PersonPinCircleOutlinedIcon />}
-                            />
-                        )}
-                        {this.getLeftMenuItemForAPIType(api.type)}
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.subscriptions',
+                                defaultMessage: 'subscriptions',
+                            })}
+                            to={pathPrefix + 'subscriptions'}
+                            Icon={<SubscriptionsIcon />}
+                        />
                         {!isAPIProduct && !isRestricted(['apim:api_publish'], api) && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
@@ -499,7 +517,19 @@ class Details extends Component {
                                 Icon={<LifeCycleIcon />}
                             />
                         )}
-                        {!isWebsocket && (
+                        {this.getLeftMenuItemForDefinitionByType(api.type)}
+                        {!isAPIProduct && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.environments',
+                                    defaultMessage: 'environments',
+                                })}
+                                route='environments'
+                                to={pathPrefix + 'environments'}
+                                Icon={<PersonPinCircleOutlinedIcon />}
+                            />
+                        )}
+                        {!api.isWebSocket() && !isAPIProduct && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.left.menu.scope',
@@ -509,14 +539,6 @@ class Details extends Component {
                                 Icon={<ScopesIcon />}
                             />
                         )}
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.documents',
-                                defaultMessage: 'documents',
-                            })}
-                            to={pathPrefix + 'documents'}
-                            Icon={<DocumentsIcon />}
-                        />
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.business.info',
@@ -535,23 +557,13 @@ class Details extends Component {
                         />
                         <LeftMenuItem
                             text={intl.formatMessage({
-                                id: 'Apis.Details.index.subscriptions',
-                                defaultMessage: 'subscriptions',
+                                id: 'Apis.Details.index.documents',
+                                defaultMessage: 'documents',
                             })}
-                            to={pathPrefix + 'subscriptions'}
-                            Icon={<SubscriptionsIcon />}
+                            to={pathPrefix + 'documents'}
+                            Icon={<DocumentsIcon />}
                         />
-                        {!isWebsocket && (
-                            <LeftMenuItem
-                                text={intl.formatMessage({
-                                    id: 'Apis.Details.index.left.menu.mediation.policies',
-                                    defaultMessage: 'mediation policies',
-                                })}
-                                to={pathPrefix + 'mediation policies'}
-                                Icon={<ScopesIcon />}
-                            />
-                        )}
-                        {!isAPIProduct && !isWebsocket && !isRestricted(['apim:api_publish'], api) && (
+                        {!isAPIProduct && !api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.monetization',
@@ -641,7 +653,6 @@ class Details extends Component {
                                 />
 
                                 <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
-                                <Route path={Details.subPaths.SCOPES_PRODUCT} component={() => <Scope api={api} />} />
                                 <Route path={Details.subPaths.DOCUMENTS} component={() => <Documents api={api} />} />
                                 <Route
                                     path={Details.subPaths.DOCUMENTS_PRODUCT}
@@ -649,6 +660,10 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.SUBSCRIPTIONS}
+                                    component={() => <Subscriptions api={api} updateAPI={this.updateAPI} />}
+                                />
+                                <Route
+                                    path={Details.subPaths.SUBSCRIPTIONS_PRODUCT}
                                     component={() => <Subscriptions api={api} updateAPI={this.updateAPI} />}
                                 />
                                 <Route path={Details.subPaths.SECURITY} component={() => <Security api={api} />} />
@@ -673,14 +688,6 @@ class Details extends Component {
                                     component={() => <Monetization api={api} />}
                                 />
                                 <Route path={Details.subPaths.EXTERNAL_STORES} component={ExternalStores} />
-                                <Route
-                                    path={Details.subPaths.MEDIATION_POLICIES}
-                                    component={MediationPoliciesOverview}
-                                />
-                                <Route
-                                    path={Details.subPaths.MEDIATION_POLICIES_PRODUCT}
-                                    component={MediationPoliciesOverview}
-                                />
                             </Switch>
                         </div>
                     </div>
@@ -714,10 +721,9 @@ Details.subPaths = {
     RESOURCES_PRODUCT: '/api-products/:apiprod_uuid/resources',
     RESOURCES_PRODUCT_EDIT: '/api-products/:apiprod_uuid/resources/edit',
     SCOPES: '/apis/:api_uuid/scopes',
-    SCOPES_PRODUCT: '/api-products/:apiprod_uuid/scopes',
-    MEDIATION_POLICIES_PRODUCT: '/api-products/:apiprod_uuid/mediation policies',
     DOCUMENTS: '/apis/:api_uuid/documents',
     DOCUMENTS_PRODUCT: '/api-products/:apiprod_uuid/documents',
+    SUBSCRIPTIONS_PRODUCT: '/api-products/:apiprod_uuid/subscriptions',
     SUBSCRIPTIONS: '/apis/:api_uuid/subscriptions',
     SECURITY: '/apis/:api_uuid/security',
     COMMENTS: '/apis/:api_uuid/comments',
@@ -727,7 +733,6 @@ Details.subPaths = {
     PROPERTIES_PRODUCT: '/api-products/:apiprod_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
     MONETIZATION: '/apis/:api_uuid/monetization',
-    MEDIATION_POLICIES: '/apis/:api_uuid/mediation policies',
     EXTERNAL_STORES: '/apis/:api_uuid/external-stores',
 };
 

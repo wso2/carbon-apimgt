@@ -18,7 +18,7 @@
 import React, { useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
+import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import { FormattedMessage } from 'react-intl';
 import Stepper from '@material-ui/core/Stepper';
@@ -178,8 +178,8 @@ export default function ApiCreateOpenAPI(props) {
                 </React.Fragment>
             }
         >
-            <Paper>
-                <Stepper activeStep={0}>
+            <Box>
+                <Stepper alternativeLabel activeStep={0}>
                     <Step>
                         <StepLabel>
                             <FormattedMessage
@@ -198,12 +198,12 @@ export default function ApiCreateOpenAPI(props) {
                         </StepLabel>
                     </Step>
                 </Stepper>
-            </Paper>
+            </Box>
 
             <Grid container spacing={3}>
-                <Grid item md={12} />
-                <Grid item md={1} />
-                <Grid item md={11}>
+                <Grid item xs={12} />
+                <Grid item xs={1} />
+                <Grid item xs={11}>
                     {wizardStep === 0 && (
                         <ProvideOpenAPI
                             onValidate={handleOnValidate}
@@ -215,9 +215,22 @@ export default function ApiCreateOpenAPI(props) {
                         <DefaultAPIForm onValidate={handleOnValidate} onChange={handleOnChange} api={apiInputs} />
                     )}
                 </Grid>
-                <Grid item md={1} />
-                <Grid item md={9}>
+                <Grid item xs={1} />
+                <Grid item xs={11}>
                     <Grid container direction='row' justify='flex-start' alignItems='center' spacing={2}>
+                        <Grid item>
+                            {wizardStep === 0 && (
+                                <Link to='/apis/'>
+                                    <Button>
+                                        <FormattedMessage
+                                            id='Apis.Create.OpenAPI.ApiCreateOpenAPI.cancel'
+                                            defaultMessage='Cancel'
+                                        />
+                                    </Button>
+                                </Link>
+                            )}
+                            {wizardStep === 1 && <Button onClick={() => setWizardStep(step => step - 1)}>Back</Button>}
+                        </Grid>
                         <Grid item>
                             {wizardStep === 0 && (
                                 <Button
@@ -239,19 +252,6 @@ export default function ApiCreateOpenAPI(props) {
                                     Create {isCreating && <CircularProgress size={24} />}
                                 </Button>
                             )}
-                        </Grid>
-                        <Grid item>
-                            {wizardStep === 0 && (
-                                <Link to='/apis/'>
-                                    <Button variant='outlined'>
-                                        <FormattedMessage
-                                            id='Apis.Create.OpenAPI.ApiCreateOpenAPI.cancel'
-                                            defaultMessage='Cancel'
-                                        />
-                                    </Button>
-                                </Link>
-                            )}
-                            {wizardStep === 1 && <Button onClick={() => setWizardStep(step => step - 1)}>Back</Button>}
                         </Grid>
                     </Grid>
                 </Grid>

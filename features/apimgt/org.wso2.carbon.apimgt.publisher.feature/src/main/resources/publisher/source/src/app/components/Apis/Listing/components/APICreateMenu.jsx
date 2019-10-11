@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 
 import MenuButton from 'AppComponents/Shared/MenuButton';
 import { FormattedMessage } from 'react-intl';
+import AuthManager from 'AppData/AuthManager';
 
 const useStyles = makeStyles(theme => ({
     links: {
@@ -115,7 +116,7 @@ const APICreateMenu = (props) => {
             </ListItem>
         </List>
     );
-    return <MenuButton {...props} menuList={createTypes} />;
+    return !AuthManager.isNotCreator() && <MenuButton {...props} menuList={createTypes} />;
 };
 
 APICreateMenu.propTypes = {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -15,7 +16,7 @@ import API from 'AppData/api';
  */
 export default function SelectPolicies(props) {
     const {
-        onChange, policies: selectedPolicies, multiple, required, helperText,
+        onChange, policies: selectedPolicies, multiple, required, helperText, isAPIProduct,
     } = props;
     const [policies, setPolicies] = useState({});
     useEffect(() => {
@@ -39,7 +40,7 @@ export default function SelectPolicies(props) {
                     multiple,
                     renderValue: selected => (Array.isArray(selected) ? selected.join(', ') : selected),
                 }}
-                helperText={helperText}
+                helperText={isAPIProduct ? helperText + 'API Product' : helperText + 'API'}
                 margin='normal'
                 variant='outlined'
             >
@@ -58,5 +59,6 @@ SelectPolicies.defaultProps = {
     policies: [],
     multiple: true,
     required: false,
-    helperText: 'Select one or multiple throttling policy for the API',
+    isAPIProduct: PropTypes.bool.isRequired,
+    helperText: 'Select one or more throttling policies for the ',
 };

@@ -29,6 +29,7 @@ import PropTypes from 'prop-types';
 import Select from '@material-ui/core/Select';
 import TenantAutocomplete from 'AppComponents/Apis/Details/Subscriptions/TenantAutocomplete';
 import Alert from 'AppComponents/Shared/Alert';
+import { isRestricted } from 'AppData/AuthManager';
 
 
 const useStyles = makeStyles(theme => ({
@@ -73,14 +74,23 @@ const useStyles = makeStyles(theme => ({
  */
 export default function SimpleSelect(props) {
     const classes = useStyles();
-    const { updateAPI } = props;
+    const { api, updateAPI } = props;
     const [tenantList, setTenantList] = React.useState([]);
+    let currentAvailability;
+    if (api.subscriptionAvailability === null || api.subscriptionAvailability === 'CURRENT_TENANT') {
+        currentAvailability = 'currentTenant';
+    } else if (api.subscriptionAvailability === 'ALL_TENANTS') {
+        currentAvailability = 'allTenants';
+    } else if (api.subscriptionAvailability === 'SPECIFIC_TENANTS') {
+        currentAvailability = 'specificTenants';
+    }
     const [values, setValues] = React.useState({
-        availability: 'currentTenant',
+        availability: currentAvailability,
     });
     const inputLabel = React.useRef(null);
     const [labelWidth, setLabelWidth] = React.useState(0);
     const isSpecificTenants = values.availability === 'specificTenants';
+    const isUIElementDisabled = isRestricted(['apim:api_publish', 'apim:api_create'], api);
 
     React.useEffect(() => {
         setLabelWidth(inputLabel.current.offsetWidth);
@@ -124,7 +134,7 @@ export default function SimpleSelect(props) {
     }
     return (
         <Paper className={classes.subscriptionAvailabilityPaper}>
-            <form className={classes.root} autoComplete='off'>
+            <form className={classes.root} autoComplete='off' onSubmit={(e) => { e.preventDefault(); }}>
                 <Grid container spacing={1} className={classes.grid}>
                     <Grid item xs={4} className={classes.gridLabel}>
                         <FormLabel>
@@ -135,7 +145,7 @@ export default function SimpleSelect(props) {
                         </FormLabel>
                     </Grid>
                     <Grid item xs={8} justify='space-between' spacing={32}>
-                        <FormControl variant='outlined' className={classes.formControl}>
+                        <FormControl variant='outlined' className={classes.formControl} disabled={isUIElementDisabled}>
                             <InputLabel ref={inputLabel} htmlFor='outlined-age-simple' />
                             <Select
                                 value={values.availability}
@@ -148,9 +158,24 @@ export default function SimpleSelect(props) {
                                     id: 'outlined-availabi;ity-simple',
                                 }}
                             >
-                                <MenuItem value='currentTenant'>Available to current tenant only</MenuItem>
-                                <MenuItem value='allTenants'>Available to all the tenants</MenuItem>
-                                <MenuItem value='specificTenants'>Available to specific tenants</MenuItem>
+                                <MenuItem value='currentTenant'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Subscriptions.SubscriptionAvailability.current.tenant.only'
+                                        defaultMessage='Available to current tenant only'
+                                    />
+                                </MenuItem>
+                                <MenuItem value='allTenants'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Subscriptions.SubscriptionAvailability.all.tenants'
+                                        defaultMessage='Available to all the tenants'
+                                    />
+                                </MenuItem>
+                                <MenuItem value='specificTenants'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Subscriptions.SubscriptionAvailability.specific.tenants'
+                                        defaultMessage='Available to specific tenants'
+                                    />
+                                </MenuItem>
                             </Select>
                         </FormControl>
                         <Button
@@ -158,13 +183,14 @@ export default function SimpleSelect(props) {
                             color='primary'
                             onClick={subscriptionAvailableTenants}
                             className={classes.saveButton}
+                            disabled={isUIElementDisabled}
                         >
                             <FormattedMessage id='Apis.Details.Scopes.CreateScope.save' defaultMessage='Save' />
                         </Button>
                     </Grid>
                     {isSpecificTenants ? (
                         <Grid item xs={8} >
-                            <TenantAutocomplete setTenantList={setTenantList} />
+                            <TenantAutocomplete setTenantList={setTenantList} api={api} />
                         </Grid>
                     ) : <Grid item xs={8} />}
                 </Grid>

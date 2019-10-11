@@ -27,6 +27,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
+import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
+import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataServiceImpl;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
@@ -107,6 +109,14 @@ public class APIHandlerServiceComponent {
                         webServiceBlockConditionsRetriever.startKeyTemplateDataRetriever();
                     }
                 }
+                // Start web service based revoked JWT tokens retriever.
+                RevokedJWTTokensRetriever webServiceRevokedJWTTokensRetriever = new RevokedJWTTokensRetriever();
+                webServiceRevokedJWTTokensRetriever.startRevokedJWTTokensRetriever();
+
+                // Start JWT revoked map cleaner.
+                RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
+                revokedJWTMapCleaner.startJWTRevokedMapCleaner();
+
                 // Read the trust store
                 ServerConfiguration config = CarbonUtils.getServerConfiguration();
                 String trustStorePassword = config.getFirstProperty(APIMgtGatewayConstants.TRUST_STORE_PASSWORD);

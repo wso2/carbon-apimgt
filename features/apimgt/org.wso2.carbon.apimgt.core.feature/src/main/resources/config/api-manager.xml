@@ -121,6 +121,10 @@
         cache. However, if the system is in a state, where the role addition and deletion happens seamlessly, the
         cache will be in in-valid state.-->
         <EnablePublisherRoleCache>true</EnablePublisherRoleCache>
+        <!-- Enable/Disable token caching at the Product REST APIs-->
+        <EnableRESTAPITokenCache>true</EnableRESTAPITokenCache>
+        <!-- Expiry time for the apim REST API token cache -->
+        <RESTAPITokenCacheExpiry>300</RESTAPITokenCacheExpiry>
 	    <!-- JWT claims Cache expiry in seconds -->
         <!--JWTClaimCacheExpiry>900</JWTClaimCacheExpiry-->
         <!-- Expiry time for the apim key mgt validation info cache -->
@@ -310,7 +314,7 @@
         <!--This property is used to indicate how we do user name comparision for token generation https://wso2.org/jira/browse/APIMANAGER-2225-->
         <CompareCaseInsensitively>true</CompareCaseInsensitively>
         <DisplayURL>false</DisplayURL>
-        <URL>https://localhost:${mgt.transport.https.port}/store</URL>
+        <URL>https://localhost:${mgt.transport.https.port}/devportal</URL>
 
         <!-- Server URL of the API Store. -->
         <ServerURL>https://localhost:${mgt.transport.https.port}${carbon.context}services/</ServerURL>

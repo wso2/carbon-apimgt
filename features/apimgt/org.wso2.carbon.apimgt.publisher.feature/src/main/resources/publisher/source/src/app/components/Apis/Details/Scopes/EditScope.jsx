@@ -18,31 +18,88 @@
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import React from 'react';
-import APIPropertyField from 'AppComponents/Apis/Details/Overview/APIPropertyField';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import TagsInput from 'react-tagsinput';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Alert from 'AppComponents/Shared/Alert';
+import Paper from '@material-ui/core/Paper';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
+import ChipInput from 'material-ui-chip-input';
+import APIValidation from 'AppData/APIValidation';
+import Chip from '@material-ui/core/Chip';
+import { red } from '@material-ui/core/colors/';
+import Divider from '@material-ui/core/Divider';
+import Icon from '@material-ui/core/Icon';
+import base64url from 'base64url';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import Error from '@material-ui/core/SvgIcon/SvgIcon';
 
 const styles = theme => ({
-    buttonSave: {
-        marginTop: theme.spacing.unit * 10,
+    root: {
+        flexGrow: 1,
+        marginTop: 10,
+        display: 'flex',
+        flexDirection: 'column',
+        padding: 20,
     },
-    buttonCancel: {
-        marginTop: theme.spacing.unit * 10,
-        marginLeft: theme.spacing.unit * 5,
+    titleWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: theme.spacing(3),
     },
-    topics: {
-        marginTop: theme.spacing.unit * 10,
+    titleLink: {
+        color: theme.palette.primary.main,
+        marginRight: theme.spacing(1),
     },
-    headline: {
-        paddingTop: theme.spacing.unit * 1.5,
-        paddingLeft: theme.spacing.unit * 2.5,
+    contentWrapper: {
+        maxWidth: theme.custom.contentAreaWidth,
+    },
+    mainTitle: {
+        paddingLeft: 0,
+    },
+    FormControl: {
+        padding: `0 0 0 ${theme.spacing.unit}px`,
+        width: '100%',
+        marginTop: 0,
+    },
+    FormControlOdd: {
+        padding: `0 0 0 ${theme.spacing.unit}px`,
+        backgroundColor: theme.palette.background.paper,
+        width: '100%',
+        marginTop: 0,
+    },
+    FormControlLabel: {
+        marginBottom: theme.spacing.unit,
+        marginTop: theme.spacing.unit,
+        fontSize: theme.typography.caption.fontSize,
+    },
+    buttonSection: {
+        paddingTop: theme.spacing.unit * 3,
+    },
+    saveButton: {
+        marginRight: theme.spacing.unit * 2,
+    },
+    helpText: {
+        color: theme.palette.text.hint,
+        marginTop: theme.spacing.unit,
+    },
+    extraPadding: {
+        paddingLeft: theme.spacing.unit * 2,
+    },
+    addNewOther: {
+        paddingTop: 40,
+    },
+    titleGrid: {
+        ' & .MuiGrid-item': {
+            padding: 0,
+            margin: 0,
+        },
     },
 });
 
@@ -62,9 +119,15 @@ class EditScope extends React.Component {
         });
         this.state = {
             apiScope: { ...thisScope },
+            validRoles: thisScope.bindings.values,
+            invalidRoles: [],
+            roleValidity: true,
         };
         this.updateScope = this.updateScope.bind(this);
         this.handleInputs = this.handleInputs.bind(this);
+        this.handleRoleDeletion = this.handleRoleDeletion.bind(this);
+        this.handleRoleAddition = this.handleRoleAddition.bind(this);
+        this.validateScopeDescription = this.validateScopeDescription.bind(this);
     }
 
     /**
@@ -72,10 +135,14 @@ class EditScope extends React.Component {
      * @memberof Scopes
      */
     updateScope() {
-        const { apiScope } = this.state;
+        const { apiScope, validRoles } = this.state;
         const {
             intl, api, history, updateAPI,
         } = this.props;
+        apiScope.bindings = {
+            type: 'role',
+            values: validRoles,
+        };
         const urlPrefix = api.apiType === 'APIProduct' ? 'api-products' : 'apis';
         const scopes = api.scopes.map((scope) => {
             if (scope.name === apiScope.name) {
@@ -125,67 +192,201 @@ class EditScope extends React.Component {
         }
     }
 
+    handleRoleDeletion = (role) => {
+        const { validRoles, invalidRoles } = this.state;
+        if (invalidRoles.includes(role)) {
+            const invalidRolesArray = invalidRoles.filter(existingRole => existingRole !== role);
+            this.setState({ invalidRoles: invalidRolesArray });
+            if (invalidRolesArray.length === 0) {
+                this.setState({ roleValidity: true });
+            }
+        } else {
+            this.setState({ validRoles: validRoles.filter(existingRole => existingRole !== role) });
+        }
+    };
+
+    handleRoleAddition(role) {
+        const { validRoles, invalidRoles } = this.state;
+        const promise = APIValidation.role.validate(base64url.encode(role));
+        promise
+            .then(() => {
+                this.setState({
+                    roleValidity: true,
+                    validRoles: [...validRoles, role],
+                });
+            })
+            .catch((error) => {
+                if (error.status === 404) {
+                    this.setState({
+                        roleValidity: false,
+                        invalidRoles: [...invalidRoles, role],
+                    });
+                } else {
+                    Alert.error('Error when validating role: ' + role);
+                    console.error('Error when validating role ' + error);
+                }
+            });
+    }
+
+    validateScopeDescription({ target: { id, value } }) {
+        const { apiScope } = this.state;
+        apiScope[id] = value;
+        this.setState({
+            apiScope,
+        });
+    }
+
     render() {
         const { classes, api, isAPIProduct } = this.props;
-        const { apiScope } = this.state;
+        const {
+            apiScope, roleValidity, validRoles, invalidRoles,
+        } = this.state;
         const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
         const url = `/${urlPrefix}/${api.id}/scopes`;
         return (
-            <Grid container>
-                <Typography className={classes.headline} gutterBottom variant='h5' component='h2'>
-                    <FormattedMessage id='Apis.Details.Scopes.EditScope.update.scope' defaultMessage='Update Scope' />
-                </Typography>
-                <Grid item lg={5} className={classes.topics}>
-                    <APIPropertyField name='Name'>
-                        <TextField
-                            disabled
-                            fullWidth
-                            id='name'
-                            type='text'
-                            name='name'
-                            margin='normal'
-                            value={apiScope.name}
-                        />
-                    </APIPropertyField>
-                    <APIPropertyField name='Description'>
-                        <TextField
-                            style={{
-                                width: '100%',
-                            }}
-                            id='description'
-                            name='description'
-                            helperText={
-                                <FormattedMessage
-                                    id='Apis.Details.Scopes.CreateScope.short.description.about.the.scope'
-                                    defaultMessage='Short description about the scope'
-                                />
-                            }
-                            margin='normal'
-                            type='text'
-                            onChange={this.handleInputs}
-                            value={this.state.apiScope.description}
-                        />
-                    </APIPropertyField>
-                    <APIPropertyField name='Roles'>
-                        <TagsInput
-                            value={this.state.apiScope.bindings.values}
-                            onChange={this.handleInputs}
-                            onlyUnique
-                        />
-                    </APIPropertyField>
-                    <Button
-                        variant='contained'
-                        color='primary'
-                        onClick={this.updateScope}
-                        className={classes.buttonSave}
-                    >
-                        <FormattedMessage id='Apis.Details.Scopes.CreateScope.save' defaultMessage='Save' />
-                    </Button>
-                    <Link to={url}>
-                        <Button variant='contained' color='primary' className={classes.buttonCancel}>
-                            <FormattedMessage id='Apis.Details.Scopes.CreateScope.cancel' defaultMessage='Cancel' />
-                        </Button>
-                    </Link>
+            <Grid container spacing={3}>
+                <Grid item sm={12} md={12} />
+                {/*
+            Following two grids control the placement of whole create page
+            For centering the content better use `container` props, but instead used an empty grid item for flexibility
+             */}
+                <Grid item sm={0} md={0} lg={2} />
+                <Grid item sm={12} md={12} lg={8}>
+                    <Grid container spacing={5} className={classes.titleGrid}>
+                        <Grid item md={12}>
+                            <div className={classes.titleWrapper}>
+                                <Link to={url} className={classes.titleLink}>
+                                    <Typography variant='h4'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Scopes.Scopes.heading.scope.heading'
+                                            defaultMessage='Scopes'
+                                        />
+                                    </Typography>
+                                </Link>
+                                <Icon>keyboard_arrow_right</Icon>
+                                <Typography variant='h4'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Scopes.EditScope.update.scope'
+                                        defaultMessage='Update Scope'
+                                    />
+                                </Typography>
+                            </div>
+                        </Grid>
+                        <Grid item md={12}>
+                            <Paper elevation={0} className={classes.root}>
+                                <FormControl margin='normal'>
+                                    <TextField
+                                        id='name'
+                                        label='Name'
+                                        fullWidth
+                                        margin='normal'
+                                        variant='outlined'
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        value={apiScope.name}
+                                        onChange={this.handleScopeNameInput}
+                                        disabled
+                                    />
+                                </FormControl>
+                                <FormControl margin='normal'>
+                                    <TextField
+                                        id='description'
+                                        label='Description'
+                                        variant='outlined'
+                                        placeholder='Short description about the scope'
+                                        helperText={
+                                            <FormattedMessage
+                                                id='Apis.Details.Scopes.EditScope.short.description.about.the.scope'
+                                                defaultMessage='Short description about the scope'
+                                            />
+                                        }
+                                        margin='normal'
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        onChange={this.validateScopeDescription}
+                                        value={apiScope.description || ''}
+                                        multiline
+                                    />
+                                </FormControl>
+                                <FormControl margin='normal'>
+                                    <FormLabel component='legend' className={classes.FormControlLabel}>
+                                        <FormattedMessage
+                                            id='Apis.Details.Scopes.EditScope.roles'
+                                            defaultMessage='Roles'
+                                        />
+                                    </FormLabel>
+                                    <ChipInput
+                                        variant='outlined'
+                                        value={validRoles.concat(invalidRoles)}
+                                        alwaysShowPlaceholder={false}
+                                        placeholder='Enter roles and press Enter'
+                                        blurBehavior='clear'
+                                        InputProps={{
+                                            endAdornment: !roleValidity && (
+                                                <InputAdornment position='end'>
+                                                    <Error color='error' />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        onAdd={this.handleRoleAddition}
+                                        error={!roleValidity}
+                                        helperText={
+                                            !roleValidity ? (
+                                                <FormattedMessage
+                                                    id='Apis.Details.EditScopes.Roles.Invalid'
+                                                    defaultMessage='Role is invalid'
+                                                />
+                                            ) : (
+                                                <FormattedMessage
+                                                    id='Apis.Details.Scopes.EditScopes.roles.help'
+                                                    defaultMessage='Enter a valid role and press enter.'
+                                                />
+                                            )
+                                        }
+                                        chipRenderer={({ value }, key) => (
+                                            <Chip
+                                                key={key}
+                                                label={value}
+                                                onDelete={() => {
+                                                    this.handleRoleDeletion(value);
+                                                }}
+                                                style={{
+                                                    backgroundColor: invalidRoles.includes(value) ? red[300] : null,
+                                                    margin: '8px 8px 8px 0',
+                                                    float: 'left',
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                </FormControl>
+                                <Divider />
+                                <div className={classes.addNewOther}>
+                                    <Button
+                                        variant='contained'
+                                        color='primary'
+                                        onClick={this.updateScope}
+                                        disabled={invalidRoles.length !== 0}
+                                        className={classes.saveButton}
+                                    >
+                                        <FormattedMessage
+                                            id='Apis.Details.Scopes.EditScope.update'
+                                            defaultMessage='Update'
+                                        />
+                                    </Button>
+                                    <Link to={url}>
+                                        <Button variant='contained'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Scopes.EditScope.cancel'
+                                                defaultMessage='Cancel'
+                                            />
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </Paper>
+                        </Grid>
+                    </Grid>
                 </Grid>
             </Grid>
         );

@@ -65,6 +65,7 @@ public class SettingsMappingUtil {
                 environmentListDTO = EnvironmentMappingUtil.fromEnvironmentCollectionToDTO(environments.values());
             }
             settingsDTO.setEnvironment(environmentListDTO.getList());
+            settingsDTO.setStoreUrl(APIUtil.getStoreUrl());
             settingsDTO.setMonetizationAttributes(getMonetizationAttributes());
             settingsDTO.setSecurityAuditProperties(getSecurityAuditProperties());
             settingsDTO.setExternalStoresEnabled(

@@ -18,12 +18,20 @@
 const suggestions = {
     common: [
         {
+            label: 'Overview',
+            route: 'overview',
+        },
+        {
+            label: 'MetaData',
+            route: 'overview',
+        },
+        {
             label: 'Transport Level Security',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'Mutual SSL',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'Manage SSL Certificates',
@@ -31,31 +39,35 @@ const suggestions = {
         },
         {
             label: 'HTTP HTTPS enable disable',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'Application Level Security',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'Enable/Disable OAuth2',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'Enable/Disable Basic Auth',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'Enable/Disable Api Key',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'Authorization Headers',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'CORS',
-            route: 'configuration',
+            route: 'runtime-configuration',
+        },
+        {
+            label: 'Backend Throughput',
+            route: 'runtime-configuration',
         },
         {
             label: 'Access Control Allow Origins',
@@ -70,19 +82,15 @@ const suggestions = {
             route: 'configuration',
         },
         {
-            label: 'Schema validation',
-            route: 'configuration',
-        },
-        {
             label: 'Response caching',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
             label: 'Access control',
-            route: 'configuration',
+            route: 'runtime-configuration',
         },
         {
-            label: 'Store Visibility',
+            label: 'Developer Portal Visibility',
             route: 'configuration',
         },
         {
@@ -100,110 +108,6 @@ const suggestions = {
         {
             label: 'Description',
             route: 'configuration',
-        },
-        {
-            label: 'Create New Version',
-            route: 'new_version',
-        },
-        {
-            label: 'Endpoints',
-            route: 'endpoints',
-        },
-        {
-            label: 'Prototyped API',
-            route: 'endpoints',
-        },
-        {
-            label: 'AWS Lambda Endpoints',
-            route: 'endpoints',
-        },
-        {
-            label: 'HTTP/HTTPS Endpoints',
-            route: 'endpoints',
-        },
-        {
-            label: 'HTTP/SOAP Endpoints',
-            route: 'endpoints',
-        },
-        {
-            label: 'Dynamic Endpoints',
-            route: 'endpoints',
-        },
-        {
-            label: 'Endpoint Security',
-            route: 'endpoints',
-        },
-        {
-            label: 'Certificates',
-            route: 'endpoints',
-        },
-        {
-            label: 'Production Endpoint',
-            route: 'endpoints',
-        },
-        {
-            label: 'Sandbox Endpoint',
-            route: 'endpoints',
-        },
-        {
-            label: 'Failover Endpoint',
-            route: 'endpoints',
-        },
-        {
-            label: 'FailoLoad balance Endpoint',
-            route: 'endpoints',
-        },
-        {
-            label: 'FailoLoad balance Endpoint',
-            route: 'endpoints',
-        },
-        {
-            label: 'API Definition',
-            route: 'api definition',
-        },
-        {
-            label: 'Import API Definition',
-            route: 'api definition',
-        },
-        {
-            label: 'Download API Definition',
-            route: 'api definition',
-        },
-        {
-            label: 'Swagger',
-            route: 'api definition',
-        },
-        {
-            label: 'Import Swagger',
-            route: 'api definition',
-        },
-        {
-            label: 'Download Swagger',
-            route: 'api definition',
-        },
-        {
-            label: 'Resources',
-            route: 'resources',
-        },
-        {
-            label: 'Resources Configuration',
-            route: 'resources',
-        },
-        {
-            label: 'Rate limiting',
-            route: 'resources',
-        },
-        {
-            label: 'Operation Governance',
-            route: 'resources',
-        },
-        {
-            label: 'Scopes',
-            route: 'scopes',
-        },
-        {
-            label: 'Add New Scope',
-            route: 'scopes',
         },
         {
             label: 'Documents',
@@ -271,11 +175,233 @@ const suggestions = {
             label: 'Deploy as a Prototype API',
             route: 'lifecycle',
         },
+        {
+            label: 'Requirements',
+            route: 'lifecycle',
+        },
+        {
+            label: 'Subscriptions',
+            route: 'subscriptions',
+        },
+        {
+            label: 'Subscription Policies',
+            route: 'subscriptions',
+        },
+        {
+            label: 'Subscription Availability',
+            route: 'subscriptions',
+        },
+        {
+            label: 'Mediation Policies',
+            route: 'runtime-configuration',
+        },
+        {
+            label: 'In Flow',
+            route: 'runtime-configuration',
+        },
+        {
+            label: 'Out Flow',
+            route: 'runtime-configuration',
+        },
+        {
+            label: 'Fault Flow',
+            route: 'runtime-configuration',
+        },
+        {
+            label: 'Monetization',
+            route: 'monetization',
+        },
+        {
+            label: 'Monetization Properties',
+            route: 'monetization',
+        },
+        {
+            label: 'Commercial Policies',
+            route: 'monetization',
+        },
+        {
+            label: 'Create New Version',
+            route: 'new_version',
+        },
+        {
+            label: 'Prototyped API',
+            route: 'endpoints',
+        },
+        {
+            label: 'AWS Lambda Endpoints',
+            route: 'endpoints',
+        },
+        {
+            label: 'HTTP/HTTPS Endpoints',
+            route: 'endpoints',
+        },
+        {
+            label: 'HTTP/SOAP Endpoints',
+            route: 'endpoints',
+        },
+        {
+            label: 'Dynamic Endpoints',
+            route: 'endpoints',
+        },
+        {
+            label: 'Endpoint Security',
+            route: 'endpoints',
+        },
+        {
+            label: 'Certificates',
+            route: 'endpoints',
+        },
+        {
+            label: 'Production Endpoint',
+            route: 'endpoints',
+        },
+        {
+            label: 'Sandbox Endpoint',
+            route: 'endpoints',
+        },
+        {
+            label: 'Failover Endpoint',
+            route: 'endpoints',
+        },
+        {
+            label: 'Load Balance Endpoint',
+            route: 'endpoints',
+        },
+        {
+            label: 'Endpoints',
+            route: 'endpoints',
+        },
+        {
+            label: 'API Definition',
+            route: 'api definition',
+        },
+        {
+            label: 'Import API Definition',
+            route: 'api definition',
+        },
+        {
+            label: 'Download API Definition',
+            route: 'api definition',
+        },
+        {
+            label: 'Swagger',
+            route: 'api definition',
+        },
+        {
+            label: 'Import Swagger',
+            route: 'api definition',
+        },
+        {
+            label: 'Download Swagger',
+            route: 'api definition',
+        },
+        {
+            label: 'Resources',
+            route: 'resources',
+        },
+        {
+            label: 'Resources Configuration',
+            route: 'resources',
+        },
+        {
+            label: 'Rate Limiting',
+            route: 'resources',
+        },
+        {
+            label: 'Operation Governance',
+            route: 'resources',
+        },
+        {
+            label: 'Scopes',
+            route: 'scopes',
+        },
+        {
+            label: 'Add New Scope',
+            route: 'scopes',
+        },
+        {
+            label: 'Schema validation',
+            route: 'runtime-configuration',
+        },
     ],
     productOnly: [
         {
-            label: 'product only feature',
+            label: 'Product only feature',
             route: 'configuration',
+        },
+        {
+            label: 'API Definition',
+            route: 'api definition',
+        },
+        {
+            label: 'Import API Definition',
+            route: 'api definition',
+        },
+        {
+            label: 'Download API Definition',
+            route: 'api definition',
+        },
+        {
+            label: 'Swagger',
+            route: 'api definition',
+        },
+        {
+            label: 'Import Swagger',
+            route: 'api definition',
+        },
+        {
+            label: 'Download Swagger',
+            route: 'api definition',
+        },
+        {
+            label: 'Resources',
+            route: 'resources',
+        },
+        {
+            label: 'Resources Configuration',
+            route: 'resources',
+        },
+        {
+            label: 'Rate Limiting',
+            route: 'resources',
+        },
+        {
+            label: 'Operation Governance',
+            route: 'resources',
+        },
+        {
+            label: 'Schema validation',
+            route: 'runtime-configuration',
+        },
+    ],
+    graphqlOnly: [
+        {
+            label: 'Operations',
+            route: 'operations',
+        },
+        {
+            label: 'Operation Type',
+            route: 'operations',
+        },
+        {
+            label: 'Operations Configuration',
+            route: 'operations',
+        },
+        {
+            label: 'Rate Limiting',
+            route: 'operations',
+        },
+        {
+            label: 'Schema Definition',
+            route: 'schema definition',
+        },
+        {
+            label: 'Scopes',
+            route: 'scopes',
+        },
+        {
+            label: 'Add New Scope',
+            route: 'scopes',
         },
     ],
 };

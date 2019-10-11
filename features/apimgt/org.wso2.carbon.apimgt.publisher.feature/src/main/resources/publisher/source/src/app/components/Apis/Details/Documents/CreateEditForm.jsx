@@ -188,7 +188,8 @@ class CreateEditForm extends React.Component {
         return { docPromise, file };
     };
     updateDocument = (apiId) => {
-        const restAPI = new Api();
+        const { apiType } = this.props;
+        const restAPI = apiType === Api.CONSTS.APIProduct ? new APIProduct() : new Api();
         const {
             name, type, summary, sourceType, sourceUrl, file, otherTypeName,
         } = this.state;
@@ -262,7 +263,7 @@ class CreateEditForm extends React.Component {
             } else {
                 this.setState({ nameEmpty: false });
             }
-        } else if (field === 'summery') {
+        } else if (field === 'summary') {
             if (value === '') {
                 this.setState({ summeryEmpty: true });
             } else {

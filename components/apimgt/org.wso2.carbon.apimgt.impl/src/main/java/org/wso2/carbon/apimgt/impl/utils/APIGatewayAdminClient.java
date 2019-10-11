@@ -280,28 +280,6 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     }
 
     /**
-     * Add the endpoint file/s to the gateway
-     *
-     * @param api API that the endpoint/s belong
-     * @param builder The endpoint template builder instance
-     * @param tenantDomain Domain of the logged tenant
-     * @throws AxisFault Thrown if an error occurred
-     */
-    public void addEndpoint(API api, APITemplateBuilder builder, String tenantDomain) throws EndpointAdminException {
-        try {
-            ArrayList<String> arrayList = getEndpointType(api);
-            log.debug("Adding endpoint to gateway");
-            for (String type : arrayList) {
-                String endpointConfigContext = builder.getConfigStringForEndpointTemplate(type);
-                checkForTenantWhenAdding(apiGatewayAdminStub, endpointConfigContext, tenantDomain);
-            }
-        } catch (Exception e) {
-            log.error("Error while adding endpoint to the gateway", e);
-            throw new EndpointAdminException("Error while generating Endpoint file in Gateway " + e.getMessage(), e);
-        }
-    }
-
-    /**
      * Delete the endpoint file/s from the gateway
      *
      * @param api API that the endpoint/s belong

@@ -86,7 +86,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 RestApiUtil.handleConflict("Cannot remove the API " + apiProductIdentifier + " as active subscriptions exist", log);
             }
 
-            apiProvider.deleteAPIProduct(apiProduct.getId());
+            apiProvider.deleteAPIProduct(apiProduct.getId(), apiProductId);
             return Response.ok().build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting API Product : " + apiProductId;
@@ -492,12 +492,11 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             product.setID(productIdentifier);
             product.setUuid(apiProductId);
 
-            apiProvider.updateAPIProduct(product);
-
             APIDefinition parser = new OAS3Parser();
             SwaggerData swaggerData = new SwaggerData(product);
             String apiDefinition = parser.generateAPIDefinition(swaggerData);
             apiProvider.saveSwaggerDefinition(product, apiDefinition);
+            apiProvider.updateAPIProduct(product);
 
             APIProduct updatedProduct = apiProvider.getAPIProduct(productIdentifier);
             APIProductDTO updatedProductDTO = APIMappingUtil.fromAPIProducttoDTO(updatedProduct);
@@ -521,31 +520,6 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             }
             String apiSwagger = apiProvider.getAPIDefinitionOfAPIProduct(retrievedProduct);
             
-            if (StringUtils.isEmpty(apiSwagger)) {
-                apiSwagger = "";
-            }
-            return Response.ok().entity(apiSwagger).build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving API Product from Id  : " + apiProductId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return null;
-    }
-
-    @Override public Response apiProductsApiProductIdSwaggerPut(String apiProductId, String apiDefinition,
-            String ifMatch, MessageContext messageContext) {
-        try {
-            String username = RestApiUtil.getLoggedInUsername();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getProvider(username);
-            APIProduct retrievedProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
-            if (retrievedProduct == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
-            }
-
-            apiProvider.updateAPIDefinitionOfAPIProduct(apiDefinition, retrievedProduct);
-            String apiSwagger = apiProvider.getAPIDefinitionOfAPIProduct(retrievedProduct);
-
             if (StringUtils.isEmpty(apiSwagger)) {
                 apiSwagger = "";
             }

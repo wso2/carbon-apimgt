@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * API Product identifier. 
@@ -75,18 +76,21 @@ public class APIProductIdentifier implements Serializable, Identifier {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+
+        if (!(o instanceof APIProductIdentifier)) {
+            return false;
+        }
 
         APIProductIdentifier that = (APIProductIdentifier) o;
 
-        return apiProductName.equals(that.apiProductName) && providerName.equals(that.providerName);
+        return Objects.equals(apiProductName, that.apiProductName) &&
+                Objects.equals(providerName, that.providerName) &&
+                Objects.equals(version, that.version);
     }
 
     @Override
     public int hashCode() {
-        int result = providerName.hashCode();
-        result = 31 * result + apiProductName.hashCode();
-        return result;
+        return Objects.hash(providerName, apiProductName, version);
     }
     
     @Override

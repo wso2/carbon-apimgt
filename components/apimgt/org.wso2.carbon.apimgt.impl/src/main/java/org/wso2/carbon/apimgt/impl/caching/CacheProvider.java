@@ -82,6 +82,20 @@ public class CacheProvider {
     }
 
     /**
+     * @return Product REST API token cache
+     */
+    public static Cache getRESTAPITokenCache() {
+        return getCache(APIConstants.REST_API_TOKEN_CACHE_NAME);
+    }
+
+    /**
+     * @return Product REST API invalid token cache
+     */
+    public static Cache getRESTAPIInvalidTokenCache() {
+        return getCache(APIConstants.REST_API_INVALID_TOKEN_CACHE_NAME);
+    }
+
+    /**
      * @return APIManagerConfiguration
      */
     private static APIManagerConfiguration getApiManagerConfiguration() {
@@ -231,6 +245,38 @@ public class CacheProvider {
     }
 
     /**
+     * Create and return the REST API token cache
+     */
+    public static Cache createRESTAPITokenCache() {
+        String restAPICacheExpiry =
+                getApiManagerConfiguration().getFirstProperty(APIConstants.REST_API_TOKEN_CACHE_EXPIRY);
+        if (restAPICacheExpiry != null) {
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.REST_API_TOKEN_CACHE_NAME,
+                    Long.parseLong(restAPICacheExpiry), Long.parseLong(restAPICacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.REST_API_TOKEN_CACHE_NAME,
+                    defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
+     * Create and return the REST API invalid token cache
+     */
+    public static Cache createRESTAPIInvalidTokenCache() {
+        String restAPICacheExpiry =
+                getApiManagerConfiguration().getFirstProperty(APIConstants.REST_API_TOKEN_CACHE_EXPIRY);
+        if (restAPICacheExpiry != null) {
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.REST_API_INVALID_TOKEN_CACHE_NAME,
+                    Long.parseLong(restAPICacheExpiry), Long.parseLong(restAPICacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.REST_API_INVALID_TOKEN_CACHE_NAME,
+                    defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
      * remove caches
      */
     public static void removeAllCaches() {
@@ -248,5 +294,9 @@ public class CacheProvider {
                 createGatewayUsernameCache().getName());
         Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
                 createInvalidUsernameCache().getName());
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
+                createRESTAPITokenCache().getName());
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
+                createRESTAPIInvalidTokenCache().getName());
     }
 }

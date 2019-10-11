@@ -54,7 +54,7 @@ const useStyles = makeStyles(theme => ({
         fontWeight: 400,
         margin: 0,
         display: 'inline-flex',
-        lineHeight: '38px',
+        lineHeight: 1.5,
     },
 }));
 
@@ -72,7 +72,7 @@ export default function MaxBackendTps(props) {
     return (
         <React.Fragment>
             <Grid item xs={12}>
-                <ExpansionPanel className={classes.expansionPanel}>
+                <ExpansionPanel className={classes.expansionPanel} defaultExpanded>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography className={classes.subHeading} variant='h6'>
                             <FormattedMessage

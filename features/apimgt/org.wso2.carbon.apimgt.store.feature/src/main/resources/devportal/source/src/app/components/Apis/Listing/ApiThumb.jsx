@@ -22,7 +22,6 @@ import { withStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import { FormattedMessage } from 'react-intl';
 import MaterialIcons from 'MaterialIcons';
 import CONSTS from 'AppData/Constants';
@@ -41,6 +40,10 @@ const styles = theme => ({
         width: theme.custom.thumbnail.width - theme.spacing(2),
         backgroundColor: theme.palette.background.paper,
         padding: theme.spacing.unit,
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+        '& a': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        }
     },
     thumbLeft: {
         alignSelf: 'flex-start',
@@ -80,12 +83,10 @@ const styles = theme => ({
         fill: 'red',
     },
     textWrapper: {
-        color: theme.palette.text.secondary,
         textDecoration: 'none',
     },
     imageWrapper: {
-        color: theme.palette.text.secondary,
-        backgroundColor: theme.palette.background.paper,
+        color: theme.custom.thumbnail.iconColor,
         width: theme.custom.thumbnail.width,
         display: 'flex',
         alignItems: 'center',
@@ -94,7 +95,6 @@ const styles = theme => ({
     imageOverlap: {
         position: 'absolute',
         bottom: 1,
-        backgroundColor: theme.custom.thumbnail.contentBackgroundColor,
     },
     ratingWrapper: {
         marginLeft: '-6px',
@@ -191,9 +191,14 @@ class ApiThumb extends React.Component {
         const { api, classes, theme } = this.props;
         const { thumbnail } = theme.custom;
         const {
-            name, version, context, provider,
+            name, version, context,
         } = api;
 
+        let { provider } = api;
+        if (api.businessInformation && api.businessInformation.businessOwner
+            && api.businessInformation.businessOwner.trim() !== '') {
+            provider = api.businessInformation.businessOwner;
+        }
         if (!api.lifeCycleStatus) {
             api.lifeCycleStatus = api.status;
         }
@@ -226,11 +231,7 @@ class ApiThumb extends React.Component {
                     {defaultImage && <img src={defaultImage} />}
                 </Link>
 
-                <div
-                    className={classNames(classes.thumbContent, {
-                        [classes.imageOverlap]: thumbnail.contentPictureOverlap,
-                    })}
-                >
+                <div className={classes.thumbContent}>
                     <Link to={details_link} className={classes.textWrapper}>
                         <Typography
                             className={classes.thumbHeader}

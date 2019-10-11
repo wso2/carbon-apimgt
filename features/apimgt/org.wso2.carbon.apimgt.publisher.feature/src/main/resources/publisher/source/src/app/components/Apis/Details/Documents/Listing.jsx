@@ -31,12 +31,14 @@ import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import { isRestricted } from 'AppData/AuthManager';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import Create from './Create';
 import MarkdownEditor from './MarkdownEditor';
 import TextEditor from './TextEditor';
 import Edit from './Edit';
 import Delete from './Delete';
+import DeleteMultiple from './DeleteMultiple';
 import Download from './Download';
 
 const styles = theme => ({
@@ -100,7 +102,7 @@ const styles = theme => ({
     },
 });
 function LinkGenerator(props) {
-    return props.apiType === API.CONSTS.APIProduct ? (
+    return props.isAPIProduct ? (
         <Link to={'/api-products/' + props.apiId + '/documents/' + props.docId + '/view'}>{props.docName}</Link>
     ) : (
         <Link to={'/apis/' + props.apiId + '/documents/' + props.docId + '/view'}>{props.docName}</Link>
@@ -112,6 +114,7 @@ class Listing extends React.Component {
         this.state = {
             docs: null,
             showAddDocs: false,
+            docsToDelete: null,
         };
         this.apiId = props.api.id;
         this.toggleAddDocs = this.toggleAddDocs.bind(this);
@@ -130,7 +133,6 @@ class Listing extends React.Component {
      */
     getDocumentsList() {
         const { api, intl } = this.props;
-
         if (api.apiType === API.CONSTS.APIProduct) {
             const apiProduct = new APIProduct();
             const docs = apiProduct.getDocuments(api.id);
@@ -168,13 +170,17 @@ class Listing extends React.Component {
             return { showAddDocs: !oldState.showAddDocs };
         });
     }
+    setFoo() {
+        this.setState({ foo: 'test' });
+    }
     render() {
         const { classes, api, isAPIProduct } = this.props;
-        const { docs, showAddDocs } = this.state;
+        const { docs, showAddDocs, docsToDelete } = this.state;
         const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
         const url = `/${urlPrefix}/${api.id}/documents/create`;
+        const showActionsColumn =
+            isRestricted(['apim:api_publish','apim:api_create'], api) ? 'excluded' : true;
         const options = {
-            selectableRows: false,
             title: false,
             filter: false,
             print: false,
@@ -182,6 +188,10 @@ class Listing extends React.Component {
             viewColumns: false,
             customToolbar: false,
             search: false,
+            onRowsDelete: (rowData, rowMeta, that = this) => {
+                that.setState({ docsToDelete: rowData });
+                return false;
+            },
         };
         const columns = [
             {
@@ -242,6 +252,7 @@ class Listing extends React.Component {
                     />
                 ),
                 options: {
+                    display: showActionsColumn,
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
                             const docName = tableMeta.rowData[1];
@@ -256,6 +267,7 @@ class Listing extends React.Component {
                                             </td>
                                             <td>
                                                 <Edit
+                                                    apiType={api.apiType}
                                                     docName={docName}
                                                     docId={docId}
                                                     apiId={this.apiId}
@@ -288,6 +300,7 @@ class Listing extends React.Component {
                                             </td>
                                             <td>
                                                 <Edit
+                                                    apiType={api.apiType}
                                                     docName={docName}
                                                     docId={docId}
                                                     apiId={this.apiId}
@@ -321,6 +334,7 @@ class Listing extends React.Component {
                                             </td>
                                             <td>
                                                 <Edit
+                                                    apiType={api.apiType}
                                                     docName={docName}
                                                     docId={docId}
                                                     apiId={this.apiId}
@@ -348,6 +362,7 @@ class Listing extends React.Component {
                                             </td>
                                             <td>
                                                 <Edit
+                                                    apiType={api.apiType}
                                                     docName={docName}
                                                     docId={docId}
                                                     apiId={this.apiId}
@@ -378,6 +393,9 @@ class Listing extends React.Component {
         ];
         return (
             <React.Fragment>
+                {docsToDelete && (
+                    <DeleteMultiple getDocumentsList={this.getDocumentsList} docsToDelete={docsToDelete} docs={docs} />
+                )}
                 <div className={classes.titleWrapper}>
                     <Typography variant='h4' className={classes.mainTitle}>
                         <FormattedMessage

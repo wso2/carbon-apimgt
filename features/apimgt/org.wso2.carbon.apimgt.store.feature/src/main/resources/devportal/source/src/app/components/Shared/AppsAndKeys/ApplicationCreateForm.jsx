@@ -19,11 +19,7 @@
 import React from 'react';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
-import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import Select from '@material-ui/core/Select';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
@@ -48,6 +44,16 @@ const styles = theme => ({
     quotaHelp: {
         position: 'relative',
     },
+    mandatoryStarSelect: {
+        '& label>span:nth-child(2)': {
+            color: 'red',
+        },
+    },
+    mandatoryStarText: {
+        '& label>span:nth-child(1)': {
+            color: 'red',
+        },
+    },
 });
 
 const ApplicationCreate = (props) => {
@@ -57,25 +63,25 @@ const ApplicationCreate = (props) => {
      * @param {*} field field that should be updated in appliction request
      * @param {*} event event fired
      */
-    const handleChange = (field, event) => {
+    const handleChange = ({ target: { name: field, value } }) => {
         const { applicationRequest, updateApplicationRequest } = props;
         const newRequest = { ...applicationRequest };
-        const { target: currentTarget } = event;
+        // const { target: currentTarget } = event;
         switch (field) {
             case 'name':
-                newRequest.name = currentTarget.value;
+                newRequest.name = value;
                 break;
             case 'description':
-                newRequest.description = currentTarget.value;
+                newRequest.description = value;
                 break;
             case 'throttlingPolicy':
-                newRequest.throttlingPolicy = currentTarget.value;
+                newRequest.throttlingPolicy = value;
                 break;
             case 'tokenType':
-                newRequest.tokenType = currentTarget.value;
+                newRequest.tokenType = value;
                 break;
             case 'attributes':
-                newRequest.attributes = currentTarget.value;
+                newRequest.attributes = value;
                 break;
             default:
                 break;
@@ -106,159 +112,161 @@ const ApplicationCreate = (props) => {
     } = props;
     const tokenTypeList = ['JWT', 'OAUTH'];
     return (
-        <form className={classes.container} noValidate autoComplete='off'>
-            <Grid container spacing={3} className={classes.root}>
-                <Grid item xs={12} md={6}>
-                    <FormControl margin='normal' className={classes.FormControl}>
-                        <TextField
-                            required
-                            value={applicationRequest.name}
-                            label={intl.formatMessage({
-                                defaultMessage: 'Application Name',
-                                id: 'Shared.AppsAndKeys.ApplicationCreateForm.application.name',
-                            })}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            helperText={intl.formatMessage({
-                                defaultMessage:
+        <form noValidate autoComplete='off'>
+            <TextField
+                classes={{
+                    root: classes.mandatoryStarText,
+                }}
+                margin='normal'
+                variant='outlined'
+                autoFocus
+                fullWidth
+                required
+                value={applicationRequest.name}
+                label={intl.formatMessage({
+                    defaultMessage: 'Application Name',
+                    id: 'Shared.AppsAndKeys.ApplicationCreateForm.application.name',
+                })}
+                helperText={intl.formatMessage({
+                    defaultMessage:
                                     `Enter a name to identify the Application. 
                                     You will be able to pick this application when subscribing to APIs`,
-                                id: 'Shared.AppsAndKeys.ApplicationCreateForm.enter.a.name',
-                            })}
-                            fullWidth
-                            name='name'
-                            onChange={e => handleChange('name', e)}
-                            placeholder={intl.formatMessage({
-                                defaultMessage: 'My Mobile Application',
-                                id: 'Shared.AppsAndKeys.ApplicationCreateForm.my.mobile.application',
-                            })}
-                            autoFocus
-                            className={classes.inputText}
-                            onBlur={e => validateName(e.target.value)}
-                            error={!isNameValid}
-                        />
-                    </FormControl>
+                    id: 'Shared.AppsAndKeys.ApplicationCreateForm.enter.a.name',
+                })}
+                name='name'
+                onChange={handleChange}
+                placeholder={intl.formatMessage({
+                    defaultMessage: 'My Mobile Application',
+                    id: 'Shared.AppsAndKeys.ApplicationCreateForm.my.mobile.application',
+                })}
+                onBlur={e => validateName(e.target.value)}
+                error={!isNameValid}
+            />
+            <TextField
+                classes={{
+                    root: classes.mandatoryStarSelect,
+                }}
+                required
+                fullWidth
+                id='outlined-select-currency'
+                select
+                label={<FormattedMessage
+                    defaultMessage='Per Token Quota.'
+                    id='Shared.AppsAndKeys.ApplicationCreateForm.per.token.quota'
+                />}
+                value={applicationRequest.throttlingPolicy}
+                name='throttlingPolicy'
+                onChange={handleChange}
+                SelectProps={throttlingPolicyList}
+                helperText={<FormattedMessage
+                    defaultMessage={`Assign API request quota per access token.
+                            Allocated quota will be shared among all
+                            the subscribed APIs of the application.`}
+                    id='Shared.AppsAndKeys.ApplicationCreateForm.assign.api.request'
+                />}
+                margin='normal'
+                variant='outlined'
+            >
+                {throttlingPolicyList.map(policy => (
+                    <MenuItem key={policy} value={policy} >
+                        {policy}
+                    </MenuItem>
+                ))}
+            </TextField>
+            <TextField
+                classes={{
+                    root: classes.mandatoryStarSelect,
+                }}
+                required
+                fullWidth
+                id='outlined-select-currency'
+                select
+                label={<FormattedMessage
+                    defaultMessage='Token Type'
+                    id='Shared.AppsAndKeys.ApplicationCreateForm.token.type'
+                />}
+                value={applicationRequest.tokenType}
+                name='tokenType'
+                onChange={handleChange}
+                SelectProps={throttlingPolicyList}
+                helperText={<FormattedMessage
+                    defaultMessage='Select token type'
+                    id='Shared.AppsAndKeys.ApplicationCreateForm.select.token.type'
+                />}
+                margin='normal'
+                variant='outlined'
+            >
+                {tokenTypeList.map(type => (
+                    <MenuItem key={type} value={type} >
+                        {type}
+                    </MenuItem>
+                ))}
+            </TextField>
 
-                    {throttlingPolicyList && (
-                        <FormControl margin='normal' className={classes.FormControlOdd}>
-                            <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}>
-                                <FormattedMessage
-                                    defaultMessage='Per Token Quota'
-                                    id='Shared.AppsAndKeys.ApplicationCreateForm.per.token.quota'
-                                />
-                            </InputLabel>
-                            <Select
-                                value={applicationRequest.throttlingPolicy}
-                                onChange={e => handleChange('throttlingPolicy', e)}
-                                input={<Input name='quota' id='quota-helper' />}
-                            >
-                                {throttlingPolicyList.map(tier => (
-                                    <MenuItem key={tier} value={tier}>
-                                        {tier}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                            <FormHelperText>
-                                <FormattedMessage
-                                    defaultMessage={`Assign API request quota per access token. 
-                                    Allocated quota will be shared among all
-                                    the subscribed APIs of the application.`}
-                                    id='Shared.AppsAndKeys.ApplicationCreateForm.assign.api.request'
-                                />
-                            </FormHelperText>
-                        </FormControl>
-                    )}
-                    <FormControl margin='normal' className={classes.FormControlOdd}>
-                        <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}>
-                            <FormattedMessage
-                                defaultMessage='Token Type'
-                                id='Shared.AppsAndKeys.ApplicationCreateForm.token.type'
-                            />
-                        </InputLabel>
-                        <Select
-                            value={applicationRequest.tokenType}
-                            onChange={e => handleChange('tokenType', e)}
-                            input={<Input name='tokenType' id='quota-helper' />}
-                        >
-                            {tokenTypeList.map(type => (
-                                <MenuItem key={type} value={type}>
-                                    {type}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                    <FormControl margin='normal' className={classes.FormControl}>
+            <TextField
+                margin='normal'
+                variant='outlined'
+                fullWidth
+                value={applicationRequest.description}
+                label={intl.formatMessage({
+                    defaultMessage: 'Application Description',
+                    id: 'Shared.AppsAndKeys.ApplicationCreateForm.application.description',
+                })}
+                helperText={intl.formatMessage({
+                    defaultMessage:
+                                'Describe the application',
+                    id: 'Shared.AppsAndKeys.ApplicationCreateForm.describe.the.application',
+                })}
+                name='description'
+                onChange={handleChange}
+                placeholder={intl.formatMessage({
+                    defaultMessage: 'My Mobile Application',
+                    id: 'Shared.AppsAndKeys.ApplicationCreateForm.my.mobile.application',
+                })}
+            />
+            {allAppAttributes && (
+                Object.entries(allAppAttributes).map(item => (
+                    item[1].hidden === 'false' ? (
                         <TextField
-                            label='Application Description'
-                            value={applicationRequest.description}
-                            InputLabelProps={{
-                                shrink: true,
+                            classes={{
+                                root: classes.mandatoryStarText,
                             }}
-                            helperText={intl.formatMessage({
-                                defaultMessage:
-                                    'Describe the application',
-                                id: 'Shared.AppsAndKeys.ApplicationCreateForm.describe.the.application',
-                            })}
+                            margin='normal'
+                            variant='outlined'
+                            required={isRequiredAttribute(item[1].attribute)}
+                            label={item[1].attribute}
+                            value={getAttributeValue(item[1].attribute)}
+                            helperText={item[1].description}
                             fullWidth
-                            multiline
-                            rowsMax='4'
-                            name='description'
-                            onChange={e => handleChange('description', e)}
-                            placeholder={intl.formatMessage({
-                                defaultMessage:
-                                    'This application is grouping apis for my mobile application',
-                                id: 'Shared.AppsAndKeys.ApplicationCreateForm.this.application',
-                            })}
+                            name={item[1].attribute}
+                            onChange={handleAttributesChange(item[1].attribute)}
+                            placeholder={'Enter ' + item[1].attribute}
                             className={classes.inputText}
                         />
-                    </FormControl>
-                    {allAppAttributes && (
-                        Object.entries(allAppAttributes).map(item => (
-                            item[1].hidden === 'false' ? (
-                                <FormControl
-                                    margin='normal'
-                                    className={classes.FormControl}
-                                    key={item[1].attribute}
-                                >
-                                    <TextField
-                                        required={isRequiredAttribute(item[1].attribute)}
-                                        label={item[1].attribute}
-                                        value={getAttributeValue(item[1].attribute)}
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        helperText={item[1].description}
-                                        fullWidth
-                                        name={item[1].attribute}
-                                        onChange={handleAttributesChange(item[1].attribute)}
-                                        placeholder={'Enter ' + item[1].attribute}
-                                        className={classes.inputText}
-                                    />
-                                </FormControl>
-                            ) : (null)))
+                    ) : (null)))
+            )}
+            {isApplicationSharingEnabled && (
+                <ChipInput
+                    label={<FormattedMessage
+                        defaultMessage='Application Groups'
+                        id='Shared.AppsAndKeys.ApplicationCreateForm.add.groups.label'
+                    />}
+                    helperText={intl.formatMessage({
+                        defaultMessage: 'Type a group and enter',
+                        id: 'Shared.AppsAndKeys.ApplicationCreateForm.type.a.group.and.enter',
+                    })}
+                    margin='normal'
+                    variant='outlined'
+                    fullWidth
+                    {...applicationRequest}
+                    value={applicationRequest.groups || []}
+                    onAdd={chip => handleAddChip(chip, applicationRequest.groups)}
+                    onDelete={(chip, index) => handleDeleteChip(
+                        chip,
+                        index, applicationRequest.groups,
                     )}
-                    {isApplicationSharingEnabled && (
-                        <FormControl margin='normal' className={classes.FormControl}>
-                            <FormLabel component='legend'>
-                                <FormHelperText>
-                                    <FormattedMessage
-                                        defaultMessage='Application Groups'
-                                        id='Shared.AppsAndKeys.ApplicationCreateForm.add.groups.label'
-                                    />
-                                </FormHelperText>
-                            </FormLabel>
-                            <ChipInput
-                                {...applicationRequest}
-                                value={applicationRequest.groups || []}
-                                onAdd={chip => handleAddChip(chip, applicationRequest.groups)}
-                                onDelete={(chip, index) => handleDeleteChip(chip,
-                                    index, applicationRequest.groups)}
-                            />
-                        </FormControl>
-                    )}
-                </Grid>
-            </Grid>
+                />
+            )}
         </form>
     );
 };

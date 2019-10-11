@@ -546,6 +546,12 @@ public class APIMappingUtil {
             throttlingPolicyNames.add(tier.getName());
         }
         apiInfoDTO.setThrottlingPolicies(throttlingPolicyNames);
+        APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
+        apiBusinessInformationDTO.setBusinessOwner(api.getBusinessOwner());
+        apiBusinessInformationDTO.setBusinessOwnerEmail(api.getBusinessOwnerEmail());
+        apiBusinessInformationDTO.setTechnicalOwner(api.getTechnicalOwner());
+        apiBusinessInformationDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
+        apiInfoDTO.setBusinessInformation(apiBusinessInformationDTO);
         //        if (api.getScopes() != null) {
         //            apiInfoDTO.setScopes(getScopeInfoDTO(api.getScopes()));
         //        }

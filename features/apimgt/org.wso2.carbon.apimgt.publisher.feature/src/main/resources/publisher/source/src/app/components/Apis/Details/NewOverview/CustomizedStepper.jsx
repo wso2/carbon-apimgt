@@ -34,8 +34,8 @@ import ArrowForwardIosRoundedIcon from '@material-ui/icons/ArrowForwardIosRounde
 import Tooltip from '@material-ui/core/Tooltip';
 import Button from '@material-ui/core/Button';
 import ApiContext, { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
 import Alert from 'AppComponents/Shared/Alert';
-import Configuration from 'Config';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 
@@ -121,6 +121,7 @@ const useStyles = makeStyles(theme => ({
 export default function CustomizedSteppers() {
     const [api, updateAPI] = useAPI();
     const classes = useStyles();
+    const { settings } = useAppContext();
     const isEndpointAvailable = api.endpointConfig !== null;
     const isTierAvailable = api.policies.length !== 0;
     const isPrototypedAvailable =
@@ -185,7 +186,7 @@ export default function CustomizedSteppers() {
                                 target='_blank'
                                 rel='noopener noreferrer'
                                 href={
-                                    `${window.location.origin}${Configuration.app.storeContext}/apis/` +
+                                    `${settings.storeUrl}/apis/` +
                                     api.id +
                                     '/overview'
                                 }
@@ -319,7 +320,7 @@ export default function CustomizedSteppers() {
                                     )}
                                     <Typography variant='h7'>
                                         <FormattedMessage
-                                            id='Apis.Details.Overview.CustomizedStepper.business.plan'
+                                            id='Apis.Details.Overview.CustomizedStepper.business.plan.endpoint'
                                             defaultMessage='Endpoint'
                                         />
                                     </Typography>
@@ -337,7 +338,7 @@ export default function CustomizedSteppers() {
                                     )}
                                     <Typography variant='h7'>
                                         <FormattedMessage
-                                            id='Apis.Details.Overview.CustomizedStepper.business.plan'
+                                            id='Apis.Details.Overview.CustomizedStepper.business.plan.businessPlans'
                                             defaultMessage=' Business plans'
                                         />
                                     </Typography>
