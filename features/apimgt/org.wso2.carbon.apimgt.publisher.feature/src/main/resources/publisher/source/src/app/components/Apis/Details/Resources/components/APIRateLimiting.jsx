@@ -147,13 +147,13 @@ function APIRateLimiting(props) {
                         >
                             <FormControlLabel
                                 value={RateLimitingLevels.API}
-                                control={<Radio />}
+                                control={<Radio color='primary' />}
                                 label='API Level'
                                 labelPlacement='end'
                             />
                             <FormControlLabel
                                 value={RateLimitingLevels.RESOURCE}
-                                control={<Radio />}
+                                control={<Radio color='primary' />}
                                 label='Operation Level'
                                 labelPlacement='end'
                             />

@@ -132,6 +132,7 @@ export default function Environments() {
                                             }
                                         }
                                         name={row.name}
+                                        color='primary'
                                     />
                                 </TableCell>
                                 <TableCell component='th' scope='row'>

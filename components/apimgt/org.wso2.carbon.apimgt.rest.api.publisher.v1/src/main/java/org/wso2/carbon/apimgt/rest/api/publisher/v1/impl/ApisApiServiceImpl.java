@@ -629,7 +629,9 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //attach micro-geteway labels
             assignLabelsToDTO(body, apiToUpdate);
-            apiProvider.manageAPI(apiToUpdate);
+
+            //preserve monetization status in the update flow
+            apiProvider.configureMonetizationInAPIArtifact(originalAPI);
 
             if (!isWSAPI) {
                 String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
@@ -638,6 +640,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
                 apiProvider.saveSwagger20Definition(apiToUpdate.getId(), newDefinition);
             }
+
+            apiProvider.manageAPI(apiToUpdate);
+
             API updatedApi = apiProvider.getAPI(apiIdentifier);
             updatedApiDTO = APIMappingUtil.fromAPItoDTO(updatedApi);
             return Response.ok().entity(updatedApiDTO).build();
@@ -2420,12 +2425,26 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param apiId             API identifier
      * @param apiDefinition     Swagger definition
+     * @param url               Swagger definition URL
+     * @param fileInputStream   Swagger definition input file content
+     * @param fileDetail
      * @param ifMatch           If-match header value
      * @return updated swagger document of the API
      */
     @Override
-    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch, MessageContext messageContext) {
+    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String url, InputStream fileInputStream,
+            Attachment fileDetail, String ifMatch, MessageContext messageContext) {
+
+        // Validate and retrieve the OpenAPI definition
+        Map validationResponseMap = null;
         try {
+            //Handle URL and file based definition imports
+            if(url != null || fileInputStream != null) {
+                validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, true);
+                APIDefinitionValidationResponse validationResponse = (APIDefinitionValidationResponse) validationResponseMap
+                        .get(RestApiConstants.RETURN_MODEL);
+                apiDefinition = validationResponse.getJsonContent();
+            }
             String updatedSwagger = updateSwagger(apiId, apiDefinition);
             return Response.ok().entity(updatedSwagger).build();
         } catch (APIManagementException e) {
@@ -2504,10 +2523,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         validateScopes(existingAPI);
 
         //Update API is called to update URITemplates and scopes of the API
-        apiProvider.updateAPI(existingAPI);
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
         apiProvider.saveSwagger20Definition(existingAPI.getId(), updatedApiDefinition);
+        apiProvider.updateAPI(existingAPI);
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(existingAPI.getId());
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);

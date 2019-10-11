@@ -690,6 +690,62 @@ class API extends Resource {
     }
 
     /**
+     * Update API definition of a given API by URL content
+     * @param apiId         API Identifier
+     * @param openAPIUrl    OpenAPI definition content URL
+     * @returns {boolean|*}
+     */
+    updateAPIDefinitionByUrl(apiId, openAPIUrl) {
+        let payload, promise_updated;
+
+        promise_updated = this.client.then(client => {
+            const apiData = this.getDataFromSpecFields(client);
+
+        payload = {
+            apiId: apiId,
+            url: openAPIUrl
+        };
+
+        const promisedResponse = client.apis['APIs'].put_apis__apiId__swagger(
+            payload,
+            this._requestMetaData({
+                'Content-Type': 'multipart/form-data',
+            }),
+        );
+        return promisedResponse.then(response => new API(response.body));
+      });
+        return promise_updated;
+    }
+
+    /**
+     * Update API definition of a given API by file content
+     * @param apiId         API Identifier
+     * @param openAPIFile   OpenAPI definition file content
+     * @returns {boolean|*}
+     */
+    updateAPIDefinitionByFile(apiId, openAPIFile) {
+        let payload, promise_updated;
+
+        promise_updated = this.client.then(client => {
+            const apiData = this.getDataFromSpecFields(client);
+
+        payload = {
+            apiId: apiId,
+            file: openAPIFile
+        };
+
+        const promisedResponse = client.apis['APIs'].put_apis__apiId__swagger(
+            payload,
+            this._requestMetaData({
+                'Content-Type': 'multipart/form-data',
+            }),
+        );
+        return promisedResponse.then(response => new API(response.body));
+    });
+        return promise_updated;
+    }
+
+    /**
      * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
      * @param apiId {Object} Updated graphQL schema which needs to be updated
      * @param graphQLSchema

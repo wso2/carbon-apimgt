@@ -76,10 +76,11 @@ const useStyles = makeStyles(theme => ({
 export default function CheckboxLabels(props) {
     const classes = useStyles();
     const { api } = props;
-    const isEndpointAvailable = api.endpointConfig !== null;
+    const isEndpointAvailable = api.endpointConfig !== null && !api.endpointConfig.implementation_status;
     const isTierAvailable = api.policies.length !== 0;
     const isPrototypedAvailable =
-        api.endpointConfig !== null && api.endpointConfig.implementation_status === 'prototyped';
+        (api.endpointConfig !== null && api.endpointConfig.implementation_status === 'prototyped')
+        || api.endpointImplementationType === 'INLINE';
 
     return (
         <Paper className={classes.paperCenter}>

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useReducer, useEffect, useState, useCallback } from 'react';
+import React, { useReducer, useEffect, useState, useCallback, useMemo } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
@@ -62,6 +62,7 @@ export default function Resources(props) {
     const [specErrors, setSpecErrors] = useState([]);
     const [markedOperations, setSelectedOperation] = useState({});
     const [openAPISpec, setOpenAPISpec] = useState({});
+    const [apiThrottlingPolicy, setApiThrottlingPolicy] = useState(api.apiThrottlingPolicy);
 
     /**
      *
@@ -96,11 +97,11 @@ export default function Resources(props) {
                 break;
             case 'scopes':
                 if (!updatedOperation.security) {
-                    updatedOperation.security = { default: {} };
-                } else if (!updatedOperation.security.default) {
-                    updatedOperation.security.default = {};
+                    updatedOperation.security = [{ default: [] }];
+                } else if (!updatedOperation.security.find(item => item.default)) {
+                    updatedOperation.security.push({ default: [] });
                 }
-                updatedOperation.security.default = [value];
+                updatedOperation.security.find(item => item.default).default = [value];
                 break;
             case 'add': {
                 const parameters = extractPathParameters(data.target, openAPISpec);
@@ -161,6 +162,12 @@ export default function Resources(props) {
         });
     }
     const onMarkAsDelete = useCallback(onOperationSelectM, [setSelectedOperation]);
+    // memoized (https://reactjs.org/docs/hooks-reference.html#usememo) to improve pref,
+    // localized to inject local apiThrottlingPolicy data
+    const localApi = useMemo(() => ({ id: api.id, apiThrottlingPolicy, scopes: api.scopes }), [
+        api,
+        apiThrottlingPolicy,
+    ]);
     /**
      *
      *
@@ -179,8 +186,9 @@ export default function Resources(props) {
 
     /**
      *
-     *
-     * @param {*} data
+     * Update the swagger using /swagger PUT operation and then fetch the updated API Object doing a apis/{api-uuid} GET
+     * @param {JSON} spec Updated full OpenAPI spec ready to PUT
+     * @returns {Promise} Promise resolving to updated API object
      */
     function updateSwagger(spec) {
         return api
@@ -232,7 +240,16 @@ export default function Resources(props) {
             default:
                 return Promise.reject(new Error('Unsupported resource operation!'));
         }
-        return updateSwagger({ ...openAPISpec, paths: copyOfOperations });
+        if (apiThrottlingPolicy !== api.apiThrottlingPolicy) {
+            return updateAPI({ apiThrottlingPolicy })
+                .catch((error) => {
+                    console.error(error);
+                    Alert.error('Error while updating the API');
+                })
+                .then(() => updateSwagger({ ...openAPISpec, paths: copyOfOperations }));
+        } else {
+            return updateSwagger({ ...openAPISpec, paths: copyOfOperations });
+        }
     }
 
     useEffect(() => {
@@ -253,7 +270,7 @@ export default function Resources(props) {
             setOperationRateLimits(response.body.list);
         });
         // TODO: need to handle the error cases through catch ~tmkb
-    }, [api]);
+    }, [api.id]);
 
     if (pageError) {
         return <Banner type='error' message={pageError} />;
@@ -276,8 +293,8 @@ export default function Resources(props) {
                 <Grid item md={12}>
                     <APIRateLimiting
                         operationRateLimits={operationRateLimits}
-                        value={api.apiThrottlingPolicy}
-                        updateAPI={updateAPI}
+                        value={apiThrottlingPolicy}
+                        onChange={setApiThrottlingPolicy}
                         isAPIProduct={api.isAPIProduct()}
                     />
                 </Grid>
@@ -318,13 +335,13 @@ export default function Resources(props) {
                                                     spec={openAPISpec}
                                                     operation={operation}
                                                     operationRateLimits={operationRateLimits}
-                                                    api={api}
+                                                    api={localApi}
                                                     markAsDelete={Boolean(markedOperations[target]
                                                         && markedOperations[target][verb])}
                                                     onMarkAsDelete={onMarkAsDelete}
                                                     disableUpdate={disableUpdate}
-                                                    disableDelete={operationProps.disableDelete}
                                                     disableMultiSelect={disableMultiSelect}
+                                                    {...operationProps}
                                                 />
                                             </Grid>
                                         );

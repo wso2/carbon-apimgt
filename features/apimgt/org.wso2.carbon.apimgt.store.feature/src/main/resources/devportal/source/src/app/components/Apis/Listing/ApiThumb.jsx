@@ -191,9 +191,14 @@ class ApiThumb extends React.Component {
         const { api, classes, theme } = this.props;
         const { thumbnail } = theme.custom;
         const {
-            name, version, context, provider,
+            name, version, context,
         } = api;
 
+        let { provider } = api;
+        if (api.businessInformation && api.businessInformation.businessOwner
+            && api.businessInformation.businessOwner.trim() !== '') {
+            provider = api.businessInformation.businessOwner;
+        }
         if (!api.lifeCycleStatus) {
             api.lifeCycleStatus = api.status;
         }

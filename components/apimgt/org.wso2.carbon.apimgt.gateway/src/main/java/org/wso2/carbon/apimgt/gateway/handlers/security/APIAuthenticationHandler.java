@@ -491,12 +491,18 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION, e);
 
         Mediator sequence = messageContext.getSequence(APISecurityConstants.API_AUTH_FAILURE_HANDLER);
-        // Invoke the custom error handler specified by the user
-        if (sequence != null && !sequence.mediate(messageContext)) {
-            // If needed user should be able to prevent the rest of the fault handling
-            // logic from getting executed
-            return;
+
+        //Setting error description which will be available to the handler
+        String errorDetail = APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage());
+        // if custom auth header is configured, the error message should specify its name instead of default value
+        if (e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_CREDENTIALS) {
+            errorDetail =
+                    APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()) + "'"
+                            + authorizationHeader + " : Bearer ACCESS_TOKEN' or '" + authorizationHeader +
+                            " : Basic ACCESS_TOKEN' or 'apikey: API_KEY'" ;
         }
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDetail);
+
         // By default we send a 401 response back
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
@@ -528,6 +534,14 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                         ", error_description=\"The access token expired\"");
                 axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
             }
+        }
+
+        messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE, status);
+        // Invoke the custom error handler specified by the user
+        if (sequence != null && !sequence.mediate(messageContext)) {
+            // If needed user should be able to prevent the rest of the fault handling
+            // logic from getting executed
+            return;
         }
 
         if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
