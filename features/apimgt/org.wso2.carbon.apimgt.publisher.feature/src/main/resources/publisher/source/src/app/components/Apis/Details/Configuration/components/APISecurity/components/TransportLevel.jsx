@@ -198,6 +198,7 @@ function TransportLevel(props) {
                                     })
                                     }
                                     value={API_SECURITY_MUTUAL_SSL}
+                                    color='primary'
                                 />
                             )}
                             label='Mutual SSL'
