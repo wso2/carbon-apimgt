@@ -2783,6 +2783,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 OASParserUtil.saveAPIDefinition(newAPI, apiDefinitionMapToJson, registry);
             }
 
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                String schemaDefinition = getGraphqlSchema(api.getId());
+                saveGraphqlSchemaDefinition(newAPI, schemaDefinition);
+            }
+
             // copy wsdl in case of a SOAP API
             String existingWsdlResourcePath = APIUtil.getWSDLDefinitionFilePath(api.getId().getApiName(),
                     api.getId().getVersion(), api.getId().getProviderName());
