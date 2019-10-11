@@ -4,7 +4,7 @@
         <h2><%=i18n.localize("Custom Throttling Policies")%></h2>
     </div>
     <div class="content-section shadow-up">
-    <div class="content-data">
+    <div class="content-data" style="overflow-x:auto;">
     <%if(outputs.globalPolicies.length) { %>
     <table class="table table-responsive table-striped" id="global-policy">
         <thead>
@@ -12,6 +12,7 @@
                 <th class=""><%=i18n.localize("Name")%></th>
                 <th class=""><%=i18n.localize("Description")%></th>
                 <th class=""><%=i18n.localize("Key Template")%></th>
+                <th class=""></th>
                 <th class=""></th>
             </tr>
         </thead>
@@ -39,6 +40,8 @@
                                 </span>
                                 <span class="hidden-xs">Edit</span>
                         </a>
+                    </td>
+                    <td>
                         <a id="deleteButton<%=count%>" onclick="deleteGlobalPolicy('<%=encode.forHtml(String(policyName))%>')" class="btn padding-reduce-on-grid-view">
                              <span class="fw-stack">
                                     <i class="fw fw-circle-outline fw-stack-2x"></i>
