@@ -25,7 +25,6 @@ import Grid from '@material-ui/core/Grid/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import CONSTS from 'AppData/Constants';
 import classNames from 'classnames';
-// import AuthManager from 'AppData/AuthManager';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
 import API from '../../../../data/api';
