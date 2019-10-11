@@ -23,9 +23,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import Hidden from '@material-ui/core/Hidden';
-import {
-    MenuItem, MenuList, ListItemIcon, ListItemText, Divider,
-} from '@material-ui/core';
+import { MenuItem, MenuList, ListItemIcon, ListItemText, Divider } from '@material-ui/core';
 import Icon from '@material-ui/core/Icon';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -46,72 +44,81 @@ import GlobalNavBar from './Header/GlobalNavbar';
 import Utils from '../../data/Utils';
 import VerticalDivider from '../Shared/VerticalDivider';
 
-const styles = theme => ({
-    appBar: {
-        position: 'relative',
-        background: theme.palette.background.appBar,
-    },
-    icon: {
-        marginRight: theme.spacing.unit * 2,
-    },
-    menuIcon: {
-        color: theme.palette.getContrastText(theme.palette.background.appBar),
-        fontSize: 35,
-    },
-    userLink: {
-        color: theme.palette.getContrastText(theme.palette.background.appBar),
-    },
-    publicStore: {
-        color: theme.palette.getContrastText(theme.palette.background.appBar),
-    },
-    // Page layout styles
-    drawer: {
-        top: 64,
-    },
-    wrapper: {
-        minHeight: '100%',
-        marginBottom: -50,
-        background: theme.palette.background.default + ' url(' + theme.custom.backgroundImage + ') repeat left top',
-    },
-    contentWrapper: {
-        display: 'flex',
-        flexDirection: 'row',
-        overflowY: 'hidden',
-        position: 'relative',
-        minHeight: 'calc(100vh - 114px)',
-    },
-    push: {
-        height: 50,
-    },
-    footer: {
-        backgroundColor: theme.palette.grey.A100,
-        paddingLeft: theme.spacing.unit * 3,
-        height: 50,
-        alignItems: 'center',
-        display: 'flex',
-    },
-    toolbar: {
-        minHeight: 56,
-        [`${theme.breakpoints.up('xs')} and (orientation: landscape)`]: {
-            minHeight: 48,
+const styles = (theme) => {
+    const pageMaxWidth = theme.custom.page.style === 'fluid' ? 'none' : theme.custom.page.width;
+    return {
+        appBar: {
+            position: 'relative',
+            background: theme.custom.appBar.background,
         },
-        [theme.breakpoints.up('sm')]: {
-            minHeight: 64,
+        icon: {
+            marginRight: theme.spacing.unit * 2,
         },
-    },
-    list: {
-        width: theme.custom.drawerWidth,
-    },
-    drawerStyles: {
-        top: theme.mixins.toolbar['@media (min-width:600px)'].minHeight,
-    },
-    listInline: {
-        '& ul': {
+        menuIcon: {
+            color: theme.palette.getContrastText(theme.custom.appBar.background),
+            fontSize: 35,
+        },
+        userLink: {
+            color: theme.palette.getContrastText(theme.custom.appBar.background),
+        },
+        publicStore: {
+            color: theme.palette.getContrastText(theme.custom.appBar.background),
+        },
+        // Page layout styles
+        drawer: {
+            top: 64,
+        },
+        wrapper: {
+            minHeight: '100%',
+            marginBottom: -50,
+            background: theme.palette.background.default + ' url(' + theme.custom.backgroundImage + ') repeat left top',
+        },
+        contentWrapper: {
             display: 'flex',
             flexDirection: 'row',
+            overflowY: 'hidden',
+            position: 'relative',
+            minHeight: 'calc(100vh - 114px)',
         },
-    },
-});
+        push: {
+            height: 50,
+        },
+        footer: {
+            backgroundColor: theme.palette.grey.A100,
+            paddingLeft: theme.spacing.unit * 3,
+            height: 50,
+            alignItems: 'center',
+            display: 'flex',
+        },
+        toolbar: {
+            minHeight: 56,
+            [`${theme.breakpoints.up('xs')} and (orientation: landscape)`]: {
+                minHeight: 48,
+            },
+            [theme.breakpoints.up('sm')]: {
+                minHeight: 64,
+            },
+        },
+        list: {
+            width: theme.custom.appBar.drawerWidth,
+        },
+        drawerStyles: {
+            top: theme.mixins.toolbar['@media (min-width:600px)'].minHeight,
+        },
+        listInline: {
+            '& ul': {
+                display: 'flex',
+                flexDirection: 'row',
+            },
+        },
+        reactRoot: {
+            maxWidth: pageMaxWidth,
+            margin: 'auto',
+            borderLeft: theme.custom.page.border,
+            borderRight: theme.custom.page.border,
+        },
+    };
+};
 
 /**
  *
@@ -119,7 +126,7 @@ const styles = theme => ({
  * @extends {React.Component}
  */
 class Layout extends React.Component {
-    static contextType = Settings
+    static contextType = Settings;
 
     /**
      * @inheritdoc
@@ -140,7 +147,10 @@ class Layout extends React.Component {
         openNavBar: false,
         openUserMenu: false,
     };
-
+    componentWillMount() {
+        const { theme } = this.props;
+        document.body.style.backgroundColor = theme.custom.page.emptyAreadBackground || '#ffffff';
+    }
     componentDidMount() {
         // Get Environments
         const promised_environments = ConfigManager.getConfigs()
@@ -235,7 +245,7 @@ class Layout extends React.Component {
             },
         };
         return (
-            <React.Fragment>
+            <div className={classes.reactRoot}>
                 <div className={classes.wrapper}>
                     <AppBar position='fixed' className={classes.appBar}>
                         <Toolbar className={classes.toolbar}>
@@ -245,7 +255,13 @@ class Layout extends React.Component {
                                 </IconButton>
                             </Hidden>
                             <Link to='/'>
-                                <img src={theme.custom.logo} />
+                                <img
+                                    src={theme.custom.appBar.logo}
+                                    style={{
+                                        height: theme.custom.appBar.logoHeight,
+                                        width: theme.custom.appBar.logoWidth,
+                                    }}
+                                />
                             </Link>
                             <Hidden smDown>
                                 <VerticalDivider height={32} />
@@ -305,9 +321,7 @@ class Layout extends React.Component {
                             {user ? (
                                 <React.Fragment>
                                     <Link to='/settings'>
-                                        <Button
-                                            className={classes.userLink}
-                                        >
+                                        <Button className={classes.userLink}>
                                             <Icon>settings</Icon>
                                             <FormattedMessage
                                                 id='Base.index.settings.caption'
@@ -353,33 +367,11 @@ class Layout extends React.Component {
                                                 <Paper>
                                                     <ClickAwayListener onClickAway={this.handleCloseUserMenu}>
                                                         <MenuList>
-                                                            <MenuItem onClick={this.handleCloseUserMenu}>
-                                                                <FormattedMessage
-                                                                    id='Base.index.profile'
-                                                                    defaultMessage='Profile'
-                                                                />
-                                                            </MenuItem>
-                                                            <MenuItem onClick={this.handleCloseUserMenu}>
-                                                                <FormattedMessage
-                                                                    id='Base.index.my.account'
-                                                                    defaultMessage='My account'
-                                                                />
-                                                            </MenuItem>
                                                             <MenuItem onClick={this.doOIDCLogout}>
                                                                 <FormattedMessage
                                                                     id='Base.index.logout'
                                                                     defaultMessage='Logout'
                                                                 />
-                                                            </MenuItem>
-                                                            <Divider />
-                                                            <MenuItem
-                                                                className={classes.menuItem}
-                                                                onClick={this.handleCloseUserMenu}
-                                                            >
-                                                                <ListItemText primary='Night Mode' />
-                                                                <ListItemIcon className={classes.icon}>
-                                                                    <Icon>brightness_low</Icon>
-                                                                </ListItemIcon>
                                                             </MenuItem>
                                                         </MenuList>
                                                     </ClickAwayListener>
@@ -419,7 +411,7 @@ class Layout extends React.Component {
                         />
                     </Typography>
                 </footer>
-            </React.Fragment>
+            </div>
         );
     }
 }

@@ -18,7 +18,7 @@
             <bean class="org.wso2.carbon.throttle.service.ThrottleApi"/>
             <bean class="org.wso2.carbon.throttle.service.IsThrottledApi"/>
             <bean class="org.wso2.carbon.throttle.service.BlockApi"/>
-            
+            <bean class="org.wso2.carbon.throttle.service.RevokedjwtApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

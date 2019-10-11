@@ -14,7 +14,7 @@ export default function APICreateBase(props) {
     const { title, children } = props;
     return (
         <Grid container spacing={3}>
-            <Grid item sm={12} md={12} />
+            <Grid item xs={12} />
             {/*
             Following two grids control the placement of whole create page
             For centering the content better use `container` props, but instead used an empty grid item for flexibility
@@ -25,7 +25,7 @@ export default function APICreateBase(props) {
                     <Grid item md={12}>
                         {title}
                     </Grid>
-                    <Grid item md={12}>
+                    <Grid item xs={12} md={12}>
                         <Paper elevation={0}>{children}</Paper>
                     </Grid>
                 </Grid>

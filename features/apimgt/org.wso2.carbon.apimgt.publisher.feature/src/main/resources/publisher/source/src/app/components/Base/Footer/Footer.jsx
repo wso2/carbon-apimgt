@@ -17,30 +17,47 @@
  */
 
 import React from 'react';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import Grid from '@material-ui/core/Grid';
+import FeedbackForm from './FeedbackForm';
 
-const styles = theme => ({
+const useStyles = makeStyles(theme => ({
     footer: {
         backgroundColor: theme.palette.grey.A100,
-        paddingLeft: theme.spacing.unit * 3,
+        paddingLeft: theme.spacing(3),
         height: 50,
         alignItems: 'center',
         display: 'flex',
     },
-});
-function Footer(props) {
-    const { classes } = props;
+}));
+
+/**
+ *
+ *
+ * @param {*} props
+ * @returns
+ */
+function Footer() {
+    const classes = useStyles();
+
     return (
         <footer className={classes.footer}>
-            <Typography noWrap>
-                <FormattedMessage
-                    id='Base.Footer.Footer.product_details'
-                    defaultMessage='WSO2 APIM v3.0.0 | © 2019 WSO2 Inc'
-                />
-            </Typography>
+            <Grid container direction='row' justify='space-between' alignItems='center'>
+                <Grid item>
+                    <Typography noWrap>
+                        <FormattedMessage
+                            id='Base.Footer.Footer.product_details'
+                            defaultMessage='WSO2 APIM v3.0.0 | © 2019 WSO2 Inc'
+                        />
+                    </Typography>
+                </Grid>
+                <Grid item>
+                    <FeedbackForm />
+                </Grid>
+            </Grid>
         </footer>
     );
 }
@@ -48,4 +65,4 @@ Footer.propTypes = {
     classes: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(Footer);
+export default Footer;

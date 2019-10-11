@@ -152,10 +152,14 @@ function getSuggestions(value, suggestions, { showEmpty = false } = {}) {
  * Downshift selection component
  */
 function DownshiftMultiple(props) {
-    const { setTenantList } = props;
+    const { api, setTenantList } = props;
     const { classes, suggestions } = props;
     const [inputValue, setInputValue] = React.useState('');
-    const [selectedItem, setSelectedItem] = React.useState([]);
+    let specificTenants = [];
+    if (api.subscriptionAvailableTenants !== null) {
+        specificTenants = api.subscriptionAvailableTenants;
+    }
+    const [selectedItem, setSelectedItem] = React.useState([...specificTenants]);
 
 
     function handleKeyDown(event) {
@@ -268,6 +272,9 @@ DownshiftMultiple.propTypes = {
         type: PropTypes.string,
         inputType: PropTypes.string,
     }).isRequired,
+    api: PropTypes.shape({
+        policies: PropTypes.array,
+    }).isRequired,
 };
 
 /**
@@ -276,7 +283,7 @@ DownshiftMultiple.propTypes = {
 export default function IntegrationDownshift(props) {
     const classes = useStyles();
     const [suggestions, setsuggestions] = useState({});
-    const { setTenantList } = props;
+    const { setTenantList, api } = props;
 
     const restApi = new API();
 
@@ -292,7 +299,7 @@ export default function IntegrationDownshift(props) {
     return (
         <div className={classes.root}>
             <div className={classes.divider} />
-            <DownshiftMultiple classes={classes} suggestions={suggestions} setTenantList={setTenantList} />
+            <DownshiftMultiple classes={classes} suggestions={suggestions} setTenantList={setTenantList} api={api} />
             <div className={classes.divider} />
         </div>
     );
@@ -302,5 +309,8 @@ IntegrationDownshift.propTypes = {
     setTenantList: PropTypes.shape({
         type: PropTypes.string,
         inputType: PropTypes.string,
+    }).isRequired,
+    api: PropTypes.shape({
+        policies: PropTypes.array,
     }).isRequired,
 };

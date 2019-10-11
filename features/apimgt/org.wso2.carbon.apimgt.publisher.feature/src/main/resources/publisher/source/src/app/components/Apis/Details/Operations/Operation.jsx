@@ -66,7 +66,6 @@ const styles = theme => ({
         background: theme.palette.background.active,
         minWidth: 100,
         borderRadius: theme.shape.borderRadius,
-        cursor: 'pointer',
     },
     paper: {
         padding: 20,
@@ -217,9 +216,9 @@ class Operation extends React.Component {
                 </TableCell>
                 <TableCell>
                     <Chip
-                        label={operation.verb.toLowerCase()}
+                        label={operation.verb}
                         style={{
-                            backgroundColor: chipColor, color: chipTextColor, height: 20, width: 40,
+                            backgroundColor: chipColor, color: chipTextColor, height: 20, width: 40, fontSize: 9,
                         }}
                         className={classes.chipActive}
                     />

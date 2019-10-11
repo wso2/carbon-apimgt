@@ -320,7 +320,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiArtifactId = resource.getUUID();
                 if (apiArtifactId != null) {
                     GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
-                    apiSortedList.add(getAPI(apiArtifact));
+                    if (apiArtifact != null) {
+                        String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
+                        if (!APIConstants.API_PRODUCT.equals(type)) {
+                            apiSortedList.add(getAPI(apiArtifact));
+                        }
+                    }
                 } else {
                     throw new GovernanceException("artifact id is null of " + apiPath);
                 }
@@ -2778,6 +2783,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 OASParserUtil.saveAPIDefinition(newAPI, apiDefinitionMapToJson, registry);
             }
 
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                String schemaDefinition = getGraphqlSchema(api.getId());
+                saveGraphqlSchemaDefinition(newAPI, schemaDefinition);
+            }
+
             // copy wsdl in case of a SOAP API
             String existingWsdlResourcePath = APIUtil.getWSDLDefinitionFilePath(api.getId().getApiName(),
                     api.getId().getVersion(), api.getId().getProviderName());
@@ -4805,7 +4815,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                         WorkflowResponse workflowResponse = apiStateWFExecutor.execute(apiStateWorkflow);
                         response.setWorkflowResponse(workflowResponse);
-                    } catch (Exception e) {
+                    } catch (WorkflowException e) {
                         handleException("Failed to execute workflow for life cycle status change : " + e.getMessage(),
                                 e);
                     }
@@ -4816,6 +4826,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     if (wfDTO != null) {
                         apiWFState = wfDTO.getStatus();
                         response.setStateChangeStatus(apiWFState.toString());
+                    } else {
+                        response.setStateChangeStatus(WorkflowStatus.APPROVED.toString());
                     }
                 }
 
@@ -6804,7 +6816,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void deleteAPIProduct(APIProductIdentifier identifier) throws APIManagementException {
+    public void deleteAPIProduct(APIProductIdentifier identifier, String apiProductUUID) throws APIManagementException {
         //this is the product resource collection path
         String productResourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
@@ -6847,22 +6859,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             GenericArtifact apiProductArtifact = artifactManager.getGenericArtifact(apiArtifactResourceUUID);
             String environments = apiProductArtifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
-            //Delete the dependencies associated  with the api product artifact
-            GovernanceArtifact[] dependenciesArray = apiProductArtifact.getDependencies();
-            if (dependenciesArray.length > 0) {
-                for (GovernanceArtifact artifact : dependenciesArray) {
-                    registry.delete(artifact.getPath());
-                }
-            }
-
-            //delete registry resources
-            artifactManager.removeGenericArtifact(productResourceUUID);
 
             APIManagerConfiguration config = getAPIManagerConfiguration();
             boolean gatewayExists = !config.getApiGatewayEnvironments().isEmpty();
             String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
             APIProduct apiProduct = new APIProduct(identifier);
+            apiProduct.setUuid(apiProductUUID);
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse
             if (gatewayExists && "Synapse".equals(gatewayType)) {
@@ -6874,6 +6877,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else {
                 log.debug("Gateway is not existed for the current API Provider");
             }
+
+            //Delete the dependencies associated  with the api product artifact
+            GovernanceArtifact[] dependenciesArray = apiProductArtifact.getDependencies();
+            if (dependenciesArray.length > 0) {
+                for (GovernanceArtifact artifact : dependenciesArray) {
+                    registry.delete(artifact.getPath());
+                }
+            }
+
+            //delete registry resources
+            artifactManager.removeGenericArtifact(productResourceUUID);
 
             apiMgtDAO.deleteAPIProduct(identifier);
             if (log.isDebugEnabled()) {
@@ -6984,57 +6998,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new FaultGatewaysException(failedGateways);
         }
 
-    }
-
-    @Override
-    public boolean isProductExist(String productName, String provider, String tenantDomain)
-            throws APIManagementException {
-        return apiMgtDAO.isProductExist(productName, provider, tenantDomain);
-    }
-
-    @Override
-    public void updateAPIDefinitionOfAPIProduct(String definition, APIProduct product)
-            throws APIManagementException {
-        try {
-            String resourcePath = APIUtil.getAPIProductOpenAPIDefinitionFilePath(product.getId());
-            resourcePath = resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
-            Resource resource;
-            if (!registry.resourceExists(resourcePath)) {
-                resource = registry.newResource();
-            } else {
-                resource = registry.get(resourcePath);
-            }
-            resource.setContent(definition);
-            resource.setMediaType("application/json");
-            registry.put(resourcePath, resource);
-
-            String[] visibleRoles = null;
-            if (product.getVisibleRoles() != null) {
-                visibleRoles = product.getVisibleRoles().split(",");
-            }
-
-            // Need to set anonymous if the visibility is public
-            APIUtil.clearResourcePermissions(resourcePath, product.getId(), ((UserRegistry) registry).getTenantId());
-            APIUtil.setResourcePermissions(product.getId().getProviderName(), product.getVisibility(), visibleRoles,
-                    resourcePath);
-
-        } catch (RegistryException e) {
-            handleException("Error while adding Swagger Definition for " + product.getId().getName() + '-'
-                    + product.getId().getProviderName(), e);
-        }
-
-    }
-
-    @Override
-    public void removeAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException {
-        String apiDefinitionFilePath = APIUtil.getAPIProductOpenAPIDefinitionFilePath(product.getId());
-        try {
-            if (registry.resourceExists(apiDefinitionFilePath)) {
-                registry.delete(apiDefinitionFilePath);
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to remove the Definition from : " + apiDefinitionFilePath, e);
-        }
     }
 
     @Override

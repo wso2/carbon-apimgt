@@ -67,6 +67,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -181,10 +182,23 @@ public class OAS3Parser extends APIDefinition {
                 }
                 scopeSet.add(scope);
             }
-            return scopeSet;
+            return sortScopes(scopeSet);
         } else {
-            return getScopesFromExtensions(openAPI);
+            return sortScopes(getScopesFromExtensions(openAPI));
         }
+    }
+
+    /**
+     * Sort scopes by name.
+     * This method was added to display scopes in publisher in a sorted manner.
+     *
+     * @param scopeSet
+     * @return Scope set
+     */
+    private Set<Scope> sortScopes(Set<Scope> scopeSet) {
+        List<Scope> scopesSortedlist = new ArrayList<>(scopeSet);
+        scopesSortedlist.sort(Comparator.comparing(Scope::getName));
+        return new LinkedHashSet(scopesSortedlist);
     }
 
     /**
@@ -470,7 +484,7 @@ public class OAS3Parser extends APIDefinition {
             openAPI.addExtension(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS, prodEndpointObj);
         }
         Object sandEndpointObj = OASParserUtil.generateOASConfigForEndpoints(api, false);
-        if (prodEndpointObj != null) {
+        if (sandEndpointObj != null) {
             openAPI.addExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandEndpointObj);
         }
         openAPI.addExtension(APIConstants.X_WSO2_BASEPATH, api.getContext());

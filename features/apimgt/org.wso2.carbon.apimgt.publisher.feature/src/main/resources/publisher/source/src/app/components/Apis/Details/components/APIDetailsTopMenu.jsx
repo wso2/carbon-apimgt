@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Tooltip from '@material-ui/core/Tooltip';
-import Configuration from 'Config';
 import { FormattedMessage } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
@@ -10,6 +9,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
 
+import { useAppContext } from 'AppComponents/Shared/AppContext';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import GoTo from 'AppComponents/Apis/Details/GoTo/GoTo';
@@ -64,6 +64,7 @@ const APIDetailsTopMenu = (props) => {
         classes, theme, api, isAPIProduct,
     } = props;
     const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
+    const { settings } = useAppContext();
     // todo: need to support rev proxy ~tmkb
     return (
         <div className={classes.root}>
@@ -72,7 +73,7 @@ const APIDetailsTopMenu = (props) => {
                 <div className={classes.backText}>
                     <FormattedMessage
                         id='Apis.Details.components.APIDetailsTopMenu.back.to.listing'
-                        defaultMessage='BACK TO {break} LISTING'
+                        defaultMessage='BACK TO {break} APIs'
                         values={{ break: <br /> }}
                     />
                 </div>
@@ -112,12 +113,12 @@ const APIDetailsTopMenu = (props) => {
             </div>
             <VerticalDivider height={70} />
             <GoTo api={api} isAPIProduct={isAPIProduct} />
-            {isVisibleInStore && <VerticalDivider height={70} />}
-            {isVisibleInStore && (
+            {(isVisibleInStore || isAPIProduct) && <VerticalDivider height={70} />}
+            {(isVisibleInStore || isAPIProduct) && (
                 <a
                     target='_blank'
                     rel='noopener noreferrer'
-                    href={`${window.location.origin}${Configuration.app.storeContext}/apis/${api.id}/overview`}
+                    href={`${settings.storeUrl}/apis/${api.id}/overview`}
                     className={classes.viewInStoreLauncher}
                 >
                     <div>

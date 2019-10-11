@@ -42,8 +42,13 @@ const styles = theme => ({
     },
     textField: {
         marginTop: 0,
-        width: '88%',
+        marginRight: 5,
+        width: '100%',
     },
+    commentAddWrapper: {
+        display: 'flex',
+        alignItems: 'top',
+    }
 });
 
 /**
@@ -165,26 +170,29 @@ class CommentAdd extends React.Component {
         return (
             <Grid container spacing={3} className={classes.contentWrapper}>
                 <Grid item xs zeroMinWidth>
-                    <TextField
-                        id='standard-multiline-flexible'
-                        autoFocus
-                        multiline
-                        className={classes.textField}
-                        margin='normal'
-                        placeholder={intl.formatMessage({
-                            defaultMessage: 'Write a comment',
-                            id: 'Apis.Details.Comments.CommentAdd.write.comment.help',
-                        })}
-                        inputProps={{ maxLength: theme.custom.maxCommentLength }}
-                        value={content}
-                        onChange={this.inputChange}
-                    />
-                    <Typography className={classes.content} align='right'>
-                        {currentLength + '/' + theme.custom.maxCommentLength}
-                    </Typography>
+                    <div className={classes.commentAddWrapper}>
+                        <TextField
+                            id='standard-multiline-flexible'
+                            autoFocus
+                            multiline
+                            className={classes.textField}
+                            margin='normal'
+                            placeholder={intl.formatMessage({
+                                defaultMessage: 'Write a comment',
+                                id: 'Apis.Details.Comments.CommentAdd.write.comment.help',
+                            })}
+                            inputProps={{ maxLength: theme.custom.maxCommentLength }}
+                            value={content}
+                            onChange={this.inputChange}
+                            variant="outlined"
+                        />
+                        <Typography className={classes.content} align='left'>
+                            {currentLength + '/' + theme.custom.maxCommentLength}
+                        </Typography>
+                    </div>
                     <Grid container spacing={1}>
                         <Grid item>
-                            <Button variant='contained' color='primary' onClick={() => this.handleClickAddComment()}>
+                            <Button variant='contained' color='primary' disabled={currentLength === 0} onClick={() => this.handleClickAddComment()}>
                                 <FormattedMessage
                                     id='Apis.Details.Comments.CommentAdd.btn.add.comment'
                                     defaultMessage='Add Comment'

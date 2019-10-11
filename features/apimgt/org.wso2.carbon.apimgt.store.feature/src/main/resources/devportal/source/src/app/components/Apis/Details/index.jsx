@@ -30,54 +30,54 @@ import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { PageNotFound } from '../../Base/Errors/index';
 import InfoBar from './InfoBar';
-import RightPanel from './RightPanel';
 import { ApiContext } from './ApiContext';
 import Progress from '../../Shared/Progress';
+import classNames from 'classnames';
 
 const LoadableSwitch = withRouter(Loadable.Map({
     loader: {
-        ApiConsole: () => import(
-            // eslint-disable-line function-paren-newline
-            /* webpackChunkName: "ApiConsole" */
-            /* webpackPrefetch: true */
-            // eslint-disable-next-line comma-dangle
-            './ApiConsole/ApiConsole'
-        ),
-        Overview: () => import(
-            // eslint-disable-line function-paren-newline
-            /* webpackChunkName: "Overview" */
-            /* webpackPrefetch: true */
-            // eslint-disable-next-line comma-dangle
-            './Overview'
-        ),
-        Documentation: () => import(
-            // eslint-disable-line function-paren-newline
-            /* webpackChunkName: "Documentation" */
-            /* webpackPrefetch: true */
-            // eslint-disable-next-line comma-dangle
-            './Documents/Documentation'
-        ),
-        Credentials: () => import(
-            // eslint-disable-line function-paren-newline
-            /* webpackChunkName: "Credentials" */
-            /* webpackPrefetch: true */
-            // eslint-disable-next-line comma-dangle
-            './Credentials/Credentials'
-        ),
-        Comments: () => import(
-            // eslint-disable-line function-paren-newline
-            /* webpackChunkName: "Comments" */
-            /* webpackPrefetch: true */
-            // eslint-disable-next-line comma-dangle
-            './Comments/Comments'
-        ),
-        Sdk: () => import(
-            // eslint-disable-line function-paren-newline
-            /* webpackChunkName: "Sdk" */
-            /* webpackPrefetch: true */
-            // eslint-disable-next-line comma-dangle
-            './Sdk'
-        ),
+        ApiConsole: () =>
+                import(
+                    // eslint-disable-line function-paren-newline
+                    /* webpackChunkName: "ApiConsole" */
+                    /* webpackPrefetch: true */
+                    // eslint-disable-next-line comma-dangle
+                    './ApiConsole/ApiConsole'),
+        Overview: () =>
+                import(
+                    // eslint-disable-line function-paren-newline
+                    /* webpackChunkName: "Overview" */
+                    /* webpackPrefetch: true */
+                    // eslint-disable-next-line comma-dangle
+                    './Overview'),
+        Documentation: () =>
+                import(
+                    // eslint-disable-line function-paren-newline
+                    /* webpackChunkName: "Documentation" */
+                    /* webpackPrefetch: true */
+                    // eslint-disable-next-line comma-dangle
+                    './Documents/Documentation'),
+        Credentials: () =>
+                import(
+                    // eslint-disable-line function-paren-newline
+                    /* webpackChunkName: "Credentials" */
+                    /* webpackPrefetch: true */
+                    // eslint-disable-next-line comma-dangle
+                    './Credentials/Credentials'),
+        Comments: () =>
+                import(
+                    // eslint-disable-line function-paren-newline
+                    /* webpackChunkName: "Comments" */
+                    /* webpackPrefetch: true */
+                    // eslint-disable-next-line comma-dangle
+                    './Comments/Comments'),
+        Sdk: () =>
+                import(
+                    // eslint-disable-line function-paren-newline
+                    /* webpackChunkName: "Sdk" */
+                    /* webpackPrefetch: true */
+                    // eslint-disable-next-line comma-dangle
+                    './Sdk'),
     },
     render(loaded, props) {
         const { match, advertised } = props;
@@ -95,16 +95,12 @@ const LoadableSwitch = withRouter(Loadable.Map({
         return (
             <Switch>
                 <Redirect exact from='/apis/:apiUuid' to={redirectURL} />
-                <Route
-                    path='/apis/:apiUuid/overview'
-                    render={props => (
-                        <Overview {...props} />)}
-                />
+                <Route path='/apis/:apiUuid/overview' render={props => <Overview {...props} />} />
                 <Route path='/apis/:apiUuid/docs' component={Documentation} />
-                {!advertised && <Route path='/apis/:apiUuid/comments' component={Comments} /> }
-                {!advertised && <Route path='/apis/:apiUuid/credentials' component={Credentials} /> }
-                {!advertised && <Route path='/apis/:apiUuid/test' component={ApiConsole} /> }
-                {!advertised && <Route path='/apis/:apiUuid/sdk' component={Sdk} /> }
+                {!advertised && <Route path='/apis/:apiUuid/comments' component={Comments} />}
+                {!advertised && <Route path='/apis/:apiUuid/credentials' component={Credentials} />}
+                {!advertised && <Route path='/apis/:apiUuid/test' component={ApiConsole} />}
+                {!advertised && <Route path='/apis/:apiUuid/sdk' component={Sdk} />}
                 <Route component={PageNotFound} />
             </Switch>
         );
@@ -119,52 +115,83 @@ const LoadableSwitch = withRouter(Loadable.Map({
  *
  * @param {*} theme
  */
-const styles = theme => ({
-    LeftMenu: {
-        backgroundColor: theme.palette.background.leftMenu,
-        width: theme.custom.leftMenuWidth,
-        textAlign: 'left',
-        fontFamily: theme.typography.fontFamily,
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        top: 0,
-        boxShadow: '11px -1px 15px -8px rgba(115,115,115,1)',
-        overflowY: 'auto',
-    },
-    leftLInkMain: {
-        borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
-        paddingBottom: theme.spacing.unit,
-        paddingTop: theme.spacing.unit,
-        cursor: 'pointer',
-        backgroundColor: theme.palette.background.leftMenuActive,
-        color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
-        textDecoration: 'none',
-        alignItems: 'center',
-        paddingLeft: theme.spacing.unit * 2,
-        display: 'flex',
-    },
-    leftLInkMainText: {
-        fontSize: 18,
-        color: theme.palette.grey[500],
-        textDecoration: 'none',
-        paddingLeft: theme.spacing.unit * 2,
-    },
-    detailsContent: {
-        display: 'flex',
-        flex: 1,
-    },
-    content: {
-        display: 'flex',
-        flex: 1,
-        flexDirection: 'column',
-        marginLeft: theme.custom.leftMenuWidth,
-        paddingBottom: theme.spacing.unit * 3,
-    },
-    leftLInkMainWrapper: {
-        textDecoration: 'none',
-    },
-});
+const styles = (theme) => {
+    const {
+        custom: {
+            leftMenu: { width, position },
+        },
+    } = theme;
+    const shiftToLeft = position === 'vertical-left' ? width : 0;
+    const shiftToRight = position === 'vertical-right' ? width : 0;
+    const leftMenuPaddingLeft = position === 'horizontal' ? theme.spacing(3) : 0;
+
+    return {
+        LeftMenu: {
+            backgroundColor: theme.custom.leftMenu.background,
+            textAlign: 'left',
+            fontFamily: theme.typography.fontFamily,
+            position: 'absolute',
+            bottom: 0,
+            paddingLeft: leftMenuPaddingLeft,
+        },
+        leftMenuHorizontal: {
+            top: theme.custom.infoBar.height,
+            width: '100%',
+            overflowX: 'auto',
+            height: 60,
+            display: 'flex',
+            left: 0,
+        },
+        leftMenuVerticalLeft: {
+            width: theme.custom.leftMenu.width,
+            top: 0,
+            left: 0,
+            overflowY: 'auto',
+        },
+        leftMenuVerticalRight: {
+            width: theme.custom.leftMenu.width,
+            top: 0,
+            right: 0,
+            overflowY: 'auto',
+        },
+        leftLInkMain: {
+            borderRight: 'solid 1px ' + theme.custom.leftMenu.background,
+            cursor: 'pointer',
+            background: theme.custom.leftMenu.rootBackground,
+            color: theme.palette.getContrastText(theme.custom.leftMenu.rootBackground),
+            textDecoration: 'none',
+            alignItems: 'center',
+            justifyContent: 'center',
+            display: 'flex',
+            height: theme.custom.infoBar.height,
+            textDecoration: 'none',
+        },
+        leftLInkMainText: {
+            fontSize: 18,
+            color: theme.palette.grey[500],
+            textDecoration: 'none',
+            paddingLeft: theme.spacing.unit * 2,
+        },
+        detailsContent: {
+            display: 'flex',
+            flex: 1,
+        },
+        content: {
+            display: 'flex',
+            flex: 1,
+            flexDirection: 'column',
+            marginLeft: shiftToLeft,
+            marginRight: shiftToRight,
+            paddingBottom: theme.spacing.unit * 3,
+        },
+        contentLoader: {
+            paddingTop: theme.spacing(3),
+        },
+        contentLoaderRightMenu: {
+            paddingRight: theme.custom.leftMenu.width,
+        },
+    };
+};
 /**
  *
  *
@@ -193,25 +220,27 @@ class Details extends React.Component {
             // const subscriptionClient = new Subscription();
             const promisedAPI = restApi.getAPIById(this.api_uuid);
 
-            promisedAPI.then((api) => {
-                this.setState({ api: api.body });
-            }).catch((error) => {
-                const { status, response } = error;
-                const { setTenantDomain, intl } = this.props;
+            promisedAPI
+                .then((api) => {
+                    this.setState({ api: api.body });
+                })
+                .catch((error) => {
+                    const { status, response } = error;
+                    const { setTenantDomain, intl } = this.props;
 
-                const message = intl.formatMessage({
-                    defaultMessage: 'Invalid tenant domain',
-                    id: 'Apis.Details.index.invalid.tenant.domain',
+                    const message = intl.formatMessage({
+                        defaultMessage: 'Invalid tenant domain',
+                        id: 'Apis.Details.index.invalid.tenant.domain',
+                    });
+                    if (response && response.body.code === 901300) {
+                        setTenantDomain('INVALID');
+                        Alert.error(message);
+                    }
+                    console.error('Error when getting apis', error);
+                    if (status === 404) {
+                        this.setState({ notFound: true });
+                    }
                 });
-                if (response && response.body.code === 901300) {
-                    setTenantDomain('INVALID');
-                    Alert.error(message);
-                }
-                console.error('Error when getting apis', error);
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
             const user = AuthManager.getUser();
             if (user != null) {
                 existingSubscriptions = restApi.getSubscriptions(this.api_uuid, null);
@@ -239,8 +268,7 @@ class Details extends React.Component {
                         // the available applications to subscribe
                         const subscribedAppIds = subscribedApplications.map(sub => sub.value);
                         const applicationsAvailable = applications.list
-                            .filter(app => !subscribedAppIds.includes(app.applicationId)
-                            && app.status === 'APPROVED')
+                            .filter(app => !subscribedAppIds.includes(app.applicationId) && app.status === 'APPROVED')
                             .map((filteredApp) => {
                                 return {
                                     value: filteredApp.applicationId,
@@ -268,7 +296,6 @@ class Details extends React.Component {
         this.state = {
             active: 'overview',
             overviewHiden: false,
-            handleMenuSelect: this.handleMenuSelect,
             updateSubscriptionData: this.updateSubscriptionData,
             api: null,
             applications: null,
@@ -280,18 +307,6 @@ class Details extends React.Component {
         this.setDetailsAPI = this.setDetailsAPI.bind(this);
         this.api_uuid = this.props.match.params.api_uuid;
     }
-
-    /**
-     *
-     *
-     * @memberof Details
-     */
-    handleMenuSelect = (menuLink) => {
-        const path = '/apis/';
-        this.props.history.push({ pathname: path + this.props.match.params.api_uuid + '/' + menuLink });
-        menuLink === 'overview' ? this.infoBar.toggleOverview(true) : this.infoBar.toggleOverview(false);
-        this.setState({ active: menuLink });
-    };
 
     /**
      *
@@ -309,22 +324,7 @@ class Details extends React.Component {
      * @memberof Details
      */
     componentDidMount() {
-        this.updateActiveLink();
         this.updateSubscriptionData();
-    }
-
-    /**
-     *
-     * Selects the active link for the side panel based on the URL
-     * @memberof Details
-     */
-    updateActiveLink() {
-        const { active } = this.state;
-        const currentLink = this.props.location.pathname.match(/[^\/]+(?=\/$|$)/g);
-
-        if (currentLink && currentLink.length > 0 && active !== currentLink[0]) {
-            this.setState({ active: currentLink[0] });
-        }
     }
 
     /**
@@ -334,65 +334,76 @@ class Details extends React.Component {
      * @memberof Details
      */
     render() {
-        this.updateActiveLink();
-
         const {
-            classes, theme, intl, apiType, match,
+            classes, theme, intl, match,
         } = this.props;
         const { apiUuid } = match.params;
-        const { active, api } = this.state;
-        const { leftMenuIconMainSize } = theme.custom;
+        const { api } = this.state;
+        const {
+            custom: {
+                leftMenu: {
+                    rootIconSize, rootIconTextVisible, rootIconVisible, position,
+                },
+            },
+        } = theme;
         const globalStyle = 'body{ font-family: ' + theme.typography.fontFamily + '}';
-        return (api ? (
+        const pathPrefix = '/apis/' + this.api_uuid + '/';
+
+        return api ? (
             <ApiContext.Provider value={this.state}>
                 <style>{globalStyle}</style>
-                <div className={classes.LeftMenu}>
-                    <Link to='/apis' className={classes.leftLInkMainWrapper}>
-                        <div className={classes.leftLInkMain}>
-                            <CustomIcon width={leftMenuIconMainSize} height={leftMenuIconMainSize} icon='api' />
-                            <Typography className={classes.leftLInkMainText}>
-                                <FormattedMessage id='Apis.Details.index.all.apis' defaultMessage='ALL APIs' />
-                            </Typography>
-                        </div>
-                    </Link>
-                    <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    {!api.advertiseInfo.advertised
-                        && (
-                            <React.Fragment>
-                                <LeftMenuItem
-                                    text='credentials'
-                                    handleMenuSelect={this.handleMenuSelect}
-                                    active={active}
-                                />
-                                <LeftMenuItem
-                                    text='comments'
-                                    handleMenuSelect={this.handleMenuSelect}
-                                    active={active}
-                                />
-                                {api.type !== 'WS'
-                                    && (
-                                        <LeftMenuItem
-                                            text='test'
-                                            handleMenuSelect={this.handleMenuSelect}
-                                            active={active}
-                                        />
-                                    )
-                                }
-                            </React.Fragment>
-                        )
-                    }
-                    <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    {!api.advertiseInfo.advertised
-                        && api.type !== 'WS' && <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    }
+                <div
+                    className={classNames(
+                        classes.LeftMenu,
+                        {
+                            [classes.leftMenuHorizontal]: position === 'horizontal',
+                        },
+                        {
+                            [classes.leftMenuVerticalLeft]: position === 'vertical-left',
+                        },
+                        {
+                            [classes.leftMenuVerticalRight]: position === 'vertical-right',
+                        },
+                        'left-menu',
+                    )}
+                >
+                    {rootIconVisible && (
+                        <Link to='/apis' className={classes.leftLInkMain}>
+                            <CustomIcon width={rootIconSize} height={rootIconSize} icon='api' />
+                            {rootIconTextVisible && (
+                                <Typography className={classes.leftLInkMainText}>
+                                    <FormattedMessage id='Apis.Details.index.all.apis' defaultMessage='ALL APIs' />
+                                </Typography>
+                            )}
+                        </Link>
+                    )}
+                    <LeftMenuItem text='overview' route='overview' to={pathPrefix + 'overview'} />
+                    {!api.advertiseInfo.advertised && (
+                        <React.Fragment>
+                            <LeftMenuItem text='credentials' route='credentials' to={pathPrefix + 'credentials'} />
+                            <LeftMenuItem text='comments' route='comments' to={pathPrefix + 'comments'} />
+                            {api.type !== 'WS' && <LeftMenuItem text='test' route='test' to={pathPrefix + 'test'} />}
+                        </React.Fragment>
+                    )}
+                    <LeftMenuItem text='Documentation' route='docs' to={pathPrefix + 'docs'} />
+                    {!api.advertiseInfo.advertised && api.type !== 'WS' && (
+                        <LeftMenuItem text='SDK' route='sdk' to={pathPrefix + 'sdk'} />
+                    )}
                 </div>
                 <div className={classes.content}>
                     <InfoBar apiId={apiUuid} innerRef={node => (this.infoBar = node)} intl={intl} />
-                    <LoadableSwitch api_uuid={apiUuid} advertised={api.advertiseInfo.advertised} />
+                    <div
+                        className={classNames(
+                            { [classes.contentLoader]: position === 'horizontal' },
+                            { [classes.contentLoaderRightMenu]: position === 'vertical-right' },
+                        )}
+                    >
+                        <LoadableSwitch api_uuid={apiUuid} advertised={api.advertiseInfo.advertised} />
+                    </div>
                 </div>
-                {theme.custom.showApiHelp && <RightPanel />}
             </ApiContext.Provider>
-        ) : <div className='apim-dual-ring' />
+        ) : (
+            <div className='apim-dual-ring' />
         );
     }
 }

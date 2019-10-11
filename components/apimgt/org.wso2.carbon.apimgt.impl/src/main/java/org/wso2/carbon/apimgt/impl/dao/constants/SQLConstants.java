@@ -2282,6 +2282,26 @@ public class SQLConstants {
             " ORDER BY " +
             "   URL_MAPPING_ID ASC ";
 
+    public static final String GET_URL_TEMPLATES_OF_API_SQL =
+            " SELECT " +
+            "   AUM.URL_PATTERN," +
+            "   AUM.HTTP_METHOD," +
+            "   AUM.AUTH_SCHEME," +
+            "   AUM.THROTTLING_TIER, " +
+            "   AUM.MEDIATION_SCRIPT, " +
+            "   PROD.API_PRODUCT_PROVIDER, " +
+            "   PROD.API_PRODUCT_NAME, " +
+            "   PROD.API_PRODUCT_VERSION " +
+            " FROM " +
+            "   AM_API_URL_MAPPING AUM " +
+            " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+            " LEFT JOIN AM_API_PRODUCT_MAPPING APM ON AUM.URL_MAPPING_ID = APM.URL_MAPPING_ID" +
+            " LEFT JOIN AM_API_PRODUCT PROD ON PROD.API_PRODUCT_ID = APM.API_PRODUCT_ID" +
+            " WHERE " +
+            "  API.API_PROVIDER = ? AND " +
+            "  API.API_NAME = ? AND " +
+            "  API.API_VERSION = ? ";
+
     public static final String GET_AUTHORIZED_DOMAINS_PREFIX =
             "SELECT AKDM.AUTHZ_DOMAIN FROM AM_APP_KEY_DOMAIN_MAPPING AKDM, ";
 
@@ -3312,19 +3332,6 @@ public class SQLConstants {
             "   UPDATED_TIME=?" +
             " WHERE" +
             "   API_PRODUCT_NAME=? AND API_PRODUCT_PROVIDER=? AND API_PRODUCT_VERSION=?";
-
-    public static final String IS_API_PRODUCT_EXIST = 
-            "SELECT UUID FROM AM_API_PRODUCT WHERE API_PRODUCT_PROVIDER=? AND API_PRODUCT_NAME=? AND TENANT_DOMAIN = ?";
-
-    public static final String GET_ALL_API_PRODUCTS = 
-            "SELECT API_PRODUCT_ID, UUID, DESCRIPTION, API_PRODUCT_PROVIDER, API_PRODUCT_NAME, API_PRODUCT_VERSION, STATE "
-            + "FROM AM_API_PRODUCT WHERE TENANT_DOMAIN = ?";
-    
-    public static final String GET_PRODUCT_RESOURCE_BY_COLUMN = 
-            "SELECT VISIBILITY, VISIBILE_ROLES, {column} FROM AM_API_PRODUCT WHERE UUID = ?";
-    
-    public static final String ADD_BLOB_API_PRODUCT_BY_COLUMN = 
-            "INSERT INTO AM_API_PRODUCT ({column}) VALUES (?) WHERE UUID = ?";
     
     public static final String UPDATE_BLOB_API_PRODUCT_BY_COLUMN = 
             "UPDATE AM_API_PRODUCT SET {column} = ? WHERE UUID = ?";
@@ -3332,9 +3339,6 @@ public class SQLConstants {
     public static final String GET_PRODUCT_ID =
             "SELECT API_PRODUCT_ID FROM AM_API_PRODUCT WHERE API_PRODUCT_NAME = ? AND API_PRODUCT_PROVIDER = ? AND "
             + "API_PRODUCT_VERSION = ?";
-
-    public static final String DELETE_PRODUCT_RESOURCE_MAPPING =
-            "DELETE FROM AM_API_PRODUCT_MAPPING WHERE URL_MAPPING_ID = ?";
 
     public static final String GET_PRODUCT_RESOURCE_MAPPINGS_FOR_API =
             "SELECT "
@@ -3614,5 +3618,12 @@ public class SQLConstants {
         public static final String DELETE_EMAIL_BY_UUID =
                 "DELETE FROM AM_NOTIFICATION_SUBSCRIBER WHERE UUID= ?";
 
+    }
+
+    public static class RevokedJWTConstants {
+
+        public static final String ADD_JWT_SIGNATURE = "INSERT INTO AM_REVOKED_JWT (UUID, SIGNATURE," +
+                "EXPIRY_TIMESTAMP, TENANT_DOMAIN) VALUES(?,?, ?, ?)";
+        public static final String DELETE_REVOKED_JWT = "DELETE FROM AM_REVOKED_JWT WHERE EXPIRY_TIMESTAMP < ?";
     }
 }

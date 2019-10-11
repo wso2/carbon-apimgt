@@ -15,17 +15,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { FormattedMessage } from 'react-intl';
 import EditIcon from '@material-ui/icons/Edit';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import Box from '@material-ui/core/Box';
+import API from 'AppData/api';
 
 import Resources from 'AppComponents/Apis/Details/Resources/Resources';
+import APIRateLimiting from '../Resources/components/APIRateLimiting';
 
 /**
  *
@@ -35,7 +38,26 @@ import Resources from 'AppComponents/Apis/Details/Resources/Resources';
  * @returns
  */
 export default function APIProductOperations() {
-    const [api] = useAPI();
+    const [api, updateAPI] = useAPI();
+    const [apiThrottlingPolicy, setApiThrottlingPolicy] = useState(api.apiThrottlingPolicy);
+    const [operationRateLimits, setOperationRateLimits] = useState([]);
+    const [isSaving, setIsSaving] = useState(false);
+    useEffect(() => {
+        // Fetch API level throttling policies only when the page get mounted for the first time `componentDidMount`
+        API.policies('api').then((response) => {
+            setOperationRateLimits(response.body.list);
+        });
+        // TODO: need to handle the error cases through catch ~tmkb
+    }, []);
+
+    /**
+     *
+     *
+     */
+    function saveChanges() {
+        setIsSaving(true);
+        updateAPI({ apiThrottlingPolicy }).finally(() => setIsSaving(false));
+    }
     return (
         <Grid container spacing={3}>
             <Grid item md={12}>
@@ -55,14 +77,38 @@ export default function APIProductOperations() {
                 </Typography>
             </Grid>
             <Grid item md={12}>
+                <APIRateLimiting
+                    operationRateLimits={operationRateLimits}
+                    api={api}
+                    value={apiThrottlingPolicy}
+                    onChange={setApiThrottlingPolicy}
+                />
+            </Grid>
+            <Grid item md={12}>
+                <Box ml={1}>
+                    <Button onClick={saveChanges} disabled={false} variant='contained' size='small' color='primary'>
+                        Save
+                        {isSaving && <CircularProgress size={24} />}
+                    </Button>
+                    <Box display='inline' ml={1}>
+                        <Button
+                            size='small'
+                            variant='outlined'
+                            onClick={() => setApiThrottlingPolicy(api.apiThrottlingPolicy)}
+                        >
+                            Rest
+                        </Button>
+                    </Box>
+                </Box>
+            </Grid>
+            <Grid item md={12}>
                 <Resources
                     hideAPIDefinitionLink
-                    disableAddOperation
-                    operationProps={{
-                        disableUpdate: true,
-                        disableDelete: true,
-                    }}
+                    disableUpdate
+                    disableRateLimiting
+                    operationProps={{ disableDelete: true }}
                     disableMultiSelect
+                    disableAddOperation
                 />
             </Grid>
         </Grid>

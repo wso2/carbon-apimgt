@@ -21,7 +21,6 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import EditRounded from '@material-ui/icons/EditRounded';
-import CloudUploadRounded from '@material-ui/icons/CloudUploadRounded';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
@@ -40,12 +39,10 @@ import yaml from 'js-yaml';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api.js';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
-
-import Dropzone from 'react-dropzone';
 import json2yaml from 'json2yaml';
-import SwaggerParser from 'swagger-parser';
 import { isRestricted } from 'AppData/AuthManager';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
+import ImportDefinition from './ImportDefinition';
 
 const EditorDialog = React.lazy(() => import('./SwaggerEditorDrawer'));
 
@@ -100,7 +97,6 @@ class APIDefinition extends React.Component {
             format: null,
             convertTo: null,
         };
-        this.onDrop = this.onDrop.bind(this);
         this.handleNo = this.handleNo.bind(this);
         this.handleOk = this.handleOk.bind(this);
         this.openEditor = this.openEditor.bind(this);
@@ -111,9 +107,6 @@ class APIDefinition extends React.Component {
         this.onChangeFormatClick = this.onChangeFormatClick.bind(this);
         this.openUpdateConfirmation = this.openUpdateConfirmation.bind(this);
         this.updateSwaggerDefinition = this.updateSwaggerDefinition.bind(this);
-        this.validateAndUpdateApiDefinition = this.validateAndUpdateApiDefinition.bind(this);
-        this.validateAndImportSchema = this.validateAndImportSchema.bind(this);
-        this.updateGraphQLAPIDefinition = this.updateGraphQLAPIDefinition.bind(this);
     }
 
     /**
@@ -157,33 +150,6 @@ class APIDefinition extends React.Component {
     }
 
     /**
-     * Handles the file upload.
-     * @param {object[]} files The uploaded file object array
-     * */
-    onDrop(files) {
-        const file = files[0];
-        const { intl } = this.props;
-        const { graphQL } = this.state;
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const { result } = e.target;
-                if (graphQL != null) {
-                    this.validateAndImportSchema(file);
-                } else {
-                    this.validateAndUpdateApiDefinition(result);
-                }
-            };
-            reader.readAsText(file);
-        } else {
-            Alert.error(intl.formatMessage({
-                id: 'Apis.Details.APIDefinition.APIDefinition.unsupported.file.type',
-                defaultMessage: 'Unsupported File Type.',
-            }));
-        }
-    }
-
-    /**
      * Toggle the format of the api definition.
      * JSON -> YAML, YAML -> JSON
      */
@@ -198,6 +164,14 @@ class APIDefinition extends React.Component {
         this.setState({ swagger: formattedString, format: convertTo, convertTo: format });
     }
 
+    setSchemaDefinition=(swagger, graphQL) => {
+        if (swagger) {
+            this.setState({ swagger });
+        }
+        if (graphQL) {
+            this.setState({ graphQL });
+        }
+    }
     /**
      * Util function to get the format which the definition can be converted to.
      * @param {*} format : The current format of definition.
@@ -205,82 +179,6 @@ class APIDefinition extends React.Component {
      */
     getConvertToFormat(format) {
         return format === 'json' ? 'yaml' : 'json';
-    }
-
-    /**
-     * Validates the given graphQL api schema.
-     * @param {*}  file graphQL schema.
-     */
-    validateAndImportSchema(file) {
-        const { api, intl } = this.props;
-        const promisedValidation = api.validateGraphQLFile(file);
-        promisedValidation
-            .then((response) => {
-                const { isValid, graphQLInfo } = response.obj;
-                if (isValid === true) {
-                    api.operations = graphQLInfo.operations;
-                    this.updateGraphQLAPIDefinition(api, graphQLInfo.graphQLSchema.schemaDefinition);
-                }
-            })
-            .catch((err) => {
-                console.log(err);
-                Alert.error(intl.formatMessage({
-                    id: 'Error.while.validating.the.imported.graphQLSchema',
-                    defaultMessage: 'Error while validating imported schema',
-                }));
-            });
-    }
-
-    /**
-     * Update the graphQL api with its operation
-     * @param {*}  api
-     * @param {*}  graphQLInfo
-     */
-    updateGraphQLAPIDefinition(api, graphQLSchema) {
-        const { intl } = this.props;
-        const promisedAPI = api.updateGraphQLAPIDefinition(api.id, graphQLSchema);
-        promisedAPI
-            .then((response) => {
-                this.setState({ graphQL: response.data });
-                Alert.success(intl.formatMessage({
-                    id: 'Apis.Details.APIDefinition.APIDefinition.graphQLDefinition.updated.successfully',
-                    defaultMessage: 'Schema Definition Updated Successfully',
-                }));
-            })
-            .catch((err) => {
-                console.log(err);
-                Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.APIDefinition.APIDefinition.error.updating.graphQL.schema',
-                    defaultMessage: 'Error while updating graphQL schema',
-                }));
-            });
-    }
-
-    /**
-     * Validates the given api definition.
-     * @param {*} apiDefinition JSON/ YAML api definition.
-     */
-    validateAndUpdateApiDefinition(apiDefinition) {
-        const { intl } = this.props;
-        let swaggerObj = {};
-        let specFormat = null;
-        if (this.hasJsonStructure(apiDefinition)) {
-            swaggerObj = JSON.parse(apiDefinition);
-            specFormat = 'json';
-        } else {
-            swaggerObj = yaml.safeLoad(apiDefinition);
-            specFormat = 'yaml';
-        }
-        SwaggerParser.validate(swaggerObj, (err, api) => {
-            if (api) {
-                this.updateSwaggerDefinition(apiDefinition, specFormat, this.getConvertToFormat(specFormat));
-            } else {
-                Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.APIDefinition.APIDefinition.file.validation.failed',
-                    defaultMessage: 'API Definition file validation failed.',
-                }));
-            }
-        });
     }
 
     /**
@@ -459,31 +357,7 @@ class APIDefinition extends React.Component {
                                 />
                             </Button>
                         )}
-                        <Dropzone
-                            multiple={false}
-                            className={classes.dropzone}
-                            onDrop={(files) => {
-                                this.onDrop(files);
-                            }}
-                        >
-                            {({ getRootProps, getInputProps }) => (
-                                <div {...getRootProps()}>
-                                    <input {...getInputProps()} />
-                                    <Button
-                                        size='small'
-                                        className={classes.button}
-                                        disabled={isRestricted(['apim:api_create'], api)}
-                                    >
-                                        <CloudUploadRounded className={classes.buttonIcon} />
-                                        <FormattedMessage
-                                            id='Apis.Details.APIDefinition.APIDefinition.import.definition'
-                                            defaultMessage='Import Definition'
-                                        />
-                                    </Button>
-                                </div>
-                            )}
-                        </Dropzone>
-
+                        <ImportDefinition setSchemaDefinition={this.setSchemaDefinition} />
                         <a className={classes.downloadLink} href={downloadLink} download={fileName}>
                             <Button size='small' className={classes.button}>
                                 <CloudDownloadRounded className={classes.buttonIcon} />

@@ -117,7 +117,7 @@ class AuthManager {
                 let username;
                 if (data.active) {
                     const currentEnv = Utils.getCurrentEnvironment();
-                    if (data.username.includes("@carbon.super")) {
+                    if (data.username.includes('@carbon.super')) {
                         username = data.username.replace('@carbon.super', '');
                     } else {
                         username = data.username;
@@ -133,6 +133,7 @@ class AuthManager {
                     }
                 } else {
                     console.warn('User with ' + partialToken + ' is not active!');
+                    throw new Error(CONSTS.errorCodes.INVALID_TOKEN);
                 }
                 return user;
             });

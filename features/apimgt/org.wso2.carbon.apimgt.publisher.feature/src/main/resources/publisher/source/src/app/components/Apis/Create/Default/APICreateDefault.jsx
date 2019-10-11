@@ -27,6 +27,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import API from 'AppData/api';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
+import Banner from 'AppComponents/Shared/Banner';
 
 import APICreateBase from 'AppComponents/Apis/Create/Components/APICreateBase';
 import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm';
@@ -42,6 +43,9 @@ import APIProduct from 'AppData/APIProduct';
 function APICreateDefault(props) {
     const { isWebSocket, isAPIProduct, history } = props;
     const { settings } = useAppContext();
+    const [pageError, setPageError] = useState(null);
+    const [isCreating, setIsCreating] = useState();
+    const [isPublishing, setIsPublishing] = useState(false);
     /**
      *
      * Reduce the events triggered from API input fields to current state
@@ -60,10 +64,11 @@ function APICreateDefault(props) {
                 return currentState;
         }
     }
-
     const [apiInputs, inputsDispatcher] = useReducer(apiInputsReducer, {
         formValidity: false,
     });
+    const isPublishable = apiInputs.endpoint && apiInputs.policies && apiInputs.policies.length !== 0;
+    const isAPICreateDisabled = !apiInputs.isFormValid || isCreating || isPublishing;
 
     /**
      *
@@ -88,17 +93,17 @@ function APICreateDefault(props) {
         });
     }
 
-    const [isCreating, setCreating] = useState();
     /**
      *
      *
      * @param {*} params
      */
     function createAPI() {
-        setCreating(true);
+        setIsCreating(true);
         const {
             name, version, context, endpoint, policies,
         } = apiInputs;
+        let promisedCreatedAPI;
         const apiData = {
             name,
             version,
@@ -122,38 +127,84 @@ function APICreateDefault(props) {
         }
         if (isAPIProduct) {
             const newAPIProduct = new APIProduct(apiData);
-            newAPIProduct
+            promisedCreatedAPI = newAPIProduct
                 .saveProduct(apiData)
                 .then((apiProduct) => {
                     Alert.info('API Product created successfully');
                     history.push(`/api-products/${apiProduct.id}/overview`);
+                    return apiProduct;
                 })
                 .catch((error) => {
                     if (error.response) {
                         Alert.error(error.response.body.description);
+                        setPageError(error.response.body);
                     } else {
-                        Alert.error('Something went wrong while adding the API Product');
+                        // TODO add i18n ~tmkb
+                        const message = 'Something went wrong while adding the API Product';
+                        Alert.error(message);
+                        setPageError(message);
                     }
-                })
-                .finally(() => setCreating(false));
+                });
         } else {
             const newAPI = new API(apiData);
-            newAPI
+            promisedCreatedAPI = newAPI
                 .save()
                 .then((api) => {
                     Alert.info('API created successfully');
+                    return api;
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        Alert.error(error.response.body.description);
+                        setPageError(error.response.body);
+                    } else {
+                        const message = 'Something went wrong while adding the API';
+                        Alert.error(message);
+                        setPageError(message);
+                    }
+                    console.error(error);
+                });
+        }
+        return promisedCreatedAPI.finally(() => setIsCreating(false));
+    }
+
+    /**
+     *
+     *
+     */
+    function createAndPublish() {
+        setIsPublishing(true);
+        createAPI().then(api =>
+            api
+                .publish()
+                .then(() => {
+                    Alert.info('API published successfully');
                     history.push(`/apis/${api.id}/overview`);
                 })
                 .catch((error) => {
                     if (error.response) {
                         Alert.error(error.response.body.description);
+                        setPageError(error.response.body);
                     } else {
-                        Alert.error('Something went wrong while adding the API');
+                        const message = 'Something went wrong while publising the API';
+                        Alert.error(message);
+                        setPageError(message);
                     }
                     console.error(error);
                 })
-                .finally(() => setCreating(false));
-        }
+                .finally(() => {
+                    setIsPublishing(false);
+                }));
+    }
+
+    /**
+     *
+     *
+     */
+    function createAPIOnly() {
+        createAPI().then((api) => {
+            history.push(`/apis/${api.id}/overview`);
+        });
     }
     let pageTitle = (
         <React.Fragment>
@@ -217,13 +268,18 @@ function APICreateDefault(props) {
     }
 
     return (
-        <APICreateBase
-            title={pageTitle}
-        >
-            <Grid container spacing={3}>
-                <Grid item md={12} />
-                <Grid item md={1} />
-                <Grid item md={11}>
+        <APICreateBase title={pageTitle}>
+            <Grid container direction='row' justify='center' alignItems='center' spacing={3}>
+                {/* Page error banner */}
+                {pageError && (
+                    <Grid item xs={11}>
+                        <Banner disableActions dense paperProps={{ elevation: 1 }} type='error' message={pageError} />
+                    </Grid>
+                )}
+                {/* end of Page error banner */}
+                <Grid item xs={12} />
+                <Grid item md={1} xs={0} />
+                <Grid item md={11} xs={12}>
                     <DefaultAPIForm
                         onValidate={handleOnValidate}
                         onChange={handleOnChange}
@@ -231,17 +287,30 @@ function APICreateDefault(props) {
                         isAPIProduct={isAPIProduct}
                     />
                 </Grid>
-                <Grid item md={1} />
-                <Grid item md={9}>
+                <Grid item md={1} xs={0} />
+                <Grid item md={11} xs={12}>
                     <Grid container direction='row' justify='flex-start' alignItems='center' spacing={2}>
                         <Grid item>
                             <Button
                                 variant='contained'
                                 color='primary'
-                                disabled={!apiInputs.isFormValid || isCreating}
-                                onClick={createAPI}
+                                disabled={isAPICreateDisabled}
+                                onClick={createAPIOnly}
                             >
-                                Create {isCreating && <CircularProgress size={24} />}
+                                Create {isCreating && !isPublishing && <CircularProgress size={24} />}
+                            </Button>
+                        </Grid>
+                        <Grid item>
+                            <Button
+                                variant='contained'
+                                color='primary'
+                                disabled={!isPublishable || isAPICreateDisabled}
+                                onClick={createAndPublish}
+                            >
+                                {!isPublishing && 'Create & Publish'}
+                                {isPublishing && <CircularProgress size={24} />}
+                                {isCreating && isPublishing && 'Creating API . . .'}
+                                {!isCreating && isPublishing && 'Publishing API . . .'}
                             </Button>
                         </Grid>
                         <Grid item>

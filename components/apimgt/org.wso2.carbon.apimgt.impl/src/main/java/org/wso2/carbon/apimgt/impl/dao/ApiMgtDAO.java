@@ -131,9 +131,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -612,7 +614,7 @@ public class ApiMgtDAO {
                 monetizationUsagePublishInfo.setState(rs.getString("STATE"));
                 monetizationUsagePublishInfo.setStatus(rs.getString("STATUS"));
                 monetizationUsagePublishInfo.setStartedTime(rs.getLong("STARTED_TIME"));
-                monetizationUsagePublishInfo.setLastPublishTime(rs.getLong("LAST_PUBLISHED_TIME"));
+                monetizationUsagePublishInfo.setLastPublishTime(rs.getLong("PUBLISHED_TIME"));
                 return monetizationUsagePublishInfo;
             }
         } catch (SQLException e) {
@@ -7434,6 +7436,81 @@ public class ApiMgtDAO {
         return urlMappings;
     }
 
+    public Set<URITemplate> getURITemplatesOfAPI(APIIdentifier identifier, String productionURL, String sandboxURL)
+            throws APIManagementException {
+        Map<String, URITemplate> uriTemplates = new HashMap<>();
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+            PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_SQL)) {
+            ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            ps.setString(2, identifier.getName());
+            ps.setString(3, identifier.getVersion());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String urlPattern = rs.getString("URL_PATTERN");
+                    String verb = rs.getString("HTTP_METHOD");
+
+                    String key = urlPattern + verb;
+
+                    URITemplate uriTemplate = uriTemplates.get(key);
+
+                    if (uriTemplate != null) {
+                        Optional<APIProductIdentifier> productId = getProductIdIfExists(rs);
+                        if (productId.isPresent()) {
+                            uriTemplate.addUsedByProduct(productId.get());
+                        }
+                    } else {
+                        uriTemplate = new URITemplate();
+                        uriTemplate.setUriTemplate(urlPattern);
+                        uriTemplate.setHTTPVerb(verb);
+                        uriTemplate.setHttpVerbs(verb);
+                        String authType = rs.getString("AUTH_SCHEME");
+                        String throttlingTier = rs.getString("THROTTLING_TIER");
+                        uriTemplate.setAuthType(authType);
+                        uriTemplate.setAuthTypes(authType);
+                        uriTemplate.setThrottlingTier(throttlingTier);
+                        uriTemplate.setThrottlingTiers(throttlingTier);
+                        uriTemplate.setResourceURI(productionURL);
+                        uriTemplate.setResourceSandboxURI(sandboxURL);
+                        InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
+                        if (mediationScriptBlob != null) {
+                            String script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+                            uriTemplate.setMediationScript(script);
+                            uriTemplate.setMediationScripts(verb, script);
+                        }
+
+                        Optional<APIProductIdentifier> productId = getProductIdIfExists(rs);
+                        if (productId.isPresent()) {
+                            uriTemplate.addUsedByProduct(productId.get());
+                        }
+
+                        uriTemplates.put(key, uriTemplate);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get URI Templates of API" + identifier, e);
+        }
+
+        return new HashSet<>(uriTemplates.values());
+    }
+
+    private Optional<APIProductIdentifier> getProductIdIfExists(ResultSet rs) throws SQLException {
+        String productProvider = rs.getString("API_PRODUCT_PROVIDER");
+
+        if (rs.wasNull()) {
+            return Optional.empty();
+        }
+
+        String productName = rs.getString("API_PRODUCT_NAME");
+        String productVersion = rs.getString("API_PRODUCT_VERSION");
+
+        APIProductIdentifier productIdentifier = new APIProductIdentifier
+                (productProvider, productName, productVersion);
+
+        return Optional.of(productIdentifier);
+    }
+
     // This should be only used only when Token Partitioning is enabled.
     public String getConsumerKeyForTokenWhenTokenPartitioningEnabled(String accessToken) throws APIManagementException {
 
@@ -14038,125 +14115,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Check whether a product with the given name and provider exists in the tenant domain
-     * @param productName
-     * @param provider
-     * @param tenantDomain
-     * @return boolean
-     * @throws APIManagementException
-     */
-    public boolean isProductExist(String productName, String provider, String tenantDomain)
-            throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement prepStmtGetAPIProduct = null;
-        boolean isExist = false;
-        
-        ResultSet rs = null;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();   
-            String queryGetAPIProduct = SQLConstants.IS_API_PRODUCT_EXIST;
-            prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
-            prepStmtGetAPIProduct.setString(1, provider);
-            prepStmtGetAPIProduct.setString(2, productName);
-            prepStmtGetAPIProduct.setString(3, tenantDomain);
-            rs = prepStmtGetAPIProduct.executeQuery();
-
-            if (rs.next()) {
-                isExist = true;
-            }
-
-        } catch (SQLException e) {
-            handleException("Error while retrieving api product for tenant " + tenantDomain , e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, connection, rs);
-        }
-        return isExist;
-    }
-    
-    /**
-     * Get product definition for uuid. 
-     * @param uuid
-     * @return APIProduct product object with visibility information
-     * @throws APIManagementException
-     */
-    public APIProduct getProductDefinition(String uuid) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement prepStmtGetAPIProduct = null;
-        String content = "";
-        APIProduct product = null;
-        ResultSet rs = null;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            String queryGetAPIProduct = SQLConstants.GET_PRODUCT_RESOURCE_BY_COLUMN.replace("{column}", "DEFINITION");
-            prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
-            prepStmtGetAPIProduct.setString(1, uuid);
-            rs = prepStmtGetAPIProduct.executeQuery();
-
-            if (rs.next()) {
-                InputStream inputStream = rs.getBinaryStream("DEFINITION");
-                if (inputStream != null) {
-                    content = APIMgtDBUtil.getStringFromInputStream(inputStream);
-                    product = new APIProduct();
-                    product.setUuid(uuid);
-                    product.setDefinition(content);
-                    //setting visibility 
-                    product.setVisibility(rs.getString("VISIBILITY"));
-                    product.setVisibleRoles(rs.getString("VISIBILE_ROLES"));                  
-                }
-            }
-
-        } catch (SQLException e) {
-            handleException("Error while retrieving definition for product id " + uuid, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, connection, rs);
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("getResourceAsStringFromProductTable() : content for uuid " + uuid
-                    + " : " + content);
-        }
-        return product;
-    }
-    
-    /**
-     * Remove data to the given column as a blob in the api product table
-     * @param uuid
-     * @param columnName
-     * @throws APIManagementException
-     */
-    public void removeStringDataFromProductTable(String uuid, String columnName) throws APIManagementException {
-        updateStringDataToProductTable(uuid, columnName, "");
-    }
-    
-    /**
-     * Update string data in the given column as a blob in the api product table
-     * @param uuid uuid
-     * @param columnName column name
-     * @param data string data
-     * @throws APIManagementException
-     */
-    public void updateStringDataToProductTable(String uuid, String columnName, String data) throws APIManagementException {
-        Connection conn = null;
-        PreparedStatement addStatement = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-            String addQuery = SQLConstants.UPDATE_BLOB_API_PRODUCT_BY_COLUMN.replace("{column}", columnName);
-            addStatement = conn.prepareStatement(addQuery);
-            addStatement.setBlob(1, new ByteArrayInputStream(data.getBytes()));
-            addStatement.setString(2, uuid);
-            addStatement.executeUpdate();
-
-            conn.commit();
-        } catch (SQLException e) {
-            handleException("Failed to update data in column : " + columnName + " for product " + uuid, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(addStatement, conn, null);
-        }
-    }
-
-    /**
      * get resource mapping of the api product
      *
      * @param productIdentifier api product identifier
@@ -14288,6 +14246,49 @@ public class ApiMgtDAO {
             handleException("Failed to delete alert email data.", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, rs);
+        }
+    }
+
+    /**
+     * Persist revoked jwt signatures to database.
+     *
+     * @param jwtSignature signature of jwt token.
+     * @param tenantDomain tenant domain of the jwt subject.
+     * @param expiryTime   expiry time of the token.
+     */
+    public void addRevokedJWTSignature(String jwtSignature, Long expiryTime, String tenantDomain) throws APIManagementException {
+
+        String addJwtSignature = SQLConstants.RevokedJWTConstants.ADD_JWT_SIGNATURE;
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement
+                     (addJwtSignature)) {
+            conn.setAutoCommit(false);
+            ps.setString(1, UUID.randomUUID().toString());
+            ps.setString(2, jwtSignature);
+            ps.setLong(3, expiryTime);
+            ps.setString(4, tenantDomain);
+            ps.execute();
+            conn.commit();
+        } catch (SQLException e) {
+            handleException("Error in adding revoked jwt signature to database : " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Removes expired JWTs from revoke table.
+     * @throws APIManagementException
+     */
+    public void removeExpiredJWTs() throws APIManagementException {
+
+        String deleteQuery = SQLConstants.RevokedJWTConstants.DELETE_REVOKED_JWT;
+        try (Connection connection = APIMgtDBUtil.getConnection(); PreparedStatement ps =
+                connection.prepareStatement(deleteQuery)) {
+            connection.setAutoCommit(false);
+            ps.setLong(1, System.currentTimeMillis() / 1000);
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while deleting expired JWTs from revoke table.", e);
         }
     }
 }

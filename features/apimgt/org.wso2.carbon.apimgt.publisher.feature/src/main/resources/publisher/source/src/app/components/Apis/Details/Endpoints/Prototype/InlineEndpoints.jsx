@@ -21,8 +21,9 @@ import PropTypes from 'prop-types';
 import GenericResource from 'AppComponents/Apis/Details/Endpoints/Prototype/GenericResource';
 
 const xMediationScriptProperty = 'x-mediation-script';
+
 const defaultScript = '/* mc.setProperty("CONTENT_TYPE", "application/json");\n' +
-    'mc.setPayloadJSON("{ "data" : "sample JSON"}");*/\n' +
+    ' mc.setPayloadJSON("{ "data" : "sample JSON"}");*/\n' +
     '/*Uncomment the above comment block to send a sample response.*/';
 
 /**
@@ -44,7 +45,7 @@ function InlineEndpoints(props) {
      * */
     const onScriptChange = (value, path, method) => {
         const tmpPaths = JSON.parse(JSON.stringify(paths));
-        tmpPaths[path][method][xMediationScriptProperty] = value;
+        tmpPaths[path][method][xMediationScriptProperty] = value.trim();
         updatePaths(tmpPaths);
     };
     return (

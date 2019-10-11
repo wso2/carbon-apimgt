@@ -126,10 +126,11 @@ class Scopes extends React.Component {
                         return false;
                     },
                     filter: false,
+                    sort: false,
                     label: (
                         <FormattedMessage
                             id='Apis.Details.Scopes.Scopes.table.header.roles'
-                            defaultMessage='Applying Roles'
+                            defaultMessage='Roles'
                         />
                     ),
                 },
@@ -151,6 +152,7 @@ class Scopes extends React.Component {
                         return false;
                     },
                     filter: false,
+                    sort: false,
                     label: (
                         <FormattedMessage
                             id='Apis.Details.Scopes.Scopes.table.header.usages'
@@ -202,6 +204,7 @@ class Scopes extends React.Component {
                         return false;
                     },
                     filter: false,
+                    sort: false,
                     label: (
                         <FormattedMessage
                             id='Apis.Details.Scopes.Scopes.table.header.actions'
@@ -216,6 +219,7 @@ class Scopes extends React.Component {
             selectableRows: false,
             title: false,
             filter: false,
+            sort: false,
             print: false,
             download: false,
             viewColumns: false,

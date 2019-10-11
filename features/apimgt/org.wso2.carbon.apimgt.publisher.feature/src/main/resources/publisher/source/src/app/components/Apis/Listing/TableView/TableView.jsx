@@ -125,6 +125,11 @@ class TableView extends React.Component {
                         backgroundColor: 'transparent',
                     },
                 },
+                MUIDataTableHeadCell: {
+                    fixedHeader: {
+                        zIndex: -1,
+                    },
+                },
             },
         };
         if (listType === 'grid') {
@@ -254,7 +259,7 @@ class TableView extends React.Component {
                 name: 'image',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.image',
-                    defaultMessage: 'image',
+                    defaultMessage: 'Image',
                 }),
                 options: {
                     customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
@@ -272,7 +277,7 @@ class TableView extends React.Component {
                 name: 'name',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.name',
-                    defaultMessage: 'name',
+                    defaultMessage: 'Name',
                 }),
                 options: {
                     customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
@@ -309,7 +314,7 @@ class TableView extends React.Component {
                 name: 'version',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.version',
-                    defaultMessage: 'version',
+                    defaultMessage: 'Version',
                 }),
                 options: {
                     sort: false,
@@ -319,7 +324,7 @@ class TableView extends React.Component {
                 name: 'context',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.context',
-                    defaultMessage: 'context',
+                    defaultMessage: 'Context',
                 }),
                 options: {
                     sort: false,
@@ -329,7 +334,7 @@ class TableView extends React.Component {
                 name: 'provider',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.provider',
-                    defaultMessage: 'provider',
+                    defaultMessage: 'Provider',
                 }),
                 options: {
                     sort: false,
@@ -395,7 +400,7 @@ class TableView extends React.Component {
         } else {
             options.customRowRender = null;
             options.title = true;
-            options.filter = true;
+            options.filter = false;
             options.print = true;
             options.download = true;
             options.viewColumns = true;

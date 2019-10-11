@@ -46,14 +46,14 @@ const useStyles = makeStyles(theme => ({
         marginLeft: theme.spacing(0.5),
     },
     actionSpace: {
-        margin: 'auto',
+        margin: '-7px auto',
     },
     subHeading: {
         fontSize: '1rem',
         fontWeight: 400,
         margin: 0,
         display: 'inline-flex',
-        lineHeight: '38px',
+        lineHeight: 1.5,
     },
 }));
 
@@ -130,6 +130,7 @@ export default function CORSConfiguration(props) {
                                         <Grid container>
                                             <Grid item md={12}>
                                                 <FormControlLabel
+                                                    style={{ display: 'flex' }}
                                                     control={
                                                         <Checkbox
                                                             disabled={isRestricted(['apim:api_create'], apiFromContext)}
@@ -141,6 +142,7 @@ export default function CORSConfiguration(props) {
                                                                 })
                                                             }
                                                             value='*'
+                                                            color='primary'
                                                         />
                                                     }
                                                     label='Allow All Origins'
@@ -149,7 +151,7 @@ export default function CORSConfiguration(props) {
                                             {!isAllowAllOrigins && (
                                                 <Grid item md={12}>
                                                     <ChipInput
-                                                        style={{ marginBottom: 40 }}
+                                                        style={{ marginBottom: 40, display: 'flex' }}
                                                         value={corsConfiguration.accessControlAllowOrigins}
                                                         helperText={
                                                             <FormattedMessage
@@ -200,7 +202,7 @@ export default function CORSConfiguration(props) {
                                     </Grid>
                                     <Grid item md={12}>
                                         <ChipInput
-                                            style={{ marginBottom: 40 }}
+                                            style={{ marginBottom: 40, display: 'flex' }}
                                             value={corsConfiguration.accessControlAllowHeaders}
                                             disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                             helperText={
@@ -244,7 +246,7 @@ export default function CORSConfiguration(props) {
                                     </Grid>
                                     <Grid item md={12}>
                                         <ChipInput
-                                            style={{ marginBottom: 40 }}
+                                            style={{ marginBottom: 40, display: 'flex' }}
                                             value={corsConfiguration.accessControlAllowMethods}
                                             disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                             helperText={
@@ -289,6 +291,7 @@ export default function CORSConfiguration(props) {
                                                             value: checked,
                                                         })
                                                     }
+                                                    color='primary'
                                                 />
                                             }
                                             label={

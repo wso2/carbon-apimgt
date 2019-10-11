@@ -23,7 +23,7 @@ import MUIDataTable from 'mui-datatables';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import queryString from 'query-string';
 import API from 'AppData/api';
-import CONSTS from 'AppData/Constants';
+import { withTheme } from '@material-ui/styles';
 import Configurations from 'Config';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import Loading from 'AppComponents/Base/Loading/Loading';
@@ -68,7 +68,7 @@ class ApiTableView extends React.Component {
     }
 
     getMuiTheme = () => {
-        const { gridView } = this.props;
+        const { gridView, theme } = this.props;
         let themeAdditions = {};
         let muiTheme = {
             overrides: {
@@ -92,7 +92,20 @@ class ApiTableView extends React.Component {
                             paddingRight: 10,
                         },
                         '& tr:nth-child(even)': {
-                            backgroundColor: '#fff',
+                            backgroundColor: theme.custom.listView.tableBodyEvenBackgrund,
+                            '& td': {
+                                color: theme.palette.getContrastText(theme.custom.listView.tableBodyEvenBackgrund),
+                            }
+                        },
+                        '& tr:nth-child(odd)': {
+                            backgroundColor: theme.custom.listView.tableBodyOddBackgrund,
+                            '& td': {
+                                color: theme.palette.getContrastText(theme.custom.listView.tableBodyOddBackgrund),
+                            }
+                        },
+                        '& th': {
+                            backgroundColor: theme.custom.listView.tableHeadBackground,
+                            color: theme.palette.getContrastText(theme.custom.listView.tableHeadBackground),
                         },
                     },
                 },
@@ -112,7 +125,7 @@ class ApiTableView extends React.Component {
                             '& tbody': {
                                 display: 'flex',
                                 flexWrap: 'wrap',
-                                marginLeft: 40,
+                                marginLeft: 0,
                             },
                             '& thead': {
                                 display: 'none',
@@ -247,7 +260,7 @@ class ApiTableView extends React.Component {
                 name: 'name',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.name',
-                    defaultMessage: 'name',
+                    defaultMessage: 'Name',
                 }),
                 options: {
                     customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
@@ -287,14 +300,14 @@ class ApiTableView extends React.Component {
                 name: 'version',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.version',
-                    defaultMessage: 'version',
+                    defaultMessage: 'Version',
                 }),
             },
             {
                 name: 'context',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.context',
-                    defaultMessage: 'context',
+                    defaultMessage: 'Context',
                 }),
                 options: {
                     sort: false,
@@ -304,7 +317,7 @@ class ApiTableView extends React.Component {
                 name: 'provider',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.provider',
-                    defaultMessage: 'provider',
+                    defaultMessage: 'Provider',
                 }),
                 options: {
                     sort: false,
@@ -314,7 +327,7 @@ class ApiTableView extends React.Component {
                 name: 'type',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.type',
-                    defaultMessage: 'type',
+                    defaultMessage: 'Type',
                 }),
                 options: {
                     sort: false,
@@ -324,7 +337,7 @@ class ApiTableView extends React.Component {
                 name: 'rating',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.rating',
-                    defaultMessage: 'rating',
+                    defaultMessage: 'Rating',
                 }),
                 options: {
                     customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
@@ -404,6 +417,8 @@ class ApiTableView extends React.Component {
             options.download = false;
             options.viewColumns = false;
             options.customToolbar = false;
+        } else {
+            options.filter = false;
         }
         if (page === 0 && this.count <= rowsPerPage) {
             options.pagination = false;
@@ -424,4 +439,4 @@ class ApiTableView extends React.Component {
 
 ApiTableView.contextType = ApiContext;
 
-export default injectIntl(withStyles(styles)(ApiTableView));
+export default injectIntl(withTheme(withStyles(styles)(ApiTableView)));

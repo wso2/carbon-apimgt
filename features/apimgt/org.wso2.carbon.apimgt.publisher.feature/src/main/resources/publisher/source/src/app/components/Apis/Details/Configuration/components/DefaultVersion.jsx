@@ -66,7 +66,7 @@ export default function DefaultVersion(props) {
                             <FormControlLabel
                                 disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                 value
-                                control={<Radio />}
+                                control={<Radio color='primary' />}
                                 label={(
                                     <FormattedMessage
                                         id='Apis.Details.Configuration.Configuration.isdefault.yes'
@@ -77,7 +77,7 @@ export default function DefaultVersion(props) {
                             <FormControlLabel
                                 disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                 value={false}
-                                control={<Radio />}
+                                control={<Radio color='primary' />}
                                 label={(
                                     <FormattedMessage
                                         id='Apis.Details.Configuration.Configuration.isdefault.no'

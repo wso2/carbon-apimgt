@@ -21,9 +21,7 @@ import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
 import classNames from 'classnames';
 import Icon from '@material-ui/core/Icon';
-import {
-    ListItemIcon, List, withStyles, ListItem, ListItemText,
-} from '@material-ui/core';
+import { ListItemIcon, List, withStyles, ListItem, ListItemText } from '@material-ui/core';
 import CustomIcon from '../../Shared/CustomIcon';
 
 /**
@@ -42,7 +40,7 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.drawer),
     },
     listTextSmall: {
-        color: theme.palette.getContrastText(theme.palette.background.appBar),
+        color: theme.palette.getContrastText(theme.custom.appBar.background),
     },
     smallIcon: {
         marginRight: 5,
@@ -53,13 +51,13 @@ const styles = theme => ({
         height: 64,
     },
     selected: {
-        background: theme.palette.background.activeMenuItem,
+        background: theme.custom.appBar.activeBackground,
         alignItems: 'center',
         textDecoration: 'none',
-        color: theme.palette.getContrastText(theme.palette.background.activeMenuItem),
+        color: theme.palette.getContrastText(theme.custom.appBar.activeBackground),
     },
     selectedText: {
-        color: theme.palette.getContrastText(theme.palette.background.activeMenuItem),
+        color: theme.palette.getContrastText(theme.custom.appBar.activeBackground),
     },
 });
 /**
@@ -93,11 +91,11 @@ function GlobalNavBar(props) {
         ditectCurrentMenu(location);
     });
 
-    let strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
+    let strokeColor = theme.palette.getContrastText(theme.custom.leftMenu.background);
     let iconWidth = 32;
     if (smallView) {
         iconWidth = 16;
-        strokeColor = theme.palette.getContrastText(theme.palette.background.appBar);
+        strokeColor = theme.palette.getContrastText(theme.custom.appBar.background);
     }
     const linkTextClasses = classNames({ [classes.small]: smallView });
     return (
@@ -132,7 +130,7 @@ function GlobalNavBar(props) {
                     </Link>
                 ) }
             <Link
-                to={theme.custom.tagWiseMode ? '/api-groups' : '/apis'}
+                to={theme.custom.tagWiseMode ? '/api-groups' : '/'}
                 className={classNames({ [classes.selected]: selected === 'apis', [classes.links]: true })}
             >
                 <ListItem button>

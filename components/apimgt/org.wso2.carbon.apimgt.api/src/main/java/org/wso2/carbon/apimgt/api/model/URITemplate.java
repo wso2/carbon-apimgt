@@ -44,6 +44,7 @@ public class URITemplate implements Serializable{
     private Map<String, String> mediationScripts = new HashMap<String, String>();
     private ConditionGroupDTO[] conditionGroups;
     private int id;
+    private Set<APIProductIdentifier> usedByProducts = new HashSet<>();
 
     public ConditionGroupDTO[] getConditionGroups() {
         return conditionGroups;
@@ -379,5 +380,13 @@ public class URITemplate implements Serializable{
 
     public List<Scope> retrieveAllScopes() {
         return this.scopes;
+    }
+
+    public Set<APIProductIdentifier> retrieveUsedByProducts() {
+        return usedByProducts;
+    }
+
+    public void addUsedByProduct(APIProductIdentifier usedByProduct) {
+        usedByProducts.add(usedByProduct);
     }
 }

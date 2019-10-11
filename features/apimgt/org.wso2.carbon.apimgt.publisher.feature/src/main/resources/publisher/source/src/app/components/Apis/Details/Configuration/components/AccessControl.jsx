@@ -187,15 +187,13 @@ export default function AccessControl(props) {
                                 {'  '}
                                 <FormattedMessage
                                     id='Apis.Details.Configuration.components.AccessControl.tooltip.all.desc'
-                                    defaultMessage='The API is viewable, modifiable by all the publishers and
-                                    creators.'
+                                    defaultMessage='The API is viewable, modifiable by all the publishers and creators.'
                                 />
                                 <br />
                                 <br />
                                 <strong>
                                     <FormattedMessage
-                                        id='Apis.Details.Configuration.components.AccessControl.tooltip.
-                                        restrict'
+                                        id='Apis.Details.Configuration.components.AccessControl.tooltip.restrict'
                                         defaultMessage='Restricted by roles :'
                                     />
                                 </strong>

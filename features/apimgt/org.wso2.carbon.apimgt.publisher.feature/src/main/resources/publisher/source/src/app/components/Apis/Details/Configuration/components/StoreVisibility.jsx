@@ -35,6 +35,8 @@ import { red } from '@material-ui/core/colors/';
 import Alert from 'AppComponents/Shared/Alert';
 import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import CONSTS from 'AppData/Constants';
+import API from 'AppData/api';
 
 const useStyles = makeStyles(theme => ({
     tooltip: {
@@ -56,9 +58,17 @@ export default function StoreVisibility(props) {
     const [roleExists, setRoleExists] = useState(false);
     const { api, configDispatcher } = props;
     const [invalidRoles, setInvalidRoles] = useState([]);
-    const isPublic = api.visibility === 'PUBLIC';
+    const isRestrictedByRoles = api.visibility === 'RESTRICTED';
     const [apiFromContext] = useAPI();
     const classes = useStyles();
+    const restApi = new API();
+    const [tenants, setTenants] = useState([]);
+    useEffect(() => {
+        restApi.getTenantsByState(CONSTS.TENANT_STATE_ACTIVE)
+            .then((result) => {
+                setTenants(result.body.count);
+            });
+    }, []);
 
     useEffect(() => {
         if (invalidRoles.length === 0) {
@@ -146,6 +156,14 @@ export default function StoreVisibility(props) {
                             defaultMessage='Restrict by role(s)'
                         />
                     </MenuItem>
+                    {tenants !== 0 &&
+                        <MenuItem value='PRIVATE'>
+                            <FormattedMessage
+                                id='Apis.Details.Configuration.components.storeVisibility.dropdown.private'
+                                defaultMessage='Visible to my domain'
+                            />
+                        </MenuItem>
+                    }
                 </TextField>
                 <Tooltip
                     title={(
@@ -193,7 +211,7 @@ export default function StoreVisibility(props) {
                     <HelpOutline />
                 </Tooltip>
             </Box>
-            {!isPublic && (
+            {isRestrictedByRoles && (
                 <Box py={2}>
                     <ChipInput
                         fullWidth
