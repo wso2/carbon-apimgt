@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
-import { Grid, FormControlLabel, Radio, RadioGroup } from '@material-ui/core';
+import React, { useContext, useEffect, useState, useReducer } from 'react';
+import { Grid, CircularProgress } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl } from 'react-intl';
@@ -27,8 +27,7 @@ import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import cloneDeep from 'lodash.clonedeep';
 import { isRestricted } from 'AppData/AuthManager';
 import EndpointOverview from './EndpointOverview';
-import PrototypeEndpoints from './Prototype/PrototypeEndpoints';
-import { getEndpointConfigByImpl, createEndpointConfig } from './endpointUtils';
+import { createEndpointConfig, getEndpointTemplateByType } from './endpointUtils';
 
 const styles = theme => ({
     endpointTypesWrapper: {
@@ -63,7 +62,6 @@ const styles = theme => ({
     },
 });
 
-const endpointImplType = ['managed', 'PROTOTYPED'];
 const defaultSwagger = { paths: {} };
 
 /**
@@ -74,11 +72,80 @@ const defaultSwagger = { paths: {} };
 function Endpoints(props) {
     const { classes, intl } = props;
     const { api, updateAPI } = useContext(APIContext);
-    const [apiObject, setModifiedAPI] = useState(api);
-    const [endpointImplementation, setEndpointImplementation] = useState('');
     const [swagger, setSwagger] = useState(defaultSwagger);
-
     const [endpointValidity, setAPIEndpointsValid] = useState({ isValid: true, message: '' });
+    const [isUpdating, setUpdating] = useState(false);
+
+    const apiReducer = (initState, configAction) => {
+        const tmpEndpointConfig = cloneDeep(initState.endpointConfig);
+        const { action, value } = configAction;
+        switch (action) {
+            case 'production_endpoints': {
+                return { ...initState, endpointConfig: { ...tmpEndpointConfig, [action]: value } };
+            }
+            case 'sandbox_endpoints': {
+                return { ...initState, endpointConfig: { ...tmpEndpointConfig, [action]: value } };
+            }
+            case 'select_endpoint_category': {
+                return { ...initState, endpointConfig: { ...value } };
+            }
+            case 'set_lb_config': {
+                return { ...initState, endpointConfig: { ...value } };
+            }
+            case 'add_endpoint': {
+                return { ...initState, endpointConfig: { ...value } };
+            }
+            case 'set_advance_config': {
+                return { ...initState, endpointConfig: { ...value } };
+            }
+            case 'remove_endpoint': {
+                return { ...initState, endpointConfig: { ...value } };
+            }
+            case 'endpointImplementationType': { // set implementation status
+                const { endpointType, implementationType } = value;
+                const config = createEndpointConfig(endpointType);
+                if (endpointType === 'prototyped') {
+                    if (implementationType === 'mock') {
+                        return { ...initState, endpointConfig: config, endpointImplementationType: 'INLINE' };
+                    }
+                    return { ...initState, endpointConfig: config, endpointImplementationType: 'ENDPOINT' };
+                }
+                return { ...initState, endpointConfig: config };
+            }
+            case 'endpointSecurity': { // set endpoint security
+                return { ...initState, endpointSecurity: value };
+            }
+            case 'endpoint_type': { // set endpoint type
+                const config = getEndpointTemplateByType(
+                    value,
+                    tmpEndpointConfig.endpoint_type === 'address',
+                    tmpEndpointConfig,
+                );
+                return { ...initState, endpointConfig: { ...config } };
+            }
+            case 'set_inline': {
+                const { endpointImplementationType, endpointConfig } = value;
+                return { ...initState, endpointConfig, endpointImplementationType };
+            }
+            case 'set_prototyped': {
+                const { endpointImplementationType, endpointConfig } = value;
+                return {
+                    ...initState,
+                    endpointImplementationType,
+                    endpointConfig,
+                };
+            }
+            case 'select_endpoint_type': {
+                const { endpointImplementationType, endpointConfig } = value;
+                return { ...initState, endpointConfig, endpointImplementationType };
+            }
+            default: {
+                return initState;
+            }
+        }
+    };
+    const [apiObject, apiDispatcher] = useReducer(apiReducer, cloneDeep(api.toJSON()));
+
 
     /**
      * Method to update the api.
@@ -86,15 +153,21 @@ function Endpoints(props) {
      * @param {function} updateFunc The api update function.
      */
     const saveAPI = () => {
-        if (apiObject !== {}) {
-            updateAPI(apiObject);
-        }
-        if (Object.getOwnPropertyNames(defaultSwagger).length !== Object.getOwnPropertyNames(swagger).length) {
-            console.log('Updating swagger...');
-            api.updateSwagger(swagger).then((resp) => {
+        const { endpointConfig, endpointImplementationType, endpointSecurity } = apiObject;
+        setUpdating(true);
+        if (endpointImplementationType === 'INLINE') {
+            const promisedAPIUpdate = updateAPI({ endpointConfig, endpointImplementationType, endpointSecurity });
+            const promisedSwaggerUpdate = api.updateSwagger(swagger);
+            Promise.all([promisedAPIUpdate, promisedSwaggerUpdate]).then((resp) => {
                 console.log('success', resp);
             }).catch((err) => {
                 console.log(err);
+            }).finally(() => {
+                setUpdating(false);
+            });
+        } else {
+            updateAPI(apiObject).finally(() => {
+                setUpdating(false);
             });
         }
     };
@@ -106,9 +179,10 @@ function Endpoints(props) {
      * @param {string} implementationType The api implementation type (INLINE/ ENDPOINT)
      * @return {{isValid: boolean, message: string}} The endpoint validity information.
      * */
-    const validate = (endpointConfig, implementationType) => {
+    const validate = (implementationType) => {
+        const { endpointConfig } = apiObject;
         if (endpointConfig === null) {
-            return { isValid: false, message: '' };
+            return { isValid: true, message: '' };
         }
         const endpointType = endpointConfig.endpoint_type;
         if (endpointType === 'awslambda') {
@@ -122,15 +196,34 @@ function Endpoints(props) {
                 };
             }
         } else if (endpointType === 'load_balance') {
-            if (endpointConfig.production_endpoints[0].url === ''
-                    && endpointConfig.sandbox_endpoints[0].url === '') {
-                return {
-                    isValid: false,
-                    message: intl.formatMessage({
-                        id: 'Apis.Details.Endpoints.Endpoints.missing.endpoint.loadbalance',
-                        defaultMessage: 'Production or Sandbox Endpoints should not be empty',
-                    }),
-                };
+            /**
+             * Checklist:
+             *  production/ sandbox endpoints should be an array.
+             *  production/ sandbox endpoint [0] must be present.
+             * */
+            if (endpointConfig.production_endpoints && endpointConfig.production_endpoints.length > 0) {
+                if (!endpointConfig.production_endpoints[0].url ||
+                    (endpointConfig.production_endpoints[0].url && endpointConfig.production_endpoints[0].url === '')) {
+                    return {
+                        isValid: false,
+                        message: intl.formatMessage({
+                            id: 'Apis.Details.Endpoints.Endpoints.missing.prod.endpoint.loadbalance',
+                            defaultMessage: 'Default Production Endpoint should not be empty',
+                        }),
+                    };
+                }
+            }
+            if (endpointConfig.sandbox_endpoints && endpointConfig.sandbox_endpoints.length > 0) {
+                if (!endpointConfig.sandbox_endpoints[0].url ||
+                    (endpointConfig.sandbox_endpoints[0].url && endpointConfig.sandbox_endpoints[0].url === '')) {
+                    return {
+                        isValid: false,
+                        message: intl.formatMessage({
+                            id: 'Apis.Details.Endpoints.Endpoints.missing.sandbox.endpoint.loadbalance',
+                            defaultMessage: 'Default Sandbox Endpoint should not be empty',
+                        }),
+                    };
+                }
             }
         } else {
             let isValidEndpoint = false;
@@ -172,32 +265,18 @@ function Endpoints(props) {
     };
 
     useEffect(() => {
-        const { lifeCycleStatus } = api;
-        const apiClone = cloneDeep(api.toJSON());
-        setModifiedAPI(apiClone);
-        const implType = apiClone.endpointConfig === null ? undefined : apiClone.endpointConfig.implementation_status;
-        setEndpointImplementation(() => {
-            return lifeCycleStatus === 'PROTOTYPED' || implType === 'prototyped' ?
-                endpointImplType[1] : endpointImplType[0];
-        });
-    }, []);
-
-    useEffect(() => {
-        setAPIEndpointsValid(validate(apiObject.endpointConfig, apiObject.endpointImplementationType));
-    }, [apiObject]);
-
-    /**
-     * Get the swagger definition if the endpoint implementation type is 'prototyped'
-     * */
-    useEffect(() => {
-        if (endpointImplementation === 'PROTOTYPED') {
+        if (api.type !== 'WS') {
             api.getSwagger(apiObject.id).then((resp) => {
                 setSwagger(resp.obj);
             }).catch((err) => {
                 console.err(err);
             });
         }
-    }, [endpointImplementation]);
+    }, []);
+
+    useEffect(() => {
+        setAPIEndpointsValid(validate(apiObject.endpointImplementationType));
+    }, [apiObject]);
 
     /**
      * Method to update the swagger object.
@@ -209,45 +288,19 @@ function Endpoints(props) {
     };
 
     /**
-     * Method to handle the Managed/ Prototyped endpoint selection.
-     *
-     * @param {any} event The option change event.
-     * */
-    const handleEndpointManagedChange = (event) => {
-        const implOption = event.target.value;
-        setEndpointImplementation(implOption);
-        const tmpEndpointConfig = getEndpointConfigByImpl(implOption);
-        setModifiedAPI({ ...apiObject, endpointConfig: tmpEndpointConfig });
-    };
-
-    /**
      * Generate endpoint configuration based on the selected endpoint type and set to the api object.
      *
      * @param {string} endpointType The endpoint type.
      * @param {string} implementationType The endpoint implementationType. (Required only for prototype endpoints)
      * */
     const generateEndpointConfig = (endpointType, implementationType) => {
-        const config = createEndpointConfig(endpointType, implementationType);
-        setModifiedAPI(() => {
-            if (endpointType === 'prototyped') {
-                if (implementationType === 'mock') {
-                    return { ...apiObject, endpointConfig: config, endpointImplementationType: 'INLINE' };
-                }
-                return { ...apiObject, endpointConfig: config, endpointImplementationType: 'ENDPOINT' };
-            } else {
-                return { ...apiObject, endpointConfig: config };
-            }
-        });
-        setEndpointImplementation(() => {
-            return apiObject.lifeCycleStatus === 'PROTOTYPED' || endpointType === 'prototyped' ?
-                endpointImplType[1] : endpointImplType[0];
-        });
+        apiDispatcher({ action: 'endpointImplementationType', value: { endpointType, implementationType } });
     };
 
     return (
         <React.Fragment>
             {/* Since the api is set to the state in component did mount, check both the api and the apiObject. */}
-            {api.endpointConfig === null && apiObject.endpointConfig === null ?
+            {(api.endpointConfig === null && apiObject.endpointConfig === null) ?
                 <NewEndpointCreate generateEndpointConfig={generateEndpointConfig} /> :
                 <div className={classes.root}>
                     <Grid container spacing={16} className={classes.titleGrid}>
@@ -259,48 +312,17 @@ function Endpoints(props) {
                                 />
                             </Typography>
                         </Grid>
-                        {apiObject.type === 'HTTP' && apiObject.endpointConfig.type !== 'awslambda' ?
-                            <Grid item>
-                                <RadioGroup
-                                    aria-label='endpointImpl'
-                                    name='endpointImpl'
-                                    className={classes.radioGroup}
-                                    value={endpointImplementation}
-                                    onChange={handleEndpointManagedChange}
-                                >
-                                    <FormControlLabel
-                                        value='managed'
-                                        control={<Radio className={classes.implSelectRadio} />}
-                                        label={<FormattedMessage
-                                            id='Apis.Details.Endpoints.Endpoints.managed'
-                                            defaultMessage='Managed'
-                                        />}
-                                    />
-                                    <FormControlLabel
-                                        value='PROTOTYPED'
-                                        control={<Radio className={classes.implSelectRadio} />}
-                                        label={<FormattedMessage
-                                            id='Apis.Details.Endpoints.Endpoints.prototyped'
-                                            defaultMessage='Prototyped'
-                                        />}
-                                    />
-                                </RadioGroup>
-                            </Grid> : <div />
-                        }
                     </Grid>
                     <div>
                         <Grid container>
                             <Grid item xs={12} className={classes.endpointsContainer}>
-                                {endpointImplementation === 'PROTOTYPED' ?
-                                    <PrototypeEndpoints
-                                        implementation_method={apiObject.endpointConfig.implementation_status}
-                                        api={apiObject}
-                                        modifyAPI={setModifiedAPI}
-                                        swaggerDef={swagger}
-                                        updateSwagger={changeSwagger}
-                                    /> :
-                                    <EndpointOverview api={apiObject} onChangeAPI={setModifiedAPI} />
-                                }
+                                <EndpointOverview
+                                    swaggerDef={swagger}
+                                    updateSwagger={changeSwagger}
+                                    api={apiObject}
+                                    onChangeAPI={apiDispatcher}
+                                    endpointsDispatcher={apiDispatcher}
+                                />
                             </Grid>
                         </Grid>
                         {
@@ -321,12 +343,14 @@ function Endpoints(props) {
                         >
                             <Grid item>
                                 <Button
-                                    disabled={!endpointValidity.isValid || isRestricted(['apim:api_create'], api)}
+                                    disabled={isUpdating || !endpointValidity.isValid ||
+                                    isRestricted(['apim:api_create'], api)}
                                     type='submit'
                                     variant='contained'
                                     color='primary'
                                     onClick={() => saveAPI()}
                                 >
+                                    {isUpdating && <CircularProgress size={10} />}
                                     <FormattedMessage
                                         id='Apis.Details.Endpoints.Endpoints.save'
                                         defaultMessage='Save'
