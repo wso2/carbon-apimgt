@@ -1309,6 +1309,8 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_TRANSPORTS, apiProduct.getTransports());
             artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
                     APIUtil.getCorsConfigurationJsonFromDto(apiProduct.getCorsConfiguration()));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER, apiProduct.getAuthorizationHeader());
+
             //Validate if the API has an unsupported context before setting it in the artifact
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {

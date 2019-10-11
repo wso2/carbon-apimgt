@@ -426,6 +426,13 @@ public class OASParserUtil {
             // no need to populate if it is prototype API
             return null;
         }
+        // Validation for only one endpoint type is provided.
+        if (isProduction && !endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+            return null;
+        }
+        if (!isProduction && !endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+            return null;
+        }
         ObjectNode endpointResult = objectMapper.createObjectNode();
         String type = endpointConfig.getString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE);
         if (APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(type)) {

@@ -18,7 +18,7 @@
  */
 
     var log = new Log("Services login DCR request");
-    var site = require("/site/conf/site.json");
+    var site = require("/site/public/theme/defaultTheme.js").Configurations.app;
     include("/services/constants.jag");
     include("/services/jagg.jag");
 

@@ -663,6 +663,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             //attach micro-geteway labels
             assignLabelsToDTO(body, apiToUpdate);
 
+            //preserve monetization status in the update flow
+            apiProvider.configureMonetizationInAPIArtifact(originalAPI);
+
             if (!isWSAPI) {
                 String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
                 APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);

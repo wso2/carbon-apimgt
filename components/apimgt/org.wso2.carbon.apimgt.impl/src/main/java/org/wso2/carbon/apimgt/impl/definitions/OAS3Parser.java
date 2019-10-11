@@ -484,7 +484,7 @@ public class OAS3Parser extends APIDefinition {
             openAPI.addExtension(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS, prodEndpointObj);
         }
         Object sandEndpointObj = OASParserUtil.generateOASConfigForEndpoints(api, false);
-        if (prodEndpointObj != null) {
+        if (sandEndpointObj != null) {
             openAPI.addExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandEndpointObj);
         }
         openAPI.addExtension(APIConstants.X_WSO2_BASEPATH, api.getContext());

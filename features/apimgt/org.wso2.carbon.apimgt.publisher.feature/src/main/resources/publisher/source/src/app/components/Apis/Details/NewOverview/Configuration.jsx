@@ -30,6 +30,12 @@ import { capitalizeFirstLetter, upperCaseString, lowerCaseString } from 'AppData
 import APIContext from '../components/ApiContext';
 import Policies from './Policies';
 
+const HUMAN_READABLE_SCHEMES = {
+    oauth2: 'OAuth2',
+    basic_auth: 'Basic Auth',
+    mutualssl: 'Mutual TLS',
+    api_key: 'API Key',
+};
 /**
  *
  *
@@ -38,22 +44,13 @@ import Policies from './Policies';
  */
 function Configuration(props) {
     const { parentClasses } = props;
-    const securitySchemeMap = {
-        oauth2: 'OAuth2',
-        basic_auth: 'Basic Auth',
-        mutualssl: 'Mutual TLS',
-        api_key: 'API Key',
-    };
     const { api } = useContext(APIContext);
 
     return (
         <React.Fragment>
             <div>
                 <Typography variant='h5' component='h3' className={parentClasses.title}>
-                    <FormattedMessage
-                        id='Apis.Details.NewOverview.MetaData.config'
-                        defaultMessage='Configuration'
-                    />
+                    <FormattedMessage id='Apis.Details.NewOverview.MetaData.config' defaultMessage='Configuration' />
                 </Typography>
             </div>
             <Box p={1}>
@@ -100,20 +97,16 @@ function Configuration(props) {
                                     ))}
                                 </React.Fragment>
                             )}
-                            {!api.transport &&
-                            <React.Fragment>
-                                <Typography
-                                    component='p'
-                                    variant='body1'
-                                    className={parentClasses.notConfigured}
-                                >
-                                    <FormattedMessage
-                                        id='Apis.Details.NewOverview.MetaData.transports.not.set'
-                                        defaultMessage='-'
-                                    />
-                                </Typography>
-                            </React.Fragment>
-                            }
+                            {!api.transport && (
+                                <React.Fragment>
+                                    <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
+                                        <FormattedMessage
+                                            id='Apis.Details.NewOverview.MetaData.transports.not.set'
+                                            defaultMessage='-'
+                                        />
+                                    </Typography>
+                                </React.Fragment>
+                            )}
                         </Typography>
                     </Grid>
                     <Grid item xs={12} md={6} lg={4}>
@@ -147,30 +140,22 @@ function Configuration(props) {
                         <Typography component='p' variant='body1'>
                             {api.securityScheme && api.securityScheme.length !== 0 && (
                                 <React.Fragment>
-                                    {api.securityScheme.map((item, index) =>
-                                        (item.includes('mandatory') ? null : (
-                                            <span>
-                                                {securitySchemeMap[item]}
-                                                {api.apiType !== API.CONSTS.APIProduct &&
-                                                    (!(api.securityScheme[index + 1].includes('mandatory'))) && ', '}
-                                            </span>
-                                        )))}
+                                    {api.securityScheme
+                                        .filter(item => !item.includes('mandatory'))
+                                        .map(filteredItem => HUMAN_READABLE_SCHEMES[filteredItem])
+                                        .join(' , ')}
                                 </React.Fragment>
                             )}
-                            {!api.securityScheme &&
-                            <React.Fragment>
-                                <Typography
-                                    component='p'
-                                    variant='body1'
-                                    className={parentClasses.notConfigured}
-                                >
-                                    <FormattedMessage
-                                        id='Apis.Details.NewOverview.MetaData.securityScheme.not.set'
-                                        defaultMessage='-'
-                                    />
-                                </Typography>
-                            </React.Fragment>
-                            }
+                            {!api.securityScheme && (
+                                <React.Fragment>
+                                    <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
+                                        <FormattedMessage
+                                            id='Apis.Details.NewOverview.MetaData.securityScheme.not.set'
+                                            defaultMessage='-'
+                                        />
+                                    </Typography>
+                                </React.Fragment>
+                            )}
                         </Typography>
                     </Grid>
                     <Grid item xs={12} md={6} lg={4}>
@@ -214,10 +199,11 @@ function Configuration(props) {
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
-                            {api.accessControl &&
+                            {api.accessControl && (
                                 <React.Fragment>
                                     {capitalizeFirstLetter(lowerCaseString(api.accessControl))}
-                                </React.Fragment>}
+                                </React.Fragment>
+                            )}
                             {api.accessControl === 'RESTRICTED' && ' ( Visible to '}
                             {api.accessControl === 'RESTRICTED' && api.accessControlRoles.join()}
                             {api.accessControl === 'RESTRICTED' && ' ) '}
@@ -235,20 +221,16 @@ function Configuration(props) {
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
                             {api.workflowStatus && <React.Fragment>{api.workflowStatus}</React.Fragment>}
-                            {!api.workflowStatus &&
-                            <React.Fragment>
-                                <Typography
-                                    component='p'
-                                    variant='body1'
-                                    className={parentClasses.notConfigured}
-                                >
-                                    <FormattedMessage
-                                        id='Apis.Details.NewOverview.MetaData.workflowStatus.not.set'
-                                        defaultMessage='-'
-                                    />
-                                </Typography>
-                            </React.Fragment>
-                            }
+                            {!api.workflowStatus && (
+                                <React.Fragment>
+                                    <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
+                                        <FormattedMessage
+                                            id='Apis.Details.NewOverview.MetaData.workflowStatus.not.set'
+                                            defaultMessage='-'
+                                        />
+                                    </Typography>
+                                </React.Fragment>
+                            )}
                         </Typography>
                     </Grid>
                     <Grid item xs={12} md={6} lg={4}>
@@ -292,10 +274,15 @@ function Configuration(props) {
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
-                            {api.visibility &&
+                            {(api.visibility && api.visibility === 'PRIVATE') ?
+                                <React.Fragment>
+                                    {'Visible to my domain'}
+                                </React.Fragment>
+                                :
                                 <React.Fragment>
                                     {capitalizeFirstLetter(lowerCaseString(api.visibility))}
-                                </React.Fragment>}
+                                </React.Fragment>
+                            }
                             {api.visibility === 'RESTRICTED' && ' ( Visible to '}
                             {api.visibility === 'RESTRICTED' && api.visibleRoles.join()}
                             {api.visibility === 'RESTRICTED' && ' ) '}
@@ -313,15 +300,18 @@ function Configuration(props) {
                                 </Typography>
                             </Grid>
                             <Grid item xs={12} md={6} lg={8}>
-                                { api.tags && api.tags.map(tag =>
-                                    (<Chip
-                                        key={tag}
-                                        label={tag}
-                                        style={{
-                                            'font-size': 13, height: 20, marginRight: 5,
-                                        }}
-                                    />))
-                                }
+                                {api.tags &&
+                                    api.tags.map(tag => (
+                                        <Chip
+                                            key={tag}
+                                            label={tag}
+                                            style={{
+                                                'font-size': 13,
+                                                height: 20,
+                                                marginRight: 5,
+                                            }}
+                                        />
+                                    ))}
                                 {api.tags.length === 0 && (
                                     <React.Fragment>
                                         <Typography
