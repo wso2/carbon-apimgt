@@ -546,7 +546,7 @@ function EndpointOverview(props) {
                                                     defaultMessage={'Please upload a mediation sequence file to ' +
                                                     'Message Mediation Policies, which sets the endpoints.'}
                                                 />
-                                                <Link to={'/apis/' + api.id + '/mediation policies'}>
+                                                <Link to={'/apis/' + api.id + '/runtime-configuration'}>
                                                     <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
                                                 </Link>
                                             </Typography>
@@ -649,7 +649,7 @@ function EndpointOverview(props) {
                             <Typography variant='h4' align='left' className={classes.titleWrapper} gutterBottom>
                                 <FormattedMessage
                                     id='Apis.Details.Endpoints.EndpointOverview.general.config.header'
-                                    defaultMessage='General Endpoint Configuration'
+                                    defaultMessage='General Endpoint Configurations'
                                 />
                             </Typography>
                             <GeneralConfiguration
@@ -672,7 +672,7 @@ function EndpointOverview(props) {
                                 <Typography variant='h4' align='left' className={classes.titleWrapper} gutterBottom>
                                     <FormattedMessage
                                         id='Apis.Details.Endpoints.EndpointOverview.lb.failover.endpoints.header'
-                                        defaultMessage='Load balance and Failover Configuration'
+                                        defaultMessage='Load balance and Failover Configurations'
                                     />
                                 </Typography>
                                 <LoadbalanceFailoverConfig
