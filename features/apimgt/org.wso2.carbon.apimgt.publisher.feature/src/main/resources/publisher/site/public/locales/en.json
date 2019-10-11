@@ -154,6 +154,7 @@
   "Apis.Details.Configuration.components.Tags.title": "Tags",
   "Apis.Details.Configuration.components.Transports.tooltip": "API will be exposed in selected transport(s) in the gateway(s)",
   "Apis.Details.Configuration.components.schema.validation.tooltip": "Enable the request and response validation against the OpenAPI definition",
+  "Apis.Details.Configuration.components.storeVisibility.dropdown.private": "Visible to my domain",
   "Apis.Details.Configuration.components.storeVisibility.dropdown.restrict": "Restrict by role(s)",
   "Apis.Details.Configuration.components.storeVisibility.form.helper.text": "By default API is visible to all developer portal users",
   "Apis.Details.Configuration.components.storeVisibility.head.topic": "Developer Portal Visibility",

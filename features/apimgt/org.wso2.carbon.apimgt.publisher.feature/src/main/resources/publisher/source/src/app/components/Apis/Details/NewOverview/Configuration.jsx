@@ -292,10 +292,15 @@ function Configuration(props) {
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
-                            {api.visibility &&
+                            {(api.visibility && api.visibility === 'PRIVATE') ?
+                                <React.Fragment>
+                                    {'Visible to my domain'}
+                                </React.Fragment>
+                                :
                                 <React.Fragment>
                                     {capitalizeFirstLetter(lowerCaseString(api.visibility))}
-                                </React.Fragment>}
+                                </React.Fragment>
+                            }
                             {api.visibility === 'RESTRICTED' && ' ( Visible to '}
                             {api.visibility === 'RESTRICTED' && api.visibleRoles.join()}
                             {api.visibility === 'RESTRICTED' && ' ) '}

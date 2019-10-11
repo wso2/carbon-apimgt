@@ -154,6 +154,7 @@
   "Apis.Details.Configuration.components.Tags.title": "",
   "Apis.Details.Configuration.components.Transports.tooltip": "",
   "Apis.Details.Configuration.components.schema.validation.tooltip": "",
+  "Apis.Details.Configuration.components.storeVisibility.dropdown.private": "",
   "Apis.Details.Configuration.components.storeVisibility.dropdown.restrict": "",
   "Apis.Details.Configuration.components.storeVisibility.form.helper.text": "",
   "Apis.Details.Configuration.components.storeVisibility.head.topic": "",
