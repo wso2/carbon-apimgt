@@ -520,7 +520,7 @@ function Overview(props) {
                         </Typography>
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails
-                        classes={{ root: classNames(classes.kkkk, { [classes.noDocumentRoot]: totalComments === 0 }) }}
+                        classes={{ root: classNames({ [classes.noDocumentRoot]: totalComments === 0 }) }}
                     >
                         <Grid container className={classes.root} spacing={2}>
                             <OverviewDocuments apiId={api.id} />
