@@ -89,7 +89,6 @@ const styles = (theme) => {
             height: 50,
             alignItems: 'center',
             display: 'flex',
-            marginTop: theme.spacing(2),
         },
         toolbar: {
             minHeight: 56,

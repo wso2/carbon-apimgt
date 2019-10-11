@@ -132,7 +132,6 @@ const styles = (theme) => {
             fontFamily: theme.typography.fontFamily,
             position: 'absolute',
             bottom: 0,
-            boxShadow: '11px -1px 15px -8px rgba(115,115,115,1)',
             paddingLeft: leftMenuPaddingLeft,
         },
         leftMenuHorizontal: {
@@ -335,7 +334,6 @@ class Details extends React.Component {
      * @memberof Details
      */
     render() {
-
         const {
             classes, theme, intl, match,
         } = this.props;
