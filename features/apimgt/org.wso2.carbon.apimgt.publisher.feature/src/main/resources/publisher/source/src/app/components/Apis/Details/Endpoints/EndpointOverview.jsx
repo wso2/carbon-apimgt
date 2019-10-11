@@ -524,6 +524,7 @@ function EndpointOverview(props) {
                                                     control={
                                                         <Radio
                                                             disabled={(isRestricted(['apim:api_create'], api))}
+                                                            color='primary'
                                                         />
                                                     }
                                                     label='Failover'
@@ -533,6 +534,7 @@ function EndpointOverview(props) {
                                                     control={
                                                         <Radio
                                                             disabled={(isRestricted(['apim:api_create'], api))}
+                                                            color='primary'
                                                         />
                                                     }
                                                     label='Load balance'
