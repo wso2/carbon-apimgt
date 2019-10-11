@@ -102,7 +102,7 @@ function GenericEndpoint(props) {
                                 disabled={(isRestricted(['apim:api_create'], api))}
                             >
                                 <Icon>
-                                    autorenew
+                                    check_circle
                                 </Icon>
                             </IconButton>
                             {type === 'prototyped' ?

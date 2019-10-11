@@ -79,6 +79,9 @@ const styles = theme => ({
     lpConfigWrapper: {
         display: 'flex',
     },
+    endpointName: {
+        fontWeight: 600,
+    },
 });
 
 const endpointTypes = [
