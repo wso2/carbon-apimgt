@@ -153,9 +153,10 @@ function Endpoints(props) {
      * @param {function} updateFunc The api update function.
      */
     const saveAPI = () => {
+        const { endpointConfig, endpointImplementationType, endpointSecurity } = apiObject;
         setUpdating(true);
-        if (api.type !== 'WS') {
-            const promisedAPIUpdate = updateAPI(apiObject);
+        if (endpointImplementationType === 'INLINE') {
+            const promisedAPIUpdate = updateAPI({ endpointConfig, endpointImplementationType, endpointSecurity });
             const promisedSwaggerUpdate = api.updateSwagger(swagger);
             Promise.all([promisedAPIUpdate, promisedSwaggerUpdate]).then((resp) => {
                 console.log('success', resp);
