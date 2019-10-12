@@ -37,7 +37,6 @@ public interface ApiProductsApiService {
       public Response apiProductsApiProductIdGet(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsApiProductIdPut(String apiProductId, APIProductDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsApiProductIdSwaggerGet(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdSwaggerPut(String apiProductId, String apiDefinition, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsApiProductIdThumbnailGet(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsApiProductIdThumbnailPut(String apiProductId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;

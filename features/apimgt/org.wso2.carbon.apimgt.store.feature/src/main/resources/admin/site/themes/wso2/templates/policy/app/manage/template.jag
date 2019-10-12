@@ -4,7 +4,7 @@
         <h2><%=i18n.localize("Application Throttling Policies")%></h2>
     </div>
     <div class="content-section shadow-up">
-    <div class="content-data">
+    <div class="content-data" style="overflow-x:auto;">
     <table class="table table-responsive table-striped" id="app-policy">
         <thead>
             <tr>
@@ -12,6 +12,7 @@
                 <th class=""><%=i18n.localize("Quota Policy")%></th>
                 <th class=""><%=i18n.localize("Quota")%></th>
                 <th class=""><%=i18n.localize("Unit Time")%></th>
+                <th class=""></th>
                 <th class=""></th>
             </tr>
         </thead>
@@ -50,6 +51,8 @@
                                 </span>
                                 <span class="hidden-xs"><%=i18n.localize("Edit")%></span>
                         </a>
+                    </td>
+                    <td>
                         <a id="deleteButton<%=count%>" onclick="deleteAppPolicy('<%=encode.forJavaScript(String(policyName))%>')" class="btn padding-reduce-on-grid-view">
                             <span class="fw-stack">
                                     <i class="fw fw-circle-outline fw-stack-2x"></i>

@@ -368,6 +368,7 @@ public final class APIConstants {
     public static final String API_LEVEL_POLICY = "APILevelPolicy";
     public static final String CERTIFICATE_INFORMATION = "CertificateInformation";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
+    public static final String AUTHORIZATION_QUERY_PARAM_DEFAULT = "access_token";
     public static final String API_KEY_HEADER_QUERY_PARAM = "apikey";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE = "RemoveOAuthHeadersFromOutMessage";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT = "true";
@@ -1216,7 +1217,7 @@ public final class APIConstants {
     public static final String X_WSO2_SANDBOX_ENDPOINTS = "x-wso2-sandbox-endpoints";
     public static final String X_WSO2_BASEPATH = "x-wso2-basePath";
     public static final String X_WSO2_TRANSPORTS = "x-wso2-transports";
-    public static final String X_WSO2_ENDPOINT_TYPE = "endpoint_type";
+    public static final String X_WSO2_ENDPOINT_TYPE = "type";
 
     //API Constants
     public static final String API_DATA_NAME = "name";
@@ -1254,6 +1255,7 @@ public final class APIConstants {
     public static final String ENDPOINT_SANDBOX_FAILOVERS = "sandbox_failovers";
     public static final String ENDPOINT_PRODUCTION_ENDPOINTS = "production_endpoints";
     public static final String ENDPOINT_SANDBOX_ENDPOINTS = "sandbox_endpoints";
+    public static final String ENDPOINT_URLS = "urls";
     public static final String ENDPOINT_URL = "url";
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
@@ -1262,6 +1264,7 @@ public final class APIConstants {
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";
 
+    public static final String REST_API_SCOPE = "Scope";
     public static final String REST_API_SCOPE_NAME = "Name";
     public static final String REST_API_SCOPE_ROLE = "Roles";
     public static final String REST_API_SCOPES_CONFIG = "RESTAPIScopes";
@@ -1557,6 +1560,8 @@ public final class APIConstants {
         public static final String SUBSCRIBED_APIS = "subscribedAPIs";
         public static final String API_CONTEXT = "context";
         public static final String API_VERSION = "version";
+        public static final String API_PUBLISHER = "publisher";
+        public static final String API_NAME = "name";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";

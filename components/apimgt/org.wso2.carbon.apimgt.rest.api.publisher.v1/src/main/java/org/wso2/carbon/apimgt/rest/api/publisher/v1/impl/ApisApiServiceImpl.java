@@ -52,7 +52,6 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -149,7 +148,6 @@ import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -359,6 +357,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         if (body.getAuthorizationHeader() == null) {
             body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
+        }
+
+        if (body.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED && body.getVisibleRoles().isEmpty()) {
+            RestApiUtil.handleBadRequest("Valid roles should be added under 'visibleRoles' to restrict " +
+                    "the visibility", log);
         }
 
         //Get all existing versions of  api been adding
@@ -617,7 +620,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
             // Validate if resources are empty
-            if (body.getOperations() == null || body.getOperations().isEmpty()) {
+            if (!isWSAPI && (body.getOperations() == null || body.getOperations().isEmpty())) {
                 RestApiUtil.handleBadRequest(ExceptionCodes.NO_RESOURCES_FOUND, log);
             }
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
@@ -626,7 +629,9 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //attach micro-geteway labels
             assignLabelsToDTO(body, apiToUpdate);
-            apiProvider.manageAPI(apiToUpdate);
+
+            //preserve monetization status in the update flow
+            apiProvider.configureMonetizationInAPIArtifact(originalAPI);
 
             if (!isWSAPI) {
                 String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
@@ -635,6 +640,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
                 apiProvider.saveSwagger20Definition(apiToUpdate.getId(), newDefinition);
             }
+
+            apiProvider.manageAPI(apiToUpdate);
+
             API updatedApi = apiProvider.getAPI(apiIdentifier);
             updatedApiDTO = APIMappingUtil.fromAPItoDTO(updatedApi);
             return Response.ok().entity(updatedApiDTO).build();
@@ -671,7 +679,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         for (URITemplate existingUriTemplate : existingUriTemplates) {
 
             // If existing URITemplate is used by any API Products
-            if (!existingUriTemplate.getUsedByProducts().isEmpty()) {
+            if (!existingUriTemplate.retrieveUsedByProducts().isEmpty()) {
                 String existingVerb = existingUriTemplate.getHTTPVerb();
                 String existingPath = existingUriTemplate.getUriTemplate();
                 boolean isReusedResourceRemoved = true;
@@ -714,7 +722,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         for (URITemplate existingUriTemplate : existingUriTemplates) {
 
             // If existing URITemplate is used by any API Products
-            if (!existingUriTemplate.getUsedByProducts().isEmpty()) {
+            if (!existingUriTemplate.retrieveUsedByProducts().isEmpty()) {
                 String existingVerb = existingUriTemplate.getHTTPVerb();
                 String existingPath = existingUriTemplate.getUriTemplate();
                 boolean isReusedResourceRemoved = true;
@@ -1145,7 +1153,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         for (URITemplate uriTemplate : uriTemplates) {
             // If existing URITemplate is used by any API Products
-            if (!uriTemplate.getUsedByProducts().isEmpty()) {
+            if (!uriTemplate.retrieveUsedByProducts().isEmpty()) {
                 APIResource apiResource = new APIResource(uriTemplate.getHTTPVerb(), uriTemplate.getUriTemplate());
                 usedProductResources.add(apiResource);
             }
@@ -2417,12 +2425,26 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param apiId             API identifier
      * @param apiDefinition     Swagger definition
+     * @param url               Swagger definition URL
+     * @param fileInputStream   Swagger definition input file content
+     * @param fileDetail
      * @param ifMatch           If-match header value
      * @return updated swagger document of the API
      */
     @Override
-    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch, MessageContext messageContext) {
+    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String url, InputStream fileInputStream,
+            Attachment fileDetail, String ifMatch, MessageContext messageContext) {
+
+        // Validate and retrieve the OpenAPI definition
+        Map validationResponseMap = null;
         try {
+            //Handle URL and file based definition imports
+            if(url != null || fileInputStream != null) {
+                validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, true);
+                APIDefinitionValidationResponse validationResponse = (APIDefinitionValidationResponse) validationResponseMap
+                        .get(RestApiConstants.RETURN_MODEL);
+                apiDefinition = validationResponse.getJsonContent();
+            }
             String updatedSwagger = updateSwagger(apiId, apiDefinition);
             return Response.ok().entity(updatedSwagger).build();
         } catch (APIManagementException e) {
@@ -2501,10 +2523,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         validateScopes(existingAPI);
 
         //Update API is called to update URITemplates and scopes of the API
-        apiProvider.updateAPI(existingAPI);
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
         apiProvider.saveSwagger20Definition(existingAPI.getId(), updatedApiDefinition);
+        apiProvider.updateAPI(existingAPI);
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(existingAPI.getId());
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
@@ -3580,10 +3602,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                             .handleBadRequest("Scope " + scope.getName() + " is already assigned by another API", log);
                 }
             }
-            //todo: validate with migrations
-//            if (StringUtils.isBlank(scope.getDescription())) {
-//                RestApiUtil.handleBadRequest("Scope cannot have empty description", log);
-//            }
+            //set description as empty if it is not provided
+            if (StringUtils.isBlank(scope.getDescription())) {
+                scope.setDescription("");
+            }
             if (scope.getRoles() != null) {
                 for (String aRole : scope.getRoles().split(",")) {
                     boolean isValidRole = APIUtil.isRoleNameExist(apiId.getProviderName(), aRole);

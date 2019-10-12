@@ -22,6 +22,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
+import { isRestricted } from 'AppData/AuthManager';
 import EditMediationPolicy from './EditMediationPolicy';
 
 const styles = {
@@ -67,7 +68,7 @@ const styles = {
  */
 function InFlow(props) {
     const {
-        classes, updateMediationPolicy, selectedMediationPolicy, type,
+        classes, updateMediationPolicy, selectedMediationPolicy, type, api,
     } = props;
     const [editing, setEditing] = useState(false);
 
@@ -125,7 +126,12 @@ function InFlow(props) {
                             <span>none</span>
                         )}
                     </Typography>
-                    <Button variant='contained' className={classes.button} onClick={startEditing}>
+                    <Button
+                        variant='contained'
+                        className={classes.button}
+                        onClick={startEditing}
+                        disabled={isRestricted(['apim:api_create'], api)}
+                    >
                         <FormattedMessage
                             id='Apis.Details.MediationPolicies.MediationPolicies.flow.update.btn'
                             defaultMessage='Update'
@@ -149,6 +155,7 @@ InFlow.propTypes = {
     updateMediationPolicy: PropTypes.func.isRequired,
     selectedMediationPolicy: PropTypes.shape({}).isRequired,
     type: PropTypes.string.isRequired,
+    api: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(InFlow);

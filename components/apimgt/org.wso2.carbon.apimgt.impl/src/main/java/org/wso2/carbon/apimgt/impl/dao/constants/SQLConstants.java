@@ -3333,19 +3333,6 @@ public class SQLConstants {
             "   UPDATED_TIME=?" +
             " WHERE" +
             "   API_PRODUCT_NAME=? AND API_PRODUCT_PROVIDER=? AND API_PRODUCT_VERSION=?";
-
-    public static final String IS_API_PRODUCT_EXIST = 
-            "SELECT UUID FROM AM_API_PRODUCT WHERE API_PRODUCT_PROVIDER=? AND API_PRODUCT_NAME=? AND TENANT_DOMAIN = ?";
-
-    public static final String GET_ALL_API_PRODUCTS = 
-            "SELECT API_PRODUCT_ID, UUID, DESCRIPTION, API_PRODUCT_PROVIDER, API_PRODUCT_NAME, API_PRODUCT_VERSION, STATE "
-            + "FROM AM_API_PRODUCT WHERE TENANT_DOMAIN = ?";
-    
-    public static final String GET_PRODUCT_RESOURCE_BY_COLUMN = 
-            "SELECT VISIBILITY, VISIBILE_ROLES, {column} FROM AM_API_PRODUCT WHERE UUID = ?";
-    
-    public static final String ADD_BLOB_API_PRODUCT_BY_COLUMN = 
-            "INSERT INTO AM_API_PRODUCT ({column}) VALUES (?) WHERE UUID = ?";
     
     public static final String UPDATE_BLOB_API_PRODUCT_BY_COLUMN = 
             "UPDATE AM_API_PRODUCT SET {column} = ? WHERE UUID = ?";
@@ -3353,9 +3340,6 @@ public class SQLConstants {
     public static final String GET_PRODUCT_ID =
             "SELECT API_PRODUCT_ID FROM AM_API_PRODUCT WHERE API_PRODUCT_NAME = ? AND API_PRODUCT_PROVIDER = ? AND "
             + "API_PRODUCT_VERSION = ?";
-
-    public static final String DELETE_PRODUCT_RESOURCE_MAPPING =
-            "DELETE FROM AM_API_PRODUCT_MAPPING WHERE URL_MAPPING_ID = ?";
 
     public static final String GET_PRODUCT_RESOURCE_MAPPINGS_FOR_API =
             "SELECT "
@@ -3635,5 +3619,12 @@ public class SQLConstants {
         public static final String DELETE_EMAIL_BY_UUID =
                 "DELETE FROM AM_NOTIFICATION_SUBSCRIBER WHERE UUID= ?";
 
+    }
+
+    public static class RevokedJWTConstants {
+
+        public static final String ADD_JWT_SIGNATURE = "INSERT INTO AM_REVOKED_JWT (UUID, SIGNATURE," +
+                "EXPIRY_TIMESTAMP, TENANT_DOMAIN) VALUES(?,?, ?, ?)";
+        public static final String DELETE_REVOKED_JWT = "DELETE FROM AM_REVOKED_JWT WHERE EXPIRY_TIMESTAMP < ?";
     }
 }

@@ -43,7 +43,15 @@ function RenderMethodBase(props) {
     } else {
         chipTextColor = theme.palette.getContrastText(theme.custom.resourceChipColors[method]);
     }
-    return <Chip label={method} style={{ backgroundColor: chipColor, color: chipTextColor, height: 20 }} />;
+    return (<Chip
+        label={method.toUpperCase()}
+        style={{ 
+            backgroundColor: chipColor,
+            color: chipTextColor,
+            height: 20,
+            margin: '5px',
+        }}
+    />);
 }
 
 RenderMethodBase.propTypes = {
@@ -56,7 +64,7 @@ const RenderMethod = withTheme(RenderMethodBase);
  *
  * @param {*} theme
  */
-const styles = {
+const styles = theme => ({
     root: {
         display: 'flex',
         flexDirection: 'row',
@@ -65,8 +73,9 @@ const styles = {
     },
     heading: {
         marginRight: 20,
+        color: theme.palette.getContrastText(theme.custom.infoBar.sliderBackground),
     },
-};
+});
 /**
  *
  *
@@ -146,8 +155,9 @@ class Resources extends React.Component {
                                     {key}
                                 </Typography>
                                 {Object.keys(path).map((innerKey) => {
-                                    return CONSTS.HTTP_METHODS.includes(innerKey)
-                                        ? <RenderMethod method={innerKey} /> : null;
+                                    return CONSTS.HTTP_METHODS.includes(innerKey) ? (
+                                        <RenderMethod method={innerKey} />
+                                    ) : null;
                                 })}
                             </div>
                         );

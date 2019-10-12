@@ -16,27 +16,6 @@
  * under the License.
  */
 
-import React from 'react';
-import { Route, Switch } from 'react-router-dom';
-import Listing from './Listing/Listing';
-import Details from './Details/index';
-import { PageNotFound } from '../Base/Errors';
-/**
- *
- *
- * @class Applications
- * @extends {Component}
- */
+## `site.json` has been removed!
 
-const applications = () => {
-    return (
-        <Switch>
-            <Route exact path='/applications' component={Listing} />
-            <Route path='/applications/:application_uuid/' component={Details} />
-            <Route component={PageNotFound} />
-        </Switch>
-    );
-};
-
-
-export default applications;
+Please refer `<APIM_PUBLISHER>/site/public/theme/defaultTheme.js` file to , get all the configurations related to Publisher SPA

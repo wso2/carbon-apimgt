@@ -7,12 +7,16 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import javax.cache.Caching;
+import java.util.Base64;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -57,6 +61,10 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
         String renewedToken = (String) transportHeaders.get(APIMgtGatewayConstants.DEACTIVATED_ACCESS_TOKEN);
         if (revokedToken != null) {
 
+            //handle JWT tokens
+            if(revokedToken.contains(APIConstants.DOT) && APIUtil.isValidJWT(revokedToken)) {
+                revokedToken = APIUtil.getSignatureIfJWT(revokedToken); //JWT signature is the cache key
+            }
             //Find the actual tenant domain on which the access token was cached. It is stored as a reference in
             //the super tenant cache.
             String cachedTenantDomain = getCachedTenantDomain(revokedToken);

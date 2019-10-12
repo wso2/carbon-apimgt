@@ -136,7 +136,7 @@
                 }
 
             } else if(conditionType == "USER") {
-                    if(!isValid(conditionValueTxt)) {
+                    if(!isValidUserName(conditionValueTxt)) {
                         $('#errorMsgDiv').show();
                         return false;
                     }
@@ -170,6 +170,10 @@
 
     function isValid(str){
         return !/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/g.test(str);;
+    }
+
+    function isValidUserName(str){
+        return !/[~`!#$%\^&*+=\-\[\]\\';,{}|\\":<>\?]/g.test(str);;
     }
 
     function validateInput(text, element, errorMsg){

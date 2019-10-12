@@ -453,7 +453,7 @@ class LifeCycleImage extends React.Component {
                             strokeWidth='.955'
                         />
                     </g>
-                    <g id='published_to_maintenance' style={this.highLightMe('published_to_maintenance')}>
+                    <g id='published_to_blocked' style={this.highLightMe('published_to_blocked')}>
                         <path
                             style={{ isolation: 'auto', mixBlendMode: 'normal' }}
                             d='m 306.92162,149.0749 92.7941,75.49823 1.41692,13.66474 -13.63383,0.80053 -92.79411,-75.49822 13.59185,-1.29876 z'
@@ -483,9 +483,9 @@ class LifeCycleImage extends React.Component {
                         />
                     </g>
                     <g
-                        id='maintenance_to_published'
+                        id='blocked_to_published'
                         transform='rotate(180 338.919 207.057)'
-                        style={this.highLightMe('maintenance_to_published')}
+                        style={this.highLightMe('blocked_to_published')}
                     >
                         <path
                             id='path7039'
@@ -515,7 +515,7 @@ class LifeCycleImage extends React.Component {
                             strokeWidth='.955'
                         />
                     </g>
-                    <g id='maintenance_to_deprecated' style={this.highLightMe('maintenance_to_deprecated')}>
+                    <g id='blocked_to_deprecated' style={this.highLightMe('blocked_to_deprecated')}>
                         <path
                             style={{ isolation: 'auto', mixBlendMode: 'normal' }}
                             d='m 427.85405,225.05409 0,-68.24164 9.52539,-9.89949 9.40863,9.89949 0,68.24164 -9.76218,-9.54594 z'

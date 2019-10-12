@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
@@ -492,12 +493,11 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             product.setID(productIdentifier);
             product.setUuid(apiProductId);
 
-            apiProvider.updateAPIProduct(product);
-
             APIDefinition parser = new OAS3Parser();
             SwaggerData swaggerData = new SwaggerData(product);
             String apiDefinition = parser.generateAPIDefinition(swaggerData);
             apiProvider.saveSwaggerDefinition(product, apiDefinition);
+            apiProvider.updateAPIProduct(product);
 
             APIProduct updatedProduct = apiProvider.getAPIProduct(productIdentifier);
             APIProductDTO updatedProductDTO = APIMappingUtil.fromAPIProducttoDTO(updatedProduct);
@@ -521,31 +521,6 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             }
             String apiSwagger = apiProvider.getAPIDefinitionOfAPIProduct(retrievedProduct);
             
-            if (StringUtils.isEmpty(apiSwagger)) {
-                apiSwagger = "";
-            }
-            return Response.ok().entity(apiSwagger).build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving API Product from Id  : " + apiProductId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return null;
-    }
-
-    @Override public Response apiProductsApiProductIdSwaggerPut(String apiProductId, String apiDefinition,
-            String ifMatch, MessageContext messageContext) {
-        try {
-            String username = RestApiUtil.getLoggedInUsername();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getProvider(username);
-            APIProduct retrievedProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
-            if (retrievedProduct == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
-            }
-
-            apiProvider.updateAPIDefinitionOfAPIProduct(apiDefinition, retrievedProduct);
-            String apiSwagger = apiProvider.getAPIDefinitionOfAPIProduct(retrievedProduct);
-
             if (StringUtils.isEmpty(apiSwagger)) {
                 apiSwagger = "";
             }
@@ -723,6 +698,14 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if (body.getVisibility() == null) {
                 //set the default visibility to PUBLIC
                 body.setVisibility(VisibilityEnum.PUBLIC);
+            }
+
+            if (body.getAuthorizationHeader() == null) {
+                body.setAuthorizationHeader(APIUtil
+                        .getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));
+            }
+            if (body.getAuthorizationHeader() == null) {
+                body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
             }
 
             APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(body, provider);

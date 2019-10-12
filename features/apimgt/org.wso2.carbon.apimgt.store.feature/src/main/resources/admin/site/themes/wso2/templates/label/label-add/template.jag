@@ -46,6 +46,8 @@
         <h2 id="tierTopic"><%=pageTitle%></h2>
         <p class="lead"></p>
     </div>
+    <input type='hidden' id='errorMessageTooLengthy' name='errorMessageTooLengthy'
+                value='<%=i18n.localize("Maximum length is 255")%>'/>
     <input type='hidden' id='errorMsgRequired' name='errorMsgRequired'
                 value='<%=i18n.localize("Required")%>'/>
     <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid'

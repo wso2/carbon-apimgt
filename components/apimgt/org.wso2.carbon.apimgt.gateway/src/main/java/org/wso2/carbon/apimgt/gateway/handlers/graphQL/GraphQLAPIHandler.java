@@ -68,11 +68,10 @@ public class GraphQLAPIHandler extends AbstractHandler {
     private static final String GRAPHQL_API = "GRAPHQL";
     private static final String HTTP_VERB = "HTTP_VERB";
     private static final String UNICODE_TRANSFORMATION_FORMAT = "UTF-8";
-    private static final String INVALID_QUERY = "INVALID QUERY";
     private static final String GRAPHQL_IDENTIFIER = "_graphQL";
     private static final String CLASS_NAME_AND_METHOD = "_GraphQLAPIHandler_handleRequest";
     private static final Log log = LogFactory.getLog(GraphQLAPIHandler.class);
-    private static GraphQLSchema schema = null;
+    private GraphQLSchema schema = null;
     private static Validator validator;
     private String apiUUID;
 
@@ -101,8 +100,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                     getAxis2MessageContext();
-            String requestPath = ((Axis2MessageContext) messageContext).getProperties().
-                    get(REST_SUB_REQUEST_PATH).toString();
+            String requestPath = messageContext.getProperty(REST_SUB_REQUEST_PATH).toString();
             if (requestPath != null && !requestPath.isEmpty()) {
                 String[] queryParams = ((Axis2MessageContext) messageContext).getProperties().
                         get(REST_SUB_REQUEST_PATH).toString().split(QUERY_PATH_STRING);
@@ -218,7 +216,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                         if (APIConstants.OPERATION_SECURITY_DISABLED.equalsIgnoreCase(type.getName())) {
                             isSecurityEnabled = false;
                         }
-                        operationAuthSchemeMappingList.put(additionalTypeName, isSecurityEnabled);
+                        operationAuthSchemeMappingList.put(base64DecodedAdditionalType, isSecurityEnabled);
                     }
                 }
                 if (!roleArrayList.isEmpty()) {
@@ -297,9 +295,9 @@ public class GraphQLAPIHandler extends AbstractHandler {
         OMElement payload = fac.createOMElement("fault", ns);
 
         OMElement errorCode = fac.createOMElement("code", ns);
-        errorCode.setText(HttpStatus.SC_UNPROCESSABLE_ENTITY + "");
+        errorCode.setText(APISecurityConstants.GRAPHQL_INVALID_QUERY + "");
         OMElement errorMessage = fac.createOMElement("message", ns);
-        errorMessage.setText(INVALID_QUERY);
+        errorMessage.setText(APISecurityConstants.GRAPHQL_INVALID_QUERY_MESSAGE);
         OMElement errorDetail = fac.createOMElement("description", ns);
         errorDetail.setText(message);
 

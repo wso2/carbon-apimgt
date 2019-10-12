@@ -10,19 +10,15 @@ const Configurations = {
                     // contrastText: will be calculated to contrast with palette.primary.main
                 },
                 secondary: {
-                    light: '#0066ff',
-                    main: '#99c573',
+                    light: '#347eff',
+                    main: '#415a85',
                     // dark: will be calculated from palette.secondary.main,
                     contrastText: '#ffcc00',
                 },
                 background: {
                     default: '#efefef',
                     paper: '#ffffff',
-                    appBar: '#1d344f',
-                    leftMenu: '#1a1f2f',
-                    leftMenuActive: '#254061',
                     drawer: '#1a1f2f',
-                    activeMenuItem: '#254061',
                 },
             },
             typography: {
@@ -33,26 +29,65 @@ const Configurations = {
                 },
             },
             custom: {
-                starColor: '#f2c73a',
-                disableColor: '#D3D3D3',
-                leftMenuWidth: 200,
                 contentAreaWidth: 1240,
-                drawerWidth: 200,
-                logo: '/devportal/site/public/images/logo.png',
-                backgroundImage: '/devportal/site/public/images/back-light.png',
-                title: 'WSO2 Developer Portal',
+                backgroundImage: '', // Add a watermark background to the content area of the page. Example ( '/devportal/site/public/images/back-light.png')
                 defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
-                showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
-                leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
-                leftMenuIconSize: 24,
-                leftMenuIconMainSize: 52,
-                leftMenuTextStyle: 'uppercase',
+                page: {
+                    style: 'fluid', // Set the page style ( Other values available 'fixed', 'fluid')
+                    width: 1240, // This value is effected only when the page.style = 'fixed'
+                    emptyAreadBackground: '#1e2129', // This value is effected only when the page.style = 'fixed' and window size is greater than page.width
+                    border: 'none', // It can be something like 'solid 1px #cccccc' for fixed layouts
+                },
+                appBar: {
+                    logo: '/devportal/site/public/images/logo.svg',
+                    logoHeight: 19,
+                    logoWidth: 208,
+                    background: '#1d344f',
+                    activeBackground: '#254061',
+                    showSearch: true,
+                    drawerWidth: 200,
+                },
+                leftMenu: {
+                    position: 'vertical-left', // Sets the position of the left menu ( 'horizontal', 'vertical-left', 'vertical-right')
+                    style: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
+                    iconSize: 24,
+                    leftMenuTextStyle: 'uppercase',
+                    width: 180,
+                    background: '#1a1f2f',
+                    leftMenuActive: '#254061',
+                    activeBackground: 'rgb(29, 52, 79)',
+                    rootIconVisible: true,
+                    rootIconSize: 42,
+                    rootIconTextVisible: false,
+                    rootBackground: '#204d6a',
+                },
+                infoBar: {
+                    height: 70,
+                    background: '#ffffff',
+                    showBackIcon: true,
+                    showThumbnail: true,
+                    starColor: '#f6bf21', // By default the opasite color of infoBar.background is derived. From here you can override it.
+                    sliderBackground: '#ffffff',
+                    iconOddColor: '#347eff',
+                    iconEvenColor: '#89b4ff',
+                    listGridSelectedColor: '#347eff', // Defines color of the selected icon ( grid/ list ) view of the api listing page
+                },
+                listView: {
+                    tableHeadBackground: '#fff',
+                    tableBodyOddBackgrund: '#efefef',
+                    tableBodyEvenBackgrund: '#fff',
+                },
+                overview: {
+                    titleIconColor: '#89b4ff',
+                    titleIconSize: 16,
+                },
                 adminRole: 'admin',
                 commentsLimit: 5,
                 maxCommentLength: 512,
                 overviewPage: {
                     commentsBackground: '/devportal/site/public/images/overview/comments.svg',
                     documentsBackground: '/devportal/site/public/images/overview/documents.svg',
+                    credentialsBackground: '/devportal/site/public/images/overview/credentials.svg',
                 },
                 resourceChipColors: {
                     get: '#02a8f4',
@@ -71,7 +106,7 @@ const Configurations = {
                 thumbnail: {
                     width: 240,
                     contentPictureOverlap: false,
-                    iconColor: '#ffffff',
+                    iconColor: 'rgba(0, 0, 0, 0.38)',
                     listViewIconSize: 20,
                     contentBackgroundColor: 'rgba(239, 239, 239, 0.5)',
                     defaultApiImage: false, // put false to render the system generated and user provided image.

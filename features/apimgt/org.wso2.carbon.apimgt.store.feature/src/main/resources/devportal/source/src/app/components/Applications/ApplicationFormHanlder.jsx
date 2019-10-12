@@ -18,68 +18,26 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import Icon from '@material-ui/core/Icon';
-import Slide from '@material-ui/core/Slide';
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import { Link } from 'react-router-dom';
 import API from 'AppData/api';
 import ApplicationCreateForm from 'AppComponents/Shared/AppsAndKeys/ApplicationCreateForm';
 import Alert from 'AppComponents/Shared/Alert';
-import Application from 'AppData/Application';
 import Settings from 'AppComponents/Shared/SettingsContext';
+import Application from 'AppData/Application';
+import { Link } from 'react-router-dom';
+import ApplicationCreateBase from './Create/ApplicationCreateBase';
 
 /**
- *
- * @inheritdoc
- * @param {*} theme theme object
- */
-const styles = theme => ({
-    appBar: {
-        position: 'relative',
-        backgroundColor: theme.palette.background.appBar,
-        color: theme.palette.getContrastText(theme.palette.background.appBar),
-    },
-    buttonRight: {
-        textDecoration: 'none',
-        color: 'white',
-    },
-    flex: {
-        flex: 1,
-    },
-    button: {
-        marginRight: theme.spacing.unit * 2,
-    },
-    link: {
-        textDecoration: 'none',
-    },
-    buttonWrapper: {
-        paddingLeft: theme.spacing.unit * 7,
-    },
-    createFormWrapper: {
-        paddingLeft: theme.spacing.unit * 5,
-    },
-});
-/**
- * @param {*} props properties
- * @returns {Component}
- */
-function Transition(props) {
-    return <Slide direction='up' {...props} />;
-}
-/**
- * Component used to handle application editing
- * @class EditApp
+ * Component used to handle application creation
+ * @class ApplicationFormHanlder
  * @extends {React.Component}
  * @param {any} value @inheritDoc
  */
-class EditApp extends React.Component {
+class ApplicationFormHanlder extends React.Component {
     static contextType = Settings;
 
     /**
@@ -88,32 +46,57 @@ class EditApp extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            open: true,
             applicationRequest: {
-                applicationId: null,
                 name: '',
                 throttlingPolicy: '',
                 description: '',
+                tokenType: 'JWT',
                 groups: null,
-                tokenType: null,
                 attributes: {},
             },
             isNameValid: true,
             throttlingPolicyList: [],
-            allAppAttributes: [],
+            allAppAttributes: null,
             isApplicationSharingEnabled: true,
+            isEdit: false,
         };
+        this.handleAddChip = this.handleAddChip.bind(this);
+        this.handleDeleteChip = this.handleDeleteChip.bind(this);
     }
 
     /**
      * Get all the throttling Policies from backend and
      * update the state
-     * @memberof EditApp
+     * @memberof ApplicationFormHanlder
      */
     componentDidMount() {
-        const { match } = this.props;
+        const { match: { params } } = this.props;
+        if (params.application_id) {
+            this.initiApplicationEditState(params.application_id);
+        } else {
+            this.initApplicationCreateState();
+        }
+        this.isApplicationGroupSharingEnabled();
+    }
+
+    /**
+     * @param {object} name application attribute name
+     * @returns {Object} attribute value
+     * @memberof ApplicationFormHanlder
+     */
+    getAttributeValue = (name) => {
         const { applicationRequest } = this.state;
-        const promisedApplication = Application.get(match.params.application_id);
+        return applicationRequest.attributes[name];
+    };
+
+    /**
+     * Initilaize the component if it is in applicatioin edit state
+     * @param {String} applicationId application id
+     * @memberof ApplicationFormHanlder
+     */
+    initiApplicationEditState = (applicationId) => {
+        const { applicationRequest } = this.state;
+        const promisedApplication = Application.get(applicationId);
         // Get all the tires to populate the drop down.
         const api = new API();
         const promiseTiers = api.getAllTiers('application');
@@ -121,10 +104,8 @@ class EditApp extends React.Component {
         Promise.all([promisedApplication, promiseTiers, promisedAttributes])
             .then((response) => {
                 const [application, tierResponse, allAttributes] = response;
-                const throttlingPolicyList = [];
-                tierResponse.body.list.map(item => throttlingPolicyList.push(item.name));
-                const allAppAttributes = [];
-                allAttributes.body.list.map(item => allAppAttributes.push(item));
+                const throttlingPolicyList = tierResponse.body.list.map(item => item.name);
+                const allAppAttributes = allAttributes.body.list;
                 const newRequest = { ...applicationRequest };
                 newRequest.applicationId = application.applicationId;
                 newRequest.name = application.name;
@@ -133,12 +114,12 @@ class EditApp extends React.Component {
                 newRequest.groups = application.groups;
                 newRequest.tokenType = application.tokenType;
                 newRequest.attributes = application.attributes;
-                this.setState({ applicationRequest: newRequest, throttlingPolicyList, allAppAttributes });
+                this.setState({
+                    isEdit: true, applicationRequest: newRequest, throttlingPolicyList, allAppAttributes,
+                });
             })
             .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
+                console.log(error);
                 const { status } = error;
                 if (status === 404) {
                     // eslint-disable-next-line react/no-unused-state
@@ -147,11 +128,44 @@ class EditApp extends React.Component {
             });
         this.isApplicationGroupSharingEnabled();
     }
+    /**
+     * Used to initialize the component state
+     * @memberof ApplicationFormHanlder
+     */
+    initApplicationCreateState = () => {
+        // Get all the tiers to populate the drop down.
+        const api = new API();
+        const promiseTiers = api.getAllTiers('application');
+        const promisedAttributes = api.getAllApplicationAttributes();
+        Promise.all([promiseTiers, promisedAttributes])
+            .then((response) => {
+                const [tierResponse, allAttributes] = response;
+                const { applicationRequest } = this.state;
+                const throttlingPolicyList = tierResponse.body.list.map(item => item.name);
+                const newRequest = { ...applicationRequest };
+                if (throttlingPolicyList.length > 0) {
+                    [newRequest.throttlingPolicy] = throttlingPolicyList;
+                }
+                const allAppAttributes = [];
+                allAttributes.body.list.map(item => allAppAttributes.push(item));
+                if (allAttributes.length > 0) {
+                    newRequest.attributes = allAppAttributes.filter(item => !item.hidden);
+                }
+                this.setState({ applicationRequest: newRequest, throttlingPolicyList, allAppAttributes });
+            })
+            .catch((error) => {
+                console.log(error);
+                const { status } = error;
+                if (status === 404) {
+                    // eslint-disable-next-line react/no-unused-state
+                    this.setState({ notFound: true });
+                }
+            });
+    }
 
     /**
-     * Update keyRequest state
+     * Update Application Request state
      * @param {Object} applicationRequest parameters requried for application
-     * create request
      */
     updateApplicationRequest = (applicationRequest) => {
         this.setState({ applicationRequest });
@@ -160,7 +174,7 @@ class EditApp extends React.Component {
     /**
      * @param {object} name application attribute name
      * @returns {void}
-     * @memberof EditApp
+     * @memberof ApplicationFormHanlder
      */
     handleAttributesChange = name => (event) => {
         const { applicationRequest } = this.state;
@@ -170,18 +184,8 @@ class EditApp extends React.Component {
 
     /**
      * @param {object} name application attribute name
-     * @returns {Object} attribute value
-     * @memberof EditApp
-     */
-    getAttributeValue = (name) => {
-        const { applicationRequest } = this.state;
-        return applicationRequest.attributes[name];
-    };
-
-    /**
-     * @param {object} name application attribute name
      * @returns {void}
-     * @memberof EditApp
+     * @memberof ApplicationFormHanlder
      */
     isRequiredAttribute = (name) => {
         const { allAppAttributes } = this.state;
@@ -229,10 +233,46 @@ class EditApp extends React.Component {
     };
 
     /**
-     * @param {Object} event the event object
+     * Validate and send the application create
+     * request to the backend
+     * @memberof ApplicationFormHanlder
+     */
+    saveApplication = () => {
+        const { applicationRequest } = this.state;
+        const { intl, history } = this.props;
+        const api = new API();
+        this.validateName(applicationRequest.name)
+            .then(() => this.validateAttributes(applicationRequest.attributes))
+            .then(() => api.createApplication(applicationRequest))
+            .then((response) => {
+                console.log('Application created successfully.');
+                Alert.info(intl.formatMessage({
+                    id: 'Applications.Create.ApplicationFormHanlder.Application.created.successfully',
+                    defaultMessage: 'Application created successfully.',
+                }));
+                const appId = response.body.applicationId;
+                history.push(`/applications/${appId}`);
+            })
+            .catch((error) => {
+                const { response } = error;
+                if (response && response.body) {
+                    const message = response.body.description || intl.formatMessage({
+                        defaultMessage: 'Error while creating the application',
+                        id: 'Applications.Create.ApplicationFormHanlder.error.while.creating.the.application',
+                    });
+                    Alert.error(message);
+                } else {
+                    Alert.error(error.message);
+                }
+                console.error('Error while creating the application');
+            });
+    };
+
+    /**
+     *  Save edited application
      * @memberof EditApp
      */
-    handleSubmit = () => {
+    saveEdit = () => {
         const { applicationRequest } = this.state;
         const {
             history, intl,
@@ -243,10 +283,9 @@ class EditApp extends React.Component {
             .then(() => api.updateApplication(applicationRequest, null))
             .then((response) => {
                 const appId = response.body.applicationId;
-                const redirectUrl = '/applications/' + appId;
-                history.push(redirectUrl);
+                history.push(`/applications/${appId}`);
                 Alert.info(intl.formatMessage({
-                    id: 'Applications.Edit.app.updated.success',
+                    id: 'Applications.ApplicationFormHanlder.app.updated.success',
                     defaultMessage: 'Application updated successfully',
                 }));
                 console.log('Application updated successfully.');
@@ -263,26 +302,12 @@ class EditApp extends React.Component {
             });
     };
 
-    /**
-     * @memberof EditApp
-     */
-    handleClose = () => {
-        this.setState({ open: false });
-    };
-
-    /**
-     * @memberof EditApp
-     */
-    handleClickOpen = () => {
-        this.setState({ open: true });
-    };
-
     validateName = (value) => {
         const { intl } = this.props;
         if (!value || value.trim() === '') {
             this.setState({ isNameValid: false });
             return Promise.reject(new Error(intl.formatMessage({
-                id: 'Applications.Edit.app.name.required',
+                id: 'Applications.Create.ApplicationFormHanlder.app.name.required',
                 defaultMessage: 'Application name is required',
             })));
         }
@@ -322,6 +347,7 @@ class EditApp extends React.Component {
 
     /**
      * retrieve Settings from the context and check the application sharing enabled
+     * @param {*} settingsData required data
      */
     isApplicationGroupSharingEnabled = () => {
         const settingsContext = this.context;
@@ -331,30 +357,55 @@ class EditApp extends React.Component {
 
     /**
      * @inheritdoc
-     * @memberof EditApp
+     * @memberof ApplicationFormHanlder
      */
     render() {
         const {
-            throttlingPolicyList, applicationRequest, isNameValid, open, allAppAttributes,
-            isApplicationSharingEnabled,
+            throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes, isApplicationSharingEnabled,
+            isEdit,
         } = this.state;
-        const { classes } = this.props;
-        return (
+        const CreatePageTitle = (
             <React.Fragment>
-                <Dialog fullScreen open={open} onClose={this.handleClose} TransitionComponent={Transition}>
-                    <AppBar className={classes.appBar}>
-                        <Toolbar>
-                            <Link to='/applications' className={classes.buttonRight}>
-                                <IconButton color='inherit' onClick={this.handleClose} aria-label='Close'>
-                                    <Icon>close</Icon>
-                                </IconButton>
-                            </Link>
-                            <Typography variant='h6' color='inherit' className={classes.flex}>
-                                <FormattedMessage id='Applications.Edit.edit.app' defaultMessage='Edit Application' />
-                            </Typography>
-                        </Toolbar>
-                    </AppBar>
-                    <div className={classes.createFormWrapper}>
+                <Typography variant='h5'>
+                    <FormattedMessage
+                        id='Applications.Create.ApplicationFormHanlder.create.application.heading'
+                        defaultMessage='Create an application'
+                    />
+                </Typography>
+                <Typography variant='caption'>
+                    <FormattedMessage
+                        id='Applications.Create.ApplicationFormHanlder.create.application.sub.heading'
+                        defaultMessage={
+                            'Create an application providing name, quota and token type parameters' +
+                            ' and optionally description'
+                        }
+                    />
+                </Typography>
+            </React.Fragment>
+        );
+        const EditPageTitle = (
+            <React.Fragment>
+                <Typography variant='h5'>
+                    <FormattedMessage
+                        id='Applications.Create.ApplicationFormHanlder.edit.application.heading'
+                        defaultMessage='Edit application'
+                    />
+                </Typography>
+                <Typography variant='caption'>
+                    <FormattedMessage
+                        id='Applications.Create.ApplicationFormHanlder.edit.application.sub.heading'
+                        defaultMessage={
+                            'Edit this application. Name, quota and token type are madatory parameters' +
+                            ' and description is optional'
+                        }
+                    />
+                </Typography>
+            </React.Fragment>
+        );
+        return (
+            <ApplicationCreateBase title={isEdit ? EditPageTitle : CreatePageTitle}>
+                <Box py={4} mb={2} display='flex' justifyContent='center'>
+                    <Grid item xs={10} md={9}>
                         <ApplicationCreateForm
                             throttlingPolicyList={throttlingPolicyList}
                             applicationRequest={applicationRequest}
@@ -369,48 +420,49 @@ class EditApp extends React.Component {
                             handleDeleteChip={this.handleDeleteChip}
                             handleAddChip={this.handleAddChip}
                         />
-                    </div>
-                    <div className={classes.buttonWrapper}>
-                        <Link to='/applications' className={classes.link}>
-                            <Button
-                                variant='outlined'
-                                className={classes.button}
-                            >
-                                <FormattedMessage
-                                    id='Applications.Edit.cancel'
-                                    defaultMessage='CANCEL'
-                                />
-                            </Button>
-                        </Link>
-                        <Button
-                            variant='contained'
-                            className={classes.button}
-                            color='primary'
-                            onClick={this.handleSubmit}
-                        >
-                            <FormattedMessage
-                                id='Applications.Edit.update.app'
-                                defaultMessage='UPDATE APPLICATION'
-                            />
-                        </Button>
-                    </div>
-                </Dialog>
-            </React.Fragment>
+                        <Box display='flex' justifyContent='flex-start' mt={4} spacing={1}>
+                            <Box>
+                                <Button
+                                    variant='contained'
+                                    color='primary'
+                                    onClick={isEdit ? this.saveEdit : this.saveApplication}
+                                >
+                                    <FormattedMessage
+                                        id='Applications.Create.ApplicationFormHanlder.save'
+                                        defaultMessage='SAVE'
+                                    />
+                                </Button>
+                            </Box>
+                            <Box ml={1}>
+                                <Link to='/applications/'>
+                                    <Button variant='text'>
+                                        <FormattedMessage
+                                            id='Applications.Create.ApplicationFormHanlder.cancel'
+                                            defaultMessage='CANCEL'
+                                        />
+                                    </Button>
+                                </Link>
+                            </Box>
+                        </Box>
+                    </Grid>
+                </Box>
+            </ApplicationCreateBase>
         );
     }
 }
 
-EditApp.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({}).isRequired,
-    match: PropTypes.shape({
-        params: PropTypes.shape({
-            application_uuid: PropTypes.string.isRequired,
-        }).isRequired,
+ApplicationFormHanlder.propTypes = {
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func.isRequired,
     }).isRequired,
     history: PropTypes.shape({
         push: PropTypes.func.isRequired,
     }).isRequired,
+    match: PropTypes.shape({
+        params: PropTypes.shape({
+            application_id: PropTypes.string.isRequired,
+        }).isRequired,
+    }).isRequired,
 };
 
-export default injectIntl(withStyles(styles)(EditApp));
+export default injectIntl(ApplicationFormHanlder);

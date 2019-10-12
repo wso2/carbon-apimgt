@@ -20,6 +20,7 @@ const CONSTS = {
     API_PRODUCT_TYPE: 'API_PRODUCT',
     errorCodes: {
         INSUFFICIENT_PREVILEGES: '900403: Insufficient privileges to login',
+        INVALID_TOKEN: '900401: Invalid token',
     },
 };
 

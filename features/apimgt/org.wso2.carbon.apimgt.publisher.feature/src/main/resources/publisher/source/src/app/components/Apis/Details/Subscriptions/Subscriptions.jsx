@@ -65,7 +65,8 @@ function Subscriptions(props) {
     }, []);
 
     return (
-        <div>
+        <React.Fragment>
+            <SubscriptionPoliciesManage api={api} updateAPI={updateAPI} />
             {tenants !== 0 && (
                 <SubscriptionAvailability api={api} updateAPI={updateAPI} />
             )}
@@ -83,8 +84,7 @@ function Subscriptions(props) {
                     </div>
                 </InlineMessage>
             )}
-            <SubscriptionPoliciesManage api={api} updateAPI={updateAPI} />
-        </div>
+        </React.Fragment>
     );
 }
 

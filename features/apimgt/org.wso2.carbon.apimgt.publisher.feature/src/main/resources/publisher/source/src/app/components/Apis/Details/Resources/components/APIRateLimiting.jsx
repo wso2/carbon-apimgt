@@ -46,7 +46,7 @@ const RateLimitingLevels = {
  * @param {*} props
  * @returns
  */
-export default function APIRateLimiting(props) {
+function APIRateLimiting(props) {
     const {
         updateAPI, operationRateLimits, onChange, value: currentApiThrottlingPolicy, isAPIProduct,
     } = props;
@@ -118,7 +118,7 @@ export default function APIRateLimiting(props) {
     return (
         <Paper>
             <Grid container direction='row' spacing={3} justify='flex-start' alignItems='flex-start'>
-                <Grid item md={12}>
+                <Grid item md={12} xs={12}>
                     <Box ml={1}>
                         <Typography variant='subtitle1' gutterBottom>
                             Operations Configuration
@@ -135,8 +135,8 @@ export default function APIRateLimiting(props) {
                     </Box>
                     <Divider light variant='middle' />
                 </Grid>
-                <Grid item md={1} />
-                <Grid item md={3}>
+                <Grid item md={1} xs={1} />
+                <Grid item md={3} xs={11}>
                     <FormControl component='fieldset'>
                         <FormLabel component='legend'>Rate limiting level</FormLabel>
                         <RadioGroup
@@ -147,20 +147,20 @@ export default function APIRateLimiting(props) {
                         >
                             <FormControlLabel
                                 value={RateLimitingLevels.API}
-                                control={<Radio />}
+                                control={<Radio color='primary' />}
                                 label='API Level'
                                 labelPlacement='end'
                             />
                             <FormControlLabel
                                 value={RateLimitingLevels.RESOURCE}
-                                control={<Radio />}
+                                control={<Radio color='primary' />}
                                 label='Operation Level'
                                 labelPlacement='end'
                             />
                         </RadioGroup>
                     </FormControl>
                 </Grid>
-                <Grid item md={8}>
+                <Grid item md={8} xs={12}>
                     <Box minHeight={70} borderLeft={1} pl={10}>
                         {isResourceLevel ? (
                             operationRateLimitMessage
@@ -205,9 +205,11 @@ export default function APIRateLimiting(props) {
                                     Save
                                     {isSaving && <CircularProgress size={24} />}
                                 </Button>
-                                <Button size='small' onClick={resetChanges}>
-                                    Reset
-                                </Button>
+                                <Box display='inline' ml={1}>
+                                    <Button size='small' onClick={resetChanges}>
+                                        Reset
+                                    </Button>
+                                </Box>
                             </Box>
                         </Grid>
                     </Fragment>
@@ -228,3 +230,5 @@ APIRateLimiting.propTypes = {
     value: PropTypes.string.isRequired,
     isAPIProduct: PropTypes.bool,
 };
+
+export default React.memo(APIRateLimiting);

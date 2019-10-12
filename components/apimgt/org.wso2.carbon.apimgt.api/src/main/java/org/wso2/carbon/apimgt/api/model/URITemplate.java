@@ -382,7 +382,7 @@ public class URITemplate implements Serializable{
         return this.scopes;
     }
 
-    public Set<APIProductIdentifier> getUsedByProducts() {
+    public Set<APIProductIdentifier> retrieveUsedByProducts() {
         return usedByProducts;
     }
 

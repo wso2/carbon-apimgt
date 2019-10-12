@@ -22,6 +22,7 @@ import { FormattedMessage } from 'react-intl';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
 import { withStyles } from '@material-ui/core/styles';
+import classNames from 'classnames';
 import CustomIcon from '../../Shared/CustomIcon';
 import ApiTableView from './ApiTableView';
 import { ApiContext } from '../Details/ApiContext';
@@ -41,17 +42,20 @@ const styles = theme => ({
     ListingWrapper: {
         paddingTop: 10,
         paddingLeft: 35,
-        width: theme.custom.contentAreaWidth,
+        maxWidth: theme.custom.contentAreaWidth,
     },
-    root: {
+    appBar: {
         height: 70,
-        background: theme.palette.background.paper,
+        background: theme.custom.infoBar.background,
+        color: theme.palette.getContrastText(theme.custom.infoBar.background),
         borderBottom: 'solid 1px ' + theme.palette.grey.A200,
         display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     mainIconWrapper: {
         paddingTop: 13,
-        paddingLeft: 35,
+        paddingLeft: 20,
         paddingRight: 20,
     },
     mainTitle: {
@@ -66,6 +70,12 @@ const styles = theme => ({
     listContentWrapper: {
         padding: `0 ${theme.spacing.unit * 3}px`,
     },
+    iconDefault: {
+        color: theme.palette.getContrastText(theme.custom.infoBar.background),
+    },
+    iconSelected: {
+        color: theme.custom.infoBar.listGridSelectedColor,
+    }
 });
 
 /**
@@ -105,13 +115,17 @@ class CommonListing extends React.Component {
      */
     render() {
         const {
-            apis, apiType, theme, classes, location: { search },
+            apis,
+            apiType,
+            theme,
+            classes,
+            location: { search },
         } = this.props;
         const { listType } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
         return (
             <main className={classes.content}>
-                <div className={classes.root}>
+                <div className={classes.appBar}>
                     <div className={classes.mainIconWrapper}>
                         <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
                     </div>
@@ -129,26 +143,34 @@ class CommonListing extends React.Component {
                     </div>
                     <div className={classes.buttonRight}>
                         <IconButton className={classes.button} onClick={() => this.setListType('list')}>
-                            <Icon color={listType === 'list' ? 'primary' : 'default'}>list</Icon>
+                            <Icon
+                                className={classNames(
+                                    { [classes.iconSelected]: listType === 'list' },
+                                    { [classes.iconDefault]: listType === 'grid' },
+                                )}
+                            >
+                                list
+                            </Icon>
                         </IconButton>
                         <IconButton className={classes.button} onClick={() => this.setListType('grid')}>
-                            <Icon color={listType === 'grid' ? 'primary' : 'default'}>grid_on</Icon>
+                            <Icon className={classNames(
+                                    { [classes.iconSelected]: listType === 'grid' },
+                                    { [classes.iconDefault]: listType === 'list' },
+                                )}>grid_on</Icon>
                         </IconButton>
                     </div>
                 </div>
                 <div className={classes.listContentWrapper}>
-                    {listType === 'grid'
-                            && (
-                                <ApiContext.Provider value={{ apiType }}>
-                                    <ApiTableView gridView query={search} />
-                                </ApiContext.Provider>
-                            )}
-                    {listType === 'list'
-                            && (
-                                <ApiContext.Provider value={{ apiType }}>
-                                    <ApiTableView gridView={false} query={search} />
-                                </ApiContext.Provider>
-                            )}
+                    {listType === 'grid' && (
+                        <ApiContext.Provider value={{ apiType }}>
+                            <ApiTableView gridView query={search} />
+                        </ApiContext.Provider>
+                    )}
+                    {listType === 'list' && (
+                        <ApiContext.Provider value={{ apiType }}>
+                            <ApiTableView gridView={false} query={search} />
+                        </ApiContext.Provider>
+                    )}
                 </div>
             </main>
         );

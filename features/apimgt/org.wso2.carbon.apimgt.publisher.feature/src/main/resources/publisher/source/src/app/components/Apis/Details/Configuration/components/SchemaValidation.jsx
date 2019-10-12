@@ -42,17 +42,18 @@ const styles = theme => ({
         fontWeight: 400,
         margin: 0,
         display: 'inline-flex',
-        lineHeight: '38px',
+        lineHeight: 2.5,
     },
     iconSpace: {
         marginLeft: theme.spacing(0.5),
     },
     actionSpace: {
-        margin: 'auto',
+        margin: theme.spacing(0, -1),
         float: 'right',
     },
     paper: {
-        padding: theme.spacing(1, 3),
+        padding: theme.spacing(0, 3),
+        marginBottom: theme.spacing(3),
     },
 });
 

@@ -82,6 +82,7 @@ export default function Transports(props) {
                                     })
                                     }
                                     value='http'
+                                    color='primary'
                                 />
                             )}
                             label='HTTP'
@@ -98,6 +99,7 @@ export default function Transports(props) {
                                     })
                                     }
                                     value='https'
+                                    color='primary'
                                 />
                             )}
                             label='HTTPS'

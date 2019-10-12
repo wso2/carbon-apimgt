@@ -76,10 +76,11 @@ const useStyles = makeStyles(theme => ({
 export default function CheckboxLabels(props) {
     const classes = useStyles();
     const { api } = props;
-    const isEndpointAvailable = api.endpointConfig !== null;
+    const isEndpointAvailable = api.endpointConfig !== null && !api.endpointConfig.implementation_status;
     const isTierAvailable = api.policies.length !== 0;
     const isPrototypedAvailable =
-        api.endpointConfig !== null && api.endpointConfig.implementation_status === 'prototyped';
+        (api.endpointConfig !== null && api.endpointConfig.implementation_status === 'prototyped')
+        || api.endpointImplementationType === 'INLINE';
 
     return (
         <Paper className={classes.paperCenter}>
@@ -125,7 +126,12 @@ export default function CheckboxLabels(props) {
                             ) : (
                                 <CloseIcon className={classes.iconFalse} />
                             )}
-                            <Typography variant='h10'>Tiers selected</Typography>
+                            <Typography variant='h10'>
+                                <FormattedMessage
+                                    id='Apis.Details.LifeCycle.CheckboxLabels.business.plans.selected'
+                                    defaultMessage='Business Plan(s) selected'
+                                />
+                            </Typography>
                             <Link to={'/apis/' + api.id + '/subscriptions'}>
                                 <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
                             </Link>
