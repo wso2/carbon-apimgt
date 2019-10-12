@@ -43,7 +43,15 @@ function RenderMethodBase(props) {
     } else {
         chipTextColor = theme.palette.getContrastText(theme.custom.resourceChipColors[method]);
     }
-    return <Chip label={method} style={{ backgroundColor: chipColor, color: chipTextColor, height: 20 }} />;
+    return (<Chip
+        label={method.toUpperCase()}
+        style={{ 
+            backgroundColor: chipColor,
+            color: chipTextColor,
+            height: 20,
+            margin: '5px',
+        }}
+    />);
 }
 
 RenderMethodBase.propTypes = {
