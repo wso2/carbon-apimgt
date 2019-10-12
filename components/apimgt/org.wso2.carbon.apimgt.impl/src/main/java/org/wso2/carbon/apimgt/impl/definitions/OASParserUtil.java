@@ -34,6 +34,7 @@ import io.swagger.models.Swagger;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.v3.parser.ObjectMapperFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -426,48 +427,66 @@ public class OASParserUtil {
             // no need to populate if it is prototype API
             return null;
         }
-        // Validation for only one endpoint type is provided.
-        if (isProduction && !endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
-            return null;
-        }
-        if (!isProduction && !endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
-            return null;
-        }
-        ObjectNode endpointResult = objectMapper.createObjectNode();
+        ObjectNode endpointResult;
         String type = endpointConfig.getString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE);
         if (APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(type)) {
+            endpointResult = objectMapper.createObjectNode();
             endpointResult.put(APIConstants.X_WSO2_ENDPOINT_TYPE, APIConstants.ENDPOINT_TYPE_DEFAULT);
-            return endpointResult;
         } else if (APIConstants.ENDPOINT_TYPE_FAILOVER.equalsIgnoreCase(type)) {
-            populateFailoverConfig(endpointResult, endpointConfig, isProduction);
+            endpointResult = populateFailoverConfig(endpointConfig, isProduction);
         } else if (APIConstants.ENDPOINT_TYPE_LOADBALANCE.equalsIgnoreCase(type)) {
-            populateLoadBalanceConfig(endpointResult, endpointConfig, isProduction);
+            endpointResult = populateLoadBalanceConfig(endpointConfig, isProduction);
         } else if (APIConstants.ENDPOINT_TYPE_HTTP.equalsIgnoreCase(type)) {
-            setPrimaryConfig(endpointResult, endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_HTTP);
+            endpointResult = setPrimaryConfig(endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_HTTP);
         } else if (APIConstants.ENDPOINT_TYPE_ADDRESS.equalsIgnoreCase(type)) {
-            setPrimaryConfig(endpointResult, endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_ADDRESS);
+            endpointResult = setPrimaryConfig(endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_ADDRESS);
         } else {
             return null;
         }
+        if(endpointResult != null) {
+            populateEndpointSecurity(api, endpointResult);
+        }
         return endpointResult;
+    }
+
+    private static void populateEndpointSecurity(API api, ObjectNode endpointResult) {
+        if (api.isEndpointSecured()) {
+            ObjectNode securityConfigObj = objectMapper.createObjectNode();
+            if (api.isEndpointAuthDigest()) {
+                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_TYPE, APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST);
+            } else {
+                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_TYPE, APIConstants.ENDPOINT_SECURITY_TYPE_BASIC);
+            }
+            if (!StringUtils.isEmpty(api.getEndpointUTUsername())) {
+                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_USERNAME, api.getEndpointUTUsername());
+            }
+            endpointResult.set(APIConstants.ENDPOINT_SECURITY_CONFIG, securityConfigObj);
+        }
     }
 
     /**
      * Set failover configuration
      *
-     * @param endpointResult result object
      * @param endpointConfig endpoint configuration json string
      * @param isProd         endpoint type
      */
-    private static void populateFailoverConfig(ObjectNode endpointResult, JSONObject endpointConfig, boolean isProd) {
-        JSONArray endpointsURLs;
-        JSONObject primaryEndpoints;
+    private static ObjectNode populateFailoverConfig(JSONObject endpointConfig, boolean isProd) {
+        JSONArray endpointsURLs = null;
+        JSONObject primaryEndpoints = null;
         if (isProd) {
-            endpointsURLs = endpointConfig.getJSONArray(APIConstants.ENDPOINT_PRODUCTION_FAILOVERS);
-            primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+            if(endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_FAILOVERS)) {
+                endpointsURLs = endpointConfig.getJSONArray(APIConstants.ENDPOINT_PRODUCTION_FAILOVERS);
+            }
+            if(endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+                primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+            }
         } else {
-            endpointsURLs = endpointConfig.getJSONArray(APIConstants.ENDPOINT_SANDBOX_FAILOVERS);
-            primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+            if(endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_FAILOVERS)) {
+                endpointsURLs = endpointConfig.getJSONArray(APIConstants.ENDPOINT_SANDBOX_FAILOVERS);
+            }
+            if(endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+                primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+            }
         }
 
         ArrayNode endpointsArray = objectMapper.createArrayNode();
@@ -480,26 +499,34 @@ public class OASParserUtil {
         if (primaryEndpoints != null && primaryEndpoints.has(APIConstants.ENDPOINT_URL)) {
             endpointsArray.add(primaryEndpoints.getString(APIConstants.ENDPOINT_URL));
         }
+        if(endpointsArray.size() < 1) {
+            return null;
+        }
+        ObjectNode endpointResult = objectMapper.createObjectNode();
         endpointResult.set(APIConstants.ENDPOINT_URLS, endpointsArray);
         endpointResult.put(APIConstants.X_WSO2_ENDPOINT_TYPE, APIConstants.ENDPOINT_TYPE_FAILOVER);
+        return endpointResult;
     }
 
     /**
      * Set load balance configuration
      *
-     * @param endpointResult result object
      * @param endpointConfig endpoint configuration json string
      * @param isProd         endpoint type
      */
-    private static void populateLoadBalanceConfig(ObjectNode endpointResult, JSONObject endpointConfig,
+    private static ObjectNode populateLoadBalanceConfig(JSONObject endpointConfig,
             boolean isProd) {
         JSONArray primaryProdEndpoints = new JSONArray();
-        if (isProd && endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) &&
-                endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) instanceof JSONArray) {
-            primaryProdEndpoints = endpointConfig.getJSONArray(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
-        } else if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) &&
-                endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) instanceof JSONArray) {
-            primaryProdEndpoints = endpointConfig.getJSONArray(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+        if (isProd) {
+            if(endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) &&
+                    endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) instanceof JSONArray) {
+                primaryProdEndpoints = endpointConfig.getJSONArray(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+            }
+        } else {
+            if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) &&
+                    endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) instanceof JSONArray) {
+                primaryProdEndpoints = endpointConfig.getJSONArray(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+            }
         }
 
         ArrayNode endpointsArray = objectMapper.createArrayNode();
@@ -507,36 +534,45 @@ public class OASParserUtil {
             for (int i = 0; i < primaryProdEndpoints.length(); i++) {
                 JSONObject obj = primaryProdEndpoints.getJSONObject(i);
                 endpointsArray.add(obj.getString(APIConstants.ENDPOINT_URL));
-                if (obj.has(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) {
-                }
             }
         }
+        if(endpointsArray.size() < 1) {
+            return null;
+        }
+        ObjectNode endpointResult = objectMapper.createObjectNode();
         endpointResult.set(APIConstants.ENDPOINT_URLS, endpointsArray);
         endpointResult.put(APIConstants.X_WSO2_ENDPOINT_TYPE, APIConstants.ENDPOINT_TYPE_LOADBALANCE);
+        return endpointResult;
     }
 
     /**
      * Set baisc configuration
      *
-     * @param endpointResult result object
      * @param endpointConfig endpoint configuration json string
      * @param isProd         endpoint type
      * @param type           endpoint type
      */
-    private static void setPrimaryConfig(ObjectNode endpointResult, JSONObject endpointConfig, boolean isProd,
+    private static ObjectNode setPrimaryConfig(JSONObject endpointConfig, boolean isProd,
             String type) {
         JSONObject primaryEndpoints = new JSONObject();
-        if (isProd && endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
-            primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
-        } else if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
-            primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+        if (isProd) {
+            if(endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+                primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+            }
+        } else {
+            if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+                primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+            }
         }
         if (primaryEndpoints != null && primaryEndpoints.has(APIConstants.ENDPOINT_URL)) {
             ArrayNode endpointsArray = objectMapper.createArrayNode();
             endpointsArray.add(primaryEndpoints.getString(APIConstants.ENDPOINT_URL));
+            ObjectNode endpointResult = objectMapper.createObjectNode();
             endpointResult.set(APIConstants.ENDPOINT_URLS, endpointsArray);
             endpointResult.put(APIConstants.X_WSO2_ENDPOINT_TYPE, type);
+            return endpointResult;
         }
+        return null;
     }
 
     /**
