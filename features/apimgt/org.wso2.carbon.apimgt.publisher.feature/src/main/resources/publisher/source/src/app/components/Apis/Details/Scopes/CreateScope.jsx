@@ -137,6 +137,7 @@ class CreateScope extends React.Component {
         this.validateScopeDescription = this.validateScopeDescription.bind(this);
         this.handleRoleAddition = this.handleRoleAddition.bind(this);
         this.handleRoleDeletion = this.handleRoleDeletion.bind(this);
+        this.isScopeNameExist = this.isScopeNameExist.bind(this);
     }
 
     /**
@@ -211,6 +212,29 @@ class CreateScope extends React.Component {
         if (!valid[id].invalid && /[!@#$%^&*(),.?":{}[\]|<>\t\n]/i.test(value)) {
             valid[id].invalid = true;
             valid[id].error = 'Field contains special characters';
+        }
+        if (!valid[id].invalid) {
+            const promise = APIValidation.scope.validate(base64url.encode(value));
+            promise
+                .then(() => {
+                    valid[id].invalid = true;
+                    valid[id].error = 'Scope name is already used by another API';
+                    this.setState({
+                        valid,
+                    });
+                })
+                .catch((error) => {
+                    if (error.status === 404) {
+                        valid[id].invalid = false;
+                        valid[id].error = '';
+                        this.setState({
+                            valid,
+                        });
+                    } else {
+                        Alert.error('Error when validating scope: ' + value);
+                        console.error('Error when validating scope ' + error);
+                    }
+                });
         }
         if (!valid[id].invalid) {
             valid[id].error = '';
