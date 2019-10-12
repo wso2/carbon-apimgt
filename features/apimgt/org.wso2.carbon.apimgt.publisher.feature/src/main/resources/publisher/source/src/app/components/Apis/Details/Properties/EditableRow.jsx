@@ -28,14 +28,9 @@ import SaveIcon from '@material-ui/icons/Save';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import { injectIntl } from 'react-intl';
+import IconButton from '@material-ui/core/IconButton';
 
-const useStyles = makeStyles(theme => ({
-    addProperty: {
-        marginRight: theme.spacing.unit * 2,
-    },
-    buttonIcon: {
-        marginRight: 10,
-    },
+const useStyles = makeStyles(() => ({
     link: {
         cursor: 'pointer',
     },
@@ -47,14 +42,15 @@ const useStyles = makeStyles(theme => ({
  */
 function EditableRow(props) {
     const {
-        oldKey, oldValue, handleUpdateList, handleDelete, apiAdditionalProperties, intl,
+        oldKey, oldValue, handleUpdateList, handleDelete, apiAdditionalProperties, intl, setEditing,
     } = props;
-    const [newKey, setKey] = useState(null);
-    const [newValue, setValue] = useState(null);
+    const [newKey, setKey] = useState(oldKey);
+    const [newValue, setValue] = useState(oldValue);
     const [editMode, setEditMode] = useState(false);
 
     const updateEditMode = function () {
         setEditMode(!editMode);
+        setEditing(true);
     };
     const handleKeyChange = (event) => {
         const { value } = event.target;
@@ -78,6 +74,7 @@ function EditableRow(props) {
         const newRow = { newKey: newKey || oldKey, newValue: newValue || oldValue };
         handleUpdateList(oldRow, newRow);
         setEditMode(false);
+        setEditing(false);
     };
     const deleteRow = function () {
         handleDelete(apiAdditionalProperties, oldKey);
@@ -103,7 +100,7 @@ function EditableRow(props) {
                         margin='normal'
                         variant='outlined'
                         className={classes.addProperty}
-                        value={newKey || oldKey}
+                        value={newKey}
                         onChange={handleKeyChange}
                         onKeyDown={handleKeyDown}
                         error={validateEmpty(newKey)}
@@ -124,7 +121,7 @@ function EditableRow(props) {
                         margin='normal'
                         variant='outlined'
                         className={classes.addProperty}
-                        value={newValue || oldValue}
+                        value={newValue}
                         onChange={handleValueChange}
                         onKeyDown={handleKeyDown}
                         error={validateEmpty(newValue)}
@@ -136,18 +133,37 @@ function EditableRow(props) {
             <TableCell align='right'>
                 {editMode ? (
                     <React.Fragment>
-                        <a className={classes.link} onClick={saveRow} onKeyDown={() => {}}>
+                        <IconButton
+                            className={classes.link}
+                            aria-label='save'
+                            onClick={saveRow}
+                            onKeyDown={() => {}}
+                            disabled={validateEmpty(newKey) || validateEmpty(newValue)}
+                            color='inherit'
+                        >
                             <SaveIcon className={classes.buttonIcon} />
-                        </a>
+                        </IconButton>
                     </React.Fragment>
                 ) : (
-                    <a className={classes.link} onClick={updateEditMode} onKeyDown={() => {}}>
+                    <IconButton
+                        className={classes.link}
+                        aria-label='edit'
+                        onClick={updateEditMode}
+                        onKeyDown={() => {}}
+                        color='inherit'
+                    >
                         <EditIcon className={classes.buttonIcon} />
-                    </a>
+                    </IconButton>
                 )}
-                <a className={classes.link} onClick={deleteRow} onKeyDown={() => {}}>
+                <IconButton
+                    className={classes.link}
+                    aria-label='remove'
+                    onClick={deleteRow}
+                    onKeyDown={() => {}}
+                    color='inherit'
+                >
                     <DeleteForeverIcon className={classes.buttonIcon} />
-                </a>
+                </IconButton>
             </TableCell>
         </TableRow>
     );
@@ -160,6 +176,7 @@ EditableRow.propTypes = {
     handleDelete: PropTypes.shape({}).isRequired,
     apiAdditionalProperties: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
+    setEditing: PropTypes.func.isRequired,
 };
 
 export default injectIntl(EditableRow);
