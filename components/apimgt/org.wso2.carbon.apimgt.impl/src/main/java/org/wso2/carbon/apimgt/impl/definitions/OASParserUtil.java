@@ -127,8 +127,8 @@ public class OASParserUtil {
      */
     public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
             throws APIManagementException {
-        APIDefinitionValidationResponse validationResponse = oas3Parser
-                .validateAPIDefinition(apiDefinition, returnJsonContent);
+        APIDefinitionValidationResponse validationResponse =
+                oas3Parser.validateAPIDefinition(apiDefinition, returnJsonContent);
         if (!validationResponse.isValid()) {
             for (ErrorHandler handler : validationResponse.getErrorItems()) {
                 if (ExceptionCodes.INVALID_OAS3_FOUND.getErrorCode() == handler.getErrorCode()) {
@@ -149,8 +149,8 @@ public class OASParserUtil {
      */
     private static APIDefinitionValidationResponse tryOAS2Validation(String apiDefinition, boolean returnJsonContent)
             throws APIManagementException {
-        APIDefinitionValidationResponse validationResponse = oas2Parser
-                .validateAPIDefinition(apiDefinition, returnJsonContent);
+        APIDefinitionValidationResponse validationResponse =
+                oas2Parser.validateAPIDefinition(apiDefinition, returnJsonContent);
         if (!validationResponse.isValid()) {
             for (ErrorHandler handler : validationResponse.getErrorItems()) {
                 if (ExceptionCodes.INVALID_OAS2_FOUND.getErrorCode() == handler.getErrorCode()) {
@@ -278,8 +278,8 @@ public class OASParserUtil {
     public static Map<String, String> getAPIOpenAPIDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry)
             throws APIManagementException {
         Map<String, String> timeStampMap = new HashMap<String, String>();
-        String resourcePath = APIUtil
-                .getOpenAPIDefinitionFilePath(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
+        String resourcePath =
+                APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
                         apiIdentifier.getProviderName());
         try {
             if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
@@ -354,17 +354,15 @@ public class OASParserUtil {
      * @return api definition json as json string
      * @throws APIManagementException
      */
-    public static String getAPIDefinition(Identifier apiIdentifier, Registry registry)
-            throws APIManagementException {
+    public static String getAPIDefinition(Identifier apiIdentifier, Registry registry) throws APIManagementException {
         String resourcePath = "";
 
         if (apiIdentifier instanceof APIIdentifier) {
-            resourcePath = APIUtil
-                    .getOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
-                            apiIdentifier.getProviderName());
+            resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
+                    apiIdentifier.getProviderName());
         } else if (apiIdentifier instanceof APIProductIdentifier) {
-            resourcePath = APIUtil
-                    .getAPIProductOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
+            resourcePath =
+                    APIUtil.getAPIProductOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
                             apiIdentifier.getProviderName());
         }
 
@@ -386,9 +384,8 @@ public class OASParserUtil {
                     "Error while retrieving OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getName() + '-'
                             + apiIdentifier.getVersion(), e);
         } catch (ParseException e) {
-            handleException(
-                    "Error while parsing OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getName() + '-'
-                            + apiIdentifier.getVersion() + " in " + resourcePath, e);
+            handleException("Error while parsing OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getName() + '-'
+                    + apiIdentifier.getVersion() + " in " + resourcePath, e);
         }
         return apiDocContent;
     }
@@ -443,7 +440,7 @@ public class OASParserUtil {
         } else {
             return null;
         }
-        if(endpointResult != null) {
+        if (endpointResult != null) {
             populateEndpointSecurity(api, endpointResult);
         }
         return endpointResult;
@@ -474,17 +471,17 @@ public class OASParserUtil {
         JSONArray endpointsURLs = null;
         JSONObject primaryEndpoints = null;
         if (isProd) {
-            if(endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_FAILOVERS)) {
+            if (endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_FAILOVERS)) {
                 endpointsURLs = endpointConfig.getJSONArray(APIConstants.ENDPOINT_PRODUCTION_FAILOVERS);
             }
-            if(endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+            if (endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
                 primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
             }
         } else {
-            if(endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_FAILOVERS)) {
+            if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_FAILOVERS)) {
                 endpointsURLs = endpointConfig.getJSONArray(APIConstants.ENDPOINT_SANDBOX_FAILOVERS);
             }
-            if(endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+            if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
                 primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
             }
         }
@@ -499,7 +496,7 @@ public class OASParserUtil {
         if (primaryEndpoints != null && primaryEndpoints.has(APIConstants.ENDPOINT_URL)) {
             endpointsArray.add(primaryEndpoints.getString(APIConstants.ENDPOINT_URL));
         }
-        if(endpointsArray.size() < 1) {
+        if (endpointsArray.size() < 1) {
             return null;
         }
         ObjectNode endpointResult = objectMapper.createObjectNode();
@@ -514,17 +511,16 @@ public class OASParserUtil {
      * @param endpointConfig endpoint configuration json string
      * @param isProd         endpoint type
      */
-    private static ObjectNode populateLoadBalanceConfig(JSONObject endpointConfig,
-            boolean isProd) {
+    private static ObjectNode populateLoadBalanceConfig(JSONObject endpointConfig, boolean isProd) {
         JSONArray primaryProdEndpoints = new JSONArray();
         if (isProd) {
-            if(endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) &&
-                    endpointConfig.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) instanceof JSONArray) {
+            if (endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) && endpointConfig
+                    .get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) instanceof JSONArray) {
                 primaryProdEndpoints = endpointConfig.getJSONArray(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
             }
         } else {
-            if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) &&
-                    endpointConfig.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) instanceof JSONArray) {
+            if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) && endpointConfig
+                    .get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) instanceof JSONArray) {
                 primaryProdEndpoints = endpointConfig.getJSONArray(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
             }
         }
@@ -536,7 +532,7 @@ public class OASParserUtil {
                 endpointsArray.add(obj.getString(APIConstants.ENDPOINT_URL));
             }
         }
-        if(endpointsArray.size() < 1) {
+        if (endpointsArray.size() < 1) {
             return null;
         }
         ObjectNode endpointResult = objectMapper.createObjectNode();
@@ -552,11 +548,10 @@ public class OASParserUtil {
      * @param isProd         endpoint type
      * @param type           endpoint type
      */
-    private static ObjectNode setPrimaryConfig(JSONObject endpointConfig, boolean isProd,
-            String type) {
+    private static ObjectNode setPrimaryConfig(JSONObject endpointConfig, boolean isProd, String type) {
         JSONObject primaryEndpoints = new JSONObject();
         if (isProd) {
-            if(endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+            if (endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
                 primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
             }
         } else {
