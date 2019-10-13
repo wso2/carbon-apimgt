@@ -116,7 +116,7 @@ const APICreateMenu = (props) => {
             </ListItem>
         </List>
     );
-    return !AuthManager.isNotCreator() && <MenuButton id='tmkasunt3' {...props} menuList={createTypes} />;
+    return !AuthManager.isNotCreator() && <MenuButton {...props} menuList={createTypes} />;
 };
 
 APICreateMenu.propTypes = {
