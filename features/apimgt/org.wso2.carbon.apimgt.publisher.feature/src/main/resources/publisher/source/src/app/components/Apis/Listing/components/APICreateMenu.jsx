@@ -21,7 +21,7 @@ const APICreateMenu = (props) => {
     const createTypes = (
         <List>
             <ListItem>
-                <Link to='/apis/create/rest' className={classes.links}>
+                <Link id='itest-id-createdefault' to='/apis/create/rest' className={classes.links}>
                     <ListItemText
                         primary={
                             <FormattedMessage
@@ -116,7 +116,7 @@ const APICreateMenu = (props) => {
             </ListItem>
         </List>
     );
-    return !AuthManager.isNotCreator() && <MenuButton {...props} menuList={createTypes} />;
+    return !AuthManager.isNotCreator() && <MenuButton id='tmkasunt3' {...props} menuList={createTypes} />;
 };
 
 APICreateMenu.propTypes = {

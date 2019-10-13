@@ -74,6 +74,7 @@ class MenuButton extends React.Component {
         return (
             <React.Fragment>
                 <Button
+                    id='itest-id-createapi'
                     buttonRef={(node) => {
                         this.anchorEl = node;
                     }}
