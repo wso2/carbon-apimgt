@@ -87,7 +87,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Internal Error occurred", e, log);
         } catch (AlertManagementException e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Analytics not Enabled").build();
+            return Response.status(Response.Status.NO_CONTENT).entity("Analytics not Enabled").build();
         }
         return Response.status(Response.Status.NO_CONTENT).build();
     }
