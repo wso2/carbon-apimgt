@@ -19,6 +19,7 @@
 import React, { useState, useEffect } from 'react';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import Grid from '@material-ui/core/Grid';
 import Tokens from 'AppComponents/Shared/AppsAndKeys/Tokens';
 import Application from 'AppData/Application';
 import ButtonPanel from './ButtonPanel';
@@ -65,9 +66,11 @@ const generateAccessTokenStep = (props) => {
     const generateAccessToken = () => {
         Application.get(createdApp.value)
             .then((application) => {
-                return application.generateToken(accessTokenRequest.keyType,
+                return application.generateToken(
+                    accessTokenRequest.keyType,
                     accessTokenRequest.timeout,
-                    accessTokenRequest.scopesSelected);
+                    accessTokenRequest.scopesSelected,
+                );
             })
             .then((response) => {
                 console.log('token generated successfully ' + response);
@@ -95,13 +98,13 @@ const generateAccessTokenStep = (props) => {
             >
                 <Tab label={keyType} />
             </Tabs>
-            <div>
+            <Grid md={10}>
                 <Tokens
                     updateAccessTokenRequest={setAccessTokenRequest}
                     accessTokenRequest={accessTokenRequest}
                     subscriptionScopes={subscriptionScopes}
                 />
-            </div>
+            </Grid>
             <ButtonPanel
                 classes={classes}
                 currentStep={currentStep}

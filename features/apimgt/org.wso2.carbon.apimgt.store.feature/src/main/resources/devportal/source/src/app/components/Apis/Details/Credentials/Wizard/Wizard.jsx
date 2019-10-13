@@ -19,16 +19,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
-import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
-import AppBar from '@material-ui/core/AppBar';
 import { Typography, Paper, Box } from '@material-ui/core';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
-import ApplicationCreateBase from 'AppComponents/Applications/Create/ApplicationCreateBase';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import CreateAppStep from './CreateAppStep';

@@ -19,6 +19,8 @@
 import React from 'react';
 import ViewToken from 'AppComponents/Shared/AppsAndKeys/ViewToken';
 import ButtonPanel from './ButtonPanel';
+import { Box } from '@material-ui/core';
+import Grid from '@material-ui/core/Grid';
 
 const copyAccessTokenStep = (props) => {
     const {
@@ -31,7 +33,11 @@ const copyAccessTokenStep = (props) => {
 
     return (
         <React.Fragment>
-            <ViewToken token={{...createdToken, isOauth:true}} />
+            <Grid md={10}>
+                <Box my={1} mx={2}>
+                    <ViewToken token={{ ...createdToken, isOauth: true }} />
+                </Box>
+            </Grid>
             <ButtonPanel
                 classes={classes}
                 currentStep={currentStep}
