@@ -503,7 +503,7 @@ class SignUp extends React.Component {
                                                         </Typography>
                                                     </FormControl>
                                                     <FormControlLabel
-                                                        control={<Checkbox onChange={this.handlePolicyChange} />}
+                                                        control={<Checkbox onChange={this.handlePolicyChange} color='primary' />}
                                                         label={(
                                                             <p>
                                                                 <strong>

@@ -262,8 +262,8 @@ class CreateNewVersion extends React.Component {
                                     value={isDefaultVersion}
                                     onChange={this.handleDefaultVersionChange()}
                                 >
-                                    <FormControlLabel value='yes' control={<Radio />} label='Yes' />
-                                    <FormControlLabel value='no' control={<Radio />} label='No' />
+                                    <FormControlLabel value='yes' control={<Radio color='primary' />} label='Yes' />
+                                    <FormControlLabel value='no' control={<Radio color='primary' />} label='No' />
                                 </RadioGroup>
                                 <FormHelperText>
                                     <FormattedMessage

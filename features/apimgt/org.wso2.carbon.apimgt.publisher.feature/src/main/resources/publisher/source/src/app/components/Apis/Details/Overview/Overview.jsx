@@ -239,7 +239,7 @@ class Overview extends Component {
         const api = new Api();
         const apiId = this.props.api.id;
         const { editableDescriptionText } = this.state;
-        const promisedApi = api.get(apiId);
+        const promisedApi = api.get(apiId); 
         promisedApi
             .then((getResponse) => {
                 const apiData = getResponse.body;

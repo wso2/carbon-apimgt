@@ -214,7 +214,7 @@ export default function ProvideWSDL(props) {
                         >
                             <FormControlLabel
                                 value='SOAP'
-                                control={<Radio />}
+                                control={<Radio color='primary' />}
                                 label={<FormattedMessage
                                     id='Apis.Create.WSDL.Steps.ProvideWSDL.passthrough.label'
                                     defaultMessage='Pass Through'
@@ -222,7 +222,7 @@ export default function ProvideWSDL(props) {
                             />
                             <FormControlLabel
                                 value='SOAPTOREST'
-                                control={<Radio />}
+                                control={<Radio color='primary' />}
                                 label={<FormattedMessage
                                     id='Apis.Create.WSDL.Steps.ProvideWSDL.SOAPtoREST.label'
                                     defaultMessage='Generate REST APIs'
@@ -253,7 +253,7 @@ export default function ProvideWSDL(props) {
                         >
                             <FormControlLabel
                                 value='url'
-                                control={<Radio />}
+                                control={<Radio color='primary' />}
                                 label={<FormattedMessage
                                     id='Apis.Create.WSDL.Steps.ProvideWSDL.url.label'
                                     defaultMessage='WSDL URL'
@@ -261,7 +261,7 @@ export default function ProvideWSDL(props) {
                             />
                             <FormControlLabel
                                 value='file'
-                                control={<Radio />}
+                                control={<Radio color='primary' />}
                                 label={fileControlLabel}
                             />
                         </RadioGroup>

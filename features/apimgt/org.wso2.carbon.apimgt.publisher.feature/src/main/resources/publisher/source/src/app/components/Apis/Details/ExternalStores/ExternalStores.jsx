@@ -184,6 +184,7 @@ export default function ExternalStores() {
                                                 }
                                             }
                                             name={row.id}
+                                            color='primary'
                                         />
                                     </StyledTableCell>
                                     <StyledTableCell component='th' scope='row'>

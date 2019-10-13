@@ -471,7 +471,7 @@ function EditMediationPolicy(props) {
                         defaultMessage='Cancel'
                     />
                 </Button>
-                <Button onClick={doneEditing} color='primary'>
+                <Button onClick={doneEditing} color='primary' variant='contained'>
                     <FormattedMessage
                         id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.select.btn'
                         defaultMessage='Select'

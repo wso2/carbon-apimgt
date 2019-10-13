@@ -164,6 +164,7 @@ class Monetization extends Component {
                                 checked={monStatus}
                                 onChange={this.handleChange}
                                 value={monStatus}
+                                color='primary'
                             />
                         }
                         label='Enable Monetization'

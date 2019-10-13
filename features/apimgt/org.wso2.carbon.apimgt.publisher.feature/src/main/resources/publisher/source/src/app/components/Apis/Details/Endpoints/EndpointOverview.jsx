@@ -498,6 +498,7 @@ function EndpointOverview(props) {
                                                 control={
                                                     <Radio
                                                         disabled={(isRestricted(['apim:api_create'], api))}
+                                                        color='primary'
                                                     />
                                                 }
                                                 label={endpoint.value}
@@ -510,6 +511,7 @@ function EndpointOverview(props) {
                                                     control={
                                                         <Radio
                                                             disabled={(isRestricted(['apim:api_create'], api))}
+                                                            color='primary'
                                                         />
                                                     }
                                                     label={endpoint.value}
@@ -522,6 +524,7 @@ function EndpointOverview(props) {
                                                 control={
                                                     <Radio
                                                         disabled={(isRestricted(['apim:api_create'], api))}
+                                                        color='primary'
                                                     />
                                                 }
                                                 label={endpoint.value}
@@ -547,7 +550,11 @@ function EndpointOverview(props) {
                                                     'Message Mediation Policies, which sets the endpoints.'}
                                                 />
                                                 <Link to={'/apis/' + api.id + '/runtime-configuration'}>
-                                                    <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
+                                                    <LaunchIcon
+                                                        style={{ marginLeft: '2px' }}
+                                                        fontSize='small'
+                                                        color='primary'
+                                                    />
                                                 </Link>
                                             </Typography>
                                         </div>
