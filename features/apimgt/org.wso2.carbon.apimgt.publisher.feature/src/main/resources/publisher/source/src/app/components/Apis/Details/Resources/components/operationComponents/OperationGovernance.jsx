@@ -153,7 +153,8 @@ export default function OperationGovernance(props) {
                     select
                     disabled={disableUpdate}
                     label='Operation scope'
-                    value={getOperationScopes(operation, spec)[0]}
+                    value={getOperationScopes(operation, spec).length !== 0 ?
+                        getOperationScopes(operation, spec)[0] : ''}
                     onChange={({ target: { value } }) =>
                         operationsDispatcher({
                             action: 'scopes',
@@ -164,6 +165,8 @@ export default function OperationGovernance(props) {
                     margin='dense'
                     variant='outlined'
                 >
+                    {api.scopes.length !== 0 && (
+                        <MenuItem key='none' value='' />)}
                     {api.scopes.map(scope => (
                         <MenuItem key={scope.name} value={scope.name}>
                             {scope.name}

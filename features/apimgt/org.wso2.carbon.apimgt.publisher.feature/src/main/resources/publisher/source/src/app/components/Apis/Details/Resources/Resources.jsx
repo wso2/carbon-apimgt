@@ -86,6 +86,8 @@ export default function Resources(props) {
                 setSelectedOperation({});
                 return data || openAPISpec.paths;
             case 'description':
+                updatedOperation[action] = value;
+                break;
             case 'summary':
                 updatedOperation[action] = value;
                 break;
@@ -101,7 +103,7 @@ export default function Resources(props) {
                 } else if (!updatedOperation.security.find(item => item.default)) {
                     updatedOperation.security.push({ default: [] });
                 }
-                updatedOperation.security.find(item => item.default).default = [value];
+                updatedOperation.security.find(item => item.default).default = (value === '') ? [] : [value];
                 break;
             case 'add': {
                 const parameters = extractPathParameters(data.target, openAPISpec);
