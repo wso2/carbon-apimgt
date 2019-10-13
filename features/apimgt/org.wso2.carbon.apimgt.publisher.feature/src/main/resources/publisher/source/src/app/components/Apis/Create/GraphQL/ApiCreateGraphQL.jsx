@@ -253,7 +253,12 @@ export default function ApiCreateGraphQL(props) {
                         />
                     )}
                     {wizardStep === 1 && (
-                        <DefaultAPIForm onValidate={handleOnValidate} onChange={handleOnChange} api={apiInputs} />
+                        <DefaultAPIForm
+                            onValidate={handleOnValidate}
+                            onChange={handleOnChange}
+                            api={apiInputs}
+                            isAPIProduct={false}
+                        />
                     )}
                 </Grid>
                 <Grid item md={1} />
