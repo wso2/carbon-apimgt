@@ -86,7 +86,7 @@ const Alerts = (props) => {
     const [isAnalyticsEnabled, setAnalyticsEnabled] = useState(false);
     const [isInProgress, setInProgress] = useState({ subscribing: false, unSubscribing: false });
     const [unsubscribeAll, setUnsubscribeAll] = useState(false);
-    const [api, setAPI] = useState(new API());
+    const api = new API();
 
     const alertIdMapping =
         {
@@ -231,9 +231,7 @@ const Alerts = (props) => {
     useEffect(() => {
         const supportedAlertsPromise = api.getSupportedAlertTypes();
         const subscribedAlertsPromise = api.getSubscribedAlertTypesByUser();
-        console.log(subscribedAlertsPromise, supportedAlertsPromise);
         Promise.all([supportedAlertsPromise, subscribedAlertsPromise]).then((response) => {
-            console.log('success', response);
             if (response[0].status === 204 || response[1].status === 204) {
                 setAnalyticsEnabled(false);
             } else {
@@ -479,8 +477,17 @@ const Alerts = (props) => {
 };
 
 Alerts.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        configDialogHeading: PropTypes.shape({}).isRequired,
+        chipInput: PropTypes.shape({}).isRequired,
+        btnContainer: PropTypes.shape({}).isRequired,
+        alertsWrapper: PropTypes.shape({}).isRequired,
+        contentWrapper: PropTypes.shape({}).isRequired,
+        manageAlertHeading: PropTypes.shape({}).isRequired,
+    }).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func.isRequired,
+    }).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Alerts));
