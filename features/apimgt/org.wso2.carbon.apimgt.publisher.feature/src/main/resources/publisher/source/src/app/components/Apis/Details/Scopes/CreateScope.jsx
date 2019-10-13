@@ -137,7 +137,6 @@ class CreateScope extends React.Component {
         this.validateScopeDescription = this.validateScopeDescription.bind(this);
         this.handleRoleAddition = this.handleRoleAddition.bind(this);
         this.handleRoleDeletion = this.handleRoleDeletion.bind(this);
-        this.isScopeNameExist = this.isScopeNameExist.bind(this);
     }
 
     /**
