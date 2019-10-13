@@ -37,6 +37,9 @@ const Configurations = {
                 h4: {
                     fontSize: '1.3rem',
                 },
+                caption: {
+                    fontSize: '0.875rem',
+                },
             },
             zIndex: {
                 apiCreateMenu: 1250,
