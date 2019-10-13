@@ -26,61 +26,56 @@ import Api from 'AppData/api';
 import AuthManager from 'AppData/AuthManager';
 import withSettings from 'AppComponents/Shared/withSettingsContext';
 import Alert from 'AppComponents/Shared/Alert';
+import classNames from 'classnames';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { PageNotFound } from '../../Base/Errors/index';
 import InfoBar from './InfoBar';
 import { ApiContext } from './ApiContext';
 import Progress from '../../Shared/Progress';
-import classNames from 'classnames';
+import Wizard from './Credentials/Wizard/Wizard';
 
 const LoadableSwitch = withRouter(Loadable.Map({
     loader: {
         ApiConsole: () =>
-                import(
-                    // eslint-disable-line function-paren-newline
+                import(// eslint-disable-line function-paren-newline
                     /* webpackChunkName: "ApiConsole" */
                     /* webpackPrefetch: true */
                     // eslint-disable-next-line comma-dangle
                     './ApiConsole/ApiConsole'),
         Overview: () =>
-                import(
-                    // eslint-disable-line function-paren-newline
+                import(// eslint-disable-line function-paren-newline
                     /* webpackChunkName: "Overview" */
                     /* webpackPrefetch: true */
                     // eslint-disable-next-line comma-dangle
                     './Overview'),
         Documentation: () =>
-                import(
-                    // eslint-disable-line function-paren-newline
+                import(// eslint-disable-line function-paren-newline
                     /* webpackChunkName: "Documentation" */
                     /* webpackPrefetch: true */
                     // eslint-disable-next-line comma-dangle
                     './Documents/Documentation'),
         Credentials: () =>
-                import(
-                    // eslint-disable-line function-paren-newline
+                import(// eslint-disable-line function-paren-newline
                     /* webpackChunkName: "Credentials" */
                     /* webpackPrefetch: true */
                     // eslint-disable-next-line comma-dangle
                     './Credentials/Credentials'),
         Comments: () =>
-                import(
-                    // eslint-disable-line function-paren-newline
+                import(// eslint-disable-line function-paren-newline
                     /* webpackChunkName: "Comments" */
                     /* webpackPrefetch: true */
                     // eslint-disable-next-line comma-dangle
                     './Comments/Comments'),
         Sdk: () =>
-                import(
-                    // eslint-disable-line function-paren-newline
+                import(// eslint-disable-line function-paren-newline
                     /* webpackChunkName: "Sdk" */
                     /* webpackPrefetch: true */
                     // eslint-disable-next-line comma-dangle
                     './Sdk'),
     },
     render(loaded, props) {
-        const { match, advertised } = props;
+        const { match, api, updateSubscriptionData } = props;
         const ApiConsole = loaded.ApiConsole.default;
         const Overview = loaded.Overview.default;
         const Documentation = loaded.Documentation.default;
@@ -89,7 +84,7 @@ const LoadableSwitch = withRouter(Loadable.Map({
         const Sdk = loaded.Sdk.default;
         const apiUuid = match.params.api_uuid;
         const path = '/apis/';
-
+        const { advertised } = api.advertiseInfo;
         const redirectURL = path + apiUuid + '/overview';
 
         return (
@@ -97,6 +92,16 @@ const LoadableSwitch = withRouter(Loadable.Map({
                 <Redirect exact from='/apis/:apiUuid' to={redirectURL} />
                 <Route path='/apis/:apiUuid/overview' render={props => <Overview {...props} />} />
                 <Route path='/apis/:apiUuid/docs' component={Documentation} />
+                <Route
+                    exact
+                    path='/apis/:apiUuid/credentials/wizard'
+                    component={() => (<Wizard
+                        updateSubscriptionData={updateSubscriptionData}
+                        apiId={api.id}
+                        handleClickToggle={() => {}}
+                        throttlingPolicyList={api.tiers}
+                    />)}
+                />
                 {!advertised && <Route path='/apis/:apiUuid/comments' component={Comments} />}
                 {!advertised && <Route path='/apis/:apiUuid/credentials' component={Credentials} />}
                 {!advertised && <Route path='/apis/:apiUuid/test' component={ApiConsole} />}
@@ -398,7 +403,7 @@ class Details extends React.Component {
                             { [classes.contentLoaderRightMenu]: position === 'vertical-right' },
                         )}
                     >
-                        <LoadableSwitch api_uuid={apiUuid} advertised={api.advertiseInfo.advertised} />
+                        <LoadableSwitch api={api} updateSubscriptionData={this.updateSubscriptionData} />
                     </div>
                 </div>
             </ApiContext.Provider>

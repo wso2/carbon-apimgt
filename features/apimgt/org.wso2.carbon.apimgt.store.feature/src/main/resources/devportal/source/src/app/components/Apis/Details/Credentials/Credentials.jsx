@@ -20,6 +20,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
+import { Link } from 'react-router-dom';
 import Slide from '@material-ui/core/Slide';
 import Button from '@material-ui/core/Button';
 import Subscription from 'AppData/Subscription';
@@ -371,18 +372,19 @@ class Credentials extends React.Component {
                                                                 }
                                                             />
                                                         </Typography>
-                                                        <Button
-                                                            variant='contained'
-                                                            color='primary'
-                                                            className={classes.buttonElm}
-                                                            onClick={() => this.handleClickToggle('openNew')}
-                                                        >
-                                                            <FormattedMessage
-                                                                id={'Apis.Details.Credentials.' +
+                                                        <Link to={`/apis/'${api.id}'/credentials/wizard`}>
+                                                            <Button
+                                                                variant='contained'
+                                                                color='primary'
+                                                                className={classes.buttonElm}
+                                                            >
+                                                                <FormattedMessage
+                                                                    id={'Apis.Details.Credentials.' +
                                                                 'SubscibeButtonPanel.subscribe.wizard'}
-                                                                defaultMessage='Wizard'
-                                                            />
-                                                        </Button>
+                                                                    defaultMessage='Wizard'
+                                                                />
+                                                            </Button>
+                                                        </Link>
                                                     </div>
                                                     {applicationsAvailable.length > 0 && (
                                                         <div className={classes.credentialBox}>
@@ -488,19 +490,30 @@ class Credentials extends React.Component {
                                         Subscribe with new Mode
                                         ***************************************
                                         */}
-                                <Dialog
+                                {/* <Dialog
                                     fullScreen
                                     open={openNew}
                                     onClose={() => this.handleClickToggle('openNew', updateSubscriptionData)}
                                     TransitionComponent={Transition}
-                                >
-                                    <Wizard
-                                        updateSubscriptionData={updateSubscriptionData}
-                                        apiId={api.id}
-                                        handleClickToggle={this.handleClickToggle}
-                                        throttlingPolicyList={throttlingPolicyList}
+                                > */}
+                                {/* <Wizard
+                                    updateSubscriptionData={updateSubscriptionData}
+                                    apiId={api.id}
+                                    handleClickToggle={this.handleClickToggle}
+                                    throttlingPolicyList={throttlingPolicyList}
+                                /> */}
+                                {/* <Switch>
+                                    <Route
+                                        path='/apis/:apiUuid/credentials/wizard'
+                                        component={() => (<Wizard
+                                            updateSubscriptionData={updateSubscriptionData}
+                                            apiId={api.id}
+                                            handleClickToggle={this.handleClickToggle}
+                                            throttlingPolicyList={throttlingPolicyList}
+                                        />)}
                                     />
-                                </Dialog>
+                                </Switch> */}
+                                {/* </Dialog> */}
                             </Paper>
                         </Grid>
                     </Grid>

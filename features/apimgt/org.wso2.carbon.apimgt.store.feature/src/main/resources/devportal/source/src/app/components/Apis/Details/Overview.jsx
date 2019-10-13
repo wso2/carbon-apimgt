@@ -258,8 +258,25 @@ function Overview(props) {
                                 }}
                             >
                                 <Grid item xs={12}>
-                                    <div className={classes.emptyBox}>
-                                        <Typography variant='body2'>
+                                    <Typography variant='subtitle2'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.subscribe.to.application'
+                                            defaultMessage='Generate Credentials'
+                                        />
+                                    </Typography>
+                                    <Typography variant='body2'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.credential.wizard.info'
+                                            defaultMessage={
+                                                'Use the Key Generation Wizard. '
+                                                + 'Create a new application -> '
+                                                + 'Subscribe -> Generate keys and '
+                                                + 'Access Token to invoke this API.'
+                                            }
+                                        />
+                                    </Typography>
+                                    <Link to={`/apis/${api.id}/credentials/wizard`}>
+                                        <Button variant='contained' color='primary' size='large'>
                                             <FormattedMessage
                                                 id='Apis.Details.Overview.no.subscription.message'
                                                 defaultMessage='No Subscriptions Allowed'

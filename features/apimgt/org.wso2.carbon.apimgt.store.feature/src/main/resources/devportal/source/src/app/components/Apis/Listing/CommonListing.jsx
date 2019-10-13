@@ -75,7 +75,7 @@ const styles = theme => ({
     },
     iconSelected: {
         color: theme.custom.infoBar.listGridSelectedColor,
-    }
+    },
 });
 
 /**
@@ -154,9 +154,11 @@ class CommonListing extends React.Component {
                         </IconButton>
                         <IconButton className={classes.button} onClick={() => this.setListType('grid')}>
                             <Icon className={classNames(
-                                    { [classes.iconSelected]: listType === 'grid' },
-                                    { [classes.iconDefault]: listType === 'list' },
-                                )}>grid_on</Icon>
+                                { [classes.iconSelected]: listType === 'grid' },
+                                { [classes.iconDefault]: listType === 'list' },
+                            )}
+                            >grid_on
+                            </Icon>
                         </IconButton>
                     </div>
                 </div>
