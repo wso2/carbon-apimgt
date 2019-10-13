@@ -176,7 +176,7 @@ function NewEndpointCreate(props) {
                                                         return (
                                                             <FormControlLabel
                                                                 value={option.type}
-                                                                control={<Radio />}
+                                                                control={<Radio color='primary' />}
                                                                 label={option.name}
                                                             />
                                                         );

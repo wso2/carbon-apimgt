@@ -192,13 +192,16 @@ export default function CustomizedSteppers() {
                                 }
                                 className={classes.viewInStoreLauncher}
                             >
-                                <Typography variant='caption'>
+                                <Typography
+                                    variant='caption'
+                                    color='primary'
+                                >
                                     <FormattedMessage
                                         id='Apis.Details.components.APIDetailsTopMenu.view.in.portal'
                                         defaultMessage='View in Dev Portal'
                                     />
+                                    <LaunchIcon style={{ marginLeft: '5px' }} fontSize='small' />
                                 </Typography>
-                                <LaunchIcon style={{ marginLeft: '5px' }} fontSize='small' />
                             </a>
                         </Grid>
                     </Grid>
@@ -325,7 +328,7 @@ export default function CustomizedSteppers() {
                                         />
                                     </Typography>
                                     <Link to={'/apis/' + api.id + '/endpoints'}>
-                                        <LaunchIcon style={{ marginLeft: '5px' }} fontSize='small' />
+                                        <LaunchIcon style={{ marginLeft: '5px' }} color='primary' fontSize='small' />
                                     </Link>
                                 </Grid>
                             </Tooltip>
@@ -343,7 +346,7 @@ export default function CustomizedSteppers() {
                                         />
                                     </Typography>
                                     <Link to={'/apis/' + api.id + '/subscriptions'}>
-                                        <LaunchIcon style={{ marginLeft: '5px' }} fontSize='small' />
+                                        <LaunchIcon style={{ marginLeft: '5px' }} color='primary' fontSize='small' />
                                     </Link>
                                 </Grid>
                             </Tooltip>

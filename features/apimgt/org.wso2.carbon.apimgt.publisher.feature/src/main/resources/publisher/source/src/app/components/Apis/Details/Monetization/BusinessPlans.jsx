@@ -92,6 +92,7 @@ class BusinessPlans extends Component {
                             id='monetizationStatus'
                             checked={this.monetizationQuery(policy.name)}
                             disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                            color='primary'
                         />
                     )}
                     label={policy.name}

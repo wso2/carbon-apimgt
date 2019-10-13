@@ -323,6 +323,7 @@ const Alerts = (props) => {
                                                         checked={isAlertSubscribed(alert.id)}
                                                         onChange={() => handleCheckAlert(alert)}
                                                         inputProps={{ 'aria-labelledby': alert.name }}
+                                                        color='primary'
                                                     />
                                                 </ListItemIcon>
                                                 <ListItemText
