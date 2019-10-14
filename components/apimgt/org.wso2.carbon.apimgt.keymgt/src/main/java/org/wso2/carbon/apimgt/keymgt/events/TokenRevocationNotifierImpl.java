@@ -63,7 +63,8 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
     public void sendMessageOnRealtime(String revokedToken, Properties properties) {
         //Variables related to Realtime Notifier
         String realtimeNotifierTTL = properties.getProperty("ttl", DEFAULT_TTL);
-        Object[] objects = new Object[] { revokedToken, realtimeNotifierTTL };
+        long expiryTimeForJWT = Long.parseLong(properties.getProperty("expiryTime"));
+        Object[] objects = new Object[] { revokedToken, realtimeNotifierTTL, expiryTimeForJWT};
         Event tokenRevocationMessage = new Event(APIConstants.TOKEN_REVOCATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
         ServiceReferenceHolder.getInstance().getOutputEventAdapterService()

@@ -55,11 +55,11 @@ public interface APIAdmin  {
 
     /**
      * Updates the details of the given Label.
-     *
+     * @param tenantDomain    tenant domain
      * @param label             content to update
      * @throws APIManagementException if failed to update label
      */
-    Label updateLabel(Label label) throws APIManagementException;
+    Label updateLabel(String tenantDomain, Label label) throws APIManagementException;
 
     Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws APIManagementException;
 
