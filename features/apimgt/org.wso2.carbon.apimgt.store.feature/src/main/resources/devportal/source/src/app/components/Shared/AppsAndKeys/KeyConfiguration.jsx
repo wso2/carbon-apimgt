@@ -158,6 +158,7 @@ class KeyConfiguration extends React.Component {
                                                 onChange={e => this.handleChange('grantType', e)}
                                                 value={value}
                                                 disabled={this.isGrantTypeDisabled(key)}
+                                                color='primary'
                                             />
                                         )}
                                         label={intl.formatMessage({

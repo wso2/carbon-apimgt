@@ -213,6 +213,7 @@ class LifeCycleUpdate extends Component {
                                             checked={checkList[index].checked}
                                             onChange={handleChangeCheckList(index)}
                                             value={checkList[index].value}
+                                            color='primary'
                                         />
                                     }
                                     label={checkList[index].label}

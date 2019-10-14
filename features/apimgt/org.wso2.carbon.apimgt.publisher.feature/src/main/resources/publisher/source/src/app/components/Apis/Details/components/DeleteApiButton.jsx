@@ -157,6 +157,7 @@ class DeleteApiButton extends React.Component {
                     <div className={classes.deleteWrapper}>
                         <VerticalDivider height={70} />
                         <a
+                            id='itest-id-deleteapi-icon-button'
                             onClick={this.handleRequestOpen}
                             onKeyDown={this.handleRequestOpen}
                             className={classes.delete}
@@ -203,6 +204,7 @@ class DeleteApiButton extends React.Component {
                             />
                         </Button>
                         <Button
+                            id='itest-id-deleteconf'
                             onClick={() => {
                                 deleteHandler();
                                 this.handleRequestClose();

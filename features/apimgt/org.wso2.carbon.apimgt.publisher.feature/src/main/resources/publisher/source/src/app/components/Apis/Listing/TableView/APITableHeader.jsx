@@ -87,6 +87,7 @@ export default class APITableHeader extends React.Component {
                             indeterminate={numSelected > 0 && numSelected < rowCount}
                             checked={numSelected === rowCount}
                             onChange={onSelectAllClick}
+                            color='primary'
                         />
                     </TableCell>
                     {rows.map((row) => {

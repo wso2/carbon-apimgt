@@ -1599,7 +1599,7 @@ public class APIMappingUtil {
         for (APIProduct apiProduct : productList) {
             APIProductInfoDTO productDto = new APIProductInfoDTO();
             productDto.setName(apiProduct.getId().getName());
-            productDto.setProvider(apiProduct.getId().getProviderName());
+            productDto.setProvider(APIUtil.replaceEmailDomainBack(apiProduct.getId().getProviderName()));
             productDto.setContext(apiProduct.getContext());
             productDto.setDescription(apiProduct.getDescription());
             productDto.setState(org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO.StateEnum
@@ -1619,7 +1619,7 @@ public class APIMappingUtil {
         APIProductDTO productDto = new APIProductDTO();
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         productDto.setName(product.getId().getName());
-        productDto.setProvider(product.getId().getProviderName());
+        productDto.setProvider(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
         productDto.setId(product.getUuid());
         productDto.setContext(product.getContext());
         productDto.setDescription(product.getDescription());
