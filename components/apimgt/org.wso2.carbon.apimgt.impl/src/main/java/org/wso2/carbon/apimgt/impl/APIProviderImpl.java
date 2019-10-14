@@ -6962,7 +6962,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // TODO handle if no resource is defined. either throw an error or add all the resources of that API
                 // to the product
             } else {
-                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getResourceURI();
+                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                 if (templateMap.containsKey(key)) {
 
                     //Since the template ID is not set from the request, we manually set it.
@@ -6970,7 +6970,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 } else {
                     throw new APIManagementException("API with id " + apiProductResource.getApiId()
-                            + " does not have a resource " + uriTemplate.getResourceURI()
+                            + " does not have a resource " + uriTemplate.getUriTemplate()
                             + " with http method " + uriTemplate.getHTTPVerb());
                 }
             }
