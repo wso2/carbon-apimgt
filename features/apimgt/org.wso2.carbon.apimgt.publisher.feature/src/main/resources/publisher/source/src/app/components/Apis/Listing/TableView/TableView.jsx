@@ -57,6 +57,7 @@ class TableView extends React.Component {
         this.state = {
             apisAndApiProducts: null,
             notFound: true,
+            displayCount: 0,
             listType: props.theme.custom.defaultApiView,
         };
         this.page = 0;
@@ -159,10 +160,10 @@ class TableView extends React.Component {
     getData = () => {
         this.xhrRequest().then((data) => {
             const { body } = data;
-            const { list, pagination } = body;
+            const { list, pagination, count } = body;
             const { total } = pagination;
             this.count = total;
-            this.setState({ apisAndApiProducts: list, notFound: false });
+            this.setState({ apisAndApiProducts: list, notFound: false, displayCount: count });
         });
     };
 
@@ -200,10 +201,11 @@ class TableView extends React.Component {
         this.page = page;
         this.xhrRequest().then((data) => {
             const { body } = data;
-            const { list } = body;
+            const { list, count } = body;
             this.setState({
                 apisAndApiProducts: list,
                 notFound: false,
+                displayCount: count,
             });
             this.setLocalStorage();
         });
@@ -342,7 +344,12 @@ class TableView extends React.Component {
             },
         ];
         const { page, count, rowsPerPage } = this;
-        const { apisAndApiProducts, notFound, listType } = this.state;
+        const {
+            apisAndApiProducts,
+            notFound,
+            listType,
+            displayCount,
+        } = this.state;
         const options = {
             filterType: 'dropdown',
             responsive: 'stacked',
@@ -417,7 +424,7 @@ class TableView extends React.Component {
                 <React.Fragment>
                     <TopMenu
                         data={apisAndApiProducts}
-                        count={count}
+                        count={displayCount}
                         setListType={this.setListType}
                         isAPIProduct={isAPIProduct}
                         listType={listType}
@@ -431,7 +438,7 @@ class TableView extends React.Component {
             <React.Fragment>
                 <TopMenu
                     data={apisAndApiProducts}
-                    count={count}
+                    count={displayCount}
                     setListType={this.setListType}
                     isAPIProduct={isAPIProduct}
                     listType={listType}
