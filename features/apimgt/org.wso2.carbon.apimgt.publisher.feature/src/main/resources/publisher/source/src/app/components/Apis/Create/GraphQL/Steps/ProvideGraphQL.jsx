@@ -109,7 +109,6 @@ export default function ProvideGraphQL(props) {
                                 id='Apis.Create.GraphQL.Steps.ProvideGraphQL.Input.file.dropzone'
                                 defaultMessage='Drag & Drop files here {break} or {break} Browse files'
                                 values={{ break: <br /> }}
-
                             />
                         )}
                     </DropZoneLocal>
