@@ -315,7 +315,7 @@ export default function CustomizedSteppers() {
                     <StepLabel style={{ position: 'relative' }} >
                         <Box p={2} bgcolor='white' borderLeft='0' borderRight='0' >
                             <Tooltip
-                                title={isEndpointAvailable ? '' : 'You have to specify an Endpoint for the API'}
+                                title={isEndpointAvailable ? '' : 'You have to specify an endpoint for the API'}
                                 placement='top'
                             >
                                 <Grid className={classes.gridEndpoint}>
@@ -336,7 +336,7 @@ export default function CustomizedSteppers() {
                                 </Grid>
                             </Tooltip>
                             <Tooltip
-                                title={isTierAvailable ? '' : 'You have to select the Business plan for the API'}
+                                title={isTierAvailable ? '' : 'You have to select the business plan for the API'}
                                 placement='bottom'
                             >
                                 <Grid xs={12} className={classes.gridSmall}>
