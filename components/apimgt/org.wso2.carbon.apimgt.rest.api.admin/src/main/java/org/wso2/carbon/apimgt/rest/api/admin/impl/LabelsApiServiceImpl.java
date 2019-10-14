@@ -121,8 +121,9 @@ public class LabelsApiServiceImpl extends LabelsApiService {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
             label = LabelMappingUtil.labelDTOToLabelPut(labelId, body);
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             LabelDTO labelDTO = LabelMappingUtil.
-                    fromLabelToLabelDTO(apiAdmin.updateLabel(label));
+                    fromLabelToLabelDTO(apiAdmin.updateLabel(tenantDomain, label));
             URI location = new URI(RestApiConstants.RESOURCE_PATH_LABEL + "/" +
                     labelDTO.getId());
             return Response.ok(location).entity(labelDTO).build();
