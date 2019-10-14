@@ -140,7 +140,6 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.paper),
         border: 'solid 1px #fff',
         padding: theme.spacing(2),
-        marginTop: 50,
     },
     paper: {
         margin: theme.spacing(2),
@@ -426,11 +425,13 @@ function Overview(props) {
                                     ),
                                 }}
                             >
-                                {api && totalComments !== 0 && (
-                                    <Comments apiId={api.id} showLatest isOverview setCount={setCount} />
-                                )}
-                                {totalComments === 0 && (
-                                    <Grid container className={classes.root} spacing={2}>
+                                <Grid container className={classes.root} spacing={2}>
+                                    {api &&
+                                        <Grid item xs={12}>
+                                            <Comments apiId={api.id} showLatest isOverview setCount={setCount} />
+                                        </Grid>
+                                    }
+                                    {totalComments === 0 &&
                                         <Grid item xs={12}>
                                             <div className={classes.emptyBox}>
                                                 <Typography variant='body2'>
@@ -441,8 +442,8 @@ function Overview(props) {
                                                 </Typography>
                                             </div>
                                         </Grid>
-                                    </Grid>
-                                )}
+                                    }
+                                </Grid>
                             </ExpansionPanelDetails>
                             <Divider />
                             <ExpansionPanelActions className={classes.actionPanel}>
