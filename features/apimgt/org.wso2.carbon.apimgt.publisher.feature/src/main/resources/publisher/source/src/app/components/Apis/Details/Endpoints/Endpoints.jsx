@@ -156,12 +156,10 @@ function Endpoints(props) {
         const { endpointConfig, endpointImplementationType, endpointSecurity } = apiObject;
         setUpdating(true);
         if (endpointImplementationType === 'INLINE') {
-            const promisedAPIUpdate = updateAPI({ endpointConfig, endpointImplementationType, endpointSecurity });
-            const promisedSwaggerUpdate = api.updateSwagger(swagger);
-            Promise.all([promisedAPIUpdate, promisedSwaggerUpdate]).then((resp) => {
-                console.log('success', resp);
-            }).catch((err) => {
-                console.log(err);
+            api.updateSwagger(swagger).then((resp) => {
+                setSwagger(resp.obj);
+            }).then(() => {
+                updateAPI({ endpointConfig, endpointImplementationType, endpointSecurity });
             }).finally(() => {
                 setUpdating(false);
             });
