@@ -47,9 +47,6 @@ import AdvanceEndpointConfig from './AdvancedConfig/AdvanceEndpointConfig';
 
 
 const styles = theme => ({
-    overviewWrapper: {
-        marginTop: theme.spacing(2),
-    },
     listing: {
         margin: theme.spacing(),
         padding: theme.spacing(),
@@ -57,7 +54,6 @@ const styles = theme => ({
     endpointContainer: {
         paddingLeft: theme.spacing(2),
         padding: theme.spacing(),
-        marginTop: theme.spacing(),
     },
     endpointName: {
         paddingLeft: theme.spacing(),

@@ -54,9 +54,6 @@ const styles = theme => ({
     errorMessageContainer: {
         marginTop: theme.spacing(),
     },
-    titleGrid: {
-        marginBottom: theme.spacing(),
-    },
     implSelectRadio: {
         padding: theme.spacing() / 2,
     },
