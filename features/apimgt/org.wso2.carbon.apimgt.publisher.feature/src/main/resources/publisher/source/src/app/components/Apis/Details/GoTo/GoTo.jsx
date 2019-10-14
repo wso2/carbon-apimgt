@@ -47,7 +47,7 @@ const useStyles = makeStyles(theme => ({
     },
     paper: {
         position: 'absolute',
-        zIndex: 1,
+        zIndex: theme.zIndex.goToSearch,
         marginTop: theme.spacing(1),
         left: 0,
         right: 0,
