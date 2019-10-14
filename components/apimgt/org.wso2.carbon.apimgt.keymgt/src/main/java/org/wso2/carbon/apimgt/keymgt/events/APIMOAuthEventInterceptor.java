@@ -52,8 +52,6 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
     private Properties persistentNotifierProperties;
     private static final String REVOKED_ACCESS_TOKEN = "RevokedAccessToken";
 
-
-
     /**
      * Default Constructor
      */
