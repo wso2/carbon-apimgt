@@ -136,7 +136,7 @@ const ApplicationCreate = (props) => {
                 name='name'
                 onChange={handleChange}
                 placeholder={intl.formatMessage({
-                    defaultMessage: 'My Mobile Application',
+                    defaultMessage: 'My Application',
                     id: 'Shared.AppsAndKeys.ApplicationCreateForm.my.mobile.application',
                 })}
                 onBlur={e => validateName(e.target.value)}

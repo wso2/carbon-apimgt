@@ -19,9 +19,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
 import { Link } from 'react-router-dom';
-import Slide from '@material-ui/core/Slide';
 import Button from '@material-ui/core/Button';
 import Subscription from 'AppData/Subscription';
 import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
@@ -30,12 +28,11 @@ import Alert from 'AppComponents/Shared/Alert';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import Application from 'AppData/Application';
 import SubscribeToApi from 'AppComponents/Shared/AppsAndKeys/SubscribeToApi';
 import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 import { ApiContext } from '../ApiContext';
-import Wizard from './Wizard/Wizard';
 import SubscriptionTableRow from './SubscriptionTableRow';
-import Application from '../../../../data/Application';
 
 /**
  * @inheritdoc
@@ -118,13 +115,6 @@ const styles = theme => ({
 });
 
 /**
- * @param {*} props properties
- * @returns {Component}
- */
-function Transition(props) {
-    return <Slide direction='up' {...props} />;
-}
-/**
  * @class Credentials
  * @extends {React.Component}
  */
@@ -132,10 +122,7 @@ class Credentials extends React.Component {
     static contextType = ApiContext;
 
     state = {
-        value: 0,
         expanded: true,
-        wizardOn: false,
-        openNew: false,
         selectedAppId: false,
         selectedKeyType: false,
         subscriptionRequest: {
@@ -156,10 +143,6 @@ class Credentials extends React.Component {
             this.updateData();
         } else {
             updateSubscriptionData(this.updateData);
-        }
-        const { location: { pathname } } = this.props;
-        if (pathname.indexOf('wizard') !== -1) {
-            this.setState({ wizardOn: true, openNew: true });
         }
     }
 
@@ -182,13 +165,6 @@ class Credentials extends React.Component {
      */
     handleExpandClick = () => {
         this.setState(state => ({ expanded: !state.expanded }));
-    };
-
-    /**
-     * @memberof Credentials
-     */
-    startStopWizard = () => {
-        this.setState(state => ({ wizardOn: !state.wizardOn }));
     };
 
     /**
@@ -224,13 +200,9 @@ class Credentials extends React.Component {
      * @inheritdoc
      * @memberof Credentials
      */
-    handleClickToggle = (name, updateSubscriptionData) => {
-        this.setState((prevState) => {
-            return { [name]: !prevState[name] };
-        });
-        if (updateSubscriptionData) {
-            updateSubscriptionData();
-        }
+    goToWizard = () => {
+        const { history } = this.props;
+        history.push('credentials/wizard');
     };
 
     /**
@@ -295,15 +267,13 @@ class Credentials extends React.Component {
         const {
             selectedKeyType,
             selectedAppId,
-            wizardOn,
             subscriptionRequest,
             throttlingPolicyList,
-            openNew,
             applicationOwner,
         } = this.state;
         return (
             <Grid container>
-                <Grid item md={12} lg={9}>
+                <Grid item md={12} lg={11}>
                     <Grid container spacing={5}>
                         <Grid item md={12}>
                             <Typography onClick={this.handleExpandClick} variant='h4' className={classes.titleSub}>
@@ -324,26 +294,24 @@ class Credentials extends React.Component {
                                 </Typography>
 
                                 {applicationsAvailable.length === 0 && subscribedApplications.length === 0 ? (
-                                    !wizardOn && (
-                                        <GenericDisplayDialog
-                                            classes={classes}
-                                            handleClick={() => this.handleClickToggle('openNew')}
-                                            heading={intl.formatMessage({
-                                                defaultMessage: 'Generate Credentials',
-                                                id: 'Apis.Details.Credentials.Credentials.generate.credentials',
-                                            })}
-                                            caption={intl.formatMessage({
-                                                defaultMessage: 'You need to generate credentials to access this API',
-                                                id:
+                                    <GenericDisplayDialog
+                                        classes={classes}
+                                        handleClick={this.goToWizard}
+                                        heading={intl.formatMessage({
+                                            defaultMessage: 'Generate Credentials',
+                                            id: 'Apis.Details.Credentials.Credentials.generate.credentials',
+                                        })}
+                                        caption={intl.formatMessage({
+                                            defaultMessage: 'You need to generate credentials to access this API',
+                                            id:
                                                     'Apis.Details.Credentials.Credentials.you.need.to'
                                                     + '.generate.credentials.to.access.this.api',
-                                            })}
-                                            buttonText={intl.formatMessage({
-                                                defaultMessage: 'GENERATE',
-                                                id: 'Apis.Details.Credentials.Credentials.generate',
-                                            })}
-                                        />
-                                    )
+                                        })}
+                                        buttonText={intl.formatMessage({
+                                            defaultMessage: 'GENERATE',
+                                            id: 'Apis.Details.Credentials.Credentials.generate',
+                                        })}
+                                    />
                                 ) : (
                                     <React.Fragment>
                                         <div className={classes.generateCredentialWrapper}>
@@ -515,6 +483,7 @@ Credentials.propTypes = {
             pathname: PropTypes.string.isRequired,
         }).isRequired,
         replace: PropTypes.func.isRequired,
+        push: PropTypes.func.isRequired,
     }).isRequired,
     location: PropTypes.shape({
         state: PropTypes.shape({
