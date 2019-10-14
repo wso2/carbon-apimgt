@@ -56,6 +56,9 @@ import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -653,6 +656,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 SwaggerData swaggerData = new SwaggerData(apiToUpdate);
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
                 apiProvider.saveSwagger20Definition(apiToUpdate.getId(), newDefinition);
+
+                updateProductResources(apiProvider, apiDefinition, apiToUpdate.getUriTemplates(), originalAPI);
             }
 
             apiProvider.manageAPI(apiToUpdate);
@@ -678,15 +683,60 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    private void updateProductResources(APIProvider apiProvider, APIDefinition oasParser,
+                                        Set<URITemplate> updatedUriTemplates, API existingAPI)
+            throws APIManagementException, FaultGatewaysException {
+        Set<URITemplate> existingUriTemplates = existingAPI.getUriTemplates();
+
+        for (URITemplate existingUriTemplate : existingUriTemplates) {
+            Set<APIProductIdentifier> apiProductIds = existingUriTemplate.retrieveUsedByProducts();
+
+            for (APIProductIdentifier apiProductId : apiProductIds) {
+                APIProduct apiProduct = apiProvider.getAPIProduct(apiProductId);
+
+                updateAPIProductWithURITemplates(updatedUriTemplates, apiProduct, apiProvider,
+                        oasParser);
+            }
+        }
+    }
+
+    private void updateAPIProductWithURITemplates(Set<URITemplate> updatedUriTemplates, APIProduct apiProduct,
+                                                  APIProvider apiProvider, APIDefinition oasParser)
+            throws APIManagementException, FaultGatewaysException {
+        List<APIProductResource> productResources = apiProduct.getProductResources();
+
+        for (URITemplate updatedUriTemplate : updatedUriTemplates) {
+            String updatedVerb = updatedUriTemplate.getHTTPVerb();
+            String updatedPath = updatedUriTemplate.getUriTemplate();
+
+            for (APIProductResource productResource : productResources) {
+                URITemplate resourceUriTemplate = productResource.getUriTemplate();
+
+                if (updatedVerb.equalsIgnoreCase(resourceUriTemplate.getHTTPVerb()) &&
+                        updatedPath.equalsIgnoreCase(resourceUriTemplate.getUriTemplate())) {
+                    productResource.setUriTemplate(updatedUriTemplate);
+                    break;
+                }
+            }
+        }
+
+        SwaggerData updatedData = new SwaggerData(apiProduct);
+        String existingProductSwagger = apiProvider.getAPIDefinitionOfAPIProduct(apiProduct);
+        String updatedProductSwagger = oasParser.generateAPIDefinition(updatedData, existingProductSwagger);
+        apiProvider.saveSwagger20Definition(apiProduct.getId(), updatedProductSwagger);
+
+        apiProvider.updateAPIProduct(apiProduct);
+    }
+
     /**
      * Finds resources that have been removed in the updated API URITemplates,
      * that are currently reused by API Products.
      *
-     * @param updateUriTemplates Updated URITemplates
+     * @param updatedUriTemplates Updated URITemplates
      * @param existingAPI Existing API
      * @return List of removed resources that are reused among API Products
      */
-    private List<APIResource> getRemovedProductResources(Set<URITemplate> updateUriTemplates, API existingAPI) {
+    private List<APIResource> getRemovedProductResources(Set<URITemplate> updatedUriTemplates, API existingAPI) {
         Set<URITemplate> existingUriTemplates = existingAPI.getUriTemplates();
         List<APIResource> removedReusedResources = new ArrayList<>();
 
@@ -698,7 +748,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String existingPath = existingUriTemplate.getUriTemplate();
                 boolean isReusedResourceRemoved = true;
 
-                for (URITemplate updatedUriTemplate : updateUriTemplates) {
+                for (URITemplate updatedUriTemplate : updatedUriTemplates) {
                     String updatedVerb = updatedUriTemplate.getHTTPVerb();
                     String updatedPath = updatedUriTemplate.getUriTemplate();
 
@@ -2500,6 +2550,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleConflict("Cannot remove following resource paths " +
                     removedProductResources.toString() + " because they are used by one or more API Products", log);
         }
+
+        updateProductResources(apiProvider, oasParser, uriTemplates, existingAPI);
 
         existingAPI.setUriTemplates(uriTemplates);
         existingAPI.setScopes(scopes);
