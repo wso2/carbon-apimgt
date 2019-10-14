@@ -44,7 +44,8 @@ import GeneralConfiguration from './GeneralConfiguration';
 import LoadbalanceFailoverConfig from './LoadbalanceFailoverConfig';
 import GenericEndpoint from './GenericEndpoint';
 import AdvanceEndpointConfig from './AdvancedConfig/AdvanceEndpointConfig';
-
+import Credentials from './AWSLambda/Credentials.jsx';
+import Mappings from './AWSLambda/Mappings.jsx';
 
 const styles = theme => ({
     overviewWrapper: {
@@ -116,6 +117,7 @@ const endpointTypes = [
     { key: 'default', value: 'Dynamic Endpoints' },
     { key: 'prototyped', value: 'Prototyped' },
     { key: 'INLINE', value: 'Mocked' },
+    { key: 'awslambda', value: 'AWS Lambda' },
 ];
 
 /**
@@ -331,6 +333,15 @@ function EndpointOverview(props) {
                     endpointConfig: tmpConfig,
                 },
             });
+        } else if (selectedKey === 'awslambda') {
+            const generatedEndpointConfig = createEndpointConfig(selectedKey);
+//             endpointsDispatcher({
+//                 action: 'select_endpoint_type',
+//                 value: {
+//                     endpointImplementationType: 'ENDPOINT',
+//                     endpointConfig: { ...generatedEndpointConfig },
+//                 },
+//             });
         } else {
             const generatedEndpointConfig = createEndpointConfig(selectedKey);
             endpointsDispatcher({
@@ -610,7 +621,33 @@ function EndpointOverview(props) {
                                                 setAdvancedConfigOpen={toggleAdvanceConfig}
                                             />
                                         </Collapse>
-                                    </React.Fragment>}
+                                        {endpointType.key !== 'default' ?
+                                            <div>
+                                                <Typography>
+                                                    <FormattedMessage
+                                                        id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
+                                                        '.endpoint.credentials'}
+                                                        defaultMessage='AWS Credentials'
+                                                    />
+                                                </Typography>
+                                                <Credentials
+                                                    saveAPI={getEndpoints}
+                                                    epConfig={{}}
+                                                    setEpConfig={getEndpoints}
+                                                />
+                                                <Typography>
+                                                    <FormattedMessage
+                                                        id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
+                                                        '.endpoint.mappings'}
+                                                        defaultMessage='Resources Mapping'
+                                                    />
+                                                </Typography>
+                                                <Mappings />
+                                            </div> :
+                                            <div />
+                                        }
+                                    </React.Fragment>
+                                }
                                 {endpointType.key === 'prototyped' || endpointType.key === 'default' ?
                                     <div /> :
                                     <React.Fragment>

@@ -2210,7 +2210,7 @@ class API extends Resource {
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    static getARNs(id) {
+    static getAmznResourceNames(id) {
         return [
             { label: 'arn:aws:lambda:us-east-2:572100981605:function:helloworld' },
             { label: 'arn:aws:lambda:us-east-2:572100981605:function:hellowso2' },

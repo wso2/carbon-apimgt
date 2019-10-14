@@ -26,6 +26,7 @@ export default function Mapping(props) {
     const { resource, resources, setResources } = props;
     const [name, setName] = useState(resource.name);
     const [arn, setArn] = useState(resource.arn);
+    const [isExistingName, setIsExistingName] = useState(false);
     const [isEmptyName, setIsEmptyName] = useState(false);
     const [isEmptyArn, setIsEmptyArn] = useState(false);
     const addResource = () => {
@@ -46,14 +47,7 @@ export default function Mapping(props) {
         }
     };
     const saveResource = () => {
-        if (name === '' && arn === '') {
-            setIsEmptyName(true);
-            setIsEmptyArn(true);
-        } else if (name === '') {
-            setIsEmptyName(true);
-        } else if (arn === '') {
-            setIsEmptyArn(true);
-        } else {
+        if (!isEmptyName && !isEmptyArn && !isExistingName) {
             const newResources = [];
             resources.forEach((element) => {
                 if (element.name !== resource.name) {
@@ -84,8 +78,11 @@ export default function Mapping(props) {
         <TableRow>
             <TableCell>
                 <TextField
-                    error={isEmptyName}
-                    helperText={isEmptyName ? 'Resource name should not be empty' : ''}
+                    error={isEmptyName || isExistingName}
+                    helperText={
+                        isEmptyName ? 'Resource name should not be empty' :
+                        isExistingName ? 'Resource name already exists' : ''
+                    }
                     required
                     id='outlined-required'
                     placeholder='URL pattern *'
@@ -97,6 +94,15 @@ export default function Mapping(props) {
                         } else {
                             setIsEmptyName(true);
                         }
+                        const resourceNames = [];
+                        resources.forEach((element) => {
+                            resourceNames.push(element.name);
+                        });
+                        if (resourceNames.includes(event.target.value)) {
+                            setIsExistingName(true);
+                        } else {
+                            setIsExistingName(false);
+                        }
                         setName(event.target.value);
                     }}
                     className={classes.textField}
@@ -107,12 +113,22 @@ export default function Mapping(props) {
             </TableCell>
             {resource.editable ?
                 <TableCell>
-                    <Button onClick={saveResource}>Save</Button>
+                    <Button
+                        onClick={saveResource}
+                        disabled={isEmptyName || isEmptyArn || isExistingName}
+                    >
+                        Save
+                    </Button>
                     <Button onClick={cancel}>Cancel</Button>
                 </TableCell>
                 :
                 <TableCell>
-                    <Button onClick={addResource}>Add</Button>
+                    <Button
+                        onClick={addResource}
+                        disabled={isEmptyName || isEmptyArn || isExistingName}
+                    >
+                        Add
+                    </Button>
                 </TableCell>
             }
         </TableRow>

@@ -31,20 +31,19 @@ const useStyles = makeStyles(theme => ({
     },
     mappingsWrapper: {
         padding: theme.spacing(),
-        borderRight: '#c4c4c4',
-        borderRightStyle: 'solid',
-        borderRightWidth: 'thin',
     },
-    mappingsHeading: {
-        display: 'flex',
-        alignItems: 'center',
+    mappingResource : {
+        maxWidth: '300px',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
     },
-    mappingsTitle: {
-        paddingLeft: theme.spacing(),
-        fontSize: '1rem',
-        paddingTop: theme.spacing(),
-        paddingBottom: theme.spacing(),
-    },
+    mappingARN : {
+        maxWidth: '800px',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+    }
 }));
 
 /**
@@ -85,60 +84,57 @@ export default function Mappings() {
     }
 
     return (
-        <Paper className={classes.root}>
-            <Grid container item xs={12}>
-                <Grid xs className={classes.mappingsWrapper}>
-                    <div className={classes.mappingsHeading}>
-                        <Typography className={classes.mappingsTitle}>
-                            Mappings
-                        </Typography>
-                    </div>
-                    <Table stickyHeader>
-                        <TableHead>
-                            <TableRow>
-                                {columns.map(column => (
-                                    <TableCell
-                                        key={column.id}
-                                        align={column.align}
-                                        style={{ minWidth: column.minWidth }}
-                                    >
-                                        {column.label}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {resources.map((resource) => {
-                                if (resource.editable) {
-                                    return (
-                                        <Mapping
-                                            resource={resource}
-                                            resources={resources}
-                                            setResources={setResources}
-                                        />
-                                    );
-                                } else {
-                                    return (
-                                        <TableRow>
-                                            <TableCell>{resource.name}</TableCell>
-                                            <TableCell>{resource.arn}</TableCell>
-                                            <TableCell>
-                                                <Button onClick={() => editResource(resource)}>Edit</Button>
-                                                <Button onClick={() => deleteResource(resource)}>Delete</Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                }
-                            })}
-                            <Mapping
-                                resource={{ name: '', arn: '', editable: false }}
-                                resources={resources}
-                                setResources={setResources}
-                            />
-                        </TableBody>
-                    </Table>
-                </Grid>
+        <Grid container item xs={12}>
+            <Grid xs className={classes.mappingsWrapper}>
+                <Table stickyHeader>
+                    <TableHead>
+                        <TableRow>
+                            {columns.map(column => (
+                                <TableCell
+                                    key={column.id}
+                                    align={column.align}
+                                    style={{ minWidth: column.minWidth }}
+                                >
+                                    {column.label}
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {resources.map((resource) => {
+                            if (resource.editable) {
+                                return (
+                                    <Mapping
+                                        resource={resource}
+                                        resources={resources}
+                                        setResources={setResources}
+                                    />
+                                );
+                            } else {
+                                return (
+                                    <TableRow>
+                                        <TableCell>
+                                            <div className={classes.mappingResource}>{resource.name}</div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className={classes.mappingARN}>{resource.arn}</div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Button onClick={() => editResource(resource)}>Edit</Button>
+                                            <Button onClick={() => deleteResource(resource)}>Delete</Button>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            }
+                        })}
+                        <Mapping
+                            resource={{ name: '', arn: '', editable: false }}
+                            resources={resources}
+                            setResources={setResources}
+                        />
+                    </TableBody>
+                </Table>
             </Grid>
-        </Paper>
+        </Grid>
     );
 }
