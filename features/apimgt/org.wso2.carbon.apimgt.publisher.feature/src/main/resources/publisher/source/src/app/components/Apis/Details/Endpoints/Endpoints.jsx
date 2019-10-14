@@ -348,11 +348,11 @@ function Endpoints(props) {
                                     color='primary'
                                     onClick={() => saveAPI()}
                                 >
-                                    {isUpdating && <CircularProgress size={10} />}
                                     <FormattedMessage
                                         id='Apis.Details.Endpoints.Endpoints.save'
                                         defaultMessage='Save'
                                     />
+                                    {isUpdating && <CircularProgress size={24} />}
                                 </Button>
                             </Grid>
                             <Grid item>
