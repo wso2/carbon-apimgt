@@ -7840,7 +7840,7 @@ public class ApiMgtDAO {
     /**
      * Returns all the Comments on an API
      *
-     * @param identifier API Identifier
+     * @param apiTypeWrapper API type wrapper
      * @return Comment Array
      * @throws APIManagementException
      */
@@ -7853,7 +7853,7 @@ public class ApiMgtDAO {
         int id = -1;
         String sqlQuery;
         if(!isProduct) {
-            sqlQuery  = SQLConstants.GET_API_COMMENTS_SQL;
+            sqlQuery  = SQLConstants.GET_COMMENTS_SQL;
         } else {
             sqlQuery = SQLConstants.GET_API_PRODUCT_COMMENTS_SQL;
         }
