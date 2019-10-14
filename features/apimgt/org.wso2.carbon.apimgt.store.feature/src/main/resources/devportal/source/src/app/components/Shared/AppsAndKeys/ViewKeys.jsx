@@ -527,8 +527,8 @@ class ViewKeys extends React.Component {
                                 <Typography variant='caption' gutterBottom >
                                     <FormattedMessage
                                         id='Shared.AppsAndKeys.ViewKeys.client.enable.client.credentials'
-                                        defaultMessage={`Enable Client-Credentials grant 
-                                            type to generate test access tokens`}
+                                        defaultMessage={'Enable Client Credentials grant ' +
+                                            'type to generate test access tokens'}
                                     />
                                 </Typography>
                             )}
