@@ -19,7 +19,7 @@ var addApiPolicy = function (policy) {
             error: false
         };
     } catch (ex) {
-        log.error(ex);
+        log.error(ex.message);
         return {
             error: true,
             message:  ex.message.split(":")[1]
