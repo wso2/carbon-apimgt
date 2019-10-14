@@ -178,6 +178,7 @@ function Overview(props) {
     const { classes, theme } = props;
     const { api, applicationsAvailable, subscribedApplications } = useContext(ApiContext);
     const [totalComments, setCount] = useState(0);
+    const [totalDocuments, setDocsCount] = useState(0);
     const [overviewDocOverride, setOverviewDocOverride] = useState(null);
     useEffect(() => {
         const restApi = new API();
@@ -545,10 +546,10 @@ function Overview(props) {
                         </Typography>
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails
-                        classes={{ root: classNames({ [classes.noDocumentRoot]: totalComments === 0 }) }}
+                        classes={{ root: classNames({ [classes.noDocumentRoot]: totalDocuments === 0 }) }}
                     >
                         <Grid container className={classes.root} spacing={2}>
-                            <OverviewDocuments apiId={api.id} />
+                            <OverviewDocuments apiId={api.id} setDocsCount={setDocsCount}/>
                         </Grid>
                     </ExpansionPanelDetails>
                     <Divider />
