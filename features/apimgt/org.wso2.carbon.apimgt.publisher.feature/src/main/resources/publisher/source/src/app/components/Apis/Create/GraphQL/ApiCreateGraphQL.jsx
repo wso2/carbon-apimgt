@@ -187,9 +187,7 @@ export default function ApiCreateGraphQL(props) {
                     <Typography variant='caption'>
                         <FormattedMessage
                             id='Apis.Create.GraphQL.ApiCreateGraphQL.sub.heading'
-                            defaultMessage={
-                                'Create an API by importing an existing GraphQL SDL definition.'
-                            }
+                            defaultMessage='Create an API by importing an existing GraphQL SDL definition.'
                         />
                     </Typography>
                 </React.Fragment>

@@ -165,7 +165,8 @@ export default function ApiCreateWSDL(props) {
                         <FormattedMessage
                             id='Apis.Create.WSDL.ApiCreateWSDL.sub.heading'
                             defaultMessage={
-                                'Expose an existing SOAP service as a REST API by importing the WSDL of the SOAP service.'
+                                'Expose an existing SOAP service as a REST API by importing the WSDL of the ' +
+                                'SOAP service.'
                             }
                         />
                     </Typography>
