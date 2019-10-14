@@ -7657,31 +7657,23 @@ public class ApiMgtDAO {
     /**
      * Adds a comment for an API
      *
-     * @param apiTypeWrapper API type wrapper
+     * @param identifier API identifier
      * @param comment    Commented Text
      * @param user       User who did the comment
      * @return Comment ID
      */
-    public String addComment(ApiTypeWrapper apiTypeWrapper, Comment comment, String user) throws APIManagementException {
+    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
         Connection connection = null;
         ResultSet insertSet = null;
         PreparedStatement insertPrepStmt = null;
         String commentId = null;
         int id = -1;
-        boolean isProduct = apiTypeWrapper.isAPIProduct();
 
-        Identifier identifier;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             //Get API Id
-            if (!isProduct) {
-                identifier = apiTypeWrapper.getApi().getId();
-                id = getAPIID(apiTypeWrapper.getApi().getId(), connection);
-            } else  {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-                id = getAPIID(apiTypeWrapper.getApiProduct().getId(), connection);
-            }
+            id = getAPIID(identifier, connection);
             if (id == -1) {
                 String msg = "Could not load API record for: " + identifier.getName();
                 log.error(msg);
@@ -7690,7 +7682,7 @@ public class ApiMgtDAO {
 
             /*This query is to update the AM_API_COMMENTS table */
             String addCommentQuery;
-            if (!isProduct) {
+            if (identifier instanceof APIIdentifier) {
                 addCommentQuery = SQLConstants.ADD_COMMENT_SQL;
             } else {
                 addCommentQuery = SQLConstants.ADD_API_PRODUCT_COMMENT_SQL;
@@ -7717,7 +7709,8 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the add comment ", e1);
                 }
             }
-            handleException("Failed to add comment data, for  " + apiTypeWrapper.getName(), e);
+            handleException("Failed to add comment data, for  " + identifier.getName() + "-" + identifier.getVersion(),
+                    e);
         } finally {
             APIMgtDBUtil.closeAllConnections(insertPrepStmt, null, insertSet);
         }
@@ -7773,35 +7766,27 @@ public class ApiMgtDAO {
      * Returns a specific comment of an API
      *
      * @param commentId  Comment ID
-     * @param apiTypeWrapper API type wrapper
+     * @param identifier API identifier
      * @return Comment Array
      * @throws APIManagementException
      */
-    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException {
+    public Comment getComment(Identifier identifier, String commentId) throws APIManagementException {
 
         Comment comment = new Comment();
         Connection connection = null;
         ResultSet resultSet = null;
         PreparedStatement prepStmt = null;
-        boolean isProduct = apiTypeWrapper.isAPIProduct();
         int id = -1;
 
         String getCommentQuery;
-        if (!isProduct) {
+        if (identifier instanceof APIIdentifier) {
             getCommentQuery = SQLConstants.GET_COMMENT_SQL;
         } else {
             getCommentQuery = SQLConstants.GET_API_PRODUCT_COMMENT_SQL;
         }
-        Identifier identifier;
         try {
             connection = APIMgtDBUtil.getConnection();
-            if (!isProduct) {
-                identifier = apiTypeWrapper.getApi().getId();
-                id = getAPIID(apiTypeWrapper.getApi().getId(), connection);
-            } else  {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-                id = getAPIID(apiTypeWrapper.getApiProduct().getId(), connection);
-            }
+            id = getAPIID(identifier, connection);
             if (id == -1) {
                 String msg = "Could not load API record for: " + identifier.getName();
                 log.error(msg);
@@ -7829,7 +7814,7 @@ public class ApiMgtDAO {
             } catch (SQLException e1) {
                 log.error("Failed to retrieve comment ", e1);
             }
-            handleException("Failed to retrieve comment for API " + apiTypeWrapper.getName() + "with comment ID " +
+            handleException("Failed to retrieve comment for API " + identifier.getName() + "with comment ID " +
                     commentId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
@@ -7863,11 +7848,10 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             if (!isProduct) {
                 identifier = apiTypeWrapper.getApi().getId();
-                id = getAPIID(apiTypeWrapper.getApi().getId(), connection);
             } else  {
                 identifier = apiTypeWrapper.getApiProduct().getId();
-                id = getAPIID(apiTypeWrapper.getApiProduct().getId(), connection);
             }
+            id = getAPIID(identifier, connection);
             if (id == -1) {
                 String msg = "Could not load API record for: " + identifier.getName();
                 log.error(msg);

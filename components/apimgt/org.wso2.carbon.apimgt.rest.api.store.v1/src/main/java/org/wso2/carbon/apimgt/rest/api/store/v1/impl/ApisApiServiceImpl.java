@@ -188,10 +188,16 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            Identifier identifier;
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
 
             Comment comment = CommentMappingUtil.fromDTOToComment(body, username, apiId);
-            String createdCommentId = apiConsumer.addComment(apiTypeWrapper, comment, username);
-            Comment createdComment = apiConsumer.getComment(apiTypeWrapper, createdCommentId);
+            String createdCommentId = apiConsumer.addComment(identifier, comment, username);
+            Comment createdComment = apiConsumer.getComment(identifier, createdCommentId);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
@@ -246,8 +252,14 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            Identifier identifier;
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
 
-            Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId);
+            Comment comment = apiConsumer.getComment(identifier, commentId);
 
             if (comment != null) {
                 CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
