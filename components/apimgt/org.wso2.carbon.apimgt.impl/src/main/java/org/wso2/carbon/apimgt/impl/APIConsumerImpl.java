@@ -3175,8 +3175,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public String addComment(APIIdentifier identifier, Comment comment, String user) throws APIManagementException {
-        return apiMgtDAO.addComment(identifier, comment, user);
+    public String addComment(ApiTypeWrapper apiTypeWrapper, Comment comment, String user) throws APIManagementException {
+        return apiMgtDAO.addComment(apiTypeWrapper, comment, user);
     }
 
     @Override
@@ -3186,8 +3186,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Comment getComment(APIIdentifier identifier, String commentId) throws APIManagementException {
-        return apiMgtDAO.getComment(identifier, commentId);
+    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException {
+        return apiMgtDAO.getComment(apiTypeWrapper, commentId);
+    }
+
+    @Override
+    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(ApiTypeWrapper apiTypeWrapper)
+            throws APIManagementException {
+        return apiMgtDAO.getComments(apiTypeWrapper);
     }
 
     @Override

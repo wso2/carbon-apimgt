@@ -116,15 +116,21 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public String addComment(APIIdentifier identifier, Comment comment, String user) throws APIManagementException {
+    public String addComment(ApiTypeWrapper apiTypeWrapper, Comment comment, String user) throws APIManagementException {
         checkSubscribePermission();
-        return super.addComment(identifier, comment, user);
+        return super.addComment(apiTypeWrapper, comment, user);
     }
 
     @Override
-    public Comment getComment(APIIdentifier identifier, String commentId) throws APIManagementException {
+    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException {
         checkSubscribePermission();
-        return super.getComment(identifier, commentId);
+        return super.getComment(apiTypeWrapper, commentId);
+    }
+
+    @Override
+    public Comment[] getComments(ApiTypeWrapper apiTypeWrapper) throws APIManagementException {
+        checkSubscribePermission();
+        return super.getComments(apiTypeWrapper);
     }
 
     @Override
