@@ -16,10 +16,11 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import SubscribeToApi from 'AppComponents/Shared/AppsAndKeys/SubscribeToApi';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
+import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
 import { injectIntl } from 'react-intl';
 import ButtonPanel from './ButtonPanel';
 
@@ -36,10 +37,11 @@ const subscribeToAppStep = (props) => {
     });
     const [newApp, setNewApp] = useState(null);
     const {
-        apiId, currentStep, throttlingPolicyList, createdApp, incrementStep, intl, setStepStatus,
+        currentStep, createdApp, incrementStep, intl, setStepStatus,
         stepStatuses, classes,
     } = props;
-
+    const { api: apiObject } = useContext(ApiContext);
+    const { id, tiers: throttlingPolicyList } = { ...apiObject, tiers: [...apiObject.tiers] };
     const subscribeToApplication = () => {
         const api = new API();
         api.subscribe(
@@ -66,7 +68,7 @@ const subscribeToAppStep = (props) => {
     };
 
     useEffect(() => {
-        const newSubscriptionRequest = { ...subscriptionRequest, apiId };
+        const newSubscriptionRequest = { ...subscriptionRequest, apiId: id };
         if (throttlingPolicyList) {
             const [tierData] = throttlingPolicyList;
             newSubscriptionRequest.throttlingPolicy = tierData.tierName;

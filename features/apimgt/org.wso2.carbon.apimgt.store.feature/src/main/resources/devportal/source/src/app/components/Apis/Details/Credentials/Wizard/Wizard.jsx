@@ -24,6 +24,7 @@ import { Typography, Paper, Box } from '@material-ui/core';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
+import ApiContext from 'AppComponents/Apis/Details/ApiContext';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import CreateAppStep from './CreateAppStep';
@@ -33,38 +34,9 @@ import GenerateAccessTokenStep from './GenerateAccessTokenStep';
 import CopyAccessTokenStep from './CopyAccessTokenStep';
 
 const styles = theme => ({
-    appBar: {
-        background: theme.palette.background.paper,
-        color: theme.palette.getContrastText(theme.palette.background.paper),
-    },
-    toolbar: {
-        marginLeft: theme.spacing.unit * 2,
-    },
-    subscribeTitle: {
-        flex: 1,
-    },
-    plainContent: {
-        paddingTop: 80,
-        paddingLeft: theme.spacing.unit * 2,
-    },
     button: {
         marginTop: theme.spacing.unit * 2,
         marginRight: theme.spacing.unit,
-    },
-    group: {
-        display: 'flex',
-        flexDirection: 'row',
-    },
-    instructions: {
-        marginTop: theme.spacing.unit,
-        marginBottom: theme.spacing.unit,
-        'font-size': theme.spacing.unit * 2,
-    },
-    root: {
-        paddingLeft: theme.spacing.unit,
-    },
-    wizardContent: {
-        paddingLeft: theme.spacing.unit,
     },
     wizardButtons: {
         paddingLeft: theme.spacing.unit * 2,
@@ -78,6 +50,7 @@ const stepComponents = [CreateAppStep, SubscribeToAppStep, GenerateKeysStep,
  * Class used for wizard
  */
 class Wizard extends Component {
+    static contextType = ApiContext;
     /**
      * @param {*} props properties
      */
@@ -184,13 +157,12 @@ class Wizard extends Component {
      * @inheritdoc
      */
     render() {
-        const {
-            classes, updateSubscriptionData, apiId, handleClickToggle, throttlingPolicyList,
-        } = this.props;
+        const { classes } = this.props;
+        const { api } = this.context;
         const { currentStep, redirect, stepStatus } = this.state;
         const CurrentStepComponent = stepComponents[currentStep];
         if (redirect) {
-            return <Redirect push to={'/apis/' + apiId + '/test'} />;
+            return <Redirect push to={'/apis/' + api.id + '/test'} />;
         }
         return (
             <React.Fragment>
@@ -220,12 +192,8 @@ class Wizard extends Component {
                                             stepStatuses={this.stepStatuses}
                                             classes={classes}
                                             setCreatedApp={this.setCreatedApp}
-                                            throttlingPolicyList={throttlingPolicyList}
-                                            apiId={apiId}
                                             setCreatedKeyType={this.setCreatedKeyType}
                                             setCreatedToken={this.setCreatedToken}
-                                            handleClickToggle={handleClickToggle}
-                                            updateSubscriptionData={updateSubscriptionData}
                                             handleReset={this.handleReset}
                                             handleRedirectTest={this.handleRedirectTest}
                                         />
@@ -263,10 +231,7 @@ Wizard.propTypes = {
         wizardContent: PropTypes.string,
         wizardButtons: PropTypes.string,
     }).isRequired,
-    updateSubscriptionData: PropTypes.func.isRequired,
-    handleClickToggle: PropTypes.func.isRequired,
     intl: PropTypes.func.isRequired,
-    apiId: PropTypes.string.isRequired,
     throttlingPolicyList: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 

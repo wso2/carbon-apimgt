@@ -16,19 +16,22 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import ViewToken from 'AppComponents/Shared/AppsAndKeys/ViewToken';
-import ButtonPanel from './ButtonPanel';
+import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
 import { Box } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
+import { useHistory } from 'react-router-dom';
+import ButtonPanel from './ButtonPanel';
 
 const copyAccessTokenStep = (props) => {
     const {
-        currentStep, createdToken, updateSubscriptionData, classes, handleClickToggle, handleReset, handleRedirectTest,
+        currentStep, createdToken, classes, handleReset, handleRedirectTest,
     } = props;
-
+    const history = useHistory();
+    const { api, updateSubscriptionData } = useContext(ApiContext);
     const completeStep = () => {
-        handleClickToggle('openNew', updateSubscriptionData);
+        updateSubscriptionData(history.push(`/apis/${api.id}/credentials`));
     };
 
     return (

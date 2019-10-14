@@ -75,7 +75,7 @@ const LoadableSwitch = withRouter(Loadable.Map({
                     './Sdk'),
     },
     render(loaded, props) {
-        const { match, api, updateSubscriptionData } = props;
+        const { match, api } = props;
         const ApiConsole = loaded.ApiConsole.default;
         const Overview = loaded.Overview.default;
         const Documentation = loaded.Documentation.default;
@@ -90,17 +90,12 @@ const LoadableSwitch = withRouter(Loadable.Map({
         return (
             <Switch>
                 <Redirect exact from='/apis/:apiUuid' to={redirectURL} />
-                <Route path='/apis/:apiUuid/overview' render={props => <Overview {...props} />} />
+                <Route path='/apis/:apiUuid/overview' render={() => <Overview {...props} />} />
                 <Route path='/apis/:apiUuid/docs' component={Documentation} />
                 <Route
                     exact
                     path='/apis/:apiUuid/credentials/wizard'
-                    component={() => (<Wizard
-                        updateSubscriptionData={updateSubscriptionData}
-                        apiId={api.id}
-                        handleClickToggle={() => {}}
-                        throttlingPolicyList={api.tiers}
-                    />)}
+                    component={Wizard}
                 />
                 {!advertised && <Route path='/apis/:apiUuid/comments' component={Comments} />}
                 {!advertised && <Route path='/apis/:apiUuid/credentials' component={Credentials} />}

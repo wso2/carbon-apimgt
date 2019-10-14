@@ -27,7 +27,6 @@ import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import { Link } from 'react-router-dom';
 import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
-import Dialog from '@material-ui/core/Dialog';
 import ExpansionPanelActions from '@material-ui/core/ExpansionPanelActions';
 import Button from '@material-ui/core/Button';
 import Alert from 'AppComponents/Shared/Alert';
@@ -281,8 +280,8 @@ function Overview(props) {
                                                 id='Apis.Details.Overview.no.subscription.message'
                                                 defaultMessage='No Subscriptions Allowed'
                                             />
-                                        </Typography>
-                                    </div>
+                                        </Button>
+                                    </Link>
                                 </Grid>
                             </ExpansionPanelDetails>
                         ) : (
