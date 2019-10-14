@@ -130,7 +130,7 @@
             location.href = "<%= jagg.url('/label-list')%>";
        });
         var isNewLabel = true;
-        if('<%=encode.forHtmlAttribute(uuid)%>' != 'null'){
+        if ('<%=encode.forHtmlAttribute(uuid)%>' != 'null') {
             isNewLabel = false;
         }
         if(!isNewLabel){
