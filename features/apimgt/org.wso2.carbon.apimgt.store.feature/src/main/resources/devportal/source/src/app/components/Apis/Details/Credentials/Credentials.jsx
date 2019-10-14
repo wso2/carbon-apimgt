@@ -485,35 +485,6 @@ class Credentials extends React.Component {
                                         )}
                                     </React.Fragment>
                                 )}
-                                {/*
-                                        ***************************************
-                                        Subscribe with new Mode
-                                        ***************************************
-                                        */}
-                                {/* <Dialog
-                                    fullScreen
-                                    open={openNew}
-                                    onClose={() => this.handleClickToggle('openNew', updateSubscriptionData)}
-                                    TransitionComponent={Transition}
-                                > */}
-                                {/* <Wizard
-                                    updateSubscriptionData={updateSubscriptionData}
-                                    apiId={api.id}
-                                    handleClickToggle={this.handleClickToggle}
-                                    throttlingPolicyList={throttlingPolicyList}
-                                /> */}
-                                {/* <Switch>
-                                    <Route
-                                        path='/apis/:apiUuid/credentials/wizard'
-                                        component={() => (<Wizard
-                                            updateSubscriptionData={updateSubscriptionData}
-                                            apiId={api.id}
-                                            handleClickToggle={this.handleClickToggle}
-                                            throttlingPolicyList={throttlingPolicyList}
-                                        />)}
-                                    />
-                                </Switch> */}
-                                {/* </Dialog> */}
                             </Paper>
                         </Grid>
                     </Grid>
