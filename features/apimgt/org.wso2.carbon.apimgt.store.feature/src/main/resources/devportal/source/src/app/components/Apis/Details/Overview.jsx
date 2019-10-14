@@ -267,7 +267,7 @@ function Overview(props) {
                                     </Typography>
                                     <Typography variant='body2'>
                                         <FormattedMessage
-                                            id='Apis.Details.Overview.credential.wizard.info'
+                                            id='Apis.Details.Overview.credential.wizard.info.body'
                                             defaultMessage={
                                                 'Use the Key Generation Wizard. '
                                                 + 'Create a new application -> '
