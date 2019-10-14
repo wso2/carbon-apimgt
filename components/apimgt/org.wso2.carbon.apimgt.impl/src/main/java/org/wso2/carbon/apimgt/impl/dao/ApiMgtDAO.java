@@ -3451,7 +3451,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param apiIdentifier API Identifier
+     * @param identifier    Identifier
      * @param rating        Rating
      * @param userId        User Id
      * @throws APIManagementException if failed to add Rating
@@ -3482,6 +3482,9 @@ public class ApiMgtDAO {
             boolean userRatingExists = false;
             //This query to check the ratings already exists for the user in the AM_API_RATINGS table
             String sqlQuery = SQLConstants.GET_API_RATING_SQL;
+            if(identifier instanceof APIProductIdentifier){
+                sqlQuery = SQLConstants.GET_API_PRODUCT_RATING_SQL;
+            }
 
             psSelect = conn.prepareStatement(sqlQuery);
             psSelect.setInt(1, apiId);
@@ -3497,6 +3500,9 @@ public class ApiMgtDAO {
             if (!userRatingExists) {
                 //This query to insert into the AM_API_RATINGS table
                 sqlAddQuery = SQLConstants.ADD_API_RATING_SQL;
+                if (identifier instanceof APIProductIdentifier) {
+                    sqlAddQuery = SQLConstants.ADD_API_PRODUCT_RATING_SQL;
+                }
                 ps = conn.prepareStatement(sqlAddQuery);
                 ps.setString(1, ratingId);
                 ps.setInt(2, rating);
@@ -3505,6 +3511,9 @@ public class ApiMgtDAO {
             } else {
                 // This query to update the AM_API_RATINGS table
                 sqlAddQuery = SQLConstants.UPDATE_API_RATING_SQL;
+                if (identifier instanceof APIProductIdentifier) {
+                    sqlAddQuery = SQLConstants.UPDATE_API_PRODUCT_RATING_SQL;
+                }
                 ps = conn.prepareStatement(sqlAddQuery);
                 // Adding data to the AM_API_RATINGS table
                 ps.setInt(1, rating);
@@ -3631,11 +3640,11 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param apiIdentifier API Identifier
+     * @param identifier    Identifier
      * @param userId        User Id
      * @throws APIManagementException if failed to get User API Rating
      */
-    public int getUserRating(Identifier apiIdentifier, String userId, Connection conn)
+    public int getUserRating(Identifier identifier, String userId, Connection conn)
             throws APIManagementException, SQLException {
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -3652,18 +3661,21 @@ public class ApiMgtDAO {
             }
             //Get API Id
             int apiId = -1;
-            apiId = getAPIID(apiIdentifier, conn);
+            apiId = getAPIID(identifier, conn);
             if (apiId == -1) {
-                String msg = "Could not load API record for: " + apiIdentifier.getName();
+                String msg = "Could not load API record for: " + identifier.getName();
                 log.error(msg);
                 throw new APIManagementException(msg);
             }
             //This query to update the AM_API_RATINGS table
-            String sqlQuery = SQLConstants.GET_RATING_SQL;
+            String sqlQuery = SQLConstants.GET_API_RATING_SQL;
+            if (identifier instanceof APIProductIdentifier) {
+                sqlQuery = SQLConstants.GET_API_PRODUCT_RATING_SQL;
+            }
             // Adding data to the AM_API_RATINGS  table
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, subscriber.getId());
-            ps.setInt(2, apiId);
+            ps.setInt(1, apiId);
+            ps.setInt(2, subscriber.getId());
             rs = ps.executeQuery();
 
             while (rs.next()) {
@@ -3709,7 +3721,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param apiIdentifier API Identifier
+     * @param identifier    Identifier
      * @param userId        User Id
      * @param conn          Database connection
      * @throws APIManagementException if failed to get user API Ratings
@@ -3734,13 +3746,17 @@ public class ApiMgtDAO {
             }
             //Get API Id
             apiId = getAPIID(identifier, conn);
+
+            String sqlQuery = SQLConstants.GET_API_RATING_INFO_SQL;
+            if(identifier instanceof APIProductIdentifier){
+                sqlQuery = SQLConstants.GET_API_PRODUCT_RATING_INFO_SQL;
+            }
             if (apiId == -1) {
                 String msg = "Could not load API record for: " + identifier.getName();
                 log.error(msg);
                 throw new APIManagementException(msg);
             }
             //This query to get rating information from the AM_API_RATINGS table
-            String sqlQuery = SQLConstants.GET_RATING_INFO_SQL;
             ps = conn.prepareStatement(sqlQuery);
             ps.setInt(1, subscriber.getId());
             ps.setInt(2, apiId);

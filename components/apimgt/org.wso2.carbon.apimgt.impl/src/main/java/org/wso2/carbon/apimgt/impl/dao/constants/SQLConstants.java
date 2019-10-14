@@ -1553,11 +1553,20 @@ public class SQLConstants {
     public static final String GET_API_RATING_SQL =
             "SELECT RATING FROM AM_API_RATINGS WHERE API_ID= ? AND SUBSCRIBER_ID=? ";
 
+    public static final String GET_API_PRODUCT_RATING_SQL =
+            "SELECT RATING FROM AM_API_PRODUCT_RATINGS WHERE API_PRODUCT_ID= ? AND SUBSCRIBER_ID=? ";
+
     public static final String ADD_API_RATING_SQL =
             "INSERT INTO AM_API_RATINGS (RATING_ID, RATING, API_ID, SUBSCRIBER_ID)  VALUES (?,?,?,?)";
 
+    public static final String ADD_API_PRODUCT_RATING_SQL =
+            "INSERT INTO AM_API_RATINGS (RATING_ID, RATING, API_PRODUCT_ID, SUBSCRIBER_ID)  VALUES (?,?,?,?)";
+
     public static final String UPDATE_API_RATING_SQL =
             "UPDATE AM_API_RATINGS SET RATING=? WHERE API_ID= ? AND SUBSCRIBER_ID=?";
+
+    public static final String UPDATE_API_PRODUCT_RATING_SQL =
+            "UPDATE AM_API_RATINGS SET RATING=? WHERE API_PRODUCT_ID= ? AND SUBSCRIBER_ID=?";
 
     public static final String GET_RATING_ID_SQL =
             "SELECT RATING_ID FROM AM_API_RATINGS WHERE API_ID= ? AND SUBSCRIBER_ID=? ";
@@ -1565,12 +1574,13 @@ public class SQLConstants {
     public static final String REMOVE_RATING_SQL =
             "DELETE FROM AM_API_RATINGS WHERE RATING_ID =? ";
 
-    public static final String GET_RATING_SQL =
-            "SELECT RATING FROM AM_API_RATINGS WHERE SUBSCRIBER_ID  = ? AND API_ID= ? ";
-
-    public static final String GET_RATING_INFO_SQL =
+    public static final String GET_API_RATING_INFO_SQL =
             "SELECT RATING_ID, API_ID, RATING, SUBSCRIBER_ID FROM AM_API_RATINGS WHERE SUBSCRIBER_ID  = ? "
                     + "AND API_ID= ? ";
+
+    public static final String GET_API_PRODUCT_RATING_INFO_SQL =
+            "SELECT RATING_ID, PRODUCT_ID, RATING, SUBSCRIBER_ID FROM AM_API_RATINGS WHERE SUBSCRIBER_ID  = ? "
+                    + "AND API_PRODUCT_ID= ? ";
 
     public static final String GET_API_ALL_RATINGS_SQL =
             "SELECT RATING_ID, API_ID, RATING, SUBSCRIBER_ID FROM AM_API_RATINGS WHERE API_ID= ? ";
