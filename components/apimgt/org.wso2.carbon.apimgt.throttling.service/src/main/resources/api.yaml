@@ -149,6 +149,22 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /conditionGroups:
+    get:
+      summary: Condition groups
+      description: |
+        This will provide condition groups in database.
+      responses:
+        200:
+          description: An array of condition groups
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ConditionGroupList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
   ThrottledEvent:
     properties:
@@ -207,3 +223,50 @@ definitions:
         type: integer
         format: int64
         description: expiry timestamp.
+  ConditionGroupList:
+    type: array
+    items:
+      $ref: '#/definitions/ConditionGroup'
+  ConditionGroup:
+    properties:
+      conditionGroupId:
+        type: integer
+      policyName:
+        type: string
+      tenantId:
+        type: integer
+      conditions:
+        type: array
+        items:
+          $ref: '#/definitions/Condition'
+  Condition:
+    properties:
+      conditionType:
+        type: string
+      conditionName:
+        type: string
+      conditionValue:
+        type: string
+      isInverted:
+        type: boolean
+      category:
+        type: string
+      headerFieldName:
+        type: string
+      headerFieldValue:
+        type: string
+      startingIP:
+        type: string
+      endingIP:
+        type: string
+      specificIP:
+        type: string
+      claimUri:
+        type: string
+      claimAttrib:
+        type: string
+      parameterName:
+        type: string
+      parameterValue:
+        type: string
+

@@ -21,9 +21,7 @@ package org.wso2.carbon.throttle.service.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.ClassPathResource;
-import org.wso2.carbon.throttle.service.dto.BlockConditionsDTO;
-import org.wso2.carbon.throttle.service.dto.RevokedJWTDTO;
-import org.wso2.carbon.throttle.service.dto.RevokedJWTListDTO;
+import org.wso2.carbon.throttle.service.dto.*;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -267,5 +265,161 @@ public final class BlockConditionDBUtil {
             closeAllConnections(ps, conn, rs);
         }
         return revokedJWTListDTO;
+    }
+
+
+    static ConditionGroupListDTO getConditionGroups() {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        ConditionGroupListDTO conditionGroupsDTOList = new ConditionGroupListDTO();
+        String sqlQuery = "SELECT AM_CONDITION_GROUP.CONDITION_GROUP_ID, AM_API_THROTTLE_POLICY.NAME AS POLICY_NAME," +
+                " AM_API_THROTTLE_POLICY.TENANT_ID " +
+                "FROM AM_CONDITION_GROUP, AM_API_THROTTLE_POLICY " +
+                "WHERE AM_CONDITION_GROUP.POLICY_ID=AM_API_THROTTLE_POLICY.POLICY_ID";
+        try {
+            conn = BlockConditionDBUtil.getConnection();
+
+            ps = conn.prepareStatement(sqlQuery);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                int conditionGroupId = rs.getInt("CONDITION_GROUP_ID");
+                String policyName = rs.getString("POLICY_NAME");
+                int tenantId = rs.getInt("TENANT_ID");
+
+                ConditionGroupDTO conditionGroupDTO = new ConditionGroupDTO();
+                conditionGroupDTO.setConditionGroupId(conditionGroupId);
+                conditionGroupDTO.setPolicyName(policyName);
+                conditionGroupDTO.setTenantId(tenantId);
+
+                List<ConditionDTO> conditions = new ArrayList<>();
+                setHeaderConditionProperties(conditionGroupId, conditions);
+                setIPConditionProperties(conditionGroupId, conditions);
+                setJWTClaimConditionProperties(conditionGroupId, conditions);
+                setQueryParamConditionProperties(conditionGroupId, conditions);
+
+                conditionGroupDTO.setConditions(conditions);
+                conditionGroupsDTOList.add(conditionGroupDTO);
+            }
+        } catch (SQLException e) {
+            log.error("Error while executing SQL", e);
+        } finally {
+            ThrottlingDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return conditionGroupsDTOList;
+    }
+
+    private static void setHeaderConditionProperties(int conditionGroupId, List<ConditionDTO> conditions) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery = "SELECT * FROM AM_HEADER_FIELD_CONDITION WHERE CONDITION_GROUP_ID=?";
+        try {
+            conn = BlockConditionDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, conditionGroupId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                String headerFieldName = rs.getString("HEADER_FIELD_NAME");
+                String headerFieldValue = rs.getString("HEADER_FIELD_VALUE");
+                boolean isHeaderFieldMapping = rs.getBoolean("IS_HEADER_FIELD_MAPPING");
+                ConditionDTO conditionDTO = new ConditionDTO();
+                conditionDTO.setCategory("HEADER");
+                conditionDTO.setHeaderFieldName(headerFieldName);
+                conditionDTO.setHeaderFieldValue(headerFieldValue);
+                conditionDTO.setIsInverted(isHeaderFieldMapping);
+                conditions.add(conditionDTO);
+            }
+        } catch (SQLException e) {
+            log.error("Error while executing SQL", e);
+        } finally {
+            ThrottlingDBUtil.closeAllConnections(ps, conn, rs);
+        }
+    }
+
+    private static void setIPConditionProperties(int conditionGroupId, List<ConditionDTO> conditions) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery = "SELECT * FROM AM_IP_CONDITION WHERE CONDITION_GROUP_ID=?";
+        try {
+            conn = BlockConditionDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, conditionGroupId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                String startingIP = rs.getString("STARTING_IP");
+                String endingIP = rs.getString("ENDING_IP");
+                String specificIP = rs.getString("SPECIFIC_IP");
+                boolean withinIPRange = rs.getBoolean("WITHIN_IP_RANGE");
+                ConditionDTO conditionDTO = new ConditionDTO();
+                conditionDTO.setCategory("IP");
+                conditionDTO.setStartingIP(startingIP);
+                conditionDTO.setEndingIP(endingIP);
+                conditionDTO.setSpecificIP(specificIP);
+                conditionDTO.setIsInverted(withinIPRange);
+                conditions.add(conditionDTO);
+            }
+        } catch (SQLException e) {
+            log.error("Error while executing SQL", e);
+        } finally {
+            ThrottlingDBUtil.closeAllConnections(ps, conn, rs);
+        }
+    }
+
+    private static void setJWTClaimConditionProperties(int conditionGroupId, List<ConditionDTO> conditions) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery = "SELECT * FROM AM_JWT_CLAIM_CONDITION WHERE CONDITION_GROUP_ID=?";
+        try {
+            conn = BlockConditionDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, conditionGroupId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                String claimUri = rs.getString("CLAIM_URI");
+                String claimAttrib = rs.getString("CLAIM_ATTRIB");
+                boolean isClaimMapping = rs.getBoolean("IS_CLAIM_MAPPING");
+                ConditionDTO conditionDTO = new ConditionDTO();
+                conditionDTO.setCategory("JWT_CLAIM");
+                conditionDTO.setClaimUri(claimUri);
+                conditionDTO.setClaimAttrib(claimAttrib);
+                conditionDTO.setIsInverted(isClaimMapping);
+                conditions.add(conditionDTO);
+            }
+        } catch (SQLException e) {
+            log.error("Error while executing SQL", e);
+        } finally {
+            ThrottlingDBUtil.closeAllConnections(ps, conn, rs);
+        }
+    }
+
+    private static void setQueryParamConditionProperties(int conditionGroupId, List<ConditionDTO> conditions) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery = "SELECT * FROM AM_QUERY_PARAMETER_CONDITION WHERE CONDITION_GROUP_ID=?";
+        try {
+            conn = BlockConditionDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, conditionGroupId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                String parameterName = rs.getString("PARAMETER_NAME");
+                String parameterValue = rs.getString("PARAMETER_VALUE");
+                boolean isParamMapping = rs.getBoolean("IS_PARAM_MAPPING");
+                ConditionDTO conditionDTO = new ConditionDTO();
+                conditionDTO.setConditionType("QUERY_PARAM");
+                conditionDTO.setParameterName(parameterName);
+                conditionDTO.setParameterValue(parameterValue);
+                conditionDTO.setIsInverted(isParamMapping);
+                conditions.add(conditionDTO);
+            }
+        } catch (SQLException e) {
+            log.error("Error while executing SQL", e);
+        } finally {
+            ThrottlingDBUtil.closeAllConnections(ps, conn, rs);
+        }
     }
 }

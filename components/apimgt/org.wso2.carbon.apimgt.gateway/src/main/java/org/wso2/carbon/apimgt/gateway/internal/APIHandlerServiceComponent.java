@@ -25,6 +25,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.conditiongroup.ConditionGroupsRetriever;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
@@ -116,6 +117,10 @@ public class APIHandlerServiceComponent {
                 // Start JWT revoked map cleaner.
                 RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
                 revokedJWTMapCleaner.startJWTRevokedMapCleaner();
+
+                // Start web service based condition groups retriever.
+                ConditionGroupsRetriever webServiceConditionGroupsRetriever = new ConditionGroupsRetriever();
+                webServiceConditionGroupsRetriever.startConditionGroupsRetriever();
 
                 // Read the trust store
                 ServerConfiguration config = CarbonUtils.getServerConfiguration();
