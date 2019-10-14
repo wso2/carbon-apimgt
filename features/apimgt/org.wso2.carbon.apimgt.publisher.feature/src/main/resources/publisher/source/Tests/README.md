@@ -19,7 +19,14 @@ To run the unit tests, simply execute the `npm test` command in the application 
 
 ## Integration tests
 
-Before running the integration tests, Make sure you have started relevent WSO2 API-Manager server in it's default ports(managment port`9443`) locally.Then, to run integration tests, Execute the command `npm run test:integration` in the application root directory.
+Test files are located in `<Product-APIM-Root>/modules/integration/tests-integration/tests-backend/src/test/resources/jest-integration-tests/`).
+Go to the above location and run
+
+```
+npm test
+```
+for more information read the integration test [README.md]() file
+
 
 ## Code coverage
 

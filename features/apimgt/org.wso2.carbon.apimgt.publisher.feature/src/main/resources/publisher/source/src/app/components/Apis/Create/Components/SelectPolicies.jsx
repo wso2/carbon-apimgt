@@ -30,7 +30,7 @@ export default function SelectPolicies(props) {
             <TextField
                 required={required}
                 fullWidth
-                id='outlined-select-currency'
+                id='itest-id-apipolicies-input'
                 select
                 label='Business plan(s)'
                 value={selectedPolicies}
@@ -45,7 +45,13 @@ export default function SelectPolicies(props) {
                 variant='outlined'
             >
                 {policies.list.map(policy => (
-                    <MenuItem dense disableGutters={multiple} key={policy.name} value={policy.displayName}>
+                    <MenuItem
+                        dense
+                        disableGutters={multiple}
+                        id={policy.name}
+                        key={policy.name}
+                        value={policy.displayName}
+                    >
                         {multiple && <Checkbox color='primary' checked={selectedPolicies.includes(policy.name)} />}
                         <ListItemText primary={policy.displayName} secondary={policy.description} />
                     </MenuItem>
