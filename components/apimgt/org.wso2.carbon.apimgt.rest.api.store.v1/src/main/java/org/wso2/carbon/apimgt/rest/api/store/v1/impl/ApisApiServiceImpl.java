@@ -663,7 +663,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 identifier = apiTypeWrapper.getApi().getId();
             }
-//            APIIdentifier apiIdentifier = api.getId();
+
             if (body != null) {
                 rating = body.getRating();
             }
