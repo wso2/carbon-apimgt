@@ -18,7 +18,7 @@ const styles = {
 const ButtonPanel = (props) => {
     const { currentStep, handleCurrentStep, handleReset } = props;
     const stepsLength = 5;
-    const { api } = useContext(ApiContext);
+    const { api, updateSubscriptionData } = useContext(ApiContext);
     const history = useHistory();
 
     /**
@@ -32,7 +32,7 @@ const ButtonPanel = (props) => {
      * Redirect back to credentials page
      */
     const handleCancel = () => {
-        history.push(`/apis/${api.id}/credentials`);
+        updateSubscriptionData(history.push('credentials'));
     };
 
     return (
