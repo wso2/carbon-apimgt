@@ -195,16 +195,10 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
             String tenantDomain = APIUtil.getTenantDomainIfJWT(token);
             apiMgtDAO.addRevokedJWTSignature(tokenSignature, expiryTime, tenantDomain);
 
-            long currentTime = System.currentTimeMillis();
-            synchronized (this) {
-                // Only run the cleanup if the last cleanup was was performed more than 1 hour ago.
-                if (currentTime - ExpiredJWTCleaner.getLastUpdatedTime() > ExpiredJWTCleaner.DURATION) {
-                    // Cleanup expired revoked tokens from db.
-                    Runnable expiredJWTCleaner = new ExpiredJWTCleaner();
-                    Thread cleanupThread = new Thread(expiredJWTCleaner);
-                    cleanupThread.start();
-                }
-            }
+            // Cleanup expired revoked tokens from db.
+            Runnable expiredJWTCleaner = new ExpiredJWTCleaner();
+            Thread cleanupThread = new Thread(expiredJWTCleaner);
+            cleanupThread.start();
         } catch (APIManagementException e) {
             log.error("Unable to add revoked JWT signature to the database");
         }

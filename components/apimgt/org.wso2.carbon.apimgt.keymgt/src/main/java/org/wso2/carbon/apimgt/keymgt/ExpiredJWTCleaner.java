@@ -31,11 +31,18 @@ public class ExpiredJWTCleaner implements Runnable {
 
     private static final Log log = LogFactory.getLog(ExpiredJWTCleaner.class);
     private static long lastUpdatedTime;
-    public static final long DURATION = 3600000;
+    private static final long DURATION = 3600000;
 
     @Override
     public void run() {
-        cleanExpiredTokens();
+
+        long currentTime = System.currentTimeMillis();
+        synchronized (this) {
+            // Only run the cleanup if the last cleanup was was performed more than 1 hour ago
+            if (currentTime - lastUpdatedTime > DURATION) {
+                cleanExpiredTokens();
+            }
+        }
     }
 
     private void cleanExpiredTokens() {
@@ -52,9 +59,5 @@ public class ExpiredJWTCleaner implements Runnable {
         } catch (APIManagementException e) {
             log.error("Unable to cleanup expired JWT tokens from revoke table", e);
         }
-    }
-
-    public static long getLastUpdatedTime() {
-        return lastUpdatedTime;
     }
 }
