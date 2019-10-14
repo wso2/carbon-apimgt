@@ -17,7 +17,7 @@
  */
 
 import React from 'react';
-import { Grid, Typography, withStyles } from '@material-ui/core';
+import { Typography, withStyles, Container } from '@material-ui/core';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import Settings from './Settings';
@@ -37,36 +37,30 @@ const styles = theme => ({
 function SettingsBase(props) {
     const { classes } = props;
     return (
-        <div>
-            <Grid container direction='column' lg={12}>
-                <Grid item container>
-                    <Grid lg={2} />
-                    <Grid lg={8}>
-                        <div className={classes.headingWrapper}>
-                            <Typography variant='h5'>
-                                <FormattedMessage
-                                    id='Settings.SettingsBase.header'
-                                    defaultMessage='Settings'
-                                />
-                            </Typography>
-                            <Typography variant='caption'>
-                                <FormattedMessage
-                                    id='Settings.SettingsBase.sub.header'
-                                    defaultMessage='View and Configure Developer Portal Settings'
-                                />
-                            </Typography>
-                        </div>
-                        <Settings />
-                    </Grid>
-                    <Grid lg={2} />
-                </Grid>
-            </Grid>
-        </div>
+        <Container fixed>
+            <div className={classes.headingWrapper}>
+                <Typography variant='h5'>
+                    <FormattedMessage
+                        id='Apis.Settings.SettingsBase.header'
+                        defaultMessage='Settings'
+                    />
+                </Typography>
+                <Typography variant='caption'>
+                    <FormattedMessage
+                        id='Apis.Settings.SettingsBase.sub.header'
+                        defaultMessage='View and Configure API Publisher Settings'
+                    />
+                </Typography>
+            </div>
+            <Settings />
+        </Container>
     );
 }
 
 SettingsBase.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        headingWrapper: PropTypes.shape({}).isRequired,
+    }).isRequired,
 };
 
 export default withStyles(styles)(SettingsBase);

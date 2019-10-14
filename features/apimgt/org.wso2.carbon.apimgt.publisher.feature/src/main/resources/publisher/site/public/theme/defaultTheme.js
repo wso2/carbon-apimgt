@@ -41,6 +41,8 @@ const Configurations = {
             zIndex: {
                 apiCreateMenu: 1250,
                 operationDeleteUndo: 1600,
+                overviewArrow: 1,
+                goToSearch: 2,
             },
             custom: {
                 starColor: '#f2c73a',
