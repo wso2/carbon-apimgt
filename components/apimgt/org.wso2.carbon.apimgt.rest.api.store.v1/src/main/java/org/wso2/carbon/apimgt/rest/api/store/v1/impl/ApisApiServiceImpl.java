@@ -27,42 +27,14 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIRating;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
-
-
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.DocumentationMappingUtil;
@@ -73,6 +45,13 @@ import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ApisApiServiceImpl implements ApisApiService {
 
@@ -655,42 +634,49 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
             //this will fail if user doesn't have access to the API or the API does not exist
-            API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
-            APIIdentifier apiIdentifier = api.getId();
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+
+            Identifier identifier;
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
+//            APIIdentifier apiIdentifier = api.getId();
             if (body != null) {
                 rating = body.getRating();
             }
             switch (rating) {
                 //Below case 0[Rate 0] - is to remove ratings from a user
                 case 0: {
-                    apiConsumer.rateAPI(apiIdentifier, APIRating.RATING_ZERO, username);
+                    apiConsumer.rateAPI(identifier, APIRating.RATING_ZERO, username);
                     break;
                 }
                 case 1: {
-                    apiConsumer.rateAPI(apiIdentifier, APIRating.RATING_ONE, username);
+                    apiConsumer.rateAPI(identifier, APIRating.RATING_ONE, username);
                     break;
                 }
                 case 2: {
-                    apiConsumer.rateAPI(apiIdentifier, APIRating.RATING_TWO, username);
+                    apiConsumer.rateAPI(identifier, APIRating.RATING_TWO, username);
                     break;
                 }
                 case 3: {
-                    apiConsumer.rateAPI(apiIdentifier, APIRating.RATING_THREE, username);
+                    apiConsumer.rateAPI(identifier, APIRating.RATING_THREE, username);
                     break;
                 }
                 case 4: {
-                    apiConsumer.rateAPI(apiIdentifier, APIRating.RATING_FOUR, username);
+                    apiConsumer.rateAPI(identifier, APIRating.RATING_FOUR, username);
                     break;
                 }
                 case 5: {
-                    apiConsumer.rateAPI(apiIdentifier, APIRating.RATING_FIVE, username);
+                    apiConsumer.rateAPI(identifier, APIRating.RATING_FIVE, username);
                     break;
                 }
                 default: {
                     throw new IllegalArgumentException("Can't handle " + rating);
                 }
             }
-            JSONObject obj = apiConsumer.getUserRatingInfo(apiIdentifier, username);
+            JSONObject obj = apiConsumer.getUserRatingInfo(identifier, username);
             RatingDTO ratingDTO = new RatingDTO();
             if (obj != null && !obj.isEmpty()) {
                 ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);

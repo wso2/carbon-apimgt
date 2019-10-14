@@ -3428,7 +3428,7 @@ public class ApiMgtDAO {
         return applicationId;
     }
 
-    public void addRating(APIIdentifier apiId, int rating, String user) throws APIManagementException {
+    public void addRating(Identifier apiId, int rating, String user) throws APIManagementException {
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
@@ -3456,7 +3456,7 @@ public class ApiMgtDAO {
      * @param userId        User Id
      * @throws APIManagementException if failed to add Rating
      */
-    public void addOrUpdateRating(APIIdentifier apiIdentifier, int rating, String userId, Connection conn)
+    public void addOrUpdateRating(Identifier identifier, int rating, String userId, Connection conn)
             throws APIManagementException, SQLException {
         PreparedStatement ps = null;
         PreparedStatement psSelect = null;
@@ -3473,9 +3473,9 @@ public class ApiMgtDAO {
                 throw new APIManagementException(msg);
             }
             int apiId;
-            apiId = getAPIID(apiIdentifier, conn);
+            apiId = getAPIID(identifier, conn);
             if (apiId == -1) {
-                String msg = "Could not load API record for: " + apiIdentifier.getApiName();
+                String msg = "Could not load API record for: " + identifier.getName();
                 log.error(msg);
                 throw new APIManagementException(msg);
             }
@@ -3683,7 +3683,7 @@ public class ApiMgtDAO {
      * @param user        User name
      * @throws APIManagementException if failed to get user API Ratings
      */
-    public JSONObject getUserRatingInfo(APIIdentifier apiId, String user) throws APIManagementException {
+    public JSONObject getUserRatingInfo(Identifier apiId, String user) throws APIManagementException {
         Connection conn = null;
         JSONObject userRating = null;
         try {
@@ -3714,7 +3714,7 @@ public class ApiMgtDAO {
      * @param conn          Database connection
      * @throws APIManagementException if failed to get user API Ratings
      */
-    private JSONObject getUserRatingInfo(APIIdentifier apiIdentifier, String userId, Connection conn)
+    private JSONObject getUserRatingInfo(Identifier identifier, String userId, Connection conn)
             throws APIManagementException, SQLException {
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -3733,9 +3733,9 @@ public class ApiMgtDAO {
                 throw new APIManagementException(msg);
             }
             //Get API Id
-            apiId = getAPIID(apiIdentifier, conn);
+            apiId = getAPIID(identifier, conn);
             if (apiId == -1) {
-                String msg = "Could not load API record for: " + apiIdentifier.getApiName();
+                String msg = "Could not load API record for: " + identifier.getName();
                 log.error(msg);
                 throw new APIManagementException(msg);
             }

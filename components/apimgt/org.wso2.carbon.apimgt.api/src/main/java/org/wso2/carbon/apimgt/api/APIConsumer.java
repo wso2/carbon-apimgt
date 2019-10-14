@@ -142,7 +142,7 @@ public interface APIConsumer extends APIManager {
      * @param user Username of the subscriber providing the rating
      * @throws APIManagementException If an error occurs while rating the API
      */
-    void rateAPI(APIIdentifier apiId, APIRating rating, String user) throws APIManagementException;
+    void rateAPI(Identifier apiId, APIRating rating, String user) throws APIManagementException;
     /**
      * Remove an user rating of a particular API. This will be called when subscribers remove their rating on an API
      *
@@ -645,7 +645,7 @@ public interface APIConsumer extends APIManager {
     
     int getUserRating(Identifier apiId, String user) throws APIManagementException;
 
-    JSONObject getUserRatingInfo(APIIdentifier apiId, String user) throws APIManagementException;
+    JSONObject getUserRatingInfo(Identifier apiId, String user) throws APIManagementException;
     
     float getAverageAPIRating(Identifier apiId) throws APIManagementException;
 
