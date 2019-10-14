@@ -64,7 +64,7 @@
         "react-tap-event-plugin": "^2.0.1",
         "react-toastify": "^1.7.0",
         "react-visibility-sensor": "^5.1.1",
-        "swagger-client": "^3.9.0",
+        "swagger-client": "^3.9.4",
         "swagger-editor": "^3.6.30",
         "swagger-parser": "^7.0.1",
         "typeface-roboto": "0.0.35",

@@ -179,6 +179,7 @@ export default function DefaultAPIForm(props) {
                     name='name'
                     onChange={onChange}
                     InputProps={{
+                        id: 'itest-id-apiname-input',
                         onBlur: ({ target: { value } }) => {
                             validate('name', value);
                         },
@@ -207,6 +208,7 @@ export default function DefaultAPIForm(props) {
                                     value={api.context}
                                     onChange={onChange}
                                     InputProps={{
+                                        id: 'itest-id-apicontext-input',
                                         onBlur: ({ target: { value } }) => {
                                             validate('context', value);
                                         },
@@ -223,7 +225,6 @@ export default function DefaultAPIForm(props) {
                                 <TextField
                                     fullWidth
                                     error={validity.version}
-                                    id='outlined-name'
                                     label={
                                         <React.Fragment>
                                             <FormattedMessage
@@ -237,6 +238,7 @@ export default function DefaultAPIForm(props) {
                                     value={api.version}
                                     onChange={onChange}
                                     InputProps={{
+                                        id: 'itest-id-apiversion-input',
                                         onBlur: ({ target: { value } }) => {
                                             validate('version', value);
                                         },
@@ -285,7 +287,7 @@ export default function DefaultAPIForm(props) {
                 {!isAPIProduct && (
                     <TextField
                         fullWidth
-                        id='outlined-name'
+                        id='itest-id-apiendpoint-input'
                         label='Endpoint'
                         name='endpoint'
                         value={api.endpoint}

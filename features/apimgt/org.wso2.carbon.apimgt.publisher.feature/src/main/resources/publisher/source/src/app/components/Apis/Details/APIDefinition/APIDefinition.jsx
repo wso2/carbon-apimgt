@@ -514,16 +514,21 @@ class APIDefinition extends React.Component {
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.handleNo} color='secondary'>
+                        <Button onClick={this.handleNo} color='primary'>
                             <FormattedMessage
                                 id='Apis.Details.APIDefinition.APIDefinition.btn.no'
-                                defaultMessage='No'
+                                defaultMessage='CANCEL'
                             />
                         </Button>
-                        <Button onClick={this.handleOk} color='primary' autoFocus>
+                        <Button
+                            onClick={this.handleOk}
+                            color='primary'
+                            autoFocus
+                            variant='contained'
+                        >
                             <FormattedMessage
                                 id='Apis.Details.APIDefinition.APIDefinition.btn.yes'
-                                defaultMessage='Yes'
+                                defaultMessage='SAVE'
                             />
                         </Button>
                     </DialogActions>

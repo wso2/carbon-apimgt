@@ -9,7 +9,7 @@ var addLabel = function () {
         $('#add-label-btn').buttonLoader('start');
         jagg.post("/site/blocks/label/label-add/ajax/label-edit.jag", {
             action: $('#action').val(),
-            labelName: $('#labelName').val(),
+            labelName: $('#labelName').val().trim(),
             uuid: $('#uuid').val(),
             description: htmlEscape($('#description').val()),
             attributes: JSON.stringify(attributes)
@@ -119,6 +119,21 @@ function validateInput(text, element, errorMsg) {
     }
 }
 
+function validateLength(text, element, errorMsg) {
+    var elementId = element.attr('id');
+    text = text.trim();
+    if(text.length > 255) {
+        element.css("border", "1px solid red");
+        $('#label' + elementId).remove();
+        element.parent().append('<label class="error" id="label' + elementId + '" >' + errorMsg + '</label>');
+        return false;
+    } else {
+        $('#label' + elementId).remove();
+        element.css("border", "1px solid #cccccc");
+        return true;
+    }
+}
+
 function validateInputCharactors(text, element, errorMsg) {
     var elementId = element.attr('id');
     var illegalChars = /([~!&@#;%^*+={}$\|\\<>\"\',])/;
@@ -149,6 +164,10 @@ function validateAttributesInput(text, element, requiredMsg, invalidErrorMsg) {
         $('#label' + elementId).remove();
         element.parent().append('<label class="error" id="label' + elementId + '" >' + invalidErrorMsg + '</label>');
         return false;
+    } else if(text.length > 255){
+        element.css("border", "1px solid red");
+        $('#label' + elementId).remove();
+        element.parent().append('<label class="error" id="label' + elementId + '" >' + invalidErrorMsg + '</label>');
     } else {
         $('#label' + elementId).remove();
         element.css("border", "1px solid #cccccc");
@@ -162,11 +181,15 @@ function validateInputs() {
     var invalidErrorMsg = $('#errorMessageInvalid').val();
     var illegalChars = $('#errorMessageIllegalChar').val();
     var errorHasSpacesMsg = $('#errorMessageSpaces').val();
+    var lengthIsTooLong = $('#errorMessageTooLengthy').val();
     var labelName = $('#labelName');
     var labelNameTxt = labelName.val();
 
     if (!validateInput(labelNameTxt, labelName, requiredMsg)) {
         return false;
+    }
+    if (!validateLength(labelNameTxt, labelName, lengthIsTooLong)) {
+            return false;
     }
     if (!validateInputCharactors(labelNameTxt, labelName, illegalChars)) {
         return false;

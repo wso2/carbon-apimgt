@@ -495,7 +495,7 @@ public class OAS2Parser extends APIDefinition {
             swagger.setVendorExtension(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS, prodEndpointObj);
         }
         Object sandEndpointObj = OASParserUtil.generateOASConfigForEndpoints(api, false);
-        if (prodEndpointObj != null) {
+        if (sandEndpointObj != null) {
             swagger.setVendorExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandEndpointObj);
         }
         swagger.setVendorExtension(APIConstants.X_WSO2_BASEPATH, api.getContext());

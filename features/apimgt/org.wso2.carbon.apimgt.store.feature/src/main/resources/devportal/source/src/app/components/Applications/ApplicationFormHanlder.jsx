@@ -404,7 +404,7 @@ class ApplicationFormHanlder extends React.Component {
         );
         return (
             <ApplicationCreateBase title={isEdit ? EditPageTitle : CreatePageTitle}>
-                <Box py={4} display='flex' justifyContent='center'>
+                <Box py={4} mb={2} display='flex' justifyContent='center'>
                     <Grid item xs={10} md={9}>
                         <ApplicationCreateForm
                             throttlingPolicyList={throttlingPolicyList}

@@ -236,7 +236,8 @@ class APIThumb extends Component {
                     </div>
                     <div className={classes.row}>
                         <Typography variant='caption' gutterBottom align='left' className={classes.thumbBy}>
-                            <FormattedMessage id='by' defaultMessage='By' />:
+                            <FormattedMessage id='by' defaultMessage='By' />
+                            <FormattedMessage id='colon' defaultMessage=' : ' />
                             {api.provider}
                         </Typography>
                     </div>

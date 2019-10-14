@@ -302,6 +302,7 @@ function APICreateDefault(props) {
                         </Grid>
                         <Grid item>
                             <Button
+                                id='itest-id-apicreatedefault-createnpublish'
                                 variant='contained'
                                 color='primary'
                                 disabled={!isPublishable || isAPICreateDisabled}

@@ -489,7 +489,7 @@ class ThumbnailView extends Component {
                         >
                             <FormControlLabel
                                 value='design'
-                                control={<Radio />}
+                                control={<Radio color='primary' />}
                                 label={<FormattedMessage
                                     id='Apis.Listing.components.ImageGenerator.ThumbnailView.design'
                                     defaultMessage='Design'
@@ -497,7 +497,7 @@ class ThumbnailView extends Component {
                             />
                             <FormControlLabel
                                 value='upload'
-                                control={<Radio />}
+                                control={<Radio color='primary' />}
                                 label={<FormattedMessage
                                     id='Apis.Listing.components.ImageGenerator.ThumbnailView.upload'
                                     defaultMessage='Upload'
