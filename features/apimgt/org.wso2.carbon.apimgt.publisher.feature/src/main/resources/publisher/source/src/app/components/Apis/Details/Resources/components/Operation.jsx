@@ -58,6 +58,7 @@ function Operation(props) {
         disableUpdate,
         onMarkAsDelete,
         markAsDelete,
+        hideParameters,
         spec,
         target,
         verb,
@@ -121,10 +122,7 @@ function Operation(props) {
         <Fragment>
             {markAsDelete && (
                 <Box className={classes.overlayUnmarkDelete}>
-                    <Tooltip
-                        title='Marked for delete'
-                        aria-label='Marked for delete'
-                    >
+                    <Tooltip title='Marked for delete' aria-label='Marked for delete'>
                         <Button onClick={toggleDelete} variant='outlined' style={{ marginTop: '10px' }}>
                             Undo
                         </Button>
@@ -200,15 +198,17 @@ function Operation(props) {
                             target={target}
                             verb={verb}
                         />
-                        <Parameters
-                            operation={operation}
-                            operationActionsDispatcher={operationsDispatcher}
-                            operationRateLimits={operationRateLimits}
-                            api={api}
-                            disableUpdate={disableUpdate}
-                            target={target}
-                            verb={verb}
-                        />
+                        {!hideParameters && (
+                            <Parameters
+                                operation={operation}
+                                operationActionsDispatcher={operationsDispatcher}
+                                operationRateLimits={operationRateLimits}
+                                api={api}
+                                disableUpdate={disableUpdate}
+                                target={target}
+                                verb={verb}
+                            />
+                        )}
                     </Grid>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
@@ -218,6 +218,8 @@ function Operation(props) {
 Operation.defaultProps = {
     highlight: false,
     disableUpdate: false,
+    /* Set following prop to false , After implementing the `Parameter` section */
+    hideParameters: true,
     disableDelete: false,
     onMarkAsDelete: () => {},
     markAsDelete: false,
@@ -230,6 +232,7 @@ Operation.propTypes = {
     markAsDelete: PropTypes.bool,
     disableDelete: PropTypes.bool,
     disableUpdate: PropTypes.bool,
+    hideParameters: PropTypes.bool,
     operation: PropTypes.shape({}).isRequired,
     target: PropTypes.string.isRequired,
     verb: PropTypes.string.isRequired,

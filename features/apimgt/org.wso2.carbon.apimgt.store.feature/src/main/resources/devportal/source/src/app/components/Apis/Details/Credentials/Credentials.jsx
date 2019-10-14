@@ -34,6 +34,7 @@ import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/S
 import { ApiContext } from '../ApiContext';
 import Wizard from './Wizard/Wizard';
 import SubscriptionTableRow from './SubscriptionTableRow';
+import Application from '../../../../data/Application';
 
 /**
  * @inheritdoc
@@ -142,6 +143,7 @@ class Credentials extends React.Component {
             throttlingPolicy: '',
         },
         throttlingPolicyList: [],
+        applicationOwner: '',
     };
 
     /**
@@ -239,6 +241,11 @@ class Credentials extends React.Component {
      */
     loadInfo = (selectedKeyType, selectedAppId) => {
         this.setState({ selectedKeyType, selectedAppId });
+
+        Application.get(selectedAppId)
+            .then((result) => {
+                this.setState({ applicationOwner: result.owner });
+            });
     };
 
     /**
@@ -291,6 +298,7 @@ class Credentials extends React.Component {
             subscriptionRequest,
             throttlingPolicyList,
             openNew,
+            applicationOwner,
         } = this.state;
         return (
             <Grid container>
@@ -467,6 +475,7 @@ class Credentials extends React.Component {
                                                             selectedKeyType={selectedKeyType}
                                                             app={app}
                                                             index={index}
+                                                            applicationOwner={applicationOwner}
                                                         />
                                                     ))}
                                                 </table>

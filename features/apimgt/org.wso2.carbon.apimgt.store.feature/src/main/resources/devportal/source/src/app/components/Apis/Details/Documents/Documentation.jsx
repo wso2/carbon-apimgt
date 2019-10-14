@@ -126,6 +126,7 @@ const styles = theme => ({
     },
     togglerTextParent: {
         writingMode: 'vertical-rl',
+        transform: 'rotate(180deg)',
     },
     togglerText: {
         textOrientation: 'sideways',
@@ -287,7 +288,7 @@ function FullWidthGrid(props) {
     return (
         <React.Fragment>
             <Typography variant='h4' className={classes.titleSub}>
-                <FormattedMessage id='Apis.Details.Documents.Documentation.title' defaultMessage='Documentation' />
+                <FormattedMessage id='Apis.Details.Documents.Documentation.title' defaultMessage='API Documentation' />
             </Typography>
             {!documentList || (documentList && documentList.length === 0) ? (
                 <div className={classes.genericMessageWrapper}>

@@ -76,10 +76,11 @@ const useStyles = makeStyles(theme => ({
 export default function CheckboxLabels(props) {
     const classes = useStyles();
     const { api } = props;
-    const isEndpointAvailable = api.endpointConfig !== null;
+    const isEndpointAvailable = api.endpointConfig !== null && !api.endpointConfig.implementation_status;
     const isTierAvailable = api.policies.length !== 0;
     const isPrototypedAvailable =
-        api.endpointConfig !== null && api.endpointConfig.implementation_status === 'prototyped';
+        (api.endpointConfig !== null && api.endpointConfig.implementation_status === 'prototyped')
+        || api.endpointImplementationType === 'INLINE';
 
     return (
         <Paper className={classes.paperCenter}>
@@ -116,7 +117,7 @@ export default function CheckboxLabels(props) {
                             )}
                             <Typography variant='h10'>Endpoint provided</Typography>
                             <Link to={'/apis/' + api.id + '/endpoints'}>
-                                <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
+                                <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
                             </Link>
                         </Grid>
                         <Grid xs={12} className={classes.grid}>
@@ -132,7 +133,7 @@ export default function CheckboxLabels(props) {
                                 />
                             </Typography>
                             <Link to={'/apis/' + api.id + '/subscriptions'}>
-                                <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
+                                <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
                             </Link>
                         </Grid>
                     </Grid>
@@ -153,7 +154,7 @@ export default function CheckboxLabels(props) {
                             )}
                             <Typography variant='h10'>Prototype Endpoint provided</Typography>
                             <Link to={'/apis/' + api.id + '/endpoints'}>
-                                <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
+                                <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
                             </Link>
                         </Grid>
                     </Grid>
@@ -178,7 +179,7 @@ export default function CheckboxLabels(props) {
                             )}
                             <Typography variant='h10'>Prototype Endpoint provided</Typography>
                             <Link to={'/apis/' + api.id + '/endpoints'}>
-                                <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
+                                <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
                             </Link>
                         </Grid>
                     </Grid>

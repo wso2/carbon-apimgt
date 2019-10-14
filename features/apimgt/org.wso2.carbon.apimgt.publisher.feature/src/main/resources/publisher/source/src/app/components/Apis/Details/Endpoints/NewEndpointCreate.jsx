@@ -139,18 +139,6 @@ function NewEndpointCreate(props) {
             }),
             options: null,
         },
-        {
-            type: 'awslambda',
-            name: intl.formatMessage({
-                id: 'Apis.Details.Endpoints.NewEndpointCreate.create.aws.endpoint',
-                defaultMessage: 'AWS Lambda Endpoint',
-            }),
-            description: intl.formatMessage({
-                id: 'Apis.Details.Endpoints.NewEndpointCreate.create.aws.endpoint.description',
-                defaultMessage: 'If you need to invoke AWS Lambda functions through WSO2 API gateway.',
-            }),
-            options: null,
-        },
     ];
 
     return (
@@ -188,7 +176,7 @@ function NewEndpointCreate(props) {
                                                         return (
                                                             <FormControlLabel
                                                                 value={option.type}
-                                                                control={<Radio />}
+                                                                control={<Radio color='primary' />}
                                                                 label={option.name}
                                                             />
                                                         );

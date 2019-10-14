@@ -198,6 +198,7 @@ function TransportLevel(props) {
                                     })
                                     }
                                     value={API_SECURITY_MUTUAL_SSL}
+                                    color='primary'
                                 />
                             )}
                             label='Mutual SSL'
@@ -221,7 +222,7 @@ function TransportLevel(props) {
                                             <Radio
                                                 disabled={!haveMultiLevelSecurity ||
                                                 isRestricted(['apim:api_create'], apiFromContext)}
-                                                color='default'
+                                                color='primary'
                                             />
                                         }
                                         label='Mandatory'
@@ -233,7 +234,7 @@ function TransportLevel(props) {
                                             <Radio
                                                 disabled={!haveMultiLevelSecurity ||
                                                 isRestricted(['apim:api_create'], apiFromContext)}
-                                                color='default'
+                                                color='primary'
                                             />
                                         }
                                         label='Optional'

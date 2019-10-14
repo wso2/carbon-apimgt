@@ -78,6 +78,7 @@ const tokens = (props) => {
                         checked={infiniteValidity}
                         onChange={e => handleChange('infiniteValidity', e)}
                         value={accessTokenRequest.timeout}
+                        color='primary'
                     />}
                     label='Api Key with infinite validity period'
                 />

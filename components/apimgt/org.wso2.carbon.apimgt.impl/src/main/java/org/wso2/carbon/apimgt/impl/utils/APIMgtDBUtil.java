@@ -81,31 +81,6 @@ public final class APIMgtDBUtil {
                     log.error(DATA_SOURCE_NAME + " not defined in api-manager.xml.");
                 }
             }
-            setupAPIManagerDatabase();
-        }
-    }
-
-    /**
-     * Creates the APIManager Database if not created already.
-     *
-     * @throws Exception if an error occurs while creating the APIManagerDatabase.
-     */
-    private static void setupAPIManagerDatabase() throws APIManagerDatabaseException {
-
-        String value = System.getProperty("setup");
-        if (value != null) {
-            LocalDatabaseCreator databaseCreator = new LocalDatabaseCreator(dataSource);
-            try {
-                if (!databaseCreator.isDatabaseStructureCreated(DB_CHECK_SQL)) {
-                    databaseCreator.createRegistryDatabase();
-                } else {
-                    log.info("APIManager database already exists. Not creating a new database.");
-                }
-            } catch (Exception e) {
-                String msg = "Error in creating the APIManager database";
-                log.fatal(msg,e);
-                throw new APIManagerDatabaseException(msg, e);
-            }
         }
     }
 

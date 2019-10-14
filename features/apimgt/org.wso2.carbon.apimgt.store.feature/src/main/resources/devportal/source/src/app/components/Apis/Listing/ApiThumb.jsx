@@ -244,7 +244,8 @@ class ApiThumb extends React.Component {
                         </Typography>
                     </Link>
                     <Typography variant='caption' gutterBottom align='left'>
-                        <FormattedMessage defaultMessage='By:' id='Apis.Listing.ApiThumb.by' />
+                        <FormattedMessage defaultMessage='By' id='Apis.Listing.ApiThumb.by' />
+                        <FormattedMessage defaultMessage=' : ' id='Apis.Listing.ApiThumb.by.colon' />
                         {provider}
                     </Typography>
                     <div className={classes.thumbInfo}>

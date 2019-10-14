@@ -158,7 +158,6 @@ class TokenManager extends React.Component {
      */
     loadApplication = () => {
         this.getserverSupportedGrantTypes();
-        this.checkOwner();
         if (this.appId) {
             this.application
                 .then(application => application.getKeys())
@@ -184,16 +183,6 @@ class TokenManager extends React.Component {
                     }
                 });
         }
-    }
-
-    /**
-     * Check if the current user is the owner of the application
-     * @param {*} owner required param
-     */
-    checkOwner() {
-        const { selectedApp } = this.props;
-        const username = AuthManager.getUser().name;
-        this.setState({ isUserOwner: username.includes(selectedApp.owner) });
     }
 
     /**
@@ -368,10 +357,16 @@ class TokenManager extends React.Component {
             classes, selectedApp, keyType,
         } = this.props;
         const {
-            keys, keyRequest, notFound, isKeyJWT, providedConsumerKey, providedConsumerSecret, isUserOwner,
+            keys, keyRequest, notFound, isKeyJWT, providedConsumerKey, providedConsumerSecret,
         } = this.state;
         if (!keys) {
             return <Loading />;
+        }
+        const username = AuthManager.getUser().name;
+        let isUserOwner = false;
+
+        if (selectedApp.owner && username === selectedApp.owner) {
+            isUserOwner = true;
         }
         const key = keys.get(keyType);
         if (keys.size > 0 && key && key.keyState === 'APPROVED' && !key.consumerKey) {

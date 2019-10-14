@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
@@ -697,6 +698,14 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if (body.getVisibility() == null) {
                 //set the default visibility to PUBLIC
                 body.setVisibility(VisibilityEnum.PUBLIC);
+            }
+
+            if (body.getAuthorizationHeader() == null) {
+                body.setAuthorizationHeader(APIUtil
+                        .getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));
+            }
+            if (body.getAuthorizationHeader() == null) {
+                body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
             }
 
             APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(body, provider);

@@ -52,10 +52,6 @@ const styles = theme => ({
         padding: 20,
         marginTop: 20,
     },
-    mandatoryStar: {
-        color: theme.palette.error.main,
-        marginLeft: theme.spacing(0.1),
-    },
 });
 
 /**
@@ -83,6 +79,7 @@ class BusinessInformation extends React.Component {
             businessOwnerEmail,
             technicalOwner,
             technicalOwnerEmail,
+            formUpdated: false,
         };
         this.isValidBusinessOwnerName = true;
         this.isValidBusinessOwnerEmail = true;
@@ -118,6 +115,7 @@ class BusinessInformation extends React.Component {
         }
         this.setState({
             [name]: value,
+            formUpdated: true,
         });
     };
 
@@ -147,7 +145,7 @@ class BusinessInformation extends React.Component {
     render() {
         const { classes, api, updateAPI } = this.props;
         const {
-            businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail,
+            businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail, formUpdated,
         } = this.state;
 
         return (
@@ -184,7 +182,6 @@ class BusinessInformation extends React.Component {
                                                 }
                                                 defaultMessage='Business Owner'
                                             />
-                                            <sup className={classes.mandatoryStar}>*</sup>
                                         </React.Fragment>
                                     }
                                     helperText={this.isValidBusinessOwnerName ?
@@ -225,7 +222,6 @@ class BusinessInformation extends React.Component {
                                                 }
                                                 defaultMessage='Business Owner Email'
                                             />
-                                            <sup className={classes.mandatoryStar}>*</sup>
                                         </React.Fragment>
                                     }
                                     helperText={this.isValidBusinessOwnerEmail ?
@@ -322,13 +318,6 @@ class BusinessInformation extends React.Component {
                                     variant='outlined'
                                 />
                             </form>
-                            <Grid container direction='row' justify='flex-end' alignItems='center'>
-                                <Grid item>
-                                    <Typography variant='caption' display='block' gutterBottom>
-                                        <sup className={classes.mandatoryStar}>*</sup> Mandatory fields
-                                    </Typography>
-                                </Grid>
-                            </Grid>
                             <div className={classes.buttonWrapper}>
                                 <Grid
                                     container
@@ -345,7 +334,7 @@ class BusinessInformation extends React.Component {
                                                 onClick={() => this.handleSubmit(updateAPI)}
                                                 disabled={
                                                     isRestricted(['apim:api_create', 'apim:api_publish'], api) ||
-                                                    this.isNotValid()
+                                                    this.isNotValid() || !formUpdated
                                                 }
                                             >
                                                 <FormattedMessage id='save' defaultMessage='Save' />

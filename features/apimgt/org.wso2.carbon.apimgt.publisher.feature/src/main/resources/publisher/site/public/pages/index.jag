@@ -18,19 +18,22 @@
   -->
 
 <html lang="en">
+<%
+var site = require("/site/public/theme/defaultTheme.js");
+%>
 
 <head>
-    <base href="/publisher/" />
+    <base href="<%= site.Configurations.app.context %>/" />
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=1024, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <title>WSO2 APIM Publisher</title>
 
-    <link href="/publisher/site/public/css/main.css" type="text/css" rel="stylesheet" />
-    <link href="/publisher/site/public/css/draftjs.css" type="text/css" rel="stylesheet" />
+    <link href="<%= site.Configurations.app.context %>/site/public/css/main.css" type="text/css" rel="stylesheet" />
+    <link href="<%= site.Configurations.app.context %>/site/public/css/draftjs.css" type="text/css" rel="stylesheet" />
 
-    <link rel="shortcut icon" href="/publisher/site/public/images/favicon.png">
+    <link rel="shortcut icon" href="<%= site.Configurations.app.context %>/site/public/images/favicon.png">
 </head>
 
 <body>
@@ -39,10 +42,10 @@
         <div class="apim-dual-ring"></div>
     </div>
 
-    <script src="/publisher/site/public/fonts/iconfont/MaterialIcons.js"></script>
-    <script src="/publisher/site/public/theme/defaultTheme.js"></script>
-    <script src="/publisher/site/public/dist/index.bundle.js"></script>
-    <link rel="stylesheet" href="/publisher/site/public/fonts/iconfont/material-icons.css">
+    <script src="<%= site.Configurations.app.context %>/site/public/fonts/iconfont/MaterialIcons.js"></script>
+    <script src="<%= site.Configurations.app.context %>/site/public/theme/defaultTheme.js"></script>
+    <script src="<%= site.Configurations.app.context %>/site/public/dist/index.bundle.js"></script>
+    <link rel="stylesheet" href="<%= site.Configurations.app.context %>/site/public/fonts/iconfont/material-icons.css">
 </body>
 
 </html>

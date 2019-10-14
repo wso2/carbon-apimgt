@@ -89,7 +89,6 @@ function getTaggedOperations(api, openAPI) {
     }
 }
 
-
 /**
  * Return the definition version given the parsed spec object
  *
@@ -138,28 +137,27 @@ function extractPathParameters(target, spec) {
     return parameters;
 }
 
-
 /**
  *
- *
+ * Return the WSO2 specific scopes array (currently only use the first element of the array)
  * @param {*} operation
  * @param {*} openAPIVersion
+ * @returns {Array} Scopes of the `default` security scheme
  */
 function getOperationScopes(operation, spec) {
     const openAPIVersion = getVersion(spec);
     let scopes = [];
     if (VERSIONS.V3.includes(openAPIVersion)) {
-        if (operation.security && operation.security.default) {
-            scopes = operation.security.default;
+        if (Array.isArray(operation.security) && operation.security.find(item => item.default)) {
+            scopes = operation.security.find(item => item.default).default;
         }
     } else if (VERSIONS.V2.includes(openAPIVersion)) {
-        if (operation.security && operation.security.default) {
-            scopes = operation.security.default;
+        if (Array.isArray(operation.security) && operation.security.find(item => item.default)) {
+            scopes = operation.security.find(item => item.default).default;
         }
     }
     return scopes;
 }
-
 
 /**
  *

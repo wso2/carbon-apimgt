@@ -189,14 +189,14 @@ class SchemaValidation extends React.Component {
                                     <FormattedMessage
                                         id={'Apis.Details.Configuration.components.SchemaValidation' +
                                         '.description.question'}
-                                        defaultMessage='Do you want  to enable schema validation?'
+                                        defaultMessage='Do you want to enable schema validation?'
                                     />
                                 </b>
                             </Typography>
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button color='primary' onClick={() => this.setIsOpen(false)}>
+                        <Button color='primary' variant='contained' onClick={() => this.setIsOpen(false)}>
                             Yes
                         </Button>
                         <Button
@@ -207,6 +207,7 @@ class SchemaValidation extends React.Component {
                                     value: false,
                                 });
                             }}
+                            color='primary'
                         >
                             No
                         </Button>
