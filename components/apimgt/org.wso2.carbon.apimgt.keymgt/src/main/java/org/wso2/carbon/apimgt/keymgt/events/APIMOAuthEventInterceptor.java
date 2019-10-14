@@ -18,11 +18,8 @@
 
 package org.wso2.carbon.apimgt.keymgt.events;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -38,7 +35,6 @@ import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
 import org.wso2.carbon.identity.oauth2.model.RefreshTokenValidationDataDO;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Base64;
 import java.util.Map;
 import java.util.Properties;
 
@@ -55,6 +51,8 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
     private Properties realtimeNotifierProperties;
     private Properties persistentNotifierProperties;
     private static final String REVOKED_ACCESS_TOKEN = "RevokedAccessToken";
+
+
 
     /**
      * Default Constructor
@@ -107,22 +105,28 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
         }
 
         if(isRevokedAccessTokenHeaderExists) {
+            String revokedToken = revokeRequestDTO.getToken();
+            Long expiryTime = 0L;
+            boolean isJwtToken = false;
+            if (revokedToken.contains(APIConstants.DOT) && APIUtil.isValidJWT(revokedToken)) {
+                 expiryTime = APIUtil.getExpiryifJWT(revokedToken);
+                 isJwtToken = true;
+            }
+            realtimeNotifierProperties.setProperty("expiryTime", expiryTime.toString());
             if (realtimeNotifierEnabled) {
                 log.debug("Realtime message sending is enabled");
-                tokenRevocationNotifier.sendMessageOnRealtime(revokeRequestDTO.getToken(), realtimeNotifierProperties);
+                tokenRevocationNotifier.sendMessageOnRealtime(revokedToken, realtimeNotifierProperties);
             } else {
                 log.debug("Realtime message sending isn't enabled or configured properly");
             }
             if (persistentNotifierEnabled) {
                 log.debug("Persistent message sending is enabled");
-                tokenRevocationNotifier.sendMessageToPersistentStorage(revokeRequestDTO.getToken(), persistentNotifierProperties);
+                tokenRevocationNotifier.sendMessageToPersistentStorage(revokedToken, persistentNotifierProperties);
             } else {
                 log.debug("Persistent message sending isn't enabled or configured properly");
             }
-            String revokedToken = revokeRequestDTO.getToken();
-            // Persist only if the token is JWT
-            if (revokedToken.contains(APIConstants.DOT) && APIUtil.isValidJWT(revokedToken)) {
-                Long expiryTime = APIUtil.getExpiryifJWT(revokedToken);
+
+            if (isJwtToken) {
                 // Persist revoked JWT token to database.
                 persistRevokedJWTSignature(revokedToken, expiryTime);
             }
@@ -145,21 +149,28 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
             Map<String, Object> params) {
 
         if(accessTokenDO != null) { // if accessTokenDO is not null, it implies the revocation was a success
+            String revokedToken = accessTokenDO.getAccessToken();
+            Long expiryTime = 0L;
+            boolean isJwtToken = false;
+            if (revokedToken.contains(APIConstants.DOT) && APIUtil.isValidJWT(revokedToken)) {
+                expiryTime = APIUtil.getExpiryifJWT(revokedToken);
+                isJwtToken = true;
+            }
+            realtimeNotifierProperties.setProperty("expiryTime", expiryTime.toString());
             if (realtimeNotifierEnabled) {
                 log.debug("Realtime message sending is enabled");
-                tokenRevocationNotifier.sendMessageOnRealtime(accessTokenDO.getTokenId(), realtimeNotifierProperties);
+                tokenRevocationNotifier.sendMessageOnRealtime(revokedToken, realtimeNotifierProperties);
             } else {
                 log.debug("Realtime message sending isn't enabled or configured properly");
             }
             if (persistentNotifierEnabled) {
                 log.debug("Persistent message sending is enabled");
-                tokenRevocationNotifier.sendMessageToPersistentStorage(accessTokenDO.getTokenId(), persistentNotifierProperties);
+                tokenRevocationNotifier.sendMessageToPersistentStorage(revokedToken,
+                        persistentNotifierProperties);
             } else {
                 log.debug("Persistent message sending isn't enabled or configured properly");
             }
-            String revokedToken = accessTokenDO.getTokenId();
-            if (revokedToken.contains(APIConstants.DOT) && APIUtil.isValidJWT(revokedToken)) {
-                Long expiryTime = APIUtil.getExpiryifJWT(revokedToken);
+            if (isJwtToken) {
                 // Persist revoked JWT token to database.
                 persistRevokedJWTSignature(revokedToken, expiryTime);
             }
@@ -184,10 +195,16 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
             String tenantDomain = APIUtil.getTenantDomainIfJWT(token);
             apiMgtDAO.addRevokedJWTSignature(tokenSignature, expiryTime, tenantDomain);
 
-            // Cleanup expired revoked tokens from db.
-            Runnable expiredJWTCleaner = new ExpiredJWTCleaner();
-            Thread cleanupThread = new Thread(expiredJWTCleaner);
-            cleanupThread.start();
+            long currentTime = System.currentTimeMillis();
+            synchronized (this) {
+                // Only run the cleanup if the last cleanup was was performed more than 1 hour ago.
+                if (currentTime - ExpiredJWTCleaner.getLastUpdatedTime() > ExpiredJWTCleaner.DURATION) {
+                    // Cleanup expired revoked tokens from db.
+                    Runnable expiredJWTCleaner = new ExpiredJWTCleaner();
+                    Thread cleanupThread = new Thread(expiredJWTCleaner);
+                    cleanupThread.start();
+                }
+            }
         } catch (APIManagementException e) {
             log.error("Unable to add revoked JWT signature to the database");
         }

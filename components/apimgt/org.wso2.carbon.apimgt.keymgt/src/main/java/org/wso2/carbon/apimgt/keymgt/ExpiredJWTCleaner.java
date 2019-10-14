@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.keymgt.events.APIMOAuthEventInterceptor;
 
 import java.util.Date;
 
@@ -31,18 +32,11 @@ public class ExpiredJWTCleaner implements Runnable {
 
     private static final Log log = LogFactory.getLog(ExpiredJWTCleaner.class);
     private static long lastUpdatedTime;
-    private static final long DURATION = 3600000;
+    public static final long DURATION = 3600000;
 
     @Override
     public void run() {
-
-        long currentTime = System.currentTimeMillis();
-        synchronized (this) {
-            // Only run the cleanup if the last cleanup was was performed more than 1 hour ago
-            if (currentTime - lastUpdatedTime > DURATION) {
-                cleanExpiredTokens();
-            }
-        }
+        cleanExpiredTokens();
     }
 
     private void cleanExpiredTokens() {
@@ -59,5 +53,9 @@ public class ExpiredJWTCleaner implements Runnable {
         } catch (APIManagementException e) {
             log.error("Unable to cleanup expired JWT tokens from revoke table", e);
         }
+    }
+
+    public static long getLastUpdatedTime() {
+        return lastUpdatedTime;
     }
 }

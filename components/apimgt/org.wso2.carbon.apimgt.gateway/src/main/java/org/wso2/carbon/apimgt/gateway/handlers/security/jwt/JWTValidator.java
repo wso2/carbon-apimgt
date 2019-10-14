@@ -120,7 +120,7 @@ public class JWTValidator {
         if (!isVerified) {
             log.debug("Token not found in the caches and revoked jwt token map.");
             try {
-                payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
+                payload = new JSONObject(new String(Base64.getUrlDecoder()  .decode(splitToken[1])));
             } catch (JSONException | IllegalArgumentException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Invalid JWT token. Token: " + GatewayUtils.getMaskedToken(splitToken));
