@@ -444,6 +444,7 @@
   "Apis.Details.Monetization.BusinessPlans.unchecked.policies": "Unchecked polices are not monetized, click save to monetize",
   "Apis.Details.Monetization.Index.monetization": "Monetization",
   "Apis.Details.Monetization.Index.monetization.configured.successfully": "Monetization Configured Successfully",
+  "Apis.Details.Monetization.Index.monetization.disabled.successfully": "Monetization Disabled Successfully",
   "Apis.Details.Monetization.Index.monetization.properties": "Monetization Properties",
   "Apis.Details.Monetization.Index.save": "Save",
   "Apis.Details.Monetization.Index.something.went.wrong.while.configuring.monetization": "Something went wrong while configuring monetization",

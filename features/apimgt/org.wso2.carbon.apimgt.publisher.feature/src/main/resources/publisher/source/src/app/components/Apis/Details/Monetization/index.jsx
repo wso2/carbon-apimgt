@@ -6,7 +6,8 @@ import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { withStyles } from '@material-ui/core/styles';
 import { Grid, Paper, Typography, Divider } from '@material-ui/core';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import { withRouter } from 'react-router';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
@@ -84,17 +85,18 @@ class Monetization extends Component {
         };
         const promisedMonetizationConf = api.configureMonetizationToApi(this.props.api.id, body);
         promisedMonetizationConf.then((response) => {
-            if (response.status !== 200) {
+            const status = JSON.parse(response.data);
+            if (status.enabled) {
                 Alert.info(intl.formatMessage({
-                    id: 'Apis.Details.Monetization.Index.something.went.wrong.while.configuring.monetization',
-                    defaultMessage: 'Something went wrong while configuring monetization',
+                    id: 'Apis.Details.Monetization.Index.monetization.configured.successfully',
+                    defaultMessage: 'Monetization Enabled Successfully',
                 }));
-                return;
+            } else {
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Details.Monetization.Index.monetization.disabled.successfully',
+                    defaultMessage: 'Monetization Disabled Successfully',
+                }));
             }
-            Alert.info(intl.formatMessage({
-                id: 'Apis.Details.Monetization.Index.monetization.configured.successfully',
-                defaultMessage: 'Monetization Configured Successfully',
-            }));
             this.setState({ monStatus: !this.state.monStatus });
         }).catch((error) => {
             console.error(error);
@@ -236,4 +238,4 @@ Monetization.propTypes = {
     }).isRequired,
 };
 
-export default withStyles(styles)(Monetization);
+export default injectIntl(withRouter(withStyles(styles)(Monetization)));
