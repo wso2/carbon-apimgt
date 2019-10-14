@@ -69,7 +69,7 @@ const styles = {
         marginRight: 20,
     },
     contentWrapper: {
-        maxHeight: '250px',
+        maxHeight: '125px',
         overflowY: 'auto',
     },
 };

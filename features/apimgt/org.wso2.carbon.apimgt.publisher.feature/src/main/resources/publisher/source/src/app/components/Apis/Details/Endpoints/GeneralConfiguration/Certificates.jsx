@@ -69,7 +69,7 @@ const useStyles = makeStyles(theme => ({
     },
     certificateList: {
         maxHeight: '250px',
-        overflow: 'scroll',
+        overflow: 'auto',
     },
     certDetailsHeader: {
         fontWeight: '600',
