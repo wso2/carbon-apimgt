@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -30,6 +30,7 @@ import Select from '@material-ui/core/Select';
 import TenantAutocomplete from 'AppComponents/Apis/Details/Subscriptions/TenantAutocomplete';
 import Alert from 'AppComponents/Shared/Alert';
 import { isRestricted } from 'AppData/AuthManager';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 
 const useStyles = makeStyles(theme => ({
@@ -74,6 +75,7 @@ export default function SimpleSelect(props) {
     const classes = useStyles();
     const { api, updateAPI } = props;
     const [tenantList, setTenantList] = React.useState([]);
+    const [isUpdating, setUpdating] = useState(false);
     let currentAvailability;
     if (api.subscriptionAvailability === null || api.subscriptionAvailability === 'CURRENT_TENANT') {
         currentAvailability = 'currentTenant';
@@ -106,6 +108,7 @@ export default function SimpleSelect(props) {
                 availabilityValue = 'SPECIFIC_TENANTS';
                 availableTenantsList = tenantList;
             }
+            setUpdating(true);
             updateAPI({
                 subscriptionAvailability: availabilityValue,
                 subscriptionAvailableTenants: availableTenantsList,
@@ -116,7 +119,8 @@ export default function SimpleSelect(props) {
                 .catch((error) => {
                     console.error(error);
                     Alert.error('Error occurred while updating tenant availability');
-                });
+                })
+                .finally(() => setUpdating(false));
         }
     }
 
@@ -188,9 +192,10 @@ export default function SimpleSelect(props) {
                                 color='primary'
                                 onClick={subscriptionAvailableTenants}
                                 className={classes.saveButton}
-                                disabled={isUIElementDisabled}
+                                disabled={isUpdating || isUIElementDisabled}
                             >
                                 <FormattedMessage id='Apis.Details.Scopes.CreateScope.save' defaultMessage='Save' />
+                                {isUpdating && <CircularProgress size={20} />}
                             </Button>
                         </Grid>
                         {isSpecificTenants ? (
