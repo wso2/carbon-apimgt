@@ -7668,7 +7668,7 @@ public class ApiMgtDAO {
         PreparedStatement insertPrepStmt = null;
         String commentId = null;
         int id = -1;
-        Boolean isProduct = apiTypeWrapper.isAPIProduct();
+        boolean isProduct = apiTypeWrapper.isAPIProduct();
 
         Identifier identifier;
         try {
@@ -7783,7 +7783,7 @@ public class ApiMgtDAO {
         Connection connection = null;
         ResultSet resultSet = null;
         PreparedStatement prepStmt = null;
-        Boolean isProduct = apiTypeWrapper.isAPIProduct();
+        boolean isProduct = apiTypeWrapper.isAPIProduct();
         int id = -1;
 
         String getCommentQuery;
@@ -7849,7 +7849,7 @@ public class ApiMgtDAO {
         Connection connection = null;
         ResultSet resultSet = null;
         PreparedStatement prepStmt = null;
-        Boolean isProduct = apiTypeWrapper.isAPIProduct();
+        boolean isProduct = apiTypeWrapper.isAPIProduct();
         int id = -1;
         String sqlQuery;
         if(!isProduct) {
