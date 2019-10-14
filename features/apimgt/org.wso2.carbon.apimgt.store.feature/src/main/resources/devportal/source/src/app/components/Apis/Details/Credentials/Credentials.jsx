@@ -372,7 +372,7 @@ class Credentials extends React.Component {
                                                                 }
                                                             />
                                                         </Typography>
-                                                        <Link to={`/apis/'${api.id}'/credentials/wizard`}>
+                                                        <Link to={`/apis/${api.id}/credentials/wizard`}>
                                                             <Button
                                                                 variant='contained'
                                                                 color='primary'

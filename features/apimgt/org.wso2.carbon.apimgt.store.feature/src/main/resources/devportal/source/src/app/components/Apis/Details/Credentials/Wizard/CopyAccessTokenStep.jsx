@@ -46,7 +46,6 @@ const copyAccessTokenStep = (props) => {
                 currentStep={currentStep}
                 handleCurrentStep={completeStep}
                 handleReset={handleReset}
-                handleRedirectTest={handleRedirectTest}
             />
         </React.Fragment>
     );

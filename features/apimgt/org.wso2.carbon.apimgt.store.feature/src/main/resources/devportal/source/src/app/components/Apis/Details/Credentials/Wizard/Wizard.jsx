@@ -18,30 +18,17 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import { Typography, Paper, Box } from '@material-ui/core';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
-import ApiContext from 'AppComponents/Apis/Details/ApiContext';
-import { Redirect } from 'react-router-dom';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import CreateAppStep from './CreateAppStep';
 import SubscribeToAppStep from './SubscribeToAppStep';
 import GenerateKeysStep from './GenerateKeysStep';
 import GenerateAccessTokenStep from './GenerateAccessTokenStep';
 import CopyAccessTokenStep from './CopyAccessTokenStep';
-
-const styles = theme => ({
-    button: {
-        marginTop: theme.spacing.unit * 2,
-        marginRight: theme.spacing.unit,
-    },
-    wizardButtons: {
-        paddingLeft: theme.spacing.unit * 2,
-    },
-});
 
 const stepComponents = [CreateAppStep, SubscribeToAppStep, GenerateKeysStep,
     GenerateAccessTokenStep, CopyAccessTokenStep];
@@ -50,7 +37,6 @@ const stepComponents = [CreateAppStep, SubscribeToAppStep, GenerateKeysStep,
  * Class used for wizard
  */
 class Wizard extends Component {
-    static contextType = ApiContext;
     /**
      * @param {*} props properties
      */
@@ -146,75 +132,69 @@ class Wizard extends Component {
     };
 
     /**
-     * Set state.redirect to true to redirect to the API console page
-     * @memberof Wizard
-     */
-    handleRedirectTest = () => {
-        this.setState({ redirect: true });
-    }
-
-    /**
      * @inheritdoc
      */
     render() {
         const { classes } = this.props;
-        const { api } = this.context;
-        const { currentStep, redirect, stepStatus } = this.state;
+        const { currentStep, stepStatus } = this.state;
         const CurrentStepComponent = stepComponents[currentStep];
-        if (redirect) {
-            return <Redirect push to={'/apis/' + api.id + '/test'} />;
-        }
         return (
-            <React.Fragment>
-                <Box my={2} mx='auto' display='flex' justifyContent='center'>
-                    <Grid item pb={1} xs={12} md={11}>
-                        <Paper elevation={0}>
-                            <Box py={1} mx='auto' display='flex' >
-                                <Grid item xs={12} md={12}>
-                                    <Stepper activeStep={currentStep}>
-                                        {this.steps.map((label) => {
-                                            return (
-                                                <Step key={label}>
-                                                    <StepLabel>{label}</StepLabel>
-                                                </Step>
-                                            );
-                                        })}
-                                    </Stepper>
-                                </Grid>
-                            </Box>
-                            <Box py={1} mx='auto' display='block' >
-                                {stepStatus === this.stepStatuses.PROCEED && (
-                                    <React.Fragment>
-                                        <CurrentStepComponent
-                                            {...this.state}
-                                            incrementStep={this.handleNext}
-                                            setStepStatus={this.setStepStatus}
-                                            stepStatuses={this.stepStatuses}
-                                            classes={classes}
-                                            setCreatedApp={this.setCreatedApp}
-                                            setCreatedKeyType={this.setCreatedKeyType}
-                                            setCreatedToken={this.setCreatedToken}
-                                            handleReset={this.handleReset}
-                                            handleRedirectTest={this.handleRedirectTest}
-                                        />
-                                    </React.Fragment>
-                                )}
-                            </Box>
-                            <Box py={1} mb={1} mx='auto' display='flex' >
-                                {stepStatus === this.stepStatuses.BLOCKED && (
-                                    <Typography variant='h4'>
-                                        <FormattedMessage
-                                            id={'Apis.Details.Credentials.Wizard.Wizard.approval.request.'
+            <Box my={2} mx='auto' display='flex' justifyContent='center'>
+                <Grid item pb={1} xs={12} md={11}>
+                    <Paper elevation={0}>
+                        <Box pt={2} px={3} display='flex' >
+                            <Typography variant='h4'>
+                                <FormattedMessage
+                                    id={'Apis.Details.Credentials.Credentials'
+                             + '.api.credentials.generate'}
+                                    defaultMessage='Key Generation Wizard'
+                                />
+                            </Typography>
+                        </Box>
+                        <Box py={1} mx='auto' display='flex' >
+                            <Grid item xs={12} md={12}>
+                                <Stepper activeStep={currentStep}>
+                                    {this.steps.map((label) => {
+                                        return (
+                                            <Step key={label}>
+                                                <StepLabel>{label}</StepLabel>
+                                            </Step>
+                                        );
+                                    })}
+                                </Stepper>
+                            </Grid>
+                        </Box>
+                        <Box py={1} mx='auto' display='block' >
+                            {stepStatus === this.stepStatuses.PROCEED && (
+                                <React.Fragment>
+                                    <CurrentStepComponent
+                                        {...this.state}
+                                        incrementStep={this.handleNext}
+                                        setStepStatus={this.setStepStatus}
+                                        stepStatuses={this.stepStatuses}
+                                        classes={classes}
+                                        setCreatedApp={this.setCreatedApp}
+                                        setCreatedKeyType={this.setCreatedKeyType}
+                                        setCreatedToken={this.setCreatedToken}
+                                        handleReset={this.handleReset}
+                                    />
+                                </React.Fragment>
+                            )}
+                        </Box>
+                        <Box py={1} mb={1} mx='auto' display='flex' >
+                            {stepStatus === this.stepStatuses.BLOCKED && (
+                                <Typography variant='h4'>
+                                    <FormattedMessage
+                                        id={'Apis.Details.Credentials.Wizard.Wizard.approval.request.'
                                                     + 'for.this.step.has'}
-                                            defaultMessage='Approval request for this step has been Sent'
-                                        />
-                                    </Typography>
-                                )}
-                            </Box>
-                        </Paper>
-                    </Grid>
-                </Box>
-            </React.Fragment >
+                                        defaultMessage='Approval request for this step has been Sent'
+                                    />
+                                </Typography>
+                            )}
+                        </Box>
+                    </Paper>
+                </Grid>
+            </Box>
         );
     }
 }
@@ -229,10 +209,9 @@ Wizard.propTypes = {
         instructions: PropTypes.string,
         button: PropTypes.string,
         wizardContent: PropTypes.string,
-        wizardButtons: PropTypes.string,
     }).isRequired,
     intl: PropTypes.func.isRequired,
     throttlingPolicyList: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
-export default injectIntl(withStyles(styles)(Wizard));
+export default injectIntl(Wizard);
