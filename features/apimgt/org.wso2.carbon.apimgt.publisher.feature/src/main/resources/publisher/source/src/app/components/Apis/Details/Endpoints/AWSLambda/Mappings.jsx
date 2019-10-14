@@ -77,10 +77,12 @@ export default function Mappings() {
      * @param {any} resource The resource.
      */
     function deleteResource(resource) {
-        const updatedResources = resources.filter((element) => {
-            return element.name !== resource.name;
-        });
-        setResources(updatedResources);
+        if (resources.length > 1) {
+            const updatedResources = resources.filter((element) => {
+                return element.name !== resource.name;
+            });
+            setResources(updatedResources);
+        }
     }
 
     return (
