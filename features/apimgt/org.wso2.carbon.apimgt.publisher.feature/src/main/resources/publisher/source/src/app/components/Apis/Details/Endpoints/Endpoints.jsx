@@ -175,7 +175,18 @@ function Endpoints(props) {
      * @return {{isValid: boolean, message: string}} The endpoint validity information.
      * */
     const validate = (implementationType) => {
-        const { endpointConfig } = apiObject;
+        const { endpointConfig, endpointSecurity } = apiObject;
+        if (endpointSecurity) {
+            if (endpointSecurity.username === '' || endpointSecurity.password === '') {
+                return {
+                    isValid: false,
+                    message: intl.formatMessage({
+                        id: 'Apis.Details.Endpoints.Endpoints.missing.security.username.error',
+                        defaultMessage: 'Endpoint Security User Name/ Password should not be empty',
+                    }),
+                };
+            }
+        }
         if (endpointConfig === null) {
             return { isValid: true, message: '' };
         }
