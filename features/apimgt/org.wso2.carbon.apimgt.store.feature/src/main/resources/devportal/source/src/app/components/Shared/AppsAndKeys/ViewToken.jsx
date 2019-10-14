@@ -148,16 +148,16 @@ class ViewToken extends React.Component {
                 </InlineMessage>
                 <div className={classes.epWrapper}>
                     <Typography className={classes.prodLabel}>
-                    {(token.isOauth) && <FormattedMessage
+                        {(token.isOauth) && <FormattedMessage
                             id='Shared.AppsAndKeys.ViewToken.access.token'
                             defaultMessage='Access Token'
                         />
-                    }
-                    {(!token.isOauth) && <FormattedMessage
+                        }
+                        {(!token.isOauth) && <FormattedMessage
                             id='Shared.AppsAndKeys.ViewToken.apikey'
                             defaultMessage='Api Key'
                         />
-                    }
+                        }
                     </Typography>
                     <TextField
                         defaultValue={token.accessToken}

@@ -19,11 +19,13 @@
 import React, { useEffect, useState } from 'react';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import Grid from '@material-ui/core/Grid';
 import KeyConfiguration from 'AppComponents/Shared/AppsAndKeys/KeyConfiguration';
 import Application from 'AppData/Application';
 import { injectIntl } from 'react-intl';
-import API from "AppData/api";
+import API from 'AppData/api';
 import ButtonPanel from './ButtonPanel';
+
 
 const generateKeysStep = (props) => {
     const keyStates = {
@@ -93,8 +95,10 @@ const generateKeysStep = (props) => {
 
     const generateKeys = () => {
         Application.get(createdApp.value).then((application) => {
-            return application.generateKeys(keyRequest.keyType, keyRequest.supportedGrantTypes,
-                keyRequest.callbackUrl);
+            return application.generateKeys(
+                keyRequest.keyType, keyRequest.supportedGrantTypes,
+                keyRequest.callbackUrl,
+            );
         }).then((response) => {
             if (response.keyState === keyStates.CREATED || response.keyState === keyStates.REJECTED) {
                 setStepStatus(stepStatuses.BLOCKED);
@@ -117,7 +121,13 @@ const generateKeysStep = (props) => {
 
     return (
         <React.Fragment>
-            <Tabs value={tab} onChange={handleTabChange} variant='fullWidth' indicatorColor='secondary' textColor='secondary'>
+            <Tabs
+                value={tab}
+                onChange={handleTabChange}
+                variant='fullWidth'
+                indicatorColor='secondary'
+                textColor='secondary'
+            >
                 <Tab label={intl.formatMessage({
                     defaultMessage: 'PRODUCTION',
                     id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.production',
@@ -130,14 +140,14 @@ const generateKeysStep = (props) => {
                 />
             </Tabs>
             {tab === 0 && (
-                <div>
+                <Grid md={10}>
                     <KeyConfiguration
                         updateKeyRequest={setKeyRequest}
                         keyRequest={keyRequest}
                         keyType='PRODUCTION'
                         isUserOwner={isUserOwner}
                     />
-                </div>
+                </Grid>
             )}
             {tab === 1 && (
                 <div>
