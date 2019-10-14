@@ -78,9 +78,8 @@ const styles = theme => ({
 function Create(props) {
     const { api, isAPIProduct } = useContext(APIContext);
     const [newDoc, setNewDoc] = useState(null);
-    const {
-        classes, intl, history
-    } = props;
+    const [saveDisabled, setSaveDisabled] = useState(true);
+    const { classes, intl, history } = props;
     const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
     const listingPath = `/${urlPrefix}/${api.id}/documents`;
     const restAPI = api.apiType === Api.CONSTS.APIProduct ? new APIProduct() : new Api();
@@ -167,11 +166,18 @@ function Create(props) {
                                     }}
                                     apiType={api.apiType}
                                     apiId={api.id}
+                                    saveDisabled={saveDisabled}
+                                    setSaveDisabled={setSaveDisabled}
                                 />
                                 <Divider />
 
                                 <div className={classes.addNewOther}>
-                                    <Button variant='contained' color='primary' onClick={() => addDocument(api.id)}>
+                                    <Button
+                                        variant='contained'
+                                        color='primary'
+                                        onClick={() => addDocument(api.id)}
+                                        disabled={saveDisabled}
+                                    >
                                         <FormattedMessage
                                             id='Apis.Details.Documents.Create.markdown.editor.add.document.button'
                                             defaultMessage='Add Document'
