@@ -44,6 +44,7 @@
         "qs": "^6.4.0",
         "query-string": "6.8.2",
         "rc-notification": "^3.0.1",
+        "rc-progress": "^2.5.2",
         "react": "^16.10.2",
         "react-autosuggest": "^9.3.4",
         "react-circular-progressbar": "^2.0.2",
