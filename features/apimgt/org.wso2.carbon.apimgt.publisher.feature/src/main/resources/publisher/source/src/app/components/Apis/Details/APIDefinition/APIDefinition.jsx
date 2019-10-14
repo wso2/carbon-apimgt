@@ -263,7 +263,7 @@ class APIDefinition extends React.Component {
                 console.log(err);
                 Alert.error(intl.formatMessage({
                     id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
-                    defaultMessage: 'Error while updating the API Definition',
+                    defaultMessage: 'Error occurred while updating the API Definition',
                 }));
                 return;
             }
@@ -274,7 +274,7 @@ class APIDefinition extends React.Component {
                 if (response) {
                     Alert.success(intl.formatMessage({
                         id: 'Apis.Details.APIDefinition.APIDefinition.api.definition.updated.successfully',
-                        defaultMessage: 'API Definition Updated Successfully',
+                        defaultMessage: 'API Definition updated successfully',
                     }));
                     if (specFormat && toFormat) {
                         this.setState({ swagger: swaggerContent, format: specFormat, convertTo: toFormat });
@@ -287,7 +287,7 @@ class APIDefinition extends React.Component {
                 console.log(err);
                 Alert.error(intl.formatMessage({
                     id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
-                    defaultMessage: 'Error while updating the API Definition',
+                    defaultMessage: 'Error occurred while updating the API Definition',
                 }));
             });
     }
@@ -372,8 +372,7 @@ class APIDefinition extends React.Component {
                                 <Typography variant='body2' color='primary'>
                                     <FormattedMessage
                                         id='Apis.Details.APIDefinition.APIDefinition.update.not.allowed'
-                                        defaultMessage={'*You are not authorized to update API Definition due to' +
-                                        ' insufficient permissions'}
+                                        defaultMessage={'*Unauthorized: Insufficient permissions to update API Definition'}
                                     />
                                 </Typography>
                             )
@@ -462,7 +461,7 @@ class APIDefinition extends React.Component {
                             <FormattedMessage
                                 id='Apis.Details.APIDefinition.APIDefinition.api.definition.save.confirmation'
                                 defaultMessage={
-                                    'Do you want to save the API Definition? This will affect the'
+                                    'Are you sure you want to save the API Definition? This might affect the'
                                     + ' existing resources.'
                                 }
                             />
