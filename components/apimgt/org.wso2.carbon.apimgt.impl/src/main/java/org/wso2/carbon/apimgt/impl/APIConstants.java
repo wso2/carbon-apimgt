@@ -228,7 +228,7 @@ public final class APIConstants {
     public static final String NUM_ERRORS = "numErrors";
     public static final String DESC = "desc";
     public static final String ID = "id";
-    public static final String ASSESSMENT_REPORT = "/assessmentreport";
+    public static final String ASSESSMENT_REPORT = "/assessmentreport?";
 
     //registry resource containing the self signup user config
     public static final String SELF_SIGN_UP_CONFIG_LOCATION = API_APPLICATION_DATA_LOCATION + "/sign-up-config.xml";
