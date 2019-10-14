@@ -62,9 +62,8 @@ export default function AuthorizationHeader(props) {
                         <FormattedMessage
                             id='Apis.Details.Configuration.Configuration.AuthHeader.tooltip'
                             defaultMessage={
-                                'If you want to send the authorization '
-                                + 'information under different header name other than Authorization,'
-                                + 'You may specify that header name here'
+                                ' The header name that is used to send the authorization '
+                                + 'information. "Authorization" is the default header.'
                             }
                         />
                     )}
