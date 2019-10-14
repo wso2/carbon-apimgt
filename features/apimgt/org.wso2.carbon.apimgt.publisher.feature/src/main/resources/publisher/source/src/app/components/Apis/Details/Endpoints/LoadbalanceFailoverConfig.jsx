@@ -163,11 +163,26 @@ function LoadbalanceFailoverConfig(props) {
     const getEndpointTypeHeading = () => {
         switch (endpointType) {
             case 'none':
-                return 'None';
+                return (
+                    <FormattedMessage
+                        id='Apis.Details.Endpoints.LoadbalanceFailoverConfig.none.heading'
+                        defaultMessage='Nothing Configured'
+                    />
+                );
             case 'failover':
-                return 'Fail Over';
+                return (
+                    <FormattedMessage
+                        id='Apis.Details.Endpoints.LoadbalanceFailoverConfig.failover.heading'
+                        defaultMessage='Failover Endpoints'
+                    />
+                );
             default:
-                return 'Load Balance';
+                return (
+                    <FormattedMessage
+                        id='Apis.Details.Endpoints.LoadbalanceFailoverConfig.loadbalance.heading'
+                        defaultMessage='Load Balanced Endpoints'
+                    />
+                );
         }
     };
 
@@ -328,7 +343,7 @@ function LoadbalanceFailoverConfig(props) {
                     <Typography className={classes.configDialogHeader}>
                         <FormattedMessage
                             id='Apis.Details.Endpoints.LoadbalanceFailoverConfig.load.balance.configuration.title'
-                            defaultMessage='Load Balance Configuration'
+                            defaultMessage='Load Balance Configurations'
                         />
                     </Typography>
                 </DialogTitle>

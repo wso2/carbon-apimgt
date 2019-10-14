@@ -3213,295 +3213,35 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
-# The "Scope Collection" resource APIs
+# Check scope existence
 ######################################################
-  /apis/{apiId}/scopes:
-
-#-----------------------------------------------------
-# Retrieve the scope associated with an API that qualify under a search condition
-#-----------------------------------------------------
-    get:
+  /scopes/{name}:
+    #-----------------------------------------------------
+    # The scope name existence check resource
+    #-----------------------------------------------------
+    head:
       security:
         - OAuth2Security:
-          - apim:api_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/scopes\""
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/scopes
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json"
-      summary: Get a list of scopes of an API
+            - apim:api_create
+            - apim:api_publish
+      operationId: validateScope
+      summary:
+        Check given scope name is already exist
       description: |
-        This operation can be used to retrieve a list of scopes belonging to an API by providing the id of the API.
+        Using this operation, user can check a given scope name exists or not.
       parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/If-None-Match'
+        - $ref : '#/parameters/scopeName'
       tags:
-        - API Scopes
+        - scope
       responses:
         200:
-          description: |
+          description:
             OK.
-            Scope list is returned.
-          schema:
-            $ref: '#/definitions/ScopeList'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-              type: string
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+            Requested scope name exists.
         404:
-          description: |
+          description:
             Not Found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
-
-#-----------------------------------------------------
-# Add a scope to a certain API
-#-----------------------------------------------------
-    post:
-      security:
-        - OAuth2Security:
-          - apim:api_create
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/scopes\""
-      x-wso2-request: "POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/scopes\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json"
-      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/scopes/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058\nContent-Type: application/json"
-      summary: Add a new scope to an API
-      description: |
-        This operation can be used to add a new scope to an API.
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - in: body
-          name: body
-          description: |
-            Scope object that needs to be added
-          required: true
-          schema:
-            $ref: '#/definitions/Scope'
-        - $ref: '#/parameters/If-Match'
-      tags:
-        - API Scopes
-      responses:
-        201:
-          description: |
-            Created.
-            Successful response with the newly created Scope object as entity in the body.
-            Location header contains URL of newly added scope.
-          schema:
-            $ref: '#/definitions/Scope'
-          headers:
-            Location:
-              description: |
-                Location to the newly created Scope.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
-        415:
-          description: |
-            Unsupported media type.
-            The entity of the request was in a not supported format.
-
-######################################################
-# The "Individual Scope" resource APIs
-######################################################
-  '/apis/{apiId}/scopes/{name}':
-
-#-----------------------------------------------------
-# Retrieve a particular scope of a certain API
-#-----------------------------------------------------
-    get:
-      security:
-        - OAuth2Security:
-          - apim:api_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/scopes/read\""
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/scopes/read
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n"
-      summary: Get a scope of an API
-      description: |
-        This operation can be used to retrieve a particular scope's metadata associated with an API.
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/scopeName'
-        - $ref: '#/parameters/If-None-Match'
-      tags:
-        - API Scopes
-      responses:
-        200:
-          description: |
-            OK.
-            Scope returned.
-          schema:
-            $ref: '#/definitions/Scope'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              type: string
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-        404:
-          description: |
-            Not Found.
-            Requested Scope does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
-
-#-----------------------------------------------------
-# Update a particular scope of a certain API
-#-----------------------------------------------------
-    put:
-      security:
-        - OAuth2Security:
-          - apim:api_create
-      x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X PUT -d data.json \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/scopes/read\""
-      x-wso2-request: "PUT https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/scopes/read\nAuthorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\nContent-Type: application/json\n"
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n"
-      summary: Update a Scope of an API
-      description: |
-        This operation can be used to update scope of an API
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/scopeName'
-        - in: body
-          name: body
-          description: |
-            Scope object that needs to be added
-          required: true
-          schema:
-            $ref: '#/definitions/Scope'
-        - $ref: '#/parameters/If-Match'
-      tags:
-        - API Scopes
-      responses:
-        200:
-          description: |
-            OK.
-            Scope updated
-          schema:
-            $ref: '#/definitions/Scope'
-          headers:
-            Location:
-              description: |
-                The URL of the updated scope.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
-#-----------------------------------------------------
-# Delete a particular scope of a certain API
-#-----------------------------------------------------
-    delete:
-      security:
-        - OAuth2Security:
-          - apim:api_create
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/scopes/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058"
-      x-wso2-request: |
-        DELETE https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/scopes/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK"
-      summary: Delete a scope of an API
-      description: |
-        This operation can be used to delete a scope associated with an API.
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/scopeName'
-        - $ref: '#/parameters/If-Match'
-      tags:
-        - API Scopes
-      responses:
-        200:
-          description: |
-            OK.
-            Resource successfully deleted.
-        404:
-          description: |
-            Not Found.
-            Resource to be deleted does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
+            Requested scope name does not exist.
 
   ######################################################
   # The "Resource Paths" resource

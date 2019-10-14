@@ -577,6 +577,7 @@ function ProductResourcesEdit(props) {
                                                                     tabIndex={-1}
                                                                     disableRipple
                                                                     onChange={() => updateCheckBox(key, innerKey)}
+                                                                    color='primary'
                                                                 />
                                                             </ListItemIcon>
                                                             <ListItemText

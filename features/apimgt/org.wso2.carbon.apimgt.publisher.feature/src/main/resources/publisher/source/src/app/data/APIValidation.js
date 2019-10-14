@@ -57,6 +57,20 @@ const roleSchema = Joi.extend(joi => ({
     ],
 }));
 
+const scopeSchema = Joi.extend(joi => ({
+    base: joi.string(),
+    name: 'scopes',
+    rules: [
+        {
+            name: 'scope',
+            validate(params, value, state, options) { // eslint-disable-line no-unused-vars
+                const api = new API();
+                return api.validateScopeName(value);
+            },
+        },
+    ],
+}));
+
 const userRoleSchema = Joi.extend(joi => ({
     base: joi.string(),
     name: 'userRole',
@@ -128,6 +142,7 @@ const definition = {
         return tmpErrors;
     }),
     role: roleSchema.systemRole().role(),
+    scope: scopeSchema.scopes().scope(),
     url: Joi.string().uri(),
     userRole: userRoleSchema.userRole().role(),
     apiParameter: apiSchema.api().isAPIParameterExist(),

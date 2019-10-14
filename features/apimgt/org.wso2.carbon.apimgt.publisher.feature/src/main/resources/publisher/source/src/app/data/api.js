@@ -1415,6 +1415,13 @@ class API extends Resource {
         return promise;
     }
 
+    validateScopeName(name) {
+        const promise = this.client.then((client) => {
+            return client.apis.scope.validateScope({ name: name })
+        });
+        return promise;
+    }
+
     /**
      * Add new thumbnail image to an API
      *

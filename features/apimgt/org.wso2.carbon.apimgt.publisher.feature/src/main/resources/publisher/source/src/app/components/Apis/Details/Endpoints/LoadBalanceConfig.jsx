@@ -24,9 +24,9 @@ import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 const algorithms = [
     {
         key: 'org.apache.synapse.endpoints.algorithms.RoundRobin',
-        value: 'Round-Robbin',
+        value: 'Round-Robin',
     },
-    { key: 'other', value: 'other' },
+    { key: 'other', value: 'Other' },
 ];
 const sessionManagementOps = [
     { key: 'http', value: 'Transport' },
@@ -193,9 +193,11 @@ function LoadBalanceConfig(props) {
             <Grid className={classes.configButtonContainer}>
                 <Button
                     color='primary'
+                    variant='contained'
                     autoFocus
                     onClick={submitConfiguration}
                     disabled={lbConfig.algoClassName === '' || isRestricted(['apim:api_create'], api)}
+                    style={{ marginRight: '10px' }}
                 >
                     <FormattedMessage
                         id='Apis.Details.Endpoints.EndpointOverview.loadbalance.config.save.button'
@@ -203,7 +205,6 @@ function LoadBalanceConfig(props) {
                     />
                 </Button>
                 <Button
-                    color='secondary'
                     onClick={closeLBConfigDialog}
                 >
                     <FormattedMessage

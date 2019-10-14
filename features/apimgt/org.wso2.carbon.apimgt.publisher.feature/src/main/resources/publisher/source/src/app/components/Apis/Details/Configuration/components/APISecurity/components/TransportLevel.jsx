@@ -222,7 +222,7 @@ function TransportLevel(props) {
                                             <Radio
                                                 disabled={!haveMultiLevelSecurity ||
                                                 isRestricted(['apim:api_create'], apiFromContext)}
-                                                color='default'
+                                                color='primary'
                                             />
                                         }
                                         label='Mandatory'
@@ -234,7 +234,7 @@ function TransportLevel(props) {
                                             <Radio
                                                 disabled={!haveMultiLevelSecurity ||
                                                 isRestricted(['apim:api_create'], apiFromContext)}
-                                                color='default'
+                                                color='primary'
                                             />
                                         }
                                         label='Optional'

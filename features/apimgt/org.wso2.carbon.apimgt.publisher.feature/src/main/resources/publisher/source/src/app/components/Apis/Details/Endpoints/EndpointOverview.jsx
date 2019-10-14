@@ -498,6 +498,7 @@ function EndpointOverview(props) {
                                                 control={
                                                     <Radio
                                                         disabled={(isRestricted(['apim:api_create'], api))}
+                                                        color='primary'
                                                     />
                                                 }
                                                 label={endpoint.value}
@@ -510,6 +511,7 @@ function EndpointOverview(props) {
                                                     control={
                                                         <Radio
                                                             disabled={(isRestricted(['apim:api_create'], api))}
+                                                            color='primary'
                                                         />
                                                     }
                                                     label={endpoint.value}
@@ -522,6 +524,7 @@ function EndpointOverview(props) {
                                                 control={
                                                     <Radio
                                                         disabled={(isRestricted(['apim:api_create'], api))}
+                                                        color='primary'
                                                     />
                                                 }
                                                 label={endpoint.value}
@@ -546,8 +549,12 @@ function EndpointOverview(props) {
                                                     defaultMessage={'Please upload a mediation sequence file to ' +
                                                     'Message Mediation Policies, which sets the endpoints.'}
                                                 />
-                                                <Link to={'/apis/' + api.id + '/mediation policies'}>
-                                                    <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
+                                                <Link to={'/apis/' + api.id + '/runtime-configuration'}>
+                                                    <LaunchIcon
+                                                        style={{ marginLeft: '2px' }}
+                                                        fontSize='small'
+                                                        color='primary'
+                                                    />
                                                 </Link>
                                             </Typography>
                                         </div>
@@ -649,7 +656,7 @@ function EndpointOverview(props) {
                             <Typography variant='h4' align='left' className={classes.titleWrapper} gutterBottom>
                                 <FormattedMessage
                                     id='Apis.Details.Endpoints.EndpointOverview.general.config.header'
-                                    defaultMessage='General Endpoint Configuration'
+                                    defaultMessage='General Endpoint Configurations'
                                 />
                             </Typography>
                             <GeneralConfiguration
@@ -672,7 +679,7 @@ function EndpointOverview(props) {
                                 <Typography variant='h4' align='left' className={classes.titleWrapper} gutterBottom>
                                     <FormattedMessage
                                         id='Apis.Details.Endpoints.EndpointOverview.lb.failover.endpoints.header'
-                                        defaultMessage='Load balance and Failover Configuration'
+                                        defaultMessage='Load balance and Failover Configurations'
                                     />
                                 </Typography>
                                 <LoadbalanceFailoverConfig

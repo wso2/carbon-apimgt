@@ -338,7 +338,10 @@ class Permission extends Component {
         const { intl, resourceNotFountMessage } = this.props;
         const columns = [
             {
-                title: intl.formatMessage({ id: 'Apis.Details.Permissions.Permission.role.col', defaultMessage: 'Role' }),
+                title: intl.formatMessage({
+                    id: 'Apis.Details.Permissions.Permission.role.col',
+                    defaultMessage: 'Role',
+                }),
                 dataIndex: 'key',
                 key: 'key',
                 render: text => <a href='#'>{text}</a>,
@@ -348,27 +351,51 @@ class Permission extends Component {
                 dataIndex: 'isRead',
                 key: 'isRead',
                 render: isChecked => (
-                    <Checkbox checked={isChecked} name='read' value={ApiPermissionValidation.permissionType.READ} />
+                    <Checkbox
+                        checked={isChecked}
+                        name='read'
+                        value={ApiPermissionValidation.permissionType.READ}
+                        color='primary'
+                    />
                 ),
             },
             {
-                title: intl.formatMessage({ id: 'Apis.Details.Permissions.Permission.update', defaultMessage: 'Update' }),
+                title: intl.formatMessage({
+                    id: 'Apis.Details.Permissions.Permission.update',
+                    defaultMessage: 'Update',
+                }),
                 dataIndex: 'isUpdate',
                 key: 'isUpdate',
                 render: isChecked => (
-                    <Checkbox checked={isChecked} name='update' value={ApiPermissionValidation.permissionType.UPDATE} />
+                    <Checkbox
+                        checked={isChecked}
+                        name='update'
+                        value={ApiPermissionValidation.permissionType.UPDATE}
+                        color='primary'
+                    />
                 ),
             },
             {
-                title: intl.formatMessage({ id: 'Apis.Details.Permissions.Permission.delete', defaultMessage: 'Delete' }),
+                title: intl.formatMessage({
+                    id: 'Apis.Details.Permissions.Permission.delete',
+                    defaultMessage: 'Delete',
+                }),
                 dataIndex: 'isDelete',
                 key: 'isDelete',
                 render: isChecked => (
-                    <Checkbox checked={isChecked} name='delete' value={ApiPermissionValidation.permissionType.DELETE} />
+                    <Checkbox
+                        checked={isChecked}
+                        name='delete'
+                        value={ApiPermissionValidation.permissionType.DELETE}
+                        color='primary'
+                    />
                 ),
             },
             {
-                title: intl.formatMessage({ id: 'Apis.Details.Permissions.Permission.manages.subscriptions', defaultMessage: 'Manage Subscriptions' }),
+                title: intl.formatMessage({
+                    id: 'Apis.Details.Permissions.Permission.manages.subscriptions',
+                    defaultMessage: 'Manage Subscriptions',
+                }),
                 dataIndex: 'isManageSubscription',
                 key: 'isManageSubscription',
                 render: isChecked => (
@@ -376,11 +403,15 @@ class Permission extends Component {
                         checked={isChecked}
                         name='manage_subscription'
                         value={ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION}
+                        color='primary'
                     />
                 ),
             },
             {
-                title: intl.formatMessage({ id: 'Apis.Details.Permissions.Permission.action', defaultMessage: 'Action' }),
+                title: intl.formatMessage({
+                    id: 'Apis.Details.Permissions.Permission.action',
+                    defaultMessage: 'Action',
+                }),
                 key: 'action',
                 render: (text, record) => (
                     <span>
@@ -478,6 +509,7 @@ class Permission extends Component {
                                                     value={ApiPermissionValidation.permissionType.READ}
                                                     checked={this.state.readField}
                                                     onChange={this.handleChangeReadField}
+                                                    color='primary'
                                                 >
                                                     <FormattedMessage
                                                         id='Apis.Details.Permissions.Permission.Read'
@@ -491,6 +523,7 @@ class Permission extends Component {
                                                     value={ApiPermissionValidation.permissionType.UPDATE}
                                                     checked={this.state.updateField}
                                                     onChange={this.handleChangeUpdateField}
+                                                    color='primary'
                                                 >
                                                     <FormattedMessage
                                                         id='Apis.Details.Permissions.Permission.Update'
@@ -504,6 +537,7 @@ class Permission extends Component {
                                                     value={ApiPermissionValidation.permissionType.DELETE}
                                                     checked={this.state.deleteField}
                                                     onChange={this.handleChangeDeleteField}
+                                                    color='primary'
                                                 >
                                                     <FormattedMessage
                                                         id='Apis.Details.Permissions.Permission.Delete'
@@ -517,6 +551,7 @@ class Permission extends Component {
                                                     value={ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION}
                                                     checked={this.state.manageSubField}
                                                     onChange={this.handleChangeManageSubField}
+                                                    color='primary'
                                                 >
                                                     <FormattedMessage
                                                         id='Apis.Details.Permissions.Permission.Manage.Subscriptions'
@@ -560,6 +595,7 @@ class Permission extends Component {
                                                     name='oauthField'
                                                     checked={this.state.oauthField}
                                                     onChange={this.toggleOauthSelect}
+                                                    color='primary'
                                                 >
                                                     <FormattedMessage
                                                         id='Apis.Details.Permissions.Permission.Oauth'
@@ -572,6 +608,7 @@ class Permission extends Component {
                                                     name='apikeyField'
                                                     checked={this.state.apikeyField}
                                                     onChange={this.toggleApiKeySelect}
+                                                    color='primary'
                                                 >
                                                     <FormattedMessage
                                                         id='Apis.Details.Permissions.Permission.API.Key'

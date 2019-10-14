@@ -506,16 +506,15 @@ function AdvanceEndpointConfig(props) {
                     color='primary'
                     autoFocus
                     disabled={isRestricted(['apim:api_create'], api)}
+                    variant='contained'
+                    style={{ marginRight: '10px' }}
                 >
                     <FormattedMessage
                         id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.config.save.button'
                         defaultMessage='Save'
                     />
                 </Button>
-                <Button
-                    onClick={onCancel}
-                    color='secondary'
-                >
+                <Button onClick={onCancel}>
                     <FormattedMessage
                         id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.cancel.button'
                         defaultMessage='Close'

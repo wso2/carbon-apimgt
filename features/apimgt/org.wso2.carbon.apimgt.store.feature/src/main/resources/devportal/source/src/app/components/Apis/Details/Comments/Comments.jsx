@@ -39,7 +39,7 @@ const styles = theme => ({
         paddingBottom: theme.spacing.unit * 2,
     },
     paper: {
-        margin: theme.spacing(3),
+        marginRight: theme.spacing(3),
         paddingBottom: theme.spacing(3),
         paddingRight: theme.spacing(2),
     },
