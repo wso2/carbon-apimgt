@@ -211,6 +211,9 @@ paths:
           name: openAPIVersion
           description: Open api version
           type: string
+          enum:
+            - V2
+            - V3
       tags:
         - APIs
       responses:
