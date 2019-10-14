@@ -61,7 +61,10 @@ public class APIAdminImpl implements APIAdmin {
      * @param label           content to add
      * @throws APIManagementException if failed add Label
      */
-    public Label addLabel(String tenantDomain, Label label) throws APIManagementException{
+    public Label addLabel(String tenantDomain, Label label) throws APIManagementException {
+        if (isLableNameExists(tenantDomain, label)) {
+            APIUtil.handleException("Label with name " + label.getName() + " already exists");
+        }
         return apiMgtDAO.addLabel(tenantDomain, label);
     }
 
@@ -81,8 +84,29 @@ public class APIAdminImpl implements APIAdmin {
      * @param label             content to update
      * @throws APIManagementException if failed to update label
      */
-    public Label updateLabel(Label label) throws APIManagementException{
+    public Label updateLabel(String tenantDomain, Label label) throws APIManagementException {
+        if (isLableNameExists(tenantDomain, label)) {
+            APIUtil.handleException("Label with name " + label.getName() + " already exists");
+        }
         return apiMgtDAO.updateLabel(label);
+    }
+
+    /**
+     *
+     * @param label content to check
+     * @return whether label is already added or not
+     * @throws APIManagementException
+     */
+    public boolean isLableNameExists(String tenantDomain, Label label) throws APIManagementException {
+        List<Label> ExistingLables = apiMgtDAO.getAllLabels(tenantDomain);
+        if (!ExistingLables.isEmpty()) {
+            for (Label labels : ExistingLables) {
+                if (labels.getName().equals(label.getName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
