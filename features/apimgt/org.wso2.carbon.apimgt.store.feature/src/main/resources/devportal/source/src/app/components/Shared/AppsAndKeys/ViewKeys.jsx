@@ -74,8 +74,8 @@ const styles = theme => ({
         cursor: 'grab',
     },
     tokenSection: {
-        marginTop: theme.spacing.unit * 2,
-        marginBottom: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(0.5),
     },
     margin: {
         marginRight: theme.spacing.unit * 2,
@@ -260,7 +260,7 @@ class ViewKeys extends React.Component {
             token, tokenScopes, tokenValidityTime, accessTokenRequest, subscriptionScopes, isKeyJWT, tokenResponse,
         } = this.state;
         const {
-            intl, keyType, classes, fullScreen, keys, selectedApp: { tokenType },
+            intl, keyType, classes, fullScreen, keys, selectedApp: { tokenType }, selectedGrantTypes,
         } = this.props;
 
         if (notFound) {
@@ -448,7 +448,7 @@ class ViewKeys extends React.Component {
                         <Grid item xs={12}>
                             <Dialog
                                 fullScreen={fullScreen}
-                                open={open || isKeyJWT}
+                                open={(open || isKeyJWT) && selectedGrantTypes.includes('client_credentials')}
                                 onClose={this.handleClose}
                                 aria-labelledby='responsive-dialog-title'
                             >
@@ -503,6 +503,7 @@ class ViewKeys extends React.Component {
                                     color='primary'
                                     className={classes.margin}
                                     onClick={this.handleClickOpen}
+                                    disabled={!selectedGrantTypes.includes('client_credentials')}
                                 >
                                     <FormattedMessage
                                         id='Shared.AppsAndKeys.ViewKeys.generate.access.token'
@@ -522,6 +523,15 @@ class ViewKeys extends React.Component {
                                     />
                                 </Button>
                             </div>
+                            {!selectedGrantTypes.includes('client_credentials') && (
+                                <Typography variant='caption' gutterBottom >
+                                    <FormattedMessage
+                                        id='Shared.AppsAndKeys.ViewKeys.client.enable.client.credentials'
+                                        defaultMessage={`Enable Client-Credentials grant 
+                                            type to generate test access tokens`}
+                                    />
+                                </Typography>
+                            )}
                         </Grid>
                     </Grid>
                 </div>

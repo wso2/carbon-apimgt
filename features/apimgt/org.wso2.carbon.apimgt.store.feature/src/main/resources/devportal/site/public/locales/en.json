@@ -286,6 +286,7 @@
   "Shared.AppsAndKeys.ViewCurl.help": "The following cURL command shows how to generate an access token using\n                            the Password Grant type.",
   "Shared.AppsAndKeys.ViewCurl.help.in.a.similar": "In a similar manner, you can generate an access token using the Client Credentials grant type with\n                        the following cURL command.",
   "Shared.AppsAndKeys.ViewKeys.access.token": "Access Token",
+  "Shared.AppsAndKeys.ViewKeys.client.enable.client.credentials": "Enable Client-Credentials grant \n                                            type to generate test access tokens",
   "Shared.AppsAndKeys.ViewKeys.consumer.close.btn": "Close",
   "Shared.AppsAndKeys.ViewKeys.consumer.generate.btn": "Generate",
   "Shared.AppsAndKeys.ViewKeys.consumer.key": "Consumer Key",
