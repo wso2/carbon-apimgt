@@ -228,6 +228,7 @@ public final class APIConstants {
     public static final String NUM_ERRORS = "numErrors";
     public static final String DESC = "desc";
     public static final String ID = "id";
+    public static final String IS_VALID = "isValid";
     public static final String ASSESSMENT_REPORT = "/assessmentreport?";
 
     //registry resource containing the self signup user config

@@ -1,5 +1,7 @@
-/**
- * Copyright (c), WSO2 Inc. (http://wso2.com) All Rights Reserved.
+/* eslint-disable indent */
+/* eslint-disable react/jsx-indent */
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +124,7 @@ class APISecurityAudit extends Component {
         super(props);
         this.state = {
             report: null,
-            overallGrade: 0,
+            overallScore: 0,
             numErrors: 0,
             loading: false,
             apiDefinition: null,
@@ -158,7 +160,7 @@ class APISecurityAudit extends Component {
             .then((response) => {
                 this.setState({
                     report: response.body.report,
-                    overallGrade: response.body.grade,
+                    overallScore: response.body.grade,
                     numErrors: response.body.numErrors,
                     loading: false,
                 });
@@ -205,15 +207,40 @@ class APISecurityAudit extends Component {
      * @return {*} dataObject array
      */
     getRowData(issues, category) {
-        const dataObject = issues.map((issue) => {
-            const rowObject = [];
-            rowObject.push(
-                this.criticalityObject[issue.criticality], issue.message,
-                (Math.round(issue.score * 100) / 100), issue.pointer, category,
-            );
-            return rowObject;
-        });
+        const dataObject = [];
+        for (const item in issues) {
+            if ({}.hasOwnProperty.call(issues, item)) {
+                for (let i = 0; i < issues[item].issues.length; i++) {
+                    const rowObject = [];
+                    if (issues[item].issues[i].specificDescription) {
+                        rowObject.push(
+                            issues[item].criticality, issues[item].issues[i].specificDescription,
+                            issues[item].issues[i].score, issues[item].issues[i].pointer,
+                            issues[item].issues[i].tooManyImpacted,
+                            issues[item].issues[i].pointersImpacted, category, issues[item].tooManyError,
+                        );
+                    } else {
+                        rowObject.push(
+                            issues[item].criticality, issues[item].description, issues[item].issues[i].score,
+                            issues[item].issues[i].pointer, issues[item].issues[i].tooManyImpacted,
+                            issues[item].issues[i].pointersImpacted, category, issues[item].tooManyError,
+                        );
+                    }
+                    dataObject.push(rowObject);
+                }
+            }
+        }
         return dataObject;
+        // const dataObject = issues.map((issue) => {
+        //     // const lengthOfIssue = issue.length;
+        //     const rowObject = [];
+        //     rowObject.push(
+        //         this.criticalityObject[issue.criticality], issue.message,
+        //         (Math.round(issue.score * 100) / 100), issue.pointer, category,
+        //     );
+        //     return rowObject;
+        // });
+        // return dataObject;
     }
 
     /**
@@ -278,12 +305,22 @@ class APISecurityAudit extends Component {
     }
 
     /**
+     * Method to round off the score of a section of the report
+     * @param {*} score Score of section
+     * @param {*} maxScore Maximum score of the section
+     * @returns {*} roundScore Rounded off score
+     */
+    roundScore(score) {
+        return Math.round(((score * 100) / 100));
+    }
+
+    /**
      * @inheritdoc
      */
     render() {
         const { classes } = this.props;
         const {
-            report, overallGrade, numErrors, loading, apiDefinition,
+            report, overallScore, numErrors, loading, apiDefinition,
         } = this.state;
 
         const reportObject = JSON.parse(report);
@@ -291,6 +328,46 @@ class APISecurityAudit extends Component {
         if (loading) {
             return <Progress />;
         }
+
+        // const columns = [
+        //     {
+        //         name: 'Severity',
+        //         options: {
+        //             filter: true,
+        //             sort: true,
+        //         },
+        //     },
+        //     {
+        //         name: 'Description',
+        //         options: {
+        //             filter: true,
+        //             sort: true,
+        //         },
+        //     },
+        //     {
+        //         name: 'Score Impact',
+        //         options: {
+        //             filter: true,
+        //             sort: true,
+        //         },
+        //     },
+        //     {
+        //         name: 'Pointer',
+        //         options: {
+        //             display: 'excluded',
+        //             filter: false,
+        //             sort: false,
+        //         },
+        //     },
+        //     {
+        //         name: 'Issue Category',
+        //         options: {
+        //             display: 'excluded',
+        //             filter: false,
+        //             sort: false,
+        //         },
+        //     },
+        // ];
 
         const columns = [
             {
@@ -308,7 +385,7 @@ class APISecurityAudit extends Component {
                 },
             },
             {
-                name: 'Score Impact',
+                name: 'Score',
                 options: {
                     filter: true,
                     sort: true,
@@ -323,7 +400,31 @@ class APISecurityAudit extends Component {
                 },
             },
             {
+                name: 'Too Many Impacted',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                    sort: false,
+                },
+            },
+            {
+                name: 'Pointers Affected',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                    sort: false,
+                },
+            },
+            {
                 name: 'Issue Category',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                    sort: false,
+                },
+            },
+            {
+                name: 'Too Many Errors',
                 options: {
                     display: 'excluded',
                     filter: false,
@@ -346,52 +447,52 @@ class APISecurityAudit extends Component {
             selectableRows: false,
             expandableRows: true,
             expandableRowsOnClick: true,
-            renderExpandableRow: (rowData) => {
-                let searchTerm;
-                const path = rowData[3] + '';
-                if (path.includes('get') ||
-                    path.includes('put') ||
-                    path.includes('post') ||
-                    path.includes('delete')) {
-                    searchTerm = path;
-                } else {
-                    searchTerm = 'none';
-                }
+        renderExpandableRow: (rowData) => {
+        const searchTerm = 'none'; // TODO - Remove the search term property from the code
+        // const path = rowData[3] + '';
+        // if (path.includes('get') ||
+        //     path.includes('put') ||
+        //     path.includes('post') ||
+        //     path.includes('delete')) {
+        //     searchTerm = path;
+        // } else {
+        //     searchTerm = 'none';
+        // }
 
-                return (
-                    <TableRow className={classes.tableRow}>
-                        <TableCell colSpan='2'>
-                            <MonacoEditor
-                                width='85%'
-                                height='250px'
-                                theme='vs-dark'
-                                value={apiDefinition}
-                                options={editorOptions}
-                                editorDidMount={(editor, monaco) => this.editorDidMount(editor, monaco, searchTerm)}
+        return (
+                <TableRow className={classes.tableRow}>
+                    <TableCell colSpan='2'>
+                        <MonacoEditor
+                            width='85%'
+                            height='250px'
+                            theme='vs-dark'
+                            value={apiDefinition}
+                            options={editorOptions}
+                            editorDidMount={(editor, monaco) => this.editorDidMount(editor, monaco, searchTerm)}
+                        />
+                    </TableCell>
+                    <TableCell>
+                        <Typography variant='body1' className={classes.referenceTypography}>
+                            <FormattedMessage
+                                id='Apis.Details.APIDefinition.AuditApi.ReferenceSection'
+                                description='Link to visit for detail on how to remedy issue'
+                                defaultMessage='Visit this {link} to view a detailed description, possible
+                                exploits and remediation for this issue.'
+                                values={{
+                                    link: (
+                                        <strong>
+                                            <a
+                                                href={this.getMoreDetailUrl(rowData[4])}
+                                                target='_blank'
+                                                rel='noopener noreferrer'
+                                            >link
+                                            </a>
+                                        </strong>),
+                                }}
                             />
-                        </TableCell>
-                        <TableCell>
-                            <Typography variant='body1' className={classes.referenceTypography}>
-                                <FormattedMessage
-                                    id='Apis.Details.APIDefinition.AuditApi.ReferenceSection'
-                                    description='Link to visit for detail on how to remedy issue'
-                                    defaultMessage='Visit this {link} to view a detailed description, possible
-                                     exploits and remediation for this issue.'
-                                    values={{
-                                        link: (
-                                            <strong>
-                                                <a
-                                                    href={this.getMoreDetailUrl(rowData[4])}
-                                                    target='_blank'
-                                                    rel='noopener noreferrer'
-                                                >link
-                                                </a>
-                                            </strong>),
-                                    }}
-                                />
-                            </Typography>
-                        </TableCell>
-                    </TableRow>
+                        </Typography>
+                    </TableCell>
+                </TableRow>
                 );
             },
         };
@@ -421,10 +522,10 @@ class APISecurityAudit extends Component {
                                         <div className={classes.auditSummarySubDiv}>
                                             <VisibilitySensor>
                                                 {({ isVisible }) => {
-                                                    const gradeProgressScore = isVisible ? overallGrade : 0;
+                                                    const progressScore = isVisible ? overallScore : 0;
                                                     return (
                                                         <CircularProgressbarWithChildren
-                                                            value={gradeProgressScore}
+                                                            value={progressScore}
                                                         >
                                                             <Typography
                                                                 variant='body1'
@@ -432,11 +533,11 @@ class APISecurityAudit extends Component {
                                                             >
                                                                 <FormattedMessage
                                                                     id='Apis.Details.APIDefinition.AuditApi
-                                                                    .OverallGradeProgress'
-                                                                    defaultMessage='{overallGrade}'
+                                                                    .OverallScoreProgress'
+                                                                    defaultMessage='{overallScore}'
                                                                     values={{
-                                                                        overallGrade: (
-                                                                            <strong>{Math.round(overallGrade)}</strong>
+                                                                        overallScore: (
+                                                                            <strong>{Math.round(overallScore)}</strong>
                                                                         ),
                                                                     }}
                                                                 />
@@ -459,11 +560,11 @@ class APISecurityAudit extends Component {
                                         <div className={classes.auditSummaryDivRight}>
                                             <Typography variant='body1'>
                                                 <FormattedMessage
-                                                    id='Apis.Details.APIDefinition.AuditApi.overallGrade'
-                                                    defaultMessage='{overallGradeText} {overallGrade} / 100'
+                                                    id='Apis.Details.APIDefinition.AuditApi.overallScore'
+                                                    defaultMessage='{overallScoreText} {overallScore} / 100'
                                                     values={{
-                                                        overallGradeText: <strong>Overall Grade:</strong>,
-                                                        overallGrade: (Math.round(overallGrade)),
+                                                        overallScoreText: <strong>Overall Score:</strong>,
+                                                        overallScore: (Math.round(overallScore)),
                                                     }}
                                                 />
                                             </Typography>
@@ -513,7 +614,7 @@ class APISecurityAudit extends Component {
                                                 </Typography>
                                             </React.Fragment>
                                             <hr />
-                                            <Typography variant='body1'>
+                                            {/* <Typography variant='body1'>
                                                 <FormattedMessage
                                                     id='Apis.Details.APIDefinition.AuditApi.OpenApiSummary'
                                                     defaultMessage='{openApiSummary}'
@@ -526,9 +627,9 @@ class APISecurityAudit extends Component {
                                                             </strong>
                                                         ),
                                                     }}
-                                                />
+                                                /> */}
 
-                                            </Typography>
+                                            {/* </Typography>
                                             <VisibilitySensor>
                                                 {({ isVisible }) => {
                                                     const gradeProgressScore = isVisible ?
@@ -542,7 +643,7 @@ class APISecurityAudit extends Component {
                                                     );
                                                 }
                                                 }
-                                            </VisibilitySensor>
+                                            </VisibilitySensor> */}
                                             <Typography variant='body1'>
                                                 <FormattedMessage
                                                     id='Apis.Details.APIDefinition.AuditApi.SecuritySummary'
@@ -551,8 +652,7 @@ class APISecurityAudit extends Component {
                                                         securitySummary: (
                                                             <strong>
                                                                 Security -
-                                                                 ({(Math.round(reportObject.security.grade * 100) / 100
-                                                                )} / 25)
+                                                                 ({this.roundScore(reportObject.security.score)} / 30)
                                                             </strong>
                                                         ),
                                                     }}
@@ -561,12 +661,12 @@ class APISecurityAudit extends Component {
                                             </Typography>
                                             <VisibilitySensor>
                                                 {({ isVisible }) => {
-                                                    const gradeProgressScore = isVisible ?
-                                                        (((Math.round(reportObject.security.grade * 100) / 100) / 25
+                                                    const progressScore = isVisible ?
+                                                        ((this.roundScore(reportObject.security.score) / 30
                                                         ) * 100) : 0;
                                                     return (
                                                         <Line
-                                                            percent={gradeProgressScore}
+                                                            percent={progressScore}
                                                             strokeColor='#3d98c7'
                                                         />
                                                     );
@@ -581,8 +681,7 @@ class APISecurityAudit extends Component {
                                                         dataValidationSummary: (
                                                             <strong>
                                                                 Data Validation -
-                                                                 ({(Math.round(reportObject.data.grade * 100) / 100
-                                                                )} / 50)
+                                                                 ({this.roundScore(reportObject.data.score)} / 70)
                                                             </strong>
                                                         ),
                                                     }}
@@ -591,12 +690,12 @@ class APISecurityAudit extends Component {
                                             </Typography>
                                             <VisibilitySensor>
                                                 {({ isVisible }) => {
-                                                    const gradeProgressScore = isVisible ?
-                                                        (((Math.round(reportObject.data.grade * 100) / 100) / 25
+                                                    const progressScore = isVisible ?
+                                                        ((this.roundScore(reportObject.data.score) / 70
                                                         ) * 100) : 0;
                                                     return (
                                                         <Line
-                                                            percent={gradeProgressScore}
+                                                            percent={progressScore}
                                                             strokeColor='#3d98c7'
                                                         />
                                                     );
@@ -608,7 +707,155 @@ class APISecurityAudit extends Component {
                                 </div>
                             </Paper>
                         </div>
-                        <Paper elevation={1} className={classes.rootPaper}>
+                        {reportObject.validation !== null &&
+                            <div className={classes.paperDiv}>
+                                <Paper elevation={1} className={classes.rootPaper}>
+                                    <div>
+                                        <Typography variant='h5' className={classes.sectionHeadingTypography}>
+                                            <FormattedMessage
+                                                id='Apis.Details.APIDefinition.AuditApi.OpenApiFormatRequirements'
+                                                defaultMessage='OpenAPI Format Requirements'
+                                            />
+                                        </Typography>
+                                    </div>
+                                </Paper>
+                            </div>
+                        }
+                        {reportObject.security !== null &&
+                            <div className={classes.paperDiv}>
+                                <Paper elevation={1} className={classes.rootPaper}>
+                                    <div>
+                                        <Typography variant='h5' className={classes.sectionHeadingTypography}>
+                                            <FormattedMessage
+                                                id='Apis.Details.APIDefinition.AuditApi.Security'
+                                                defaultMessage='Security'
+                                            />
+                                        </Typography>
+                                        <Typography variant='body1'>
+                                            <FormattedMessage
+                                                id='Apis.Details.APIDefinition.AuditApi.SecurityNumOfIssues'
+                                                defaultMessage='{securityNumOfIssuesText} {securityNumOfIssues}'
+                                                values={{
+                                                    securityNumOfIssuesText: (
+                                                        <strong>Number of Issues:</strong>
+                                                    ),
+                                                    securityNumOfIssues: reportObject.security.issueCounter,
+                                                }}
+                                            />
+                                        </Typography>
+                                        <Typography variant='body1'>
+                                            <FormattedMessage
+                                                id='Apis.Details.APIDefinition.AuditApi.SecurityScore'
+                                                defaultMessage='{securityScoreText} {securityScore}  / 30'
+                                                values={{
+                                                    dataScoreText: (
+                                                        <strong>Score:</strong>
+                                                    ),
+                                                    dataScore: (
+                                                        (Math.round(reportObject.data.score * 100) / 100)
+                                                    ),
+                                                }}
+                                            />
+                                        </Typography>
+                                    </div>
+                                </Paper>
+                            </div>
+                        }
+                        {reportObject.data !== null &&
+                            <div className={classes.paperDiv}>
+                                <Paper elevation={1} className={classes.rootPaper}>
+                                    <div>
+                                        <Typography variant='h5' className={classes.sectionHeadingTypography}>
+                                            <FormattedMessage
+                                                id='Apis.Details.APIDefinition.AuditApi.DataValidation'
+                                                defaultMessage='Data Validation'
+                                            />
+                                        </Typography>
+                                        <Typography variant='body1'>
+                                            <FormattedMessage
+                                                id='Apis.Details.APIDefinition.AuditApi.DataValidationNumOfIssues'
+                                                defaultMessage='{dataNumOfIssuesText} {dataNumOfIssues}'
+                                                values={{
+                                                    dataNumOfIssuesText: (
+                                                        <strong>Number of Issues:</strong>
+                                                    ),
+                                                    dataNumOfIssues: reportObject.data.issueCounter,
+                                                }}
+                                            />
+                                        </Typography>
+                                        <Typography variant='body1'>
+                                            <FormattedMessage
+                                                id='Apis.Details.APIDefinition.AuditApi.DataValidationScore'
+                                                defaultMessage='{dataScoreText} {dataScore}  / 70'
+                                                values={{
+                                                    dataScoreText: (
+                                                        <strong>Score:</strong>
+                                                    ),
+                                                    dataScore: (
+                                                        (Math.round(reportObject.data.score * 100) / 100)
+                                                    ),
+                                                }}
+                                            />
+                                        </Typography>
+                                        <React.Fragment>
+                                            <Typography variant='body1'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.APIDefinition.AuditApi.dataCriticality'
+                                                    defaultMessage='{dataCriticalityText} {dataCriticality}'
+                                                    values={{
+                                                        dataCriticalityText: (
+                                                            <strong>Criticality:</strong>
+                                                        ),
+                                                        dataCriticality: reportObject.data.criticality,
+                                                    }}
+                                                />
+                                                <Tooltip
+                                                    placement='right'
+                                                    classes={{
+                                                        tooltip: classes.htmlTooltip,
+                                                    }}
+                                                    title={
+                                                        <React.Fragment>
+                                                            <FormattedMessage
+                                                                id='Apis.Details.APIDefinition.AuditApi.tooltip'
+                                                                defaultMessage={
+                                                                    'Criticality ranges from 1 to 5, with 1 being' +
+                                                                            ' low vulnerability and 5' +
+                                                                            'being high vulnerability'
+                                                                }
+                                                            />
+                                                        </React.Fragment>
+                                                    }
+                                                >
+                                                    <Button className={classes.helpButton}>
+                                                        <HelpOutline className={classes.helpIcon} />
+                                                    </Button>
+                                                </Tooltip>
+                                            </Typography>
+                                        </React.Fragment>
+                                        {(reportObject.data.issueCounter !== 0) &&
+                                            <div>
+                                                <hr />
+                                                <Typography variant='body1'>
+                                                    <MuiThemeProvider theme={this.getMuiTheme()}>
+                                                        <MUIDataTable
+                                                            title='Issues'
+                                                            data={this.getRowData(
+                                                                reportObject.data.issues,
+                                                                'Data Validation',
+                                                            )}
+                                                            columns={columns}
+                                                            options={options}
+                                                        />
+                                                    </MuiThemeProvider>
+                                                </Typography>
+                                            </div>
+                                        }
+                                    </div>
+                                </Paper>
+                            </div>
+                        }
+                        {/* <Paper elevation={1} className={classes.rootPaper}>
                             <div>
                                 <Typography variant='h5' className={classes.sectionHeadingTypography}>
                                     <FormattedMessage
@@ -677,8 +924,8 @@ class APISecurityAudit extends Component {
                                             </Button>
                                         </Tooltip>
                                     </Typography>
-                                </React.Fragment>
-                                {(reportObject.validation.issueCounter !== 0) &&
+                                </React.Fragment> */}
+                                {/* {(reportObject.validation.issueCounter !== 0) &&
                                     <div>
                                         <hr />
                                         <Typography variant='body1'>
@@ -695,8 +942,8 @@ class APISecurityAudit extends Component {
                                             </MuiThemeProvider>
                                         </Typography>
                                     </div>
-                                }
-                            </div>
+                                } */}
+                            {/* </div>
                         </Paper>
 
                         <Paper elevation={1} className={classes.rootPaper}>
@@ -763,8 +1010,8 @@ class APISecurityAudit extends Component {
                                             </Button>
                                         </Tooltip>
                                     </Typography>
-                                </React.Fragment>
-                                {(reportObject.security.issueCounter !== 0) &&
+                                </React.Fragment> */}
+                                {/* {(reportObject.security.issueCounter !== 0) &&
                                     <div>
                                         <hr />
                                         <Typography variant='body1'>
@@ -778,8 +1025,8 @@ class APISecurityAudit extends Component {
                                             </MuiThemeProvider>
                                         </Typography>
                                     </div>
-                                }
-                            </div>
+                                } */}
+                            {/* </div>
                         </Paper>
                         <Paper elevation={1} className={classes.rootPaper}>
                             <div>
@@ -847,8 +1094,8 @@ class APISecurityAudit extends Component {
                                             </Button>
                                         </Tooltip>
                                     </Typography>
-                                </React.Fragment>
-                                {(reportObject.data.issueCounter !== 0) &&
+                                </React.Fragment> */}
+                                {/* {(reportObject.data.issueCounter !== 0) &&
                                     <div>
                                         <hr />
                                         <Typography variant='body1'>
@@ -862,9 +1109,9 @@ class APISecurityAudit extends Component {
                                             </MuiThemeProvider>
                                         </Typography>
                                     </div>
-                                }
-                            </div>
-                        </Paper>
+                                } */}
+                            {/* </div>
+                        </Paper> */}
                     </div>
                 )}
             </div>
