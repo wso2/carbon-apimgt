@@ -64,9 +64,6 @@ export default function SelectPolicies(props) {
                     variant='outlined'
                     InputProps={{
                         id: 'itest-id-apipolicies-input',
-                        // onBlur: ({ target: { value } }) => {
-                        //     validate('policies', value);
-                        // },
                     }}
                 >
                     {policies.list.map(policy => (

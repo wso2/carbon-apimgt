@@ -185,7 +185,7 @@ export default function DefaultAPIForm(props) {
                     error={validity.name}
                     label={
                         <React.Fragment>
-                            <FormattedMessage id='Apis.Create.WSDL.Steps.DefaultAPIForm.name' defaultMessage='Name' />
+                            <FormattedMessage id='Apis.Create.Components.DefaultAPIForm.name' defaultMessage='Name' />
                             <sup className={classes.mandatoryStar}>*</sup>
                         </React.Fragment>
                     }
@@ -215,7 +215,7 @@ export default function DefaultAPIForm(props) {
                                     label={
                                         <React.Fragment>
                                             <FormattedMessage
-                                                id='Apis.Create.WSDL.Steps.DefaultAPIForm.api.context'
+                                                id='Apis.Create.Components.DefaultAPIForm.api.context'
                                                 defaultMessage='Context'
                                             />
                                             <sup className={classes.mandatoryStar}>*</sup>
@@ -245,7 +245,7 @@ export default function DefaultAPIForm(props) {
                                     label={
                                         <React.Fragment>
                                             <FormattedMessage
-                                                id='Apis.Create.WSDL.Steps.DefaultAPIForm.version'
+                                                id='Apis.Create.Components.DefaultAPIForm.version'
                                                 defaultMessage='Version'
                                             />
                                             <sup className={classes.mandatoryStar}>*</sup>
@@ -276,7 +276,7 @@ export default function DefaultAPIForm(props) {
                                     label={
                                         <React.Fragment>
                                             <FormattedMessage
-                                                id='Apis.Create.WSDL.Steps.DefaultAPIForm.api.product.context'
+                                                id='Apis.Create.Components.DefaultAPIForm.api.product.context'
                                                 defaultMessage='Context'
                                             />
                                             <sup className={classes.mandatoryStar}>*</sup>
