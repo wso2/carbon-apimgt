@@ -31,6 +31,15 @@ const useStyles = makeStyles(theme => ({
         color: theme.palette.error.main,
         marginLeft: theme.spacing(0.1),
     },
+    helperTextContext: {
+        '& p': {
+            textOverflow: 'ellipsis',
+            width: 400,
+            display: 'block',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+        },
+    },
 }));
 
 /**
@@ -227,6 +236,7 @@ export default function DefaultAPIForm(props) {
                                         (validity.context && validity.context.message) ||
                                         `API will be exposed in ${actualContext(api)} context at the gateway`
                                     }
+                                    classes={{ root: classes.helperTextContext }}
                                     margin='normal'
                                     variant='outlined'
                                 />
