@@ -54,9 +54,6 @@ const styles = theme => ({
     errorMessageContainer: {
         marginTop: theme.spacing(),
     },
-    titleGrid: {
-        marginBottom: theme.spacing(),
-    },
     implSelectRadio: {
         padding: theme.spacing() / 2,
     },
@@ -156,12 +153,10 @@ function Endpoints(props) {
         const { endpointConfig, endpointImplementationType, endpointSecurity } = apiObject;
         setUpdating(true);
         if (endpointImplementationType === 'INLINE') {
-            const promisedAPIUpdate = updateAPI({ endpointConfig, endpointImplementationType, endpointSecurity });
-            const promisedSwaggerUpdate = api.updateSwagger(swagger);
-            Promise.all([promisedAPIUpdate, promisedSwaggerUpdate]).then((resp) => {
-                console.log('success', resp);
-            }).catch((err) => {
-                console.log(err);
+            api.updateSwagger(swagger).then((resp) => {
+                setSwagger(resp.obj);
+            }).then(() => {
+                updateAPI({ endpointConfig, endpointImplementationType, endpointSecurity });
             }).finally(() => {
                 setUpdating(false);
             });
@@ -180,7 +175,18 @@ function Endpoints(props) {
      * @return {{isValid: boolean, message: string}} The endpoint validity information.
      * */
     const validate = (implementationType) => {
-        const { endpointConfig } = apiObject;
+        const { endpointConfig, endpointSecurity } = apiObject;
+        if (endpointSecurity) {
+            if (endpointSecurity.username === '' || endpointSecurity.password === '') {
+                return {
+                    isValid: false,
+                    message: intl.formatMessage({
+                        id: 'Apis.Details.Endpoints.Endpoints.missing.security.username.error',
+                        defaultMessage: 'Endpoint Security User Name/ Password should not be empty',
+                    }),
+                };
+            }
+        }
         if (endpointConfig === null) {
             return { isValid: true, message: '' };
         }
@@ -350,11 +356,11 @@ function Endpoints(props) {
                                     color='primary'
                                     onClick={() => saveAPI()}
                                 >
-                                    {isUpdating && <CircularProgress size={10} />}
                                     <FormattedMessage
                                         id='Apis.Details.Endpoints.Endpoints.save'
                                         defaultMessage='Save'
                                     />
+                                    {isUpdating && <CircularProgress size={24} />}
                                 </Button>
                             </Grid>
                             <Grid item>

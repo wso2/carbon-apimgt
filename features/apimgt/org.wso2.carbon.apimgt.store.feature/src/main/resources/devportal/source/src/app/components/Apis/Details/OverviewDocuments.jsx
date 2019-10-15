@@ -84,13 +84,14 @@ function OverviewDocuments(props) {
 
     useEffect(() => {
         const restApi = new API();
-        const { apiId } = props;
+        const { apiId, setDocsCount } = props;
         const promisedApi = restApi.getDocumentsByAPIId(apiId);
         promisedApi
             .then((response) => {
                 if (response.obj.list.length > 0) {
                     // Rearanging the response to group them by the sourceType property.
                     setDocs(response.obj.list);
+                    setDocsCount(response.obj.count);
                 }
             })
             .catch((error) => {

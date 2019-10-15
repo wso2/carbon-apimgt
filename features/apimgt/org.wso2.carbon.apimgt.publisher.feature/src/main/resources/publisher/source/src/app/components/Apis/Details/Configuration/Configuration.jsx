@@ -213,7 +213,7 @@ export default function Configuration() {
                         <Typography variant='caption'>
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.Design.sub.heading'
-                                defaultMessage='On this page you can change design/metadata related configurations'
+                                defaultMessage="Configure your API's visibility and define what your API offers."
                             />
                         </Typography>
                     </Grid>

@@ -187,11 +187,17 @@ public class ApisApiServiceImpl implements ApisApiService {
         String requestedTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            Identifier identifier;
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
 
             Comment comment = CommentMappingUtil.fromDTOToComment(body, username, apiId);
-            String createdCommentId = apiConsumer.addComment(apiIdentifier, comment, username);
-            Comment createdComment = apiConsumer.getComment(apiIdentifier, createdCommentId);
+            String createdCommentId = apiConsumer.addComment(identifier, comment, username);
+            Comment createdComment = apiConsumer.getComment(identifier, createdCommentId);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
@@ -217,9 +223,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
 
-            Comment[] comments = apiConsumer.getComments(apiIdentifier);
+            Comment[] comments = apiConsumer.getComments(apiTypeWrapper);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, limit, offset);
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
@@ -245,9 +251,15 @@ public class ApisApiServiceImpl implements ApisApiService {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            Identifier identifier;
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
 
-            Comment comment = apiConsumer.getComment(apiIdentifier, commentId);
+            Comment comment = apiConsumer.getComment(identifier, commentId);
 
             if (comment != null) {
                 CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(comment);

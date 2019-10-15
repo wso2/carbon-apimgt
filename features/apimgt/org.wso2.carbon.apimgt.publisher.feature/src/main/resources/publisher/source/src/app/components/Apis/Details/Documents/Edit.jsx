@@ -65,6 +65,7 @@ function Edit(props) {
 
     const { intl, apiType } = props;
     const [open, setOpen] = useState(false);
+    const [saveDisabled, setSaveDisabled] = useState(false);
     let createEditForm = useRef(null);
 
     const toggleOpen = () => {
@@ -139,7 +140,7 @@ function Edit(props) {
                         />
                         "{props.docName}"
                     </Typography>
-                    <Button className={classes.button} variant='contained' color='primary' onClick={updateDoc}>
+                    <Button className={classes.button} variant='contained' color='primary' onClick={updateDoc} disabled={saveDisabled}>
                         <FormattedMessage
                             id='Apis.Details.Documents.Edit.documents.text.editor.update.content'
                             defaultMessage='Save'
@@ -160,6 +161,8 @@ function Edit(props) {
                         docId={docId}
                         apiId={apiId}
                         apiType={apiType}
+                        saveDisabled={saveDisabled}
+                        setSaveDisabled={setSaveDisabled}
                     />
                 </div>
             </Dialog>

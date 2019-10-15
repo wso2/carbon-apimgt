@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -30,6 +30,7 @@ import Select from '@material-ui/core/Select';
 import TenantAutocomplete from 'AppComponents/Apis/Details/Subscriptions/TenantAutocomplete';
 import Alert from 'AppComponents/Shared/Alert';
 import { isRestricted } from 'AppData/AuthManager';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 
 const useStyles = makeStyles(theme => ({
@@ -39,7 +40,6 @@ const useStyles = makeStyles(theme => ({
     },
     formControl: {
         margin: theme.spacing.unit * 1,
-        marginLeft: theme.spacing.unit * -30,
         minWidth: 300,
     },
     textControl: {
@@ -62,7 +62,6 @@ const useStyles = makeStyles(theme => ({
         marginTop: theme.spacing.unit * 3.5,
     },
     saveButton: {
-        marginLeft: theme.spacing.unit * 90,
         marginTop: theme.spacing.unit * 2,
     },
 }));
@@ -76,6 +75,7 @@ export default function SimpleSelect(props) {
     const classes = useStyles();
     const { api, updateAPI } = props;
     const [tenantList, setTenantList] = React.useState([]);
+    const [isUpdating, setUpdating] = useState(false);
     let currentAvailability;
     if (api.subscriptionAvailability === null || api.subscriptionAvailability === 'CURRENT_TENANT') {
         currentAvailability = 'currentTenant';
@@ -108,6 +108,7 @@ export default function SimpleSelect(props) {
                 availabilityValue = 'SPECIFIC_TENANTS';
                 availableTenantsList = tenantList;
             }
+            setUpdating(true);
             updateAPI({
                 subscriptionAvailability: availabilityValue,
                 subscriptionAvailableTenants: availableTenantsList,
@@ -118,7 +119,8 @@ export default function SimpleSelect(props) {
                 .catch((error) => {
                     console.error(error);
                     Alert.error('Error occurred while updating tenant availability');
-                });
+                })
+                .finally(() => setUpdating(false));
         }
     }
 
@@ -133,69 +135,78 @@ export default function SimpleSelect(props) {
         }));
     }
     return (
-        <Paper className={classes.subscriptionAvailabilityPaper}>
-            <form className={classes.root} autoComplete='off' onSubmit={(e) => { e.preventDefault(); }}>
-                <Grid container spacing={1} className={classes.grid}>
-                    <Grid item xs={4} className={classes.gridLabel}>
-                        <FormLabel>
-                            <FormattedMessage
-                                id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.subscription.availability'
-                                defaultMessage='Subscription Availability'
-                            /> {' : '}
-                        </FormLabel>
-                    </Grid>
-                    <Grid item xs={8} justify='space-between' spacing={32}>
-                        <FormControl variant='outlined' className={classes.formControl} disabled={isUIElementDisabled}>
-                            <InputLabel ref={inputLabel} htmlFor='outlined-age-simple' />
-                            <Select
-                                value={values.availability}
-                                onChange={handleChange}
-                                labelWidth={labelWidth}
-                                displayEmpty
-                                name='availability'
-                                inputProps={{
-                                    name: 'availability',
-                                    id: 'outlined-availabi;ity-simple',
-                                }}
-                            >
-                                <MenuItem value='currentTenant'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Subscriptions.SubscriptionAvailability.current.tenant.only'
-                                        defaultMessage='Available to current tenant only'
-                                    />
-                                </MenuItem>
-                                <MenuItem value='allTenants'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Subscriptions.SubscriptionAvailability.all.tenants'
-                                        defaultMessage='Available to all the tenants'
-                                    />
-                                </MenuItem>
-                                <MenuItem value='specificTenants'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Subscriptions.SubscriptionAvailability.specific.tenants'
-                                        defaultMessage='Available to specific tenants'
-                                    />
-                                </MenuItem>
-                            </Select>
-                        </FormControl>
-                        <Button
-                            variant='contained'
-                            color='primary'
-                            onClick={subscriptionAvailableTenants}
-                            className={classes.saveButton}
-                            disabled={isUIElementDisabled}
-                        >
-                            <FormattedMessage id='Apis.Details.Scopes.CreateScope.save' defaultMessage='Save' />
-                        </Button>
-                    </Grid>
-                    {isSpecificTenants ? (
-                        <Grid item xs={8} >
-                            <TenantAutocomplete setTenantList={setTenantList} api={api} />
+        <Grid item xs={12} md={12} lg={12}>
+            <Paper className={classes.subscriptionAvailabilityPaper}>
+                <form className={classes.root} autoComplete='off' onSubmit={(e) => { e.preventDefault(); }}>
+                    <Grid container xs={12} spacing={1} className={classes.grid}>
+                        <Grid item xs={4} className={classes.gridLabel}>
+                            <FormLabel>
+                                <FormattedMessage
+                                    id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.subscription.availability'
+                                    defaultMessage='Subscription Availability'
+                                /> {' : '}
+                            </FormLabel>
                         </Grid>
-                    ) : <Grid item xs={8} />}
-                </Grid>
-            </form>
-        </Paper >
+                        <Grid item xs={6}>
+                            <FormControl
+                                variant='outlined'
+                                className={classes.formControl}
+                                disabled={isUIElementDisabled}
+                            >
+                                <InputLabel ref={inputLabel} htmlFor='outlined-age-simple' />
+                                <Select
+                                    value={values.availability}
+                                    onChange={handleChange}
+                                    labelWidth={labelWidth}
+                                    displayEmpty
+                                    name='availability'
+                                    inputProps={{
+                                        name: 'availability',
+                                        id: 'outlined-availabi;ity-simple',
+                                    }}
+                                >
+                                    <MenuItem value='currentTenant'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Subscriptions.SubscriptionAvailability.current.tenant.only'
+                                            defaultMessage='Available to current tenant only'
+                                        />
+                                    </MenuItem>
+                                    <MenuItem value='allTenants'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Subscriptions.SubscriptionAvailability.all.tenants'
+                                            defaultMessage='Available to all the tenants'
+                                        />
+                                    </MenuItem>
+                                    <MenuItem value='specificTenants'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Subscriptions.SubscriptionAvailability.specific.tenants'
+                                            defaultMessage='Available to specific tenants'
+                                        />
+                                    </MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={2}>
+                            <Button
+                                variant='contained'
+                                color='primary'
+                                onClick={subscriptionAvailableTenants}
+                                className={classes.saveButton}
+                                disabled={isUpdating || isUIElementDisabled}
+                            >
+                                <FormattedMessage id='Apis.Details.Scopes.CreateScope.save' defaultMessage='Save' />
+                                {isUpdating && <CircularProgress size={20} />}
+                            </Button>
+                        </Grid>
+                        {isSpecificTenants ? (
+                            <Grid item xs={8} >
+                                <TenantAutocomplete setTenantList={setTenantList} api={api} />
+                            </Grid>
+                        ) : <Grid item xs={8} />}
+                    </Grid>
+                </form>
+            </Paper >
+        </Grid>
     );
 }
 SimpleSelect.propTypes = {

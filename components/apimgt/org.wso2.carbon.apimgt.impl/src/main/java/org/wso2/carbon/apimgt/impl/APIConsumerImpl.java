@@ -1332,8 +1332,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         JwtTokenInfoDTO jwtTokenInfoDTO = APIUtil.getJwtTokenInfoDTO(application, userName,
                 MultitenantUtils.getTenantDomain(userName));
 
-        ExtendedApplicationDTO applicationDTO = new ExtendedApplicationDTO();
-        applicationDTO.setUuid(application.getUUID());
+        ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setId(application.getId());
         applicationDTO.setName(application.getName());
         applicationDTO.setOwner(application.getOwner());
@@ -3175,7 +3174,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public String addComment(APIIdentifier identifier, Comment comment, String user) throws APIManagementException {
+    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
         return apiMgtDAO.addComment(identifier, comment, user);
     }
 
@@ -3186,8 +3185,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Comment getComment(APIIdentifier identifier, String commentId) throws APIManagementException {
+    public Comment getComment(Identifier identifier, String commentId) throws APIManagementException {
         return apiMgtDAO.getComment(identifier, commentId);
+    }
+
+    @Override
+    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(ApiTypeWrapper apiTypeWrapper)
+            throws APIManagementException {
+        return apiMgtDAO.getComments(apiTypeWrapper);
     }
 
     @Override

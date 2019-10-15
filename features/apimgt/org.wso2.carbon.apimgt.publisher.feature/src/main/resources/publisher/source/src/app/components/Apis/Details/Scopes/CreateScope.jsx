@@ -25,7 +25,6 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
 import Grid from '@material-ui/core/Grid';
 import ChipInput from 'material-ui-chip-input';
 import APIValidation from 'AppData/APIValidation';
@@ -36,7 +35,6 @@ import Chip from '@material-ui/core/Chip';
 import Icon from '@material-ui/core/Icon';
 import Paper from '@material-ui/core/Paper';
 import { red } from '@material-ui/core/colors/';
-import Divider from '@material-ui/core/Divider';
 import Alert from 'AppComponents/Shared/Alert';
 import Api from 'AppData/api';
 
@@ -383,13 +381,11 @@ class CreateScope extends React.Component {
                                     />
                                 </FormControl>
                                 <FormControl margin='normal'>
-                                    <FormLabel component='legend' className={classes.FormControlLabel}>
-                                        <FormattedMessage
-                                            id='Apis.Details.Scopes.CreateScope.roles'
-                                            defaultMessage='Roles'
-                                        />
-                                    </FormLabel>
                                     <ChipInput
+                                        label='Roles'
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
                                         variant='outlined'
                                         value={validRoles.concat(invalidRoles)}
                                         alwaysShowPlaceholder={false}
@@ -433,7 +429,6 @@ class CreateScope extends React.Component {
                                         )}
                                     />
                                 </FormControl>
-                                <Divider />
                                 <div className={classes.addNewOther}>
                                     <Button
                                         variant='contained'

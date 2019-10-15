@@ -161,7 +161,7 @@ class BusinessInformation extends React.Component {
                         <Typography variant='caption'>
                             <FormattedMessage
                                 id='Apis.Details.BusinessInformation.BusinessInformation.sub.heading'
-                                defaultMessage='On this page you can modify business information'
+                                defaultMessage='Business Information of the API'
                             />
                         </Typography>
                     </Box>

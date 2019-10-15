@@ -23,7 +23,7 @@ import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
-import { FormattedMessage, injectIntl, } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Alert from '../../../Shared/Alert';
 import API from '../../../../data/api';
 
@@ -48,7 +48,7 @@ const styles = theme => ({
     commentAddWrapper: {
         display: 'flex',
         alignItems: 'top',
-    }
+    },
 });
 
 /**
@@ -71,8 +71,8 @@ class CommentAdd extends React.Component {
         this.inputChange = this.inputChange.bind(this);
         this.handleClickAddComment = this.handleClickAddComment.bind(this);
         this.handleClickCancel = this.handleClickCancel.bind(this);
-        //this.handleCategoryChange = this.handleCategoryChange.bind(this);
-        //this.filterCommentToAddReply = this.filterCommentToAddReply.bind(this);
+        // this.handleCategoryChange = this.handleCategoryChange.bind(this);
+        // this.filterCommentToAddReply = this.filterCommentToAddReply.bind(this);
     }
 
     /**
@@ -89,7 +89,7 @@ class CommentAdd extends React.Component {
      * @memberof CommentAdd
      */
     handleClickCancel() {
-        this.setState({content:""})
+        this.setState({ content: '' });
         // const { toggleShowReply } = this.props;
         // toggleShowReply();
     }
@@ -121,7 +121,7 @@ class CommentAdd extends React.Component {
         if (comment.content.replace(/\s/g, '').length) {
             Api.addComment(apiId, comment)
                 .then((newComment) => {
-                    this.setState({ content: ''});
+                    this.setState({ content: '' });
                     const addedComment = newComment.body;
                     // if (parentCommentId === null) {
                     //     allComments.push(addedComment);
@@ -130,7 +130,7 @@ class CommentAdd extends React.Component {
                     //     allComments[index].replies.push(addedComment);
                     //     toggleShowReply();
                     // }
-                    allComments.push(addedComment)
+                    allComments.push(addedComment);
                     commentsUpdate(allComments);
                 })
                 .catch((error) => {
@@ -138,21 +138,17 @@ class CommentAdd extends React.Component {
                     if (error.response && error.response.body && error.response.body.message) {
                         Alert.error(error.response.body.message);
                     } else {
-                        Alert.error(
-                            intl.formatMessage({
-                                defaultMessage: 'Something went wrong while adding the comment',
-                                id: 'Apis.Details.Comments.CommentAdd.something.went.wrong',
-                            }),
-                        );
+                        Alert.error(intl.formatMessage({
+                            defaultMessage: 'Something went wrong while adding the comment',
+                            id: 'Apis.Details.Comments.CommentAdd.something.went.wrong',
+                        }));
                     }
                 });
         } else {
-            Alert.error(
-                intl.formatMessage({
-                    defaultMessage: 'You cannot enter a blank comment',
-                    id: 'Apis.Details.Comments.CommentAdd.error.blank.comment',
-                }),
-            );
+            Alert.error(intl.formatMessage({
+                defaultMessage: 'You cannot enter a blank comment',
+                id: 'Apis.Details.Comments.CommentAdd.error.blank.comment',
+            }));
         }
         this.setState({ currentLength: 0 });
     }
@@ -184,7 +180,7 @@ class CommentAdd extends React.Component {
                             inputProps={{ maxLength: theme.custom.maxCommentLength }}
                             value={content}
                             onChange={this.inputChange}
-                            variant="outlined"
+                            variant='outlined'
                         />
                         <Typography className={classes.content} align='left'>
                             {currentLength + '/' + theme.custom.maxCommentLength}
@@ -192,7 +188,12 @@ class CommentAdd extends React.Component {
                     </div>
                     <Grid container spacing={1}>
                         <Grid item>
-                            <Button variant='contained' color='primary' disabled={currentLength === 0} onClick={() => this.handleClickAddComment()}>
+                            <Button
+                                variant='contained'
+                                color='primary'
+                                disabled={currentLength === 0}
+                                onClick={() => this.handleClickAddComment()}
+                            >
                                 <FormattedMessage
                                     id='Apis.Details.Comments.CommentAdd.btn.add.comment'
                                     defaultMessage='Add Comment'

@@ -24,7 +24,7 @@ var saveSubscriptionPolicy = function (action, policyName, description, defaultQ
             error: false
         };
     } catch (ex) {
-        log.error(ex);
+        log.error(ex.message);
         return {
             error: true,
             message:  ex.message.split(":")[1]

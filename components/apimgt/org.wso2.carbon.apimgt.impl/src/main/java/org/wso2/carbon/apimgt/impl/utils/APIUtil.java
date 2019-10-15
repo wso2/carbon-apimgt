@@ -9270,7 +9270,7 @@ public final class APIUtil {
         String alias = config.getFirstProperty(APIConstants.API_STORE_API_KEY_ALIAS);
         if (alias == null) {
             log.warn("The configurations related to Api Key alias in APIStore " +
-                    "are missing in api-manager.xml.");
+                    "are missing in api-manager.xml. Hence returning the default value.");
             return APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
         }
         return alias;

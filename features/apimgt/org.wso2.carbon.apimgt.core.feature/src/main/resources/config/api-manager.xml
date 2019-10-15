@@ -341,6 +341,9 @@
              Default is "true". If user wants to disable, he must set this param as "false" -->
         <DisplayRatings>true</DisplayRatings>
 
+        <!-- This parameter specifies the  alias value of the Api Key which will be used for Api Key Authentication  -->
+        <ApiKeyAlias>gateway_certificate_alias</ApiKeyAlias>
+
         <!--set isStoreForumEnabled to false for disable forum in store-->
         <!--isStoreForumEnabled>false</isStoreForumEnabled-->
 
