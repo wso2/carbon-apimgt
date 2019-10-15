@@ -83,10 +83,11 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return matched subscriptions as a list of SubscriptionDTOs
      */
     @Override
-    public Response subscriptionsGet(String apiId, String applicationId, String apiType, String groupId, Integer offset,
-                                     Integer limit, String ifNoneMatch, MessageContext messageContext) {
+    public Response subscriptionsGet(String apiId, String applicationId, String apiType, String groupId,
+                                     String xWSO2Tenant, Integer offset, Integer limit, String ifNoneMatch,
+                                     MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         Subscriber subscriber = new Subscriber(username);
         Set<SubscribedAPI> subscriptions;
         List<SubscribedAPI> subscribedAPIList = new ArrayList<>();
@@ -171,9 +172,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return newly added subscription as a SubscriptionDTO if successful
      */
     @Override
-    public Response subscriptionsPost(SubscriptionDTO body, MessageContext messageContext) {
+    public Response subscriptionsPost(SubscriptionDTO body, String xWSO2Tenant, MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIConsumer apiConsumer;
         Identifier identifier;
         try {
@@ -275,9 +276,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return list of newly added subscription as a SubscriptionDTO if successful
      */
     @Override
-    public Response subscriptionsMultiplePost(List<SubscriptionDTO> body, MessageContext messageContext) {
+    public Response subscriptionsMultiplePost(List<SubscriptionDTO> body, String xWSO2Tenant,
+                                              MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         List<SubscriptionDTO> subscriptions = new ArrayList<>();
         for (SubscriptionDTO subscriptionDTO : body) {
             try {

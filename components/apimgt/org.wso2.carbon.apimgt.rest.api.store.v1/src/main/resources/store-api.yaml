@@ -2299,6 +2299,7 @@ paths:
         - $ref: '#/parameters/applicationId-Q'
         - $ref: '#/parameters/apiType-Q'
         - $ref: '#/parameters/groupId'
+        - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/If-None-Match'
@@ -2349,6 +2350,7 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Subscription'
+        - $ref: '#/parameters/requestedTenant'
       tags:
         - Subscriptions
       responses:
@@ -2419,6 +2421,7 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Subscription'
+        - $ref: '#/parameters/requestedTenant'
       tags:
         - Subscriptions
       responses:
