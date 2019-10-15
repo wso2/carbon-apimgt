@@ -209,7 +209,7 @@ class AuthManager {
             password,
             grant_type: 'password',
             validity_period: 3600,
-            scopes: 'apim:subscribe apim:signup apim:workflow_approve',
+            scopes: 'apim:subscribe apim:signup apim:workflow_approve apim:sub_alert_manage',
         };
         const promised_response = axios(Utils.getLoginTokenPath(environment), {
             method: 'POST',
