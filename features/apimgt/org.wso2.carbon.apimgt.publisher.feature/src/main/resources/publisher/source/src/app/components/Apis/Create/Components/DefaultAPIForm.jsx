@@ -74,7 +74,8 @@ export default function DefaultAPIForm(props) {
 
     // Check the provided API validity on mount, TODO: Better to use Joi schema here ~tmkb
     useEffect(() => {
-        onValidate(Boolean(api.name) && Boolean(api.version) && Boolean(api.context));
+        onValidate(Boolean(api.name) && (isAPIProduct || Boolean(api.version)) && Boolean(api.context)
+         && Boolean(api.policies));
     }, []);
 
     const updateValidity = (newState) => {
@@ -89,7 +90,8 @@ export default function DefaultAPIForm(props) {
         // API Name , Version & Context is a must that's why `&&` chain
         // if isAPIProduct gets true version validation has been skipped
         isFormValid =
-            isFormValid && Boolean(api.name) && (isAPIProduct || Boolean(api.version)) && Boolean(api.context);
+            isFormValid && Boolean(api.name) && (isAPIProduct || Boolean(api.version)) && Boolean(api.context)
+            && (!isAPIProduct || (Boolean(api.policies) && api.policies.length > 0));
         onValidate(isFormValid, validity);
         setValidity(newState);
     };
@@ -162,6 +164,11 @@ export default function DefaultAPIForm(props) {
                 }
                 break;
             }
+            case 'policies': {
+                const policyValidity = value && value.length > 0;
+                updateValidity({ ...validity, version: policyValidity });
+                break;
+            }
             default: {
                 break;
             }
@@ -208,7 +215,7 @@ export default function DefaultAPIForm(props) {
                                     label={
                                         <React.Fragment>
                                             <FormattedMessage
-                                                id='Apis.Create.WSDL.Steps.DefaultAPIForm.context'
+                                                id='Apis.Create.WSDL.Steps.DefaultAPIForm.api.context'
                                                 defaultMessage='Context'
                                             />
                                             <sup className={classes.mandatoryStar}>*</sup>
@@ -269,7 +276,7 @@ export default function DefaultAPIForm(props) {
                                     label={
                                         <React.Fragment>
                                             <FormattedMessage
-                                                id='Apis.Create.WSDL.Steps.DefaultAPIForm.context'
+                                                id='Apis.Create.WSDL.Steps.DefaultAPIForm.api.product.context'
                                                 defaultMessage='Context'
                                             />
                                             <sup className={classes.mandatoryStar}>*</sup>
@@ -323,7 +330,12 @@ export default function DefaultAPIForm(props) {
                     />
                 )}
 
-                <SelectPolicies policies={api.policies} isAPIProduct={isAPIProduct} onChange={onChange} />
+                <SelectPolicies
+                    policies={api.policies}
+                    isAPIProduct={isAPIProduct}
+                    onChange={onChange}
+                    validate={validate}
+                />
             </form>
             <Grid container direction='row' justify='flex-end' alignItems='center'>
                 <Grid item>
