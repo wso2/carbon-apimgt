@@ -117,7 +117,7 @@ export default function DefaultAPIForm(props) {
                         if (result.body.list.length > 0) {
                             updateValidity({
                                 ...validity,
-                                name: { details: [{ message: 'API with name ' + value + ' exists' }] },
+                                name: { details: [{ message: 'Name ' + value + ' already exists' }] },
                             });
                         } else {
                             updateValidity({ ...validity, name: nameValidity });
@@ -138,7 +138,7 @@ export default function DefaultAPIForm(props) {
                         if (result.body.list.length > 0) {
                             updateValidity({
                                 ...validity,
-                                context: { details: [{ message: 'API context with version exists' }] },
+                                context: { details: [{ message: apiContext + ' context with version exists' }] },
                             });
                         } else {
                             updateValidity({ ...validity, context: contextValidity, version: null });
