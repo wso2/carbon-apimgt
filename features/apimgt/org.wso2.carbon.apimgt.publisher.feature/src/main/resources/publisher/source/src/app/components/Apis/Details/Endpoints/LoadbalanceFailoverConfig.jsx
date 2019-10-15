@@ -76,8 +76,9 @@ const styles = theme => ({
         marginTop: theme.spacing(2),
         marginBottom: theme.spacing(2),
     },
-    lpConfigWrapper: {
-        display: 'flex',
+    lbConfigBtn: {
+        position: 'relative',
+        top: '10px',
     },
     endpointName: {
         fontWeight: 600,
@@ -264,6 +265,7 @@ function LoadbalanceFailoverConfig(props) {
                                 </TextField>
                                 <div className={classes.lpConfigWrapper}>
                                     <IconButton
+                                        className={classes.lbConfigBtn}
                                         disabled={epConfig.endpoint_type !== 'load_balance'}
                                         aria-label='Delete'
                                         onClick={() => setLBConfigOpen(true)}
