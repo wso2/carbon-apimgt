@@ -4531,8 +4531,8 @@ public final class APIUtil {
         return uriTemplate;
     }
 
-    public static float getAverageRating(APIIdentifier apiId) throws APIManagementException {
-        return ApiMgtDAO.getInstance().getAverageRating(apiId);
+    public static float getAverageRating(Identifier id) throws APIManagementException {
+        return ApiMgtDAO.getInstance().getAverageRating(id);
     }
 
     public static float getAverageRating(int apiId) throws APIManagementException {
@@ -8899,6 +8899,7 @@ public final class APIUtil {
             APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, productName,
                     productVersion);
             apiProduct = new APIProduct(apiProductIdentifier);
+            apiProduct.setRating(Float.toString(getAverageRating(apiProductIdentifier)));
             ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
 
             setResourceProperties(apiProduct, registry, artifactPath);
