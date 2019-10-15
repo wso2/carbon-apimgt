@@ -104,9 +104,14 @@ export default function DefaultAPIForm(props) {
             case 'name': {
                 const nameValidity = APIValidation.apiName.required().validate(value).error;
                 if (nameValidity === null) {
-                    APIValidation.apiParameter.validate(field + ':' + value).then((isValid) => {
-                        if (isValid) {
-                            updateValidity({ ...validity, name: { message: 'API with name ' + value + ' exists' } });
+                    APIValidation.apiParameter.validate(field + ':' + value).then((result) => {
+                        if (result.body.list.length > 0) {
+                            updateValidity({
+                                ...validity,
+                                name: {
+                                    message: value + ' name already exists',
+                                },
+                            });
                         } else {
                             updateValidity({ ...validity, name: nameValidity });
                         }
@@ -119,12 +124,14 @@ export default function DefaultAPIForm(props) {
             case 'context': {
                 const contextValidity = APIValidation.apiContext.required().validate(value).error;
                 if (contextValidity === null) {
-                    const apiContext = value.includes('/')
-                        ? value + '/' + api.version
-                        : '/' + value + '/' + api.version;
-                    APIValidation.apiParameter.validate(field + ':' + apiContext).then((isValid) => {
-                        if (isValid) {
-                            updateValidity({ ...validity, context: { message: 'API context with version exists' } });
+                    const apiContext = value.includes('/') ? value + '/' + (isAPIProduct ? '1.0.0' : api.version)
+                        : '/' + value + '/' + (isAPIProduct ? '1.0.0' : api.version);
+                    APIValidation.apiParameter.validate(field + ':' + apiContext).then((result) => {
+                        if (result.body.list.length > 0) {
+                            updateValidity({
+                                ...validity,
+                                context: { message: apiContext + ' context with version already exists' },
+                            });
                         } else {
                             updateValidity({ ...validity, context: contextValidity, version: null });
                         }
@@ -140,9 +147,12 @@ export default function DefaultAPIForm(props) {
                     const apiVersion = api.context.includes('/')
                         ? api.context + '/' + value
                         : '/' + api.context + '/' + value;
-                    APIValidation.apiParameter.validate(field + ':' + apiVersion).then((isValid) => {
-                        if (isValid) {
-                            updateValidity({ ...validity, version: { message: 'API context with version exists' } });
+                    APIValidation.apiParameter.validate('context:' + apiVersion).then((result) => {
+                        if (result.body.list.length > 0) {
+                            updateValidity({
+                                ...validity,
+                                version: { message: apiVersion + ' context with version already exists' },
+                            });
                         } else {
                             updateValidity({ ...validity, version: versionValidity, context: null });
                         }
