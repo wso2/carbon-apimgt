@@ -582,7 +582,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             APIProduct apiProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
             ResourceFile apiImage = new ResourceFile(fileInputStream, fileContentType);
             String thumbPath = APIUtil.getProductIconPath(apiProduct.getId());
-            String thumbnailUrl = apiProvider.addProductResourceFile(thumbPath, apiImage);
+            String thumbnailUrl = apiProvider.addProductResourceFile(apiProduct.getId(), thumbPath, apiImage);
             apiProduct.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, apiProduct.getId().getProviderName()));
             APIUtil.setResourcePermissions(apiProduct.getId().getProviderName(), null, null, thumbPath);
 

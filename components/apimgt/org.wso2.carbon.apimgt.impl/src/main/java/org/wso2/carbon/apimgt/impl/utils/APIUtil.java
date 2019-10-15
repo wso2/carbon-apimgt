@@ -3101,6 +3101,30 @@ public final class APIUtil {
     }
 
     /**
+     * Check whether user is exist
+     *
+     * @param username A username
+     * @throws APIManagementException If an error occurs
+     */
+    public static boolean isUserExist(String username) throws APIManagementException {
+        if (username == null) {
+            throw new APIManagementException("Attempt to execute privileged operation as" + " the anonymous user");
+        }
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
+        try {
+            int tenantId =
+                    ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+            UserStoreManager manager =
+                    ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
+                            .getUserStoreManager();
+            return manager.isExistingUser(tenantAwareUserName);
+        } catch (UserStoreException e) {
+            throw new APIManagementException("UserStoreException while trying the user existence " + username, e);
+        }
+    }
+
+    /**
      * To add the value to a cache.
      *
      * @param cacheName - Name of the Cache

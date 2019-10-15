@@ -493,7 +493,7 @@ public final class APIImportUtil {
         try (FileInputStream inputStream = new FileInputStream(imageFile.getAbsolutePath())) {
             ResourceFile apiImage = new ResourceFile(inputStream, mimeType);
             String thumbPath = APIUtil.getIconPath(apiIdentifier);
-            String thumbnailUrl = apiProvider.addResourceFile(thumbPath, apiImage);
+            String thumbnailUrl = apiProvider.addResourceFile(importedApi.getId(), thumbPath, apiImage);
             importedApi.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl,
                     apiIdentifier.getProviderName()));
             APIUtil.setResourcePermissions(apiIdentifier.getProviderName(), null, null, thumbPath);
@@ -577,7 +577,7 @@ public final class APIImportUtil {
                         String filePathDoc = APIUtil.getDocumentationFilePath(apiIdentifier, filePath);
                         APIUtil.setResourcePermissions(importedApi.getId().getProviderName(),
                                 importedApi.getVisibility(), visibleRoles, filePathDoc);
-                        doc.setFilePath(apiProvider.addResourceFile(filePathDoc, apiDocument));
+                        doc.setFilePath(apiProvider.addResourceFile(importedApi.getId(), filePathDoc, apiDocument));
                     }
                 }
 
