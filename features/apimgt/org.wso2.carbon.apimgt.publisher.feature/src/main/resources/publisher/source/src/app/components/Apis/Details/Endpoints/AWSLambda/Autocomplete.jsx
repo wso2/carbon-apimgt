@@ -154,7 +154,6 @@ export default function IntegrationDownshift(props) {
                     if (changes !== null) {
                         setIsEmptyArn(false);
                         setArn(changes);
-
                     }
                 }}
             >
@@ -182,7 +181,7 @@ export default function IntegrationDownshift(props) {
                                 setIsEmptyArn(false);
                             }
                         },
-                        onBlur: (event) => {
+                        onBlur: () => {
                             clearSelection();
                         },
                         value: arn,

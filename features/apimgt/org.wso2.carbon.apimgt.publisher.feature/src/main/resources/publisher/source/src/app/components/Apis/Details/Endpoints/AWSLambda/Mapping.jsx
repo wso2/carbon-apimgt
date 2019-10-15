@@ -80,8 +80,9 @@ export default function Mapping(props) {
                 <TextField
                     error={isEmptyName || isExistingName}
                     helperText={
+                        // eslint-disable-next-line no-nested-ternary
                         isEmptyName ? 'Resource name should not be empty' :
-                        isExistingName ? 'Resource name already exists' : ''
+                            isExistingName ? 'Resource name already exists' : ''
                     }
                     required
                     id='outlined-required'

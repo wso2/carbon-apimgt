@@ -335,13 +335,13 @@ function EndpointOverview(props) {
             });
         } else if (selectedKey === 'awslambda') {
             const generatedEndpointConfig = createEndpointConfig(selectedKey);
-//             endpointsDispatcher({
-//                 action: 'select_endpoint_type',
-//                 value: {
-//                     endpointImplementationType: 'ENDPOINT',
-//                     endpointConfig: { ...generatedEndpointConfig },
-//                 },
-//             });
+            endpointsDispatcher({
+                action: 'select_endpoint_type',
+                value: {
+                    endpointImplementationType: 'ENDPOINT',
+                    endpointConfig: { ...generatedEndpointConfig },
+                },
+            });
         } else {
             const generatedEndpointConfig = createEndpointConfig(selectedKey);
             endpointsDispatcher({

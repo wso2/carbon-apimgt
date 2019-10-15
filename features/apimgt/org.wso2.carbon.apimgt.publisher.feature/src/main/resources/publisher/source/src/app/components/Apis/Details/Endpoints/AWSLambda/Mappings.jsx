@@ -6,10 +6,8 @@ import {
     TableCell,
     TableHead,
     TableRow,
-    Typography,
     Button,
     makeStyles,
-    Paper,
 } from '@material-ui/core';
 import Mapping from './Mapping.jsx';
 import API from '../../../../../data/api'; // TODO: Use webpack aliases instead of relative paths ~tmkb
@@ -32,18 +30,18 @@ const useStyles = makeStyles(theme => ({
     mappingsWrapper: {
         padding: theme.spacing(),
     },
-    mappingResource : {
+    mappingResource: {
         maxWidth: '300px',
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
     },
-    mappingARN : {
+    mappingARN: {
         maxWidth: '800px',
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
-    }
+    },
 }));
 
 /**
