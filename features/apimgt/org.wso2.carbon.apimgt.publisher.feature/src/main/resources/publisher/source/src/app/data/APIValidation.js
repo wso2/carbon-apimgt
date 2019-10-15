@@ -18,6 +18,7 @@
 
 import Joi from '@hapi/joi';
 import API from 'AppData/api';
+import queryString from 'query-string';
 
 /**
  * Get the base error message for error types.
@@ -92,8 +93,12 @@ const apiSchema = Joi.extend(joi => ({
         {
             name: 'isAPIParameterExist',
             validate(params, value, state, options) { // eslint-disable-line no-unused-vars
-                const api = new API();
-                return api.validateAPIParameter(value);
+                const inputValue = value.trim().toLowerCase();
+                const composeQuery = '?query=' + inputValue;
+                const composeQueryJSON = queryString.parse(composeQuery);
+                composeQueryJSON.limit = 1;
+                composeQueryJSON.offset = 0;
+                return API.search(composeQueryJSON);
             },
         },
     ],
