@@ -47,9 +47,6 @@ import AdvanceEndpointConfig from './AdvancedConfig/AdvanceEndpointConfig';
 
 
 const styles = theme => ({
-    overviewWrapper: {
-        marginTop: theme.spacing(2),
-    },
     listing: {
         margin: theme.spacing(),
         padding: theme.spacing(),
@@ -57,7 +54,6 @@ const styles = theme => ({
     endpointContainer: {
         paddingLeft: theme.spacing(2),
         padding: theme.spacing(),
-        marginTop: theme.spacing(),
     },
     endpointName: {
         paddingLeft: theme.spacing(),
@@ -347,12 +343,9 @@ function EndpointOverview(props) {
      * Handles the endpoint security toggle action.
      * */
     const handleToggleEndpointSecurity = () => {
-        setEndpointSecurityInfo(() => {
-            if (endpointSecurityInfo === null) {
-                return { type: 'BASIC', username: '', password: '' };
-            }
-            return null;
-        });
+        const tmpSecurityInfo = endpointSecurityInfo === null ? { type: 'BASIC', username: '', password: '' } : null;
+        setEndpointSecurityInfo(tmpSecurityInfo);
+        endpointsDispatcher({ action: 'endpointSecurity', value: tmpSecurityInfo });
     };
 
     /**
