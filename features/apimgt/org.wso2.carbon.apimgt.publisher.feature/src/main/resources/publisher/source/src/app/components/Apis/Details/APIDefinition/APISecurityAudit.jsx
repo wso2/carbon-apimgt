@@ -214,16 +214,18 @@ class APISecurityAudit extends Component {
                     const rowObject = [];
                     if (issues[item].issues[i].specificDescription) {
                         rowObject.push(
-                            issues[item].criticality, issues[item].issues[i].specificDescription,
-                            issues[item].issues[i].score, issues[item].issues[i].pointer,
+                            this.criticalityObject[issues[item].criticality],
+                            issues[item].issues[i].specificDescription,
+                            this.roundScore(issues[item].issues[i].score), issues[item].issues[i].pointer,
                             issues[item].issues[i].tooManyImpacted,
-                            issues[item].issues[i].pointersImpacted, category, issues[item].tooManyError,
+                            issues[item].issues[i].pointersAffected, category, issues[item].tooManyError,
                         );
                     } else {
                         rowObject.push(
-                            issues[item].criticality, issues[item].description, issues[item].issues[i].score,
+                            this.criticalityObject[issues[item].criticality],
+                            issues[item].description, this.roundScore(issues[item].issues[i].score),
                             issues[item].issues[i].pointer, issues[item].issues[i].tooManyImpacted,
-                            issues[item].issues[i].pointersImpacted, category, issues[item].tooManyError,
+                            issues[item].issues[i].pointersAffected, category, issues[item].tooManyError,
                         );
                     }
                     dataObject.push(rowObject);
@@ -231,6 +233,8 @@ class APISecurityAudit extends Component {
             }
         }
         return dataObject;
+
+        // TODO - This code block has to be removed after completing the revamp of the API Security Audit UI.
         // const dataObject = issues.map((issue) => {
         //     // const lengthOfIssue = issue.length;
         //     const rowObject = [];
@@ -277,11 +281,22 @@ class APISecurityAudit extends Component {
      */
     editorDidMount = (editor, monaco, searchTerm) => {
         const { classes } = this.props;
-        if (searchTerm !== 'none') {
+        if (searchTerm !== '') {
+            // let indexCount;
+            const lastTerms = [];
             const termObject = searchTerm.split('/');
-            const lastTerms = termObject.map((term) => {
-                return editor.getModel().findNextMatch(term, 1, false, false, null, false);
-            });
+            // const lastTerms = termObject.map((term, index) => {
+            //     indexCount++;
+            //     return editor.getModel()
+            //     .findNextMatch(term, index === 0 ? lastTerms[indexCount - 1] : 1, false, false, null, false);
+            // });
+            for (let i = 0; i < termObject.length; i++) {
+                if (i === 0) {
+                    lastTerms.push(editor.getModel().findNextMatch(termObject[i], 1, false, false, null, false));
+                } else {
+                    lastTerms.push(editor.getModel().findNextMatch(termObject[i], 100, false, false, null, false));
+                }
+            }
             const finalMatchIndex = lastTerms.length - 1;
             if (lastTerms[finalMatchIndex] != null) {
                 editor.revealLineInCenter(lastTerms[finalMatchIndex].range.startLineNumber);
@@ -311,7 +326,7 @@ class APISecurityAudit extends Component {
      * @returns {*} roundScore Rounded off score
      */
     roundScore(score) {
-        return Math.round(((score * 100) / 100));
+        return Math.round(score * 100) / 100;
     }
 
     /**
@@ -329,46 +344,6 @@ class APISecurityAudit extends Component {
             return <Progress />;
         }
 
-        // const columns = [
-        //     {
-        //         name: 'Severity',
-        //         options: {
-        //             filter: true,
-        //             sort: true,
-        //         },
-        //     },
-        //     {
-        //         name: 'Description',
-        //         options: {
-        //             filter: true,
-        //             sort: true,
-        //         },
-        //     },
-        //     {
-        //         name: 'Score Impact',
-        //         options: {
-        //             filter: true,
-        //             sort: true,
-        //         },
-        //     },
-        //     {
-        //         name: 'Pointer',
-        //         options: {
-        //             display: 'excluded',
-        //             filter: false,
-        //             sort: false,
-        //         },
-        //     },
-        //     {
-        //         name: 'Issue Category',
-        //         options: {
-        //             display: 'excluded',
-        //             filter: false,
-        //             sort: false,
-        //         },
-        //     },
-        // ];
-
         const columns = [
             {
                 name: 'Severity',
@@ -385,7 +360,7 @@ class APISecurityAudit extends Component {
                 },
             },
             {
-                name: 'Score',
+                name: 'Score Impact',
                 options: {
                     filter: true,
                     sort: true,
@@ -448,8 +423,12 @@ class APISecurityAudit extends Component {
             expandableRows: true,
             expandableRowsOnClick: true,
         renderExpandableRow: (rowData) => {
-        const searchTerm = 'none'; // TODO - Remove the search term property from the code
-        // const path = rowData[3] + '';
+        let searchTerm = null;
+        const indexNumber = rowData[3];
+        const path = reportObject.index[indexNumber];
+        searchTerm = path;
+
+        // TODO - Remove the following code block after completing the pointer feature
         // if (path.includes('get') ||
         //     path.includes('put') ||
         //     path.includes('post') ||
@@ -482,7 +461,7 @@ class APISecurityAudit extends Component {
                                     link: (
                                         <strong>
                                             <a
-                                                href={this.getMoreDetailUrl(rowData[4])}
+                                                href={this.getMoreDetailUrl(rowData[6])}
                                                 target='_blank'
                                                 rel='noopener noreferrer'
                                             >link
@@ -541,7 +520,6 @@ class APISecurityAudit extends Component {
                                                                         ),
                                                                     }}
                                                                 />
-
                                                             </Typography>
                                                             <Typography
                                                                 variant='body1'
@@ -564,7 +542,7 @@ class APISecurityAudit extends Component {
                                                     defaultMessage='{overallScoreText} {overallScore} / 100'
                                                     values={{
                                                         overallScoreText: <strong>Overall Score:</strong>,
-                                                        overallScore: (Math.round(overallScore)),
+                                                        overallScore: this.roundScore(overallScore),
                                                     }}
                                                 />
                                             </Typography>
@@ -585,9 +563,11 @@ class APISecurityAudit extends Component {
                                                         defaultMessage='{overallCriticalityText} {overallCriticality}'
                                                         values={{
                                                             overallCriticalityText: (
-                                                                <strong>Overall Criticality:</strong>
+                                                                <strong>Overall Severity:</strong>
                                                             ),
-                                                            overallCriticality: reportObject.criticality,
+                                                            overallCriticality: (
+                                                                this.criticalityObject[reportObject.criticality]
+                                                            ),
                                                         }}
                                                     />
                                                     <Tooltip
@@ -600,8 +580,10 @@ class APISecurityAudit extends Component {
                                                                 <FormattedMessage
                                                                     id='Apis.Details.APIDefinition.AuditApi.tooltip'
                                                                     defaultMessage={
-                                                                        'Criticality ranges from 1 to 5, with 1 being' +
-                                                                    ' low vulnerability and 5 being high vulnerability'
+                                                                        'Severity ranges from INFO, LOW, MEDIUM, ' +
+                                                                        'HIGH to CRITICAL, with INFO being ' +
+                                                                        'low vulnerability and CRITICAL' +
+                                                                        'being high vulnerability'
                                                                     }
                                                                 />
                                                             </React.Fragment>
@@ -748,15 +730,72 @@ class APISecurityAudit extends Component {
                                                 id='Apis.Details.APIDefinition.AuditApi.SecurityScore'
                                                 defaultMessage='{securityScoreText} {securityScore}  / 30'
                                                 values={{
-                                                    dataScoreText: (
+                                                    securityScoreText: (
                                                         <strong>Score:</strong>
                                                     ),
-                                                    dataScore: (
-                                                        (Math.round(reportObject.data.score * 100) / 100)
+                                                    securityScore: (
+                                                        (Math.round(reportObject.security.score * 100) / 100)
                                                     ),
                                                 }}
                                             />
                                         </Typography>
+                                        <React.Fragment>
+                                            <Typography variant='body1'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.APIDefinition.AuditApi.securityCriticality'
+                                                    defaultMessage='{securityCriticalityText} {securityCriticality}'
+                                                    values={{
+                                                        securityCriticalityText: (
+                                                            <strong>Severity:</strong>
+                                                        ),
+                                                        securityCriticality: (
+                                                            this.criticalityObject[reportObject.security.criticality]
+                                                        ),
+                                                    }}
+                                                />
+                                                <Tooltip
+                                                    placement='right'
+                                                    classes={{
+                                                        tooltip: classes.htmlTooltip,
+                                                    }}
+                                                    title={
+                                                        <React.Fragment>
+                                                            <FormattedMessage
+                                                                id='Apis.Details.APIDefinition.AuditApi.tooltip'
+                                                                defaultMessage={
+                                                                    'Severity ranges from INFO, LOW, MEDIUM, HIGH ' +
+                                                                    'to CRITICAL, with INFO being ' +
+                                                                    'low vulnerability and CRITICAL' +
+                                                                    'being high vulnerability'
+                                                                }
+                                                            />
+                                                        </React.Fragment>
+                                                    }
+                                                >
+                                                    <Button className={classes.helpButton}>
+                                                        <HelpOutline className={classes.helpIcon} />
+                                                    </Button>
+                                                </Tooltip>
+                                            </Typography>
+                                        </React.Fragment>
+                                        {(reportObject.data.issueCounter !== 0) &&
+                                            <div>
+                                                <hr />
+                                                <Typography variant='body1'>
+                                                    <MuiThemeProvider theme={this.getMuiTheme()}>
+                                                        <MUIDataTable
+                                                            title='Issues'
+                                                            data={this.getRowData(
+                                                                reportObject.security.issues,
+                                                                'Security',
+                                                            )}
+                                                            columns={columns}
+                                                            options={options}
+                                                        />
+                                                    </MuiThemeProvider>
+                                                </Typography>
+                                            </div>
+                                        }
                                     </div>
                                 </Paper>
                             </div>
@@ -804,9 +843,11 @@ class APISecurityAudit extends Component {
                                                     defaultMessage='{dataCriticalityText} {dataCriticality}'
                                                     values={{
                                                         dataCriticalityText: (
-                                                            <strong>Criticality:</strong>
+                                                            <strong>Severity:</strong>
                                                         ),
-                                                        dataCriticality: reportObject.data.criticality,
+                                                        dataCriticality: (
+                                                            this.criticalityObject[reportObject.data.criticality]
+                                                        ),
                                                     }}
                                                 />
                                                 <Tooltip
@@ -819,9 +860,10 @@ class APISecurityAudit extends Component {
                                                             <FormattedMessage
                                                                 id='Apis.Details.APIDefinition.AuditApi.tooltip'
                                                                 defaultMessage={
-                                                                    'Criticality ranges from 1 to 5, with 1 being' +
-                                                                            ' low vulnerability and 5' +
-                                                                            'being high vulnerability'
+                                                                    'Severity ranges from INFO, LOW, MEDIUM, ' +
+                                                                    'HIGH to CRITICAL, with INFO being ' +
+                                                                    'low vulnerability and CRITICAL' +
+                                                                    'being high vulnerability'
                                                                 }
                                                             />
                                                         </React.Fragment>
