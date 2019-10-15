@@ -23,7 +23,6 @@ import java.security.MessageDigest;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -202,17 +201,9 @@ public class TokenGenTest {
 
 
     }
-    @Ignore
+
     @Test
     public void testJWTx5tEncoding() throws Exception {
-        //Preparing mocks
-        AbstractJWTGenerator jwtGenerator = new JWTGenerator();
-        PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.mockStatic(KeyStoreManager.class);
-        PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
-        PowerMockito.when(APIUtil.generateHeader(Mockito.any(),Mockito.any())).thenCallRealMethod();
-        KeyStoreManager keyStoreManager = Mockito.mock(KeyStoreManager.class);
-        PowerMockito.when(keyStoreManager.getInstance(Mockito.anyInt())).thenReturn(keyStoreManager);
         //Read public certificat
         InputStream inputStream = new FileInputStream("src/test/resources/wso2carbon.jks");
         KeyStore keystore = KeyStore.getInstance("JKS");
@@ -220,9 +211,8 @@ public class TokenGenTest {
         keystore.load(inputStream, pwd);
         Certificate cert = keystore.getCertificate("wso2carbon");
 
-        Mockito.when(keyStoreManager.getDefaultPrimaryCertificate()).thenReturn((X509Certificate) cert);
         //Generate JWT header using the above certificate
-        String header = jwtGenerator.addCertToHeader("admin@carbon.super");
+        String header = APIUtil.generateHeader(cert, "SHA256withRSA");
 
         //Get the public certificate's thumbprint and base64url encode it
         byte[] der = cert.getEncoded();
@@ -235,7 +225,6 @@ public class TokenGenTest {
         //Check if the encoded thumbprint get matched with JWT header's x5t
         Assert.assertTrue(header.contains(encodedThumbprint));
     }
-
 
     /**
      * Helper method to hexify a byte array.

@@ -27,12 +27,12 @@ import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import { Link } from 'react-router-dom';
 import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
-import Dialog from '@material-ui/core/Dialog';
 import ExpansionPanelActions from '@material-ui/core/ExpansionPanelActions';
 import Button from '@material-ui/core/Button';
 import Alert from 'AppComponents/Shared/Alert';
 import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
+import AuthManager from 'AppData/AuthManager';
 import View from 'AppComponents/Apis/Details/Documents/View';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import { ApiContext } from './ApiContext';
@@ -140,7 +140,6 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.paper),
         border: 'solid 1px #fff',
         padding: theme.spacing(2),
-        marginTop: 50,
     },
     paper: {
         margin: theme.spacing(2),
@@ -179,6 +178,7 @@ function Overview(props) {
     const { classes, theme } = props;
     const { api, applicationsAvailable, subscribedApplications } = useContext(ApiContext);
     const [totalComments, setCount] = useState(0);
+    const [totalDocuments, setDocsCount] = useState(0);
     const [overviewDocOverride, setOverviewDocOverride] = useState(null);
     useEffect(() => {
         const restApi = new API();
@@ -201,14 +201,14 @@ function Overview(props) {
                 }
             });
     }, []);
-    const getResourcesForAPIs = (apiType, api) => {
+    const getResourcesForAPIs = (apiType, apiObject) => {
         switch (apiType) {
             case 'GRAPHQL':
-                return <Operations api={api} />;
+                return <Operations api={apiObject} />;
             case 'WS':
                 return '';
             default:
-                return <Resources api={api} />;
+                return <Resources api={apiObject} />;
         }
     };
 
@@ -231,6 +231,7 @@ function Overview(props) {
     }
     const titleIconColor = theme.custom.overview.titleIconColor;
     const titleIconSize = theme.custom.overview.titleIconSize;
+    const user = AuthManager.getUser();
     return (
         <Grid container className={classes.root} spacing={2}>
             {!api.advertiseInfo.advertised && (
@@ -258,14 +259,31 @@ function Overview(props) {
                                 }}
                             >
                                 <Grid item xs={12}>
-                                    <div className={classes.emptyBox}>
-                                        <Typography variant='body2'>
+                                    <Typography variant='subtitle2'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.subscribe.to.application'
+                                            defaultMessage='Generate Credentials'
+                                        />
+                                    </Typography>
+                                    <Typography variant='body2'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.credential.wizard.info.body'
+                                            defaultMessage={
+                                                'Use the Key Generation Wizard. '
+                                                + 'Create a new application -> '
+                                                + 'Subscribe -> Generate keys and '
+                                                + 'Access Token to invoke this API.'
+                                            }
+                                        />
+                                    </Typography>
+                                    <Link to={`/apis/${api.id}/credentials/wizard`}>
+                                        <Button variant='contained' color='primary' size='large'>
                                             <FormattedMessage
                                                 id='Apis.Details.Overview.no.subscription.message'
                                                 defaultMessage='No Subscriptions Allowed'
                                             />
-                                        </Typography>
-                                    </div>
+                                        </Button>
+                                    </Link>
                                 </Grid>
                             </ExpansionPanelDetails>
                         ) : (
@@ -282,23 +300,26 @@ function Overview(props) {
                                             <FormattedMessage
                                                 id='Apis.Details.Overview.credential.wizard.info'
                                                 defaultMessage={
-                                                    'Use the Key Generation Wizard. Create a new application -> Subscribe -> ' +
+                                                    'Use the Key Generation Wizard. Create a new application '
+                                                    + '-> Subscribe -> ' +
                                                     ' Generate keys and Access Token to invoke this API.'
                                                 }
                                             />
                                         </Typography>
-                                        <Link
-                                            to={{
-                                                pathname: '/apis/' + api.id + '/credentials/wizard',
-                                            }}
-                                        >
-                                            <Button variant='contained' color='primary' size='large'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Overview.credential.wizard.title'
-                                                    defaultMessage='Key Generation Wizard'
-                                                />
-                                            </Button>
-                                        </Link>
+                                        {user && (
+                                            <Link
+                                                to={{
+                                                    pathname: '/apis/' + api.id + '/credentials/wizard',
+                                                }}
+                                            >
+                                                <Button variant='contained' color='primary' size='large'>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Overview.credential.wizard.title'
+                                                        defaultMessage='Key Generation Wizard'
+                                                    />
+                                                </Button>
+                                            </Link>
+                                        )}
                                         {applicationsAvailable && applicationsAvailable.length > 0 && (
                                             <React.Fragment>
                                                 <Link to={'/apis/' + api.id + '/credentials'}>
@@ -426,11 +447,13 @@ function Overview(props) {
                                     ),
                                 }}
                             >
-                                {api && totalComments !== 0 && (
-                                    <Comments apiId={api.id} showLatest isOverview setCount={setCount} />
-                                )}
-                                {totalComments === 0 && (
-                                    <Grid container className={classes.root} spacing={2}>
+                                <Grid container className={classes.root} spacing={2}>
+                                    {api &&
+                                        <Grid item xs={12}>
+                                            <Comments apiId={api.id} showLatest isOverview setCount={setCount} />
+                                        </Grid>
+                                    }
+                                    {totalComments === 0 &&
                                         <Grid item xs={12}>
                                             <div className={classes.emptyBox}>
                                                 <Typography variant='body2'>
@@ -441,8 +464,8 @@ function Overview(props) {
                                                 </Typography>
                                             </div>
                                         </Grid>
-                                    </Grid>
-                                )}
+                                    }
+                                </Grid>
                             </ExpansionPanelDetails>
                             <Divider />
                             <ExpansionPanelActions className={classes.actionPanel}>
@@ -482,7 +505,10 @@ function Overview(props) {
                                             <Typography>
                                                 <FormattedMessage
                                                     id='Apis.Details.Overview.sdk.generation.description'
-                                                    defaultMessage='If you want to create a software application to consume the subscribed APIs, you can generate client side SDK for a supported language/framework and use it as a start point to write the software application.'
+                                                    defaultMessage={`If you want to create a software application
+                                                     to consume the subscribed APIs, you can generate client side
+                                                      SDK for a supported language/framework and use it as a start
+                                                       point to write the software application.`}
                                                 />
                                             </Typography>
                                         </Grid>
@@ -520,10 +546,10 @@ function Overview(props) {
                         </Typography>
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails
-                        classes={{ root: classNames({ [classes.noDocumentRoot]: totalComments === 0 }) }}
+                        classes={{ root: classNames({ [classes.noDocumentRoot]: totalDocuments === 0 }) }}
                     >
                         <Grid container className={classes.root} spacing={2}>
-                            <OverviewDocuments apiId={api.id} />
+                            <OverviewDocuments apiId={api.id} setDocsCount={setDocsCount}/>
                         </Grid>
                     </ExpansionPanelDetails>
                     <Divider />

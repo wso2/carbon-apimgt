@@ -83,7 +83,7 @@ const styles = theme => ({
     root: {
         height: 80,
         background: theme.palette.background.paper,
-        borderBottom: 'solid 1px ' + theme.palette.grey.A200,
+        borderBottom: `solid 1px ${theme.palette.grey.A200}`,
         display: 'block',
     },
     mainIconWrapper: {
@@ -156,7 +156,7 @@ class Listing extends Component {
     /**
      * @memberof Listing
      */
-    updateApps = () => {
+    updateApps= () => {
         const promisedApplications = Application.all();
         promisedApplications
             .then((applications) => {
@@ -264,9 +264,7 @@ class Listing extends Component {
         if (event) {
             id = event.currentTarget.getAttribute('data-appId');
         }
-        this.setState(({ isDeleteOpen }) => {
-            return { isDeleteOpen: !isDeleteOpen, deletingId: id };
-        });
+        this.setState(({ isDeleteOpen }) => ({ isDeleteOpen: !isDeleteOpen, deletingId: id }));
     }
 
     /**

@@ -395,7 +395,7 @@ public interface APIConsumer extends APIManager {
      * @param user Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
-    String addComment(APIIdentifier identifier, Comment comment, String user) throws APIManagementException;
+    String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
 
     /**
      * @param identifier Api identifier
@@ -407,12 +407,19 @@ public interface APIConsumer extends APIManager {
     /**
      * This method is to get a comment of an API.
      *
-     * @param identifier API Identifier
+     * @param identifier API identifier
      * @param commentId Comment ID
      * @return Comment
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment getComment(APIIdentifier identifier, String commentId) throws APIManagementException;
+    Comment getComment(Identifier identifier, String commentId) throws APIManagementException;
+
+    /**
+     * @param apiTypeWrapper Api type wrapper
+     * @return Comments
+     * @throws APIManagementException if failed to get comments for identifier
+     */
+    Comment[] getComments(ApiTypeWrapper apiTypeWrapper) throws APIManagementException;
 
     /**
      * This method is to delete a comment.

@@ -544,18 +544,18 @@ public class SQLConstants {
 
     public static final String ADD_MONETIZATION_USAGE_PUBLISH_INFO =
             " INSERT" +
-                    " INTO AM_MONETIZATION_USAGE_PUBLISHER (ID, STATE, STATUS, STARTED_TIME, PUBLISHED_TIME) " +
+                    " INTO AM_MONETIZATION_USAGE (ID, STATE, STATUS, STARTED_TIME, PUBLISHED_TIME) " +
                     " VALUES (?,?,?,?,?)";
 
     public static final String UPDATE_MONETIZATION_USAGE_PUBLISH_INFO =
-            " UPDATE AM_MONETIZATION_USAGE_PUBLISHER SET" +
+            " UPDATE AM_MONETIZATION_USAGE SET" +
                     " STATE = ?, STATUS = ?, STARTED_TIME = ?, PUBLISHED_TIME = ?" +
                     " WHERE ID = ?";
 
     public static final String GET_MONETIZATION_USAGE_PUBLISH_INFO =
             " SELECT " +
                     "ID, STATE, STATUS, STARTED_TIME, PUBLISHED_TIME " +
-                    "FROM AM_MONETIZATION_USAGE_PUBLISHER";
+                    "FROM AM_MONETIZATION_USAGE";
 
     public static final String UPDATE_SUBSCRIBER_SQL =
             " UPDATE AM_SUBSCRIBER " +
@@ -2330,6 +2330,10 @@ public class SQLConstants {
             " INSERT INTO AM_API_COMMENTS (COMMENT_ID,COMMENT_TEXT,COMMENTED_USER,DATE_COMMENTED,API_ID)" +
             " VALUES (?,?,?,?,?)";
 
+    public static final String ADD_API_PRODUCT_COMMENT_SQL =
+            " INSERT INTO AM_API_COMMENTS (COMMENT_ID,COMMENT_TEXT,COMMENTED_USER,DATE_COMMENTED,API_PRODUCT_ID)" +
+                    " VALUES (?,?,?,?,?)";
+
     public static final String GET_COMMENT_SQL =
             " SELECT AM_API_COMMENTS.COMMENT_ID AS COMMENT_ID," +
             "   AM_API_COMMENTS.COMMENT_TEXT AS COMMENT_TEXT," +
@@ -2341,6 +2345,18 @@ public class SQLConstants {
             "   AND API.API_VERSION = ? " +
             "   AND API.API_ID = AM_API_COMMENTS.API_ID " +
             "   AND AM_API_COMMENTS.COMMENT_ID = ?";
+
+    public static final String GET_API_PRODUCT_COMMENT_SQL =
+            " SELECT AM_API_COMMENTS.COMMENT_ID AS COMMENT_ID," +
+                    "   AM_API_COMMENTS.COMMENT_TEXT AS COMMENT_TEXT," +
+                    "   AM_API_COMMENTS.COMMENTED_USER AS COMMENTED_USER," +
+                    "   AM_API_COMMENTS.DATE_COMMENTED AS DATE_COMMENTED " +
+                    " FROM AM_API_COMMENTS, AM_API_PRODUCT API_PRODUCT " +
+                    " WHERE API_PRODUCT.API_PRODUCT_PROVIDER = ? " +
+                    "   AND API_PRODUCT.API_PRODUCT_NAME = ? " +
+                    "   AND API_PRODUCT.API_PRODUCT_VERSION = ? " +
+                    "   AND API_PRODUCT.API_PRODUCT_ID = AM_API_COMMENTS.API_PRODUCT_ID " +
+                    "   AND AM_API_COMMENTS.COMMENT_ID = ?";
 
     public static final String GET_COMMENTS_SQL =
             " SELECT AM_API_COMMENTS.COMMENT_ID AS COMMENT_ID," +
@@ -2355,6 +2371,20 @@ public class SQLConstants {
             "   AND API.API_NAME = ? " +
             "   AND API.API_VERSION  = ? " +
             "   AND API.API_ID = AM_API_COMMENTS.API_ID";
+
+    public static final String GET_API_PRODUCT_COMMENTS_SQL =
+            " SELECT AM_API_COMMENTS.COMMENT_ID AS COMMENT_ID," +
+                    "   AM_API_COMMENTS.COMMENT_TEXT AS COMMENT_TEXT," +
+                    "   AM_API_COMMENTS.COMMENTED_USER AS COMMENTED_USER," +
+                    "   AM_API_COMMENTS.DATE_COMMENTED AS DATE_COMMENTED " +
+                    " FROM " +
+                    "   AM_API_COMMENTS, " +
+                    "   AM_API_PRODUCT API_PRODUCT " +
+                    " WHERE " +
+                    "   API_PRODUCT.API_PRODUCT_PROVIDER = ? " +
+                    "   AND API_PRODUCT.API_PRODUCT_NAME = ? " +
+                    "   AND API_PRODUCT.API_PRODUCT_VERSION  = ? " +
+                    "   AND API_PRODUCT.API_PRODUCT_ID = AM_API_COMMENTS.API_PRODUCT_ID";
 
     public static final String DELETE_COMMENT_SQL = "DELETE FROM AM_API_COMMENTS WHERE AM_API_COMMENTS.COMMENT_ID = ?";
 

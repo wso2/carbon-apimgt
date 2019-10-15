@@ -148,7 +148,15 @@ const definition = {
     }),
     role: roleSchema.systemRole().role(),
     scope: scopeSchema.scopes().scope(),
-    url: Joi.string().uri(),
+    url: Joi.string().uri().error((errors) => {
+        const tmpErrors = [...errors];
+        errors.forEach((err, index) => {
+            const tmpError = { ...err };
+            tmpError.message = 'URL ' + getMessage(err.type);
+            tmpErrors[index] = tmpError;
+        });
+        return tmpErrors;
+    }),
     userRole: userRoleSchema.userRole().role(),
     apiParameter: apiSchema.api().isAPIParameterExist(),
     apiDocument: documentSchema.document().isDocumentPresent(),

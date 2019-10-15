@@ -25,25 +25,34 @@ import { FormattedMessage } from 'react-intl';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 import HelpOutline from '@material-ui/icons/HelpOutline';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { isRestricted } from 'AppData/AuthManager';
 import { makeStyles } from '@material-ui/core';
-import Paper from '@material-ui/core/Paper';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import TextField from '@material-ui/core/TextField';
 
 const useStyles = makeStyles(theme => ({
+    expansionPanel: {
+        marginBottom: theme.spacing(3),
+    },
+    expansionPanelDetails: {
+        flexDirection: 'column',
+    },
     iconSpace: {
         marginLeft: theme.spacing(0.5),
     },
     actionSpace: {
-        margin: theme.spacing(0, -1),
-        float: 'right',
+        margin: '-7px auto',
     },
     subHeading: {
         fontSize: '1rem',
         fontWeight: 400,
         margin: 0,
         display: 'inline-flex',
-        lineHeight: 2.5,
+        lineHeight: 1.5,
     },
     paper: {
         padding: theme.spacing(0, 3),
@@ -61,11 +70,12 @@ export default function ResponseCaching(props) {
     const { api, configDispatcher } = props;
     const classes = useStyles();
     const [apiFromContext] = useAPI();
+    const isResponseCachingEnabled = api.responseCachingEnabled;
 
     return (
-        <Paper className={classes.paper}>
-            <Grid container spacing={1} alignItems='flex-start'>
-                <Grid item md={12}>
+        <React.Fragment>
+            <ExpansionPanel className={classes.expansionPanel}>
+                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                     <Typography className={classes.subHeading} variant='h6'>
                         <FormattedMessage
                             id='Apis.Details.Configuration.Configuration.response.caching'
@@ -103,9 +113,33 @@ export default function ResponseCaching(props) {
                             />
                         }
                     />
-                </Grid>
-            </Grid>
-        </Paper>
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails className={classes.expansionPanelDetails}>
+                    <Grid container spacing={1} alignItems='flex-start'>
+                        <Grid item>
+                            {isResponseCachingEnabled && (
+                                <TextField
+                                    value={api.cacheTimeout}
+                                    onChange={({ target: { value } }) =>
+                                        configDispatcher({
+                                            action: 'cacheTimeout',
+                                            value,
+                                        })
+                                    }
+                                    margin='normal'
+                                    helperText={
+                                        <FormattedMessage
+                                            id='Apis.Details.Configuration.Configuration.cache.timeout'
+                                            defaultMessage='Cache Timeout (seconds)'
+                                        />
+                                    }
+                                />
+                            )}
+                        </Grid>
+                    </Grid>
+                </ExpansionPanelDetails>
+            </ExpansionPanel>
+        </React.Fragment>
     );
 }
 

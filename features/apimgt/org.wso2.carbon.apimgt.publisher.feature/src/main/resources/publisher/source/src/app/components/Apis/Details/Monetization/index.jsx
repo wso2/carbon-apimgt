@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { withStyles } from '@material-ui/core/styles';
-import { Grid, Paper, Typography, Divider } from '@material-ui/core';
+import { Grid, Paper, Typography } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { withRouter } from 'react-router';
 import { Progress } from 'AppComponents/Shared';
@@ -209,7 +209,6 @@ class Monetization extends Component {
                             </Grid>
                         </Paper>
                     </Grid>
-                    <Divider className={classes.grid} />
                     <Grid>
                         <Paper className={classes.paper}>
                             <Grid item xs={12} className={classes.grid}>
@@ -217,7 +216,6 @@ class Monetization extends Component {
                             </Grid>
                         </Paper>
                     </Grid>
-                    <Divider className={classes.grid} />
                     <Button onClick={this.handleSubmit} color='primary' variant='contained' className={classes.button} >
                         <FormattedMessage
                             id='Apis.Details.Monetization.Index.save'

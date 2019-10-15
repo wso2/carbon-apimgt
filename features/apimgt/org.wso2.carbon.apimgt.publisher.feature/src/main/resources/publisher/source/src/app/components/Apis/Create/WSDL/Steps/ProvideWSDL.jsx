@@ -203,7 +203,7 @@ export default function ProvideWSDL(props) {
                                 <sup className={classes.mandatoryStar}>*</sup>{' '}
                                 <FormattedMessage
                                     id='Apis.Create.WSDL.Steps.ProvideWSDL.implementation.type'
-                                    defaultMessage='Implementation type'
+                                    defaultMessage='Implementation Type'
                                 />
                             </React.Fragment>
                         </FormLabel>
@@ -242,7 +242,7 @@ export default function ProvideWSDL(props) {
                                 <sup className={classes.mandatoryStar}>*</sup>{' '}
                                 <FormattedMessage
                                     id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.type'
-                                    defaultMessage='Input type'
+                                    defaultMessage='Input Type'
                                 />
                             </React.Fragment>
                         </FormLabel>

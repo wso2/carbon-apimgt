@@ -11,6 +11,10 @@
     {
       "name": "ttl",
       "type": "STRING"
+    },
+    {
+      "name": "expiryTime",
+      "type": "LONG"
     }
   ]
 }

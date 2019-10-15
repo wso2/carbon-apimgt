@@ -14,7 +14,7 @@ var addLabel = function (action, labelId, labelName, description, attributes) {
             apiAdmin.addLabel(tenantDomain, label);
         } else if (action == "update") {
             var label = constructLabelObject(labelId, labelName, description, attributes);
-            apiAdmin.updateLabel(label);
+            apiAdmin.updateLabel(tenantDomain, label);
         }
         return {
             error: false

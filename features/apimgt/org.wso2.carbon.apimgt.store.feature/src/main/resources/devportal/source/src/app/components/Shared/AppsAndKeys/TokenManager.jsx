@@ -68,7 +68,8 @@ const styles = theme => ({
     },
     paper: {
         background: 'none',
-        marginBottom: theme.spacing.unit * 2,
+        marginBottom: theme.spacing(2),
+        marginTop: theme.spacing(2),
     },
 });
 
@@ -254,7 +255,8 @@ class TokenManager extends React.Component {
                     applicationKey.consumerSecret,
                 );
             })
-            .then(() => {
+            .then((response) => {
+                this.setState({ keys: response.keys });
                 Alert.info(intl.formatMessage({
                     id: 'Shared.AppsAndKeys.TokenManager.key.update.success',
                     defaultMessage: 'Application keys updated successfully',
@@ -399,7 +401,7 @@ class TokenManager extends React.Component {
         // todo replace use of localStorage with useContext
         // const settingsData = localStorage.getItem('settings');
         // const { mapExistingAuthApps } = JSON.parse(settingsData);
-
+        const keyGrantTypes = key ? key.supportedGrantTypes : [];
         const settingsContext = this.context;
         const { mapExistingAuthApps } = settingsContext.settings;
 
@@ -417,6 +419,7 @@ class TokenManager extends React.Component {
                     keyType={keyType}
                     keys={keys}
                     isKeyJWT={isKeyJWT}
+                    selectedGrantTypes={keyGrantTypes}
                 />
                 <Paper className={classes.paper}>
                     <ExpansionPanel defaultExpanded>

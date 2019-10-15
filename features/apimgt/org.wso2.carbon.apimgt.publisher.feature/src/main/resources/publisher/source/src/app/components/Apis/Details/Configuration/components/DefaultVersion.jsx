@@ -96,10 +96,9 @@ export default function DefaultVersion(props) {
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.defaultversion.tooltip'
                                 defaultMessage={
-                                    'If a particular version of an API is default, '
-                                    + 'That API can be invoked without specifying the version'
-                                    + ' parameter in the path, The default version will be wired '
-                                    + 'to that request automatically'
+                                    'The Default API can be invoked without specifying the version. In this case, the '
+                                    + ' version of the Default API will be wired to version parameter of the'
+                                    + ' request automatically.'
                                 }
                             />
                         )}
