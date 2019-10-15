@@ -363,6 +363,9 @@ class TableView extends React.Component {
             rowsPerPage,
             onChangeRowsPerPage: (numberOfRows) => {
                 this.rowsPerPage = numberOfRows;
+                if (count - 1 === rowsPerPage * page && page !== 0) {
+                    this.page = page - 1;
+                }
                 this.getData();
                 this.setLocalStorage();
             },
