@@ -26,7 +26,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import Box from '@material-ui/core/Box';
 import API from 'AppData/api';
-import { capitalizeFirstLetter, upperCaseString, lowerCaseString } from 'AppData/StringFormatter';
+import { capitalizeFirstLetter, upperCaseString, lowerCaseString } from 'AppData/stringFormatter';
 import APIContext from '../components/ApiContext';
 import Policies from './Policies';
 

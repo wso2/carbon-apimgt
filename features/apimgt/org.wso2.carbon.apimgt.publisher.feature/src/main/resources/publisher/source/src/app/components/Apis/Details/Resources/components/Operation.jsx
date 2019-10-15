@@ -201,10 +201,11 @@ function Operation(props) {
                         {!hideParameters && (
                             <Parameters
                                 operation={operation}
-                                operationActionsDispatcher={operationsDispatcher}
+                                operationsDispatcher={operationsDispatcher}
                                 operationRateLimits={operationRateLimits}
                                 api={api}
                                 disableUpdate={disableUpdate}
+                                spec={spec}
                                 target={target}
                                 verb={verb}
                             />
@@ -219,7 +220,7 @@ Operation.defaultProps = {
     highlight: false,
     disableUpdate: false,
     /* Set following prop to false , After implementing the `Parameter` section */
-    hideParameters: true,
+    hideParameters: false,
     disableDelete: false,
     onMarkAsDelete: () => {},
     markAsDelete: false,

@@ -24,7 +24,7 @@ import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Tooltip from '@material-ui/core/Tooltip';
 import API from 'AppData/api';
-import { capitalizeFirstLetter } from 'AppData/StringFormatter';
+import { capitalizeFirstLetter } from 'AppData/stringFormatter';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import BusinessInformation from './BusinessInformation';
 

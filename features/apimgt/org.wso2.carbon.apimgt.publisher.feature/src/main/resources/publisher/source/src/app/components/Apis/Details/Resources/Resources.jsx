@@ -92,6 +92,18 @@ export default function Resources(props) {
             case 'authType':
                 updatedOperation['x-auth-type'] = value ? 'Any' : 'None';
                 break;
+            case 'parameter':
+                if (!updatedOperation.parameters) {
+                    updatedOperation.parameters = [value];
+                } else {
+                    updatedOperation.parameters.push(value);
+                }
+                break;
+            case 'deleteParameter':
+                updatedOperation.parameters = updatedOperation.parameters.filter((parameter) => {
+                    return parameter.in !== value.in && parameter.name !== value.name;
+                });
+                break;
             case 'throttlingPolicy':
                 updatedOperation['x-throttling-tier'] = value;
                 break;
@@ -336,8 +348,7 @@ export default function Resources(props) {
                                                     operation={operation}
                                                     operationRateLimits={operationRateLimits}
                                                     api={localApi}
-                                                    markAsDelete={Boolean(markedOperations[target]
-                                                        && markedOperations[target][verb])}
+                                                    markAsDelete={Boolean(markedOperations[target] && markedOperations[target][verb])}
                                                     onMarkAsDelete={onMarkAsDelete}
                                                     disableUpdate={disableUpdate}
                                                     disableMultiSelect={disableMultiSelect}
