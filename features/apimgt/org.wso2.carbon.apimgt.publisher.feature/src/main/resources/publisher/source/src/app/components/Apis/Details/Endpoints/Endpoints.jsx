@@ -174,8 +174,6 @@ function Endpoints(props) {
 
     /**
      * Validate the provided endpoint config object.
-     *
-     * @param {any} endpointConfig The provided endpoint config for validation.
      * @param {string} implementationType The api implementation type (INLINE/ ENDPOINT)
      * @return {{isValid: boolean, message: string}} The endpoint validity information.
      * */
@@ -186,12 +184,12 @@ function Endpoints(props) {
         }
         const endpointType = endpointConfig.endpoint_type;
         if (endpointType === 'awslambda') {
-            if (endpointConfig.accessKey === '' || endpointConfig.secretKey === '') {
+            if (endpointConfig.amznAccessKey === '' && endpointConfig.amznSecretKey === '') {
                 return {
                     isValid: false,
                     message: intl.formatMessage({
                         id: 'Apis.Details.Endpoints.Endpoints.missing.accessKey.secretKey.error',
-                        defaultMessage: 'Access Key and/ or Secret Key should not be empty',
+                        defaultMessage: 'Access Key and Secret Key should not be empty',
                     }),
                 };
             }

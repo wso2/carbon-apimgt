@@ -9,16 +9,14 @@ import {
     Button,
     makeStyles,
 } from '@material-ui/core';
+import PropTypes from 'prop-types';
 import Mapping from './Mapping.jsx';
-import API from '../../../../../data/api'; // TODO: Use webpack aliases instead of relative paths ~tmkb
 
 const columns = [
     { id: 'name', label: 'Resource Name', minWidth: 100 },
     { id: 'arn', label: 'ARN', minWidth: 400 },
     { id: 'actions', label: 'Actions', minWidth: 100 },
 ];
-
-const defaultResources = API.getResources();
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -30,13 +28,13 @@ const useStyles = makeStyles(theme => ({
     mappingsWrapper: {
         padding: theme.spacing(),
     },
-    mappingResource: {
+    mappingTarget: {
         maxWidth: '300px',
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
     },
-    mappingARN: {
+    mappingArn: {
         maxWidth: '800px',
         whiteSpace: 'nowrap',
         overflow: 'hidden',
@@ -46,11 +44,13 @@ const useStyles = makeStyles(theme => ({
 
 /**
  * The mappings component. This component holds the mappings of resources and ARNs.
+ * @param {any} props The props that are being passed to the function.
  * @returns {any} HTML view of the mappings.
  */
-export default function Mappings() {
+export default function Mappings(props) {
+    const { api } = props;
+    const [resources, setResources] = useState(api.operations);
     const classes = useStyles();
-    const [resources, setResources] = useState(defaultResources);
 
     /**
      * The function which enables the editing feature for a resource.
@@ -59,7 +59,7 @@ export default function Mappings() {
     function editResource(resource) {
         const updatedResources = [];
         resources.forEach((element) => {
-            if (element.name !== resource.name) {
+            if (element.target !== resource.target) {
                 updatedResources.push(element);
             } else {
                 const editableResource = element;
@@ -77,7 +77,7 @@ export default function Mappings() {
     function deleteResource(resource) {
         if (resources.length > 1) {
             const updatedResources = resources.filter((element) => {
-                return element.name !== resource.name;
+                return element.target !== resource.target;
             });
             setResources(updatedResources);
         }
@@ -114,10 +114,10 @@ export default function Mappings() {
                                 return (
                                     <TableRow>
                                         <TableCell>
-                                            <div className={classes.mappingResource}>{resource.name}</div>
+                                            <div className={classes.mappingTarget}>{resource.target}</div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className={classes.mappingARN}>{resource.arn}</div>
+                                            <div className={classes.mappingArn}>{resource.arn}</div>
                                         </TableCell>
                                         <TableCell>
                                             <Button onClick={() => editResource(resource)}>Edit</Button>
@@ -138,3 +138,7 @@ export default function Mappings() {
         </Grid>
     );
 }
+
+Mappings.propTypes = {
+    api: PropTypes.isRequired,
+};

@@ -24,11 +24,12 @@ const useStyles = makeStyles(theme => ({
 export default function Mapping(props) {
     const classes = useStyles();
     const { resource, resources, setResources } = props;
-    const [name, setName] = useState(resource.name);
+    const [name, setName] = useState(resource.target);
     const [arn, setArn] = useState(resource.arn);
     const [isExistingName, setIsExistingName] = useState(false);
     const [isEmptyName, setIsEmptyName] = useState(false);
     const [isEmptyArn, setIsEmptyArn] = useState(false);
+
     const addResource = () => {
         if (name === '' && arn === '') {
             setIsEmptyName(true);
@@ -38,7 +39,7 @@ export default function Mapping(props) {
         } else if (arn === '') {
             setIsEmptyArn(true);
         } else {
-            const newResource = { name, arn, editable: false };
+            const newResource = { target: name, arn, editable: false };
             const newResources = resources.slice();
             newResources.push(newResource);
             setResources(newResources);
@@ -46,14 +47,15 @@ export default function Mapping(props) {
             setArn('');
         }
     };
+
     const saveResource = () => {
         if (!isEmptyName && !isEmptyArn && !isExistingName) {
             const newResources = [];
             resources.forEach((element) => {
-                if (element.name !== resource.name) {
+                if (element.target !== resource.target) {
                     newResources.push(element);
                 } else {
-                    newResources.push({ name, arn, editable: false });
+                    newResources.push({ target: name, arn, editable: false });
                 }
             });
             setResources(newResources);
@@ -61,10 +63,11 @@ export default function Mapping(props) {
             setArn('');
         }
     };
+
     const cancel = () => {
         const newResources = [];
         resources.forEach((element) => {
-            if (element.name !== resource.name) {
+            if (element.target !== resource.target) {
                 newResources.push(element);
             } else {
                 const newResource = resource;
@@ -74,6 +77,7 @@ export default function Mapping(props) {
         });
         setResources(newResources);
     };
+
     return (
         <TableRow>
             <TableCell>
@@ -97,7 +101,7 @@ export default function Mapping(props) {
                         }
                         const resourceNames = [];
                         resources.forEach((element) => {
-                            resourceNames.push(element.name);
+                            resourceNames.push(element.target);
                         });
                         if (resourceNames.includes(event.target.value)) {
                             setIsExistingName(true);

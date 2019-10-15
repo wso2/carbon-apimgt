@@ -2197,19 +2197,6 @@ class API extends Resource {
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    static getResources(id) {
-        return [
-            { name: '/getRand1', arn: 'arn:aws:lambda:us-east-2:572100981605:function:helloworld', editable: false },
-            { name: '/getRand2', arn: 'arn:aws:lambda:us-east-2:572100981605:function:adder', editable: false },
-        ];
-    }
-
-    /**
-     * Get ARNs of an user role
-     * @param id {string} UUID of the api product.
-     * @param callback {function} A callback function to invoke after receiving successful response.
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
     static getAmznResourceNames(id) {
         return [
             { label: 'arn:aws:lambda:us-east-2:572100981605:function:helloworld' },
