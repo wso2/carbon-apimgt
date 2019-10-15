@@ -158,12 +158,13 @@ class Details extends Component {
             apiNotFound: false,
             // updateAPI: this.updateAPI,
             isAPIProduct,
+            imageUpdate: 0,
         };
         this.setAPI = this.setAPI.bind(this);
         this.setAPIProduct = this.setAPIProduct.bind(this);
         this.updateAPI = this.updateAPI.bind(this);
+        this.setImageUpdate = this.setImageUpdate.bind(this);
     }
-
     /**
      * @inheritDoc
      * @memberof Details
@@ -203,7 +204,16 @@ class Details extends Component {
             this.setAPI();
         }
     }
-
+    /**
+     *
+     * This method is a hack to update the image in the toolbar when a new image is uploaded
+     * @memberof Details
+     */
+    setImageUpdate() {
+        this.setState(previousState => ({
+            imageUpdate: previousState.imageUpdate + 1,
+        }));
+    }
     /**
      *
      *
@@ -396,7 +406,9 @@ class Details extends Component {
      * @returns {Component} Render API Details page
      */
     render() {
-        const { api, apiNotFound, isAPIProduct } = this.state;
+        const {
+            api, apiNotFound, isAPIProduct, imageUpdate,
+        } = this.state;
         const {
             classes,
             theme,
@@ -449,6 +461,7 @@ class Details extends Component {
                         updateAPI: this.updateAPI,
                         isAPIProduct,
                         setAPI: this.setAPI,
+                        setImageUpdate: this.setImageUpdate,
                     }}
                 >
                     <div className={classes.LeftMenu}>
@@ -585,7 +598,7 @@ class Details extends Component {
                         )}
                     </div>
                     <div className={classes.content}>
-                        <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} />
+                        <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} imageUpdate={imageUpdate} />
                         <div className={classes.contentInside}>
                             <Switch>
                                 <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
@@ -631,10 +644,7 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.OPERATIONS}
-                                    component={() => (<Operations
-                                        api={api}
-                                        updateAPI={this.updateAPI}
-                                    />)}
+                                    component={() => <Operations api={api} updateAPI={this.updateAPI} />}
                                 />
                                 <Route
                                     exact
