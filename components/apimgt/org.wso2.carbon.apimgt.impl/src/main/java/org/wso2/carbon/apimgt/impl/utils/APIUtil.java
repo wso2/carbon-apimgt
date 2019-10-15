@@ -4143,6 +4143,7 @@ public final class APIUtil {
                 }
             }
 
+            createAnalyticsRole(APIConstants.ANALYTICS_ROLE, tenantId);
             createSelfSignUpRoles(tenantId);
         }
     }
@@ -4437,6 +4438,19 @@ public final class APIUtil {
                 new Permission(APIConstants.Permissions.CONFIGURE_GOVERNANCE, UserMgtConstants.EXECUTE_ACTION),
                 new Permission(APIConstants.Permissions.RESOURCE_GOVERN, UserMgtConstants.EXECUTE_ACTION)};
         createRole(roleName, creatorPermissions, tenantId);
+    }
+
+    /**
+     * Create Analytics role with the given name in specified tenant
+     *
+     * @param roleName role name
+     * @param tenantId id of the tenant
+     * @throws APIManagementException
+     */
+    public static void createAnalyticsRole(String roleName, int tenantId) throws APIManagementException {
+        Permission[] analyticsPermissions = new Permission[]{
+                new Permission(APIConstants.Permissions.LOGIN, UserMgtConstants.EXECUTE_ACTION)};
+        createRole(roleName, analyticsPermissions, tenantId);
     }
 
     /**
