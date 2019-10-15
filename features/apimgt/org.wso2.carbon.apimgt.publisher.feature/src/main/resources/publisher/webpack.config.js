@@ -19,9 +19,13 @@
 
 const path = require('path');
 
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+
 const config = {
     entry: {
         index: './source/index.jsx',
+        'editor.worker': 'monaco-editor/esm/vs/editor/editor.worker.js',
     },
     output: {
         path: path.resolve(__dirname, 'site/public/dist'),
@@ -83,7 +87,12 @@ const config = {
         Config: 'Configurations',
         MaterialIcons: 'MaterialIcons',
     },
-    plugins: [],
+    plugins: [
+        new MonacoWebpackPlugin({
+            // available options are documented at https://github.com/Microsoft/monaco-editor-webpack-plugin#options
+            languages: ['json', 'javascript'],
+        }),
+    ],
 };
 
 if (process.env.NODE_ENV === 'development') {
@@ -104,7 +113,6 @@ if (process.env.NODE_ENV === 'development') {
 
 module.exports = function (env) {
     if (env && env.analysis) {
-        const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
         config.plugins.push(new BundleAnalyzerPlugin());
     }
     return config;
