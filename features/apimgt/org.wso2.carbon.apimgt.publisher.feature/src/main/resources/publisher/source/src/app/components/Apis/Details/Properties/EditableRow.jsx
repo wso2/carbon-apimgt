@@ -91,6 +91,7 @@ function EditableRow(props) {
             {editMode ? (
                 <TableCell>
                     <TextField
+                        fullWidth
                         required
                         id='outlined-required'
                         label={intl.formatMessage({
@@ -112,6 +113,7 @@ function EditableRow(props) {
             {editMode ? (
                 <TableCell>
                     <TextField
+                        fullWidth
                         required
                         id='outlined-required'
                         label={intl.formatMessage({
