@@ -735,7 +735,7 @@
   "Apis.Listing.ApiThumb.version": "Version",
   "Apis.Listing.SampleAPI.SampleAPI.created": "Sample PizzaShackAPI API created successfully",
   "Apis.Listing.SampleAPI.SampleAPI.description": "WSO2 API Publisher enables API providers to  publish APIs, share documentation, provision API keys and gather feedback on features, quality and usage. To get started, Create an API or Publish a sample API.",
-  "Apis.Listing.SampleAPI.SampleAPIProduct.successful": "CalculatorAPIProduct published successfully",
+  "Apis.Listing.SampleAPI.SampleAPIProduct.successful": "Sample CalculatorAPIProduct published successfully",
   "Apis.Listing.SampleAPI.SampleAPIProductWizard.calculator.text": "Creating API Calculator",
   "Apis.Listing.SampleAPI.SampleAPIProductWizard.mathapi": "Creating Math API",
   "Apis.Listing.SampleAPI.SampleAPIProductWizard.product.button": "Go to CalculatorAPIProduct",

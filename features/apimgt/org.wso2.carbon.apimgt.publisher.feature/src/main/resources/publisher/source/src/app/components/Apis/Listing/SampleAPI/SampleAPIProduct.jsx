@@ -91,7 +91,7 @@ function SampleAPI(prop) {
                 setProductPath(`/api-products/${prod.body.id}/overview`);
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Listing.SampleAPI.SampleAPIProduct.successful',
-                    defaultMessage: 'CalculatorAPIProduct published successfully',
+                    defaultMessage: 'Sample CalculatorAPIProduct published successfully',
                 }));
             })
             .catch((error) => {
