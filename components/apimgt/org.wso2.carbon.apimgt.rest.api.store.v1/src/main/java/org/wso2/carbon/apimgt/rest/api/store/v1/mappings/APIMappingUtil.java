@@ -406,7 +406,6 @@ public class APIMappingUtil {
     public static RatingDTO fromJsonToRatingDTO(JSONObject obj) {
         RatingDTO ratingDTO = new RatingDTO();
         if (obj != null) {
-            ratingDTO.setApiId(String.valueOf(obj.get(APIConstants.API_ID)));
             ratingDTO.setRatingId(String.valueOf(obj.get(APIConstants.RATING_ID)));
             ratingDTO.setRatedBy((String) obj.get(APIConstants.USERNAME));
             ratingDTO.setRating((Integer) obj.get(APIConstants.RATING));
