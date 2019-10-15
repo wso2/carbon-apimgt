@@ -3108,7 +3108,7 @@ public final class APIUtil {
      */
     public static boolean isUserExist(String username) throws APIManagementException {
         if (username == null) {
-            throw new APIManagementException("Attempt to execute privileged operation as" + " the anonymous user");
+            throw new APIManagementException("Attempt to execute privileged operation as the anonymous user");
         }
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
