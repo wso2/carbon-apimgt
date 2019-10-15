@@ -327,7 +327,7 @@
   "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.basic": "Basic Auth",
   "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.digest.auth": "Digest Auth",
   "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.password.input": "Password",
-  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.user.name.input": "User Name",
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.user.name.input": "Username",
   "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias": "Alias",
   "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias.error": "Alias should not be empty",
   "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias.helpertext": "Alias for the certificate",

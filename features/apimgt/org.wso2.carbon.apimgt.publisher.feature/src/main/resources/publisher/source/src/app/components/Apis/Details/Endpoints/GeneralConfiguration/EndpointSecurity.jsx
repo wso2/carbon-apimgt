@@ -101,7 +101,7 @@ function EndpointSecurity(props) {
                     label={(
                         <FormattedMessage
                             id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.user.name.input'
-                            defaultMessage='User Name'
+                            defaultMessage='Username'
                         />
                     )}
                     onChange={
