@@ -348,7 +348,8 @@ export default function Resources(props) {
                                                     operation={operation}
                                                     operationRateLimits={operationRateLimits}
                                                     api={localApi}
-                                                    markAsDelete={Boolean(markedOperations[target] && markedOperations[target][verb])}
+                                                    markAsDelete={Boolean(markedOperations[target]
+                                                        && markedOperations[target][verb])}
                                                     onMarkAsDelete={onMarkAsDelete}
                                                     disableUpdate={disableUpdate}
                                                     disableMultiSelect={disableMultiSelect}

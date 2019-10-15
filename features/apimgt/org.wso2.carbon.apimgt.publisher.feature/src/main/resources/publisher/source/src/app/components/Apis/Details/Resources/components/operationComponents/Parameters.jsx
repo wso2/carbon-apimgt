@@ -69,11 +69,14 @@ export default function Parameters(props) {
 }
 
 Parameters.propTypes = {
-    operation: PropTypes.shape({
-        target: PropTypes.string.isRequired,
-        verb: PropTypes.string.isRequired,
-        spec: PropTypes.shape({}).isRequired,
-    }).isRequired,
+    target: PropTypes.string.isRequired,
+    verb: PropTypes.string.isRequired,
+    spec: PropTypes.shape({}).isRequired,
+    operationsDispatcher: PropTypes.func.isRequired,
+    operation: PropTypes.shape({}).isRequired,
+    disableUpdate: PropTypes.bool,
 };
 
-Parameters.defaultProps = {};
+Parameters.defaultProps = {
+    disableUpdate: false,
+};
