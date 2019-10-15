@@ -315,7 +315,7 @@ function Endpoints(props) {
                 <div className={classes.root}>
                     <Grid container spacing={16} className={classes.titleGrid}>
                         <Grid item>
-                            <Typography variant='h4' align='left' className={classes.titleWrapper}>
+                            <Typography variant='h4' align='left' gutterBottom>
                                 <FormattedMessage
                                     id='Apis.Details.Endpoints.Endpoints.endpoints.header'
                                     defaultMessage='Endpoints'

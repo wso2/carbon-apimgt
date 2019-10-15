@@ -72,7 +72,6 @@ const styles = theme => ({
     radioGroup: {
         display: 'flex',
         flexDirection: 'row',
-        paddingTop: theme.spacing(),
     },
     endpointsWrapperLeft: {
         padding: theme.spacing(),
@@ -455,7 +454,7 @@ function EndpointOverview(props) {
         <div className={classes.overviewWrapper}>
             {api.type === 'WS' ?
                 <Paper className={classes.endpointContainer}>
-                    <Typography>
+                    <Typography gutterBottom>
                         <FormattedMessage
                             id='Apis.Details.Endpoints.EndpointOverview.websoket.endpoint'
                             defaultMessage='Websocket Endpoint'

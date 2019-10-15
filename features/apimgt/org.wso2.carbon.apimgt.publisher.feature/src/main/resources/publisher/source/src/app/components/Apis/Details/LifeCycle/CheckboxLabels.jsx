@@ -96,7 +96,7 @@ export default function CheckboxLabels(props) {
             {(api.lifeCycleStatus === 'CREATED' || api.lifeCycleStatus === 'PROTOTYPED') && (
                 <React.Fragment>
                     <Grid xs={12} className={classes.labelsGrid}>
-                        <Typography style={{ fontWeight: 600 }}>
+                        <Typography variant='subtitle2'>
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.publisher'
                                 defaultMessage='Publish'
@@ -138,7 +138,7 @@ export default function CheckboxLabels(props) {
                         </Grid>
                     </Grid>
                     <Grid xs={12} className={classes.labelsGrid}>
-                        <Typography style={{ fontWeight: 600 }}>
+                        <Typography variant='subtitle2'>
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.prototype'
                                 defaultMessage='Deploy as a Prototype'
@@ -168,7 +168,7 @@ export default function CheckboxLabels(props) {
             {api.lifeCycleStatus === 'PUBLISHED' && (
                 <React.Fragment>
                     <Grid xs={12} className={classes.labelsGrid}>
-                        <Typography style={{ fontWeight: 600 }} >
+                        <Typography variant='subtitle2' >
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.prototype'
                                 defaultMessage='Deploy as a Prototype'
