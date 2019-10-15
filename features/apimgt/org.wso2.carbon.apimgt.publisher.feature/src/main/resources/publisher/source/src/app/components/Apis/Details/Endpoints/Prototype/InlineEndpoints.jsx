@@ -54,11 +54,10 @@ function InlineEndpoints(props) {
             <Grid container spacing={1} direction='column'>
                 {Object.keys(paths).map((path) => {
                     return (
-                        Object.keys(paths[path]).map((method, index) => {
+                        Object.keys(paths[path]).map((method) => {
                             const mediationScript = paths[path][method][xMediationScriptProperty];
                             const script = mediationScript === undefined ? defaultScript : mediationScript;
                             return (<GenericResource
-                                index={index}
                                 resourcePath={path}
                                 resourceMethod={method}
                                 onChange={onScriptChange}
