@@ -307,7 +307,8 @@ export default function DefaultAPIForm(props) {
                                                 <div style={{ marginTop: index !== 0 && '10px' }}>
                                                     {detail.message}
                                                 </div>);
-                                        })) || `API Product will be exposed in ${actualContext(api)} context at the gateway`
+                                        })) ||
+                                         `API Product will be exposed in ${actualContext(api)} context at the gateway`
                                     }
                                     margin='normal'
                                     variant='outlined'
