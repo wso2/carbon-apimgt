@@ -23,7 +23,7 @@ import { withStyles } from '@material-ui/core';
 import CommonListing from './Listing/CommonListing';
 import TagCloudListing from './Listing/TagCloudListing';
 import Details from './Details/index';
-import { PageNotFound } from '../Base/Errors';
+import { ResourceNotFound } from '../Base/Errors';
 
 /**
  * Default API Store overview page
@@ -66,7 +66,7 @@ function Apis() {
                 render={props => (
                     <Details {...props} apiType={CONSTS.API_PRODUCT_TYPE} />)}
             />
-            <Route component={PageNotFound} />
+            <Route component={ResourceNotFound} />
         </Switch>
     );
 }
