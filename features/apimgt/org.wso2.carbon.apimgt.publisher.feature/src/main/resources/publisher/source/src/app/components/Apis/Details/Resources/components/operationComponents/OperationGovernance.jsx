@@ -30,6 +30,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import LaunchIcon from '@material-ui/icons/Launch';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
 import { Link } from 'react-router-dom';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import { getOperationScopes } from '../../operationUtils';
@@ -46,6 +48,16 @@ export default function OperationGovernance(props) {
         operation, operationsDispatcher, operationRateLimits, api, disableUpdate, spec, target, verb,
     } = props;
     const isOperationRateLimiting = api.apiThrottlingPolicy === null;
+
+    /**
+     *
+     *
+     * Remove scope
+     */
+    function removeScope() {
+        operationsDispatcher({ action: 'scopes', data: { target, verb, value: '' } });
+    }
+
     return (
         <Fragment>
             <Grid item md={12}>
@@ -165,14 +177,17 @@ export default function OperationGovernance(props) {
                     margin='dense'
                     variant='outlined'
                 >
-                    {api.scopes.length !== 0 && (
-                        <MenuItem key='none' value='' />)}
                     {api.scopes.map(scope => (
                         <MenuItem key={scope.name} value={scope.name}>
                             {scope.name}
                         </MenuItem>
                     ))}
                 </TextField>
+                <Tooltip title='Remove scope'>
+                    <IconButton onClick={removeScope} aria-label='delete'>
+                        <DeleteIcon fontSize='small' />
+                    </IconButton>
+                </Tooltip>
                 {!disableUpdate && (
                     <Link to={`/apis/${api.id}/scopes/create`} target='_blank'>
                         <Typography style={{ marginLeft: '10px' }} color='primary' display='inline' variant='caption'>
