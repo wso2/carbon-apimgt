@@ -59,7 +59,7 @@ const useStyles = makeStyles(theme => ({
     },
     certificatesHeader: {
         fontWeight: 600,
-        marginTop: 20,
+        marginTop: '10px',
     },
     addCertificateBtn: {
         borderColor: '#c4c4c4',
