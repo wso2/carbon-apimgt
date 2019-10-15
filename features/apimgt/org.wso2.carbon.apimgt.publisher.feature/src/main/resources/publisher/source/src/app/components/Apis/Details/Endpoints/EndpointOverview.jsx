@@ -454,7 +454,7 @@ function EndpointOverview(props) {
     return (
         <div className={classes.overviewWrapper}>
             {api.type === 'WS' ?
-                <React.Fragment>
+                <Paper className={classes.endpointContainer}>
                     <Typography>
                         <FormattedMessage
                             id='Apis.Details.Endpoints.EndpointOverview.websoket.endpoint'
@@ -472,7 +472,7 @@ function EndpointOverview(props) {
                         editEndpoint={editEndpoint}
                         setAdvancedConfigOpen={toggleAdvanceConfig}
                     />
-                </React.Fragment>
+                </Paper>
                 :
                 <Grid container spacing={2}>
                     <Grid item xs={12}>

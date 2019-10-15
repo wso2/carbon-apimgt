@@ -27,6 +27,7 @@ import { withStyles } from '@material-ui/core/styles';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import { injectIntl } from 'react-intl';
 import API from 'AppData/api';
+import { CircularProgress } from '@material-ui/core';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import LifeCycleImage from './LifeCycleImage';
@@ -75,6 +76,7 @@ class LifeCycleUpdate extends Component {
         };
         this.state = {
             newState: null,
+            isUpdating: null,
         };
     }
 
@@ -84,6 +86,7 @@ class LifeCycleUpdate extends Component {
      * @memberof LifeCycleUpdate
      */
     updateLCStateOfAPI(apiUUID, action) {
+        this.setState({ isUpdating: action });
         let promisedUpdate;
         const lifecycleChecklist = this.props.checkList.map(item => item.value + ':' + item.checked);
         if (lifecycleChecklist.length > 0) {
@@ -117,6 +120,8 @@ class LifeCycleUpdate extends Component {
             .catch((errorResponse) => {
                 console.log(errorResponse);
                 Alert.error(JSON.stringify(errorResponse.message));
+            }).finally(() => {
+                this.setState({ isUpdating: null });
             });
     }
 
@@ -227,7 +232,7 @@ class LifeCycleUpdate extends Component {
                                 lifecycleButtons.map((transitionState) => {
                                     return (
                                         <Button
-                                            disabled={transitionState.disabled}
+                                            disabled={transitionState.disabled || this.state.isUpdating}
                                             variant='outlined'
                                             className={classes.stateButton}
                                             key={transitionState.event}
@@ -235,6 +240,8 @@ class LifeCycleUpdate extends Component {
                                             onClick={this.updateLifeCycleState}
                                         >
                                             {transitionState.event}
+                                            {this.state.isUpdating === transitionState.event &&
+                                            <CircularProgress size={18} /> }
                                         </Button>
                                     );
                                 }))
