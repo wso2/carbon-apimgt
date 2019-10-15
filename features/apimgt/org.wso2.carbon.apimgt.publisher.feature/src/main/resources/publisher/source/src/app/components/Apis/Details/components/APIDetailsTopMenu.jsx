@@ -61,7 +61,7 @@ const styles = theme => ({
 
 const APIDetailsTopMenu = (props) => {
     const {
-        classes, theme, api, isAPIProduct,
+        classes, theme, api, isAPIProduct, imageUpdate,
     } = props;
     const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
     const { settings } = useAppContext();
@@ -79,7 +79,7 @@ const APIDetailsTopMenu = (props) => {
                 </div>
             </Link>
             <VerticalDivider height={70} />
-            <ThumbnailView api={api} width={70} height={50} />
+            <ThumbnailView api={api} width={70} height={50} imageUpdate={imageUpdate} />
             <div style={{ marginLeft: theme.spacing.unit }}>
                 <Typography variant='h4'>
                     {api.name} {isAPIProduct ? '' : ':' + api.version}
@@ -143,6 +143,7 @@ APIDetailsTopMenu.propTypes = {
     theme: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({}).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
+    imageUpdate: PropTypes.number.isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(APIDetailsTopMenu);
