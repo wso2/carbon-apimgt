@@ -110,7 +110,11 @@ function Endpoints(props) {
                 return { ...initState, endpointConfig: config };
             }
             case 'endpointSecurity': { // set endpoint security
-                return { ...initState, endpointSecurity: value };
+                const tmpSecurityInfo = cloneDeep(value);
+                if (value && tmpSecurityInfo.password === '**********') {
+                    tmpSecurityInfo.password = '';
+                }
+                return { ...initState, endpointSecurity: tmpSecurityInfo };
             }
             case 'endpoint_type': { // set endpoint type
                 const config = getEndpointTemplateByType(
@@ -177,7 +181,7 @@ function Endpoints(props) {
     const validate = (implementationType) => {
         const { endpointConfig, endpointSecurity } = apiObject;
         if (endpointSecurity) {
-            if (endpointSecurity.username === '' || endpointSecurity.password === '') {
+            if (endpointSecurity.username === '' || endpointSecurity.password === null) {
                 return {
                     isValid: false,
                     message: intl.formatMessage({
