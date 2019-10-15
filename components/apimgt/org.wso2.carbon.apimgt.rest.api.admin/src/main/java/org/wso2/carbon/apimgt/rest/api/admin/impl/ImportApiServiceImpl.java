@@ -181,6 +181,8 @@ public class ImportApiServiceImpl extends ImportApiService {
                 Application application = consumer.getApplicationById(appId);
                 applicationDetails.setId(appId);
                 applicationDetails.setUUID(application.getUUID());
+                applicationDetails.setOwner(application.getOwner());
+                applicationDetails.updateSubscriber(application.getSubscriber());
                 consumer.updateApplication(applicationDetails);
             } else {
                 appId = consumer.addApplication(applicationDetails, ownerId);
@@ -189,7 +191,7 @@ public class ImportApiServiceImpl extends ImportApiService {
             List<APIIdentifier> skippedAPIs = new ArrayList<>();
             if (skipSubscriptions == null || !skipSubscriptions) {
                 skippedAPIs = importExportManager
-                        .importSubscriptions(applicationDetails, username, appId, update);
+                        .importSubscriptions(applicationDetails, ownerId, appId, update);
             }
             Application importedApplication = consumer.getApplicationById(appId);
             importedApplication.setOwner(ownerId);
@@ -203,7 +205,7 @@ public class ImportApiServiceImpl extends ImportApiService {
                 // Add application keys if present and keys does not exists in the current application
                 if (applicationDetails.getKeys().size() > 0 && importedApplication.getKeys().size() == 0) {
                     for (APIKey apiKey : applicationDetails.getKeys()) {
-                        importExportManager.addApplicationKey(username, importedApplication, apiKey);
+                        importExportManager.addApplicationKey(ownerId, importedApplication, apiKey);
                     }
                 }
             }
