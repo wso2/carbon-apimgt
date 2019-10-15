@@ -194,7 +194,7 @@ class LifeCycleUpdate extends Component {
                                 </Grid>
                                 {(api.lifeCycleStatus === 'CREATED' || api.lifeCycleStatus === 'PUBLISHED' ||
                                 api.lifeCycleStatus === 'PROTOTYPED') && (
-                                    <Grid item xs={4}>
+                                    <Grid item xs={3}>
                                         <CheckboxLabels api={api} />
                                     </Grid>
                                 )}

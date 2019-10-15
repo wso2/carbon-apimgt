@@ -161,7 +161,7 @@ function EndpointOverview(props) {
             return endpointTypes[1];
         } else if (type === 'default') {
             return endpointTypes[2];
-        } {
+        } else {
             const availableEndpoints = (endpointConfig.production_endpoints && endpointConfig.production_endpoints) ||
                 (endpointConfig.sandbox_endpoints && endpointConfig.sandbox_endpoints);
             // Handle the all endpoints de-select condition... Rollback to http.

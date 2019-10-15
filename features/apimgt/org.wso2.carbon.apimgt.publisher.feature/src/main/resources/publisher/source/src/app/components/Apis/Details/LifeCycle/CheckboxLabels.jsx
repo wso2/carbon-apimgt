@@ -38,11 +38,6 @@ const useStyles = makeStyles(theme => ({
         alignItems: 'left',
         justifyContent: 'center',
     },
-    headingBox: {
-        display: 'grid',
-        lineHeight: '38px',
-        justifyContent: 'center',
-    },
     iconTrue: {
         color: green[500],
         marginRight: theme.spacing(1),
@@ -84,8 +79,8 @@ export default function CheckboxLabels(props) {
 
     return (
         <Paper className={classes.paperCenter}>
-            <Grid xs={12} className={classes.headingBox}>
-                <Typography variant='h5' style={{ fontWeight: 600 }}>
+            <Grid xs={12}>
+                <Typography variant='h6'>
                     <FormattedMessage
                         id='Apis.Details.Configuration.Configuration.requirements'
                         defaultMessage='Requirements'
@@ -101,7 +96,7 @@ export default function CheckboxLabels(props) {
             {(api.lifeCycleStatus === 'CREATED' || api.lifeCycleStatus === 'PROTOTYPED') && (
                 <React.Fragment>
                     <Grid xs={12} className={classes.labelsGrid}>
-                        <Typography variant='h6' style={{ fontWeight: 600 }}>
+                        <Typography style={{ fontWeight: 600 }}>
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.publisher'
                                 defaultMessage='Publish'
@@ -143,7 +138,7 @@ export default function CheckboxLabels(props) {
                         </Grid>
                     </Grid>
                     <Grid xs={12} className={classes.labelsGrid}>
-                        <Typography variant='h6' style={{ fontWeight: 600 }}>
+                        <Typography style={{ fontWeight: 600 }}>
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.prototype'
                                 defaultMessage='Deploy as a Prototype'
@@ -173,7 +168,7 @@ export default function CheckboxLabels(props) {
             {api.lifeCycleStatus === 'PUBLISHED' && (
                 <React.Fragment>
                     <Grid xs={12} className={classes.labelsGrid}>
-                        <Typography variant='h6' style={{ fontWeight: 600 }} >
+                        <Typography style={{ fontWeight: 600 }} >
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.prototype'
                                 defaultMessage='Deploy as a Prototype'
