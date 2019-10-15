@@ -267,15 +267,16 @@ var validIPRange = function (startIP, endIP) {
     var endIPBlocks = endIP.split(".");
     var startIp = 0;
     var endIp = 0;
+    var power = 0;
     for (var i = 0; i < 4; i++) {
-        var power = 3-i;
+        power = 3-i;
         startIp = startIp + startIPBlocks[i]* Math.pow(256,power);
     }
     for (var i = 0; i < 4; i++) {
-        var power = 3-i;
+        power = 3-i;
         endIp = endIp + endIPBlocks[i] * Math.pow(256,power);
     }
-    if(startIp<endIp){
+    if(startIp < endIp){
         return true;
     }
     return false;
