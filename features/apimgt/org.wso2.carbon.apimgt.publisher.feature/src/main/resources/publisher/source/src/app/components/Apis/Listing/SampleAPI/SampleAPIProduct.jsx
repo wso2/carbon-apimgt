@@ -74,9 +74,6 @@ function SampleAPI(prop) {
 
     const [step, setStep] = useState(0);
     const [productPath, setProductPath] = useState(null);
-    let calculatorApiId = null;
-    let mathApiId = null;
-
     /**
      * Create API Product
      * @param {*} calculatorApiId
@@ -123,39 +120,25 @@ function SampleAPI(prop) {
      */
     const handleDeploySample = () => {
         setStep(1);
-        const restApi = new API();
-        const calculatorSearch = search(calculatorPayload).then((result) => {
-            calculatorApiId = result.body.list.length > 0 ? result.body.list[0].id : null;
-        });
-
-        const mathApiSearch = search(mathPayload).then((result) => {
-            mathApiId = result.body.list.length > 0 ? result.body.list[0].id : null;
-        });
-
-        Promise.all([calculatorSearch, mathApiSearch]).then(() => {
-            if (calculatorApiId === null && mathApiId === null) {
-                const calculatorPromise = restApi.create(calculatorPayload);
-                const mathPromise = restApi.create(mathPayload);
-                Promise.all([calculatorPromise, mathPromise]).then((data) => {
-                    calculatorApiId = data[0].body.id;
-                    mathApiId = data[1].body.id;
-                    createSampleProduct(calculatorApiId, mathApiId);
-                });
-            } else if (calculatorApiId === null && mathApiId !== null) {
-                const calculatorPromise = restApi.create(calculatorPayload);
-                Promise.all([calculatorPromise]).then((data) => {
-                    calculatorApiId = data[0].body.id;
-                    createSampleProduct(calculatorApiId, mathApiId);
-                });
-            } else if (mathApiId === null && calculatorApiId !== null) {
-                const mathPromise = restApi.create(mathPayload);
-                Promise.all([mathPromise]).then((data) => {
-                    mathApiId = data[0].body.id;
-                    createSampleProduct(calculatorApiId, mathApiId);
-                });
+        const calculatorSearch = search(calculatorPayload);
+        const mathApiSearch = search(mathPayload);
+        Promise.all([calculatorSearch, mathApiSearch]).then(([calResponse, mathResponse]) => {
+            const calAPI = calResponse.body.list.find(api => api.name === calculatorPayload.name);
+            const mathAPI = mathResponse.body.list.find(api => api.name === mathPayload.name);
+            let promisedCalAPI;
+            let promisedMathAPI;
+            if (!calAPI) {
+                promisedCalAPI = new API(calculatorPayload).save();
             } else {
-                createSampleProduct(calculatorApiId, mathApiId);
+                promisedCalAPI = Promise.resolve(calAPI);
             }
+            if (!mathAPI) {
+                promisedMathAPI = new API(mathPayload).save();
+            } else {
+                promisedMathAPI = Promise.resolve(mathAPI);
+            }
+            Promise.all([promisedCalAPI, promisedMathAPI]).then(([calculatorAPI, MathAPI]) =>
+                createSampleProduct(calculatorAPI.id, MathAPI.id));
         });
     };
 
