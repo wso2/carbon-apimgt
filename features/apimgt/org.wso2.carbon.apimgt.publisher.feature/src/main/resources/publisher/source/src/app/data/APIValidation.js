@@ -123,13 +123,7 @@ const documentSchema = Joi.extend(joi => ({
 const definition = {
     apiName: Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/).required()
         .error((errors) => {
-            const tmpErrors = [...errors];
-            errors.forEach((err, index) => {
-                const tmpError = { ...err };
-                tmpError.message = 'API Name ' + getMessage(err.type);
-                tmpErrors[index] = tmpError;
-            });
-            return tmpErrors;
+            return errors.map(error => ({ ...error, message: 'Name ' + getMessage(error.type) }));
         }),
     apiVersion: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/).required().error((errors) => {
         const tmpErrors = [...errors];
@@ -140,15 +134,9 @@ const definition = {
         });
         return tmpErrors;
     }),
-    apiContext: Joi.string().max(60).regex(/(?!.*\/t\/.*|.*\/t$)^[/a-zA-Z0-9/]{1,50}$/).required()
+    apiContext: Joi.string().max(60).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$]+$/).required()
         .error((errors) => {
-            const tmpErrors = [...errors];
-            errors.forEach((err, index) => {
-                const tmpError = { ...err };
-                tmpError.message = 'API Context ' + getMessage(err.type);
-                tmpErrors[index] = tmpError;
-            });
-            return tmpErrors;
+            return errors.map(error => ({ ...error, message: 'Context ' + getMessage(error.type) }));
         }),
     role: roleSchema.systemRole().role(),
     scope: scopeSchema.scopes().scope(),
