@@ -447,6 +447,7 @@ public final class APIConstants {
     public static final String PUBLISHING_TIME_OUT = "publishTimeout";
     public static final String NON_BLOCKING = "non-blocking";
     public static final String BLOCKING_CONDITIONS_STREAM_ID = "org.wso2.blocking.request.stream:1.0.0";
+    public static final String API_POLICY_STREAM_ID = "org.wso2.apipolicy.request.stream:1.0.0";
     public static final String TOKEN_REVOCATION_STREAM_ID = "org.wso2.apimgt.token.revocation.stream:1.0.0";
     public static final String KEY_TEMPLATE_STREM_ID = "org.wso2.keytemplate.request.stream:1.0.0";
 
@@ -792,6 +793,7 @@ public final class APIConstants {
 
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
     public static final String BLOCKING_EVENT_PUBLISHER = "blockingEventPublisher";
+    public static final String API_POLICY_EVENT_PUBLISHER = "apiPolicyEventPublisher";
     public static final String TOKEN_REVOCATION_EVENT_PUBLISHER = "tokenRevocationPublisher";
 
     public static final int AM_CREATOR_APIMGT_EXECUTION_ID = 200;
@@ -1403,6 +1405,14 @@ public final class APIConstants {
     public static final String BLOCKING_CONDITIONS_API = "API";
     public static final String BLOCKING_CONDITIONS_USER = "USER";
     public static final String BLOCKING_CONDITIONS_IP = "IP";
+
+    public static final String API_POLICY_KEY = "apiPolicyKey";
+    public static final String API_POLICY_TENANT_ID = "tenantId";
+    public static final String API_POLICY_CONDITIONS = "conditions";
+    public static final String API_POLICY_CONDITION_INVERTED = "isInverted";
+    public static final String API_POLICY_CONDITION_TYPE = "conditionType";
+    public static final String API_POLICY_CONDITION_NAME = "conditionName";
+    public static final String API_POLICY_CONDITION_VALUE = "conditionValue";
 
     public static final String REVOKED_TOKEN_KEY = "revokedToken";
     public static final String REVOKED_TOKEN_EXPIRY_TIME = "expiryTime";

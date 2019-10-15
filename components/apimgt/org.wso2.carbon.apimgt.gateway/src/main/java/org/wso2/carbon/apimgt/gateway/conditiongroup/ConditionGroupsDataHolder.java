@@ -19,7 +19,9 @@ package org.wso2.carbon.apimgt.gateway.conditiongroup;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,6 +58,18 @@ public class ConditionGroupsDataHolder {
      */
     Map<String, ConditionGroupDTO[]> getConditionGroupsMap() {
         return conditionGroupsMap;
+    }
+
+    public void updatePolicyConditionGroup(String key, ConditionDTO[] conditionDTOs) {
+        if (key != null) {
+            ConditionGroupDTO[] oldConditionGroupDTOs = conditionGroupsMap.get(key);
+
+            for (ConditionGroupDTO conditionGroupDTO: oldConditionGroupDTOs) {
+                if (!APIConstants.THROTTLE_POLICY_DEFAULT.equals(conditionGroupDTO.getConditionGroupId())) {
+                    conditionGroupDTO.setConditions(conditionDTOs);
+                }
+            }
+        }
     }
 
     /**

@@ -1,0 +1,20 @@
+{
+  "name": "org.wso2.apipolicy.request.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "API Policy Event Stream",
+  "payloadData": [
+    {
+      "name": "apiPolicyKey",
+      "type": "STRING"
+    },
+    {
+      "name": "tenantId",
+      "type": "INT"
+    },
+    {
+      "name": "conditions",
+      "type": "STRING"
+    }
+  ]
+}

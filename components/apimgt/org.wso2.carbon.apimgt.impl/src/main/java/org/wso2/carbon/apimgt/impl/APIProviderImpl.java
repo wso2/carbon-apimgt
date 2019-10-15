@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
+import org.json.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -76,14 +77,7 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.Usage;
-import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.Condition;
-import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
-import org.wso2.carbon.apimgt.api.model.policy.Policy;
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
-import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.GatewayCertificateManager;
@@ -5514,6 +5508,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 APIPolicy existingPolicy = apiMgtDAO.getAPIPolicy(policy.getPolicyName(), policy.getTenantId());
                 apiPolicy = apiMgtDAO.updateAPIPolicy(apiPolicy);
+                publishAPIPolicyEvent(apiPolicy);
+
                 executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
                 String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefault(apiPolicy);
                 //TODO rename level to  resource or appropriate name
@@ -7445,5 +7441,54 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
         return getGraphqlSchemaDefinition(apiId);
+    }
+
+    private void publishAPIPolicyEvent(APIPolicy apiPolicy) {
+        OutputEventAdapterService eventAdapterService = ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
+
+        //Generate Conditions Object
+        JSONArray conditionsJSON = new JSONArray();
+        if (!apiPolicy.getPipelines().isEmpty()) {
+            for (Condition condition : apiPolicy.getPipelines().get(0).getConditions()) {
+                JSONObject conditionJSON = new JSONObject();
+                conditionJSON.put(APIConstants.API_POLICY_CONDITION_INVERTED, condition.isInvertCondition());
+                if (PolicyConstants.IP_SPECIFIC_TYPE.equals(condition.getType())) {
+                    IPCondition ipCondition = (IPCondition) condition;
+                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.IP_SPECIFIC_TYPE);
+                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, PolicyConstants.IP_SPECIFIC_TYPE);
+                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, ipCondition.getSpecificIP());
+                } else if (PolicyConstants.IP_RANGE_TYPE.equals(condition.getType())) {
+                    IPCondition ipRangeCondition = (IPCondition) condition;
+                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.IP_RANGE_TYPE);
+                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, ipRangeCondition.getStartingIP());
+                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, ipRangeCondition.getEndingIP());
+                } else if (PolicyConstants.HEADER_TYPE.equals(condition.getType())) {
+                    HeaderCondition headerCondition = (HeaderCondition) condition;
+                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.HEADER_TYPE);
+                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, headerCondition.getHeaderName());
+                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, headerCondition.getValue());
+                } else if (PolicyConstants.QUERY_PARAMETER_TYPE.equals(condition.getType())) {
+                    QueryParameterCondition queryParameterCondition = (QueryParameterCondition) condition;
+                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.QUERY_PARAMETER_TYPE);
+                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, queryParameterCondition.getParameter());
+                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, queryParameterCondition.getValue());
+                } else if (PolicyConstants.JWT_CLAIMS_TYPE.equals(condition.getType())) {
+                    JWTClaimsCondition jwtClaimsCondition = (JWTClaimsCondition) condition;
+                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.JWT_CLAIMS_TYPE);
+                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, jwtClaimsCondition.getClaimUrl());
+                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, jwtClaimsCondition.getAttribute());
+                }
+                conditionsJSON.put(conditionJSON);
+            }
+        }
+
+        Object[] objects = new Object[]{apiPolicy.getPolicyName(), apiPolicy.getTenantId(), conditionsJSON.toString() };
+        Event apiPolicyMessage = new Event(APIConstants.API_POLICY_STREAM_ID, System.currentTimeMillis(),
+                null, null, objects);
+        ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();
+
+        if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
+            eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, Collections.EMPTY_MAP, apiPolicyMessage);
+        }
     }
 }

@@ -18,12 +18,15 @@
 
 package org.wso2.carbon.apimgt.jms.listener.utils;
 
+import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
+import org.wso2.carbon.apimgt.gateway.conditiongroup.ConditionGroupsDataHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
@@ -110,6 +113,11 @@ public class JMSMessageListener implements MessageListener {
                          */
                         handleRevokedTokenMessage((String) map.get(APIConstants.REVOKED_TOKEN_KEY),
                                 (Long) map.get(APIConstants.REVOKED_TOKEN_EXPIRY_TIME));
+                    } else if (map.get(APIConstants.API_POLICY_KEY) != null) {
+                         /*
+                         * This message contains API policy data in map which contains Keys
+                         */
+                        handleAPIPolicyMessage(map);
                     }
                 } else {
                     log.warn("Event dropped due to unsupported message type " + message.getClass());
@@ -282,5 +290,20 @@ public class JMSMessageListener implements MessageListener {
         //Remove token from the token's own tenant's cache.
         Utils.removeTokenFromTenantTokenCache(revokedToken, cachedTenantDomain);
         Utils.putInvalidTokenIntoTenantInvalidTokenCache(revokedToken, cachedTenantDomain);
+    }
+
+    private void handleAPIPolicyMessage(Map<String, Object> map) {
+        if (log.isDebugEnabled()) {
+            log.debug("Received Key -  apiPolicyKey : " + map.get(APIConstants.API_POLICY_KEY).toString() + " , " +
+                    "tenantId :" + map.get(APIConstants.API_POLICY_TENANT_ID).toString() + " , " +
+                    "conditions : " + map.get(APIConstants.API_POLICY_CONDITIONS));
+        }
+
+        String policyName = map.get(APIConstants.API_POLICY_KEY).toString();
+        int tenantId = (int) map.get(APIConstants.API_POLICY_TENANT_ID);
+        ConditionDTO[] conditions =  new Gson().fromJson(map.get(APIConstants.API_POLICY_CONDITIONS).toString(),
+                ConditionDTO[].class);
+
+        ConditionGroupsDataHolder.getInstance().updatePolicyConditionGroup(tenantId + "-" + policyName, conditions);
     }
 }
