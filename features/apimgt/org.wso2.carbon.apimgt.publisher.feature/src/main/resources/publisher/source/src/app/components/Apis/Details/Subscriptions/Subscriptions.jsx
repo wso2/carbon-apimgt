@@ -36,6 +36,10 @@ const useStyles = makeStyles(theme => ({
     emptyBox: {
         marginTop: theme.spacing.unit * 2,
     },
+    heading: {
+        marginTop: theme.spacing(3),
+        marginBottom: theme.spacing(2),
+    },
 }));
 
 /**
@@ -70,7 +74,7 @@ function Subscriptions(props) {
             {tenants !== 0 && (
                 <SubscriptionAvailability api={api} updateAPI={updateAPI} />
             )}
-            <div style={{ marginTop: '20px', marginBottom: '20px' }}>
+            <div className={classes.heading}>
                 <Typography variant='h4'>
                     <FormattedMessage
                         id='Apis.Details.Subscriptions.SubscriptionsTable.manage.subscriptions'

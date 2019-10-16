@@ -64,6 +64,12 @@ const useStyles = makeStyles(theme => ({
     saveButton: {
         marginTop: theme.spacing.unit * 2,
     },
+    heading: {
+        marginTop: theme.spacing(3),
+    },
+    tenantsList: {
+        height: theme.spacing(12),
+    },
 }));
 
 /**
@@ -136,7 +142,7 @@ export default function SimpleSelect(props) {
     }
     return (
         <Grid item xs={12} md={12} lg={12}>
-            <Typography variant='h4' style={{ marginTop: '20px' }}>
+            <Typography variant='h4' className={classes.heading}>
                 <FormattedMessage
                     id='Apis.Details.Subscriptions.SubscriptionAvailability.subscription.availability'
                     defaultMessage='Subscription Availability'
@@ -203,7 +209,7 @@ export default function SimpleSelect(props) {
                             </Button>
                         </Grid>
                         {isSpecificTenants ? (
-                            <Grid item xs={8} style={{ height: '100px' }} >
+                            <Grid item xs={8} className={classes.tenantsList} >
                                 <TenantAutocomplete setTenantList={setTenantList} api={api} />
                             </Grid>
                         ) : <Grid item xs={8} />}
