@@ -26,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
+import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.gateway.conditiongroup.ConditionGroupsDataHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
@@ -301,9 +302,9 @@ public class JMSMessageListener implements MessageListener {
 
         String policyName = map.get(APIConstants.API_POLICY_KEY).toString();
         int tenantId = (int) map.get(APIConstants.API_POLICY_TENANT_ID);
-        ConditionDTO[] conditions =  new Gson().fromJson(map.get(APIConstants.API_POLICY_CONDITIONS).toString(),
-                ConditionDTO[].class);
+        ConditionGroupDTO[] conditionGroups =  new Gson().fromJson(map.get(APIConstants.API_POLICY_CONDITION_GROUPS).toString(),
+                ConditionGroupDTO[].class);
 
-        ConditionGroupsDataHolder.getInstance().updatePolicyConditionGroup(tenantId + "-" + policyName, conditions);
+        ConditionGroupsDataHolder.getInstance().updatePolicyConditionGroup(tenantId + "-" + policyName, conditionGroups);
     }
 }

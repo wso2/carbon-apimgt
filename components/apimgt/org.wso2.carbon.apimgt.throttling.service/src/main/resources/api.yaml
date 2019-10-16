@@ -230,7 +230,7 @@ definitions:
   ConditionGroup:
     properties:
       conditionGroupId:
-        type: integer
+        type: string
       policyName:
         type: string
       tenantId:

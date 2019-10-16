@@ -7447,42 +7447,50 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         OutputEventAdapterService eventAdapterService = ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
 
         //Generate Conditions Object
-        JSONArray conditionsJSON = new JSONArray();
+        JSONArray conditionGroupsJSON = new JSONArray();
+
         if (!apiPolicy.getPipelines().isEmpty()) {
-            for (Condition condition : apiPolicy.getPipelines().get(0).getConditions()) {
-                JSONObject conditionJSON = new JSONObject();
-                conditionJSON.put(APIConstants.API_POLICY_CONDITION_INVERTED, condition.isInvertCondition());
-                if (PolicyConstants.IP_SPECIFIC_TYPE.equals(condition.getType())) {
-                    IPCondition ipCondition = (IPCondition) condition;
-                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.IP_SPECIFIC_TYPE);
-                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, PolicyConstants.IP_SPECIFIC_TYPE);
-                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, ipCondition.getSpecificIP());
-                } else if (PolicyConstants.IP_RANGE_TYPE.equals(condition.getType())) {
-                    IPCondition ipRangeCondition = (IPCondition) condition;
-                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.IP_RANGE_TYPE);
-                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, ipRangeCondition.getStartingIP());
-                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, ipRangeCondition.getEndingIP());
-                } else if (PolicyConstants.HEADER_TYPE.equals(condition.getType())) {
-                    HeaderCondition headerCondition = (HeaderCondition) condition;
-                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.HEADER_TYPE);
-                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, headerCondition.getHeaderName());
-                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, headerCondition.getValue());
-                } else if (PolicyConstants.QUERY_PARAMETER_TYPE.equals(condition.getType())) {
-                    QueryParameterCondition queryParameterCondition = (QueryParameterCondition) condition;
-                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.QUERY_PARAMETER_TYPE);
-                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, queryParameterCondition.getParameter());
-                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, queryParameterCondition.getValue());
-                } else if (PolicyConstants.JWT_CLAIMS_TYPE.equals(condition.getType())) {
-                    JWTClaimsCondition jwtClaimsCondition = (JWTClaimsCondition) condition;
-                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.JWT_CLAIMS_TYPE);
-                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, jwtClaimsCondition.getClaimUrl());
-                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, jwtClaimsCondition.getAttribute());
+            for (Pipeline conditionGroup: apiPolicy.getPipelines()) {
+                JSONObject conditionGroupJSON = new JSONObject();
+                JSONArray conditionsJSON = new JSONArray();
+                for (Condition condition : conditionGroup.getConditions()) {
+                    JSONObject conditionJSON = new JSONObject();
+                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_INVERTED, condition.isInvertCondition());
+                    if (PolicyConstants.IP_SPECIFIC_TYPE.equals(condition.getType())) {
+                        IPCondition ipCondition = (IPCondition) condition;
+                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.IP_SPECIFIC_TYPE);
+                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, PolicyConstants.IP_SPECIFIC_TYPE);
+                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, ipCondition.getSpecificIP());
+                    } else if (PolicyConstants.IP_RANGE_TYPE.equals(condition.getType())) {
+                        IPCondition ipRangeCondition = (IPCondition) condition;
+                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.IP_RANGE_TYPE);
+                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, ipRangeCondition.getStartingIP());
+                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, ipRangeCondition.getEndingIP());
+                    } else if (PolicyConstants.HEADER_TYPE.equals(condition.getType())) {
+                        HeaderCondition headerCondition = (HeaderCondition) condition;
+                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.HEADER_TYPE);
+                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, headerCondition.getHeaderName());
+                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, headerCondition.getValue());
+                    } else if (PolicyConstants.QUERY_PARAMETER_TYPE.equals(condition.getType())) {
+                        QueryParameterCondition queryParameterCondition = (QueryParameterCondition) condition;
+                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.QUERY_PARAMETER_TYPE);
+                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, queryParameterCondition.getParameter());
+                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, queryParameterCondition.getValue());
+                    } else if (PolicyConstants.JWT_CLAIMS_TYPE.equals(condition.getType())) {
+                        JWTClaimsCondition jwtClaimsCondition = (JWTClaimsCondition) condition;
+                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.JWT_CLAIMS_TYPE);
+                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, jwtClaimsCondition.getClaimUrl());
+                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, jwtClaimsCondition.getAttribute());
+                    }
+                    conditionsJSON.put(conditionJSON);
                 }
-                conditionsJSON.put(conditionJSON);
+                conditionGroupJSON.put(APIConstants.API_POLICY_CONDITION_GROUP_ID, "_condition_" + conditionGroup.getId());
+                conditionGroupJSON.put(APIConstants.API_POLICY_CONDITIONS, conditionsJSON);
+                conditionGroupsJSON.put(conditionGroupJSON);
             }
         }
 
-        Object[] objects = new Object[]{apiPolicy.getPolicyName(), apiPolicy.getTenantId(), conditionsJSON.toString() };
+        Object[] objects = new Object[]{apiPolicy.getPolicyName(), apiPolicy.getTenantId(), conditionGroupsJSON.toString() };
         Event apiPolicyMessage = new Event(APIConstants.API_POLICY_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
         ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();

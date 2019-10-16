@@ -110,21 +110,13 @@ public class ConditionGroupsRetriever extends TimerTask {
 
     private void loadConditionGroupsFromWebService() {
         ConditionGroupDTO[] conditionGroupDTOS = retrieveConditionGroupsData();
-        if(conditionGroupDTOS != null) {
+        if (conditionGroupDTOS != null && conditionGroupDTOS.length > 0) {
             for (ConditionGroupDTO conditionGroupDTO : conditionGroupDTOS) {
-                org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO[] convertedConditionGroupDTOS = new org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO[2];
-
-                org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO defaultGroup = new org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO();
-                defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
-                convertedConditionGroupDTOS[0] = defaultGroup;
-
-                convertedConditionGroupDTOS[1] = convertConditionGroupDTO(conditionGroupDTO);
-
                 ConditionGroupsDataHolder.getInstance().addConditionGroupToMap(
                         conditionGroupDTO.getTenantId() + "-" + conditionGroupDTO.getPolicyName(),
-                        convertedConditionGroupDTOS);
-                if(log.isDebugEnabled()) {
-                    log.debug("Condition Groups for throttle policy : " + conditionGroupDTO.getPolicyName()
+                        convertConditionGroupDTO(conditionGroupDTO));
+                if (log.isDebugEnabled()) {
+                    log.debug("Condition Group for throttle policy : " + conditionGroupDTO.getPolicyName()
                             + " is added to the map.");
                 }
             }
@@ -151,7 +143,7 @@ public class ConditionGroupsRetriever extends TimerTask {
         org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO convertedConditionGroupDTO = new org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO();
 
         //Convert
-        convertedConditionGroupDTO.setConditionGroupId(String.valueOf(retrievedConditionGroupDTO.getConditionGroupId()));
+        convertedConditionGroupDTO.setConditionGroupId(retrievedConditionGroupDTO.getConditionGroupId());
 
         org.wso2.carbon.apimgt.api.dto.ConditionDTO[] conditions =
                 new org.wso2.carbon.apimgt.api.dto.ConditionDTO[retrievedConditionGroupDTO.getConditions().length];

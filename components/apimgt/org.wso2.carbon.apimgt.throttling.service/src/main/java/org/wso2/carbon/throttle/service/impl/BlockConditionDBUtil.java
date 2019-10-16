@@ -288,7 +288,7 @@ public final class BlockConditionDBUtil {
                 int tenantId = rs.getInt("TENANT_ID");
 
                 ConditionGroupDTO conditionGroupDTO = new ConditionGroupDTO();
-                conditionGroupDTO.setConditionGroupId(conditionGroupId);
+                conditionGroupDTO.setConditionGroupId("_condition_" + conditionGroupId);
                 conditionGroupDTO.setPolicyName(policyName);
                 conditionGroupDTO.setTenantId(tenantId);
 

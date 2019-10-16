@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.gateway.dto;
  */
 public class ConditionGroupDTO {
 
-    private int conditionGroupId;
+    private String conditionGroupId;
 
     private String policyName;
 
@@ -30,11 +30,11 @@ public class ConditionGroupDTO {
 
     private ConditionDTO[] conditions;
 
-    public int getConditionGroupId() {
+    public String getConditionGroupId() {
         return conditionGroupId;
     }
 
-    public void setConditionGroupId(int conditionGroupId) {
+    public void setConditionGroupId(String conditionGroupId) {
         this.conditionGroupId = conditionGroupId;
     }
 

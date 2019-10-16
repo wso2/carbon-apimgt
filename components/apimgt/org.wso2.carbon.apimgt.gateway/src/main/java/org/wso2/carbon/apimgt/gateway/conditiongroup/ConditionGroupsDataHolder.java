@@ -19,10 +19,9 @@ package org.wso2.carbon.apimgt.gateway.conditiongroup;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,10 +39,17 @@ public class ConditionGroupsDataHolder {
      * @param key key to be added.
      * @param value value to be added.
      */
-    public void addConditionGroupToMap(String key, ConditionGroupDTO[] value) {
+    public void addConditionGroupToMap(String key, ConditionGroupDTO value) {
         if (key != null && value != null) {
+            ConditionGroupDTO[] conditionGroupDTOS = conditionGroupsMap.get(key);
+            if (conditionGroupDTOS == null) {
+                conditionGroupDTOS = new ConditionGroupDTO[1];
+            } else {
+                conditionGroupDTOS = Arrays.copyOf(conditionGroupDTOS, conditionGroupDTOS.length + 1);
+            }
+            conditionGroupDTOS[conditionGroupDTOS.length - 1] = value;
             log.debug("Adding condition group key, value pair to the map :" + key + " , " + value);
-            conditionGroupsMap.put(key, value);
+            conditionGroupsMap.put(key, conditionGroupDTOS);
         }
     }
 
@@ -60,15 +66,9 @@ public class ConditionGroupsDataHolder {
         return conditionGroupsMap;
     }
 
-    public void updatePolicyConditionGroup(String key, ConditionDTO[] conditionDTOs) {
+    public void updatePolicyConditionGroup(String key, ConditionGroupDTO[] conditionGroupsDTOS) {
         if (key != null) {
-            ConditionGroupDTO[] oldConditionGroupDTOs = conditionGroupsMap.get(key);
-
-            for (ConditionGroupDTO conditionGroupDTO: oldConditionGroupDTOs) {
-                if (!APIConstants.THROTTLE_POLICY_DEFAULT.equals(conditionGroupDTO.getConditionGroupId())) {
-                    conditionGroupDTO.setConditions(conditionDTOs);
-                }
-            }
+            conditionGroupsMap.put(key, conditionGroupsDTOS);
         }
     }
 

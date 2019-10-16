@@ -1408,11 +1408,13 @@ public final class APIConstants {
 
     public static final String API_POLICY_KEY = "apiPolicyKey";
     public static final String API_POLICY_TENANT_ID = "tenantId";
+    public static final String API_POLICY_CONDITION_GROUPS = "conditionGroups";
     public static final String API_POLICY_CONDITIONS = "conditions";
     public static final String API_POLICY_CONDITION_INVERTED = "isInverted";
     public static final String API_POLICY_CONDITION_TYPE = "conditionType";
     public static final String API_POLICY_CONDITION_NAME = "conditionName";
     public static final String API_POLICY_CONDITION_VALUE = "conditionValue";
+    public static final String API_POLICY_CONDITION_GROUP_ID = "conditionGroupId";
 
     public static final String REVOKED_TOKEN_KEY = "revokedToken";
     public static final String REVOKED_TOKEN_EXPIRY_TIME = "expiryTime";

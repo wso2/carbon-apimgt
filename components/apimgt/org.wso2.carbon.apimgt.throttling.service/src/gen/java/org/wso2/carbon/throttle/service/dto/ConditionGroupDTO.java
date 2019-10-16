@@ -18,7 +18,7 @@ public class ConditionGroupDTO  {
   
   
   
-  private Integer conditionGroupId = null;
+  private String conditionGroupId = null;
   
   
   private String policyName = null;
@@ -34,10 +34,10 @@ public class ConditionGroupDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("conditionGroupId")
-  public Integer getConditionGroupId() {
+  public String getConditionGroupId() {
     return conditionGroupId;
   }
-  public void setConditionGroupId(Integer conditionGroupId) {
+  public void setConditionGroupId(String conditionGroupId) {
     this.conditionGroupId = conditionGroupId;
   }
 
