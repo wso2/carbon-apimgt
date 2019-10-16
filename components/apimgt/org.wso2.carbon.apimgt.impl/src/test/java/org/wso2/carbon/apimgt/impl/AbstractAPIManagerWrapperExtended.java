@@ -50,8 +50,9 @@ public class AbstractAPIManagerWrapperExtended extends AbstractAPIManagerWrapper
     public Resource getCustomMediationResourceFromUuid(String mediationPolicyId){
         return new ResourceImpl("/apimgt/apis", new ResourceDO());
     }
+
     @Override
-    public Resource getApiSpecificMediationResourceFromUuid(String uuid, String resourcePath){
+    public Resource getApiSpecificMediationResourceFromUuid(Identifier identifier, String uuid, String resourcePath) {
         return new ResourceImpl("/apimgt/apis", new ResourceDO());
     }
 

@@ -42,7 +42,6 @@ import Utils from 'AppData/Utils';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
-import { PageNotFound } from 'AppComponents/Base/Errors';
 import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import { Progress } from 'AppComponents/Shared';
@@ -158,12 +157,13 @@ class Details extends Component {
             apiNotFound: false,
             // updateAPI: this.updateAPI,
             isAPIProduct,
+            imageUpdate: 0,
         };
         this.setAPI = this.setAPI.bind(this);
         this.setAPIProduct = this.setAPIProduct.bind(this);
         this.updateAPI = this.updateAPI.bind(this);
+        this.setImageUpdate = this.setImageUpdate.bind(this);
     }
-
     /**
      * @inheritDoc
      * @memberof Details
@@ -203,7 +203,16 @@ class Details extends Component {
             this.setAPI();
         }
     }
-
+    /**
+     *
+     * This method is a hack to update the image in the toolbar when a new image is uploaded
+     * @memberof Details
+     */
+    setImageUpdate() {
+        this.setState(previousState => ({
+            imageUpdate: previousState.imageUpdate + 1,
+        }));
+    }
     /**
      *
      *
@@ -396,7 +405,9 @@ class Details extends Component {
      * @returns {Component} Render API Details page
      */
     render() {
-        const { api, apiNotFound, isAPIProduct } = this.state;
+        const {
+            api, apiNotFound, isAPIProduct, imageUpdate,
+        } = this.state;
         const {
             classes,
             theme,
@@ -410,7 +421,7 @@ class Details extends Component {
 
         // pageLocation renaming is to prevent es-lint errors saying can't use global name location
         if (!Details.isValidURL(pathname)) {
-            return <PageNotFound location={pageLocation} />;
+            return <ResourceNotFound location={pageLocation} />;
         }
         const uuid = match.params.apiUUID || match.params.api_uuid || match.params.apiProdUUID;
         const pathPrefix = '/' + (isAPIProduct ? 'api-products' : 'apis') + '/' + uuid + '/';
@@ -424,7 +435,7 @@ class Details extends Component {
                 },
                 bodyMessage: {
                     id: 'Apis.Details.index.api.not.found.body',
-                    defaultMessage: "Can't find the API with the id {uuid}",
+                    defaultMessage: "Can't find the API with the given id",
                 },
             });
             const resourceNotFountMessage = {
@@ -449,6 +460,7 @@ class Details extends Component {
                         updateAPI: this.updateAPI,
                         isAPIProduct,
                         setAPI: this.setAPI,
+                        setImageUpdate: this.setImageUpdate,
                     }}
                 >
                     <div className={classes.LeftMenu}>
@@ -585,7 +597,7 @@ class Details extends Component {
                         )}
                     </div>
                     <div className={classes.content}>
-                        <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} />
+                        <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} imageUpdate={imageUpdate} />
                         <div className={classes.contentInside}>
                             <Switch>
                                 <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
@@ -631,10 +643,7 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.OPERATIONS}
-                                    component={() => (<Operations
-                                        api={api}
-                                        updateAPI={this.updateAPI}
-                                    />)}
+                                    component={() => <Operations api={api} updateAPI={this.updateAPI} />}
                                 />
                                 <Route
                                     exact

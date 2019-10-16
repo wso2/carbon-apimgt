@@ -2507,7 +2507,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                         filePath, registry);
-                documentation.setFilePath(addResourceFile(filePath, icon));
+                documentation.setFilePath(addResourceFile(apiId, filePath, icon));
                 APIUtil.setFilePermission(filePath);
             } catch (APIManagementException e) {
                 handleException("Failed to add file to document " + documentation.getName(), e);
@@ -2601,7 +2601,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.getId().getApiName(), newVersion);
                 ResourceFile icon = new ResourceFile(oldImage.getContentStream(), oldImage.getMediaType());
                 artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL,
-                        addResourceFile(APIUtil.getIconPath(newApiId), icon));
+                        addResourceFile(api.getId(), APIUtil.getIconPath(newApiId), icon));
             }
             // If the API has custom mediation policy, copy it to new version.
 
@@ -2623,7 +2623,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         ResourceFile seqFile = new ResourceFile(inSequence.getContentStream(), inSequence.getMediaType());
                         OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
                         String seqFileName = seqElment.getAttributeValue(new QName("name"));
-                        addResourceFile(inSeqNewFilePath + seqFileName, seqFile);
+                        addResourceFile(api.getId(), inSeqNewFilePath + seqFileName, seqFile);
                     }
                 }
             }
@@ -2647,7 +2647,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         ResourceFile seqFile = new ResourceFile(outSequence.getContentStream(), outSequence.getMediaType());
                         OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
                         String seqFileName = seqElment.getAttributeValue(new QName("name"));
-                        addResourceFile(outSeqNewFilePath + seqFileName, seqFile);
+                        addResourceFile(api.getId(), outSeqNewFilePath + seqFileName, seqFile);
                     }
                 }
             }
@@ -7354,7 +7354,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 APIUtil.setResourcePermissions(apiProduct.getId().getProviderName(), apiProduct.getVisibility(), visibleRoles,
                         filePath, registry);
-                documentation.setFilePath(addResourceFile(filePath, icon));
+                documentation.setFilePath(addResourceFile(productId, filePath, icon));
                 APIUtil.setFilePermission(filePath);
             } catch (APIManagementException e) {
                 handleException("Failed to add file to product document " + documentation.getName(), e);

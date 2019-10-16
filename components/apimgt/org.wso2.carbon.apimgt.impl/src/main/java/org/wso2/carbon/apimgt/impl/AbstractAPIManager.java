@@ -506,7 +506,7 @@ public abstract class AbstractAPIManager implements APIManager {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(uuid);
             if (apiArtifact != null) {
                 API api = getApiForPublishing(registry, apiArtifact);
-                APIIdentifier apiIdentifier = APIUtil.getAPIIdentifier(apiArtifact.getPath());
+                APIIdentifier apiIdentifier = api.getId();
                 WorkflowDTO workflowDTO = APIUtil.getAPIWorkflowStatus(apiIdentifier, WF_TYPE_AM_API_STATE);
                 if (workflowDTO != null) {
                     WorkflowStatus status = workflowDTO.getStatus();
@@ -1201,7 +1201,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return swaggerDoc;
     }
 
-    public String addResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException {
+    public String addResourceFile(Identifier identifier, String resourcePath, ResourceFile resourceFile) throws APIManagementException {
         try {
             Resource thumb = registry.newResource();
             thumb.setContentStream(resourceFile.getContent());
@@ -1446,8 +1446,6 @@ public abstract class AbstractAPIManager implements APIManager {
             if(artifact == null) {
                 return documentation;
             }
-            APIIdentifier apiIdentifier = APIUtil.getAPIIdentifier(artifact.getPath());
-            checkAccessControlPermission(apiIdentifier);
             if (null != artifact) {
                 documentation = APIUtil.getDocumentation(artifact);
                 documentation.setCreatedDate(registryType.get(artifact.getPath()).getCreatedTime());
@@ -2303,14 +2301,15 @@ public abstract class AbstractAPIManager implements APIManager {
     /**
      * Returns Registry resource matching given mediation policy identifier
      *
+     * @param identifier API identifier
      * @param uuid         mediation policy identifier
      * @param resourcePath registry path to the API resource
      * @return Registry resource matches given identifier or null
      * @throws APIManagementException If fails to get the resource matching given identifier
      */
     @Override
-    public Resource getApiSpecificMediationResourceFromUuid
-    (String uuid, String resourcePath) throws APIManagementException {
+    public Resource getApiSpecificMediationResourceFromUuid(Identifier identifier, String uuid, String resourcePath)
+            throws APIManagementException {
         try {
             Resource resource = registry.get(resourcePath);
             if (resource instanceof Collection) {
@@ -2454,17 +2453,17 @@ public abstract class AbstractAPIManager implements APIManager {
 
     /**
      * Returns Mediation policy specify by given identifier
-     *
+     * @param identifier API or Product identifier
      * @param apiResourcePath   registry path to the API resource
      * @param mediationPolicyId mediation policy identifier
      * @return Mediation object contains details of the mediation policy or null
      */
     @Override
-    public Mediation getApiSpecificMediationPolicy(String apiResourcePath, String mediationPolicyId)
-            throws APIManagementException {
+    public Mediation getApiSpecificMediationPolicy(Identifier identifier, String apiResourcePath,
+            String mediationPolicyId) throws APIManagementException {
         //Get registry resource correspond to given policy identifier
-        Resource mediationResource = getApiSpecificMediationResourceFromUuid(mediationPolicyId,
-                apiResourcePath);
+        Resource mediationResource =
+                getApiSpecificMediationResourceFromUuid(identifier, mediationPolicyId, apiResourcePath);
         Mediation mediation = null;
         if (mediationResource != null) {
             try {
@@ -2504,15 +2503,15 @@ public abstract class AbstractAPIManager implements APIManager {
 
     /**
      * Delete existing API specific mediation policy
-     *
+     * @param identifier API or Product identifier
      * @param apiResourcePath   path to the API registry resource
      * @param mediationPolicyId mediation policy identifier
      */
     @Override
-    public Boolean deleteApiSpecificMediationPolicy(String apiResourcePath, String mediationPolicyId)
-            throws APIManagementException {
-        Resource mediationResource = this.getApiSpecificMediationResourceFromUuid(mediationPolicyId,
-                apiResourcePath);
+    public Boolean deleteApiSpecificMediationPolicy(Identifier identifier, String apiResourcePath,
+            String mediationPolicyId) throws APIManagementException {
+        Resource mediationResource =
+                this.getApiSpecificMediationResourceFromUuid(identifier, mediationPolicyId, apiResourcePath);
         if (mediationResource != null) {
             //If resource exists
             String mediationPath = mediationResource.getPath();
@@ -3443,9 +3442,10 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public String addProductResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException {
+    public String addProductResourceFile(APIProductIdentifier identifier, String resourcePath,
+            ResourceFile resourceFile) throws APIManagementException {
         //todo : implement access control checks here and move to userawareAPIProvider
-        return addResourceFile(resourcePath, resourceFile);
+        return addResourceFile(identifier, resourcePath, resourceFile);
     }
 
 

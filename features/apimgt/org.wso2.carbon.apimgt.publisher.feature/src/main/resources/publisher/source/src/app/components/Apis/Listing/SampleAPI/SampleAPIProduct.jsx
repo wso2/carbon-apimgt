@@ -26,6 +26,7 @@ import green from '@material-ui/core/colors/green';
 import Icon from '@material-ui/core/Icon';
 import { PropTypes } from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import queryString from 'query-string';
 
 import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
@@ -67,45 +68,77 @@ const useStyles = makeStyles(theme => ({
  * @class SampleAPI
  * @extends {Component}
  */
-function SampleAPI(props) {
+function SampleAPI(prop) {
     const classes = useStyles();
+    const { intl } = prop;
 
     const [step, setStep] = useState(0);
     const [productPath, setProductPath] = useState(null);
+    /**
+     * Create API Product
+     * @param {*} calculatorApiId
+     * @param {*} mathApiId
+     */
+    function createSampleProduct(calId, mathId) {
+        setStep(3);
+        const sampleProductPayload = apiProduct(calId, mathId);
+        const productRestApi = new APIProduct();
+
+        const productPromise = productRestApi.create(sampleProductPayload);
+        productPromise
+            .then((prod) => {
+                setStep(4);
+                setProductPath(`/api-products/${prod.body.id}/overview`);
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Listing.SampleAPI.SampleAPIProduct.successful',
+                    defaultMessage: 'Sample CalculatorAPIProduct published successfully',
+                }));
+            })
+            .catch((error) => {
+                setStep(0);
+                this.setState({ deploying: false });
+                Alert.error(error);
+            });
+    }
+
+    /**
+     *  Check apis before create them
+     * @param {*} api
+     */
+    function search(api) {
+        const composeQuery = '?query=name:' + api.name;
+        const composeQueryJSON = queryString.parse(composeQuery);
+        composeQueryJSON.limit = 1;
+        composeQueryJSON.offset = 0;
+        return API.search(composeQueryJSON);
+    }
+
 
     /**
      *Handle onClick event for `Deploy Sample API` Button
      * @memberof SampleAPI
      */
     const handleDeploySample = () => {
-        const { intl } = props;
         setStep(1);
-        const restApi = new API();
-        const calculatorPromise = restApi.create(calculatorPayload);
-        const mathPromise = restApi.create(mathPayload);
-
-        Promise.all([calculatorPromise, mathPromise]).then((data) => {
-            setStep(3);
-            const calculatorApiId = data[0].body.id;
-            const mathApiId = data[1].body.id;
-            const sampleProductPayload = apiProduct(calculatorApiId, mathApiId);
-            const productRestApi = new APIProduct();
-
-            const productPromise = productRestApi.create(sampleProductPayload);
-            productPromise
-                .then((prod) => {
-                    setStep(4);
-                    setProductPath(`/api-products/${prod.body.id}/overview`);
-                    Alert.info(intl.formatMessage({
-                        id: 'Apis.Listing.SampleAPI.SampleAPIProduct.successful',
-                        defaultMessage: 'CalculatorAPIProduct published successfully',
-                    }));
-                })
-                .catch((error) => {
-                    setStep(0);
-                    this.setState({ deploying: false });
-                    Alert.error(error);
-                });
+        const calculatorSearch = search(calculatorPayload);
+        const mathApiSearch = search(mathPayload);
+        Promise.all([calculatorSearch, mathApiSearch]).then(([calResponse, mathResponse]) => {
+            const calAPI = calResponse.body.list.find(api => api.name === calculatorPayload.name);
+            const mathAPI = mathResponse.body.list.find(api => api.name === mathPayload.name);
+            let promisedCalAPI;
+            let promisedMathAPI;
+            if (!calAPI) {
+                promisedCalAPI = new API(calculatorPayload).save();
+            } else {
+                promisedCalAPI = Promise.resolve(calAPI);
+            }
+            if (!mathAPI) {
+                promisedMathAPI = new API(mathPayload).save();
+            } else {
+                promisedMathAPI = Promise.resolve(mathAPI);
+            }
+            Promise.all([promisedCalAPI, promisedMathAPI]).then(([calculatorAPI, MathAPI]) =>
+                createSampleProduct(calculatorAPI.id, MathAPI.id));
         });
     };
 

@@ -88,7 +88,8 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     }
 
     @Override
-    public String addResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException{
+    public String addResourceFile(Identifier identifier, String resourcePath, ResourceFile resourceFile)
+            throws APIManagementException {
         return null;
     }
 

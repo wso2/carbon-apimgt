@@ -20,7 +20,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import { PageNotFound } from 'AppComponents/Base/Errors/index';
+import { PageNotFound } from 'AppComponents/Base/Errors/ResourceNotFound';
 
 import APICreateDefault from './Default/APICreateDefault';
 import APIProductCreateWrapper from './APIProduct/APIProductCreateWrapper';

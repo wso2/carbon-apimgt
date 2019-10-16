@@ -36,6 +36,10 @@ const useStyles = makeStyles(theme => ({
     emptyBox: {
         marginTop: theme.spacing.unit * 2,
     },
+    heading: {
+        marginTop: theme.spacing(3),
+        marginBottom: theme.spacing(2),
+    },
 }));
 
 /**
@@ -70,6 +74,20 @@ function Subscriptions(props) {
             {tenants !== 0 && (
                 <SubscriptionAvailability api={api} updateAPI={updateAPI} />
             )}
+            <div className={classes.heading}>
+                <Typography variant='h4'>
+                    <FormattedMessage
+                        id='Apis.Details.Subscriptions.SubscriptionsTable.manage.subscriptions'
+                        defaultMessage='Manage Subscriptions'
+                    />
+                </Typography>
+                <Typography variant='caption' gutterBottom >
+                    <FormattedMessage
+                        id='Apis.Details.Subscriptions.SubscriptionsTable.sub.heading'
+                        defaultMessage='Manage subscriptions of the API'
+                    />
+                </Typography>
+            </div>
             {subscriptions !== 0 ? (
                 <SubscriptionsTable api={api} />
             ) : (

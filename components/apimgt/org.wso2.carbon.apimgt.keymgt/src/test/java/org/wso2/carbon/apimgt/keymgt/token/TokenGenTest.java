@@ -16,23 +16,15 @@
 
 package org.wso2.carbon.apimgt.keymgt.token;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.MessageDigest;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
-import org.junit.Assert;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
@@ -40,12 +32,16 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
-import org.wso2.carbon.identity.oauth.cache.AuthorizationGrantCacheKey;
+import org.wso2.carbon.core.util.KeyStoreManager;
+import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.MessageDigest;
+import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Map;
-import org.wso2.carbon.core.util.KeyStoreManager;
-//import org.wso2.carbon.apimgt.impl.utils.TokenGenUtil;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest( {AbstractJWTGenerator.class,APIUtil.class,KeyStoreManager.class})
@@ -65,8 +61,8 @@ public class TokenGenTest {
     public void testAbstractJWTGenerator() throws Exception {
         JWTGenerator jwtGen = new JWTGenerator() {
             @Override
-            protected Map<String, String> getClaimsFromCache(AuthorizationGrantCacheKey cacheKey) {
-                return new HashMap<String, String>();
+            protected Map<String, String> convertClaimMap(Map<ClaimMapping, String> userAttributes) {
+                return new HashMap<>();
             }
         };
         APIKeyValidationInfoDTO dto=new APIKeyValidationInfoDTO();
@@ -126,8 +122,8 @@ public class TokenGenTest {
     public void testJWTGeneration() throws Exception {
         JWTGenerator jwtGen = new JWTGenerator() {
             @Override
-            public Map<String, String> getClaimsFromCache(AuthorizationGrantCacheKey cacheKey) {
-                return new HashMap<String, String>();
+            public Map<String, String> convertClaimMap(Map<ClaimMapping, String> userAttributes) {
+                return new HashMap<>();
             }
         };
         APIKeyValidationInfoDTO dto=new APIKeyValidationInfoDTO();

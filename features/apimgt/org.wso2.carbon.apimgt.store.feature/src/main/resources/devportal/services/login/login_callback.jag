@@ -65,13 +65,13 @@
     // Setting access token part 1 as secured HTTP only cookie, Can't restrict the path to /api/am/store
     // because partial HTTP only cookie is required for get the user information from access token,
     // hence setting the HTTP only access token path to /store/
-    var cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': accessTokenPart2, 'path': site.context + "/", "HttpOnly": true, "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
+    var cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': accessTokenPart2, 'path': site.context + "/", "httpOnly": true, "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
     response.addCookie(cookie);
 
-    cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': accessTokenPart2, 'path': "/api/am/store/", "HttpOnly": true, "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
+    cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': accessTokenPart2, 'path': "/api/am/store/", "httpOnly": true, "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
     response.addCookie(cookie);
 
-    cookie = {'name': 'AM_REF_TOKEN_DEFAULT_P2', 'value': refreshTokenPart2, 'path': site.context + "/", "HttpOnly": true, "secure": true, "maxAge": -1};
+    cookie = {'name': 'AM_REF_TOKEN_DEFAULT_P2', 'value': refreshTokenPart2, 'path': site.context + "/", "httpOnly": true, "secure": true, "maxAge": -1};
     response.addCookie(cookie);
 
     cookie = {'name': 'WSO2_AM_TOKEN_1_Default', 'value': accessTokenPart1, 'path': site.context + "/", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
