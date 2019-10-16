@@ -33,6 +33,8 @@ function getMessage(errorType) {
             return 'should not be empty';
         case 'string.regex.base':
             return 'should not contain spaces or special characters';
+        case 'string.max':
+            return 'has exceeded the maximum number of characters';
         default:
             return 'should not be empty';
     }
@@ -119,15 +121,10 @@ const documentSchema = Joi.extend(joi => ({
 }));
 
 const definition = {
-    apiName: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/).required().error((errors) => {
-        const tmpErrors = [...errors];
-        errors.forEach((err, index) => {
-            const tmpError = { ...err };
-            tmpError.message = 'API Name ' + getMessage(err.type);
-            tmpErrors[index] = tmpError;
-        });
-        return tmpErrors;
-    }),
+    apiName: Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/).required()
+        .error((errors) => {
+            return errors.map(error => ({ ...error, message: 'Name ' + getMessage(error.type) }));
+        }),
     apiVersion: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/).required().error((errors) => {
         const tmpErrors = [...errors];
         errors.forEach((err, index) => {
@@ -137,15 +134,10 @@ const definition = {
         });
         return tmpErrors;
     }),
-    apiContext: Joi.string().regex(/(?!.*\/t\/.*|.*\/t$)^[/a-zA-Z0-9/]{1,50}$/).required().error((errors) => {
-        const tmpErrors = [...errors];
-        errors.forEach((err, index) => {
-            const tmpError = { ...err };
-            tmpError.message = 'API Context ' + getMessage(err.type);
-            tmpErrors[index] = tmpError;
-        });
-        return tmpErrors;
-    }),
+    apiContext: Joi.string().max(60).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$]+$/).required()
+        .error((errors) => {
+            return errors.map(error => ({ ...error, message: 'Context ' + getMessage(error.type) }));
+        }),
     role: roleSchema.systemRole().role(),
     scope: scopeSchema.scopes().scope(),
     url: Joi.string().uri().error((errors) => {

@@ -31,6 +31,15 @@ const useStyles = makeStyles(theme => ({
         color: theme.palette.error.main,
         marginLeft: theme.spacing(0.1),
     },
+    helperTextContext: {
+        '& p': {
+            textOverflow: 'ellipsis',
+            width: 400,
+            display: 'block',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+        },
+    },
 }));
 
 /**
@@ -104,15 +113,13 @@ export default function DefaultAPIForm(props) {
     function validate(field, value) {
         switch (field) {
             case 'name': {
-                const nameValidity = APIValidation.apiName.required().validate(value).error;
+                const nameValidity = APIValidation.apiName.required().validate(value, { abortEarly: false }).error;
                 if (nameValidity === null) {
                     APIValidation.apiParameter.validate(field + ':' + value).then((result) => {
                         if (result.body.list.length > 0) {
                             updateValidity({
                                 ...validity,
-                                name: {
-                                    message: value + ' name already exists',
-                                },
+                                name: { details: [{ message: 'Name ' + value + ' already exists' }] },
                             });
                         } else {
                             updateValidity({ ...validity, name: nameValidity });
@@ -124,7 +131,8 @@ export default function DefaultAPIForm(props) {
                 break;
             }
             case 'context': {
-                const contextValidity = APIValidation.apiContext.required().validate(value).error;
+                const contextValidity = APIValidation.apiContext.required()
+                    .validate(value, { abortEarly: false }).error;
                 if (contextValidity === null) {
                     const apiContext = value.includes('/') ? value + '/' + (isAPIProduct ? '1.0.0' : api.version)
                         : '/' + value + '/' + (isAPIProduct ? '1.0.0' : api.version);
@@ -132,7 +140,7 @@ export default function DefaultAPIForm(props) {
                         if (result.body.list.length > 0) {
                             updateValidity({
                                 ...validity,
-                                context: { message: apiContext + ' context with version already exists' },
+                                context: { details: [{ message: apiContext + ' context with version exists' }] },
                             });
                         } else {
                             updateValidity({ ...validity, context: contextValidity, version: null });
@@ -190,7 +198,12 @@ export default function DefaultAPIForm(props) {
                         </React.Fragment>
                     }
                     helperText={
-                        (validity.name && validity.name.message)
+                        (validity.name && validity.name.details.map((detail, index) => {
+                            return (
+                                <div style={{ marginTop: index !== 0 && '10px' }}>
+                                    {detail.message}
+                                </div>);
+                        }))
                     }
                     value={api.name}
                     name='name'
@@ -231,9 +244,14 @@ export default function DefaultAPIForm(props) {
                                         },
                                     }}
                                     helperText={
-                                        (validity.context && validity.context.message) ||
-                                        `API will be exposed in ${actualContext(api)} context at the gateway`
+                                        (validity.context && validity.context.details.map((detail, index) => {
+                                            return (
+                                                <div style={{ marginTop: index !== 0 && '10px' }}>
+                                                    {detail.message}
+                                                </div>);
+                                        })) || `API will be exposed in ${actualContext(api)} context at the gateway`
                                     }
+                                    classes={{ root: classes.helperTextContext }}
                                     margin='normal'
                                     variant='outlined'
                                 />
@@ -291,8 +309,13 @@ export default function DefaultAPIForm(props) {
                                         },
                                     }}
                                     helperText={
-                                        (validity.context && validity.context.message) ||
-                                        `API Product will be exposed in ${actualContext(api)} context at the gateway`
+                                        (validity.context && validity.context.details.map((detail, index) => {
+                                            return (
+                                                <div style={{ marginTop: index !== 0 && '10px' }}>
+                                                    {detail.message}
+                                                </div>);
+                                        })) ||
+                                         `API Product will be exposed in ${actualContext(api)} context at the gateway`
                                     }
                                     margin='normal'
                                     variant='outlined'
