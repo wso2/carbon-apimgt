@@ -196,7 +196,8 @@ class Subscriptions extends React.Component {
                 const { list } = response.obj;
                 const subscribedIds = this.getIdsOfSubscribedEntities();
                 const unsubscribedAPIList = list
-                    .filter(api => !subscribedIds.includes(api.id) && !api.advertiseInfo.advertised)
+                    .filter(api => (!subscribedIds.includes(api.id) && !api.advertiseInfo.advertised)
+                     && api.isSubscriptionAvailable)
                     .map((filteredApi) => {
                         return {
                             Id: filteredApi.id,
