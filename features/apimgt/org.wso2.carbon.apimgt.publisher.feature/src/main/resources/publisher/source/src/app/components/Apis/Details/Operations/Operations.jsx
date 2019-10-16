@@ -225,7 +225,7 @@ class Operations extends React.Component {
                 <Box pb={3}>
                     <Typography variant='h5'>
                         <FormattedMessage
-                            id='Apis.Details.Operations.Operations.operation'
+                            id='Apis.Details.Operations.Operations.title'
                             defaultMessage='Operations'
                         />
                     </Typography>
@@ -263,7 +263,7 @@ class Operations extends React.Component {
                                 <TableCell>
                                     <Typography variant='subtitle2'>
                                         <FormattedMessage
-                                            id='Apis.Details.Resources.Resource.Operation'
+                                            id='Apis.Details.Operations.operation.operationName'
                                             defaultMessage='Operation'
                                         />
                                     </Typography>
@@ -271,7 +271,7 @@ class Operations extends React.Component {
                                 <TableCell>
                                     <Typography variant='subtitle2'>
                                         <FormattedMessage
-                                            id='Apis.Details.Resources.Resource.OperationType'
+                                            id='Apis.Details.Operations.Operation.OperationType'
                                             defaultMessage='Operation Type'
                                         />
                                     </Typography>
@@ -279,7 +279,7 @@ class Operations extends React.Component {
                                 <TableCell>
                                     <Typography variant='subtitle2'>
                                         <FormattedMessage
-                                            id='Apis.Details.Resources.Resource.throttling.policy'
+                                            id='Apis.Details.Operations.Operation.throttling.policy'
                                             defaultMessage='Rate Limiting'
                                         />
                                     </Typography>
@@ -287,7 +287,7 @@ class Operations extends React.Component {
                                 <TableCell>
                                     <Typography variant='subtitle2'>
                                         <FormattedMessage
-                                            id='Apis.Details.Resources.Resource.scopes'
+                                            id='Apis.Details.Operations.Operation.scopes'
                                             defaultMessage='Scope'
                                         />
                                     </Typography>
@@ -295,7 +295,7 @@ class Operations extends React.Component {
                                 <TableCell>
                                     <Typography variant='subtitle2'>
                                         <FormattedMessage
-                                            id='Apis.Details.Resources.Resource.authType'
+                                            id='Apis.Details.Operations.Operation.authType'
                                             defaultMessage='Security Enabled'
                                         />
                                     </Typography>
@@ -324,14 +324,14 @@ class Operations extends React.Component {
                         >
                             {isSaving && <CircularProgress size={20} />}
                             <FormattedMessage
-                                id='Apis.Details.Resources.Resources.save'
+                                id='Apis.Details.Operations.Operation.save'
                                 defaultMessage='Save'
                             />
                         </Button>
                         <Link to={'/apis/' + api.id + '/overview'}>
                             <Button>
                                 <FormattedMessage
-                                    id='Apis.Details.Configuration.Configuration.cancel'
+                                    id='Apis.Details.Operations.Operation.cancel'
                                     defaultMessage='Cancel'
                                 />
                             </Button>
