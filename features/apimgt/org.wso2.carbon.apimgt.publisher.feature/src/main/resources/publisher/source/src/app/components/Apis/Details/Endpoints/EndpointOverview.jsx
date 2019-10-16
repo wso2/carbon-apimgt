@@ -45,7 +45,6 @@ import LoadbalanceFailoverConfig from './LoadbalanceFailoverConfig';
 import GenericEndpoint from './GenericEndpoint';
 import AdvanceEndpointConfig from './AdvancedConfig/AdvanceEndpointConfig';
 import Credentials from './AWSLambda/Credentials.jsx';
-import Mappings from './AWSLambda/Mappings.jsx';
 
 const styles = theme => ({
     listing: {
@@ -555,19 +554,11 @@ function EndpointOverview(props) {
                                             />
                                         </Typography>
                                         <Credentials
-                                            saveAPI={getEndpoints}
                                             epConfig={epConfig}
                                             setEpConfig={setEpConfig}
                                         />
-                                        <Typography>
-                                            <FormattedMessage
-                                                id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
-                                                '.endpoint.mappings'}
-                                                defaultMessage='Resources Mapping'
-                                            />
-                                        </Typography>
-                                        <Mappings api={api} />
-                                    </div> :
+                                    </div>
+                                    :
                                     <div>
                                         {endpointType.key === 'default' ?
                                             <InlineMessage>

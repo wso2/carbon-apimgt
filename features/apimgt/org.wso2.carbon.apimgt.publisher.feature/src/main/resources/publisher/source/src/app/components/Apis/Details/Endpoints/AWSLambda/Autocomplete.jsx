@@ -33,9 +33,6 @@ function renderInput(inputProps) {
 }
 
 renderInput.propTypes = {
-    /**
-   * Override or extend the styles applied to the component.
-   */
     // eslint-disable-next-line react/forbid-prop-types
     classes: PropTypes.object.isRequired,
     // eslint-disable-next-line react/forbid-prop-types, react/require-default-props
@@ -75,9 +72,7 @@ renderSuggestion.propTypes = {
     // eslint-disable-next-line react/forbid-prop-types
     itemProps: PropTypes.object.isRequired,
     selectedItem: PropTypes.string.isRequired,
-    suggestion: PropTypes.shape({
-        label: PropTypes.string.isRequired,
-    }).isRequired,
+    suggestion: PropTypes.shape('').isRequired,
 };
 
 /**
