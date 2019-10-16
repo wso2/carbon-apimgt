@@ -111,6 +111,12 @@
           "roles": "admin",
           "name": "apim:bot_data",
           "key": "apim:bot_data"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:tenantInfo",
+          "key": "apim:tenantInfo"
         }
       ]
     }
@@ -2593,7 +2599,57 @@
             }
           },
           "404": {
-            "description": "Not Found.\nWorkflow for the given reference in not found.\n",
+            "description": "Not Found.\nWorkflow for the given reference is not found.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/tenant-info/{username}": {
+      "get": {
+        "x-scope": "apim:tenantInfo",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X GET \"https://localhost:9443/api/am/admin/v0.15/tenant-info/john\"",
+        "x-wso2-request": "GET https://localhost:9443/api/am/admin/v0.15/tenant-info/john\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n   \"tenantDomain\" : \"carbon.super\",\n   \"tenantId\" : -1234 \n}",
+        "x-wso2-response": "HTTP/1.1 200 OK",
+        "summary": "Get tenant id of the user\n",
+        "description": "This operation is to get tenant id of the provided user\n",
+        "operationId": "getTenantInfoByUsername",
+        "parameters": [
+          {
+            "name": "username",
+            "description": "The state represents the current state of the tenant\n\nSupported states are [ active, inactive]\n",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "default": "john"
+          }
+        ],
+        "tags": [
+          "Tenants"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nTenant id of the user retrieved.\n",
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/TenantInfo"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nRequested user does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable.\nThe requested media type is not supported\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -3608,6 +3664,25 @@
         "description": {
           "type": "string",
           "example": "Approve workflow request."
+        }
+      }
+    },
+    "TenantInfo": {
+      "title": "Tenant information",
+      "type": "object",
+      "description": "The tenant information of the user",
+      "properties": {
+        "username": {
+          "type": "string",
+          "example": "john"
+        },
+        "tenantDomain": {
+          "type": "string",
+          "example": "carbon.super"
+        },
+        "tenantId": {
+          "type": "integer",
+          "example": -1234
         }
       }
     }

@@ -24,6 +24,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.ImportApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.MonetizationApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.WorkflowsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.TenantInfoApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
