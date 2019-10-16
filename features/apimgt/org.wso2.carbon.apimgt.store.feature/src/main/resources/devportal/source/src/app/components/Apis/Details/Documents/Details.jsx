@@ -22,9 +22,7 @@ import Paper from '@material-ui/core/Paper';
 import Icon from '@material-ui/core/Icon';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
-
 import View from 'AppComponents/Apis/Details/Documents/View';
-
 import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles(theme => ({
