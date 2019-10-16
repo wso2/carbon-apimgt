@@ -35,7 +35,6 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Tooltip from '@material-ui/core/Tooltip';
-import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
 import PropTypes from 'prop-types';
 
@@ -630,14 +629,6 @@ class SubscriptionsTable extends Component {
         const { classes, intl, api } = this.props;
         return (
             <React.Fragment>
-                <div className={classes.titleWrapper}>
-                    <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        <FormattedMessage
-                            id='Apis.Details.Subscriptions.SubscriptionsTable.manage.subscriptions'
-                            defaultMessage='Manage Subscriptions'
-                        />
-                    </Typography>
-                </div>
                 <Paper>
                     <Tooltip
                         title={intl.formatMessage({

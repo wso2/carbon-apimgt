@@ -22,7 +22,7 @@ import Button from '@material-ui/core/Button';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
+import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
@@ -40,7 +40,7 @@ const useStyles = makeStyles(theme => ({
     },
     formControl: {
         margin: theme.spacing.unit * 1,
-        minWidth: 300,
+        minWidth: 400,
     },
     textControl: {
         margin: theme.spacing.unit * 1,
@@ -136,18 +136,22 @@ export default function SimpleSelect(props) {
     }
     return (
         <Grid item xs={12} md={12} lg={12}>
+            <Typography variant='h4' style={{ marginTop: '20px' }}>
+                <FormattedMessage
+                    id='Apis.Details.Subscriptions.SubscriptionAvailability.subscription.availability'
+                    defaultMessage='Subscription Availability'
+                />
+            </Typography>
+            <Typography variant='caption' gutterBottom>
+                <FormattedMessage
+                    id='Apis.Details.Subscriptions.SubscriptionAvailability.sub.heading'
+                    defaultMessage='Make subscriptions available to tenants'
+                />
+            </Typography>
             <Paper className={classes.subscriptionAvailabilityPaper}>
                 <form className={classes.root} autoComplete='off' onSubmit={(e) => { e.preventDefault(); }}>
                     <Grid container xs={12} spacing={1} className={classes.grid}>
-                        <Grid item xs={4} className={classes.gridLabel}>
-                            <FormLabel>
-                                <FormattedMessage
-                                    id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.subscription.availability'
-                                    defaultMessage='Subscription Availability'
-                                /> {' : '}
-                            </FormLabel>
-                        </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={10}>
                             <FormControl
                                 variant='outlined'
                                 className={classes.formControl}
@@ -199,7 +203,7 @@ export default function SimpleSelect(props) {
                             </Button>
                         </Grid>
                         {isSpecificTenants ? (
-                            <Grid item xs={8} >
+                            <Grid item xs={8} style={{ height: '100px' }} >
                                 <TenantAutocomplete setTenantList={setTenantList} api={api} />
                             </Grid>
                         ) : <Grid item xs={8} />}
