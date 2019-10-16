@@ -18,6 +18,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -34,7 +35,8 @@ import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import useWindowSize from 'AppComponents/Shared/UseWindowSize';
-import View from 'AppComponents/Apis/Details/Documents/View';
+import Details from 'AppComponents/Apis/Details/Documents/Details';
+import { PageNotFound } from 'AppComponents/Base/Errors';
 
 const styles = theme => ({
     paper: {
@@ -71,27 +73,10 @@ const styles = theme => ({
         paddingTop: 3,
         paddingBottom: 3,
     },
-    fullView: {
-        cursor: 'pointer',
-        position: 'absolute',
-        right: 5,
-        top: 5,
-    },
     childList: {
         paddingTop: 0,
         marginTop: 0,
         paddingBottom: 0,
-    },
-    popupHeader: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        position: 'fixed',
-        width: '100%',
-    },
-    viewWrapper: {
-        padding: theme.spacing.unit * 2,
-        marginTop: 50,
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
@@ -223,7 +208,6 @@ function FullWidthGrid(props) {
     const [selectedIndexB, changeSelectedIndexB] = useState(0);
     const [documentList, changeDocumentList] = useState(null);
     const [selectedDoc, changeSelectedDoc] = useState(null);
-    const [open, setOpen] = useState(false);
     const [width, height] = useWindowSize();
     const [showDocList, setShowDocList] = useState(!(width < 1400));
     const toggleDocList = () => {
@@ -234,6 +218,8 @@ function FullWidthGrid(props) {
         changeSelectedIndexB(newIndexB);
         changeSelectedDoc(doc);
         scrollToY(0, 1500, 'easeInOutQuint');
+        const path = `/apis/${apiId}/documents/${doc.documentId}/details`;
+        props.history.push({pathname: path})
     };
     const apiId = props.match.params.apiUuid;
     useEffect(() => {
@@ -282,9 +268,6 @@ function FullWidthGrid(props) {
             });
     }, []);
 
-    const toggleOpen = () => {
-        setOpen(!open);
-    };
     return (
         <React.Fragment>
             <Typography variant='h4' className={classes.titleSub}>
@@ -387,29 +370,20 @@ function FullWidthGrid(props) {
                     </div>
                     <div className={classes.docView}>
                         {selectedDoc && (
-                            <React.Fragment>
-                                <Paper className={classes.paper}>
-                                    {(selectedDoc.sourceType === 'MARKDOWN' || selectedDoc.sourceType === 'INLINE') && (
-                                        <Icon className={classes.fullView} onClick={toggleOpen}>
-                                            launch
-                                        </Icon>
-                                    )}
-                                    <View doc={selectedDoc} apiId={apiId} fullScreen={open} />
-                                </Paper>
-                                <Dialog fullScreen open={open} onClose={toggleOpen}>
-                                    <Paper square className={classes.popupHeader}>
-                                        <IconButton color='inherit' onClick={toggleOpen} aria-label='Close'>
-                                            <Icon>close</Icon>
-                                        </IconButton>
-                                        <Typography variant='h4' className={classes.docName}>
-                                            {selectedDoc.name}
-                                        </Typography>
-                                    </Paper>
-                                    <div className={classes.viewWrapper}>
-                                        <View doc={selectedDoc} apiId={apiId} fullScreen={open} />
-                                    </div>
-                                </Dialog>
-                            </React.Fragment>
+                            <Switch>
+                                <Redirect
+                                    exact
+                                    from='/apis/:apiUuid/documents'
+                                    to={`/apis/${apiId}/documents/${selectedDoc.documentId}/details`}
+                                />
+                                <Route
+                                    exact
+                                    path='/apis/:apiUuid/documents/:documentId/details'
+                                    render={() => <Details selectedDoc={selectedDoc} {...props} />}
+                                />
+                                } />
+                                <Route component={PageNotFound} />
+                            </Switch>
                         )}
                     </div>
                 </div>
