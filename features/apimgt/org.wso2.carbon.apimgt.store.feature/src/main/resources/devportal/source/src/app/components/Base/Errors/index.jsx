@@ -16,8 +16,7 @@
  * under the License.
  */
 
-import PageNotFound from './PageNotfound'
 import ResourceNotFound from './ResourceNotFound'
 import ScopeNotFound from './ScopeNotFound'
 
-export { PageNotFound, ResourceNotFound, ScopeNotFound }
+export { ResourceNotFound, ScopeNotFound }

@@ -42,7 +42,6 @@ import Utils from 'AppData/Utils';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
-import { PageNotFound } from 'AppComponents/Base/Errors';
 import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import { Progress } from 'AppComponents/Shared';
@@ -422,7 +421,7 @@ class Details extends Component {
 
         // pageLocation renaming is to prevent es-lint errors saying can't use global name location
         if (!Details.isValidURL(pathname)) {
-            return <PageNotFound location={pageLocation} />;
+            return <ResourceNotFound location={pageLocation} />;
         }
         const uuid = match.params.apiUUID || match.params.api_uuid || match.params.apiProdUUID;
         const pathPrefix = '/' + (isAPIProduct ? 'api-products' : 'apis') + '/' + uuid + '/';
@@ -436,7 +435,7 @@ class Details extends Component {
                 },
                 bodyMessage: {
                     id: 'Apis.Details.index.api.not.found.body',
-                    defaultMessage: "Can't find the API with the id {uuid}",
+                    defaultMessage: "Can't find the API with the given id",
                 },
             });
             const resourceNotFountMessage = {

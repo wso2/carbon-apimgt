@@ -16,29 +16,78 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
+import Grid from '@material-ui/core/Grid';
+import { Link } from 'react-router-dom';
+import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
+import Container from '@material-ui/core/Container';
+import Image404 from './Custom404Image';
 
 const ResourceNotFound = (props) => {
     return (
-        <Paper elevation={4}>
-            <Typography variant='h5' component='h3'>
-                <FormattedMessage id='Base.Errors.ResourceNotfound.title' defaultMessage='404 Resource Not Found!' />
-            </Typography>
-            <Typography variant='body1' component='p'>
-                <FormattedMessage
-                    id='Base.Errors.ResourceNotfound.message'
-                    defaultMessage="Can't find the resource you are looking for"
-                />
-                <span style={{ color: 'green' }}>
-                    {' '}
-                    {props.response ? props.response.statusText : ''}
-                    {' '}
-                </span>
-            </Typography>
-        </Paper>
+        <Container maxWidth='md'>
+            <Box padding={4}>
+                <Paper elevation={0} >
+                    <Box padding={4}>
+                        <Grid container alignItems='center' justify='center' style={{ height: '100%' }}>
+                            <Grid item xs={12} md={6}>
+                                <Typography variant='h5' gutterBottom>
+                                    <FormattedMessage
+                                        id='Base.Errors.ResourceNotfound.default_tittle'
+                                        defaultMessage='Page Not Found'
+                                    />
+                                </Typography>
+                                <Typography variant='subtitle1' gutterBottom>
+                                    <FormattedMessage
+                                        id='Base.Errors.ResourceNotfound.default_body'
+                                        defaultMessage='The page you are looking for is not available'
+                                    />
+                                    <span style={{ color: 'green' }}>
+                                        {' '}
+                                        {props.response ? props.response.statusText : ''}
+                                        {' '}
+                                    </span>
+                                </Typography>
+                                <Box py={5}>
+                                    <Box pb={2}>
+                                        <Typography variant='subtitle1'>
+                                            <FormattedMessage
+                                                id='Base.Errors.ResourceNotFound.more.links'
+                                                defaultMessage='You may check below links'
+                                            />
+                                        </Typography>
+                                    </Box>
+                                    <Link to='/apis/' style={{ marginRight: 8 }}>
+                                        <Button variant='contained' color='primary'>
+                                            <FormattedMessage
+                                                id='Base.Errors.ResourceNotFound.api.list'
+                                                defaultMessage='API List'
+                                            />
+                                        </Button>
+                                    </Link>
+                                    <Link to='/applications/'>
+                                        <Button variant='contained' color='primary'>
+                                            <FormattedMessage
+                                                id='Base.Errors.ResourceNotFound.applications'
+                                                defaultMessage='Applications'
+                                            />
+                                        </Button>
+                                    </Link>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                {/* Image */}
+                                <Image404 style={{ fontSize: 400, fill: '#ccc' }} />
+                            </Grid>
+                        </Grid>
+                    </Box>
+                </Paper>
+            </Box>
+        </Container>
     );
 };
 

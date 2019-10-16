@@ -23,7 +23,6 @@ import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
-import { PageNotFound } from 'AppComponents/Base/Errors/index';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
@@ -291,7 +290,7 @@ class Details extends Component {
                                 component={() => (this.renderManager(application, 'SANDBOX'))}
                             />
                             <Route path='/applications/:applicationId/subscriptions' component={Subscriptions} />
-                            <Route component={PageNotFound} />
+                            <Route component={ResourceNotFound} />
                         </Switch>
                     </div>
                 </div>
