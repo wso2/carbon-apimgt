@@ -34,7 +34,7 @@ const Documents = (props) => {
         <div>
             <Switch>
                 <Route exact path={'/' + urlPrefix + '/:apiUUID/documents'} component={Listing} />} />
-                <Route exact path={'/' + urlPrefix + '/:apiUUID/documents/:documentId/view'} component={View} />} />
+                <Route exact path={'/' + urlPrefix + '/:apiUUID/documents/:documentId/details'} component={View} />} />
                 <Route exact path={'/' + urlPrefix + '/:apiUUID/documents/:documentId/edit'} component={Edit} />} />
                 <Route
                     exact

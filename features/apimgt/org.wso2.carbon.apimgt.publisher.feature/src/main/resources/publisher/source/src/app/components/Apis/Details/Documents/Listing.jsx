@@ -102,10 +102,10 @@ const styles = theme => ({
     },
 });
 function LinkGenerator(props) {
-    return props.isAPIProduct ? (
-        <Link to={'/api-products/' + props.apiId + '/documents/' + props.docId + '/view'}>{props.docName}</Link>
+    return props.apiType === 'APIProduct' ? (
+        <Link to={'/api-products/' + props.apiId + '/documents/' + props.docId + '/details'}>{props.docName}</Link>
     ) : (
-        <Link to={'/apis/' + props.apiId + '/documents/' + props.docId + '/view'}>{props.docName}</Link>
+        <Link to={'/apis/' + props.apiId + '/documents/' + props.docId + '/details'}>{props.docName}</Link>
     );
 }
 class Listing extends React.Component {
