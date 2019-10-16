@@ -74,7 +74,7 @@ const styles = theme => ({
         background: '#fff',
         borderRight: '1px solid rgba(0, 0, 0, 0.42)',
         minHeight: '40px',
-        padding: '5px 5px 5px 10px',
+        padding: '5px 5px 5px 15px',
     },
     infoButton: {
         margin: theme.spacing(1),
