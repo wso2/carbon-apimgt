@@ -25,6 +25,9 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 import Tenants from 'AppData/Tenants';
+import Configurations from 'Config';
+import Loading from 'AppComponents/Base/Loading/Loading';
+
 
 const styles = theme => ({
     root: {
@@ -64,21 +67,32 @@ const styles = theme => ({
 const tenantListing = (props) => {
     const settingContext = useContext(Settings);
     const [tenants, setTenants] = useState([]);
+    const [loading, setLoading] = useState(true);
     const { tenantList, classes, theme } = props;
 
     useEffect(() => {
         if (tenantList || tenantList.length === 0) {
             const tenantApi = new Tenants();
             tenantApi.getTenantsByState().then((response) => {
-                setTenants(response.body.list);
+                const { list } = response.body;
+                if (list.length > 0) {
+                    setLoading(false);
+                    setTenants(list);
+                } else {
+                    window.location = Configurations.app.context;
+                }
             }).catch((error) => {
                 console.error('error when getting tenants ' + error);
             });
         } else {
             setTenants(tenantList);
+            setLoading(false);
         }
     }, []);
 
+    if (loading) {
+        return <Loading />;
+    }
     return (
         <div className={classes.root}>
             <Grid container md={4} justify='left' spacing={0} className={classes.list}>
