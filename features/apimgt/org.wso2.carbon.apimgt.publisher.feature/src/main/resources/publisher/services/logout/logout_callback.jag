@@ -27,7 +27,7 @@
         'name': 'AM_ACC_TOKEN_DEFAULT_P2',
         'value': '',
         'path': site.context + "/",
-        "HttpOnly": true,
+        "httpOnly": true,
         "secure": true,
         "maxAge": 2
     };
@@ -37,7 +37,7 @@
         'name': 'AM_ACC_TOKEN_DEFAULT_P2',
         'value': '',
         'path': "/api/am/publisher/",
-        "HttpOnly": true,
+        "httpOnly": true,
         "secure": true,
         "maxAge": 2
     };
@@ -47,7 +47,7 @@
         'name': 'AM_REF_TOKEN_DEFAULT_P2',
         'value': '',
         'path': site.context + "/",
-        "HttpOnly": true,
+        "httpOnly": true,
         "secure": true,
         "maxAge": 2
     };
