@@ -73,13 +73,11 @@ const styles = theme => ({
         paddingTop: 3,
         paddingBottom: 3,
     },
-
     childList: {
         paddingTop: 0,
         marginTop: 0,
         paddingBottom: 0,
     },
-
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
         paddingLeft: theme.spacing(3),
