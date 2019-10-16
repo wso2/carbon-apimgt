@@ -430,10 +430,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String addResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException {
-        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifier(resourcePath);
-        checkAccessControlPermission(apiIdentifier);
-        return super.addResourceFile(resourcePath, resourceFile);
+    public String addResourceFile(Identifier identifier, String resourcePath, ResourceFile resourceFile)
+            throws APIManagementException {
+        checkAccessControlPermission(identifier);
+        return super.addResourceFile(identifier, resourcePath, resourceFile);
     }
 
     @Override
@@ -477,27 +477,24 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public Boolean deleteApiSpecificMediationPolicy(String apiResourcePath, String mediationPolicyId)
-            throws APIManagementException {
-        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifier(apiResourcePath);
-        checkAccessControlPermission(apiIdentifier);
-        return super.deleteApiSpecificMediationPolicy(apiResourcePath, mediationPolicyId);
+    public Boolean deleteApiSpecificMediationPolicy(Identifier identifier, String apiResourcePath,
+            String mediationPolicyId) throws APIManagementException {
+        checkAccessControlPermission(identifier);
+        return super.deleteApiSpecificMediationPolicy(identifier, apiResourcePath, mediationPolicyId);
     }
 
     @Override
-    public Mediation getApiSpecificMediationPolicy(String apiResourcePath, String mediationPolicyId)
-            throws APIManagementException {
-        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifier(apiResourcePath);
-        checkAccessControlPermission(apiIdentifier);
-        return super.getApiSpecificMediationPolicy(apiResourcePath, mediationPolicyId);
+    public Mediation getApiSpecificMediationPolicy(Identifier identifier, String apiResourcePath,
+            String mediationPolicyId) throws APIManagementException {
+        checkAccessControlPermission(identifier);
+        return super.getApiSpecificMediationPolicy(identifier, apiResourcePath, mediationPolicyId);
     }
 
     @Override
-    public Resource getApiSpecificMediationResourceFromUuid(String uuid, String resourcePath)
+    public Resource getApiSpecificMediationResourceFromUuid(Identifier identifier, String uuid, String resourcePath)
             throws APIManagementException {
-        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifier(resourcePath);
-        checkAccessControlPermission(apiIdentifier);
-        return super.getApiSpecificMediationResourceFromUuid(uuid, resourcePath);
+        checkAccessControlPermission(identifier);
+        return super.getApiSpecificMediationResourceFromUuid(identifier, uuid, resourcePath);
     }
 
     @Override

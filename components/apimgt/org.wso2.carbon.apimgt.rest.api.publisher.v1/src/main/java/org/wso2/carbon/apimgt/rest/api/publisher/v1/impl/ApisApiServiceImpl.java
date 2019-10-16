@@ -423,6 +423,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                             provider + ") overridden with current user (" + username + ")");
                 }
                 provider = username;
+            } else {
+                if (!APIUtil.isUserExist(provider)) {
+                    RestApiUtil.handleBadRequest("Specified provider " + provider + " not exist.", log);
+                }
             }
         } else {
             //Set username in case provider is null or empty
@@ -1416,8 +1420,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            documentation = apiProvider.getDocumentation(documentId, tenantDomain);
+            //this will fail if API is not accessible
             APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            documentation = apiProvider.getDocumentation(documentId, tenantDomain);
             if (documentation == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
             }
@@ -1454,6 +1459,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             String sourceUrl = body.getSourceUrl();
             Documentation oldDocument = apiProvider.getDocumentation(documentId, tenantDomain);
 
@@ -1477,8 +1484,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             body.setName(oldDocument.getName());
 
             Documentation newDocumentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
-            //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             newDocumentation.setFilePath(oldDocument.getFilePath());
             apiProvider.updateDocumentation(apiIdentifier, newDocumentation);
 
@@ -1774,8 +1779,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             //Getting the api base path out apiResourcePath
             apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
             //Getting specified mediation policy
-            Mediation mediation = apiProvider.getApiSpecificMediationPolicy(apiResourcePath,
-                    mediationPolicyId);
+            Mediation mediation =
+                    apiProvider.getApiSpecificMediationPolicy(apiIdentifier, apiResourcePath, mediationPolicyId);
             if (mediation != null) {
                 if (isAPIModified(api, mediation)) {
                     apiProvider.updateAPI(api);
@@ -1783,8 +1788,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
             }
-            boolean deletionStatus = apiProvider.deleteApiSpecificMediationPolicy(apiResourcePath,
-                    mediationPolicyId);
+            boolean deletionStatus =
+                    apiProvider.deleteApiSpecificMediationPolicy(apiIdentifier, apiResourcePath, mediationPolicyId);
             if (deletionStatus) {
                 return Response.ok().build();
             } else {
@@ -1832,8 +1837,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             //Getting the api base path out of apiResourcePath
             apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
             //Getting specified mediation policy
-            Mediation mediation = apiProvider.getApiSpecificMediationPolicy(apiResourcePath,
-                    mediationPolicyId);
+            Mediation mediation =
+                    apiProvider.getApiSpecificMediationPolicy(apiIdentifier, apiResourcePath, mediationPolicyId);
             if (mediation != null) {
                 MediationDTO mediationDTO =
                         MediationMappingUtil.fromMediationToDTO(mediation);
@@ -1888,8 +1893,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             //Getting the api base path out of apiResourcePath
             apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
             //Getting resource correspond to the given uuid
-            Resource mediationResource = apiProvider.getApiSpecificMediationResourceFromUuid
-                    (mediationPolicyId, apiResourcePath);
+            Resource mediationResource = apiProvider
+                    .getApiSpecificMediationResourceFromUuid(apiIdentifier, mediationPolicyId, apiResourcePath);
             if (mediationResource != null) {
                 ResourceFile contentFile = new ResourceFile(fileInputStream, fileDetail.getContentType().toString());
 
@@ -1897,12 +1902,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                 resourcePath = mediationResource.getPath();
 
                 //Updating the existing mediation policy
-                String updatedPolicyUrl = apiProvider.addResourceFile(resourcePath, contentFile);
+                String updatedPolicyUrl = apiProvider.addResourceFile(apiIdentifier, resourcePath, contentFile);
                 if (StringUtils.isNotBlank(updatedPolicyUrl)) {
                     String uuid = apiProvider.getCreatedResourceUuid(resourcePath);
                     //Getting the updated mediation policy
-                    updatedMediation = apiProvider.getApiSpecificMediationPolicy
-                            (apiResourcePath, uuid);
+                    updatedMediation = apiProvider.getApiSpecificMediationPolicy(apiIdentifier, apiResourcePath, uuid);
                     MediationDTO updatedMediationDTO =
                             MediationMappingUtil.fromMediationToDTO(updatedMediation);
                     URI uploadedMediationUri = new URI(updatedPolicyUrl);
@@ -1958,8 +1962,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             //Getting the api base path out of apiResourcePath
             apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
             //Getting resource correspond to the given uuid
-            Resource mediationResource = apiProvider.getApiSpecificMediationResourceFromUuid
-                    (mediationPolicyId, apiResourcePath);
+            Resource mediationResource = apiProvider
+                    .getApiSpecificMediationResourceFromUuid(apiIdentifier, mediationPolicyId, apiResourcePath);
             if (mediationResource == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MEDIATION_POLICY, mediationPolicyId, log);
                 return null;
@@ -2045,7 +2049,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
                 ResourceFile contentFile = new ResourceFile(fileInputStream, fileContentType);
                 //Adding api specific mediation policy
-                mediationPolicyUrl = apiProvider.addResourceFile(mediationResourcePath, contentFile);
+                mediationPolicyUrl = apiProvider.addResourceFile(apiIdentifier, mediationResourcePath, contentFile);
             } else if (inlineContent != null) {
                 //todo
             }
@@ -2054,8 +2058,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 //Getting the uuid of created mediation policy
                 String uuid = apiProvider.getCreatedResourceUuid(mediationResourcePath);
                 //Getting created Api specific mediation policy
-                Mediation createdMediation = apiProvider.getApiSpecificMediationPolicy
-                        (apiResourcePath, uuid);
+                Mediation createdMediation =
+                        apiProvider.getApiSpecificMediationPolicy(apiIdentifier, apiResourcePath, uuid);
                 MediationDTO createdPolicy =
                         MediationMappingUtil.fromMediationToDTO(createdMediation);
                 URI uploadedMediationUri = new URI(mediationPolicyUrl);
@@ -2625,7 +2629,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             ResourceFile apiImage = new ResourceFile(fileInputStream, fileContentType);
             String thumbPath = APIUtil.getIconPath(api.getId());
-            String thumbnailUrl = apiProvider.addResourceFile(thumbPath, apiImage);
+            String thumbnailUrl = apiProvider.addResourceFile(api.getId(), thumbPath, apiImage);
             api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
             APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
 

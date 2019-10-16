@@ -181,16 +181,13 @@ export default function ApiCreateGraphQL(props) {
                     <Typography variant='h5'>
                         <FormattedMessage
                             id='Apis.Create.GraphQL.ApiCreateGraphQL.heading'
-                            defaultMessage='Create an API using GraphQL SDL definition'
+                            defaultMessage='Create an API using a GraphQL SDL definition'
                         />
                     </Typography>
                     <Typography variant='caption'>
                         <FormattedMessage
                             id='Apis.Create.GraphQL.ApiCreateGraphQL.sub.heading'
-                            defaultMessage={
-                                'Use an existing GraphQL SDL definition file' +
-                                ' to create an API in WSO2 API Manager.'
-                            }
+                            defaultMessage='Create an API by importing an existing GraphQL SDL definition.'
                         />
                     </Typography>
                 </React.Fragment>
@@ -253,7 +250,12 @@ export default function ApiCreateGraphQL(props) {
                         />
                     )}
                     {wizardStep === 1 && (
-                        <DefaultAPIForm onValidate={handleOnValidate} onChange={handleOnChange} api={apiInputs} />
+                        <DefaultAPIForm
+                            onValidate={handleOnValidate}
+                            onChange={handleOnChange}
+                            api={apiInputs}
+                            isAPIProduct={false}
+                        />
                     )}
                 </Grid>
                 <Grid item md={1} />

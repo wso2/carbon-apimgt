@@ -81,7 +81,7 @@
                 'name': 'AM_ACC_TOKEN_DEFAULT_P2',
                 'value': accessTokenPart2,
                 'path': site.context + "/",
-                "HttpOnly": true,
+                "httpOnly": true,
                 "secure": true,
                 "maxAge": Integer(tokenResponse.expires_in)
             };
@@ -91,7 +91,7 @@
                 'name': 'AM_ACC_TOKEN_DEFAULT_P2',
                 'value': accessTokenPart2,
                 'path': "/api/am/publisher/",
-                "HttpOnly": true,
+                "httpOnly": true,
                 "secure": true,
                 "maxAge": Integer(tokenResponse.expires_in)
             };
@@ -101,7 +101,7 @@
                 'name': 'AM_REF_TOKEN_DEFAULT_P2',
                 'value': refreshTokenPart2,
                 'path': site.context + "/",
-                "HttpOnly": true,
+                "httpOnly": true,
                 "secure": true,
                 "maxAge": -1
             };

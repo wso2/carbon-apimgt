@@ -23,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -326,8 +325,9 @@ public class APIMappingUtil {
     public static API getAPIInfoFromUUID(String apiUUID, String requestedTenantDomain)
             throws APIManagementException {
         API api;
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        api = apiProvider.getLightweightAPIByUUID(apiUUID, requestedTenantDomain);
+        String username = RestApiUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+        api = apiConsumer.getLightweightAPIByUUID(apiUUID, requestedTenantDomain);
         return api;
     }
 
@@ -406,7 +406,6 @@ public class APIMappingUtil {
     public static RatingDTO fromJsonToRatingDTO(JSONObject obj) {
         RatingDTO ratingDTO = new RatingDTO();
         if (obj != null) {
-            ratingDTO.setApiId(String.valueOf(obj.get(APIConstants.API_ID)));
             ratingDTO.setRatingId(String.valueOf(obj.get(APIConstants.RATING_ID)));
             ratingDTO.setRatedBy((String) obj.get(APIConstants.USERNAME));
             ratingDTO.setRating((Integer) obj.get(APIConstants.RATING));

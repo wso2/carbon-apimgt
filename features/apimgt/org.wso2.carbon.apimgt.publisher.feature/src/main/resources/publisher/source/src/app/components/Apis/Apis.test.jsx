@@ -25,7 +25,8 @@ import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
 import APIs from './Apis';
 import APICreateRoutes from './Create/APICreateRoutes';
 
-import { PageNotFound } from '../Base/Errors';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+
 
 jest.mock('./Listing/Listing', () => () => {
     return <div>Testing Listing page</div>;
@@ -72,7 +73,7 @@ describe('Test APIs main routing component', () => {
         expect(wrapper.find(APICreateRoutes)).toHaveLength(1);
 
         // Page not found is expected here, Because we are navigating to exact /apis/create path
-        const pageNotFoundWrapper = wrapper.find(PageNotFound);
+        const pageNotFoundWrapper = wrapper.find(ResourceNotFound);
         expect(pageNotFoundWrapper).toHaveLength(1);
     });
 
@@ -87,9 +88,8 @@ describe('Test APIs main routing component', () => {
             </MemoryRouter>
         );
         const wrapper = mountWithIntl(noneExistingPath);
-        const pageNotFoundWrapper = wrapper.find(PageNotFound);
+        const pageNotFoundWrapper = wrapper.find(ResourceNotFound);
         expect(pageNotFoundWrapper).toHaveLength(1);
-        expect(pageNotFoundWrapper.contains('404 Page Not Found!')).toBeTruthy();
-        expect(pageNotFoundWrapper.contains(url)).toBeTruthy();
+        expect(pageNotFoundWrapper.contains('The page you are looking for is not available')).toBeTruthy();
     });
 });

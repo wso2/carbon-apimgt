@@ -193,7 +193,8 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
                 //Getting registry path of the existing resource
                 String resourcePath = mediationResource.getPath();
                 //Updating the existing global mediation policy
-                String updatedPolicyUrl = apiProvider.addResourceFile(resourcePath, contentFile);
+                // No need to check API permission, hence null as api identifier
+                String updatedPolicyUrl = apiProvider.addResourceFile(null, resourcePath, contentFile);
                 if (StringUtils.isNotBlank(updatedPolicyUrl)) {
                     //Getting uuid of updated global mediation policy
                     String uuid = apiProvider.getCreatedResourceUuid(resourcePath);
@@ -261,8 +262,8 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
                 RestApiUtil.handleConflict("Mediation policy already exists", log);
             }
             //Adding new global mediation sequence
-            String mediationPolicyUrl =
-                    apiProvider.addResourceFile(mediationPolicyPath, contentFile);
+            // No need to check API permission, hence null as api identifier
+            String mediationPolicyUrl = apiProvider.addResourceFile(null, mediationPolicyPath, contentFile);
             if (StringUtils.isNotBlank(mediationPolicyUrl)) {
                 //Getting the uuid of the created global mediation policy
                 String uuid = apiProvider.getCreatedResourceUuid(mediationPolicyPath);

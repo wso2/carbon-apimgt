@@ -104,7 +104,8 @@ public class APIMappingUtil {
 
         context = context.startsWith("/") ? context : ("/" + context);
         String providerDomain = MultitenantUtils.getTenantDomain(provider);
-        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain) &&
+                !context.startsWith("/t")) {
             //Create tenant aware context for API
             context = "/t/" + providerDomain + context;
         }
@@ -1629,6 +1630,7 @@ public class APIMappingUtil {
         productDto.setContext(product.getContext());
         productDto.setDescription(product.getDescription());
         productDto.setApiType(APIConstants.AuditLogConstants.API_PRODUCT);
+        productDto.setAuthorizationHeader(product.getAuthorizationHeader());
 
         Set<String> apiTags = product.getTags();
         List<String> tagsToReturn = new ArrayList<>(apiTags);
@@ -1813,7 +1815,8 @@ public class APIMappingUtil {
 
         context = context.startsWith("/") ? context : ("/" + context);
         String providerDomain = MultitenantUtils.getTenantDomain(provider);
-        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain) &&
+                !context.startsWith("/t")) {
             //Create tenant aware context for API
             context = "/t/" + providerDomain + context;
         }

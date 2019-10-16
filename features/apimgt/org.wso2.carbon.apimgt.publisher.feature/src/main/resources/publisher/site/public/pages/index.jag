@@ -32,8 +32,8 @@ var site = require("/site/public/theme/defaultTheme.js");
 
     <link href="<%= site.Configurations.app.context %>/site/public/css/main.css" type="text/css" rel="stylesheet" />
     <link href="<%= site.Configurations.app.context %>/site/public/css/draftjs.css" type="text/css" rel="stylesheet" />
-
-    <link rel="shortcut icon" href="<%= site.Configurations.app.context %>/site/public/images/favicon.png">
+    <link rel="shortcut icon" href="<%= site.Configurations.app.context %>/site/public/images/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="<%= site.Configurations.app.context %>/site/public/images/_favicon.ico">
 </head>
 
 <body>

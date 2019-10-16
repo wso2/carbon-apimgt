@@ -48,9 +48,6 @@ import Credentials from './AWSLambda/Credentials.jsx';
 import Mappings from './AWSLambda/Mappings.jsx';
 
 const styles = theme => ({
-    overviewWrapper: {
-        marginTop: theme.spacing(2),
-    },
     listing: {
         margin: theme.spacing(),
         padding: theme.spacing(),
@@ -58,7 +55,6 @@ const styles = theme => ({
     endpointContainer: {
         paddingLeft: theme.spacing(2),
         padding: theme.spacing(),
-        marginTop: theme.spacing(),
     },
     endpointName: {
         paddingLeft: theme.spacing(),
@@ -77,7 +73,6 @@ const styles = theme => ({
     radioGroup: {
         display: 'flex',
         flexDirection: 'row',
-        paddingTop: theme.spacing(),
     },
     endpointsWrapperLeft: {
         padding: theme.spacing(),
@@ -360,12 +355,10 @@ function EndpointOverview(props) {
      * Handles the endpoint security toggle action.
      * */
     const handleToggleEndpointSecurity = () => {
-        setEndpointSecurityInfo(() => {
-            if (endpointSecurityInfo === null) {
-                return { type: 'BASIC', username: '', password: '' };
-            }
-            return null;
-        });
+        const tmpSecurityInfo = endpointSecurityInfo === null ?
+            { type: 'BASIC', username: null, password: null } : null;
+        setEndpointSecurityInfo(tmpSecurityInfo);
+        endpointsDispatcher({ action: 'endpointSecurity', value: tmpSecurityInfo });
     };
 
     /**
@@ -473,8 +466,8 @@ function EndpointOverview(props) {
     return (
         <div className={classes.overviewWrapper}>
             {api.type === 'WS' ?
-                <React.Fragment>
-                    <Typography>
+                <Paper className={classes.endpointContainer}>
+                    <Typography gutterBottom>
                         <FormattedMessage
                             id='Apis.Details.Endpoints.EndpointOverview.websoket.endpoint'
                             defaultMessage='Websocket Endpoint'
@@ -491,7 +484,7 @@ function EndpointOverview(props) {
                         editEndpoint={editEndpoint}
                         setAdvancedConfigOpen={toggleAdvanceConfig}
                     />
-                </React.Fragment>
+                </Paper>
                 :
                 <Grid container spacing={2}>
                     <Grid item xs={12}>

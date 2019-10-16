@@ -163,16 +163,13 @@ export default function ApiCreateOpenAPI(props) {
                     <Typography variant='h5'>
                         <FormattedMessage
                             id='Apis.Create.OpenAPI.ApiCreateOpenAPI.heading'
-                            defaultMessage='Create an API using OpenAPI definition'
+                            defaultMessage='Create an API using an OpenAPI definition.'
                         />
                     </Typography>
                     <Typography variant='caption'>
                         <FormattedMessage
                             id='Apis.Create.OpenAPI.ApiCreateOpenAPI.sub.heading'
-                            defaultMessage={
-                                'Use an existing OpenAPI definition file or URL' +
-                                ' to create an API in WSO2 API Manager.'
-                            }
+                            defaultMessage='Create an API using an existing OpenAPI definition (swagger) file or URL.'
                         />
                     </Typography>
                 </React.Fragment>
@@ -212,7 +209,12 @@ export default function ApiCreateOpenAPI(props) {
                         />
                     )}
                     {wizardStep === 1 && (
-                        <DefaultAPIForm onValidate={handleOnValidate} onChange={handleOnChange} api={apiInputs} />
+                        <DefaultAPIForm
+                            onValidate={handleOnValidate}
+                            onChange={handleOnChange}
+                            api={apiInputs}
+                            isAPIProduct={false}
+                        />
                     )}
                 </Grid>
                 <Grid item xs={1} />

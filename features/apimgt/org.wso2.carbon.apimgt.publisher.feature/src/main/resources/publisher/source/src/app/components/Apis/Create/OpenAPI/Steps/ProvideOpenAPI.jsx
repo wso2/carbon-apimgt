@@ -158,7 +158,7 @@ export default function ProvideOpenAPI(props) {
                                 <sup className={classes.mandatoryStar}>*</sup>{' '}
                                 <FormattedMessage
                                     id='Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.type'
-                                    defaultMessage='Input type'
+                                    defaultMessage='Input Type'
                                 />
                             </React.Fragment>
                         </FormLabel>

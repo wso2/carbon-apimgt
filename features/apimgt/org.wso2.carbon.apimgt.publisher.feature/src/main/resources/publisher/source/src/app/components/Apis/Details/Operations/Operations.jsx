@@ -21,7 +21,9 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import List from '@material-ui/core/List';
+import { Link } from 'react-router-dom';
+import Box from '@material-ui/core/Box';
+import TextField from '@material-ui/core/TextField';
 import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import Table from '@material-ui/core/Table';
@@ -64,12 +66,11 @@ const styles = theme => ({
     },
     button: {
         marginLeft: theme.spacing.unit * 2,
-        textTransform: theme.custom.leftMenuTextStyle,
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
     buttonMain: {
-        textTransform: theme.custom.leftMenuTextStyle,
         color: theme.palette.getContrastText(theme.palette.primary.main),
+        marginRight: theme.spacing(1),
     },
     addNewWrapper: {
         backgroundColor: theme.palette.background.paper,
@@ -134,6 +135,7 @@ class Operations extends React.Component {
         this.handleUpdateList = this.handleUpdateList.bind(this);
         this.handleApiThrottlePolicy = this.handleApiThrottlePolicy.bind(this);
         this.updateOperations = this.updateOperations.bind(this);
+        this.filterOperations = this.filterOperations.bind(this);
     }
 
     /**
@@ -183,11 +185,26 @@ class Operations extends React.Component {
      */
     updateOperations() {
         const { operations, apiThrottlingPolicy } = this.state;
-        const { updateAPI } = this.props;
+        const { api, updateAPI } = this.props;
+        const operationList = [...api.operations, ...operations];
         this.setState({ isSaving: true });
-        updateAPI({ operations, apiThrottlingPolicy }).finally(() => this.setState({ isSaving: false }));
+        updateAPI({ operations: operationList, apiThrottlingPolicy }).finally(() => this.setState({ isSaving: false }));
     }
 
+    /**
+     *
+     * @param {*} event
+     */
+    filterOperations(event, apiOperation) {
+        let filteredOperation;
+        if (event.target.value != null) {
+            filteredOperation = apiOperation.filter(operation =>
+                operation.target.toLowerCase().includes(event.target.value.toLowerCase()));
+        } else {
+            filteredOperation = apiOperation;
+        }
+        this.setState({ operations: filteredOperation });
+    }
     /**
      * @inheritdoc
      */
@@ -204,99 +221,124 @@ class Operations extends React.Component {
         }
         const { classes } = this.props;
         return (
-            <Grid container direction='row' spacing={3} justify='flex-start' alignItems='flex-start'>
-                <Grid item md={12}>
-                    <APIRateLimiting
-                        operationRateLimits={apiPolicies}
-                        api={api}
-                        value={apiThrottlingPolicy}
-                        onChange={this.handleApiThrottlePolicy}
-                    />
-                </Grid>
-                <div className={classes.root}>
-                    <div className={classes.titleWrapper}>
-                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+            <React.Fragment>
+                <Box pb={3}>
+                    <Typography variant='h5'>
+                        <FormattedMessage
+                            id='Apis.Details.Operations.Operations.title'
+                            defaultMessage='Operations'
+                        />
+                    </Typography>
+                </Box>
+
+                <Grid container spacing={2}>
+                    <Grid item md={12}>
+                        <APIRateLimiting
+                            operationRateLimits={apiPolicies}
+                            api={api}
+                            value={apiThrottlingPolicy}
+                            onChange={this.handleApiThrottlePolicy}
+                        />
+                    </Grid>
+                    <Grid item md={2}>
+                        <Box mt={4} pb={2}>
+                            <div className={classes.searchWrapper}>
+                                <TextField
+                                    id='outlined-full-width'
+                                    label='Operation'
+                                    placeholder='Filter Operations'
+                                    onChange={e => this.filterOperations(e, api.operations)}
+                                    fullWidth
+                                    variant='outlined'
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                />
+                            </div>
+                        </Box>
+                    </Grid>
+                    <Grid item md={12}>
+                        <Table>
+                            <TableRow>
+                                <TableCell>
+                                    <Typography variant='subtitle2'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Operations.operation.operationName'
+                                            defaultMessage='Operation'
+                                        />
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography variant='subtitle2'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Operations.Operation.OperationType'
+                                            defaultMessage='Operation Type'
+                                        />
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography variant='subtitle2'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Operations.Operation.throttling.policy'
+                                            defaultMessage='Rate Limiting'
+                                        />
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography variant='subtitle2'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Operations.Operation.scopes'
+                                            defaultMessage='Scope'
+                                        />
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography variant='subtitle2'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Operations.Operation.authType'
+                                            defaultMessage='Security Enabled'
+                                        />
+                                    </Typography>
+                                </TableCell>
+                            </TableRow>
+                            {operations.map((item) => {
+                                return (
+                                    <Operation
+                                        operation={item}
+                                        handleUpdateList={this.handleUpdateList}
+                                        scopes={this.props.api.scopes}
+                                        isOperationRateLimiting={!apiThrottlingPolicy}
+                                        apiPolicies={apiPolicies}
+                                    />
+                                );
+                            })}
+                        </Table>
+                    </Grid>
+                    <Grid item>
+                        <Button
+                            variant='contained'
+                            color='primary'
+                            disabled={isSaving}
+                            className={classes.buttonMain}
+                            onClick={this.updateOperations}
+                        >
+                            {isSaving && <CircularProgress size={20} />}
                             <FormattedMessage
-                                id='Apis.Details.Operations.Operations.operation'
-                                defaultMessage='Operations'
+                                id='Apis.Details.Operations.Operation.save'
+                                defaultMessage='Save'
                             />
-                        </Typography>
-                    </div>
-                    <div className={classes.contentWrapper}>
-                        <List>
-                            <Grid>
-                                <Table>
-                                    <TableRow>
-                                        <TableCell>
-                                            <Typography variant='subtitle2'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Resources.Resource.Operation'
-                                                    defaultMessage='Operation'
-                                                />
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant='subtitle2'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Resources.Resource.OperationType'
-                                                    defaultMessage='Operation Type'
-                                                />
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant='subtitle2'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Resources.Resource.throttling.policy'
-                                                    defaultMessage='Throttling Policy'
-                                                />
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant='subtitle2'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Resources.Resource.scopes'
-                                                    defaultMessage='Scopes'
-                                                />
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant='subtitle2'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Resources.Resource.authType'
-                                                    defaultMessage='Security Enabled'
-                                                />
-                                            </Typography>
-                                        </TableCell>
-                                    </TableRow>
-                                    {operations.map((item) => {
-                                        return (
-                                            <Operation
-                                                operation={item}
-                                                handleUpdateList={this.handleUpdateList}
-                                                scopes={this.props.api.scopes}
-                                                isOperationRateLimiting={!apiThrottlingPolicy}
-                                                apiPolicies={apiPolicies}
-                                            />
-                                        );
-                                    })}
-                                </Table>
-                            </Grid>
-                        </List>
-                        <div>
-                            <Button
-                                variant='contained'
-                                color='primary'
-                                disabled={isSaving}
-                                className={classes.buttonMain}
-                                onClick={this.updateOperations}
-                            >
-                                {isSaving && <CircularProgress size={20} />}
-                                <FormattedMessage id='Apis.Details.Resources.Resources.save' defaultMessage='Save' />
+                        </Button>
+                        <Link to={'/apis/' + api.id + '/overview'}>
+                            <Button>
+                                <FormattedMessage
+                                    id='Apis.Details.Operations.Operation.cancel'
+                                    defaultMessage='Cancel'
+                                />
                             </Button>
-                        </div>
-                    </div>
-                </div>
-            </Grid>
+                        </Link>
+                    </Grid>
+                </Grid>
+            </React.Fragment>
         );
     }
 }

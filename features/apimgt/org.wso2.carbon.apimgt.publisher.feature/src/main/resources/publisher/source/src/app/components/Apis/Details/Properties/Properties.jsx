@@ -119,6 +119,9 @@ const useStyles = makeStyles(theme => ({
         fontWeight: 200,
         marginBottom: 20,
     },
+    marginRight: {
+        marginRight: theme.spacing(1),
+    },
 }));
 
 /**
@@ -310,18 +313,20 @@ function Properties(props) {
                         defaultMessage='API Properties'
                     />
                 </Typography>
-                <Button
-                    size='small'
-                    className={classes.button}
-                    onClick={toggleAddProperty}
-                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
-                >
-                    <AddCircle className={classes.buttonIcon} />
-                    <FormattedMessage
-                        id='Apis.Details.Properties.Properties.add.new.property'
-                        defaultMessage='Add New Property'
-                    />
-                </Button>
+                {(!isEmpty(additionalProperties) || showAddProperty) && (
+                    <Button
+                        size='small'
+                        className={classes.button}
+                        onClick={toggleAddProperty}
+                        disabled={showAddProperty || isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                    >
+                        <AddCircle className={classes.buttonIcon} />
+                        <FormattedMessage
+                            id='Apis.Details.Properties.Properties.add.new.property'
+                            defaultMessage='Add New Property'
+                        />
+                    </Button>
+                )}
             </div>
             {isEmpty(additionalProperties) && !showAddProperty && (
                 <div className={classes.messageBox}>
@@ -388,6 +393,7 @@ function Properties(props) {
                                             <TableRow>
                                                 <TableCell>
                                                     <TextField
+                                                        fullWidth
                                                         required
                                                         id='outlined-required'
                                                         label={intl.formatMessage({
@@ -410,6 +416,7 @@ function Properties(props) {
                                                 </TableCell>
                                                 <TableCell>
                                                     <TextField
+                                                        fullWidth
                                                         required
                                                         id='outlined-required'
                                                         label={intl.formatMessage({
@@ -439,6 +446,7 @@ function Properties(props) {
                                                             isRestricted(['apim:api_create', 'apim:api_publish'], api)
                                                         }
                                                         onClick={handleAddToList}
+                                                        className={classes.marginRight}
                                                     >
                                                         <FormattedMessage
                                                             id='Apis.Details.Properties.Properties.add'
@@ -461,7 +469,7 @@ function Properties(props) {
                                                             id='Apis.Details.Properties.Properties.help'
                                                             defaultMessage={
                                                                 'Property name should be unique, should not contain ' +
-                                                                'spaces, cannot be case-sensitive, cannot be any ' +
+                                                                'spaces and cannot be any ' +
                                                                 'of the following as they are reserved keywords : ' +
                                                                 'provider, version, context, status, description, ' +
                                                                 'subcontext, doc, lcState, name, tags.'
@@ -481,7 +489,7 @@ function Properties(props) {
                                 container
                                 direction='row'
                                 alignItems='flex-start'
-                                spacing={4}
+                                spacing={1}
                                 className={classes.buttonSection}
                             >
                                 <Grid item>

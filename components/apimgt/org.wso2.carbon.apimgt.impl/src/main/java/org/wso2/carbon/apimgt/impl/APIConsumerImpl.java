@@ -1332,8 +1332,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         JwtTokenInfoDTO jwtTokenInfoDTO = APIUtil.getJwtTokenInfoDTO(application, userName,
                 MultitenantUtils.getTenantDomain(userName));
 
-        ExtendedApplicationDTO applicationDTO = new ExtendedApplicationDTO();
-        applicationDTO.setUuid(application.getUUID());
+        ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setId(application.getId());
         applicationDTO.setName(application.getName());
         applicationDTO.setOwner(application.getOwner());
@@ -1898,13 +1897,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public void rateAPI(APIIdentifier apiId, APIRating rating, String user) throws APIManagementException {
-        apiMgtDAO.addRating(apiId, rating.getRating(), user);
+    public void rateAPI(Identifier id, APIRating rating, String user) throws APIManagementException {
+        apiMgtDAO.addRating(id, rating.getRating(), user);
     }
 
     @Override
-    public void removeAPIRating(APIIdentifier apiId, String user) throws APIManagementException {
-        apiMgtDAO.removeAPIRating(apiId, user);
+    public void removeAPIRating(Identifier id, String user) throws APIManagementException {
+        apiMgtDAO.removeAPIRating(id, user);
     }
 
     @Override
@@ -1913,10 +1912,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public JSONObject getUserRatingInfo(APIIdentifier apiId, String user) throws APIManagementException {
-        JSONObject obj = apiMgtDAO.getUserRatingInfo(apiId, user);
+    public JSONObject getUserRatingInfo(Identifier id, String user) throws APIManagementException {
+        JSONObject obj = apiMgtDAO.getUserRatingInfo(id, user);
         if (obj == null || obj.isEmpty()) {
-            String msg = "Failed to get API ratings for API " + apiId + " for user " + user;
+            String msg = "Failed to get API ratings for API " + id.getName() + " for user " + user;
             log.error(msg);
             throw new APIMgtResourceNotFoundException(msg);
         }
@@ -3175,7 +3174,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public String addComment(APIIdentifier identifier, Comment comment, String user) throws APIManagementException {
+    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
         return apiMgtDAO.addComment(identifier, comment, user);
     }
 
@@ -3186,8 +3185,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Comment getComment(APIIdentifier identifier, String commentId) throws APIManagementException {
+    public Comment getComment(Identifier identifier, String commentId) throws APIManagementException {
         return apiMgtDAO.getComment(identifier, commentId);
+    }
+
+    @Override
+    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(ApiTypeWrapper apiTypeWrapper)
+            throws APIManagementException {
+        return apiMgtDAO.getComments(apiTypeWrapper);
     }
 
     @Override

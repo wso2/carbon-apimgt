@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.keymgt.service;
 
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,6 +44,8 @@ public class TokenValidationContext {
     private APIKeyValidationInfoDTO validationInfoDTO;
     private boolean isCacheHit;
     private AccessTokenInfo tokenInfo;
+    private AuthenticatedUser user;
+    private String authorizationCode;
 
     public AccessTokenInfo getTokenInfo() {
         return tokenInfo;
@@ -140,4 +143,19 @@ public class TokenValidationContext {
         return this.attributeMap.get(key);
     }
 
+    public AuthenticatedUser getUser() {
+        return user;
+    }
+
+    public void setUser(AuthenticatedUser user) {
+        this.user = user;
+    }
+
+    public String getAuthorizationCode() {
+        return authorizationCode;
+    }
+
+    public void setAuthorizationCode(String authorizationCode) {
+        this.authorizationCode = authorizationCode;
+    }
 }

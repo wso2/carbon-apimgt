@@ -101,7 +101,7 @@ export default function Resources(props) {
                 } else if (!updatedOperation.security.find(item => item.default)) {
                     updatedOperation.security.push({ default: [] });
                 }
-                updatedOperation.security.find(item => item.default).default = [value];
+                updatedOperation.security.find(item => item.default).default = value;
                 break;
             case 'add': {
                 const parameters = extractPathParameters(data.target, openAPISpec);

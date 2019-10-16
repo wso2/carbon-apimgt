@@ -25,7 +25,6 @@ import Alert from 'AppComponents/Shared/Alert';
 import { injectIntl } from 'react-intl';
 import ButtonPanel from './ButtonPanel';
 
-
 const createAppStep = (props) => {
     const APPLICATION_STATES = {
         CREATED: 'CREATED',
@@ -40,7 +39,6 @@ const createAppStep = (props) => {
         tokenType: 'JWT',
     });
     const [isNameValid, setIsNameValid] = useState(true);
-
     const [notFound, setNotFound] = useState(false);
     const {
         currentStep, setCreatedApp, incrementStep, intl, setStepStatus, stepStatuses, classes,

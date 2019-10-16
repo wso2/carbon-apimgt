@@ -30,6 +30,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import LaunchIcon from '@material-ui/icons/Launch';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
 import { Link } from 'react-router-dom';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import { getOperationScopes } from '../../operationUtils';
@@ -46,6 +48,7 @@ export default function OperationGovernance(props) {
         operation, operationsDispatcher, operationRateLimits, api, disableUpdate, spec, target, verb,
     } = props;
     const isOperationRateLimiting = api.apiThrottlingPolicy === null;
+
     return (
         <Fragment>
             <Grid item md={12}>
@@ -157,7 +160,7 @@ export default function OperationGovernance(props) {
                     onChange={({ target: { value } }) =>
                         operationsDispatcher({
                             action: 'scopes',
-                            data: { target, verb, value },
+                            data: { target, verb, value: [value] },
                         })
                     }
                     helperText='Select a scope to control permissions to this operation'
@@ -170,6 +173,14 @@ export default function OperationGovernance(props) {
                         </MenuItem>
                     ))}
                 </TextField>
+                <Tooltip title='Remove scope'>
+                    <IconButton
+                        onClick={() => operationsDispatcher({ action: 'scopes', data: { target, verb, value: [] } })}
+                        aria-label='delete'
+                    >
+                        <DeleteIcon fontSize='small' />
+                    </IconButton>
+                </Tooltip>
                 {!disableUpdate && (
                     <Link to={`/apis/${api.id}/scopes/create`} target='_blank'>
                         <Typography style={{ marginLeft: '10px' }} color='primary' display='inline' variant='caption'>

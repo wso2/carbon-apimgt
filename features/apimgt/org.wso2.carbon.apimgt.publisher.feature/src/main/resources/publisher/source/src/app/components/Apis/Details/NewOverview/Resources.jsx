@@ -69,7 +69,7 @@ const styles = {
         marginRight: 20,
     },
     contentWrapper: {
-        maxHeight: '250px',
+        maxHeight: '125px',
         overflowY: 'auto',
     },
 };
@@ -144,23 +144,21 @@ class Resources extends React.Component {
                         )}
                 </div>
                 <Box p={1}>
-                    <div className={classes.root}>
-                        <div className={classes.contentWrapper}>
-                            {Object.keys(paths).map((key) => {
-                                const path = paths[key];
-                                return (
-                                    <div className={classes.root}>
-                                        <Typography className={classes.heading} variant='body1'>
-                                            {key}
-                                        </Typography>
-                                        {Object.keys(path).map((innerKey) => {
-                                            return CONSTS.HTTP_METHODS.includes(innerKey) ?
-                                                <RenderMethod method={innerKey} /> : null;
-                                        })}
-                                    </div>
-                                );
-                            })}
-                        </div>
+                    <div className={classes.contentWrapper}>
+                        {Object.keys(paths).map((key) => {
+                            const path = paths[key];
+                            return (
+                                <div className={classes.root}>
+                                    <Typography className={classes.heading} variant='body1'>
+                                        {key}
+                                    </Typography>
+                                    {Object.keys(path).map((innerKey) => {
+                                        return CONSTS.HTTP_METHODS.includes(innerKey) ?
+                                            <RenderMethod method={innerKey} /> : null;
+                                    })}
+                                </div>
+                            );
+                        })}
                     </div>
                     <Link to={'/apis/' + api.id + '/resources'}>
                         <Typography
