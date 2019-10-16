@@ -294,12 +294,13 @@ class APISecurityAudit extends Component {
                 if (i === 0) {
                     lastTerms.push(editor.getModel().findNextMatch(termObject[i], 1, false, false, null, false));
                 } else {
-                    lastTerms.push(editor.getModel().findNextMatch(termObject[i], 100, false, false, null, false));
+                    lastTerms.push(editor.getModel().findNextMatch(termObject[i], { lineNumber: 50, column: 120 }, false, false, null, false));
                 }
             }
             const finalMatchIndex = lastTerms.length - 1;
             if (lastTerms[finalMatchIndex] != null) {
                 editor.revealLineInCenter(lastTerms[finalMatchIndex].range.startLineNumber);
+                // editor.revealPositionInCenter({ lineNumber: 50, column: 120 });
                 editor.deltaDecorations([], [
                     {
                         range: new monaco.Range(
