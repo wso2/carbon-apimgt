@@ -27,7 +27,7 @@ import CustomIcon from 'AppComponents/Shared/CustomIcon';
 const styles = theme => ({
     leftLInkText: {
         color: theme.palette.getContrastText(theme.palette.background.leftMenu),
-        textTransform: 'capitalize',
+        textTransform: theme.custom.leftMenuTextStyle,
         width: '100%',
         textAlign: 'left',
         overflow: 'hidden',

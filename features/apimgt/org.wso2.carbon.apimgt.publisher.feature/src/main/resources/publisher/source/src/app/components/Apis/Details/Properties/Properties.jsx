@@ -57,7 +57,6 @@ const useStyles = makeStyles(theme => ({
     },
     button: {
         marginLeft: theme.spacing(2),
-        textTransform: theme.custom.leftMenuTextStyle,
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
     FormControl: {
