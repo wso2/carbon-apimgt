@@ -37,7 +37,6 @@ import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 
 import APIRateLimiting from '../Resources/components/APIRateLimiting';
 import Operation from './Operation';
-import OperationsSelector from '../Resources/components/OperationsSelector';
 
 
 const styles = theme => ({
