@@ -6,8 +6,8 @@
     "scripts": {
         "test": "jest",
         "test:coverage": "jest --coverage",
-        "build:prod": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
-        "build:dev": "NODE_ENV=development webpack -d --watch ",
+        "build:prod": "rm -R site/public/dist/; NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
+        "build:dev": "rm -R site/public/dist/; NODE_ENV=development webpack -d --watch ",
         "analysis": "NODE_ENV=development webpack --env.analysis -p --progress",
         "lint": "eslint source",
         "i18n": "extract-messages -l=en,fr -o site/public/locales/ -d en --extractFromFormatMessageCall --flat 'source/src/app/**/*.jsx'"
@@ -45,6 +45,7 @@
         "query-string": "6.8.2",
         "rc-notification": "^3.0.1",
         "react": "^16.10.2",
+        "react-app-polyfill": "^1.0.4",
         "react-autosuggest": "^9.3.4",
         "react-color": "^2.17.3",
         "react-dom": "^16.10.2",
@@ -69,12 +70,14 @@
         "url-loader": "^0.5.9"
     },
     "devDependencies": {
-        "@babel/core": "^7.4.4",
+        "@babel/core": "^7.6.4",
         "@babel/plugin-proposal-class-properties": "^7.4.4",
+        "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
         "@babel/plugin-syntax-dynamic-import": "^7.2.0",
-        "@babel/preset-env": "^7.4.4",
-        "@babel/preset-react": "^7.0.0",
-        "@babel/register": "^7.4.4",
+        "@babel/plugin-transform-spread": "^7.6.2",
+        "@babel/preset-env": "^7.6.3",
+        "@babel/preset-react": "^7.6.3",
+        "@babel/register": "^7.6.2",
         "@stoplight/prism-http": "^3.1.0",
         "babel-eslint": "^10.0.1",
         "babel-jest": "^24.8.0",

@@ -24,9 +24,9 @@ var site = require("/site/public/theme/defaultTheme.js");
 
 <head>
     <base href="<%= site.Configurations.app.context %>/" />
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=1024, initial-scale=1">
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=1024, initial-scale=1"/>
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <title>WSO2 APIM Publisher</title>
 

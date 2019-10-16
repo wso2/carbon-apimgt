@@ -275,6 +275,7 @@ export default function Resources(props) {
                     Alert.error(error.response.body.description);
                     setPageError(error.response.body);
                 }
+                console.error(error);
             });
 
         // Fetch API level throttling policies only when the page get mounted for the first time `componentDidMount`
