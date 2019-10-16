@@ -91,7 +91,7 @@ const LoadableSwitch = withRouter(Loadable.Map({
             <Switch>
                 <Redirect exact from='/apis/:apiUuid' to={redirectURL} />
                 <Route path='/apis/:apiUuid/overview' render={() => <Overview {...props} />} />
-                <Route path='/apis/:apiUuid/docs' component={Documentation} />
+                <Route path='/apis/:apiUuid/documents' component={Documentation} />
                 <Route
                     exact
                     path='/apis/:apiUuid/credentials/wizard'
@@ -388,7 +388,7 @@ class Details extends React.Component {
                             {api.type !== 'WS' && <LeftMenuItem text='test' route='test' to={pathPrefix + 'test'} />}
                         </React.Fragment>
                     )}
-                    <LeftMenuItem text='Documentation' route='docs' to={pathPrefix + 'docs'} />
+                    <LeftMenuItem text='Documentation' route='documents' to={pathPrefix + 'documents'} />
                     {!api.advertiseInfo.advertised && api.type !== 'WS' && (
                         <LeftMenuItem text='SDK' route='sdk' to={pathPrefix + 'sdk'} />
                     )}

@@ -58,7 +58,7 @@ function RenderMethodBase(props) {
     return (<Chip
         label={method}
         style={{
-            backgroundColor: chipColor, color: chipTextColor, height: 20, fontSize: 9, width: 75,
+            backgroundColor: chipColor, color: chipTextColor, height: 20, fontSize: 9, width: 95,
         }}
     />);
 }
@@ -88,9 +88,10 @@ function Operations(props) {
                             />
                         </Typography>
                     </div>
-                    <div className={classes.contentWrapper}>
-                        <Table style={{ padding: 20 }}>
-                            {api.operations
+                    <div>
+                        <div className={classes.contentWrapper}>
+                            <Table style={{ padding: 20 }}>
+                                {api.operations
                             && api.operations.length !== 0
                             && api.operations.map(item => (
                                 <TableRow style={{ borderStyle: 'hidden' }}>
@@ -104,24 +105,25 @@ function Operations(props) {
                                     </TableCell>
                                 </TableRow>
                             ))}
-                        </Table>
+                            </Table>
+                        </div>
+                        <Box py={2}>
+                            <Link to={'/apis/' + api.id + '/operations'}>
+                                <Typography
+                                    className={classes.subHeading}
+                                    color='primary'
+                                    display='inline'
+                                    variant='caption'
+                                >
+                                    <FormattedMessage
+                                        id='Apis.Details.NewOverview.Operations.ShowMore'
+                                        defaultMessage='Show More'
+                                    />
+                                    <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
+                                </Typography>
+                            </Link>
+                        </Box>
                     </div>
-                    <Box py={2} style={{ marginLeft: 500 }}>
-                        <Link to={'/apis/' + api.id + '/operations'}>
-                            <Typography
-                                className={classes.subHeading}
-                                color='primary'
-                                display='inline'
-                                variant='caption'
-                            >
-                                <FormattedMessage
-                                    id='Apis.Details.NewOverview.Operations.ShowMore'
-                                    defaultMessage='Show More'
-                                />
-                                <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
-                            </Typography>
-                        </Link>
-                    </Box>
                 </React.Fragment>
             )}
         </ApiContext.Consumer>
