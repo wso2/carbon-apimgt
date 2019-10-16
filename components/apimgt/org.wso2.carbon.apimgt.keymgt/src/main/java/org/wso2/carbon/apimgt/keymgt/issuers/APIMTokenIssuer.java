@@ -39,7 +39,6 @@ import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.apimgt.keymgt.token.APIMJWTGenerator;
 import org.wso2.carbon.apimgt.keymgt.token.TokenGenerator;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
-import org.wso2.carbon.apimgt.keymgt.util.APIMTokenIssuerUtil;
 import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
@@ -114,13 +113,17 @@ public class APIMTokenIssuer extends OauthTokenIssuerImpl {
                         if (jwtGenerator != null) {
                             TokenValidationContext validationContext = new TokenValidationContext();
                             APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
-                            apiKeyValidationInfoDTO.setEndUserName(tokReqMsgCtx.getAuthorizedUser().toFullQualifiedUsername());
+                            apiKeyValidationInfoDTO.setEndUserName(tokReqMsgCtx.getAuthorizedUser()
+                                    .toFullQualifiedUsername());
                             apiKeyValidationInfoDTO.setSubscriber(application.getOwner());
                             apiKeyValidationInfoDTO.setApplicationName(application.getName());
                             apiKeyValidationInfoDTO.setApplicationId(String.valueOf(application.getId()));
                             apiKeyValidationInfoDTO.setType(application.getKeyType());
                             apiKeyValidationInfoDTO.setApplicationTier(application.getTier());
                             validationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
+                            validationContext.setUser(tokReqMsgCtx.getAuthorizedUser());
+                            validationContext.setAuthorizationCode(tokReqMsgCtx.getOauth2AccessTokenReqDTO()
+                                    .getAuthorizationCode());
                             jwtTokenInfoDTO.setBackendJwt(jwtGenerator.generateToken(validationContext));
                         }
                     }
