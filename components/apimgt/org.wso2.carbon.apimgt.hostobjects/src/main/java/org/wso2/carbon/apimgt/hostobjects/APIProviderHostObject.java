@@ -757,7 +757,7 @@ public class APIProviderHostObject extends ScriptableObject {
             String localName = seqElment.getLocalName();
             seqFileName = seqElment.getAttributeValue(new QName("name"));
             if ("sequence".equals(localName) && seqFileName != null) {
-                apiProvider.addResourceFile(filePath + seqFileName, inSeq);
+                apiProvider.addResourceFile(apiIdentifier, filePath + seqFileName, inSeq);
             } else {
                 throw new APIManagementException("Sequence is malformed");
             }
@@ -1769,7 +1769,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         ResourceFile thumbIcon = new ResourceFile(inputStream, contentType);
         String thumbPath = APIUtil.getIconPath(api.getId());
-        String thumbnailUrl = apiProvider.addResourceFile(thumbPath, thumbIcon);
+        String thumbnailUrl = apiProvider.addResourceFile(api.getId(), thumbPath, thumbIcon);
         api.setThumbnailUrl(thumbnailUrl);
 
         /*Set permissions to anonymous role for thumbPath*/
@@ -4340,7 +4340,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     ResourceFile resourceFile = new ResourceFile(fileHostObject.getInputStream(),
                             fileHostObject.getJavaScriptFile().getContentType());
                     String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
-                    doc.setFilePath(apiProvider.addResourceFile(filePath, resourceFile));
+                    doc.setFilePath(apiProvider.addResourceFile(apiId, filePath, resourceFile));
                 } else if (oldDoc.getFilePath() != null) {
                     doc.setFilePath(oldDoc.getFilePath());
                 }
