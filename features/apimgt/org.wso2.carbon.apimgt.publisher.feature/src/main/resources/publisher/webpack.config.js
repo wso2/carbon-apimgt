@@ -25,7 +25,6 @@ const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const config = {
     entry: {
         index: './source/index.jsx',
-        'editor.worker': 'monaco-editor/esm/vs/editor/editor.worker.js',
     },
     output: {
         path: path.resolve(__dirname, 'site/public/dist'),
@@ -90,7 +89,7 @@ const config = {
     plugins: [
         new MonacoWebpackPlugin({
             // available options are documented at https://github.com/Microsoft/monaco-editor-webpack-plugin#options
-            languages: ['json', 'javascript'],
+            languages: ['json', 'javascript', 'typescript', 'markdown', 'yaml'],
         }),
     ],
 };

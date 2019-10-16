@@ -29,7 +29,7 @@ import {
     makeStyles,
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import * as MonacoEditor from 'monaco-editor';
+import * as monacoEditor from 'monaco-editor';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import Utils from 'AppData/Utils';
@@ -83,10 +83,11 @@ function GenericResource(props) {
 
     const classes = useStyles();
     useEffect(() => {
-        editor = MonacoEditor.editor.create(editorRef.current, {
+        editor = monacoEditor.editor.create(editorRef.current, {
             value: scriptContent,
             language: 'javascript',
             wordWrap: 'on',
+            theme: 'vs-dark',
             automaticLayout: true,
             readOnly: isRestricted(['apim:api_create'], api),
         });
