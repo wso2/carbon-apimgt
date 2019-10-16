@@ -325,7 +325,6 @@ CreateNewVersion.propTypes = {
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,
-    valid: PropTypes.shape({}).isRequired,
 };
 
 export default withAPI(withStyles(styles)(CreateNewVersion));
