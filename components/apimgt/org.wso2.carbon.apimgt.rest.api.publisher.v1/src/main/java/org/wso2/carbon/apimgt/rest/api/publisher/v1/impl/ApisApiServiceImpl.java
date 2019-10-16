@@ -3674,7 +3674,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiEndpointValidationResponseDTO.setStatusCode(statusCode);
             apiEndpointValidationResponseDTO.setStatusMessage(HttpStatus.getStatusText(statusCode));
         } catch (Exception e) {
-            log.error("Error occurred while sending the request to the given endpoint url:" + e);
+            log.error("Error occurred while sending the request to the given endpoint url:", e);
             apiEndpointValidationResponseDTO.setError(e.getMessage());
         } finally {
             method.releaseConnection();
