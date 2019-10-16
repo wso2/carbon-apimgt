@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import Settings from 'AppComponents/Shared/SettingsContext';
 import { withStyles } from '@material-ui/core/styles';
@@ -24,10 +24,6 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
-import Tenants from 'AppData/Tenants';
-import Configurations from 'Config';
-import Loading from 'AppComponents/Base/Loading/Loading';
-
 
 const styles = theme => ({
     root: {
@@ -66,37 +62,12 @@ const styles = theme => ({
 
 const tenantListing = (props) => {
     const settingContext = useContext(Settings);
-    const [tenants, setTenants] = useState([]);
-    const [loading, setLoading] = useState(true);
     const { tenantList, classes, theme } = props;
 
-    useEffect(() => {
-        if (tenantList || tenantList.length === 0) {
-            const tenantApi = new Tenants();
-            tenantApi.getTenantsByState().then((response) => {
-                const { list } = response.body;
-                if (list.length > 0) {
-                    setLoading(false);
-                    setTenants(list);
-                } else {
-                    window.location = Configurations.app.context;
-                }
-            }).catch((error) => {
-                console.error('error when getting tenants ' + error);
-            });
-        } else {
-            setTenants(tenantList);
-            setLoading(false);
-        }
-    }, []);
-
-    if (loading) {
-        return <Loading />;
-    }
     return (
         <div className={classes.root}>
             <Grid container md={4} justify='left' spacing={0} className={classes.list}>
-                {tenants.map(({ domain }) => {
+                {tenantList.map(({ domain }) => {
                     return (
                         <Grid item xs={12} md={12} className={classes.listItem}>
                             <Link
