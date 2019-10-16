@@ -202,7 +202,7 @@ class TokenManager extends React.Component {
     generateKeys() {
         const { keyRequest, keys } = this.state;
         const {
-            keyType, updateSubscriptionData, selectedApp: { tokenType }, intl,
+            keyType, updateSubscriptionData, selectedApp: { tokenType, hashEnabled }, intl,
         } = this.props;
         this.application
             .then((application) => {
@@ -213,7 +213,9 @@ class TokenManager extends React.Component {
                     updateSubscriptionData();
                 }
                 const newKeys = new Map([...keys]);
-                const isKeyJWT = tokenType === 'JWT';
+                // in case token hashing is enabled, isKeyJWT is set to true even if the token tyoe is JWT.
+                // This is to mimic the behavior of JWT tokens (by showing the token in a dialog)
+                const isKeyJWT = (tokenType === 'JWT') || hashEnabled;
                 newKeys.set(keyType, response);
                 this.setState({ keys: newKeys, isKeyJWT });
                 Alert.info(intl.formatMessage({
@@ -420,6 +422,7 @@ class TokenManager extends React.Component {
                     keys={keys}
                     isKeyJWT={isKeyJWT}
                     selectedGrantTypes={keyGrantTypes}
+                    isUserOwner={isUserOwner}
                 />
                 <Paper className={classes.paper}>
                     <ExpansionPanel defaultExpanded>
@@ -597,6 +600,7 @@ TokenManager.propTypes = {
         appId: PropTypes.string,
         value: PropTypes.string,
         owner: PropTypes.string,
+        hashEnabled: PropTypes.bool,
     }).isRequired,
     keyType: PropTypes.string.isRequired,
     updateSubscriptionData: PropTypes.func.isRequired,

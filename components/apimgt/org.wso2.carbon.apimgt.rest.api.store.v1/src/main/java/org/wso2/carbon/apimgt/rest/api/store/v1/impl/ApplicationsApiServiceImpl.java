@@ -65,6 +65,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -237,6 +238,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 application.setApplicationAttributes(applicationAttributes);
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                     ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
+                    applicationDTO.setHashEnabled(OAuthServerConfiguration.getInstance().isClientSecretHashEnabled());
                     JSONArray scopes= apiConsumer.getScopesForApplicationSubscription(username, application.getId());
                     applicationDTO.setSubscriptionScopes(scopes);
                     return Response.ok().entity(applicationDTO).build();
