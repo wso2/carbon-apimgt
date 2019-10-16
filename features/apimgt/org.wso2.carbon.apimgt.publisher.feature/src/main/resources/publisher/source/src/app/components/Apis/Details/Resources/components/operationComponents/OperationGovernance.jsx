@@ -49,15 +49,6 @@ export default function OperationGovernance(props) {
     } = props;
     const isOperationRateLimiting = api.apiThrottlingPolicy === null;
 
-    /**
-     *
-     *
-     * Remove scope
-     */
-    function removeScope() {
-        operationsDispatcher({ action: 'scopes', data: { target, verb, value: '' } });
-    }
-
     return (
         <Fragment>
             <Grid item md={12}>
@@ -165,12 +156,11 @@ export default function OperationGovernance(props) {
                     select
                     disabled={disableUpdate}
                     label='Operation scope'
-                    value={getOperationScopes(operation, spec).length !== 0 ?
-                        getOperationScopes(operation, spec)[0] : ''}
+                    value={getOperationScopes(operation, spec)[0]}
                     onChange={({ target: { value } }) =>
                         operationsDispatcher({
                             action: 'scopes',
-                            data: { target, verb, value },
+                            data: { target, verb, value: [value] },
                         })
                     }
                     helperText='Select a scope to control permissions to this operation'
@@ -184,7 +174,10 @@ export default function OperationGovernance(props) {
                     ))}
                 </TextField>
                 <Tooltip title='Remove scope'>
-                    <IconButton onClick={removeScope} aria-label='delete'>
+                    <IconButton
+                        onClick={() => operationsDispatcher({ action: 'scopes', data: { target, verb, value: [] } })}
+                        aria-label='delete'
+                    >
                         <DeleteIcon fontSize='small' />
                     </IconButton>
                 </Tooltip>
