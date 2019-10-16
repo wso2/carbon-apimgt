@@ -195,6 +195,10 @@
       {
         "Name": "apim:sub_alert_manage",
         "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:tenantInfo",
+        "Roles": "admin"
       }
     ]
   },
