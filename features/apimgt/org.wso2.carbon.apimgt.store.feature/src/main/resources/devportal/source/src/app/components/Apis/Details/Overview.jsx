@@ -335,26 +335,6 @@ function Overview(props) {
                                                         />
                                                     </Button>
                                                 </Link>
-                                                <Typography variant='body2'>
-                                                    {` ${applicationsAvailable.length} `}
-                                                    {applicationsAvailable.length === 1 ? (
-                                                        <FormattedMessage
-                                                            id={
-                                                                'Apis.Details.Overview.subscribe.to.' +
-                                                                'application.content.Application'
-                                                            }
-                                                            defaultMessage='Application'
-                                                        />
-                                                    ) : (
-                                                        <FormattedMessage
-                                                            id={
-                                                                'Apis.Details.Overview.subscribe.to.' +
-                                                                'application.content.Applications'
-                                                            }
-                                                            defaultMessage='Applications'
-                                                        />
-                                                    )}
-                                                </Typography>
                                             </React.Fragment>
                                         )}
                                     </Grid>
@@ -370,7 +350,7 @@ function Overview(props) {
                                                 {subscribedApplications.length}{' '}
                                                 <FormattedMessage
                                                     id='Apis.Details.Overview.subscriptions'
-                                                    defaultMessage='Subscriptions'
+                                                    defaultMessage='Subscriptions >>'
                                                 />
                                             </Typography>
                                         </Link>
