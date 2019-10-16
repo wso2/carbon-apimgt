@@ -2198,12 +2198,15 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getAmznResourceNames(id) {
-        return [
-            { label: 'arn:aws:lambda:us-east-2:572100981605:function:helloworld' },
-            { label: 'arn:aws:lambda:us-east-2:572100981605:function:hellowso2' },
-            { label: 'arn:aws:lambda:us-east-2:572100981605:function:random-number-generator' },
-            { label: 'arn:aws:lambda:us-east-2:572100981605:function:adder' },
-        ];
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['AWS Lambda (Individual)'].get_apis__apiId__amznResourceNames(
+                {
+                    apiId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
     }
 }
 

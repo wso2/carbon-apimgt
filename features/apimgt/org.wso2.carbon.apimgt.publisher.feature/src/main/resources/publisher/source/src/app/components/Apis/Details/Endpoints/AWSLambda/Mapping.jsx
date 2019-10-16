@@ -23,7 +23,12 @@ const useStyles = makeStyles(theme => ({
  */
 export default function Mapping(props) {
     const classes = useStyles();
-    const { resource, resources, setResources } = props;
+    const {
+        api,
+        resource,
+        resources,
+        setResources,
+    } = props;
     const [name, setName] = useState(resource.target);
     const [arn, setArn] = useState(resource.arn);
     const [isExistingName, setIsExistingName] = useState(false);
@@ -114,7 +119,13 @@ export default function Mapping(props) {
                 />
             </TableCell>
             <TableCell>
-                <Autocomplete arn={arn} setArn={setArn} isEmptyArn={isEmptyArn} setIsEmptyArn={setIsEmptyArn} />
+                <Autocomplete
+                    api={api}
+                    arn={arn}
+                    setArn={setArn}
+                    isEmptyArn={isEmptyArn}
+                    setIsEmptyArn={setIsEmptyArn}
+                />
             </TableCell>
             {resource.editable ?
                 <TableCell>
@@ -141,6 +152,7 @@ export default function Mapping(props) {
 }
 
 Mapping.propTypes = {
+    api: PropTypes.shape({}).isRequired,
     resource: PropTypes.shape({}).isRequired,
     resources: PropTypes.shape([]).isRequired,
     setResources: PropTypes.func.isRequired,

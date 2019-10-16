@@ -105,6 +105,7 @@ export default function Mappings(props) {
                             if (resource.editable) {
                                 return (
                                     <Mapping
+                                        api={api}
                                         resource={resource}
                                         resources={resources}
                                         setResources={setResources}
@@ -117,7 +118,7 @@ export default function Mappings(props) {
                                             <div className={classes.mappingTarget}>{resource.target}</div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className={classes.mappingArn}>{resource.arn}</div>
+                                            <div className={classes.mappingArn}>{resource.amznResourceName}</div>
                                         </TableCell>
                                         <TableCell>
                                             <Button onClick={() => editResource(resource)}>Edit</Button>
@@ -128,6 +129,7 @@ export default function Mappings(props) {
                             }
                         })}
                         <Mapping
+                            api={api}
                             resource={{ name: '', arn: '', editable: false }}
                             resources={resources}
                             setResources={setResources}

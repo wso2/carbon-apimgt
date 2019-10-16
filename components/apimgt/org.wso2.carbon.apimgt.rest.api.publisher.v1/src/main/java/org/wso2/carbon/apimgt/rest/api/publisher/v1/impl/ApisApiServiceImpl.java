@@ -699,6 +699,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    // AWS Lambda: rest api operation to get ARNs
     @Override
     public Response apisApiIdAmznResourceNamesGet(String apiId, MessageContext messageContext) throws APIManagementException {
         try {
@@ -706,7 +707,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (endpointConfig != null) {
                 if (endpointConfig.containsKey("amznAccessKey") && endpointConfig.containsKey("amznSecretKey")) {
                     String accessKey = (String) endpointConfig.get("amznAccessKey");
-                    String secretKey = (String) endpointConfig.get("amznSecretKey");
+                    String encryptedSecretKey = (String) endpointConfig.get("amznSecretKey");
+                    CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                    String secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(encryptedSecretKey), "UTF-8");
                     BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
                     AWSStaticCredentialsProvider credentials = new AWSStaticCredentialsProvider(awsCredentials);
                     AWSLambda awsLambda = AWSLambdaClientBuilder.standard()

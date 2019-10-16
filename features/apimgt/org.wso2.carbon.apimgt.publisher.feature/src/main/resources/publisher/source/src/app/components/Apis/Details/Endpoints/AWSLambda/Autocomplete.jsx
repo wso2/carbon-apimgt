@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import deburr from 'lodash/deburr';
 import Downshift from 'downshift';
@@ -6,9 +6,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
-import API from '../../../../../data/api';
-
-const arns = API.getAmznResourceNames();
+import API from 'AppData/api';
 
 /**
  * The renderInput function.
@@ -54,19 +52,19 @@ function renderSuggestion(suggestionProps) {
         suggestion, index, itemProps, highlightedIndex, selectedItem,
     } = suggestionProps;
     const isHighlighted = highlightedIndex === index;
-    const isSelected = (selectedItem || '').indexOf(suggestion.label) > -1;
+    const isSelected = (selectedItem || '').indexOf(suggestion) > -1;
 
     return (
         <MenuItem
             {...itemProps}
-            key={suggestion.label}
+            key={suggestion}
             selected={isHighlighted}
             component='div'
             style={{
                 fontWeight: isSelected ? 500 : 400,
             }}
         >
-            {suggestion.label}
+            {suggestion}
         </MenuItem>
     );
 }
@@ -84,24 +82,22 @@ renderSuggestion.propTypes = {
 
 /**
  * The getSuggestions function.
- * @param {any} value The props that are being passed to the function.
+ * @param {any} value The value that are being passed to the function.
+ * @param {any} arns The arns that are being passed to the function.
  * @returns {any} suggestion values.
  */
-function getSuggestions(value, { showEmpty = false } = {}) {
+function getSuggestions(value, { showEmpty = false } = {}, arns) {
     const inputValue = deburr(value.trim()).toLowerCase();
     const inputLength = inputValue.length;
     let count = 0;
-
-    return inputLength === 0 && !showEmpty
-        ? []
-        : arns.filter((suggestion) => {
-            const keep =
-          count < 5 && suggestion.label.slice(0, inputLength).toLowerCase() === inputValue;
-
+    return inputLength === 0 && !showEmpty ?
+        []
+        :
+        arns.filter((suggestion) => {
+            const keep = count < 5 && suggestion.slice(0, inputLength).toLowerCase() === inputValue;
             if (keep) {
                 count += 1;
             }
-
             return keep;
         });
 }
@@ -141,11 +137,19 @@ const useStyles = makeStyles(theme => ({
 export default function IntegrationDownshift(props) {
     const classes = useStyles();
     const {
+        api,
         arn,
         setArn,
         isEmptyArn,
         setIsEmptyArn,
     } = props;
+    const [arns, setArns] = useState([]);
+    useEffect(() => {
+        API.getAmznResourceNames(api.id)
+            .then((response) => {
+                setArns(response.body.list);
+            });
+    }, []);
     return (
         <div className={classes.root}>
             <Downshift
@@ -206,14 +210,15 @@ export default function IntegrationDownshift(props) {
                             <div {...getMenuProps()}>
                                 {isOpen ? (
                                     <Paper className={classes.paper} square>
-                                        {getSuggestions(inputValue, { showEmpty: true }).map((suggestion, index) =>
-                                            renderSuggestion({
-                                                suggestion,
-                                                index,
-                                                itemProps: getItemProps({ item: suggestion.label }),
-                                                highlightedIndex,
-                                                selectedItem,
-                                            }))}
+                                        {getSuggestions(inputValue, { showEmpty: true }, arns)
+                                            .map((suggestion, index) =>
+                                                renderSuggestion({
+                                                    suggestion,
+                                                    index,
+                                                    itemProps: getItemProps({ item: suggestion }),
+                                                    highlightedIndex,
+                                                    selectedItem,
+                                                }))}
                                     </Paper>
                                 ) : null}
                             </div>
@@ -226,6 +231,7 @@ export default function IntegrationDownshift(props) {
 }
 
 IntegrationDownshift.propTypes = {
+    api: PropTypes.isRequired,
     arn: PropTypes.shape('').isRequired,
     setArn: PropTypes.func.isRequired,
     isEmptyArn: PropTypes.shape('').isRequired,
