@@ -122,9 +122,9 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public Comment getComment(Identifier identifier, String commentId) throws APIManagementException {
+    public void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException {
         checkSubscribePermission();
-        return super.getComment(identifier, commentId);
+        super.deleteComment(identifier,commentId);
     }
 
     @Override
