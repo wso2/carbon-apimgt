@@ -37,6 +37,10 @@ const variantIcon = {
 };
 
 const useStyles1 = makeStyles(theme => ({
+    root: {
+        position: 'relative' /* Overriding the default Snackbar root properties to stack messages */,
+        padding: '5px' /* To add some space between messages when stacking messages */,
+    },
     success: {
         backgroundColor: green[600],
     },
@@ -97,6 +101,7 @@ MySnackbarContentWrapper.propTypes = {
 };
 
 export default function Message(props) {
+    const classes = useStyles1();
     const { message, handleClose, type } = props;
     return (
         <Snackbar
@@ -105,6 +110,7 @@ export default function Message(props) {
                 horizontal: 'right',
             }}
             open
+            classes={{ root: classes.root }}
             onClose={handleClose}
         >
             <MySnackbarContentWrapper onClose={handleClose} variant={type} message={message} />
