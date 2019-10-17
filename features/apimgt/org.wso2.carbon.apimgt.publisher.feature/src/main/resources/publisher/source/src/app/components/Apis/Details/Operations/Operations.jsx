@@ -34,7 +34,6 @@ import Grid from '@material-ui/core/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-
 import APIRateLimiting from '../Resources/components/APIRateLimiting';
 import Operation from './Operation';
 
@@ -128,6 +127,7 @@ class Operations extends React.Component {
             apiPolicies: [],
             operations: api.operations,
             apiThrottlingPolicy: api.apiThrottlingPolicy,
+            filterKeyWord: '',
             isSaving: false,
         };
 
@@ -135,7 +135,7 @@ class Operations extends React.Component {
         this.handleUpdateList = this.handleUpdateList.bind(this);
         this.handleApiThrottlePolicy = this.handleApiThrottlePolicy.bind(this);
         this.updateOperations = this.updateOperations.bind(this);
-        this.filterOperations = this.filterOperations.bind(this);
+        this.setFilterByKeyWord = this.setFilterKeyWord.bind(this);
     }
 
     /**
@@ -162,13 +162,10 @@ class Operations extends React.Component {
 
     /**
      *
-     * @param {*} newOperation
+     * @param {*} event
      */
-    handleUpdateList(newOperation) {
-        const { operations } = this.state;
-        const updatedList = operations.map(operation =>
-            (operation.target === newOperation.target ? newOperation : operation));
-        this.setState({ operations: updatedList });
+    setFilterByKeyWord(event) {
+        this.setState({ filterKeyWord: event.target.value.toLowerCase() });
     }
 
     /**
@@ -182,36 +179,32 @@ class Operations extends React.Component {
     }
     /**
      *
+     * @param {*} newOperation
      */
-    updateOperations() {
-        const { operations, apiThrottlingPolicy } = this.state;
-        const { api, updateAPI } = this.props;
-        const operationList = [...api.operations, ...operations];
-        this.setState({ isSaving: true });
-        updateAPI({ operations: operationList, apiThrottlingPolicy }).finally(() => this.setState({ isSaving: false }));
+    handleUpdateList(newOperation) {
+        const { operations } = this.state;
+        const updatedList = operations.map(operation =>
+            (operation.target === newOperation.target ? newOperation : operation));
+        this.setState({ operations: updatedList });
     }
 
     /**
      *
-     * @param {*} event
      */
-    filterOperations(event, apiOperation) {
-        let filteredOperation;
-        if (event.target.value != null) {
-            filteredOperation = apiOperation.filter(operation =>
-                operation.target.toLowerCase().includes(event.target.value.toLowerCase()));
-        } else {
-            filteredOperation = apiOperation;
-        }
-        this.setState({ operations: filteredOperation });
+    updateOperations() {
+        const { operations, apiThrottlingPolicy } = this.state;
+        const { updateAPI } = this.props;
+        this.setState({ isSaving: true });
+        updateAPI({ operations, apiThrottlingPolicy }).finally(() => this.setState({ isSaving: false }));
     }
+
     /**
      * @inheritdoc
      */
     render() {
         const { api } = this.props;
         const {
-            operations, apiPolicies, apiThrottlingPolicy, isSaving,
+            operations, apiPolicies, apiThrottlingPolicy, isSaving, filterKeyWord,
         } = this.state;
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFoundMessage} />;
@@ -247,7 +240,7 @@ class Operations extends React.Component {
                                     id='outlined-full-width'
                                     label='Operation'
                                     placeholder='Filter Operations'
-                                    onChange={e => this.filterOperations(e, api.operations)}
+                                    onChange={e => this.setFilterByKeyWord(e, api.operations)}
                                     fullWidth
                                     variant='outlined'
                                     InputLabelProps={{
@@ -301,7 +294,8 @@ class Operations extends React.Component {
                                     </Typography>
                                 </TableCell>
                             </TableRow>
-                            {operations.map((item) => {
+                            {operations.filter(operation =>
+                                operation.target.toLowerCase().includes(filterKeyWord)).map((item) => {
                                 return (
                                     <Operation
                                         operation={item}
