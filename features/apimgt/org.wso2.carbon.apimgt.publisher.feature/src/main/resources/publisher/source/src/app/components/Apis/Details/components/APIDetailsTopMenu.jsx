@@ -72,8 +72,8 @@ const APIDetailsTopMenu = (props) => {
                 <KeyboardArrowLeft className={classes.backIcon} />
                 <div className={classes.backText}>
                     <FormattedMessage
-                        id='Apis.Details.components.APIDetailsTopMenu.back.to.listing'
-                        defaultMessage='BACK TO {break} APIs'
+                        id='Apis.Details.components.APIDetailsTopMenu.back.to'
+                        defaultMessage={isAPIProduct ? 'BACK TO {break} PRODUCTs' : 'BACK TO {break} APIs'}
                         values={{ break: <br /> }}
                     />
                 </div>
