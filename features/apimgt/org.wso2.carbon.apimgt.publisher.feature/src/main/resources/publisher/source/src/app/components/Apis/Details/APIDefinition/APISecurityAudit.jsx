@@ -291,10 +291,14 @@ class APISecurityAudit extends Component {
             //     .findNextMatch(term, index === 0 ? lastTerms[indexCount - 1] : 1, false, false, null, false);
             // });
             for (let i = 0; i < termObject.length; i++) {
-                if (i === 0) {
-                    lastTerms.push(editor.getModel().findNextMatch(termObject[i], 1, false, false, null, false));
+                if (i === 0 || lastTerms[lastTerms.length - 1] === null) {
+                    if (lastTerms[lastTerms.length - 2] !== null) {
+                        lastTerms.push(editor.getModel().findNextMatch(termObject[i], { lineNumber: lastTerms[lastTerms.length - 2].range.endLineNumber, column: 1 }, false, false, null, false));
+                    } else {
+                        lastTerms.push(editor.getModel().findNextMatch(termObject[i], 1, false, false, null, false));
+                    }
                 } else {
-                    lastTerms.push(editor.getModel().findNextMatch(termObject[i], { lineNumber: 50, column: 120 }, false, false, null, false));
+                    lastTerms.push(editor.getModel().findNextMatch(termObject[i], { lineNumber: lastTerms[lastTerms.length - 1].range.endLineNumber, column: 1 }, false, false, null, false));
                 }
             }
             const finalMatchIndex = lastTerms.length - 1;
