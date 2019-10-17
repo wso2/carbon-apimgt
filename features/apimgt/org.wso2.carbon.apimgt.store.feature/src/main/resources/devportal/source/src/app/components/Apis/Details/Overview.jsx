@@ -101,9 +101,6 @@ const styles = theme => ({
     subsToApp: {
         marginTop: theme.spacing(2),
     },
-    subscribeButton: {
-        marginLeft: theme.spacing(2),
-    },
     expansionRoot: {
         minHeight: 238,
     },
@@ -306,7 +303,9 @@ function Overview(props) {
                                                 }
                                             />
                                         </Typography>
-                                        {user && (
+                                    </Grid>
+                                    {user && (
+                                        <Grid item>
                                             <Link
                                                 to={{
                                                     pathname: '/apis/' + api.id + '/credentials/wizard',
@@ -319,8 +318,10 @@ function Overview(props) {
                                                     />
                                                 </Button>
                                             </Link>
-                                        )}
-                                        {applicationsAvailable && applicationsAvailable.length > 0 && (
+                                        </Grid>
+                                    )}
+                                    {applicationsAvailable && applicationsAvailable.length > 0 && (
+                                        <Grid item>
                                             <React.Fragment>
                                                 <Link to={'/apis/' + api.id + '/credentials'}>
                                                     <Button
@@ -336,8 +337,8 @@ function Overview(props) {
                                                     </Button>
                                                 </Link>
                                             </React.Fragment>
-                                        )}
-                                    </Grid>
+                                        </Grid>
+                                    )}
                                     <Grid item xs={12}>
                                         <Typography variant='subtitle2'>
                                             <FormattedMessage
@@ -529,7 +530,7 @@ function Overview(props) {
                         classes={{ root: classNames({ [classes.noDocumentRoot]: totalDocuments === 0 }) }}
                     >
                         <Grid container className={classes.root} spacing={2}>
-                            <OverviewDocuments apiId={api.id} setDocsCount={setDocsCount}/>
+                            <OverviewDocuments apiId={api.id} setDocsCount={setDocsCount} />
                         </Grid>
                     </ExpansionPanelDetails>
                     <Divider />
