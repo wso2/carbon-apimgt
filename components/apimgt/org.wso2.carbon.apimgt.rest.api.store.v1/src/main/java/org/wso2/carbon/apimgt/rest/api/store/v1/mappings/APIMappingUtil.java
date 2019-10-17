@@ -856,9 +856,9 @@ public class APIMappingUtil {
     private static boolean isSubscriptionAvailable(String apiTenant, String subscriptionAvailability,
                                                   String subscriptionAllowedTenants) {
 
-        String userDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         boolean subscriptionAllowed = false;
-        if (!userDomain.equals(apiTenant)) {
+        if (!tenantDomain.equals(apiTenant)) {
             if (APIConstants.SUBSCRIPTION_TO_ALL_TENANTS.equals(subscriptionAvailability)) {
                 subscriptionAllowed = true;
             } else if (APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS.equals(subscriptionAvailability)) {
@@ -867,7 +867,7 @@ public class APIMappingUtil {
                     allowedTenants = subscriptionAllowedTenants.split(",");
                     if (allowedTenants != null) {
                         for (String tenant : allowedTenants) {
-                            if (tenant != null && userDomain.equals(tenant.trim())) {
+                            if (tenant != null && tenantDomain.equals(tenant.trim())) {
                                 subscriptionAllowed = true;
                                 break;
                             }
