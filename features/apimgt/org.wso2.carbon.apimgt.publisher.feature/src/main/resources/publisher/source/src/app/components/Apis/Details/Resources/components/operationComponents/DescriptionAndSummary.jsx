@@ -43,7 +43,7 @@ export default function DescriptionAndSummary(props) {
                 </Typography>
             </Grid>
             <Grid item md={1} />
-            <Grid item md={6}>
+            <Grid item md={5}>
                 <TextField
                     margin='dense'
                     fullWidth
@@ -74,6 +74,7 @@ export default function DescriptionAndSummary(props) {
                     }
                 />
             </Grid>
+            <Grid item md={1} />
         </Fragment>
     );
 }

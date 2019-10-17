@@ -2279,6 +2279,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return result;
     }
 
+    @Override
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String requestedTenantDomain, int start, int end,
+            boolean isLazyLoad) throws APIManagementException {
+        Map<String, Object> searchResults =
+                super.searchPaginatedAPIs(searchQuery, requestedTenantDomain, start, end, isLazyLoad);
+        return filterMultipleVersionedAPIs(searchResults);
+    }
 
     /**
 	 * Pagination API search based on solr indexing
@@ -5421,7 +5428,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     private Map<String, Object> filterMultipleVersionedAPIs(Map<String, Object> searchResults) {
-        ArrayList<Object> apiSet = (ArrayList<Object>) searchResults.get("apis");
+        Object apiObj = searchResults.get("apis");
+        ArrayList<Object> apiSet;
+        if (apiObj instanceof Set) {
+            apiSet = new ArrayList<>(((Set) apiObj));
+        } else {
+            apiSet = (ArrayList<Object>) apiObj;
+        }
 
         //filter store results if displayMultipleVersions is set to false
         Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
@@ -5486,7 +5499,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             apiSet = tempApiSet;
             apiSet.sort(new ContentSearchResultNameComparator());
-            searchResults.put("apis", apiSet);
+
+            if (apiObj instanceof Set) {
+                searchResults.put("apis", new HashSet<>(apiSet));
+            } else {
+                searchResults.put("apis", apiSet);
+            }
         }
         return searchResults;
     }

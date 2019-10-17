@@ -340,11 +340,15 @@ class Credentials extends React.Component {
                                                                 }
                                                             />
                                                         </Typography>
-                                                        <Link to={`/apis/${api.id}/credentials/wizard`}>
+                                                        <Link
+                                                            to={`/apis/${api.id}/credentials/wizard`}
+                                                            style={!api.isSubscriptionAvailable ? { pointerEvents: 'none' } : null}
+                                                        >
                                                             <Button
                                                                 variant='contained'
                                                                 color='primary'
                                                                 className={classes.buttonElm}
+                                                                disabled={!api.isSubscriptionAvailable}
                                                             >
                                                                 <FormattedMessage
                                                                     id={'Apis.Details.Credentials.' +
@@ -378,6 +382,7 @@ class Credentials extends React.Component {
                                                                 color='primary'
                                                                 className={classes.buttonElm}
                                                                 onClick={() => this.handleSubscribe()}
+                                                                disabled={!api.isSubscriptionAvailable}
                                                             >
                                                                 <FormattedMessage
                                                                     id={'Apis.Details.Credentials.'

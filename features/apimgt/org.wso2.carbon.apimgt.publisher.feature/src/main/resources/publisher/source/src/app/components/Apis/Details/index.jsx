@@ -48,6 +48,7 @@ import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import AppContext from 'AppComponents/Shared/AppContext';
+import LastUpdatedTime from 'AppComponents/Apis/Details/components/LastUpdatedTime';
 import Overview from './NewOverview/Overview';
 import Configuration from './Configuration/Configuration';
 import RuntimeConfiguration from './Configuration/RuntimeConfiguration';
@@ -599,6 +600,7 @@ class Details extends Component {
                     <div className={classes.content}>
                         <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} imageUpdate={imageUpdate} />
                         <div className={classes.contentInside}>
+                            <LastUpdatedTime lastUpdatedTime={api.lastUpdatedTime} />
                             <Switch>
                                 <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
                                 <Route

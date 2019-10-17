@@ -29,9 +29,10 @@ import API from 'AppData/api.js';
 import APIProduct from 'AppData/APIProduct';
 import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
+import { isRestricted } from 'AppData/AuthManager';
 
 function Delete(props) {
-    const { intl } = props;
+    const { intl, api } = props;
     const [open, setOpen] = useState(false);
 
     const runAction = (action) => {
@@ -73,7 +74,7 @@ function Delete(props) {
     const { apiName } = props;
     return (
         <div>
-            <Button onClick={toggleOpen}>
+            <Button onClick={toggleOpen} disabled={isRestricted(['apim:api_create'], api)}>
                 <Icon>delete_forever</Icon>
                 <FormattedMessage id='Apis.Details.Documents.Delete.document.delete' defaultMessage='Delete' />
             </Button>
@@ -124,6 +125,10 @@ Delete.propTypes = {
     docId: PropTypes.shape({}).isRequired,
     getDocumentsList: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({
+        id: PropTypes.string,
+        apiType: PropTypes.oneOf([API.CONSTS.API, API.CONSTS.APIProduct]),
+    }).isRequired,
 };
 
 export default injectIntl(Delete);

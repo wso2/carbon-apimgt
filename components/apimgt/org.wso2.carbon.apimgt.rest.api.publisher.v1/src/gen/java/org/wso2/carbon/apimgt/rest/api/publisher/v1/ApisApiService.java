@@ -14,6 +14,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
@@ -99,6 +100,7 @@ public interface ApisApiService {
       public Response updateWSDLOfAPI(String apiId, InputStream fileInputStream, Attachment fileDetail, String url, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response validateAPI(String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response validateDocument(String apiId, String name, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response validateEndpoint(String endpointUrl, String apiId, MessageContext messageContext) throws APIManagementException;
       public Response validateOpenAPIDefinition(String url, InputStream fileInputStream, Attachment fileDetail, Boolean returnContent, MessageContext messageContext) throws APIManagementException;
       public Response validateWSDLDefinition(String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
 }
