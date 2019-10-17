@@ -1,13 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
-import Tooltip from '@material-ui/core/Tooltip';
 import { FormattedMessage } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
-import moment from 'moment';
 
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
@@ -50,12 +48,16 @@ const styles = theme => ({
     },
     dateWrapper: {
         flex: 1,
-        alignSelf: 'flex-start',
+        alignSelf: 'center',
     },
     lastUpdatedTypography: {
-        width: '25%',
-        alignSelf: 'flex-end',
-        'margin-top': '30px',
+        display: 'inline-block',
+        minWidth: 30,
+    },
+    apiName: {
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
     },
 });
 
@@ -65,6 +67,10 @@ const APIDetailsTopMenu = (props) => {
     } = props;
     const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
     const { settings } = useAppContext();
+    let apiType = 'API';
+    if (isAPIProduct) {
+        apiType = 'PRODUCT';
+    }
     // todo: need to support rev proxy ~tmkb
     return (
         <div className={classes.root}>
@@ -73,15 +79,15 @@ const APIDetailsTopMenu = (props) => {
                 <div className={classes.backText}>
                     <FormattedMessage
                         id='Apis.Details.components.APIDetailsTopMenu.back.to.listing'
-                        defaultMessage='BACK TO {break} APIs'
-                        values={{ break: <br /> }}
+                        defaultMessage='BACK TO {break} {apiType}s'
+                        values={{ break: <br />, apiType }}
                     />
                 </div>
             </Link>
             <VerticalDivider height={70} />
             <ThumbnailView api={api} width={70} height={50} imageUpdate={imageUpdate} />
-            <div style={{ marginLeft: theme.spacing.unit }}>
-                <Typography variant='h4'>
+            <div style={{ marginLeft: theme.spacing.unit, maxWidth: 500 }}>
+                <Typography variant='h4' className={classes.apiName}>
                     {api.name} {isAPIProduct ? '' : ':' + api.version}
                 </Typography>
                 <Typography variant='caption' gutterBottom align='left'>
@@ -95,22 +101,7 @@ const APIDetailsTopMenu = (props) => {
                     State
                 </Typography>
             </div>
-            <VerticalDivider height={70} />
-            <div className={classes.dateWrapper}>
-                <Tooltip
-                    title={moment(api.lastUpdatedTime).calendar()}
-                    aria-label='add'
-                    className={classes.lastUpdatedTooltip}
-                >
-                    <Typography variant='caption' display='block' className={classes.lastUpdatedTypography}>
-                        <FormattedMessage
-                            id='Apis.Details.components.APIDetailsTopMenu.last.updated.time'
-                            defaultMessage='Last updated:'
-                        />{' '}
-                        {moment(api.lastUpdatedTime).fromNow()}
-                    </Typography>
-                </Tooltip>
-            </div>
+            <div className={classes.dateWrapper} />
             <VerticalDivider height={70} />
             <GoTo api={api} isAPIProduct={isAPIProduct} />
             {(isVisibleInStore || isAPIProduct) && <VerticalDivider height={70} />}
@@ -120,6 +111,7 @@ const APIDetailsTopMenu = (props) => {
                     rel='noopener noreferrer'
                     href={`${settings.storeUrl}/apis/${api.id}/overview`}
                     className={classes.viewInStoreLauncher}
+                    style={{ minWidth: 90 }}
                 >
                     <div>
                         <LaunchIcon />

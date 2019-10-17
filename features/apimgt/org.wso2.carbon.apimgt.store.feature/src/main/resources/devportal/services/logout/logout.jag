@@ -19,7 +19,7 @@
 
     var log = new Log("Logout Request Function");
     include("/services/constants.jag");
-    var site = require("/site/conf/site.json");
+    var site = require("/site/public/theme/defaultTheme.js").Configurations.app;
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
     var idTokenP1 = request.getCookie("AM_ID_TOKEN_DEFAULT_P1").value;

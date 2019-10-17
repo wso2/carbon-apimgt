@@ -19,10 +19,10 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CreateScope from './CreateScope';
 import EditScope from './EditScope';
 import Scopes from './Scopes';
-import { PageNotFound } from '../../../Base/Errors';
 
 const Scope = () => {
     const [api, updateAPI] = useAPI();
@@ -40,7 +40,7 @@ const Scope = () => {
                 path={'/' + urlPrefix + '/:api_uuid/scopes/edit'}
                 component={props => <EditScope api={api} {...props} updateAPI={updateAPI} />}
             />
-            <Route component={PageNotFound} />
+            <Route component={ResourceNotFound} />
         </Switch>
     );
 };
