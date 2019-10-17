@@ -98,13 +98,21 @@ const styles = theme => ({
         paddingLeft: theme.spacing(2),
     },
     appContent: {
-        paddingTop: theme.spacing(4),
+        // paddingTop: theme.spacing(3),
         maxWidth: '95%',
         margin: 'auto',
+        height: '90%',
+        // overflow: 'scroll',
     },
     dialogContainer: {
         width: 1000,
         padding: theme.spacing(2),
+    },
+    fullHeight: {
+        height: '100%',
+    },
+    container: {
+        height: '100%',
     },
 });
 
@@ -346,12 +354,12 @@ class Listing extends Component {
                         </Typography>
                     </Box>
                 </div>
-                <Grid container spacing={0} justify='center'>
+                <Grid container spacing={0} justify='center' className={classes.container}>
                     <Grid item xs={12}>
                         {data.size > 0 ? (
                             <div className={classes.appContent}>
-                                <Paper>
-                                    <Table>
+                                <Paper className={classes.fullHeight}>
+                                    <Table className={classes.fullHeight}>
                                         <ApplicationTableHead
                                             order={order}
                                             orderBy={orderBy}
@@ -367,27 +375,27 @@ class Listing extends Component {
                                             isApplicationSharingEnabled={isApplicationSharingEnabled}
                                             toggleDeleteConfirmation={this.toggleDeleteConfirmation}
                                         />
+                                        <TableFooter>
+                                            <TableRow>
+                                                <TablePagination
+                                                    component='div'
+                                                    count={totalApps}
+                                                    rowsPerPage={rowsPerPage}
+                                                    rowsPerPageOptions={[5, 10, 15]}
+                                                    labelRowsPerPage='Show'
+                                                    page={page}
+                                                    backIconButtonProps={{
+                                                        'aria-label': 'Previous Page',
+                                                    }}
+                                                    nextIconButtonProps={{
+                                                        'aria-label': 'Next Page',
+                                                    }}
+                                                    onChangePage={this.handleChangePage}
+                                                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                                                />
+                                            </TableRow>
+                                        </TableFooter>
                                     </Table>
-                                    <TableFooter>
-                                        <TableRow>
-                                            <TablePagination
-                                                component='div'
-                                                count={totalApps}
-                                                rowsPerPage={rowsPerPage}
-                                                rowsPerPageOptions={[5, 10, 15]}
-                                                labelRowsPerPage='Show'
-                                                page={page}
-                                                backIconButtonProps={{
-                                                    'aria-label': 'Previous Page',
-                                                }}
-                                                nextIconButtonProps={{
-                                                    'aria-label': 'Next Page',
-                                                }}
-                                                onChangePage={this.handleChangePage}
-                                                onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                                            />
-                                        </TableRow>
-                                    </TableFooter>
                                 </Paper>
                             </div>
                         ) : (
