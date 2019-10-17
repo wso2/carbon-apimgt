@@ -161,7 +161,7 @@ export default function OperationGovernance(props) {
                     onChange={({ target: { value } }) =>
                         operationsDispatcher({
                             action: 'scopes',
-                            data: { target, verb, value },
+                            data: { target, verb, value: [value] },
                         })
                     }
                     helperText='Select a scope to control permissions to this operation'
