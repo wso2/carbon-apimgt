@@ -98,11 +98,12 @@ const styles = theme => ({
         paddingLeft: theme.spacing(2),
     },
     appContent: {
-        // paddingTop: theme.spacing(3),
+        marginTop: theme.spacing(2),
         maxWidth: '95%',
         margin: 'auto',
-        height: '90%',
-        // overflow: 'scroll',
+        maxHeight: theme.spacing(90),
+        height: theme.spacing(90),
+        overflow: 'scroll',
     },
     dialogContainer: {
         width: 1000,
@@ -358,7 +359,7 @@ class Listing extends Component {
                     <Grid item xs={12}>
                         {data.size > 0 ? (
                             <div className={classes.appContent}>
-                                <Paper className={classes.fullHeight}>
+                                <Paper className={data.size < 9 ? classes.fullHeight : ''}>
                                     <Table className={classes.fullHeight}>
                                         <ApplicationTableHead
                                             order={order}

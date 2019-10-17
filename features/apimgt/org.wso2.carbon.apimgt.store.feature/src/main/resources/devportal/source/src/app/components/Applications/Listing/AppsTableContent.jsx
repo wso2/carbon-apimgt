@@ -38,7 +38,7 @@ import { withStyles } from '@material-ui/core/styles';
  */
 const styles = theme => ({
     fullHeight: {
-        height: '90%',
+        height: '100%',
     },
     tableRow: {
         height: theme.spacing(5),
