@@ -28,8 +28,6 @@
         "code": request.getParameter("code","UTF-8"),
         "redirect_uri": serverUrl + site.context + LOGIN_CALLBACK_URL_SUFFIX
     };
-var log = new Log();
-log.info(site);
     var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
     var systemApplicationDAO = new SystemApplicationDTO();
     var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_store");

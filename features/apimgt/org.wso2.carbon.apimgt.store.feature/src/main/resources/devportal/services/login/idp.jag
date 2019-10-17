@@ -40,7 +40,7 @@
     // get the pathname excluding the 'devportal/publisher' segment
     if (referer !== null) {
         var context = site.context.charAt(0) === '/' ? site.context.substring(1) : site.context;
-        var hostnamePattern = "(https?:\/\/.*):(\\d*)\/(" + context + ")";
+        var hostnamePattern = "(https?:\/\/.*):?(\\d*)\/?(" + context + ")";
         var re = new RegExp(hostnamePattern);
         state = encodeURI(referer.replace(re, ''));
     }
