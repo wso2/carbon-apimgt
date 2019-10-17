@@ -57,7 +57,8 @@ export default class ProtectedApp extends Component {
             messages: {},
             userResolved: false,
             scopesFound: false,
-            tenantList: null,
+            tenantResolved: false,
+            tenantList: [],
         };
         this.environments = [];
         this.loadLocale = this.loadLocale.bind(this);
@@ -73,16 +74,22 @@ export default class ProtectedApp extends Component {
         const { tenant } = queryString.parse(search);
         const tenantApi = new Tenants();
 
-        // Check if tenant domain is present as a query param if not retrieve the tenant list
-        if (tenant) {
-            this.setState({ tenantList: [] }, setTenantDomain(tenant));
-        } else {
-            tenantApi.getTenantsByState().then((response) => {
-                this.setState({ tenantList: response.body.list });
-            }).catch((error) => {
-                console.error('error when getting tenants ' + error);
-            });
-        }
+        tenantApi.getTenantsByState().then((response) => {
+            const { list } = response.body;
+            if (list.length > 0) {
+                // Check if tenant domain is present as a query param if not retrieve the tenant list,
+                // only set the list in the state
+                if (tenant) {
+                    this.setState({ tenantResolved: true, tenantList: list }, setTenantDomain(tenant));
+                } else {
+                    this.setState({ tenantResolved: true, tenantList: response.body.list });
+                }
+            } else {
+                this.setState({ tenantResolved: true });
+            }
+        }).catch((error) => {
+            console.error('error when getting tenants ' + error);
+        });
 
         ConfigManager.getConfigs()
             .environments.then((response) => {
@@ -188,7 +195,9 @@ export default class ProtectedApp extends Component {
      * @returns {Component}
      */
     render() {
-        const { userResolved, tenantList, notEnoughPermission } = this.state;
+        const {
+            userResolved, tenantList, notEnoughPermission, tenantResolved,
+        } = this.state;
         const { tenantDomain } = this.context;
         if (!userResolved) {
             return <Loading />;
@@ -204,13 +213,13 @@ export default class ProtectedApp extends Component {
         }
 
         // Waiting till the tenant list is retrieved
-        if (tenantList === null) {
+        if (!tenantResolved) {
             return <Loading />;
         }
         // user is redirected to tenant listing page if there are any tenants present and
         // if the user is not authenticated and if there is no tenant domain present in the context
         // tenantDomain contains INVALID when the tenant does not exist
-        if (tenantDomain === 'INVALID' || (tenantList.length > 0 && !isAuthenticated && tenantDomain === null)) {
+        if (tenantList.length > 0 && (tenantDomain === 'INVALID' || (!isAuthenticated && tenantDomain === null))) {
             return <TenantListing tenantList={tenantList} />;
         }
         /**

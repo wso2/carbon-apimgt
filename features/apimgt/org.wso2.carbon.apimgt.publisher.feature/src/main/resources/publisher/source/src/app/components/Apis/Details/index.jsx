@@ -48,6 +48,7 @@ import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import AppContext from 'AppComponents/Shared/AppContext';
+import LastUpdatedTime from 'AppComponents/Apis/Details/components/LastUpdatedTime';
 import Overview from './NewOverview/Overview';
 import Configuration from './Configuration/Configuration';
 import RuntimeConfiguration from './Configuration/RuntimeConfiguration';
@@ -134,7 +135,7 @@ class Details extends Component {
     static isValidURL(pathname) {
         for (const [subPathKey, subPath] of Object.entries(Details.subPaths)) {
             // Skip the BASE path , because it will match for any `/apis/:apiUUID/*` values
-            if (subPathKey !== 'BASE') {
+            if ((subPathKey !== 'BASE') && (subPathKey !== 'BASE_PRODUCT')) {
                 const matched = matchPath(pathname, subPath);
                 if (matched) {
                     return matched;
@@ -585,13 +586,13 @@ class Details extends Component {
                                 Icon={<MonetizationIcon />}
                             />
                         )}
-                        {settingsContext.externalStoresEnabled && (
+                        {!isAPIProduct && settingsContext.externalStoresEnabled && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.external-stores',
-                                    defaultMessage: 'external developer portals',
+                                    defaultMessage: 'external dev portals',
                                 })}
-                                to={pathPrefix + 'external-stores'}
+                                to={pathPrefix + 'external-devportals'}
                                 Icon={<StoreIcon />}
                             />
                         )}
@@ -599,6 +600,7 @@ class Details extends Component {
                     <div className={classes.content}>
                         <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} imageUpdate={imageUpdate} />
                         <div className={classes.contentInside}>
+                            <LastUpdatedTime lastUpdatedTime={api.lastUpdatedTime} />
                             <Switch>
                                 <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
                                 <Route
@@ -742,7 +744,7 @@ Details.subPaths = {
     PROPERTIES_PRODUCT: '/api-products/:apiprod_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
     MONETIZATION: '/apis/:api_uuid/monetization',
-    EXTERNAL_STORES: '/apis/:api_uuid/external-stores',
+    EXTERNAL_STORES: '/apis/:api_uuid/external-devportals',
 };
 
 // To make sure that paths will not change by outsiders, Basically an enum

@@ -147,7 +147,6 @@ public class APIGatewayManager {
                     template.setAuthType("Any");
                     template.setHTTPVerb("POST");
                     template.setHttpVerbs("POST");
-                    template.setHttpVerbs("GET");
                     template.setUriTemplate("/*");
                     uriTemplates.add(template);
                     api.setUriTemplates(uriTemplates);
