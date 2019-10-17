@@ -207,7 +207,7 @@ class CreateScope extends React.Component {
             valid[id].invalid = true;
             valid[id].error = 'Scope name already exist';
         }
-        if (!valid[id].invalid && /[!@#$%^&*(),?"{}[\]|<>\t\n]/i.test(value)) {
+        if (!valid[id].invalid && /[!@#$%^&*(),?"{}[\]|<>\t\n]|(^apim:)/i.test(value)) {
             valid[id].invalid = true;
             valid[id].error = 'Field contains special characters';
         }
