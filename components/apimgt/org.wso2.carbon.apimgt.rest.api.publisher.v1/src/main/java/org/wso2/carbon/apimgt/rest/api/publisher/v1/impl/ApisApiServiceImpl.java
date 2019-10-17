@@ -100,6 +100,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -2670,7 +2671,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response validateEndpoint(String endpointUrl, String apiId, MessageContext messageContext) throws APIManagementException {
+    public Response validateEndpoint(String endpointUrl, String apiId, MessageContext messageContext) {
 
         ApiEndpointValidationResponseDTO apiEndpointValidationResponseDTO = new ApiEndpointValidationResponseDTO();
         apiEndpointValidationResponseDTO.setError("");
@@ -2698,12 +2699,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (url.getProtocol().matches("http")) {
                 apiEndpointValidationResponseDTO = sendHttpHEADRequest(endpointUrl);
                 return Response.status(Response.Status.OK).entity(apiEndpointValidationResponseDTO).build();
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Unsupported protocol : " + url.getProtocol());
-                }
-                apiEndpointValidationResponseDTO.setError("Unsupported protocol");
             }
+        } catch (MalformedURLException e) {
+            log.error("Malformed Url error occurred while sending the HEAD request to the given endpoint url:", e);
+            apiEndpointValidationResponseDTO.setError(e.getMessage());
         } catch (Exception e) {
             RestApiUtil.handleInternalServerError("Error while testing the validity of API endpoint url " +
                     "existence", e, log);
@@ -3673,9 +3672,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             int statusCode = client.executeMethod(method);
             apiEndpointValidationResponseDTO.setStatusCode(statusCode);
             apiEndpointValidationResponseDTO.setStatusMessage(HttpStatus.getStatusText(statusCode));
-        } catch (Exception e) {
-            log.error("Error occurred while sending the request to the given endpoint url:", e);
-            apiEndpointValidationResponseDTO.setError(e.getMessage());
+        } catch (UnknownHostException e) {
+            log.error("UnknownHostException occurred while sending the HEAD request to the given endpoint url:", e);
+            apiEndpointValidationResponseDTO.setError("Unknown Host");
+        } catch (IOException e) {
+            log.error("Error occurred while sending the HEAD request to the given endpoint url:", e);
+            apiEndpointValidationResponseDTO.setError("Connection error");
         } finally {
             method.releaseConnection();
         }
