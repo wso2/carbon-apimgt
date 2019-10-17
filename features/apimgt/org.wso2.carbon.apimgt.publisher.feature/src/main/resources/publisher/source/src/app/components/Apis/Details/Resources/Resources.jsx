@@ -95,6 +95,9 @@ export default function Resources(props) {
             case 'throttlingPolicy':
                 updatedOperation['x-throttling-tier'] = value;
                 break;
+            case 'amznResourceName':
+                updatedOperation['x-amzn-resource-name'] = value;
+                break;
             case 'scopes':
                 if (!updatedOperation.security) {
                     updatedOperation.security = [{ default: [] }];
@@ -164,7 +167,12 @@ export default function Resources(props) {
     const onMarkAsDelete = useCallback(onOperationSelectM, [setSelectedOperation]);
     // memoized (https://reactjs.org/docs/hooks-reference.html#usememo) to improve pref,
     // localized to inject local apiThrottlingPolicy data
-    const localApi = useMemo(() => ({ id: api.id, apiThrottlingPolicy, scopes: api.scopes }), [
+    const localApi = useMemo(() => ({
+        id: api.id,
+        apiThrottlingPolicy,
+        scopes: api.scopes,
+        endpointConfig: api.endpointConfig,
+    }), [
         api,
         apiThrottlingPolicy,
     ]);

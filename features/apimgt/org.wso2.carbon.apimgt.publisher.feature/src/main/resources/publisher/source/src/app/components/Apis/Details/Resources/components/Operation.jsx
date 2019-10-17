@@ -38,6 +38,7 @@ import Badge from '@material-ui/core/Badge';
 import { isRestricted } from 'AppData/AuthManager';
 import DescriptionAndSummary from './operationComponents/DescriptionAndSummary';
 import OperationGovernance from './operationComponents/OperationGovernance';
+import AmznResourceName from './operationComponents/AmznResourceName';
 import Parameters from './operationComponents/Parameters';
 
 /**
@@ -181,6 +182,16 @@ function Operation(props) {
                 <Divider light className={classes.customDivider} />
                 <ExpansionPanelDetails>
                     <Grid spacing={2} container direction='row' justify='flex-start' alignItems='flex-start'>
+                        {api.endpointConfig.endpoint_type === 'awslambda' ?
+                            <AmznResourceName
+                                api={api}
+                                operation={operation}
+                                operationsDispatcher={operationsDispatcher}
+                                target={target}
+                                verb={verb}
+                            /> :
+                            <div />
+                        }
                         <DescriptionAndSummary
                             operation={operation}
                             operationsDispatcher={operationsDispatcher}
