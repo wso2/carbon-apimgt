@@ -846,7 +846,7 @@ public class APIMappingUtil {
     }
 
     /**
-     * Maps external store advertise API properties to AdvertiseInfoDTO object.
+     * Checks whether tenant is allowed to subscribe
      *
      * @param apiTenant                  Tenant of the API creator
      * @param subscriptionAvailability   Subscription availability
