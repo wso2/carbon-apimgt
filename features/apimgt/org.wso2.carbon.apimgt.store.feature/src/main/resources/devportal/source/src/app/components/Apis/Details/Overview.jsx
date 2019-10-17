@@ -338,7 +338,6 @@ function Overview(props) {
                                                         variant='contained'
                                                         color='primary'
                                                         size='large'
-                                                        className={classes.subscribeButton}
                                                         disabled={!api.isSubscriptionAvailable}
                                                     >
                                                         <FormattedMessage
