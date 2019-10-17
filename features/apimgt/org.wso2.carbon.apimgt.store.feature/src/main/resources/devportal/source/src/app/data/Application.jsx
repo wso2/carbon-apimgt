@@ -218,10 +218,12 @@ export default class Application extends Resource {
         });
     }
 
-    static all() {
+    static all(limit = 3, offset = null) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
         const promisedAll = apiClient.client.then((client) => {
-            return client.apis.Applications.get_applications({}, this._requestMetaData());
+            return client.apis.Applications.get_applications({
+                limit, offset,
+            }, this._requestMetaData());
         });
         return promisedAll.then(response => response.obj);
     }

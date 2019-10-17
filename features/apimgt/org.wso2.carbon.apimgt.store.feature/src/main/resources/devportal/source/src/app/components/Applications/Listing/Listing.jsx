@@ -131,6 +131,7 @@ class Listing extends Component {
             open: false,
             isApplicationSharingEnabled: true,
             isDeleteOpen: false,
+            totalApps: 0,
         };
         this.handleAppDelete = this.handleAppDelete.bind(this);
     }
@@ -156,17 +157,19 @@ class Listing extends Component {
     /**
      * @memberof Listing
      */
-    updateApps= () => {
-        const promisedApplications = Application.all();
+    updateApps = () => {
+        const { page, rowsPerPage } = this.state;
+        const promisedApplications = Application.all(rowsPerPage, page * rowsPerPage);
         promisedApplications
             .then((applications) => {
+                const { pagination: { total } } = applications;
                 // Applications list put into map, to make it efficient when deleting apps (referring back to an App)
                 const apps = new Map();
                 applications.list.map(app => apps.set(app.applicationId, app)); // Store application against its UUID
-                this.setState({ data: apps });
+                this.setState({ data: apps, totalApps: total });
             })
             .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') console.log(error);
+                console.log(error);
                 const { status } = error;
                 if (status === 404) {
                     // eslint-disable-next-line react/no-unused-state
@@ -175,7 +178,7 @@ class Listing extends Component {
                     window.location = '/devportal/services/configs';
                 }
             });
-    };
+    }
 
     /**
      * @param{*} event event
@@ -198,8 +201,8 @@ class Listing extends Component {
      * @memberof Listing
      */
     handleChangePage = (event, page) => {
-        this.setState({ page });
-    };
+        this.setState({ page }, this.updateApps);
+    }
 
     /**
      *
@@ -273,7 +276,7 @@ class Listing extends Component {
     render() {
         const {
             data, order, orderBy, rowsPerPage, page, open, isApplicationSharingEnabled,
-            isDeleteOpen,
+            isDeleteOpen, totalApps,
         } = this.state;
         if (!data) {
             return <Loading />;
@@ -366,7 +369,7 @@ class Listing extends Component {
                                         <TableRow>
                                             <TablePagination
                                                 component='div'
-                                                count={data.size}
+                                                count={totalApps}
                                                 rowsPerPage={rowsPerPage}
                                                 rowsPerPageOptions={[5, 10, 15]}
                                                 labelRowsPerPage='Show'
