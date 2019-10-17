@@ -65,6 +65,10 @@ const APIDetailsTopMenu = (props) => {
     } = props;
     const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
     const { settings } = useAppContext();
+    let apiType = 'API';
+    if (isAPIProduct) {
+        apiType = 'PRODUCT';
+    }
     // todo: need to support rev proxy ~tmkb
     return (
         <div className={classes.root}>
@@ -73,8 +77,8 @@ const APIDetailsTopMenu = (props) => {
                 <div className={classes.backText}>
                     <FormattedMessage
                         id='Apis.Details.components.APIDetailsTopMenu.back.to.listing'
-                        defaultMessage={isAPIProduct ? 'BACK TO {break} PRODUCTs' : 'BACK TO {break} APIs'}
-                        values={{ break: <br /> }}
+                        defaultMessage='BACK TO {break} {apiType}s'
+                        values={{ break: <br />, apiType }}
                     />
                 </div>
             </Link>
