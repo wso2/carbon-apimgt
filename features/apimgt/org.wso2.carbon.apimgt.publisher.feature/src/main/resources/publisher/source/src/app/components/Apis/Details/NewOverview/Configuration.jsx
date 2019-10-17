@@ -64,6 +64,7 @@ function Configuration(props) {
                             />
                             <Tooltip
                                 placement='top'
+                                tabIndex='-1'
                                 classes={{
                                     tooltip: parentClasses.htmlTooltip,
                                 }}
@@ -118,6 +119,7 @@ function Configuration(props) {
                             />
                             <Tooltip
                                 placement='top'
+                                tabIndex='-1'
                                 classes={{
                                     tooltip: parentClasses.htmlTooltip,
                                 }}
@@ -167,6 +169,7 @@ function Configuration(props) {
                             />
                             <Tooltip
                                 placement='top'
+                                tabIndex='-1'
                                 classes={{
                                     tooltip: parentClasses.htmlTooltip,
                                 }}
@@ -242,6 +245,7 @@ function Configuration(props) {
                             />
                             <Tooltip
                                 placement='top'
+                                tabIndex='-1'
                                 classes={{
                                     tooltip: parentClasses.htmlTooltip,
                                 }}

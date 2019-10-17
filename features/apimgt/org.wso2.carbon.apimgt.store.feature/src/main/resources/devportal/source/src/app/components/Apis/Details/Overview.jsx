@@ -311,8 +311,14 @@ function Overview(props) {
                                                 to={{
                                                     pathname: '/apis/' + api.id + '/credentials/wizard',
                                                 }}
+                                                style={!api.isSubscriptionAvailable ? { pointerEvents: 'none' } : null}
                                             >
-                                                <Button variant='contained' color='primary' size='large'>
+                                                <Button
+                                                    variant='contained'
+                                                    color='primary'
+                                                    size='large'
+                                                    disabled={!api.isSubscriptionAvailable}
+                                                >
                                                     <FormattedMessage
                                                         id='Apis.Details.Overview.credential.wizard.title'
                                                         defaultMessage='Key Generation Wizard'
@@ -322,12 +328,17 @@ function Overview(props) {
                                         )}
                                         {applicationsAvailable && applicationsAvailable.length > 0 && (
                                             <React.Fragment>
-                                                <Link to={'/apis/' + api.id + '/credentials'}>
+                                                <Link
+                                                    to={'/apis/' + api.id + '/credentials'}
+                                                    style={!api.isSubscriptionAvailable ?
+                                                        { pointerEvents: 'none' } : null}
+                                                >
                                                     <Button
                                                         variant='contained'
                                                         color='primary'
                                                         size='large'
                                                         className={classes.subscribeButton}
+                                                        disabled={!api.isSubscriptionAvailable}
                                                     >
                                                         <FormattedMessage
                                                             id='Apis.Details.Overview.subscribe.to.application.btn'
@@ -335,26 +346,6 @@ function Overview(props) {
                                                         />
                                                     </Button>
                                                 </Link>
-                                                <Typography variant='body2'>
-                                                    {` ${applicationsAvailable.length} `}
-                                                    {applicationsAvailable.length === 1 ? (
-                                                        <FormattedMessage
-                                                            id={
-                                                                'Apis.Details.Overview.subscribe.to.' +
-                                                                'application.content.Application'
-                                                            }
-                                                            defaultMessage='Application'
-                                                        />
-                                                    ) : (
-                                                        <FormattedMessage
-                                                            id={
-                                                                'Apis.Details.Overview.subscribe.to.' +
-                                                                'application.content.Applications'
-                                                            }
-                                                            defaultMessage='Applications'
-                                                        />
-                                                    )}
-                                                </Typography>
                                             </React.Fragment>
                                         )}
                                     </Grid>
@@ -370,7 +361,7 @@ function Overview(props) {
                                                 {subscribedApplications.length}{' '}
                                                 <FormattedMessage
                                                     id='Apis.Details.Overview.subscriptions'
-                                                    defaultMessage='Subscriptions'
+                                                    defaultMessage='Subscriptions >>'
                                                 />
                                             </Typography>
                                         </Link>
@@ -549,7 +540,7 @@ function Overview(props) {
                         classes={{ root: classNames({ [classes.noDocumentRoot]: totalDocuments === 0 }) }}
                     >
                         <Grid container className={classes.root} spacing={2}>
-                            <OverviewDocuments apiId={api.id} setDocsCount={setDocsCount}/>
+                            <OverviewDocuments apiId={api.id} setDocsCount={setDocsCount} />
                         </Grid>
                     </ExpansionPanelDetails>
                     <Divider />

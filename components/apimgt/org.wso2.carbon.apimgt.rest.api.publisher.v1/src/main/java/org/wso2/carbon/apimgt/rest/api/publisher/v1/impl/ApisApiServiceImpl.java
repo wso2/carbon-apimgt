@@ -100,6 +100,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -114,6 +115,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
@@ -132,7 +134,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
@@ -146,11 +147,20 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.MediationMapp
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.RegistryConstants;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.HeadMethod;
+import org.apache.http.HttpHost;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.wso2.carbon.utils.CarbonUtils;
 
 public class ApisApiServiceImpl implements ApisApiService {
 
@@ -2661,6 +2671,46 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
+    public Response validateEndpoint(String endpointUrl, String apiId, MessageContext messageContext) {
+
+        ApiEndpointValidationResponseDTO apiEndpointValidationResponseDTO = new ApiEndpointValidationResponseDTO();
+        apiEndpointValidationResponseDTO.setError("");
+        try {
+            URL url = new URL(endpointUrl);
+            if (url.getProtocol().matches("https")) {
+                ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
+                String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
+                String trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password");
+                System.setProperty("javax.net.ssl.trustStore", trustStorePath);
+                System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+
+                String keyStore = serverConfig.getFirstProperty("Security.KeyStore.Location");
+                String keyStoreType = serverConfig.getFirstProperty("Security.KeyStore.Type");
+                String keyStorePassword = serverConfig.getFirstProperty("Security.KeyStore.Password");
+                System.setProperty("javax.net.ssl.keyStoreType", keyStoreType);
+                System.setProperty("javax.net.ssl.keyStore", keyStore);
+                System.setProperty("javax.net.ssl.keyStorePassword", keyStorePassword);
+
+                /* apiId can be used to get the related API's uriTemplates. These uriTemplates can be used to extract
+                the API operations and append those operations separately to the API endpoint url. This edited url can
+                 be used to test the endpoint, in case their is no valid url for the sole endpoint url provided. */
+                apiEndpointValidationResponseDTO = sendHttpHEADRequest(endpointUrl);
+                return Response.status(Response.Status.OK).entity(apiEndpointValidationResponseDTO).build();
+            } else if (url.getProtocol().matches("http")) {
+                apiEndpointValidationResponseDTO = sendHttpHEADRequest(endpointUrl);
+                return Response.status(Response.Status.OK).entity(apiEndpointValidationResponseDTO).build();
+            }
+        } catch (MalformedURLException e) {
+            log.error("Malformed Url error occurred while sending the HEAD request to the given endpoint url:", e);
+            apiEndpointValidationResponseDTO.setError(e.getMessage());
+        } catch (Exception e) {
+            RestApiUtil.handleInternalServerError("Error while testing the validity of API endpoint url " +
+                    "existence", e, log);
+        }
+        return Response.status(Response.Status.OK).entity(apiEndpointValidationResponseDTO).build();
+    }
+
+    @Override
     public Response apisApiIdResourcePathsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch,
             MessageContext messageContext) {
         try {
@@ -3589,5 +3639,48 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
         }
+    }
+
+    /**
+     * Send HTTP HEAD request to test the endpoint url
+     *
+     * @param urlVal url for which the HEAD request is sent
+     * @return ApiEndpointValidationResponseDTO Response DTO containing validity information of the HEAD request made
+     * to test the endpoint url
+     */
+    public static ApiEndpointValidationResponseDTO sendHttpHEADRequest(String urlVal) {
+
+        ApiEndpointValidationResponseDTO apiEndpointValidationResponseDTO = new ApiEndpointValidationResponseDTO();
+        HttpHead head = new HttpHead(urlVal);
+        org.apache.commons.httpclient.HttpClient client = new org.apache.commons.httpclient.HttpClient();
+        // extract the host name and add the Host http header for sanity
+        head.addHeader("Host", urlVal.replaceAll("https?://", "").
+                replaceAll("(/.*)?", ""));
+        client.getParams().setParameter("http.socket.timeout", 4000);
+        client.getParams().setParameter("http.connection.timeout", 4000);
+        HttpMethod method = new HeadMethod(urlVal);
+
+        if (System.getProperty(APIConstants.HTTP_PROXY_HOST) != null &&
+                System.getProperty(APIConstants.HTTP_PROXY_PORT) != null) {
+            log.debug("Proxy configured, hence routing through configured proxy");
+            String proxyHost = System.getProperty(APIConstants.HTTP_PROXY_HOST);
+            String proxyPort = System.getProperty(APIConstants.HTTP_PROXY_PORT);
+            client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
+                    new HttpHost(proxyHost, Integer.parseInt(proxyPort)));
+        }
+        try {
+            int statusCode = client.executeMethod(method);
+            apiEndpointValidationResponseDTO.setStatusCode(statusCode);
+            apiEndpointValidationResponseDTO.setStatusMessage(HttpStatus.getStatusText(statusCode));
+        } catch (UnknownHostException e) {
+            log.error("UnknownHostException occurred while sending the HEAD request to the given endpoint url:", e);
+            apiEndpointValidationResponseDTO.setError("Unknown Host");
+        } catch (IOException e) {
+            log.error("Error occurred while sending the HEAD request to the given endpoint url:", e);
+            apiEndpointValidationResponseDTO.setError("Connection error");
+        } finally {
+            method.releaseConnection();
+        }
+        return apiEndpointValidationResponseDTO;
     }
 }

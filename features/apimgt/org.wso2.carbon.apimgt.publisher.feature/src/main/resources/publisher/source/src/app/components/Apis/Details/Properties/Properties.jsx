@@ -57,7 +57,6 @@ const useStyles = makeStyles(theme => ({
     },
     button: {
         marginLeft: theme.spacing(2),
-        textTransform: theme.custom.leftMenuTextStyle,
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
     FormControl: {
@@ -318,7 +317,7 @@ function Properties(props) {
                         size='small'
                         className={classes.button}
                         onClick={toggleAddProperty}
-                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                        disabled={showAddProperty || isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                     >
                         <AddCircle className={classes.buttonIcon} />
                         <FormattedMessage
@@ -469,7 +468,7 @@ function Properties(props) {
                                                             id='Apis.Details.Properties.Properties.help'
                                                             defaultMessage={
                                                                 'Property name should be unique, should not contain ' +
-                                                                'spaces, is case-sensitive, cannot be any ' +
+                                                                'spaces and cannot be any ' +
                                                                 'of the following as they are reserved keywords : ' +
                                                                 'provider, version, context, status, description, ' +
                                                                 'subcontext, doc, lcState, name, tags.'

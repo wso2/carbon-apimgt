@@ -181,6 +181,7 @@ function MetaData(props) {
                                     aria-label='add'
                                     interactive
                                     placement='top-start'
+                                    tabIndex='-1'
                                 >
                                     <Typography variant='body1' display='block'>
                                         {capitalizeFirstLetter(moment(api.createdTime).fromNow())}
@@ -221,6 +222,7 @@ function MetaData(props) {
                                     aria-label='add'
                                     interactive
                                     placement='top-start'
+                                    tabIndex='-1'
                                 >
                                     <Typography variant='body1' display='block'>
                                         {capitalizeFirstLetter(moment(api.lastUpdatedTime).fromNow())}

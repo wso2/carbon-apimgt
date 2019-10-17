@@ -61,7 +61,6 @@ const styles = theme => ({
         paddingLeft: 0,
     },
     button: {
-        textTransform: theme.custom.leftMenuTextStyle,
         textDecoration: 'none',
         color: theme.palette.getContrastText(theme.palette.primary.main),
         marginLeft: theme.spacing(1),

@@ -288,7 +288,7 @@ class Credentials extends React.Component {
                                         id='Apis.Details.Credentials.Credentials.'
                                         defaultMessage={`API Credentials are grouped in to applications. An application 
                                         is primarily used to decouple the consumer from the APIs. It allows you to 
-                                        Generate and use a single key for multiple APIs and subscribe multiple times to 
+                                        generate and use a single key for multiple APIs and subscribe multiple times to 
                                         a single API with different SLA levels.`}
                                     />
                                 </Typography>
@@ -340,11 +340,15 @@ class Credentials extends React.Component {
                                                                 }
                                                             />
                                                         </Typography>
-                                                        <Link to={`/apis/${api.id}/credentials/wizard`}>
+                                                        <Link
+                                                            to={`/apis/${api.id}/credentials/wizard`}
+                                                            style={!api.isSubscriptionAvailable ? { pointerEvents: 'none' } : null}
+                                                        >
                                                             <Button
                                                                 variant='contained'
                                                                 color='primary'
                                                                 className={classes.buttonElm}
+                                                                disabled={!api.isSubscriptionAvailable}
                                                             >
                                                                 <FormattedMessage
                                                                     id={'Apis.Details.Credentials.' +
@@ -378,6 +382,7 @@ class Credentials extends React.Component {
                                                                 color='primary'
                                                                 className={classes.buttonElm}
                                                                 onClick={() => this.handleSubscribe()}
+                                                                disabled={!api.isSubscriptionAvailable}
                                                             >
                                                                 <FormattedMessage
                                                                     id={'Apis.Details.Credentials.'

@@ -1682,9 +1682,55 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  /apis/validate-endpoint:
+    post:
+      security:
+        - OAuth2Security:
+            - apim:api_create
+      summary: Check whether given endpoint url is valid
+      operationId: validateEndpoint
+      description: |
+        Using this operation, it is possible check whether the given API endpoint url is a valid url
+      parameters:
+        - in: query
+          name: endpointUrl
+          description: API endpoint url
+          type: string
+          required: true
+        - in: query
+          name: apiId
+          type: string
+          required: false
+      tags:
+        - Validation
+      responses:
+        200:
+          description: |
+            OK.
+            API definition validation information is returned
+          schema:
+            $ref: '#/definitions/ApiEndpointValidationResponse'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Workflow for the given reference in not found.
+          schema:
+            $ref: '#/definitions/Error'
+
   ######################################################
   # The "Validate API" utility API.
-  # This api is used to check the existance of
+  # This api is used to check the existence of
   # apiName and context/version.
   ######################################################
 
@@ -8436,6 +8482,27 @@ definitions:
               $ref: '#/definitions/APIOperations'
           graphQLSchema:
             $ref: '#/definitions/GraphQLSchema'
+
+#-----------------------------------------------------
+# The API Endpoint URL Validation Response Resource
+#-----------------------------------------------------
+  ApiEndpointValidationResponse:
+    title: API Endpoint url validation response
+    required:
+      - statusCode
+      - statusMessage
+    properties:
+      statusCode:
+        type: integer
+        description: HTTP status code
+      statusMessage:
+        type: string
+        description: string
+      error:
+        type: string
+        description: |
+          If an error occurs, the error message will be set to this property.
+          If not, this will remain null.
 
 #-----------------------------------------------------
 # The Threat Protection Policy List Resource

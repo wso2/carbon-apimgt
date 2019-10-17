@@ -3453,7 +3453,7 @@ public class SQLConstants {
 				+ "   AM_API_THROTTLE_POLICY " + " WHERE" + "   TENANT_ID =?";
 
 		public static final String GET_API_POLICIES = " SELECT " + "   * " + "FROM " + "   AM_API_THROTTLE_POLICY "
-				+ " WHERE" + "   TENANT_ID =?";
+				+ " WHERE" + "   TENANT_ID =? ORDER BY NAME";
 
 		public static final String GET_API_POLICY_ID_SQL = "SELECT " + "POLICY_ID, UUID " + "FROM "
 				+ " AM_API_THROTTLE_POLICY " + "WHERE " + "NAME = ? AND " + "TENANT_ID = ?";

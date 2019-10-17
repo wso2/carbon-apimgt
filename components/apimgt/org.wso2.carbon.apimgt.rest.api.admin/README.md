@@ -20,7 +20,7 @@ There are some corresponding branches in the repo for each WSO2 API Manager Vers
 |  APIM Version/API | Branch |
 | :------------ |:-------------
 | APIM 2.0.0 - Admin REST API      | apim-2.0.0
-| APIM 2.1.0 - Admin REST API      | master
+| \> APIM 2.1.0 - Admin REST API      | master
 
 
 2. Add this plug-in to the org.wso2.carbon.apimgt.rest.api.admin component’s pom.xml file.
@@ -196,15 +196,17 @@ beans.xml file.
 .util/src/main/resources/admin-api.json file.
 - **Note:** This is required for the OAuth2 scopes validation related functionality to work. (See OAuthAuthenticationInterceptor class)
 
-13. Build the org.wso2.carbon.apimgt.rest.api.util component.
+13. Build the org.wso2.carbon.apimgt.rest.api.util component. 
 
-14. Build org.wso2.carbon.apimgt.rest.api.admin and deploy the api#am#admin#v0.15.war in the pack
-- **NOTE**: You do not need to put the org.wso2.carbon.apimgt.rest.api.util.jar as a patch as this will be bundled inside the
-webapp when we build the two components in that order. 
+14. Rename the target/org.wso2.carbon.apimgt.rest.api.util
+-{version}.jar file as org.wso2.carbon.apimgt.rest.api.util_{version}.jar and copy to <AM_HOME>/lib/runtimes/cxf3/
+
+15. Build org.wso2.carbon.apimgt.rest.api.admin and deploy the api#am#admin#v0.15.war in the pack
 
 ##### Invoke the new /sample resource:
 
-15. Follow the guide https://docs.wso2.com/display/AM250/apidocs/admin/#guide and generate an access token with the scope
+16. Follow the guide https://docs.wso2.com/display/AM250/apidocs/admin/#guide and generate an access token with the
+ scope
 defined in the x-scope element in your new resource definition.
 In the following example the value of the x-scope element is apim:api_view.
 
@@ -215,7 +217,7 @@ In the following example the value of the x-scope element is apim:api_view.
       X-wso2-curl ...
 ```
 
-16. Invoke the /sample resource with the generated access token.
+17. Invoke the /sample resource with the generated access token.
 
 ```
 curl -H "Authorization: Bearer <access-token>" https://localhost:9443/api/am/admin/v0.15/sample -k -v

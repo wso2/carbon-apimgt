@@ -26,6 +26,7 @@ import API from 'AppData/api';
 import { withTheme } from '@material-ui/styles';
 import Configurations from 'Config';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
+import withSettings from 'AppComponents/Shared/withSettingsContext';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import Alert from 'AppComponents/Shared/Alert';
 import ImageGenerator from './ImageGenerator';
@@ -95,13 +96,13 @@ class ApiTableView extends React.Component {
                             backgroundColor: theme.custom.listView.tableBodyEvenBackgrund,
                             '& td': {
                                 color: theme.palette.getContrastText(theme.custom.listView.tableBodyEvenBackgrund),
-                            }
+                            },
                         },
                         '& tr:nth-child(odd)': {
                             backgroundColor: theme.custom.listView.tableBodyOddBackgrund,
                             '& td': {
                                 color: theme.palette.getContrastText(theme.custom.listView.tableBodyOddBackgrund),
-                            }
+                            },
                         },
                         '& th': {
                             backgroundColor: theme.custom.listView.tableHeadBackground,
@@ -171,11 +172,21 @@ class ApiTableView extends React.Component {
                 this.count = total;
                 this.setState({ data: list });
             })
-            .catch((e) => {
-                Alert.error(intl.formatMessage({
-                    defaultMessage: 'Error While Loading APIs',
-                    id: 'Apis.Listing.ApiTableView.error.loading',
-                }));
+            .catch((error) => {
+                const { response } = error;
+                const { setTenantDomain } = this.props;
+                if (response && response.body.code === 901300) {
+                    setTenantDomain('INVALID');
+                    Alert.error(intl.formatMessage({
+                        defaultMessage: 'Invalid tenant domain',
+                        id: 'Apis.Listing.ApiTableView.invalid.tenant.domain',
+                    }));
+                } else {
+                    Alert.error(intl.formatMessage({
+                        defaultMessage: 'Error While Loading APIs',
+                        id: 'Apis.Listing.ApiTableView.error.loading',
+                    }));
+                }
             })
             .finally(() => {
                 this.setState({ loading: false });
@@ -302,6 +313,9 @@ class ApiTableView extends React.Component {
                     id: 'Apis.Listing.ApiTableView.version',
                     defaultMessage: 'Version',
                 }),
+                options: {
+                    sort: false,
+                },
             },
             {
                 name: 'context',
@@ -359,9 +373,7 @@ class ApiTableView extends React.Component {
                             }
                         }
                     },
-                    options: {
-                        sort: false,
-                    },
+                    sort: false,
                 },
             },
             {
@@ -439,4 +451,4 @@ class ApiTableView extends React.Component {
 
 ApiTableView.contextType = ApiContext;
 
-export default injectIntl(withTheme(withStyles(styles)(ApiTableView)));
+export default withSettings(injectIntl(withTheme(withStyles(styles)(ApiTableView))));

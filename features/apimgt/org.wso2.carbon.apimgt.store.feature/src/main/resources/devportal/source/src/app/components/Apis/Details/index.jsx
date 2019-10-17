@@ -29,7 +29,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import classNames from 'classnames';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
-import { PageNotFound } from '../../Base/Errors/index';
+import { ResourceNotFound } from '../../Base/Errors/index';
 import InfoBar from './InfoBar';
 import { ApiContext } from './ApiContext';
 import Progress from '../../Shared/Progress';
@@ -91,7 +91,7 @@ const LoadableSwitch = withRouter(Loadable.Map({
             <Switch>
                 <Redirect exact from='/apis/:apiUuid' to={redirectURL} />
                 <Route path='/apis/:apiUuid/overview' render={() => <Overview {...props} />} />
-                <Route path='/apis/:apiUuid/docs' component={Documentation} />
+                <Route path='/apis/:apiUuid/documents' component={Documentation} />
                 <Route
                     exact
                     path='/apis/:apiUuid/credentials/wizard'
@@ -101,7 +101,7 @@ const LoadableSwitch = withRouter(Loadable.Map({
                 {!advertised && <Route path='/apis/:apiUuid/credentials' component={Credentials} />}
                 {!advertised && <Route path='/apis/:apiUuid/test' component={ApiConsole} />}
                 {!advertised && <Route path='/apis/:apiUuid/sdk' component={Sdk} />}
-                <Route component={PageNotFound} />
+                <Route component={ResourceNotFound} />
             </Switch>
         );
     },
@@ -338,7 +338,7 @@ class Details extends React.Component {
             classes, theme, intl, match,
         } = this.props;
         const { apiUuid } = match.params;
-        const { api } = this.state;
+        const { api, notFound } = this.state;
         const {
             custom: {
                 leftMenu: {
@@ -348,6 +348,9 @@ class Details extends React.Component {
         } = theme;
         const globalStyle = 'body{ font-family: ' + theme.typography.fontFamily + '}';
         const pathPrefix = '/apis/' + this.api_uuid + '/';
+        if (!api && notFound) {
+            return <ResourceNotFound />;
+        }
 
         return api ? (
             <ApiContext.Provider value={this.state}>
@@ -385,7 +388,7 @@ class Details extends React.Component {
                             {api.type !== 'WS' && <LeftMenuItem text='test' route='test' to={pathPrefix + 'test'} />}
                         </React.Fragment>
                     )}
-                    <LeftMenuItem text='Documentation' route='docs' to={pathPrefix + 'docs'} />
+                    <LeftMenuItem text='Documentation' route='documents' to={pathPrefix + 'documents'} />
                     {!api.advertiseInfo.advertised && api.type !== 'WS' && (
                         <LeftMenuItem text='SDK' route='sdk' to={pathPrefix + 'sdk'} />
                     )}
