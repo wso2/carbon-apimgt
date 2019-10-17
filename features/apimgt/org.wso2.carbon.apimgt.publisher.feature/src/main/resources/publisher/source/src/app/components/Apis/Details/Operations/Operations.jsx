@@ -135,7 +135,6 @@ class Operations extends React.Component {
         this.handleUpdateList = this.handleUpdateList.bind(this);
         this.handleApiThrottlePolicy = this.handleApiThrottlePolicy.bind(this);
         this.updateOperations = this.updateOperations.bind(this);
-        this.setFilterByKeyWord = this.setFilterKeyWord.bind(this);
     }
 
     /**
