@@ -112,29 +112,13 @@ public class OASParserUtil {
      * @throws APIManagementException If error occurred while parsing definition.
      */
     public static APIDefinition getOASParser(String apiDefinition) throws APIManagementException {
-        ObjectMapper mapper;
-        if (apiDefinition.trim().startsWith("{")) {
-            mapper = ObjectMapperFactory.createJson();
-        } else {
-            mapper = ObjectMapperFactory.createYaml();
-        }
-        JsonNode rootNode;
-        try {
-            rootNode = mapper.readTree(apiDefinition.getBytes());
-        } catch (IOException e) {
-            throw new APIManagementException("Error occurred while parsing OAS definition", e);
-        }
-        ObjectNode node = (ObjectNode) rootNode;
-        JsonNode openapi = node.get("openapi");
-        if (openapi != null && openapi.asText().startsWith("3.")) {
-            return oas3Parser;
-        }
-        JsonNode swagger = node.get("swagger");
-        if (swagger != null) {
+        SwaggerVersion swaggerVersion = getSwaggerVersion(apiDefinition);
+
+        if (swaggerVersion == SwaggerVersion.SWAGGER) {
             return oas2Parser;
         }
 
-        throw new APIManagementException("Invalid OAS definition provided.");
+        return oas3Parser;
     }
 
     private static SwaggerVersion getSwaggerVersion(String apiDefinition) throws APIManagementException {
