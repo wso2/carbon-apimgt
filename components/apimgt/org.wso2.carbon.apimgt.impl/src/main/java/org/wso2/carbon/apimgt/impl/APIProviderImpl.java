@@ -186,6 +186,7 @@ import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.retrieveSavedEmailList;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -6728,7 +6729,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void addAPIProductWithoutPublishingToGateway(APIProduct product) throws APIManagementException {
+    public Set<API> addAPIProductWithoutPublishingToGateway(APIProduct product) throws APIManagementException {
+        Set<API> associtedAPIs = new HashSet<>();
+
         validateApiProductInfo(product);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
@@ -6756,6 +6759,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 continue;
             }
             if (api != null) {
+                associtedAPIs.add(api);
                 apiProductResource.setApiIdentifier(api.getId());
                 apiProductResource.setProductIdentifier(product.getId());
                 apiProductResource.setEndpointConfig(api.getEndpointConfig());
@@ -6788,6 +6792,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //now we have validated APIs and it's resources inside the API product. Add it to database
 
         apiMgtDAO.addAPIProduct(product, tenantDomain);
+
+        return associtedAPIs;
     }
 
     @Override
@@ -6936,7 +6942,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException {
+    public Set<API> updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException {
+        Set<API> associatedAPIs = new HashSet<>();
         //validate resources and set api identifiers and resource ids to product
         List<APIProductResource> resources = product.getProductResources();
         for (APIProductResource apiProductResource : resources) {
@@ -6951,6 +6958,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else {
                 api = super.getAPIbyUUID(apiProductResource.getApiId(), tenantDomain);
             }
+            associatedAPIs.add(api);
+
             // if API does not exist, getLightweightAPIByUUID() method throws exception. so no need to handle NULL
             apiProductResource.setApiIdentifier(api.getId());
             apiProductResource.setProductIdentifier(product.getId());
@@ -6998,6 +7007,38 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new FaultGatewaysException(failedGateways);
         }
 
+        return associatedAPIs;
+    }
+
+    @Override
+    public void updateLocalEntry(APIProduct product) throws FaultGatewaysException {
+        APIProductIdentifier apiProductId = product.getId();
+
+        String provider = apiProductId.getProviderName();
+        if (provider.contains("AT")) {
+            provider = provider.replace("-AT-", "@");
+            tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        } else {
+            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        }
+
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        Map<String, String> failedToPublishEnvironments = gatewayManager.updateLocalEntry(product, tenantDomain);
+
+        Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
+
+        if (!failedToPublishEnvironments.isEmpty()) {
+            Set<String> publishedEnvironments = new HashSet<String>(product.getEnvironments());
+            publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
+            product.setEnvironments(publishedEnvironments);
+            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
+            failedGateways.put("UNPUBLISHED", Collections.<String, String>emptyMap());
+        }
+
+        if (!failedGateways.isEmpty() &&
+                (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {
+            throw new FaultGatewaysException(failedGateways);
+        }
     }
 
     @Override

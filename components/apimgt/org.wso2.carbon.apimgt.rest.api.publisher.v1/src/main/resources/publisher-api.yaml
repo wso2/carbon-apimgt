@@ -8029,10 +8029,8 @@ definitions:
       throttlingPolicy:
         type: string
         example: "Unlimited"
-      scopes:
-        type: array
-        items:
-          type: string
+      scope:
+        type: string
       usedProductIds:
         type: array
         items:

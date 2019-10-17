@@ -1060,19 +1060,17 @@ public class APIMappingUtil {
             String uriTempVal = operation.getTarget();
 
             String httpVerb = operation.getVerb();
-            List<String> scopeList = operation.getScopes();
-            if (scopeList != null) {
-                for (String scopeKey : scopeList) {
-                    for (Scope definedScope : model.getScopes()) {
-                        if (definedScope.getKey().equalsIgnoreCase(scopeKey)) {
-                            Scope scope = new Scope();
-                            scope.setKey(scopeKey);
-                            scope.setName(definedScope.getName());
-                            scope.setDescription(definedScope.getDescription());
-                            scope.setRoles(definedScope.getRoles());
-                            template.setScopes(scope);
-                            template.setScope(scope);
-                        }
+            String scopeKey = operation.getScope();
+            if (scopeKey != null) {
+                for (Scope definedScope : model.getScopes()) {
+                    if (definedScope.getKey().equalsIgnoreCase(scopeKey)) {
+                        Scope scope = new Scope();
+                        scope.setKey(scopeKey);
+                        scope.setName(definedScope.getName());
+                        scope.setDescription(definedScope.getDescription());
+                        scope.setRoles(definedScope.getRoles());
+                        template.setScopes(scope);
+                        template.setScope(scope);
                     }
                 }
 
@@ -1548,9 +1546,7 @@ public class APIMappingUtil {
         operationsDTO.setVerb(uriTemplate.getHTTPVerb());
         operationsDTO.setTarget(uriTemplate.getUriTemplate());
         if (uriTemplate.getScope() != null) {
-            operationsDTO.setScopes(new ArrayList<String>() {{
-                add(uriTemplate.getScope().getName());
-            }});
+            operationsDTO.setScope(uriTemplate.getScope().getName());
         }
         operationsDTO.setThrottlingPolicy(uriTemplate.getThrottlingTier());
         Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
@@ -1910,8 +1906,6 @@ public class APIMappingUtil {
                 template.setHTTPVerb(resourceItem.getVerb());
                 template.setResourceURI(resourceItem.getTarget());
                 template.setUriTemplate(resourceItem.getTarget());
-                template.setAuthType(resourceItem.getAuthType());
-                template.setThrottlingTier(resourceItem.getThrottlingPolicy());
 
                 APIProductResource resource = new APIProductResource();
                 resource.setApiId(res.getApiId());

@@ -810,7 +810,7 @@ public class OAS2Parser extends APIDefinition {
      * @return Swagger
      * @throws APIManagementException
      */
-    private Swagger getSwagger(String oasDefinition) throws APIManagementException {
+    Swagger getSwagger(String oasDefinition) {
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(oasDefinition);
         if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {

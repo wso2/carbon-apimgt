@@ -463,6 +463,31 @@ public class APIGatewayManager {
 
         return failedEnvironmentsMap;
     }
+
+    public Map<String, String> updateLocalEntry(APIProduct apiProduct, String tenantDomain) {
+        Map<String, String> failedEnvironmentsMap = new HashMap<>();
+
+        for (String environmentName : apiProduct.getEnvironments()) {
+
+            Environment environment = environments.get(environmentName);
+            try {
+                LocalEntryAdminClient localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
+
+                String definition = apiProduct.getDefinition();
+                localEntryAdminClient.deleteEntry(apiProduct.getUuid());
+                localEntryAdminClient.addLocalEntry("<localEntry key=\"" + apiProduct.getUuid() + "\">" +
+                        definition.replaceAll("&(?!amp;)", "&amp;").
+                                replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                        + "</localEntry>");
+            } catch (AxisFault e) {
+                failedEnvironmentsMap.put(environmentName, e.getMessage());
+                log.error("Error occurred when publish to gateway " + environmentName, e);
+            }
+        }
+
+        return failedEnvironmentsMap;
+    }
+
 	/**
 	 * Removed an API from the configured Gateways
 	 * 

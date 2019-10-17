@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.impl.definitions;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
+import org.json.simple.JSONValue;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.APIDefinition;
@@ -29,6 +30,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.IOException;
@@ -429,5 +431,29 @@ public class OASParserUtilTest {
         Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC,
                 securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE).asText());
         Assert.assertEquals(endUserName, securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME).asText());
+    }
+
+    @Test
+    public void testSyncOpenAPIResourcePaths() throws Exception {
+        String petStoreSwaggerYAMLString = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "petstore_v3.yaml"),
+                "UTF-8");
+
+        String genPetStoreSwaggerYAMLString = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "generated_petstore_v3.yaml"),
+                "UTF-8");
+
+        String updatedSwaggerString = OASParserUtil.syncSwaggerOperations(petStoreSwaggerYAMLString, genPetStoreSwaggerYAMLString);
+
+        Yaml yaml= new Yaml();
+        String petStoreSwaggerJSONString = JSONValue.toJSONString(yaml.load(petStoreSwaggerYAMLString));
+
+        JSONObject petStoreSwagger = new JSONObject(petStoreSwaggerJSONString);
+        JSONObject updatedGenPetStore = new JSONObject(updatedSwaggerString);
+
+        JSONObject petStorePaths = (JSONObject) petStoreSwagger.get(APIConstants.SWAGGER_PATHS);
+        JSONObject updatedPetStorePaths = (JSONObject) updatedGenPetStore.get(APIConstants.SWAGGER_PATHS);
+
+       Assert.assertEquals(petStorePaths.toString(), updatedPetStorePaths.toString());
     }
 }

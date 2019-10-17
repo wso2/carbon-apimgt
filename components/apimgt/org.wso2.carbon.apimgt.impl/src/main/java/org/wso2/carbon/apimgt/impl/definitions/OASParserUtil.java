@@ -26,6 +26,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.models.HttpMethod;
+import io.swagger.models.Path;
 import io.swagger.models.RefModel;
 import io.swagger.models.RefPath;
 import io.swagger.models.RefResponse;
@@ -33,7 +35,18 @@ import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.security.OAuthFlow;
+import io.swagger.v3.oas.models.security.OAuthFlows;
+import io.swagger.v3.oas.models.security.Scopes;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ObjectMapperFactory;
+import io.swagger.v3.parser.converter.SwaggerConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -72,6 +85,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -83,6 +97,12 @@ public class OASParserUtil {
     private static APIDefinition oas2Parser = new OAS2Parser();
     private static APIDefinition oas3Parser = new OAS3Parser();
     private static ObjectMapper objectMapper = new ObjectMapper();
+    private static SwaggerConverter swaggerConverter = new SwaggerConverter();
+
+    enum SwaggerVersion {
+        SWAGGER,
+        OPEN_API,
+    };
 
     /**
      * Return correct OAS parser by validating give definition with OAS 2/3 parsers.
@@ -115,6 +135,186 @@ public class OASParserUtil {
         }
 
         throw new APIManagementException("Invalid OAS definition provided.");
+    }
+
+    private static SwaggerVersion getSwaggerVersion(String apiDefinition) throws APIManagementException {
+        ObjectMapper mapper;
+        if (apiDefinition.trim().startsWith("{")) {
+            mapper = ObjectMapperFactory.createJson();
+        } else {
+            mapper = ObjectMapperFactory.createYaml();
+        }
+        JsonNode rootNode;
+        try {
+            rootNode = mapper.readTree(apiDefinition.getBytes());
+        } catch (IOException e) {
+            throw new APIManagementException("Error occurred while parsing OAS definition", e);
+        }
+        ObjectNode node = (ObjectNode) rootNode;
+        JsonNode openapi = node.get("openapi");
+        if (openapi != null && openapi.asText().startsWith("3.")) {
+            return SwaggerVersion.OPEN_API;
+        }
+        JsonNode swagger = node.get("swagger");
+        if (swagger != null) {
+            return SwaggerVersion.SWAGGER;
+        }
+
+        throw new APIManagementException("Invalid OAS definition provided.");
+    }
+
+    public static String syncSwaggerOperations(String sourceSwagger, String destinationSwagger)
+            throws APIManagementException {
+        SwaggerVersion sourceSwaggerVersion = getSwaggerVersion(sourceSwagger);
+        SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(destinationSwagger);
+        OpenAPI destOpenAPI;
+
+        if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
+            destOpenAPI = ((OAS3Parser) oas3Parser).getOpenAPI(destinationSwagger);
+        } else {
+            throw new APIManagementException("Cannot sync destination swagger because it is not in OpenAPI format");
+        }
+
+        if (sourceSwaggerVersion == SwaggerVersion.OPEN_API) {
+            syncWithOpenAPISource(sourceSwagger, destOpenAPI);
+        } else if (sourceSwaggerVersion == SwaggerVersion.SWAGGER) {
+            syncWithSwaggerSource(sourceSwagger, destOpenAPI);
+        }
+
+        return Json.pretty(destOpenAPI);
+    }
+
+    private static void syncWithOpenAPISource(String sourceSwagger, OpenAPI destOpenAPI) {
+        OpenAPI srcOpenAPI = ((OAS3Parser) oas3Parser).getOpenAPI(sourceSwagger);
+
+        Paths destPaths = destOpenAPI.getPaths();
+        Paths srcPaths = srcOpenAPI.getPaths();
+        Set<String> destPathKeys = destPaths.keySet();
+
+        for (String destPathKey : destPathKeys) {
+
+            // Find matching source swagger PathItem that already exists in the destination swagger
+            PathItem srcPathItem = srcPaths.get(destPathKey);
+
+            if (srcPathItem != null) {
+                PathItem destPathItem = destPaths.get(destPathKey);
+
+                syncWithOpenAPIPathItem(srcPathItem, destPathItem, destOpenAPI);
+            }
+        }
+    }
+
+    private static void syncWithOpenAPIPathItem(PathItem srcPathItem, PathItem destPathItem, OpenAPI destOpenAPI) {
+        Map<PathItem.HttpMethod, Operation> srcOperations = srcPathItem.readOperationsMap();
+        Map<PathItem.HttpMethod, Operation> destOperations = destPathItem.readOperationsMap();
+
+        for (PathItem.HttpMethod destMethod : destOperations.keySet()) {
+            Operation srcOperation = srcOperations.get(destMethod);
+
+            if (srcOperation != null) {
+                Operation destOperation = destOperations.get(destMethod);
+
+                // Update security scheme by removing stale scopes belonging to the destination operation
+                // and add fresh scopes that are to be introduced by the source operation
+                updateSecuritySchemeScopes(srcOperation, destOperation, destOpenAPI);
+
+                // Update the destination method with the source operation
+                destPathItem.operation(destMethod, srcOperation);
+            }
+        }
+    }
+
+    private static void syncWithSwaggerSource(String sourceSwagger, OpenAPI destOpenAPI) {
+        Swagger srcSwagger = ((OAS2Parser) oas2Parser).getSwagger(sourceSwagger);
+
+        Paths destPaths = destOpenAPI.getPaths();
+        Map<String, Path> srcPaths = srcSwagger.getPaths();
+        Set<String> destPathKeys = destPaths.keySet();
+
+        for (String destPathKey : destPathKeys) {
+
+            // Find matching source swagger Path that already exists in the destination swagger
+            Path srcPath = srcPaths.get(destPathKey);
+
+            if (srcPath != null) {
+                // Get corresponding path from destination swagger
+                PathItem destPathItem = destPaths.get(destPathKey);
+
+                syncWithSwaggerPath(srcPath, destPathItem, destOpenAPI);
+            }
+        }
+    }
+
+    private static void syncWithSwaggerPath(Path srcPath, PathItem destPathItem, OpenAPI destOpenAPI) {
+        Map<HttpMethod, io.swagger.models.Operation> srcOperations = srcPath.getOperationMap();
+        Map<PathItem.HttpMethod, Operation> destOperations = destPathItem.readOperationsMap();
+
+        for (PathItem.HttpMethod destMethod : destOperations.keySet()) {
+            // Get same operation that exists in the destination swagger from the source swagger
+            HttpMethod srcMethod = HttpMethod.valueOf(destMethod.name());
+            io.swagger.models.Operation srcOperation = srcOperations.get(srcMethod);
+
+            if (srcOperation != null) {
+                Operation destOperation = destOperations.get(destMethod);
+
+                Operation convertedSrcOperation = swaggerConverter.convert(srcOperation);
+
+                // Update security scheme by removing stale scopes belonging to the destination operation
+                // and add fresh scopes that are to be introduced by the source operation
+                updateSecuritySchemeScopes(convertedSrcOperation, destOperation, destOpenAPI);
+
+                // Update the destination method with the source operation
+                destPathItem.operation(destMethod, convertedSrcOperation);
+            }
+        }
+    }
+
+    private static void updateSecuritySchemeScopes(Operation srcOperation, Operation destOperation,
+                                                   OpenAPI destOpenAPI) {
+        Scopes securitySchemeScopes = null;
+
+        Map<String, SecurityScheme> securitySchemes = destOpenAPI.getComponents().getSecuritySchemes();
+
+        // Get security scheme to update
+        SecurityScheme securityScheme = securitySchemes.get(OAS3Parser.OPENAPI_SECURITY_SCHEMA_KEY);
+
+        if (securityScheme != null) {
+            OAuthFlows flows = securityScheme.getFlows();
+
+            if (flows != null) {
+                OAuthFlow implicit = flows.getImplicit();
+
+                if (implicit != null) {
+                    securitySchemeScopes = implicit.getScopes();
+                }
+            }
+        }
+
+        if (securitySchemeScopes != null) {
+            List<SecurityRequirement> destOperationSecurity = destOperation.getSecurity();
+
+            // Remove scopes that may have been added originally by the destination operation
+            for (SecurityRequirement requirement : destOperationSecurity) {
+                List<String> scopes = requirement.get(OAS3Parser.OPENAPI_SECURITY_SCHEMA_KEY);
+                if (scopes != null) {
+                    for (String scope : scopes) {
+                        securitySchemeScopes.remove(scope);
+                    }
+                }
+            }
+
+            List<SecurityRequirement> srcOperationSecurity = srcOperation.getSecurity();
+
+            // Add scopes that are introduced by the source operation
+            for (SecurityRequirement requirement : srcOperationSecurity) {
+                List<String> scopes = requirement.get(OAS3Parser.OPENAPI_SECURITY_SCHEMA_KEY);
+                if (scopes != null) {
+                    for (String scope : scopes) {
+                        securitySchemeScopes.addString(scope, scope);
+                    }
+                }
+            }
+        }
     }
 
     /**

@@ -1177,11 +1177,11 @@ public interface APIProvider extends APIManager {
 
     /**
      * Create API product
-     * @param product product object containing details of the prouct
-     * @return UUID of the api product
+     * @param product product object containing details of the product
+     * @return Collection of APIs that are associated with this APIProduct
      * @throws APIManagementException exception
      */
-    void addAPIProductWithoutPublishingToGateway(APIProduct product) throws APIManagementException;
+    Set<API> addAPIProductWithoutPublishingToGateway(APIProduct product) throws APIManagementException;
 
     /**
      * Publish API Product to Gateway
@@ -1202,10 +1202,20 @@ public interface APIProvider extends APIManager {
     /**
      * Update API Product
      * @param product
+     * @return Collection of APIs that are associated with this APIProduct
      * @throws APIManagementException
      */
-    void updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException;
+    Set<API> updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException;
 
+    /**
+     * Update API Products local entry. This is to be called whenever the swagger definition of an dependent API gets
+     * updated
+     *
+     * @param product
+     * @throws APIManagementException
+     * @throws FaultGatewaysException
+     */
+    void updateLocalEntry(APIProduct product) throws FaultGatewaysException;
 
     List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException;
 
