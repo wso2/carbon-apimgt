@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
     Grid,
@@ -20,11 +20,8 @@ const useStyles = makeStyles(theme => ({
  * @returns {any} HTML view of the credentials component.
  */
 export default function Credentials(props) {
-    const { epConfig, setEpConfig } = props;
+    const { epConfig, setEpConfig, endpointsDispatcher } = props;
     const classes = useStyles();
-    const [accessKey, setAccessKey] = useState(epConfig.amznAccessKey);
-    const [secretKey, setSecretKey] = useState(epConfig.amznSecretKey);
-    const [isChanged, setIsChanged] = useState(false);
     return (
         <Grid item>
             <TextField
@@ -34,10 +31,12 @@ export default function Credentials(props) {
                 margin='normal'
                 variant='outlined'
                 className={classes.textField}
-                value={accessKey}
+                value={epConfig.amznAccessKey}
                 onChange={(event) => {
-                    setAccessKey(event.target.value);
-                    setEpConfig(epConfig);
+                    const newEpConfig = { ...epConfig };
+                    newEpConfig.amznAccessKey = event.target.value;
+                    setEpConfig(newEpConfig);
+                    endpointsDispatcher({ action: 'set_awsCredentials', value: newEpConfig });
                 }}
             />
             <TextField
@@ -48,11 +47,12 @@ export default function Credentials(props) {
                 margin='normal'
                 variant='outlined'
                 className={classes.textField}
-                value={isChanged ? secretKey : 'abcdefghijklmnopqrstuvwxyz'}
+                value={epConfig.amznSecretKey}
                 onChange={(event) => {
-                    setIsChanged(true);
-                    setSecretKey(event.target.value);
-                    setEpConfig(epConfig);
+                    const newEpConfig = { ...epConfig };
+                    newEpConfig.amznSecretKey = event.target.value;
+                    setEpConfig(newEpConfig);
+                    endpointsDispatcher({ action: 'set_awsCredentials', value: newEpConfig });
                 }}
             />
         </Grid>
@@ -62,4 +62,5 @@ export default function Credentials(props) {
 Credentials.propTypes = {
     epConfig: PropTypes.shape({}).isRequired,
     setEpConfig: PropTypes.func.isRequired,
+    endpointsDispatcher: PropTypes.func.isRequired,
 };

@@ -136,6 +136,9 @@ function Endpoints(props) {
                     endpointConfig,
                 };
             }
+            case 'set_awsCredentials': {
+                return { ...initState, endpointConfig: { ...value } };
+            }
             case 'select_endpoint_type': {
                 const { endpointImplementationType, endpointConfig } = value;
                 return { ...initState, endpointConfig, endpointImplementationType };
@@ -194,7 +197,7 @@ function Endpoints(props) {
         }
         const endpointType = endpointConfig.endpoint_type;
         if (endpointType === 'awslambda') {
-            if (endpointConfig.amznAccessKey === '' && endpointConfig.amznSecretKey === '') {
+            if (endpointConfig.amznAccessKey === '' || endpointConfig.amznSecretKey === '') {
                 return {
                     isValid: false,
                     message: intl.formatMessage({

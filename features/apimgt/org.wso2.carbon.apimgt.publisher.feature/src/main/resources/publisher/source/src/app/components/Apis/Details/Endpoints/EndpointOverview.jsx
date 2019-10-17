@@ -556,6 +556,7 @@ function EndpointOverview(props) {
                                         <Credentials
                                             epConfig={epConfig}
                                             setEpConfig={setEpConfig}
+                                            endpointsDispatcher={endpointsDispatcher}
                                         />
                                     </div>
                                     :
