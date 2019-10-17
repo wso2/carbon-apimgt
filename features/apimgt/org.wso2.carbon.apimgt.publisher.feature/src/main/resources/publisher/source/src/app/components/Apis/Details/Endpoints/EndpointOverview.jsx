@@ -107,8 +107,8 @@ const styles = theme => ({
 
 const endpointTypes = [
     { key: 'http', value: 'HTTP/REST Endpoint' },
-    { key: 'address', value: 'HTTP/SOAP Endpoint' },
     { key: 'default', value: 'Dynamic Endpoints' },
+    { key: 'address', value: 'HTTP/SOAP Endpoint' },
     { key: 'prototyped', value: 'Prototyped' },
     { key: 'INLINE', value: 'Mocked' },
     { key: 'awslambda', value: 'AWS Lambda' },
@@ -129,6 +129,8 @@ function EndpointOverview(props) {
     } = props;
     const { endpointConfig, endpointSecurity } = api;
     const [endpointType, setEndpointType] = useState(endpointTypes[0]);
+    const [supportedEnpointTypes, setSupportedEndpointType] = useState([]);
+
     const [epConfig, setEpConfig] = useState(endpointConfig);
     const [endpointSecurityInfo, setEndpointSecurityInfo] = useState(null);
     const [advanceConfigOptions, setAdvancedConfigOptions] = useState({
@@ -157,9 +159,9 @@ function EndpointOverview(props) {
             return endpointTypes[3];
         } else if (type === 'http') {
             return endpointTypes[0];
-        } else if (type === 'address') {
-            return endpointTypes[1];
         } else if (type === 'default') {
+            return endpointTypes[1];
+        } else if (type === 'address') {
             return endpointTypes[2];
         } else if (type === 'awslambda') {
             return endpointTypes[5];
@@ -171,13 +173,42 @@ function EndpointOverview(props) {
                 return endpointTypes[0];
             }
             if (Array.isArray(availableEndpoints)) {
-                return availableEndpoints[0].endpoint_type !== undefined ? endpointTypes[1] : endpointTypes[0];
+                return availableEndpoints[0].endpoint_type !== undefined ?
+                    endpointTypes[1] : endpointTypes[0];
             }
-            return availableEndpoints.endpoint_type !== undefined ? endpointTypes[1] : endpointTypes[0];
+            return availableEndpoints.endpoint_type !== undefined ?
+                endpointTypes[1] : endpointTypes[0];
         }
     };
 
+    /**
+     * Method to get the supported endpoint types by api type.
+     *
+     * @param {Object} apiObject  The representative type of the endpoint.
+     * @return {string} The supported endpoint types.
+     * */
+    const getSupportedType = (apiObject) => {
+        const { type } = apiObject;
+        let supportedEndpointTypes = [];
+        if (type === 'GRAPHQL') {
+            supportedEndpointTypes = [
+                { key: 'http', value: 'HTTP/REST Endpoint' },
+                { key: 'default', value: 'Dynamic Endpoints' },
+            ];
+        } else {
+            supportedEndpointTypes = [
+                { key: 'http', value: 'HTTP/REST Endpoint' },
+                { key: 'address', value: 'HTTP/SOAP Endpoint' },
+                { key: 'default', value: 'Dynamic Endpoints' },
+                { key: 'prototyped', value: 'Prototyped' },
+                { key: 'INLINE', value: 'Mocked' },
+            ];
+        }
+        return supportedEndpointTypes;
+    };
+
     useEffect(() => {
+        const supportedTypeLists = getSupportedType(api);
         const epType = getEndpointType(api);
         if (epType.key !== 'INLINE') {
             setEndpointCategory({
@@ -185,6 +216,7 @@ function EndpointOverview(props) {
                 sandbox: !!endpointConfig.sandbox_endpoints,
             });
         }
+        setSupportedEndpointType(supportedTypeLists);
         setEpConfig(endpointConfig);
         setEndpointType(epType);
         setEndpointSecurityInfo(endpointSecurity);
@@ -495,7 +527,7 @@ function EndpointOverview(props) {
                                 value={endpointType.key}
                                 onChange={handleEndpointTypeSelect}
                             >
-                                {endpointTypes.map((endpoint) => {
+                                {supportedEnpointTypes.map((endpoint) => {
                                     if (api.lifeCycleStatus === 'CREATED') {
                                         return (
                                             <FormControlLabel
