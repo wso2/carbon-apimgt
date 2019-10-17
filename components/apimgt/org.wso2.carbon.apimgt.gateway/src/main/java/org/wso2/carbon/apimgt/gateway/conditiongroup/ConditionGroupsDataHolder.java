@@ -73,6 +73,12 @@ public class ConditionGroupsDataHolder {
         }
     }
 
+    public void deletePolicy(String key) {
+        if (key != null) {
+            conditionGroupsMap.remove(key);
+        }
+    }
+
     /**
      * This method can be used to get the singleton instance of this class.
      * @return the singleton instance.

@@ -5252,6 +5252,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 apiPolicy.setUserLevel(PolicyConstants.ACROSS_ALL);
                 apiPolicy = apiMgtDAO.addAPIPolicy(apiPolicy);
+                publishAPIPolicyEvent(apiPolicy, false);
                 executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
                 String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefault(apiPolicy);
                 String policyFile = apiPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + apiPolicy.getPolicyName();
@@ -5508,7 +5509,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 APIPolicy existingPolicy = apiMgtDAO.getAPIPolicy(policy.getPolicyName(), policy.getTenantId());
                 apiPolicy = apiMgtDAO.updateAPIPolicy(apiPolicy);
-                publishAPIPolicyEvent(apiPolicy);
+                publishAPIPolicyEvent(apiPolicy, false);
 
                 executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
                 String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefault(apiPolicy);
@@ -5660,6 +5661,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     policyFileNames.add(policyFile + "_condition_" + pipeline.getId());
                 }
             }
+            publishAPIPolicyEvent(policy, true);
 
         } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
             ApplicationPolicy appPolicy = apiMgtDAO.getApplicationPolicy(policyName, tenantID);
@@ -7443,54 +7445,55 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return getGraphqlSchemaDefinition(apiId);
     }
 
-    private void publishAPIPolicyEvent(APIPolicy apiPolicy) {
+    private void publishAPIPolicyEvent(APIPolicy apiPolicy, boolean isDeleteState) {
         OutputEventAdapterService eventAdapterService = ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
 
         //Generate Conditions Object
         JSONArray conditionGroupsJSON = new JSONArray();
-
-        if (!apiPolicy.getPipelines().isEmpty()) {
-            for (Pipeline conditionGroup: apiPolicy.getPipelines()) {
-                JSONObject conditionGroupJSON = new JSONObject();
-                JSONArray conditionsJSON = new JSONArray();
-                for (Condition condition : conditionGroup.getConditions()) {
-                    JSONObject conditionJSON = new JSONObject();
-                    conditionJSON.put(APIConstants.API_POLICY_CONDITION_INVERTED, condition.isInvertCondition());
-                    if (PolicyConstants.IP_SPECIFIC_TYPE.equals(condition.getType())) {
-                        IPCondition ipCondition = (IPCondition) condition;
-                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.IP_SPECIFIC_TYPE);
-                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, PolicyConstants.IP_SPECIFIC_TYPE);
-                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, ipCondition.getSpecificIP());
-                    } else if (PolicyConstants.IP_RANGE_TYPE.equals(condition.getType())) {
-                        IPCondition ipRangeCondition = (IPCondition) condition;
-                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.IP_RANGE_TYPE);
-                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, ipRangeCondition.getStartingIP());
-                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, ipRangeCondition.getEndingIP());
-                    } else if (PolicyConstants.HEADER_TYPE.equals(condition.getType())) {
-                        HeaderCondition headerCondition = (HeaderCondition) condition;
-                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.HEADER_TYPE);
-                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, headerCondition.getHeaderName());
-                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, headerCondition.getValue());
-                    } else if (PolicyConstants.QUERY_PARAMETER_TYPE.equals(condition.getType())) {
-                        QueryParameterCondition queryParameterCondition = (QueryParameterCondition) condition;
-                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.QUERY_PARAMETER_TYPE);
-                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, queryParameterCondition.getParameter());
-                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, queryParameterCondition.getValue());
-                    } else if (PolicyConstants.JWT_CLAIMS_TYPE.equals(condition.getType())) {
-                        JWTClaimsCondition jwtClaimsCondition = (JWTClaimsCondition) condition;
-                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.JWT_CLAIMS_TYPE);
-                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, jwtClaimsCondition.getClaimUrl());
-                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, jwtClaimsCondition.getAttribute());
+        if (!isDeleteState) {
+            if (apiPolicy.getPipelines() != null) {
+                for (Pipeline conditionGroup : apiPolicy.getPipelines()) {
+                    JSONObject conditionGroupJSON = new JSONObject();
+                    JSONArray conditionsJSON = new JSONArray();
+                    for (Condition condition : conditionGroup.getConditions()) {
+                        JSONObject conditionJSON = new JSONObject();
+                        conditionJSON.put(APIConstants.API_POLICY_CONDITION_INVERTED, condition.isInvertCondition());
+                        if (PolicyConstants.IP_SPECIFIC_TYPE.equals(condition.getType())) {
+                            IPCondition ipCondition = (IPCondition) condition;
+                            conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.IP_SPECIFIC_TYPE);
+                            conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, PolicyConstants.IP_SPECIFIC_TYPE);
+                            conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, ipCondition.getSpecificIP());
+                        } else if (PolicyConstants.IP_RANGE_TYPE.equals(condition.getType())) {
+                            IPCondition ipRangeCondition = (IPCondition) condition;
+                            conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.IP_RANGE_TYPE);
+                            conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, ipRangeCondition.getStartingIP());
+                            conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, ipRangeCondition.getEndingIP());
+                        } else if (PolicyConstants.HEADER_TYPE.equals(condition.getType())) {
+                            HeaderCondition headerCondition = (HeaderCondition) condition;
+                            conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.HEADER_TYPE);
+                            conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, headerCondition.getHeaderName());
+                            conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, headerCondition.getValue());
+                        } else if (PolicyConstants.QUERY_PARAMETER_TYPE.equals(condition.getType())) {
+                            QueryParameterCondition queryParameterCondition = (QueryParameterCondition) condition;
+                            conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.QUERY_PARAMETER_TYPE);
+                            conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, queryParameterCondition.getParameter());
+                            conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, queryParameterCondition.getValue());
+                        } else if (PolicyConstants.JWT_CLAIMS_TYPE.equals(condition.getType())) {
+                            JWTClaimsCondition jwtClaimsCondition = (JWTClaimsCondition) condition;
+                            conditionJSON.put(APIConstants.API_POLICY_CONDITION_TYPE, PolicyConstants.JWT_CLAIMS_TYPE);
+                            conditionJSON.put(APIConstants.API_POLICY_CONDITION_NAME, jwtClaimsCondition.getClaimUrl());
+                            conditionJSON.put(APIConstants.API_POLICY_CONDITION_VALUE, jwtClaimsCondition.getAttribute());
+                        }
+                        conditionsJSON.put(conditionJSON);
                     }
-                    conditionsJSON.put(conditionJSON);
+                    conditionGroupJSON.put(APIConstants.API_POLICY_CONDITION_GROUP_ID, "_condition_" + conditionGroup.getId());
+                    conditionGroupJSON.put(APIConstants.API_POLICY_CONDITIONS, conditionsJSON);
+                    conditionGroupsJSON.put(conditionGroupJSON);
                 }
-                conditionGroupJSON.put(APIConstants.API_POLICY_CONDITION_GROUP_ID, "_condition_" + conditionGroup.getId());
-                conditionGroupJSON.put(APIConstants.API_POLICY_CONDITIONS, conditionsJSON);
-                conditionGroupsJSON.put(conditionGroupJSON);
             }
         }
-
-        Object[] objects = new Object[]{apiPolicy.getPolicyName(), apiPolicy.getTenantId(), conditionGroupsJSON.toString() };
+        Object[] objects = new Object[]{apiPolicy.getPolicyName(), apiPolicy.getTenantId(),
+                conditionGroupsJSON.toString(), isDeleteState };
         Event apiPolicyMessage = new Event(APIConstants.API_POLICY_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
         ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();

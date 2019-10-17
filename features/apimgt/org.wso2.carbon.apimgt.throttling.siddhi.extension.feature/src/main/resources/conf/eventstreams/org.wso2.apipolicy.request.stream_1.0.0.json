@@ -15,6 +15,10 @@
     {
       "name": "conditionGroups",
       "type": "STRING"
+    },
+    {
+      "name": "deleteState",
+      "type": "BOOL"
     }
   ]
 }

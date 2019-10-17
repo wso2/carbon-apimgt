@@ -302,9 +302,13 @@ public class JMSMessageListener implements MessageListener {
 
         String policyName = map.get(APIConstants.API_POLICY_KEY).toString();
         int tenantId = (int) map.get(APIConstants.API_POLICY_TENANT_ID);
-        ConditionGroupDTO[] conditionGroups =  new Gson().fromJson(map.get(APIConstants.API_POLICY_CONDITION_GROUPS).toString(),
-                ConditionGroupDTO[].class);
-
-        ConditionGroupsDataHolder.getInstance().updatePolicyConditionGroup(tenantId + "-" + policyName, conditionGroups);
+        boolean deleteState = (boolean) map.get(APIConstants.API_POLICY_DELETE_STATE);
+        if (deleteState) {
+            ConditionGroupsDataHolder.getInstance().deletePolicy(tenantId + "-" + policyName);
+        } else {
+            ConditionGroupDTO[] conditionGroups = new Gson().fromJson(map.get(APIConstants.API_POLICY_CONDITION_GROUPS).toString(),
+                    ConditionGroupDTO[].class);
+            ConditionGroupsDataHolder.getInstance().updatePolicyConditionGroup(tenantId + "-" + policyName, conditionGroups);
+        }
     }
 }

@@ -1408,6 +1408,7 @@ public final class APIConstants {
 
     public static final String API_POLICY_KEY = "apiPolicyKey";
     public static final String API_POLICY_TENANT_ID = "tenantId";
+    public static final String API_POLICY_DELETE_STATE = "deleteState";
     public static final String API_POLICY_CONDITION_GROUPS = "conditionGroups";
     public static final String API_POLICY_CONDITIONS = "conditions";
     public static final String API_POLICY_CONDITION_INVERTED = "isInverted";
