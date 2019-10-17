@@ -431,13 +431,13 @@ function EndpointOverview(props) {
 
     /**
      * Method to handle the endpoint security changes.
-     * @param {any} event The html event
+     * @param {string} value The value
      * @param {string} field The security propety that is being modified.
      * */
-    const handleEndpointSecurityChange = (event, field) => {
+    const handleEndpointSecurityChange = (value, field) => {
         endpointsDispatcher({
             action: 'endpointSecurity',
-            value: { ...endpointSecurityInfo, [field]: event.target.value },
+            value: { ...endpointSecurityInfo, [field]: value },
         });
     };
 
