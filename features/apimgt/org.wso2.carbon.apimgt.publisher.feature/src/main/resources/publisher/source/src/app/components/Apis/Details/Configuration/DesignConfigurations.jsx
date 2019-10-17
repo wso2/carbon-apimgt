@@ -143,7 +143,7 @@ function copyAPIConfig(api) {
  * @param {*} props
  * @returns
  */
-export default function Configuration() {
+export default function DesignConfigurations() {
     /**
      *
      * Reduce the configuration UI related actions in to updated state

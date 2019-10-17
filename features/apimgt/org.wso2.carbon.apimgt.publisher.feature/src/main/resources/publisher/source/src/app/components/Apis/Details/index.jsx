@@ -50,7 +50,7 @@ import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import AppContext from 'AppComponents/Shared/AppContext';
 import LastUpdatedTime from 'AppComponents/Apis/Details/components/LastUpdatedTime';
 import Overview from './NewOverview/Overview';
-import Configuration from './Configuration/Configuration';
+import DesignConfigurations from './Configuration/DesignConfigurations';
 import RuntimeConfiguration from './Configuration/RuntimeConfiguration';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
@@ -624,7 +624,7 @@ class Details extends Component {
                                 <Route path={Details.subPaths.LIFE_CYCLE} component={() => <LifeCycle api={api} />} />
                                 <Route
                                     path={Details.subPaths.CONFIGURATION}
-                                    component={() => <Configuration api={api} />}
+                                    component={() => <DesignConfigurations api={api} />}
                                 />
                                 <Route
                                     path={Details.subPaths.RUNTIME_CONFIGURATION}
@@ -632,7 +632,7 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.CONFIGURATION_PRODUCT}
-                                    component={() => <Configuration api={api} />}
+                                    component={() => <DesignConfigurations api={api} />}
                                 />
                                 <Route
                                     path={Details.subPaths.RUNTIME_CONFIGURATION_PRODUCT}

@@ -35,7 +35,7 @@ import SpecErrors from './components/SpecErrors';
 import AddOperation from './components/AddOperation';
 import GoToDefinitionLink from './components/GoToDefinitionLink';
 import APIRateLimiting from './components/APIRateLimiting';
-import { extractPathParameters, isSelectAll } from './operationUtils';
+import { extractPathParameters, isSelectAll, mapAPIOperations } from './operationUtils';
 import OperationsSelector from './components/OperationsSelector';
 import SaveOperations from './components/SaveOperations';
 
@@ -174,12 +174,19 @@ export default function Resources(props) {
         });
     }
     const onMarkAsDelete = useCallback(onOperationSelectM, [setSelectedOperation]);
+
+    // can't depends on API id because we need to consider the changes in operations in api object
     // memoized (https://reactjs.org/docs/hooks-reference.html#usememo) to improve pref,
     // localized to inject local apiThrottlingPolicy data
-    const localApi = useMemo(() => ({ id: api.id, apiThrottlingPolicy, scopes: api.scopes }), [
-        api,
-        apiThrottlingPolicy,
-    ]);
+    const localApi = useMemo(
+        () => ({
+            id: api.id,
+            apiThrottlingPolicy,
+            scopes: api.scopes,
+            operations: api.isAPIProduct() ? {} : mapAPIOperations(api.operations),
+        }),
+        [api, apiThrottlingPolicy],
+    );
     /**
      *
      *
@@ -228,7 +235,7 @@ export default function Resources(props) {
         switch (type) {
             case 'save':
                 if (isSelectAll(markedOperations, copyOfOperations)) {
-                    const message = "Can't delete all the operations, Please keep at least one operation.";
+                    const message = 'At least one operation is required for the API';
                     Alert.warning(message);
                     return Promise.reject(new Error(message));
                 }
@@ -349,8 +356,7 @@ export default function Resources(props) {
                                                     operation={operation}
                                                     operationRateLimits={operationRateLimits}
                                                     api={localApi}
-                                                    markAsDelete={Boolean(markedOperations[target]
-                                                        && markedOperations[target][verb])}
+                                                    markAsDelete={Boolean(markedOperations[target] && markedOperations[target][verb])}
                                                     onMarkAsDelete={onMarkAsDelete}
                                                     disableUpdate={disableUpdate}
                                                     disableMultiSelect={disableMultiSelect}

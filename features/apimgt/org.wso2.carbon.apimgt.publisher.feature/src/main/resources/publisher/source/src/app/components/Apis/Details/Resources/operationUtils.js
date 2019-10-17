@@ -159,6 +159,27 @@ function getOperationScopes(operation, spec) {
     return scopes;
 }
 
+
+/**
+ * Map the api.operations array to swagger paths like object
+ * @param {Array} operations Operations in API DTO
+ * @returns {Object} Mapped operations object
+ */
+function mapAPIOperations(operations) {
+    const temp = {};
+    for (const operation of operations) {
+        const { target, verb, ...rest } = operation;
+        if (!temp[target]) {
+            temp[target] = {
+                [verb]: rest,
+            };
+        } else {
+            temp[target][verb] = rest;
+        }
+    }
+    return temp;
+}
+
 /**
  *
  *
@@ -180,4 +201,4 @@ function isSelectAll(selectedOperations, operations) {
     }
     return true;
 }
-export { getTaggedOperations, getAPIProductTaggedOperations, extractPathParameters, getOperationScopes, isSelectAll };
+export { mapAPIOperations, getTaggedOperations, getAPIProductTaggedOperations, extractPathParameters, getOperationScopes, isSelectAll };
