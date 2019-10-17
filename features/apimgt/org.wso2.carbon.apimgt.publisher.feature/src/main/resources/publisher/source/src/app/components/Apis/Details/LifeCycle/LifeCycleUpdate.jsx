@@ -209,9 +209,9 @@ class LifeCycleUpdate extends Component {
                                 <Grid item xs={8}>
                                     <LifeCycleImage lifeCycleStatus={newState || api.lifeCycleStatus} />
                                 </Grid>
-                                {(api.lifeCycleStatus === 'CREATED' ||
-                                    api.lifeCycleStatus === 'PUBLISHED' ||
-                                    api.lifeCycleStatus === 'PROTOTYPED') && (
+                                {(api.lifeCycleStatus === 'CREATED' || (api.lifeCycleStatus === 'PUBLISHED'
+                                && api.type !== 'GRAPHQL') ||
+                                api.lifeCycleStatus === 'PROTOTYPED') && (
                                     <Grid item xs={3}>
                                         <CheckboxLabels api={api} />
                                     </Grid>

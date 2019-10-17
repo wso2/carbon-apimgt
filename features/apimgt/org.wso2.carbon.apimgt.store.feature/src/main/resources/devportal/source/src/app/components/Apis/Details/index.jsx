@@ -337,6 +337,7 @@ class Details extends React.Component {
         const {
             classes, theme, intl, match,
         } = this.props;
+        const user = AuthManager.getUser();
         const { apiUuid } = match.params;
         const { api, notFound } = this.state;
         const {
@@ -383,8 +384,11 @@ class Details extends React.Component {
                     <LeftMenuItem text='overview' route='overview' to={pathPrefix + 'overview'} />
                     {!api.advertiseInfo.advertised && (
                         <React.Fragment>
-                            <LeftMenuItem text='credentials' route='credentials' to={pathPrefix + 'credentials'} />
-                            <LeftMenuItem text='comments' route='comments' to={pathPrefix + 'comments'} />
+                            { user &&
+                            <div>
+                                <LeftMenuItem text='credentials' route='credentials' to={pathPrefix + 'credentials'} />
+                                <LeftMenuItem text='comments' route='comments' to={pathPrefix + 'comments'} />
+                            </div>}
                             {api.type !== 'WS' && <LeftMenuItem text='test' route='test' to={pathPrefix + 'test'} />}
                         </React.Fragment>
                     )}
