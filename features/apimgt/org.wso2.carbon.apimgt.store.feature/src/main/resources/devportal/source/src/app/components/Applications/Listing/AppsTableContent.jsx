@@ -69,10 +69,9 @@ class AppsTableContent extends Component {
      */
     render() {
         const {
-            apps, toggleDeleteConfirmation, page, rowsPerPage, order, orderBy,
+            apps, toggleDeleteConfirmation,
         } = this.props;
         const { notFound } = this.state;
-        const emptyRowsPerPage = rowsPerPage - Math.min(rowsPerPage, apps.size - page * rowsPerPage);
         let appsTableData = [];
 
         if (apps) {
@@ -87,8 +86,6 @@ class AppsTableContent extends Component {
         return (
             <TableBody>
                 {appsTableData
-                    .sort(getSorting(order, orderBy))
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((app) => {
                         return (
                             <TableRow key={app.applicationId}>
@@ -193,11 +190,6 @@ class AppsTableContent extends Component {
                             </TableRow>
                         );
                     })}
-                {emptyRowsPerPage > 0 && (
-                    <TableRow style={{ height: 49 * emptyRowsPerPage }}>
-                        <TableCell colSpan={6} />
-                    </TableRow>
-                )}
             </TableBody>
         );
     }

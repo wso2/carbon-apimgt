@@ -158,8 +158,10 @@ class Listing extends Component {
      * @memberof Listing
      */
     updateApps = () => {
-        const { page, rowsPerPage } = this.state;
-        const promisedApplications = Application.all(rowsPerPage, page * rowsPerPage);
+        const {
+            page, rowsPerPage, order, orderBy,
+        } = this.state;
+        const promisedApplications = Application.all(rowsPerPage, page * rowsPerPage, order, orderBy);
         promisedApplications
             .then((applications) => {
                 const { pagination: { total } } = applications;
@@ -187,12 +189,13 @@ class Listing extends Component {
     handleRequestSort = (event, property) => {
         const { orderBy, order } = this.state;
         let currentOrder = 'desc';
-        if (orderBy === property && order === 'desc') {
-            currentOrder = 'asc';
+        if (orderBy === property) {
+            currentOrder = order === 'desc' ? 'asc' : 'desc';
+            this.setState({ order: currentOrder }, this.updateApps);
+        } else {
+            this.setState({ order: currentOrder, orderBy: property }, this.updateApps);
         }
-        this.setState({ order: currentOrder, orderBy });
     };
-
 
     /**
      *
@@ -210,7 +213,7 @@ class Listing extends Component {
      * @memberof Listing
      */
     handleChangeRowsPerPage = (event) => {
-        this.setState({ rowsPerPage: event.target.value });
+        this.setState({ rowsPerPage: event.target.value }, this.updateApps);
     };
 
     /**
