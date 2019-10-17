@@ -111,7 +111,6 @@ const endpointTypes = [
     { key: 'address', value: 'HTTP/SOAP Endpoint' },
     { key: 'prototyped', value: 'Prototyped' },
     { key: 'INLINE', value: 'Mocked' },
-    { key: 'awslambda', value: 'AWS Lambda' },
 ];
 
 /**
@@ -194,7 +193,6 @@ function EndpointOverview(props) {
                 { key: 'default', value: 'Dynamic Endpoints' },
                 { key: 'prototyped', value: 'Prototyped' },
                 { key: 'INLINE', value: 'Mocked' },
-                { key: 'awslambda', value: 'AWS Lambda' },
             ];
         }
         return supportedEndpointTypes;
