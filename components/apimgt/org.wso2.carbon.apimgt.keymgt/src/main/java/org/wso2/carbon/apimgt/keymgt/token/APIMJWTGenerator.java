@@ -112,8 +112,7 @@ public class APIMJWTGenerator extends JWTGenerator {
                     if (userAttributeSeparator != null && claimVal
                             .contains(userAttributeSeparator)) {
                         StringTokenizer st = new StringTokenizer(claimVal, userAttributeSeparator);
-                        while (st.hasMoreElements
-                                ()) {
+                        while (st.hasMoreElements()) {
                             String attValue = st.nextElement().toString();
                             if (StringUtils.isNotBlank(attValue)) {
                                 claimList.add(attValue);
