@@ -598,7 +598,13 @@ public class APIGatewayManager {
                     APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
 
                     APIIdentifier id = new APIIdentifier(PRODUCT_PREFIX, apiProduct.getId().getName(), PRODUCT_VERSION);
-                    client.deleteApi(tenantDomain, id);
+                    // Endpoint may have been deleted already due to previously initiated API Product delete call that
+                    // only partially completed due an error that could have occurred at registry or DB level.
+                    if (client.getApi(tenantDomain, id) != null) {
+                        client.deleteApi(tenantDomain, id);
+                    } else {
+                        continue;
+                    }
 
                     for (API api : associatedAPIs) {
                         if (client.getApi(tenantDomain, api.getId()) == null) {

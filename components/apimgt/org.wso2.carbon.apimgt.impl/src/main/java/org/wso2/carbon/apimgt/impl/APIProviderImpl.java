@@ -1911,6 +1911,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         Set<API> associatedAPIs = getAssociatedAPIs(apiProduct);
+        List<APIIdentifier> apisWithoutEndpoints = new ArrayList<>();
+
+        for (API api : associatedAPIs) {
+            String endpointConfig = api.getEndpointConfig();
+
+            if (StringUtils.isEmpty(endpointConfig)) {
+                apisWithoutEndpoints.add(api.getId());
+            }
+        }
+
+        if (!apisWithoutEndpoints.isEmpty()) {
+            throw new APIManagementException("Cannot publish API Product: " + apiProductId + " to gateway",
+            ExceptionCodes.from(ExceptionCodes.API_PRODUCT_RESOURCE_ENDPOINT_UNDEFINED, apiProductId.toString(),
+            apisWithoutEndpoints.toString()));
+        }
+
         failedEnvironment = gatewayManager.publishToGateway(apiProduct, builder, tenantDomain, associatedAPIs);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + apiProductId.getName() + ", API Version " + apiProductId.getVersion()
