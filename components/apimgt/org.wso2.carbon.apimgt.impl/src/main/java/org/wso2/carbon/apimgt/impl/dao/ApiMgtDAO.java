@@ -1770,33 +1770,23 @@ public class ApiMgtDAO {
 
                 String[] groupIDArray = groupingId.split(",");
 
-                // Set the same parameters for each of the 2 SELECT statements of the UNION
-                for (int i = 0; i < 2; ++i) {
-                    statement.setInt(++paramIndex, tenantId);
-                    statement.setString(++paramIndex, applicationName);
-
-                    for (String groupId : groupIDArray) {
-                        statement.setString(++paramIndex, groupId);
-                    }
-                    statement.setString(++paramIndex, tenantDomain);
-                    statement.setString(++paramIndex, subscriber.getName());
-                }
-            } else {
-                // Set the same parameters for each of the 2 SELECT statements of the UNION
-                for (int i = 0; i < 2; ++i) {
-                    statement.setInt(++paramIndex, tenantId);
-                    statement.setString(++paramIndex, applicationName);
-                    statement.setString(++paramIndex, groupingId);
-                    statement.setString(++paramIndex, subscriber.getName());
-                }
-            }
-        } else {
-            // Set the same parameters for each of the 2 SELECT statements of the UNION
-            for (int i = 0; i < 2; ++i) {
                 statement.setInt(++paramIndex, tenantId);
                 statement.setString(++paramIndex, applicationName);
+                for (String groupId : groupIDArray) {
+                    statement.setString(++paramIndex, groupId);
+                }
+                statement.setString(++paramIndex, tenantDomain);
+                statement.setString(++paramIndex, subscriber.getName());
+            } else {
+                statement.setInt(++paramIndex, tenantId);
+                statement.setString(++paramIndex, applicationName);
+                statement.setString(++paramIndex, groupingId);
                 statement.setString(++paramIndex, subscriber.getName());
             }
+        } else {
+            statement.setInt(++paramIndex, tenantId);
+            statement.setString(++paramIndex, applicationName);
+            statement.setString(++paramIndex, subscriber.getName());
         }
 
         return statement.executeQuery();
@@ -1968,37 +1958,27 @@ public class ApiMgtDAO {
                                                PreparedStatement statement) throws SQLException {
         int tenantId = APIUtil.getTenantId(subscriber.getName());
         int paramIndex = 0;
-        //TODO remove the loops and assign the correct index
+
         if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
             if (multiGroupAppSharingEnabled) {
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                 String[] groupIDArray = groupingId.split(",");
 
-                // Set the same parameters for each of the 2 SELECT statements of the UNION
-                for (int i = 0; i < 1; ++i) {
-                    statement.setInt(++paramIndex, tenantId);
-
-                    for (String groupId : groupIDArray) {
-                        statement.setString(++paramIndex, groupId);
-                    }
-
-                    statement.setString(++paramIndex, tenantDomain);
-                    statement.setString(++paramIndex, subscriber.getName());
-                }
-            } else {
-                // Set the same parameters for each of the 2 SELECT statements of the UNION
-                for (int i = 0; i < 1; ++i) {
-                    statement.setInt(++paramIndex, tenantId);
-                    statement.setString(++paramIndex, groupingId);
-                    statement.setString(++paramIndex, subscriber.getName());
-                }
-            }
-        } else {
-            // Set the same parameters for each of the 2 SELECT statements of the UNION
-            for (int i = 0; i < 1; ++i) {
                 statement.setInt(++paramIndex, tenantId);
+                for (String groupId : groupIDArray) {
+                    statement.setString(++paramIndex, groupId);
+                }
+                statement.setString(++paramIndex, tenantDomain);
+                statement.setString(++paramIndex, subscriber.getName());
+
+            } else {
+                statement.setInt(++paramIndex, tenantId);
+                statement.setString(++paramIndex, groupingId);
                 statement.setString(++paramIndex, subscriber.getName());
             }
+        } else {
+            statement.setInt(++paramIndex, tenantId);
+            statement.setString(++paramIndex, subscriber.getName());
         }
 
         return statement.executeQuery();
