@@ -30,6 +30,7 @@ import Paper from '@material-ui/core/Paper';
 import Alert from 'AppComponents/Shared/Alert';
 import CreateEditForm from './CreateEditForm';
 import Api from 'AppData/api';
+import { isRestricted } from 'AppData/AuthManager';
 
 const styles = {
     appBar: {
@@ -118,10 +119,10 @@ function Edit(props) {
             });
     };
 
-    const { classes, docId, apiId} = props;
+    const { classes, docId, apiId, api} = props;
     return (
         <div>
-            <Button onClick={toggleOpen}>
+            <Button onClick={toggleOpen} disabled={isRestricted(['apim:api_create'], api)}>
                 <Icon>edit</Icon>
                 <FormattedMessage
                     id='Apis.Details.Documents.Edit.documents.text.editor.edit'
@@ -175,6 +176,10 @@ Edit.propTypes = {
     docId: PropTypes.shape({}).isRequired,
     getDocumentsList: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({
+        id: PropTypes.string,
+        apiType: PropTypes.oneOf([Api.CONSTS.API, Api.CONSTS.APIProduct]),
+    }).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Edit));

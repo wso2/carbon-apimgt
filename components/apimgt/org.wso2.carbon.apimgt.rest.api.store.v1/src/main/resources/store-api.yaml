@@ -3707,6 +3707,9 @@ definitions:
         $ref: '#/definitions/AdvertiseInfo'
       businessInformation:
         $ref: '#/definitions/APIBusinessInformation'
+      isSubscriptionAvailable:
+        type: boolean
+        example: false
 
 #-----------------------------------------------------
 # The Standard API resource
@@ -3905,6 +3908,9 @@ definitions:
       advertiseInfo:
         description: The advertise info of the API
         $ref: '#/definitions/AdvertiseInfo'
+      isSubscriptionAvailable:
+        type: boolean
+        example: false
 
 #-----------------------------------------------------
 # The Label resource

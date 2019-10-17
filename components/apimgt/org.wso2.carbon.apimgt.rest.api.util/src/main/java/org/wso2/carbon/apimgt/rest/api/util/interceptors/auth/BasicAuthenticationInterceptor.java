@@ -153,7 +153,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
      */
     private boolean validateRoles(Message inMessage, UserRealm userRealm, String tenantDomain, String username) {
         String basePath = (String) inMessage.get(Message.BASE_PATH);
-        String path = (String) inMessage.get(Message.PATH_INFO);
+        String path = (String) inMessage.get(Message.REQUEST_URI);
         String verb = (String) inMessage.get(Message.HTTP_REQUEST_METHOD);
         String resource = path.substring(basePath.length() - 1);
         String[] userRoles;

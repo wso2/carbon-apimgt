@@ -310,8 +310,14 @@ function Overview(props) {
                                                 to={{
                                                     pathname: '/apis/' + api.id + '/credentials/wizard',
                                                 }}
+                                                style={!api.isSubscriptionAvailable ? { pointerEvents: 'none' } : null}
                                             >
-                                                <Button variant='contained' color='primary' size='large'>
+                                                <Button
+                                                    variant='contained'
+                                                    color='primary'
+                                                    size='large'
+                                                    disabled={!api.isSubscriptionAvailable}
+                                                >
                                                     <FormattedMessage
                                                         id='Apis.Details.Overview.credential.wizard.title'
                                                         defaultMessage='Key Generation Wizard'
@@ -323,12 +329,17 @@ function Overview(props) {
                                     {applicationsAvailable && applicationsAvailable.length > 0 && (
                                         <Grid item>
                                             <React.Fragment>
-                                                <Link to={'/apis/' + api.id + '/credentials'}>
+                                                <Link
+                                                    to={'/apis/' + api.id + '/credentials'}
+                                                    style={!api.isSubscriptionAvailable ?
+                                                        { pointerEvents: 'none' } : null}
+                                                >
                                                     <Button
                                                         variant='contained'
                                                         color='primary'
                                                         size='large'
                                                         className={classes.subscribeButton}
+                                                        disabled={!api.isSubscriptionAvailable}
                                                     >
                                                         <FormattedMessage
                                                             id='Apis.Details.Overview.subscribe.to.application.btn'

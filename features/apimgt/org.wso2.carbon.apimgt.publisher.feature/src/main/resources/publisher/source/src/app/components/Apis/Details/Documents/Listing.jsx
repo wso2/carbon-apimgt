@@ -272,6 +272,7 @@ class Listing extends React.Component {
                                                     docId={docId}
                                                     apiId={this.apiId}
                                                     getDocumentsList={this.getDocumentsList}
+                                                    api
                                                 />
                                             </td>
                                             <td>
@@ -281,6 +282,7 @@ class Listing extends React.Component {
                                                     apiId={this.apiId}
                                                     getDocumentsList={this.getDocumentsList}
                                                     apiType={api.apiType}
+                                                    api
                                                 />
                                             </td>
                                         </tr>
@@ -305,6 +307,7 @@ class Listing extends React.Component {
                                                     docId={docId}
                                                     apiId={this.apiId}
                                                     getDocumentsList={this.getDocumentsList}
+                                                    api
                                                 />
                                             </td>
                                             <td>
@@ -314,6 +317,7 @@ class Listing extends React.Component {
                                                     apiId={this.apiId}
                                                     getDocumentsList={this.getDocumentsList}
                                                     apiType={api.apiType}
+                                                    api
                                                 />
                                             </td>
                                         </tr>
@@ -339,6 +343,7 @@ class Listing extends React.Component {
                                                     docId={docId}
                                                     apiId={this.apiId}
                                                     getDocumentsList={this.getDocumentsList}
+                                                    api
                                                 />
                                             </td>
                                             <td>
@@ -348,6 +353,7 @@ class Listing extends React.Component {
                                                     apiId={this.apiId}
                                                     getDocumentsList={this.getDocumentsList}
                                                     apiType={api.apiType}
+                                                    api
                                                 />
                                             </td>
                                         </tr>
@@ -367,6 +373,7 @@ class Listing extends React.Component {
                                                     docId={docId}
                                                     apiId={this.apiId}
                                                     getDocumentsList={this.getDocumentsList}
+                                                    api
                                                 />
                                             </td>
                                             <td>
@@ -376,6 +383,7 @@ class Listing extends React.Component {
                                                     apiId={this.apiId}
                                                     getDocumentsList={this.getDocumentsList}
                                                     apiType={api.apiType}
+                                                    api
                                                 />
                                             </td>
                                         </tr>
@@ -407,8 +415,8 @@ class Listing extends React.Component {
                         resourcePath={isAPIProduct ? resourcePath.API_PRODUCTS : resourcePath.API_CHANGE_LC}
                         resourceMethod={resourceMethod.POST}
                     >
-                        <Link to={url}>
-                            <Button size='small' className={classes.button}>
+                        <Link to={!isRestricted(['apim:api_create'], api) && url}>
+                            <Button size='small' className={classes.button} disabled={isRestricted(['apim:api_create'], api)}>
                                 <AddCircle className={classes.buttonIcon} />
                                 <FormattedMessage
                                     id='Apis.Details.Documents.Listing.add.new.document.button'
@@ -449,8 +457,8 @@ class Listing extends React.Component {
                                     />
                                 </Typography>
                                 <div className={classes.actions}>
-                                    <Link to={url}>
-                                        <Button variant='contained' color='primary' className={classes.button}>
+                                    <Link to={!isRestricted(['apim:api_create'], api) && url}>
+                                        <Button variant='contained' color='primary' className={classes.button} disabled={isRestricted(['apim:api_create'], api)}>
                                             <FormattedMessage
                                                 id='Apis.Details.Documents.Listing.add.new.msg.button'
                                                 defaultMessage='Add New Document'

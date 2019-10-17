@@ -94,7 +94,7 @@ export default function OperationGovernance(props) {
                 </sup>
             </Grid>
             <Grid item md={1} />
-            <Grid item md={3}>
+            <Grid item md={5}>
                 <TextField
                     id='operation_rate_limiting_policy'
                     select
@@ -148,13 +148,14 @@ export default function OperationGovernance(props) {
                     ))}
                 </TextField>
             </Grid>
-            <Grid item md={8} />
+            <Grid item md={6} />
             <Grid item md={1} />
-            <Grid item md={11}>
+            <Grid item md={5}>
                 <TextField
                     id='operation_scope'
                     select
                     disabled={disableUpdate}
+                    fullWidth
                     label='Operation scope'
                     value={getOperationScopes(operation, spec)[0]}
                     onChange={({ target: { value } }) =>
@@ -173,6 +174,8 @@ export default function OperationGovernance(props) {
                         </MenuItem>
                     ))}
                 </TextField>
+            </Grid>
+            <Grid item md={5} >
                 <Tooltip title='Remove scope'>
                     <IconButton
                         onClick={() => operationsDispatcher({ action: 'scopes', data: { target, verb, value: [] } })}
@@ -190,6 +193,7 @@ export default function OperationGovernance(props) {
                     </Link>
                 )}
             </Grid>
+            <Grid item md={1} />
         </Fragment>
     );
 }
