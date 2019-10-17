@@ -59,6 +59,10 @@ public class APIProduct {
     private Set<String> environments;
     private List<Label> gatewayLabels;
 
+    private JSONObject monetizationProperties = new JSONObject();
+    private boolean isMonetizationEnabled = false;
+
+
     private Set<Scope> scopes;
 
     /**
@@ -185,6 +189,21 @@ public class APIProduct {
     }
     public int getProductId() {
         return productId;
+    }
+    public JSONObject getMonetizationProperties() {
+        return monetizationProperties;
+    }
+    public boolean getMonetizationStatus() {
+        return isMonetizationEnabled;
+    }
+    public void setMonetizationStatus(boolean monetizationStatus) {
+        this.isMonetizationEnabled = monetizationStatus;
+    }
+    public void setMonetizationProperties(JSONObject monetizationProperties) {
+        this.monetizationProperties = monetizationProperties;
+    }
+    public void addMonetizationProperty(String key, String value) {
+        monetizationProperties.put(key, value);
     }
     public void setProductId(int productId) {
         this.productId = productId;

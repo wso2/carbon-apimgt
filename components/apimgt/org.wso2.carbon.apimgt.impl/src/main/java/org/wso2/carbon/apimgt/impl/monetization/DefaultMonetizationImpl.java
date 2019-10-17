@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
@@ -58,7 +59,19 @@ public class DefaultMonetizationImpl implements Monetization {
     }
 
     @Override
+    public boolean enableMonetization(String tenantDomain, APIProduct apiProduct, Map<String, String> monetizationProperties)
+            throws MonetizationException {
+        return true;
+    }
+
+    @Override
     public boolean disableMonetization(String tenantDomain, API api, Map<String, String> monetizationProperties)
+            throws MonetizationException {
+        return true;
+    }
+
+    @Override
+    public boolean disableMonetization(String tenantDomain, APIProduct apiProduct, Map<String, String> monetizationProperties)
             throws MonetizationException {
         return true;
     }

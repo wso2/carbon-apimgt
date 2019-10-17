@@ -5386,6 +5386,50 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public void configureMonetizationInAPIProductArtifact(APIProduct apiProduct) throws APIManagementException {
+
+        boolean transactionCommitted = false;
+        try {
+            registry.beginTransaction();
+            String apiArtifactId = registry.get(APIUtil.getAPIProductPath(apiProduct.getId())).getId();
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            if (artifactManager == null) {
+                handleException("Artifact manager is null when updating monetization data for API ID " + apiProduct.getId());
+            }
+            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
+            //set monetization status (i.e - enabled or disabled)
+            artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS,
+                    Boolean.toString(apiProduct.getMonetizationStatus()));
+            //clear existing monetization properties
+            artifact.removeAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
+            //set new additional monetization data
+            if (apiProduct.getMonetizationProperties() != null) {
+                artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES,
+                        apiProduct.getMonetizationProperties().toJSONString());
+            }
+            artifactManager.updateGenericArtifact(artifact);
+            registry.commitTransaction();
+            transactionCommitted = true;
+        } catch (Exception e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                handleException("Error while rolling back the transaction (monetization status update) for API product : " +
+                        apiProduct.getId().getName(), re);
+            }
+            handleException("Error while performing registry transaction (monetization status update) operation", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException e) {
+                handleException("Error occurred while rolling back the transaction (monetization status update).", e);
+            }
+        }
+    }
+
     /**
      * This methods creates a monetization plan for a given subscription policy
      *

@@ -67,6 +67,9 @@ public interface Monetization {
     boolean enableMonetization(String tenantDomain, API api,
                                Map<String, String> monetizationProperties) throws MonetizationException;
 
+    boolean enableMonetization(String tenantDomain, APIProduct apiProduct,
+                               Map<String, String> monetizationProperties) throws MonetizationException;
+
     /**
      * Disable monetization for a API
      *
@@ -79,6 +82,8 @@ public interface Monetization {
     boolean disableMonetization(String tenantDomain, API api,
                                 Map<String, String> monetizationProperties) throws MonetizationException;
 
+    boolean disableMonetization(String tenantDomain, APIProduct apiProduct,
+                                Map<String, String> monetizationProperties) throws MonetizationException;
     /**
      * Get mapping of tiers and billing engine plans
      *

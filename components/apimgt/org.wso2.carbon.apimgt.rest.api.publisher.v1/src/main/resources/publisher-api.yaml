@@ -2026,6 +2026,8 @@ paths:
             $ref: '#/definitions/Error'
 
 
+
+
   #########################################################
 # The "Configure Monetization" Processing Function resource API
 #########################################################
@@ -2077,6 +2079,9 @@ paths:
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+
+
+
 
 #########################################################
 # The get monetizied policies processing function resource API
@@ -5170,6 +5175,91 @@ paths:
           description: |
             Not Found.
             Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+  /api-products/{apiProductId}/monetize:
+    #---------------------------------------
+    # Configure monetization for a given API Product
+    #---------------------------------------
+    post:
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+      summary: Configure monetization for a given API product
+      description: |
+        This operation can be used to configure monetization for a given API product.
+      parameters:
+        - $ref: '#/parameters/apiProductId'
+        - in: body
+          name: body
+          description: |
+            Monetization data object
+          required: true
+          schema:
+            $ref: '#/definitions/APIMonetizationInfo'
+      tags:
+        - API Products
+      responses:
+        201:
+          description: |
+            OK.
+            Monetization status changed successfully.
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested resource does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+  /api-products/{apiProductId}/monetization:
+    #---------------------------------------
+    # Get monetized policies for a given API product
+    #---------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+      summary: Get monetization status for each tier in a given API product
+      description: |
+        This operation can be used to get monetization status for each tier in a given API product
+      parameters:
+        - $ref: '#/parameters/apiProductId'
+      tags:
+        - API Products
+      responses:
+        200:
+          description: |
+            OK.
+            Monetization status for each tier returned successfully.
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested resource does not exist.
           schema:
             $ref: '#/definitions/Error'
         406:

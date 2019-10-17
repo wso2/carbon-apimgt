@@ -18,17 +18,22 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import com.google.gson.Gson;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
@@ -47,6 +52,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -443,6 +449,87 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String errorMessage = "Error while retrieving API Product from Id  : " + apiProductId ;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
+        return null;
+    }
+
+    /**
+     * Monetize (enable or disable) for a given API product
+     *
+     * @param apiProductId API product ID
+     * @param body request body
+     * @param messageContext message context
+     * @return monetizationDTO
+     */
+    @Override
+    public Response apiProductsApiProductIdMonetizePost(String apiProductId, APIMonetizationInfoDTO body,
+                                                        MessageContext messageContext) throws APIManagementException {
+        try {
+            if (StringUtils.isBlank(apiProductId)) {
+                String errorMessage = "API product ID cannot be empty or null when configuring monetization.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProduct apiProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
+            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIProductbyUUID(apiId, tenantDomain);
+            //API api = apiProvider.getAPI(apiIdentifier);
+            if (!APIConstants.PUBLISHED.equalsIgnoreCase(apiProduct.getState())) {
+                String errorMessage = "API product " + apiProduct.getProductId() +
+                        " should be in published state to configure monetization.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+            //set the monetization status
+            boolean monetizationEnabled = body.isEnabled();
+            apiProduct.setMonetizationStatus(monetizationEnabled);
+            //clear the existing properties related to monetization
+            apiProduct.getMonetizationProperties().clear();
+            Map<String, String> monetizationProperties = body.getProperties();
+            if (MapUtils.isNotEmpty(monetizationProperties)) {
+                String errorMessage = RestApiPublisherUtils.validateMonetizationProperties(monetizationProperties);
+                if (!errorMessage.isEmpty()) {
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+                for (Map.Entry<String, String> currentEntry : monetizationProperties.entrySet()) {
+                    apiProduct.addMonetizationProperty(currentEntry.getKey(), currentEntry.getValue());
+                }
+            }
+            apiProvider.configureMonetizationInAPIProductArtifact(apiProduct);
+            Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
+            HashMap monetizationDataMap = new Gson().fromJson(apiProduct.getMonetizationProperties().toString(), HashMap.class);
+            boolean isMonetizationStateChangeSuccessful = false;
+            if (MapUtils.isEmpty(monetizationDataMap)) {
+                String errorMessage = "Monetization is not configured. Monetization data is empty for API ID " + apiProductId;
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+            try {
+                if (monetizationEnabled) {
+                    isMonetizationStateChangeSuccessful = monetizationImplementation.enableMonetization
+                            (tenantDomain, apiProduct, monetizationDataMap);
+                } else {
+                    isMonetizationStateChangeSuccessful = monetizationImplementation.disableMonetization
+                            (tenantDomain, apiProduct, monetizationDataMap);
+                }
+            } catch (MonetizationException e) {
+                String errorMessage = "Error while changing monetization status for API ID : " + apiProductId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+            if (isMonetizationStateChangeSuccessful) {
+                APIMonetizationInfoDTO monetizationInfoDTO = APIMappingUtil.getMonetizationInfoDTO(apiProduct.getId());
+                return Response.ok().entity(monetizationInfoDTO).build();
+            } else {
+                String errorMessage = "Unable to change monetization status for API : " + apiProductId;
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while configuring monetization for API ID : " + apiProductId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return Response.serverError().build();
+    }
+
+    @Override
+    public Response apiProductsApiProductIdMonetizationGet(String apiProductId, MessageContext messageContext)
+            throws APIManagementException {
         return null;
     }
 
