@@ -657,7 +657,6 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         String provider = null;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             String username = RestApiUtil.getLoggedInUsername();
             // if not add product
             provider = body.getProvider();
@@ -675,10 +674,6 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 provider = username;
             }
 
-            /*if (apiProvider.isProductExist(body.getName(), provider, tenantDomain)) {
-                RestApiUtil.handleBadRequest(
-                        "Product with name " + body.getName() + " for provider " + provider + " already exists", log);
-            }*/
             List<String> tiersFromDTO = body.getPolicies();
             Set<Tier> definedTiers = apiProvider.getTiers();
             List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
