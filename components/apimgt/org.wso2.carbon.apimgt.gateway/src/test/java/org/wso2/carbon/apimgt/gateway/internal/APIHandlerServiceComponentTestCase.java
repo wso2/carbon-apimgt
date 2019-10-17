@@ -31,6 +31,7 @@ import org.osgi.service.component.ComponentContext;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.gateway.conditiongroup.ConditionGroupsRetriever;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
@@ -128,6 +129,9 @@ public class APIHandlerServiceComponentTestCase {
         RevokedJWTMapCleaner revokedJWTMapCleaner = Mockito.mock(RevokedJWTMapCleaner.class);
         PowerMockito.whenNew(RevokedJWTMapCleaner.class).withAnyArguments().thenReturn(revokedJWTMapCleaner);
         PowerMockito.doNothing().when(revokedJWTMapCleaner).startJWTRevokedMapCleaner();
+        ConditionGroupsRetriever conditionGroupsRetriever = Mockito.mock(ConditionGroupsRetriever.class);
+        PowerMockito.whenNew(ConditionGroupsRetriever.class).withAnyArguments().thenReturn(conditionGroupsRetriever);
+        PowerMockito.doNothing().when(conditionGroupsRetriever).startConditionGroupsRetriever();
         PowerMockito.mockStatic(Cache.class);
         Cache cache = Mockito.mock(Cache.class);
         PowerMockito.mockStatic(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);

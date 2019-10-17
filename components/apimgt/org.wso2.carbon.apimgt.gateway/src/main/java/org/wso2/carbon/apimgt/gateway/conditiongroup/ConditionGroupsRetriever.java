@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.gateway.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.gateway.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
