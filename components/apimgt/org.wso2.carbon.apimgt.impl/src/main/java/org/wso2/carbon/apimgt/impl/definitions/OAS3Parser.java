@@ -82,7 +82,7 @@ import java.util.Set;
  */
 public class OAS3Parser extends APIDefinition {
     private static final Log log = LogFactory.getLog(OAS3Parser.class);
-    private static final String OPENAPI_SECURITY_SCHEMA_KEY = "default";
+    static final String OPENAPI_SECURITY_SCHEMA_KEY = "default";
 
     /**
      * This method returns URI templates according to the given swagger file
@@ -885,9 +885,8 @@ public class OAS3Parser extends APIDefinition {
      *
      * @param oasDefinition OAS definition
      * @return OpenAPI
-     * @throws APIManagementException
      */
-    private OpenAPI getOpenAPI(String oasDefinition) throws APIManagementException {
+    OpenAPI getOpenAPI(String oasDefinition) {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(oasDefinition, null, null);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {

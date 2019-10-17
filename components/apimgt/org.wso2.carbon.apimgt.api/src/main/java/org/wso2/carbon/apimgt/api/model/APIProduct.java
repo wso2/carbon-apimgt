@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -56,10 +57,10 @@ public class APIProduct {
     private List<APIProductResource> productResources = new ArrayList<>();
     private String definition;
     private JSONObject additionalProperties = new JSONObject();
-    private Set<String> environments;
-    private List<Label> gatewayLabels;
+    private Set<String> environments = new HashSet<>();
+    private List<Label> gatewayLabels = new ArrayList<>();
 
-    private Set<Scope> scopes;
+    private Set<Scope> scopes = new HashSet<>();
 
     /**
      * API security at the gateway level.
@@ -374,6 +375,10 @@ public class APIProduct {
 
     public void setScopes(Set<Scope> scopes) {
         this.scopes = scopes;
+    }
+
+    public void addScope(Scope scope) {
+        this.scopes.add(scope);
     }
 
     public void setCreatedTime(Date createdTime) {

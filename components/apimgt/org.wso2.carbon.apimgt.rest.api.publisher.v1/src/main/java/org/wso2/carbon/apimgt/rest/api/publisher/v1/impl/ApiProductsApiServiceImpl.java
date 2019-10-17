@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
@@ -493,11 +494,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             product.setID(productIdentifier);
             product.setUuid(apiProductId);
 
-            APIDefinition parser = new OAS3Parser();
-            SwaggerData swaggerData = new SwaggerData(product);
-            String apiDefinition = parser.generateAPIDefinition(swaggerData);
-            apiProvider.saveSwaggerDefinition(product, apiDefinition);
-            apiProvider.updateAPIProduct(product);
+            Set<API> associatedAPIs = apiProvider.updateAPIProduct(product);
+            updateAPIProductSwagger(associatedAPIs, product, apiProvider);
 
             APIProduct updatedProduct = apiProvider.getAPIProduct(productIdentifier);
             APIProductDTO updatedProductDTO = APIMappingUtil.fromAPIProducttoDTO(updatedProduct);
@@ -710,14 +708,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
             APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(body, provider);
 
-            apiProvider.addAPIProductWithoutPublishingToGateway(productToBeAdded);
+            Set<API> associatedAPIs = apiProvider.addAPIProductWithoutPublishingToGateway(productToBeAdded);
+            addAPIProductSwagger(associatedAPIs, productToBeAdded, apiProvider);
+
             APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
-
-            APIDefinition parser = new OAS3Parser();
-            SwaggerData swaggerData = new SwaggerData(productToBeAdded);
-            String apiDefinition = parser.generateAPIDefinition(swaggerData);
-            apiProvider.saveSwagger20Definition(productToBeAdded.getId(), apiDefinition);
-
             APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
 
             apiProvider.saveToGateway(createdProduct);
@@ -737,6 +731,40 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    private void addAPIProductSwagger(Set<API> associatedAPIs, APIProduct product, APIProvider apiProvider)
+            throws APIManagementException, FaultGatewaysException {
+        APIDefinition parser = new OAS3Parser();
+        SwaggerData swaggerData = new SwaggerData(product);
+        String apiProductSwagger = parser.generateAPIDefinition(swaggerData);
+
+        for (API api : associatedAPIs) {
+            apiProductSwagger = OASParserUtil.syncSwaggerOperations(api.getSwaggerDefinition(), apiProductSwagger);
+        }
+
+        apiProvider.saveSwagger20Definition(product.getId(), apiProductSwagger);
+        product.setDefinition(apiProductSwagger);
+
+        apiProvider.updateLocalEntry(product);
+    }
+
+    private void updateAPIProductSwagger(Set<API> associatedAPIs, APIProduct product, APIProvider apiProvider)
+            throws APIManagementException, FaultGatewaysException {
+        APIDefinition parser = new OAS3Parser();
+        SwaggerData updatedData = new SwaggerData(product);
+        String existingProductSwagger = apiProvider.getAPIDefinitionOfAPIProduct(product);
+        String updatedProductSwagger = parser.generateAPIDefinition(updatedData, existingProductSwagger);
+
+        for (API api : associatedAPIs) {
+            updatedProductSwagger = OASParserUtil.syncSwaggerOperations(api.getSwaggerDefinition(),
+                    updatedProductSwagger);
+        }
+
+        apiProvider.saveSwagger20Definition(product.getId(), updatedProductSwagger);
+        product.setDefinition(updatedProductSwagger);
+
+        apiProvider.updateLocalEntry(product);
     }
 
     /**
