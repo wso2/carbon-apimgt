@@ -243,8 +243,10 @@ class CreateNewVersion extends React.Component {
                                                 <FormattedMessage
                                                     id='Apis.Details.NewVersion.NewVersion.tooltip'
                                                     defaultMessage={
-                                                        'Determine if this should be the default version ' +
-                                                        'among multiple versions of the API'
+                                                        'Indicates if this is the default version of the API. ' +
+                                                        'If an API is invoked without specifying a version, ' +
+                                                        'the API Gateway will route the request to the default ' +
+                                                        'version of the API.'
                                                     }
                                                 />
                                             </React.Fragment>
