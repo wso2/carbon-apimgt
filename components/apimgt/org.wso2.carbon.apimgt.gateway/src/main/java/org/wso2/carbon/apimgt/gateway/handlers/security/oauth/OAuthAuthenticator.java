@@ -31,6 +31,7 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
+import org.wso2.carbon.apimgt.gateway.conditiongroup.ConditionGroupsDataHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
@@ -42,6 +43,7 @@ import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.metrics.manager.Level;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
@@ -216,10 +218,10 @@ public class OAuthAuthenticator implements Authenticator {
                 }
                 List<VerbInfoDTO> verbInfoList;
                 //set default condition group
-                ConditionGroupDTO[] conditionGroups = new ConditionGroupDTO[1];
+                ConditionGroupDTO[] conditionGroupsWithDefaultGroup = new ConditionGroupDTO[1];
                 ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
                 defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
-                conditionGroups[0] = defaultGroup;
+                conditionGroupsWithDefaultGroup[0] = defaultGroup;
 
                 if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
                     HashMap<String, Boolean> operationAuthSchemeMappingList =
@@ -242,7 +244,14 @@ public class OAuthAuthenticator implements Authenticator {
                         verbInfoDTO.setHttpVerb(httpMethod);
                         verbInfoDTO.setThrottling(operationThrottlingMappingList.get(operation));
                         verbInfoDTO.setRequestKey(apiContext + "/" + apiVersion + operation + ":" + httpMethod);
-                        verbInfoDTO.setConditionGroups(conditionGroups);
+                        // Set condition groups
+                        ConditionGroupDTO[] conditionGroups = ConditionGroupsDataHolder.getInstance().getConditionGroupsOfPolicy(
+                                PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId() + "-" + verbInfoDTO.getThrottling());
+                        if (conditionGroups == null) {
+                            verbInfoDTO.setConditionGroups(conditionGroupsWithDefaultGroup);
+                        } else {
+                            verbInfoDTO.setConditionGroups(conditionGroups);
+                        }
                         verbInfoList.add(verbInfoDTO);
                     }
                 } else {
@@ -253,7 +262,14 @@ public class OAuthAuthenticator implements Authenticator {
                     verbInfoDTO.setAuthType(authenticationScheme);
                     verbInfoDTO.setThrottling(OpenAPIUtils.getResourceThrottlingTier(openAPI, synCtx));
                     verbInfoDTO.setRequestKey(apiContext + "/" + apiVersion + matchingResource + ":" + httpMethod);
-                    verbInfoDTO.setConditionGroups(conditionGroups);
+                    // Set condition groups
+                    ConditionGroupDTO[] conditionGroups = ConditionGroupsDataHolder.getInstance().getConditionGroupsOfPolicy(
+                            PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId() + "-" + verbInfoDTO.getThrottling());
+                    if (conditionGroups == null) {
+                        verbInfoDTO.setConditionGroups(conditionGroupsWithDefaultGroup);
+                    } else {
+                        verbInfoDTO.setConditionGroups(conditionGroups);
+                    }
                     verbInfoList.add(verbInfoDTO);
                 }
 

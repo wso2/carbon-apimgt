@@ -32,9 +32,11 @@ import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
+import org.wso2.carbon.apimgt.gateway.conditiongroup.ConditionGroupsDataHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -569,6 +571,12 @@ public class APIKeyValidator {
         ResourceInfoDTO resourceInfoDTO = null;
         VerbInfoDTO verbInfoDTO = null;
 
+        //set default condition group
+        ConditionGroupDTO[] conditionGroupsWithDefaultGroup = new ConditionGroupDTO[1];
+        ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
+        defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
+        conditionGroupsWithDefaultGroup[0] = defaultGroup;
+
         // The following map is used to retrieve already created ResourceInfoDTO rather than iterating -
         // the resource Set in apiInfoDTO.
         LinkedHashMap<String, ResourceInfoDTO> resourcesMap = new LinkedHashMap<String, ResourceInfoDTO>();
@@ -586,7 +594,20 @@ public class APIKeyValidator {
             verbInfoDTO.setAuthType(uriTemplate.getAuthType());
             verbInfoDTO.setThrottling(uriTemplate.getThrottlingTier());
             verbInfoDTO.setThrottlingConditions(uriTemplate.getThrottlingConditions());
-            verbInfoDTO.setConditionGroups(uriTemplate.getConditionGroups());
+
+            // Set condition groups
+            if (uriTemplate.getConditionGroups() != null) {
+                verbInfoDTO.setConditionGroups(uriTemplate.getConditionGroups());
+            } else {
+                ConditionGroupDTO[] conditionGroups = ConditionGroupsDataHolder.getInstance().getConditionGroupsOfPolicy(
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId() + "-" + verbInfoDTO.getThrottling());
+                if (conditionGroups == null) {
+                    verbInfoDTO.setConditionGroups(conditionGroupsWithDefaultGroup);
+                } else {
+                    verbInfoDTO.setConditionGroups(conditionGroups);
+                }
+            }
+
             verbInfoDTO.setApplicableLevel(uriTemplate.getApplicableLevel());
             resourceInfoDTO.getHttpVerbs().add(verbInfoDTO);
         }

@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.conditiongroup;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -78,5 +79,25 @@ public class ConditionGroupsDataHolder {
      */
     public static ConditionGroupsDataHolder getInstance() {
         return instance;
+    }
+
+    /**
+     * Returns the condition groups related to an API Policy.
+     * @return an array of condition groups.
+     */
+    public ConditionGroupDTO[] getConditionGroupsOfPolicy(String key) {
+        ConditionGroupDTO[] conditionGroupDTOS = conditionGroupsMap.get(key);
+
+        if (conditionGroupDTOS == null) {
+            conditionGroupDTOS = new ConditionGroupDTO[1];
+        } else {
+            conditionGroupDTOS = Arrays.copyOf(conditionGroupDTOS, conditionGroupDTOS.length + 1);
+        }
+
+        ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
+        defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
+        conditionGroupDTOS[conditionGroupDTOS.length - 1] = defaultGroup;
+
+        return conditionGroupDTOS;
     }
 }
