@@ -19,7 +19,7 @@
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Route, Switch } from 'react-router-dom';
-import { PageNotFound } from 'AppComponents/Base/Errors';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 import Listing from './Listing';
 import View from './View';
@@ -43,7 +43,7 @@ const Documents = (props) => {
                 />
                 } />
                 <Route exact path={'/' + urlPrefix + '/:apiUUID/documents/create'} component={DocCreate} />
-                <Route component={PageNotFound} />
+                <Route component={ResourceNotFound} />
             </Switch>
         </div>
     );
