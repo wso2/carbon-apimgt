@@ -313,6 +313,9 @@ class ApiTableView extends React.Component {
                     id: 'Apis.Listing.ApiTableView.version',
                     defaultMessage: 'Version',
                 }),
+                options: {
+                    sort: false,
+                },
             },
             {
                 name: 'context',
@@ -370,9 +373,7 @@ class ApiTableView extends React.Component {
                             }
                         }
                     },
-                    options: {
-                        sort: false,
-                    },
+                    sort: false,
                 },
             },
             {
