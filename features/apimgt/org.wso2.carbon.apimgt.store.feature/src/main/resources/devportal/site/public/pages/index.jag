@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <!--
   ~ Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
@@ -19,9 +18,11 @@
   -->
 
 <html lang="en">
-
+<%
+    var defaultTheme = require("/site/public/theme/defaultTheme.js");
+%>
 <head>
-  <base href="/devportal/" />
+  <base href="<%= defaultTheme.Configurations.app.context %>/" />
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -37,10 +38,10 @@
   <div id="react-root">
     <div class="apim-dual-ring"></div>
   </div>
-  <script type="text/javascript" src="/devportal/site/public/theme/defaultTheme.js"></script>
-  <script src="/devportal/site/public/fonts/iconfont/MaterialIcons.js"></script>
-  <script src="/devportal/site/public/dist/index.bundle.js"></script>
-  <link rel="stylesheet" href="/devportal/site/public/fonts/iconfont/material-icons.css">
+  <script type="text/javascript" src="<%= defaultTheme.Configurations.app.context %>/site/public/theme/defaultTheme.js"></script>
+  <script src="<%= defaultTheme.Configurations.app.context %>/site/public/fonts/iconfont/MaterialIcons.js"></script>
+  <script src="<%= defaultTheme.Configurations.app.context %>/site/public/dist/index.bundle.js"></script>
+  <link rel="stylesheet" href="<%= defaultTheme.Configurations.app.context %>/site/public/fonts/iconfont/material-icons.css">
 </body>
 
 </html>
