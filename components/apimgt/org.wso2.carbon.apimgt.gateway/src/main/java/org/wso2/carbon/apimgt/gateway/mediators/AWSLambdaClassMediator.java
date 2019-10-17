@@ -37,17 +37,17 @@ public class AWSLambdaClassMediator extends AbstractMediator {
      * @return true
      */
     public boolean mediate(MessageContext messageContext) {
-        // convert XML payload to JSON payload
-        String JSONPayload = XML.toJSONObject(messageContext.getEnvelope().getBody().toString()).getJSONObject("soapenv:Body").getJSONObject("jsonObject").toString();
-
-        // get response from Lambda
-        ByteBuffer response = invokeLambda(JSONPayload);
-
-        // byte buffer to string conversion
-        String strResponse = new String(response.array(), Charset.forName("UTF-8"));
-
-        // set response to messageContext
         try {
+            // convert XML payload to JSON payload
+            String JSONPayload = XML.toJSONObject(messageContext.getEnvelope().getBody().toString()).getJSONObject("soapenv:Body").getJSONObject("jsonObject").toString();
+
+            // get response from Lambda
+            ByteBuffer response = invokeLambda(JSONPayload);
+
+            // byte buffer to string conversion
+            String strResponse = new String(response.array(), Charset.forName("UTF-8"));
+
+            // set response to messageContext
             JsonUtil.getNewJsonPayload(((Axis2MessageContext) messageContext).getAxis2MessageContext(), strResponse, true, true);
         } catch (AxisFault axisFault) {
             axisFault.printStackTrace();
