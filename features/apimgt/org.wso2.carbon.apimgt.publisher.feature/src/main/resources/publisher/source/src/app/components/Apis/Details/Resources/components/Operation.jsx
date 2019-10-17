@@ -35,7 +35,6 @@ import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
 // splitted operation components
 
-import { isRestricted } from 'AppData/AuthManager';
 import DescriptionAndSummary from './operationComponents/DescriptionAndSummary';
 import OperationGovernance from './operationComponents/OperationGovernance';
 import Parameters from './operationComponents/Parameters';
@@ -171,7 +170,11 @@ function Operation(props) {
                         </Grid>
                         {!(disableDelete || markAsDelete) && (
                             <Grid item md={1}>
-                                <IconButton onClick={toggleDelete} aria-label='delete'>
+                                <IconButton
+                                    disabled={disableUpdate}
+                                    onClick={toggleDelete}
+                                    aria-label='delete'
+                                >
                                     <DeleteIcon fontSize='small' />
                                 </IconButton>
                             </Grid>
@@ -184,7 +187,7 @@ function Operation(props) {
                         <DescriptionAndSummary
                             operation={operation}
                             operationsDispatcher={operationsDispatcher}
-                            disableUpdate={isRestricted(['apim:api_create'], api)}
+                            disableUpdate={disableUpdate}
                             target={target}
                             verb={verb}
                         />

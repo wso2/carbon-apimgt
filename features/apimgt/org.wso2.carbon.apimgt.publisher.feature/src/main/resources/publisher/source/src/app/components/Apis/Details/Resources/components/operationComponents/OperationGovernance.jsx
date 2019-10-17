@@ -175,6 +175,7 @@ export default function OperationGovernance(props) {
                 </TextField>
                 <Tooltip title='Remove scope'>
                     <IconButton
+                        disabled={disableUpdate}
                         onClick={() => operationsDispatcher({ action: 'scopes', data: { target, verb, value: [] } })}
                         aria-label='delete'
                     >

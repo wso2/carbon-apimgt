@@ -25,6 +25,8 @@ import isEmpty from 'lodash.isempty';
 import IconButton from '@material-ui/core/IconButton';
 import ClearAllIcon from '@material-ui/icons/ClearAll';
 import Tooltip from '@material-ui/core/Tooltip';
+import { isRestricted } from 'AppData/AuthManager';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 /**
  *
@@ -34,6 +36,7 @@ import Tooltip from '@material-ui/core/Tooltip';
  */
 export default function OperationsSelector(props) {
     const { selectedOperations, setSelectedOperation, operations } = props;
+    const [apiFromContext] = useAPI();
 
     // TODO: Following logic introduce a limitation in showing `indeterminate` icon state if user
     // select all -> unchecked one operation -> recheck same operation again ~tmkb
@@ -53,7 +56,12 @@ export default function OperationsSelector(props) {
                 <Box mr={17.25}>
                     <Tooltip title={isIndeterminate ? 'Clear selections' : 'Mark all for delete'}>
                         <div>
-                            <IconButton onClick={handleSelector} aria-label='delete all' size='large'>
+                            <IconButton
+                                disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                                onClick={handleSelector}
+                                aria-label='delete all'
+                                size='large'
+                            >
                                 {isIndeterminate ? <ClearAllIcon /> : <DeleteSweepIcon />}
                             </IconButton>
                         </div>

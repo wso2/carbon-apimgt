@@ -339,7 +339,7 @@ export default function Resources(props) {
                                                     markAsDelete={Boolean(markedOperations[target]
                                                         && markedOperations[target][verb])}
                                                     onMarkAsDelete={onMarkAsDelete}
-                                                    disableUpdate={disableUpdate}
+                                                    disableUpdate={isRestricted(['apim:api_create'], api)}
                                                     disableMultiSelect={disableMultiSelect}
                                                     {...operationProps}
                                                 />
