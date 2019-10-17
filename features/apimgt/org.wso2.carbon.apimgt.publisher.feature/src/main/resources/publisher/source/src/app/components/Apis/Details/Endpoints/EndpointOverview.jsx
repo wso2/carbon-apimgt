@@ -178,6 +178,12 @@ function EndpointOverview(props) {
         }
     };
 
+    /**
+     * Method to get the supported endpoint types by api type.
+     *
+     * @param {Object} apiObject  The representative type of the endpoint.
+     * @return {string} The supported endpoint types.
+     * */
     const getSupportedType = (apiObject) => {
         const { type } = apiObject;
         let supportedEndpointTypes = [];
