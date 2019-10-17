@@ -385,10 +385,10 @@ class Details extends React.Component {
                     {!api.advertiseInfo.advertised && (
                         <React.Fragment>
                             { user &&
-                            <div>
+                            <React.Fragment>
                                 <LeftMenuItem text='credentials' route='credentials' to={pathPrefix + 'credentials'} />
                                 <LeftMenuItem text='comments' route='comments' to={pathPrefix + 'comments'} />
-                            </div>}
+                            </React.Fragment>}
                             {api.type !== 'WS' && <LeftMenuItem text='test' route='test' to={pathPrefix + 'test'} />}
                         </React.Fragment>
                     )}
