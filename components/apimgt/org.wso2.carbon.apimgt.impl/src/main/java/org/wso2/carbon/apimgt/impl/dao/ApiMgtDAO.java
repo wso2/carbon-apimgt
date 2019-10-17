@@ -7476,15 +7476,15 @@ public class ApiMgtDAO {
     }
 
     private Optional<APIProductIdentifier> getProductIdIfExists(ResultSet rs) throws SQLException {
-        String productProvider = rs.getString("API_TYPE");
+        String type = rs.getString("API_TYPE");
 
-        if (rs.wasNull() || StringUtils.isEmpty(productProvider)) {
+        if (rs.wasNull() || StringUtils.isEmpty(type)) {
             return Optional.empty();
         }
 
         String productName = rs.getString("API_NAME");
         String productVersion = rs.getString("API_VERSION");
-
+        String productProvider = rs.getString("API_PROVIDER");
         APIProductIdentifier productIdentifier = new APIProductIdentifier
                 (productProvider, productName, productVersion);
 
