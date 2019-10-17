@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.indexing.indexer;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -92,8 +93,18 @@ public class DocumentIndexer extends RXTIndexer {
         if (documentResource != null) {
             try {
                 fetchRequiredDetailsFromAssociatedAPI(registry, documentResource, fields);
-                String content = fetchDocumentContent(registry, documentResource);
-                newIndexDocument = new IndexDocument(fileData.path, "", content, indexDocument.getTenantId());
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append(fetchDocumentContent(registry, documentResource));
+                if (fields.get(APIConstants.DOC_NAME) != null) {
+                    stringBuilder.append(APIConstants.DOC_NAME + "=" + StringUtils
+                            .join(fields.get(APIConstants.DOC_NAME), ","));
+                }
+                if (fields.get(APIConstants.DOC_SUMMARY) != null) {
+                    stringBuilder.append(APIConstants.DOC_SUMMARY + "=" + StringUtils
+                            .join(fields.get(APIConstants.DOC_SUMMARY), ","));
+                }
+                newIndexDocument =
+                        new IndexDocument(fileData.path, "", stringBuilder.toString(), indexDocument.getTenantId());
                 fields.put(APIConstants.DOCUMENT_INDEXER_INDICATOR, Arrays.asList("true"));
                 newIndexDocument.setFields(fields);
             } catch (APIManagementException e) {
