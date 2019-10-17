@@ -22,6 +22,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import EditRounded from '@material-ui/icons/EditRounded';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
+import SwapHorizontalCircle from '@material-ui/icons/SwapHorizontalCircle';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
@@ -379,11 +380,12 @@ class APIDefinition extends React.Component {
                         }
                     </div>
                     {isGraphQL === 0 && (
-                        <div className={classes.converterWrapper}>
-                            <Button size='small' className={classes.button} onClick={this.onChangeFormatClick}>
+                        <div className={classes.titleWrapper}>
+                            <Button size='small' className={classes.button} onClick={this.onChangeFormatClick} >
+                                <SwapHorizontalCircle className={classes.buttonIcon} />
                                 <FormattedMessage
                                     id='Apis.Details.APIDefinition.APIDefinition.convert.to'
-                                    defaultMessage='Convert to:'
+                                    defaultMessage='Convert to '
                                 />
                                 {convertTo}
                             </Button>
