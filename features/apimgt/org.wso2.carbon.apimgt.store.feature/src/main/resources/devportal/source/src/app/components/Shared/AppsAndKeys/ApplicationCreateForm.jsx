@@ -141,6 +141,7 @@ const ApplicationCreate = (props) => {
                 })}
                 onBlur={e => validateName(e.target.value)}
                 error={!isNameValid}
+                inputProps={{ maxLength: 70 }}
             />
             <TextField
                 classes={{
