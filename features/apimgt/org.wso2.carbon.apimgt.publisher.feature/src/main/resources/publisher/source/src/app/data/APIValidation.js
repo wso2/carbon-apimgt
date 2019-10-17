@@ -121,7 +121,7 @@ const documentSchema = Joi.extend(joi => ({
 }));
 
 const definition = {
-    apiName: Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/).required()
+    apiName: Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/).required()
         .error((errors) => {
             return errors.map(error => ({ ...error, message: 'Name ' + getMessage(error.type) }));
         }),
@@ -134,7 +134,7 @@ const definition = {
         });
         return tmpErrors;
     }),
-    apiContext: Joi.string().max(60).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$]+$/).required()
+    apiContext: Joi.string().max(60).regex(/(?!.*\/t\/.*|.*\/t$)^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/).required()
         .error((errors) => {
             return errors.map(error => ({ ...error, message: 'Context ' + getMessage(error.type) }));
         }),
