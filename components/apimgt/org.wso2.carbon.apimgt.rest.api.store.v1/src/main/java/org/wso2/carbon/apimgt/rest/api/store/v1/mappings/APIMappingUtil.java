@@ -853,7 +853,7 @@ public class APIMappingUtil {
      * @param subscriptionAllowedTenants Subscription allowed tenants
      * @return subscriptionAllowed
      */
-    public static boolean isSubscriptionAvailable(String apiTenant, String subscriptionAvailability,
+    private static boolean isSubscriptionAvailable(String apiTenant, String subscriptionAvailability,
                                                   String subscriptionAllowedTenants) {
 
         String userDomain = RestApiUtil.getLoggedInUserTenantDomain();
