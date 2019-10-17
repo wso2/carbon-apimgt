@@ -20,15 +20,16 @@ import React, { useContext, useState, useEffect } from 'react';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import { isRestricted } from 'AppData/AuthManager';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 
 import 'react-tagsinput/react-tagsinput.css';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage, useIntl, defineMessages } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { Link } from 'react-router-dom';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -54,15 +55,6 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-const StyledTableCell = withStyles(() => ({
-    head: {
-        fontSize: 13,
-    },
-    body: {
-        fontSize: 14,
-    },
-}))(TableCell);
-
 /**
  * Renders an External Store list
  * @class ExternalStores
@@ -77,18 +69,25 @@ export default function ExternalStores() {
     const classes = useStyles();
     const intl = useIntl();
     if (!settings.externalStoresEnabled) {
-        return (
-            <div className='message message-warning'>
-                <h4>
-                    <FormattedMessage
-                        id='Apis.Details.ExternalStores.ExternalStores.external.stores.not.found.for.api'
-                        defaultMessage='External Developer Portals not found for api: '
-                    />
-                    <span style={{ color: 'green' }}> {api.id} </span>
-                </h4>
-            </div>
-        );
+        const resourceNotFoundMessageText = defineMessages({
+            titleMessage: {
+                id: 'Apis.Details.ExternalStores.ExternalStores.external.stores.not.found.title',
+                defaultMessage: 'External Developert Portals Not Found for API : {apiUUID}',
+            },
+            bodyMessage: {
+                id: 'Apis.Details.ExternalStores.ExternalStores.external.stores.not.found.body',
+                defaultMessage: 'No External Developer Portals configured for current tenant',
+            },
+        });
+        const resourceNotFountMessage = {
+            title: intl.formatMessage(resourceNotFoundMessageText.titleMessage, {
+                apiUUID: `${api.id}`,
+            }),
+            body: intl.formatMessage(resourceNotFoundMessageText.bodyMessage),
+        };
+        return <ResourceNotFound message={resourceNotFountMessage} />;
     }
+
     /**
      * Gets published external stores
      */
@@ -125,7 +124,7 @@ export default function ExternalStores() {
                 const successfulStores = response.body.list.map(store => store.id);
                 Alert.success(intl.formatMessage({
                     id: 'Apis.Details.ExternalStores.ExternalStores.successfully.published.to.external.stores',
-                    defaultMessage: 'Successfully Published to external developer portals: ',
+                    defaultMessage: 'Successfully Published to external developer portals: {successfulStores}',
                 }, { successfulStores }));
             })
             .catch((error) => {
@@ -155,20 +154,41 @@ export default function ExternalStores() {
                     <Table className={classes.table}>
                         <TableHead>
                             <TableRow>
-                                <StyledTableCell />
-                                <StyledTableCell>Name</StyledTableCell>
-                                <StyledTableCell>Type</StyledTableCell>
-                                <StyledTableCell>Endpoint</StyledTableCell>
+                                <TableCell />
+                                <TableCell>
+                                    <Typography>
+                                        <FormattedMessage
+                                            id='Apis.Details.ExternalStores.ExternalStores.name'
+                                            defaultMessage='Name'
+                                        />
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography>
+                                        <FormattedMessage
+                                            id='Apis.Details.ExternalStores.ExternalStores.type'
+                                            defaultMessage='Type'
+                                        />
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography>
+                                        <FormattedMessage
+                                            id='Apis.Details.ExternalStores.ExternalStores.endpoint'
+                                            defaultMessage='Endpoint'
+                                        />
+                                    </Typography>
+                                </TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {allExternalStores.map(row => (
                                 <TableRow key={row.id}>
-                                    <StyledTableCell padding='checkbox'>
+                                    <TableCell padding='checkbox'>
                                         <Checkbox
                                             checked={publishedExternalStores.includes(row.id)}
                                             disabled={api.lifeCycleStatus !== 'PUBLISHED'
-                                            || isRestricted(['apim:api_publish'], api)}
+                                                || isRestricted(['apim:api_publish'], api)}
                                             onChange={
                                                 (event) => {
                                                     const { checked, name } = event.target;
@@ -186,20 +206,23 @@ export default function ExternalStores() {
                                             name={row.id}
                                             color='primary'
                                         />
-                                    </StyledTableCell>
-                                    <StyledTableCell component='th' scope='row'>
-                                        {row.displayName}
-                                    </StyledTableCell>
-                                    <StyledTableCell>{row.type}</StyledTableCell>
-                                    <StyledTableCell>
+                                    </TableCell>
+                                    <TableCell component='th' scope='row'>
+                                        <Typography> {row.displayName} </Typography>
+                                    </TableCell>
+                                    <TableCell> <Typography>{row.type}</Typography></TableCell>
+                                    <TableCell>
                                         <a
                                             target='_blank'
                                             rel='noopener noreferrer'
                                             href={row.endpoint}
                                             className={classes.viewInExStoreLink}
-                                        >{row.endpoint}
+                                        >
+                                            <Typography>
+                                                {row.endpoint}
+                                            </Typography>
                                         </a>
-                                    </StyledTableCell>
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -246,7 +269,7 @@ export default function ExternalStores() {
                                         <FormattedMessage
                                             id='Apis.Details.ExternalStores.ExternalStores.update.not.allowed'
                                             defaultMessage={'* You are not authorized to publish the API' +
-                                            ' to external developer portals due to insufficient permissions'}
+                                                ' to external developer portals due to insufficient permissions'}
                                         />
                                     </Typography>
                                 </Grid>
