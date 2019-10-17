@@ -80,7 +80,7 @@ const styles = theme => ({
     InfoToolTip: {
         backgroundColor: '#f5f5f9',
         color: 'rgba(0,0,0,0.87)',
-        maxWidth: 249,
+        maxWidth: 350,
         fontSize: theme.typography.pxToRem(14),
         fontWeight: '400',
         border: '1px solid #dadde9',
@@ -254,7 +254,7 @@ class HeaderSearch extends React.Component {
                         classes,
                         placeholder: intl.formatMessage({
                             id: 'Base.Header.headersearch.HeaderSearch.search_api.tooltip',
-                            defaultMessage: 'Search APIs',
+                            defaultMessage: 'Search',
                         }),
                         value: searchText,
                         onChange: this.handleChange,
@@ -273,67 +273,67 @@ class HeaderSearch extends React.Component {
                         <React.Fragment>
                             <FormattedMessage
                                 id='Base.Header.headersearch.HeaderSearch.tooltip.title'
-                                defaultMessage='Search Options'
+                                defaultMessage='Search Options for APIs and APIProducts'
                             />
-                            <ol style={{ marginLeft: '-20px', marginTop: '5px' }}>
-                                <li>
+                            <ol style={{ marginLeft: '-20px', marginTop: '8px' }}>
+                                <li style={{ marginTop: '5px' }}>
                                     <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option1'
-                                        defaultMessage='By API Name [Default]'
+                                        defaultMessage='Name [Default]'
                                     />
                                 </li>
-                                <li>
+                                <li style={{ marginTop: '5px' }}>
                                     <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option2'
-                                        defaultMessage='By API Provider [ Syntax - provider:xxxx ]'
+                                        defaultMessage='Provider [ Syntax - provider:xxxx ]'
                                     />
                                 </li>
-                                <li>
+                                <li style={{ marginTop: '5px' }}>
                                     <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option3'
-                                        defaultMessage='By API Version [ Syntax - version:xxxx ]'
+                                        defaultMessage='Version [ Syntax - version:xxxx ]'
                                     />
                                 </li>
-                                <li>
+                                <li style={{ marginTop: '5px' }}>
                                     <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option4'
-                                        defaultMessage='By Context [ Syntax - context:xxxx ]'
+                                        defaultMessage='Context [ Syntax - context:xxxx ]'
                                     />
                                 </li>
-                                <li>
+                                <li style={{ marginTop: '5px' }}>
                                     <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option5'
-                                        defaultMessage='By Status [ Syntax - status:xxxx ]'
+                                        defaultMessage='Status [ Syntax - status:xxxx ]'
                                     />
                                 </li>
-                                <li>
+                                <li style={{ marginTop: '5px' }}>
                                     <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option6'
-                                        defaultMessage='By Description [ Syntax - description:xxxx ]'
+                                        defaultMessage='Description [ Syntax - description:xxxx ]'
                                     />
                                 </li>
-                                <li>
+                                <li style={{ marginTop: '5px' }}>
                                     <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option7'
-                                        defaultMessage='By Sub-Context [ Syntax - subcontext:xxxx ]'
+                                        defaultMessage='Sub-Context [ Syntax - subcontext:xxxx ]'
                                     />
                                 </li>
-                                <li>
+                                <li style={{ marginTop: '5px' }}>
                                     <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option8'
-                                        defaultMessage='By Documentation Content [ Syntax - doc:xxxx ]'
+                                        defaultMessage='Documentation Content [ Syntax - doc:xxxx ]'
                                     />
                                 </li>
-                                <li>
+                                <li style={{ marginTop: '5px' }}>
                                     <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option9'
-                                        defaultMessage='By Microgateway Label [ Syntax - label:xxxx ]'
+                                        defaultMessage='Microgateway Label [ Syntax - label:xxxx ]'
                                     />
                                 </li>
-                                <li>
+                                <li style={{ marginTop: '5px' }}>
                                     <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option10'
-                                        defaultMessage='By API Properties [Syntax - property_name:property_value]'
+                                        defaultMessage='Properties [Syntax - property_name:property_value]'
                                     />
                                 </li>
                             </ol>
