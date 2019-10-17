@@ -18,12 +18,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import { CircularProgress, Typography, Grid } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import withStyles from '@material-ui/core/styles/withStyles';
 import API from 'AppData/api';
 import CONSTS from 'AppData/Constants';
 import { FormattedMessage } from 'react-intl';
-import Typography from '@material-ui/core/Typography';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import SubscriptionsTable from './SubscriptionsTable';
 import SubscriptionPoliciesManage from './SubscriptionPoliciesManage';
@@ -52,22 +52,28 @@ function Subscriptions(props) {
     const classes = useStyles();
     const { api, updateAPI } = props;
     const restApi = new API();
-    const [tenants, setTenants] = useState([]);
-    const [subscriptions, setSubsriptions] = useState([]);
+    const [tenants, setTenants] = useState(null);
+    const [subscriptions, setSubscriptions] = useState(null);
     useEffect(() => {
         restApi.getTenantsByState(CONSTS.TENANT_STATE_ACTIVE)
             .then((result) => {
                 setTenants(result.body.count);
             });
-    }, []);
-
-    useEffect(() => {
         restApi.subscriptions(api.id)
             .then((result) => {
-                setSubsriptions(result.body.count);
+                setSubscriptions(result.body.count);
             });
     }, []);
 
+    if (typeof tenants !== 'number' || typeof subscriptions !== 'number') {
+        return (
+            <Grid container direction='row' justify='center' alignItems='center'>
+                <Grid item>
+                    <CircularProgress />
+                </Grid>
+            </Grid>
+        );
+    }
     return (
         <React.Fragment>
             <SubscriptionPoliciesManage api={api} updateAPI={updateAPI} />
