@@ -18,7 +18,7 @@
  */
 
     var log = new Log("Services login DCR request");
-    var site = require("/site/public/theme/defaultTheme.js").Configurations.app;
+    var site = require("/site/public/theme/settings.js").Settings.app;
     include("/services/constants.jag");
 
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;

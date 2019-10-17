@@ -1,7 +1,6 @@
-const APP_CONTEXT = '/devportal';
 const Settings = {
     app: {
-        context: APP_CONTEXT,
+        context: '/devportal',
     },
     grantTypes: {
         authorization_code: 'Code',
