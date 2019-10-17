@@ -89,7 +89,7 @@ const LoadableSwitch = withRouter(Loadable.Map({
 
         return (
             <Switch>
-                <Redirect exact from='/apis/:apiUuid' to={redirectURL} />
+                <Redirect exact from={`/apis/${apiUuid}`} to={redirectURL} />
                 <Route path='/apis/:apiUuid/overview' render={() => <Overview {...props} />} />
                 <Route path='/apis/:apiUuid/documents' component={Documentation} />
                 <Route
