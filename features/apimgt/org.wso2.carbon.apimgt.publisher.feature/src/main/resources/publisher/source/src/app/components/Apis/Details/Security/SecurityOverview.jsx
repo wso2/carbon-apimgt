@@ -51,7 +51,6 @@ const styles = theme => ({
     },
     button: {
         marginLeft: theme.spacing.unit * 2,
-        textTransform: theme.custom.leftMenuTextStyle,
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
     buttonIcon: {
