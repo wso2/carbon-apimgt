@@ -213,7 +213,7 @@ class TokenManager extends React.Component {
                     updateSubscriptionData();
                 }
                 const newKeys = new Map([...keys]);
-                // in case token hashing is enabled, isKeyJWT is set to true even if the token tyoe is JWT.
+                // in case token hashing is enabled, isKeyJWT is set to true even if the token type is JWT.
                 // This is to mimic the behavior of JWT tokens (by showing the token in a dialog)
                 const isKeyJWT = (tokenType === 'JWT') || hashEnabled;
                 newKeys.set(keyType, response);
