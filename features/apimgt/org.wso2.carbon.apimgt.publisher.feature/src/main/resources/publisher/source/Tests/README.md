@@ -25,7 +25,7 @@ Go to the above location and run
 ```
 npm test
 ```
-for more information read the integration test [README.md]() file
+for more information read the integration test [README.md](https://github.com/wso2/product-apim/blob/master/modules/integration/tests-integration/tests-backend/src/test/resources/jest-integration-tests/README.md) file
 
 
 ## Code coverage
