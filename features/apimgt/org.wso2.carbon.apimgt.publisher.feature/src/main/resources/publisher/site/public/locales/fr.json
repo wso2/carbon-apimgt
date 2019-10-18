@@ -612,6 +612,8 @@
   "Apis.Details.Resources.Resources.something.went.wrong.while.updating.the.api": "",
   "Apis.Details.Resources.components.AddOperation.add.tooltip": "",
   "Apis.Details.Resources.components.AddOperation.clear.inputs.tooltip": "",
+  "Apis.Details.Resources.components.AddParameter.add.tooltip": "",
+  "Apis.Details.Resources.components.AddParameter.clear.inputs.tooltip": "",
   "Apis.Details.Scopes.CreateScope.cancel": "",
   "Apis.Details.Scopes.CreateScope.create.new.scope": "",
   "Apis.Details.Scopes.CreateScope.roles.help": "",
