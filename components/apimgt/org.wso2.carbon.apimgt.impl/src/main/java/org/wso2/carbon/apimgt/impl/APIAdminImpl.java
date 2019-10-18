@@ -26,9 +26,11 @@ import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.text.SimpleDateFormat;
 import java.sql.SQLException;
@@ -74,7 +76,10 @@ public class APIAdminImpl implements APIAdmin {
      * @param labelId Label identifier
      * @throws APIManagementException If failed to delete label
      */
-    public void deleteLabel(String labelId) throws APIManagementException{
+    public void deleteLabel(String user, String labelId) throws APIManagementException {
+        if (isAttachedLabel(user, labelId)) {
+            APIUtil.handleException("Unable to delete label. Label is already attached to a API");
+        }
         apiMgtDAO.deleteLabel(labelId);
     }
 
@@ -100,6 +105,33 @@ public class APIAdminImpl implements APIAdmin {
             for (Label labels : ExistingLables) {
                 if (labels.getName().equalsIgnoreCase(label.getName())) {
                     return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isAttachedLabel(String user, String labelId) throws APIManagementException {
+        APIProviderImpl apiProvider = new APIProviderImpl(user);
+        List<API> apiList = apiProvider.getAllAPIs();
+        List<Label> allLabelsWithID = getAllLabels(MultitenantUtils.getTenantDomain(user));
+        String labelName = null;
+        for (Label label : allLabelsWithID) {
+            if (labelId.equalsIgnoreCase(label.getLabelId())) {
+                labelName = label.getName();
+                break;
+            }
+        }
+        if (labelName != null && !labelName.isEmpty()) {
+            UserAwareAPIProvider userAwareAPIProvider = new UserAwareAPIProvider(user);
+            for (API api : apiList) {
+                String uuid = api.getUUID();
+                API lightweightAPIByUUID = userAwareAPIProvider.getLightweightAPIByUUID(uuid, apiProvider.tenantDomain);
+                List<Label> attachedLabelsWithoutID = lightweightAPIByUUID.getGatewayLabels();
+                for (Label labelWithoutId : attachedLabelsWithoutID) {
+                    if (labelName.equalsIgnoreCase(labelWithoutId.getName())) {
+                        return true;
+                    }
                 }
             }
         }

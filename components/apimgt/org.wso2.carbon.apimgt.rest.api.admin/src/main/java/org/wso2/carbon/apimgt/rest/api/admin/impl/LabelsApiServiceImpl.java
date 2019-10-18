@@ -53,7 +53,8 @@ public class LabelsApiServiceImpl extends LabelsApiService {
     public Response labelsLabelIdDelete(String labelId, String ifMatch, String ifUnmodifiedSince) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            apiAdmin.deleteLabel(labelId);
+            String user = RestApiUtil.getLoggedInUsername();
+            apiAdmin.deleteLabel(user, labelId);
             return Response.ok().build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting API : " + labelId;

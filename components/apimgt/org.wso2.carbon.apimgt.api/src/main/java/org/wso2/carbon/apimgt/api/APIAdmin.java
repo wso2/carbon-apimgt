@@ -51,7 +51,7 @@ public interface APIAdmin  {
      * @param labelID  Label identifier
      * @throws APIManagementException If failed to delete label
      */
-    void deleteLabel(String labelID) throws APIManagementException;
+    void deleteLabel(String user, String labelID) throws APIManagementException;
 
     /**
      * Updates the details of the given Label.
