@@ -58,7 +58,6 @@ function GenericEndpointAdd(props) {
         addEndpoint,
     } = props;
     const [serviceUrl, setServiceUrl] = useState('');
-    const [isError, setError] = useState(false);
     const { api } = useContext(APIContext);
 
     /**
@@ -80,12 +79,9 @@ function GenericEndpointAdd(props) {
                 className={classes.textField}
                 value={serviceUrl}
                 onChange={event => setServiceUrl(event.target.value)}
-                onBlur={event => setError(event.target.value === '')}
                 variant='outlined'
                 margin='normal'
-                placeholder='Add new endpoint'
-                error={isError}
-                required
+                placeholder='Enter the Endpoint URL and press + button'
                 InputProps={{
                     endAdornment: (
                         <InputAdornment position='end'>

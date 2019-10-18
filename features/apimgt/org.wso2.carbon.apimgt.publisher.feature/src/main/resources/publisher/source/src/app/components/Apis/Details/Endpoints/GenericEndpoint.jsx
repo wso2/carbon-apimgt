@@ -23,6 +23,7 @@ import {
     TextField,
     withStyles,
 } from '@material-ui/core';
+import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { isRestricted } from 'AppData/AuthManager';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
@@ -87,6 +88,12 @@ function GenericEndpoint(props) {
                 placeholder={!serviceUrl ? 'http://appserver/resource' : ''}
                 onChange={event => setServiceUrl(event.target.value)}
                 onBlur={() => editEndpoint(index, category, serviceUrl)}
+                error={!serviceUrl}
+                helperText={!serviceUrl ?
+                    <FormattedMessage
+                        id='Apis.Details.Endpoints.GenericEndpoint.no.ep.error'
+                        defaultMessage='Endpoint URL should not be empty'
+                    /> : ''}
                 variant='outlined'
                 margin='normal'
                 required
