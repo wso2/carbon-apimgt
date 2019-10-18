@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -119,6 +120,10 @@ public class SearchApiServiceImpl implements SearchApiService {
                             SearchResultMappingUtil.fromDocumentationToDocumentResultDTO((Documentation) pair.getKey(),
                                     (API) pair.getValue());
                     allmatchedResults.add(docResult);
+                } else if (searchResult instanceof APIProduct) {
+                    APIProduct apiProduct = (APIProduct) searchResult;
+                    SearchResultDTO apiResult = SearchResultMappingUtil.fromAPIToAPIResultDTO(apiProduct);
+                    allmatchedResults.add(apiResult);
                 }
             }
 
