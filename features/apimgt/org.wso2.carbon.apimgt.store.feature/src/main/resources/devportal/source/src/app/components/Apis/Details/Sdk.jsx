@@ -259,7 +259,7 @@ class Sdk extends React.Component {
                     <Typography variant='h5' component='h3'>
                         <FormattedMessage
                             id='Apis.Details.Sdk.no.sdks'
-                            defaultMessage='No SDKs Yet'
+                            defaultMessage='No SDKs'
                         />
                     </Typography>
                     <Typography component='p'>
