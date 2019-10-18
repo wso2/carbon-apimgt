@@ -604,6 +604,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             SwaggerData swaggerData = new SwaggerData(product);
             String apiDefinition = parser.generateAPIDefinition(swaggerData);
             apiProvider.saveSwaggerDefinition(product, apiDefinition);
+            //preserve monetization status in the update flow
+            apiProvider.configureMonetizationInAPIProductArtifact(product);
             apiProvider.updateAPIProduct(product);
 
             APIProduct updatedProduct = apiProvider.getAPIProduct(productIdentifier);
