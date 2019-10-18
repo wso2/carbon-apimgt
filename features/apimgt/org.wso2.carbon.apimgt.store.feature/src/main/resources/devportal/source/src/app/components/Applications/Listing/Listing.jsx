@@ -98,13 +98,22 @@ const styles = theme => ({
         paddingLeft: theme.spacing(2),
     },
     appContent: {
-        paddingTop: theme.spacing(4),
+        marginTop: theme.spacing(2),
         maxWidth: '95%',
         margin: 'auto',
+        maxHeight: theme.spacing(90),
+        height: theme.spacing(90),
+        overflow: 'scroll',
     },
     dialogContainer: {
         width: 1000,
         padding: theme.spacing(2),
+    },
+    fullHeight: {
+        height: '100%',
+    },
+    container: {
+        height: '100%',
     },
 });
 
@@ -131,6 +140,7 @@ class Listing extends Component {
             open: false,
             isApplicationSharingEnabled: true,
             isDeleteOpen: false,
+            totalApps: 0,
         };
         this.handleAppDelete = this.handleAppDelete.bind(this);
     }
@@ -156,17 +166,21 @@ class Listing extends Component {
     /**
      * @memberof Listing
      */
-    updateApps= () => {
-        const promisedApplications = Application.all();
+    updateApps = () => {
+        const {
+            page, rowsPerPage, order, orderBy,
+        } = this.state;
+        const promisedApplications = Application.all(rowsPerPage, page * rowsPerPage, order, orderBy);
         promisedApplications
             .then((applications) => {
+                const { pagination: { total } } = applications;
                 // Applications list put into map, to make it efficient when deleting apps (referring back to an App)
                 const apps = new Map();
                 applications.list.map(app => apps.set(app.applicationId, app)); // Store application against its UUID
-                this.setState({ data: apps });
+                this.setState({ data: apps, totalApps: total });
             })
             .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') console.log(error);
+                console.log(error);
                 const { status } = error;
                 if (status === 404) {
                     // eslint-disable-next-line react/no-unused-state
@@ -175,7 +189,7 @@ class Listing extends Component {
                     window.location = '/devportal/services/configs';
                 }
             });
-    };
+    }
 
     /**
      * @param{*} event event
@@ -184,12 +198,13 @@ class Listing extends Component {
     handleRequestSort = (event, property) => {
         const { orderBy, order } = this.state;
         let currentOrder = 'desc';
-        if (orderBy === property && order === 'desc') {
-            currentOrder = 'asc';
+        if (orderBy === property) {
+            currentOrder = order === 'desc' ? 'asc' : 'desc';
+            this.setState({ order: currentOrder }, this.updateApps);
+        } else {
+            this.setState({ order: currentOrder, orderBy: property }, this.updateApps);
         }
-        this.setState({ order: currentOrder, orderBy });
     };
-
 
     /**
      *
@@ -198,8 +213,8 @@ class Listing extends Component {
      * @memberof Listing
      */
     handleChangePage = (event, page) => {
-        this.setState({ page });
-    };
+        this.setState({ page }, this.updateApps);
+    }
 
     /**
      *
@@ -207,7 +222,7 @@ class Listing extends Component {
      * @memberof Listing
      */
     handleChangeRowsPerPage = (event) => {
-        this.setState({ rowsPerPage: event.target.value });
+        this.setState({ rowsPerPage: event.target.value }, this.updateApps);
     };
 
     /**
@@ -273,7 +288,7 @@ class Listing extends Component {
     render() {
         const {
             data, order, orderBy, rowsPerPage, page, open, isApplicationSharingEnabled,
-            isDeleteOpen,
+            isDeleteOpen, totalApps,
         } = this.state;
         if (!data) {
             return <Loading />;
@@ -340,12 +355,12 @@ class Listing extends Component {
                         </Typography>
                     </Box>
                 </div>
-                <Grid container spacing={0} justify='center'>
+                <Grid container spacing={0} justify='center' className={classes.container}>
                     <Grid item xs={12}>
                         {data.size > 0 ? (
                             <div className={classes.appContent}>
-                                <Paper>
-                                    <Table>
+                                <Paper className={data.size < 9 ? classes.fullHeight : ''}>
+                                    <Table className={classes.fullHeight}>
                                         <ApplicationTableHead
                                             order={order}
                                             orderBy={orderBy}
@@ -361,27 +376,27 @@ class Listing extends Component {
                                             isApplicationSharingEnabled={isApplicationSharingEnabled}
                                             toggleDeleteConfirmation={this.toggleDeleteConfirmation}
                                         />
+                                        <TableFooter>
+                                            <TableRow>
+                                                <TablePagination
+                                                    component='div'
+                                                    count={totalApps}
+                                                    rowsPerPage={rowsPerPage}
+                                                    rowsPerPageOptions={[5, 10, 15]}
+                                                    labelRowsPerPage='Show'
+                                                    page={page}
+                                                    backIconButtonProps={{
+                                                        'aria-label': 'Previous Page',
+                                                    }}
+                                                    nextIconButtonProps={{
+                                                        'aria-label': 'Next Page',
+                                                    }}
+                                                    onChangePage={this.handleChangePage}
+                                                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                                                />
+                                            </TableRow>
+                                        </TableFooter>
                                     </Table>
-                                    <TableFooter>
-                                        <TableRow>
-                                            <TablePagination
-                                                component='div'
-                                                count={data.size}
-                                                rowsPerPage={rowsPerPage}
-                                                rowsPerPageOptions={[5, 10, 15]}
-                                                labelRowsPerPage='Show'
-                                                page={page}
-                                                backIconButtonProps={{
-                                                    'aria-label': 'Previous Page',
-                                                }}
-                                                nextIconButtonProps={{
-                                                    'aria-label': 'Next Page',
-                                                }}
-                                                onChangePage={this.handleChangePage}
-                                                onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                                            />
-                                        </TableRow>
-                                    </TableFooter>
                                 </Paper>
                             </div>
                         ) : (
