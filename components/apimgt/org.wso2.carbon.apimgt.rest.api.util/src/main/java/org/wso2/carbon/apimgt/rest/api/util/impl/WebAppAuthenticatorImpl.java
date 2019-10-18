@@ -116,11 +116,6 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                 RealmService realmService = (RealmService) carbonContext.getOSGiService(RealmService.class, null);
                 try {
                     String username = tokenInfo.getEndUserName();
-                    if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                        if (username.endsWith(SUPER_TENANT_SUFFIX)) {
-                            username = username.substring(0, username.length() - SUPER_TENANT_SUFFIX.length());
-                        }
-                    }
                     tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
                     carbonContext.setTenantDomain(tenantDomain);
                     carbonContext.setTenantId(tenantId);
