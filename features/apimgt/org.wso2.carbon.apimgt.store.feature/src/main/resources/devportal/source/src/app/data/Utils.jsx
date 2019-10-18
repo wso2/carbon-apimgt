@@ -17,7 +17,7 @@
  */
 
 import Axios from "axios";
-import Configurations from 'Config';
+import Settings from 'Settings';
 import AuthManager from "./AuthManager";
 
 /**
@@ -179,19 +179,19 @@ class Utils {
     }
 
     static getDCRappInfoRequestURL(environment = Utils.getEnvironment()) {
-        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}${Configurations.app.context}`;
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}${Settings.app.context}`;
     }
 
     static getAppLogoutURL() {
-        return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGOUT + Configurations.app.context;
+        return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGOUT + Settings.app.context;
     }
 
     static getLoginTokenPath(environment = Utils.getEnvironment()) {
-        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Configurations.app.context}`;
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Settings.app.context}`;
     }
 
     static getSignUpTokenPath(environment) {
-        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_SIGN_UP_PATH}${Configurations.app.context}`;
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_SIGN_UP_PATH}${Settings.app.context}`;
     }
 
     static getSwaggerURL() {
