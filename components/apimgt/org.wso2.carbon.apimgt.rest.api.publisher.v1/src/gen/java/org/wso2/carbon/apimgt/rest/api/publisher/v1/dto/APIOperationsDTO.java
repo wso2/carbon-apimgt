@@ -22,7 +22,7 @@ public class APIOperationsDTO   {
     private String verb = null;
     private String authType = "Any";
     private String throttlingPolicy = null;
-    private String scope = null;
+    private List<String> scopes = new ArrayList<>();
     private List<String> usedProductIds = new ArrayList<>();
 
   /**
@@ -112,19 +112,19 @@ public class APIOperationsDTO   {
 
   /**
    **/
-  public APIOperationsDTO scope(String scope) {
-    this.scope = scope;
+  public APIOperationsDTO scopes(List<String> scopes) {
+    this.scopes = scopes;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("scope")
-  public String getScope() {
-    return scope;
+  @JsonProperty("scopes")
+  public List<String> getScopes() {
+    return scopes;
   }
-  public void setScope(String scope) {
-    this.scope = scope;
+  public void setScopes(List<String> scopes) {
+    this.scopes = scopes;
   }
 
   /**
@@ -159,13 +159,13 @@ public class APIOperationsDTO   {
         Objects.equals(verb, apIOperations.verb) &&
         Objects.equals(authType, apIOperations.authType) &&
         Objects.equals(throttlingPolicy, apIOperations.throttlingPolicy) &&
-        Objects.equals(scope, apIOperations.scope) &&
+        Objects.equals(scopes, apIOperations.scopes) &&
         Objects.equals(usedProductIds, apIOperations.usedProductIds);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, target, verb, authType, throttlingPolicy, scope, usedProductIds);
+    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds);
   }
 
   @Override
@@ -178,7 +178,7 @@ public class APIOperationsDTO   {
     sb.append("    verb: ").append(toIndentedString(verb)).append("\n");
     sb.append("    authType: ").append(toIndentedString(authType)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
-    sb.append("    scope: ").append(toIndentedString(scope)).append("\n");
+    sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    usedProductIds: ").append(toIndentedString(usedProductIds)).append("\n");
     sb.append("}");
     return sb.toString();

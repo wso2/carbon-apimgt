@@ -736,7 +736,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
     private void addAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping,
                                       APIProduct product, APIProvider apiProvider)
-            throws APIManagementException, FaultGatewaysException {
+            throws APIManagementException {
         APIDefinition parser = new OAS3Parser();
         SwaggerData swaggerData = new SwaggerData(product);
         String apiProductSwagger = parser.generateAPIDefinition(swaggerData);
@@ -745,8 +745,6 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
         apiProvider.saveSwagger20Definition(product.getId(), apiProductSwagger);
         product.setDefinition(apiProductSwagger);
-
-        apiProvider.updateLocalEntry(product);
     }
 
     private void updateAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping,

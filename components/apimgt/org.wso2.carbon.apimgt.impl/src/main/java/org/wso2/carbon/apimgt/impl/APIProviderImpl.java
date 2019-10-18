@@ -6775,6 +6775,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 continue;
             }
             if (api != null) {
+                api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
                 if (!apiToProductResourceMapping.containsKey(api)) {
                     apiToProductResourceMapping.put(api, new ArrayList<>());
                 }
@@ -6980,6 +6981,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else {
                 api = super.getAPIbyUUID(apiProductResource.getApiId(), tenantDomain);
             }
+
+            api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
 
             if (!apiToProductResourceMapping.containsKey(api)) {
                 apiToProductResourceMapping.put(api, new ArrayList<>());
