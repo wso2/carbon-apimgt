@@ -17,7 +17,7 @@
  */
 
 import React, { Component } from 'react';
-import Configurations from 'Config';
+import Settings from 'Settings';
 import { FormattedMessage } from 'react-intl';
 
 const messageStyles = {
@@ -65,15 +65,15 @@ const buttonStyleLogout = {
 };
 
 function onRetry() {
-    window.location = Configurations.app.context;
+    window.location = Settings.app.context;
 }
 
 function onLogout() {
-    window.location = Configurations.app.context + '/services/logout';
+    window.location = Settings.app.context + '/services/logout';
 }
 
 function onGoToAnonymousView() {
-    window.location = Configurations.app.context + '/services/auth/callback/logout';
+    window.location = Settings.app.context + '/services/auth/callback/logout';
 }
 
 class LoginDenied extends Component {

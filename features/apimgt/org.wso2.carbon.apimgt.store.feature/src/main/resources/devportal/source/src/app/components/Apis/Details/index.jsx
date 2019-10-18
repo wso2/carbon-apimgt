@@ -89,7 +89,7 @@ const LoadableSwitch = withRouter(Loadable.Map({
 
         return (
             <Switch>
-                <Redirect exact from='/apis/:apiUuid' to={redirectURL} />
+                <Redirect exact from={`/apis/${apiUuid}`} to={redirectURL} />
                 <Route path='/apis/:apiUuid/overview' render={() => <Overview {...props} />} />
                 <Route path='/apis/:apiUuid/documents' component={Documentation} />
                 <Route
@@ -337,6 +337,7 @@ class Details extends React.Component {
         const {
             classes, theme, intl, match,
         } = this.props;
+        const user = AuthManager.getUser();
         const { apiUuid } = match.params;
         const { api, notFound } = this.state;
         const {
@@ -383,8 +384,11 @@ class Details extends React.Component {
                     <LeftMenuItem text='overview' route='overview' to={pathPrefix + 'overview'} />
                     {!api.advertiseInfo.advertised && (
                         <React.Fragment>
-                            <LeftMenuItem text='credentials' route='credentials' to={pathPrefix + 'credentials'} />
-                            <LeftMenuItem text='comments' route='comments' to={pathPrefix + 'comments'} />
+                            { user &&
+                            <React.Fragment>
+                                <LeftMenuItem text='credentials' route='credentials' to={pathPrefix + 'credentials'} />
+                                <LeftMenuItem text='comments' route='comments' to={pathPrefix + 'comments'} />
+                            </React.Fragment>}
                             {api.type !== 'WS' && <LeftMenuItem text='test' route='test' to={pathPrefix + 'test'} />}
                         </React.Fragment>
                     )}

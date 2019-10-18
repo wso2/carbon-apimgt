@@ -33,6 +33,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { isRestricted } from 'AppData/AuthManager';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const RateLimitingLevels = {
     API: 'api',
@@ -55,6 +57,7 @@ function APIRateLimiting(props) {
 
     const isResourceLevel = apiThrottlingPolicy === null;
     const rateLimitingLevel = isResourceLevel ? RateLimitingLevels.RESOURCE : RateLimitingLevels.API;
+    const [apiFromContext] = useAPI();
 
     // Following effect is used to handle the controlled component case, If user provide onChange handler to
     // control this component, Then we accept the props as the valid input and update the current state value from props
@@ -147,13 +150,19 @@ function APIRateLimiting(props) {
                         >
                             <FormControlLabel
                                 value={RateLimitingLevels.API}
-                                control={<Radio color='primary' />}
+                                control={<Radio
+                                    color='primary'
+                                    disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                                />}
                                 label='API Level'
                                 labelPlacement='end'
                             />
                             <FormControlLabel
                                 value={RateLimitingLevels.RESOURCE}
-                                control={<Radio color='primary' />}
+                                control={<Radio
+                                    color='primary'
+                                    disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                                />}
                                 label='Operation Level'
                                 labelPlacement='end'
                             />
@@ -166,6 +175,7 @@ function APIRateLimiting(props) {
                             operationRateLimitMessage
                         ) : (
                             <TextField
+                                disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                 id='operation_throttling_policy'
                                 select
                                 label='Rate limiting policies'
