@@ -165,6 +165,18 @@ const suggestions = {
             label: 'Properties',
             route: 'business info',
         },
+        {
+            label: 'Subscriptions',
+            route: 'subscriptions',
+        },
+        {
+            label: 'Subscription Policies',
+            route: 'subscriptions',
+        },
+        {
+            label: 'Subscription Availability',
+            route: 'subscriptions',
+        },
     ],
     apiOnly: [
         {
@@ -202,18 +214,6 @@ const suggestions = {
         {
             label: 'Requirements',
             route: 'lifecycle',
-        },
-        {
-            label: 'Subscriptions',
-            route: 'subscriptions',
-        },
-        {
-            label: 'Subscription Policies',
-            route: 'subscriptions',
-        },
-        {
-            label: 'Subscription Availability',
-            route: 'subscriptions',
         },
         {
             label: 'Mediation Policies',
@@ -474,18 +474,6 @@ const suggestions = {
         {
             label: 'Requirements',
             route: 'lifecycle',
-        },
-        {
-            label: 'Subscriptions',
-            route: 'subscriptions',
-        },
-        {
-            label: 'Subscription Policies',
-            route: 'subscriptions',
-        },
-        {
-            label: 'Subscription Availability',
-            route: 'subscriptions',
         },
         {
             label: 'Monetization',
