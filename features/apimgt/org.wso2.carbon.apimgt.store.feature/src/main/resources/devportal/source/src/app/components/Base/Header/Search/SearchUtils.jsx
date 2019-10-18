@@ -31,6 +31,7 @@ import APIsIcon from '@material-ui/icons/SettingsApplicationsOutlined';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
 import NativeSelect from '@material-ui/core/NativeSelect';
 import { FormattedMessage } from 'react-intl';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import API from 'AppData/api';
 /* Utility methods defined here are described in
@@ -46,6 +47,14 @@ function renderInput(inputProps) {
     const {
         classes, ref, isLoading, onDropDownChange, ...other
     } = inputProps;
+    let loadingAdorment = null;
+    if (isLoading) {
+        loadingAdorment = (
+            <InputAdornment position='end'>
+                <CircularProgress />
+            </InputAdornment>
+        );
+    }
     return (
         <React.Fragment>
             <NativeSelect
@@ -82,6 +91,7 @@ function renderInput(inputProps) {
                             <SearchOutlined />
                         </InputAdornment>
                     ),
+                    endAdornment: loadingAdorment,
                     ...other,
                 }}
             />
