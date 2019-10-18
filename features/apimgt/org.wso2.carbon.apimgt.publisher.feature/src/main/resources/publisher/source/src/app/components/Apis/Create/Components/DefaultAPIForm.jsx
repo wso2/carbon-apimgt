@@ -112,25 +112,27 @@ export default function DefaultAPIForm(props) {
 
     // Check the provided API validity on mount, TODO: Better to use Joi schema here ~tmkb
     useEffect(() => {
-        onValidate(Boolean(api.name) && (isAPIProduct || Boolean(api.version)) && Boolean(api.context)
-         && Boolean(api.policies));
+        onValidate(Boolean(api.name) &&
+                (isAPIProduct || Boolean(api.version)) &&
+                Boolean(api.context) &&
+                Boolean(api.policies));
     }, []);
 
     const updateValidity = (newState) => {
         let isFormValid =
             Object.entries(newState).length > 0 &&
             Object.entries(newState)
-                .map(([key, value]) =>
-                    value === null ||
-                        value === undefined ||
-                        (isAPIProduct && ['version', 'endpoints'].includes(key)))
+                .map(([, value]) => value === null || value === undefined)
                 .reduce((acc, cVal) => acc && cVal); // Aggregate the individual validation states
         // TODO: refactor following redundant validation.
         // The valid state should available in the above reduced state ~tmkb
         // if isAPIProduct gets true version validation has been skipped
         isFormValid =
-            isFormValid && Boolean(api.name) && (isAPIProduct || Boolean(api.version)) && Boolean(api.context)
-            && (!isAPIProduct || (Boolean(api.policies) && api.policies.length > 0));
+            isFormValid &&
+            Boolean(api.name) &&
+            (isAPIProduct || Boolean(api.version)) &&
+            Boolean(api.context) &&
+            (!isAPIProduct || (Boolean(api.policies) && api.policies.length > 0));
         onValidate(isFormValid, validity);
         setValidity(newState);
     };
@@ -162,8 +164,8 @@ export default function DefaultAPIForm(props) {
                 break;
             }
             case 'context': {
-                const contextValidity = APIValidation.apiContext.required()
-                    .validate(value, { abortEarly: false }).error;
+                const contextValidity = APIValidation.apiContext.required().validate(value, { abortEarly: false })
+                    .error;
                 if (contextValidity === null) {
                     let apiContext = value.includes('/') ? value + '/' + api.version : '/' + value + '/' + api.version;
                     if (isAPIProduct) {
@@ -206,7 +208,13 @@ export default function DefaultAPIForm(props) {
             }
             case 'policies': {
                 const policyValidity = value && value.length > 0;
-                updateValidity({ ...validity, policies: !policyValidity || null });
+                updateValidity({
+                    ...validity,
+                    policy:
+                        policyValidity || !isAPIProduct
+                            ? null
+                            : { message: 'Need to select at least one policy to create an API Product' },
+                });
                 break;
             }
             default: {
@@ -253,12 +261,10 @@ export default function DefaultAPIForm(props) {
                         </React.Fragment>
                     }
                     helperText={
-                        (validity.name && validity.name.details.map((detail, index) => {
-                            return (
-                                <div style={{ marginTop: index !== 0 && '10px' }}>
-                                    {detail.message}
-                                </div>);
-                        }))
+                        validity.name &&
+                        validity.name.details.map((detail, index) => {
+                            return <div style={{ marginTop: index !== 0 && '10px' }}>{detail.message}</div>;
+                        })
                     }
                     value={api.name}
                     name='name'
@@ -299,12 +305,15 @@ export default function DefaultAPIForm(props) {
                                         },
                                     }}
                                     helperText={
-                                        (validity.context && validity.context.details.map((detail, index) => {
-                                            return (
-                                                <div style={{ marginTop: index !== 0 && '10px' }}>
-                                                    {detail.message}
-                                                </div>);
-                                        })) || `API will be exposed in ${actualContext(api)} context at the gateway`
+                                        (validity.context &&
+                                            validity.context.details.map((detail, index) => {
+                                                return (
+                                                    <div style={{ marginTop: index !== 0 && '10px' }}>
+                                                        {detail.message}
+                                                    </div>
+                                                );
+                                            })) ||
+                                        `API will be exposed in ${actualContext(api)} context at the gateway`
                                     }
                                     classes={{ root: classes.helperTextContext }}
                                     margin='normal'
@@ -364,13 +373,15 @@ export default function DefaultAPIForm(props) {
                                         },
                                     }}
                                     helperText={
-                                        (validity.context && validity.context.details.map((detail, index) => {
-                                            return (
-                                                <div style={{ marginTop: index !== 0 && '10px' }}>
-                                                    {detail.message}
-                                                </div>);
-                                        })) ||
-                                         `API Product will be exposed in ${actualContext(api)} context at the gateway`
+                                        (validity.context &&
+                                            validity.context.details.map((detail, index) => {
+                                                return (
+                                                    <div style={{ marginTop: index !== 0 && '10px' }}>
+                                                        {detail.message}
+                                                    </div>
+                                                );
+                                            })) ||
+                                        `API Product will be exposed in ${actualContext(api)} context at the gateway`
                                     }
                                     margin='normal'
                                     variant='outlined'

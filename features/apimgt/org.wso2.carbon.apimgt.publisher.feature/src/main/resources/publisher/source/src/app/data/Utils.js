@@ -16,9 +16,6 @@
  * under the License.
  */
 
-import Axios from 'axios';
-import Configurations from 'Config';
-
 /**
  * Utility class for Publisher application
  */
@@ -155,31 +152,6 @@ class Utils {
     }
 
     /**
-     * Get Publisher OAuth App info from back end to construct SSO Request
-     * @param {Object} environment Current Environment
-     * @returns {Promise} Promised Publisher OAuth app info
-     */
-    static getPromisedDCRAppInfo(environment) {
-        return Axios.get(Utils.getDCRAppInfoRequestURL(environment));
-    }
-
-    static getDCRAppInfoRequestURL(environment = Utils.getCurrentEnvironment()) {
-        // TODO: tmkasun need to implement proper API return
-        // `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}${Utils.CONST.CONTEXT_PATH}`;
-        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}`;
-    }
-
-    static getAppLogoutURL() {
-        return (
-            Utils.CONST.PROTOCOL + Utils.getCurrentEnvironment().host + Utils.CONST.LOGOUT + Configurations.app.context
-        );
-    }
-
-    static getLoginTokenPath(environment = Utils.getCurrentEnvironment()) {
-        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Configurations.app.context}`;
-    }
-
-    /**
      *
      * Get swagger definition URL
      * @static
@@ -290,10 +262,7 @@ class Utils {
 Utils.CONST = {
     LOCAL_STORAGE_ENVIRONMENT: 'environment_publisher',
     // TODO: fix/remove below wrong paths
-    DCR_APP_INFO: '/publisher/site/public/theme/temporary_login_config.json',
     MULTI_ENVIRONMENT_OVERVIEW_ENABLED: 'multi_env_overview',
-    LOGOUT: '/login/logout',
-    LOGIN_TOKEN_PATH: '/login/token',
 
     LOGOUT_CALLBACK: '/services/auth/callback/logout',
     INTROSPECT: '/services/auth/introspect',
