@@ -34,7 +34,7 @@
     };
     var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
     var systemApplicationDAO = new SystemApplicationDTO();
-    var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_store");
+    var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_devportal");
 
     var clientId = systemApplicationDTO.getConsumerKey();
     var clientSecret = systemApplicationDTO.getConsumerSecret();
