@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -184,6 +185,24 @@ public class ApiKeyAuthenticator implements Authenticator {
                     log.error("Invalid Api Key.");
                     throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                } else if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
+                                getMaskedToken(splitToken));
+                    }
+                    log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                            "Invalid JWT token");
+                }
+            } else {
+                if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
+                                getMaskedToken(splitToken));
+                    }
+                    log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                            "Invalid JWT token");
                 }
             }
 
