@@ -2108,6 +2108,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
             HashMap monetizationDataMap = new Gson().fromJson(api.getMonetizationProperties().toString(), HashMap.class);
             boolean isMonetizationStateChangeSuccessful = false;
+
+
+
+
             if (MapUtils.isEmpty(monetizationDataMap)) {
                 String errorMessage = "Monetization is not configured. Monetization data is empty for API "
                         + apiIdentifier.getApiName();

@@ -70,6 +70,37 @@ class APIProduct extends Resource {
         return this.type;
     }
 
+    getSettings() {
+        const promisedSettings = this.client.then(client => {
+            return client.apis['Settings'].get_settings();
+        });
+        return promisedSettings.then(response => response.body);
+    }
+
+    getMonetization(id, callback = null) {
+        const promiseMonetization = this.client.then(client => {
+            return client.apis['API Monetization'].get_apis__apiId__monetization(
+                {
+                    apiId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promiseMonetization.then(response => response.body);
+    }
+
+    getSubscriptionPolicies(id, callback = null) {
+        const promisePolicies = this.client.then(client => {
+            return client.apis['APIs'].get_apis__apiId__subscription_policies(
+                {
+                    apiId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promisePolicies.then(response => response.body);
+    }
+
     /**
      * Create an API Product with the given parameters in template
      * @param {Object} api_product_data - APIProduct data which need to fill the placeholder values in the @get_template

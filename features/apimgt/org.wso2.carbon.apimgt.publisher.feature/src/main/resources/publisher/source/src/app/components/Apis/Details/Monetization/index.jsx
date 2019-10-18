@@ -11,6 +11,7 @@ import { withRouter } from 'react-router';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
 import { isRestricted } from 'AppData/AuthManager';
 
 import BusinessPlans from './BusinessPlans';
@@ -62,14 +63,26 @@ class Monetization extends Component {
 
     getMonetizationData() {
         const { api } = this.props;
-        api.getSettings().then((settings) => {
-            if (settings.monetizationAttributes != null) {
-                this.setState({ monetizationAttributes: settings.monetizationAttributes });
-            }
-        });
-        api.getMonetization(this.props.api.id).then((status) => {
-            this.setState({ monStatus: status.enabled });
-        });
+        if (api.apiType === 'APIProduct') {
+            const apiProduct = new APIProduct(api.name, api.context, api.policies);
+            apiProduct.getSettings().then((settings) => {
+                if (settings.monetizationAttributes != null) {
+                    this.setState({ monetizationAttributes: settings.monetizationAttributes });
+                }
+            });
+            apiProduct.getMonetization(this.props.api.id).then((status) => {
+                this.setState({ monStatus: status.enabled });
+            });            
+        } else {
+            api.getSettings().then((settings) => {
+                if (settings.monetizationAttributes != null) {
+                    this.setState({ monetizationAttributes: settings.monetizationAttributes });
+                }
+            });
+            api.getMonetization(this.props.api.id).then((status) => {
+                this.setState({ monStatus: status.enabled });
+            });
+        }
     }
 
     /**

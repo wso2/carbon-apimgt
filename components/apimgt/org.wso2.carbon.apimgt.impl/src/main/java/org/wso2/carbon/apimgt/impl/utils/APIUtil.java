@@ -651,8 +651,6 @@ public final class APIUtil {
             //set data and status related to monetization
             api.setMonetizationStatus(Boolean.parseBoolean(artifact.getAttribute
                     (APIConstants.Monetization.API_MONETIZATION_STATUS)));
-
-
             String monetizationInfo = artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
             if (StringUtils.isNotBlank(monetizationInfo)) {
                 JSONParser parser = new JSONParser();
@@ -9013,16 +9011,15 @@ public final class APIUtil {
             }
 
             apiProduct.setProductResources(resources);
-
             //set data and status related to monetization
-            apiProduct.setMonetizationStatus(Boolean.parseBoolean(artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS)));
+            apiProduct.setMonetizationStatus(Boolean.parseBoolean(artifact.getAttribute
+                    (APIConstants.Monetization.API_MONETIZATION_STATUS)));
             String monetizationInfo = artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
             if (StringUtils.isNotBlank(monetizationInfo)) {
                 JSONParser parser = new JSONParser();
                 JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
                 apiProduct.setMonetizationProperties(jsonObj);
             }
-
         } catch (GovernanceException e) {
             String msg = "Failed to get API Product for artifact ";
             throw new APIManagementException(msg, e);

@@ -2025,9 +2025,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-
-
-
   #########################################################
 # The "Configure Monetization" Processing Function resource API
 #########################################################
@@ -2079,9 +2076,6 @@ paths:
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
-
-
-
 
 #########################################################
 # The get monetizied policies processing function resource API
