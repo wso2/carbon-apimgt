@@ -33,8 +33,8 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.core.ServerStartupObserver;
 
-@Component(name = "org.wso2.carbon.apimgt.impl.internal.StartupServiceComponent",
-        immediate = true) public class StartupServiceComponent {
+@Component(name = "org.wso2.carbon.apimgt.impl.internal.StartupServiceComponent", immediate = true)
+public class StartupServiceComponent {
 
     private static final Log log = LogFactory.getLog(StartupServiceComponent.class);
 
