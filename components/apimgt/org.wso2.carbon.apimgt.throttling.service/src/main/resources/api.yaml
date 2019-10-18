@@ -149,6 +149,22 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /apikey/revoke/:
+    post:
+      summary: Revoke given API Key
+      description: |
+        This will provide access to JTIs of revoked JWT tokens in database.
+      responses:
+        200:
+          description: An array of shops around you
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/RevokedJWTList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
   ThrottledEvent:
     properties:

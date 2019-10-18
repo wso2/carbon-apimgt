@@ -14205,6 +14205,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error in adding revoked jwt signature to database : " + e.getMessage(), e);
         }
+    }
 
     /**
      * Removes expired JWTs from revoke table.
