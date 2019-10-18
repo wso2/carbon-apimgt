@@ -149,11 +149,11 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /apikey/revoke/:
+  /apikey/revoke:
     post:
       summary: Revoke given API Key
       description: |
-        This will provide access to JTIs of revoked JWT tokens in database.
+        Revoke and notify the provided API Key
       responses:
         200:
           description: An array of shops around you
