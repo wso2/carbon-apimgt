@@ -494,8 +494,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             product.setID(productIdentifier);
             product.setUuid(apiProductId);
 
-            Set<API> associatedAPIs = apiProvider.updateAPIProduct(product);
-            updateAPIProductSwagger(associatedAPIs, product, apiProvider);
+            Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.updateAPIProduct(product);
+            updateAPIProductSwagger(apiToProductResourceMapping, product, apiProvider);
 
             APIProduct updatedProduct = apiProvider.getAPIProduct(productIdentifier);
             APIProductDTO updatedProductDTO = APIMappingUtil.fromAPIProducttoDTO(updatedProduct);
@@ -703,8 +703,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
             APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(body, provider);
 
-            Set<API> associatedAPIs = apiProvider.addAPIProductWithoutPublishingToGateway(productToBeAdded);
-            addAPIProductSwagger(associatedAPIs, productToBeAdded, apiProvider);
+            Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.addAPIProductWithoutPublishingToGateway(productToBeAdded);
+            addAPIProductSwagger(apiToProductResourceMapping, productToBeAdded, apiProvider);
 
             APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
             APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
@@ -728,15 +728,14 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return null;
     }
 
-    private void addAPIProductSwagger(Set<API> associatedAPIs, APIProduct product, APIProvider apiProvider)
+    private void addAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping,
+                                      APIProduct product, APIProvider apiProvider)
             throws APIManagementException, FaultGatewaysException {
         APIDefinition parser = new OAS3Parser();
         SwaggerData swaggerData = new SwaggerData(product);
         String apiProductSwagger = parser.generateAPIDefinition(swaggerData);
 
-        for (API api : associatedAPIs) {
-            apiProductSwagger = OASParserUtil.syncSwaggerOperations(api.getSwaggerDefinition(), apiProductSwagger);
-        }
+        apiProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping, apiProductSwagger);
 
         apiProvider.saveSwagger20Definition(product.getId(), apiProductSwagger);
         product.setDefinition(apiProductSwagger);
@@ -744,17 +743,16 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         apiProvider.updateLocalEntry(product);
     }
 
-    private void updateAPIProductSwagger(Set<API> associatedAPIs, APIProduct product, APIProvider apiProvider)
+    private void updateAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping,
+                                         APIProduct product, APIProvider apiProvider)
             throws APIManagementException, FaultGatewaysException {
         APIDefinition parser = new OAS3Parser();
         SwaggerData updatedData = new SwaggerData(product);
         String existingProductSwagger = apiProvider.getAPIDefinitionOfAPIProduct(product);
         String updatedProductSwagger = parser.generateAPIDefinition(updatedData, existingProductSwagger);
 
-        for (API api : associatedAPIs) {
-            updatedProductSwagger = OASParserUtil.syncSwaggerOperations(api.getSwaggerDefinition(),
+        updatedProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping,
                     updatedProductSwagger);
-        }
 
         apiProvider.saveSwagger20Definition(product.getId(), updatedProductSwagger);
         product.setDefinition(updatedProductSwagger);

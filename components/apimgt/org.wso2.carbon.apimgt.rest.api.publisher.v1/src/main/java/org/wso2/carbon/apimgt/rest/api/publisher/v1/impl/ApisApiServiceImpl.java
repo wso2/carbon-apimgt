@@ -657,13 +657,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 SwaggerData swaggerData = new SwaggerData(apiToUpdate);
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
                 apiProvider.saveSwagger20Definition(apiToUpdate.getId(), newDefinition);
-
-                Set<APIProduct> productsToBeUpdated = getProductsToBeUpdated(apiProvider,
-                        originalAPI);
-
-                for (APIProduct apiProduct : productsToBeUpdated) {
-                    updateAPIProductSwagger(apiToUpdate.getUriTemplates(), apiProduct, apiProvider);
-                }
             }
 
             apiProvider.manageAPI(apiToUpdate);
@@ -687,76 +680,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
-    }
-
-    private Set<APIProduct> getProductsToBeUpdated(APIProvider apiProvider, API api) throws APIManagementException {
-        Set<URITemplate> uriTemplates = api.getUriTemplates();
-        Set<APIProductIdentifier> uniqueApiProductIds = new HashSet<>();
-        Set<APIProduct> apiProductsToUpdate = new HashSet<>();
-
-        // Find unique set of associated APIProduct Ids
-        for (URITemplate uriTemplate : uriTemplates) {
-            Set<APIProductIdentifier> apiProductIds = uriTemplate.retrieveUsedByProducts();
-
-            uniqueApiProductIds.addAll(apiProductIds);
-        }
-
-        // Get API Products to be updated
-        for (APIProductIdentifier apiProductId : uniqueApiProductIds) {
-            apiProductsToUpdate.add(apiProvider.getAPIProduct(apiProductId));
-        }
-
-        return apiProductsToUpdate;
-    }
-
-    private void updateAPIProductSwagger(Set<URITemplate> updatedUriTemplates, APIProduct apiProduct,
-                                         APIProvider apiProvider)
-            throws APIManagementException, FaultGatewaysException {
-        List<APIProductResource> productResources = apiProduct.getProductResources();
-
-        for (URITemplate updatedUriTemplate : updatedUriTemplates) {
-
-            // Get updated URITemplate path + verb combination
-            String updatedVerb = updatedUriTemplate.getHTTPVerb();
-            String updatedPath = updatedUriTemplate.getUriTemplate();
-
-            for (APIProductResource productResource : productResources) {
-                URITemplate resourceUriTemplate = productResource.getUriTemplate();
-
-                // Match path + verb combination to find relevant API Product resource to update
-                if (updatedVerb.equalsIgnoreCase(resourceUriTemplate.getHTTPVerb()) &&
-                        updatedPath.equalsIgnoreCase(resourceUriTemplate.getUriTemplate())) {
-
-                    // Update URITemplate at matching APIProduct Resource level &
-                    // add URITemplate scope to the valid scopes in API Product
-                    productResource.setUriTemplate(updatedUriTemplate);
-                    apiProduct.addScope(updatedUriTemplate.getScope());
-                    break;
-                }
-            }
-        }
-
-        // Update API Product swagger with new data
-        SwaggerData updatedData = new SwaggerData(apiProduct);
-        String existingProductSwagger = apiProvider.getAPIDefinitionOfAPIProduct(apiProduct);
-        // API Product Swagger format is 3.0.0
-        APIDefinition oasParser = new OAS3Parser();
-        String updatedProductSwagger = oasParser.generateAPIDefinition(updatedData, existingProductSwagger);
-        apiProvider.saveSwagger20Definition(apiProduct.getId(), updatedProductSwagger);
-        apiProduct.setDefinition(updatedProductSwagger);
-
-        apiProvider.updateLocalEntry(apiProduct);
-    }
-
-    private void updateAPIProductSwagger(String updatedAPISwagger, APIProduct apiProduct, APIProvider apiProvider)
-            throws APIManagementException, FaultGatewaysException {
-        String apiProductSwagger = apiProduct.getDefinition();
-
-        String updatedProductSwagger = OASParserUtil.syncSwaggerOperations(updatedAPISwagger, apiProductSwagger);
-        apiProvider.saveSwagger20Definition(apiProduct.getId(), updatedProductSwagger);
-        apiProduct.setDefinition(updatedProductSwagger);
-
-        apiProvider.updateLocalEntry(apiProduct);
     }
 
     /**
@@ -2580,12 +2503,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (!removedProductResources.isEmpty()) {
             RestApiUtil.handleConflict("Cannot remove following resource paths " +
                     removedProductResources.toString() + " because they are used by one or more API Products", log);
-        }
-
-        Set<APIProduct> productsToBeUpdated = getProductsToBeUpdated(apiProvider, existingAPI);
-
-        for (APIProduct apiProduct : productsToBeUpdated) {
-            updateAPIProductSwagger(apiDefinition, apiProduct, apiProvider);
         }
 
         existingAPI.setUriTemplates(uriTemplates);

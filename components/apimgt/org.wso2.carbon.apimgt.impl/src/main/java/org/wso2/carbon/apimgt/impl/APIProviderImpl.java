@@ -6745,8 +6745,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Set<API> addAPIProductWithoutPublishingToGateway(APIProduct product) throws APIManagementException {
-        Set<API> associtedAPIs = new HashSet<>();
+    public Map<API, List<APIProductResource>> addAPIProductWithoutPublishingToGateway(APIProduct product) throws APIManagementException {
+        Map<API, List<APIProductResource>> apiToProductResourceMapping = new HashMap<>();
 
         validateApiProductInfo(product);
         String tenantDomain = MultitenantUtils
@@ -6775,7 +6775,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 continue;
             }
             if (api != null) {
-                associtedAPIs.add(api);
+                if (!apiToProductResourceMapping.containsKey(api)) {
+                    apiToProductResourceMapping.put(api, new ArrayList<>());
+                }
+
+                List<APIProductResource> apiProductResources = apiToProductResourceMapping.get(api);
+                apiProductResources.add(apiProductResource);
+
                 apiProductResource.setApiIdentifier(api.getId());
                 apiProductResource.setProductIdentifier(product.getId());
                 apiProductResource.setEndpointConfig(api.getEndpointConfig());
@@ -6809,7 +6815,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         apiMgtDAO.addAPIProduct(product, tenantDomain);
 
-        return associtedAPIs;
+        return apiToProductResourceMapping;
     }
 
     @Override
@@ -6958,8 +6964,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Set<API> updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException {
-        Set<API> associatedAPIs = new HashSet<>();
+    public Map<API, List<APIProductResource>> updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException {
+        Map<API, List<APIProductResource>> apiToProductResourceMapping = new HashMap<>();
         //validate resources and set api identifiers and resource ids to product
         List<APIProductResource> resources = product.getProductResources();
         for (APIProductResource apiProductResource : resources) {
@@ -6974,7 +6980,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else {
                 api = super.getAPIbyUUID(apiProductResource.getApiId(), tenantDomain);
             }
-            associatedAPIs.add(api);
+
+            if (!apiToProductResourceMapping.containsKey(api)) {
+                apiToProductResourceMapping.put(api, new ArrayList<>());
+            }
+
+            List<APIProductResource> apiProductResources = apiToProductResourceMapping.get(api);
+            apiProductResources.add(apiProductResource);
 
             // if API does not exist, getLightweightAPIByUUID() method throws exception. so no need to handle NULL
             apiProductResource.setApiIdentifier(api.getId());
@@ -7023,7 +7035,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new FaultGatewaysException(failedGateways);
         }
 
-        return associatedAPIs;
+        return apiToProductResourceMapping;
     }
 
     @Override
