@@ -359,7 +359,7 @@
   "Apis.Details.Endpoints.LoadbalanceFailoverConfig.load.balance.configuration.title": "Load Balance Configurations",
   "Apis.Details.Endpoints.LoadbalanceFailoverConfig.loadbalance.heading": "Load Balanced Endpoints",
   "Apis.Details.Endpoints.LoadbalanceFailoverConfig.no.endpoints.message": "Add Production/ Sandbox endpoints to configure.",
-  "Apis.Details.Endpoints.LoadbalanceFailoverConfig.none.heading": "None Configured",
+  "Apis.Details.Endpoints.LoadbalanceFailoverConfig.none.heading": "Not Configured",
   "Apis.Details.Endpoints.LoadbalanceFailoverConfig.production.failover.endpoint": "Production Failover Endpoints",
   "Apis.Details.Endpoints.LoadbalanceFailoverConfig.production.loadbalance.endpoint": "Production Loadbalanced Endpoints",
   "Apis.Details.Endpoints.LoadbalanceFailoverConfig.sandbox.failover.endpoint": "Sandbox Failover Endpoints",
