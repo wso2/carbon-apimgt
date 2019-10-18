@@ -1,5 +1,5 @@
 # Override public folder
-If you want to override a certain store webapp static files, this is the correct place to do it.
+If you want to override a certain devportal webapp static files, this is the correct place to do it.
 You do not have to copy the entire directory, only copy the desired file/files.
 
 #### Example

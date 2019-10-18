@@ -29,10 +29,10 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Application from 'AppData/Application';
+import AuthManager from 'AppData/AuthManager';
 import SubscribeToApi from 'AppComponents/Shared/AppsAndKeys/SubscribeToApi';
 import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 import { ApiContext } from '../ApiContext';
-import AuthManager from '../../../../data/AuthManager';
 import SubscriptionTableRow from './SubscriptionTableRow';
 
 /**
