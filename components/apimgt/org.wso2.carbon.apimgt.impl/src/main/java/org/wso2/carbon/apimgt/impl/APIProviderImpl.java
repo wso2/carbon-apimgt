@@ -5397,7 +5397,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (artifactManager == null) {
                 handleException("Artifact manager is null when updating monetization data for API ID " + apiProduct.getId());
             }
-            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(apiProduct.getUuid());
             //set monetization status (i.e - enabled or disabled)
             artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS,
                     Boolean.toString(apiProduct.getMonetizationStatus()));

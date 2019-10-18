@@ -89,6 +89,18 @@ class APIProduct extends Resource {
         return promiseMonetization.then(response => response.body);
     }
 
+    configureMonetizationToApiProduct(id, body) {
+        const promised_status = this.client.then(client => {
+            debugger;
+            return client.apis['API Monetization'].post_apis__apiId__monetize({
+                apiId: id,
+                body,
+            });
+        });
+        debugger;
+        return promised_status;
+    }
+
     getSubscriptionPolicies(id, callback = null) {
         const promisePolicies = this.client.then(client => {
             return client.apis['APIs'].get_apis__apiId__subscription_policies(
