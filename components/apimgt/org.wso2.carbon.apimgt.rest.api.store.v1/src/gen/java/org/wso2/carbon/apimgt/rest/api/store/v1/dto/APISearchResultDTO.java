@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultDTO;
 import javax.validation.constraints.*;
 
@@ -22,6 +23,8 @@ public class APISearchResultDTO extends SearchResultDTO  {
     private String provider = null;
     private String status = null;
     private String thumbnailUri = null;
+    private APIBusinessInformationDTO businessInformation = null;
+    private String avgRating = null;
 
   /**
    * A brief description about the API
@@ -130,6 +133,41 @@ public class APISearchResultDTO extends SearchResultDTO  {
     this.thumbnailUri = thumbnailUri;
   }
 
+  /**
+   **/
+  public APISearchResultDTO businessInformation(APIBusinessInformationDTO businessInformation) {
+    this.businessInformation = businessInformation;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("businessInformation")
+  public APIBusinessInformationDTO getBusinessInformation() {
+    return businessInformation;
+  }
+  public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
+    this.businessInformation = businessInformation;
+  }
+
+  /**
+   * Average rating of the API
+   **/
+  public APISearchResultDTO avgRating(String avgRating) {
+    this.avgRating = avgRating;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "4.5", value = "Average rating of the API")
+  @JsonProperty("avgRating")
+  public String getAvgRating() {
+    return avgRating;
+  }
+  public void setAvgRating(String avgRating) {
+    this.avgRating = avgRating;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -145,12 +183,14 @@ public class APISearchResultDTO extends SearchResultDTO  {
         Objects.equals(version, apISearchResult.version) &&
         Objects.equals(provider, apISearchResult.provider) &&
         Objects.equals(status, apISearchResult.status) &&
-        Objects.equals(thumbnailUri, apISearchResult.thumbnailUri);
+        Objects.equals(thumbnailUri, apISearchResult.thumbnailUri) &&
+        Objects.equals(businessInformation, apISearchResult.businessInformation) &&
+        Objects.equals(avgRating, apISearchResult.avgRating);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, version, provider, status, thumbnailUri);
+    return Objects.hash(description, context, version, provider, status, thumbnailUri, businessInformation, avgRating);
   }
 
   @Override
@@ -164,6 +204,8 @@ public class APISearchResultDTO extends SearchResultDTO  {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
+    sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
+    sb.append("    avgRating: ").append(toIndentedString(avgRating)).append("\n");
     sb.append("}");
     return sb.toString();
   }
