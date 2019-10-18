@@ -354,11 +354,12 @@ class ApiConsole extends React.Component {
         }
 
         const authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
+        const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
 
         return (
             <React.Fragment>
                 <Grid container className={classes.grid}>
-                    {!user && (
+                    {!isPrototypedAPI && !user && (
                         <Grid item md={6}>
                             <Paper className={classes.userNotificationPaper}>
                                 <Typography variant='h5' component='h3'>
@@ -377,7 +378,7 @@ class ApiConsole extends React.Component {
                             </Paper>
                         </Grid>
                     )}
-                    {user && subscriptions && (
+                    {!isPrototypedAPI && user && subscriptions && (
                         <Grid container>
                             <Grid item md={4} xs={4} className={classes.gridWrapper}>
                                 <FormControl className={classes.formControl} disabled={subscriptions.length === 0}>
@@ -476,19 +477,20 @@ class ApiConsole extends React.Component {
                             </FormControl>
                         </Grid>
                     )}
+                    {!isPrototypedAPI &&
                     <Grid container md={9} xs={8} justify='center'>
                         <Grid item md={9} xs={8} className={classes.gridWrapper}>
                             <TextField
                                 margin='normal'
                                 variant='outlined'
                                 className={classes.inputText}
-                                label={<FormattedMessage id='access.token' defaultMessage='Access Token' />}
+                                label={<FormattedMessage id='access.token' defaultMessage='Access Token'/>}
                                 name='accessToken'
                                 onChange={this.handleChanges}
                                 type={showToken ? 'text' : 'password'}
                                 value={accessToken || ''}
                                 helperText={
-                                    <FormattedMessage id='enter.access.token' defaultMessage='Enter access Token' />}
+                                    <FormattedMessage id='enter.access.token' defaultMessage='Enter access Token'/>}
                                 InputProps={{
                                     endAdornment: (
                                         <InputAdornment position='end'>
@@ -512,6 +514,7 @@ class ApiConsole extends React.Component {
                             />
                         </Grid>
                     </Grid>
+                    }
                     <Grid xs={12} container>
                         <Grid xs={10} />
                         <Grid xs={2}>
