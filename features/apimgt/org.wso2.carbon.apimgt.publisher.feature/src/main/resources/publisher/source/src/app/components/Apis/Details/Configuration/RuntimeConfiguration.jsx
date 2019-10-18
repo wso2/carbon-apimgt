@@ -107,6 +107,10 @@ const useStyles = makeStyles(theme => ({
         display: 'inline-flex',
         lineHeight: '38px',
     },
+    info: {
+        display: 'flex',
+        height: '100%',
+    },
 }));
 
 /**
@@ -421,12 +425,15 @@ export default function RuntimeConfiguration() {
                                 </React.Fragment>
                             )}
                             {api.isAPIProduct() && (
-                                <Typography variant='body1'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Configuration.RuntimeConfiguration.backend.api.produt.endpoint'
-                                        defaultMessage='Please refer respective APIs for endpoint information'
-                                    />
-                                </Typography>
+                                <Box alignItems='center' justifyContent='center' className={classes.info}>
+                                    <Typography variant='body1'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.
+                                            endpoint'
+                                            defaultMessage='Please refer respective APIs for endpoint information'
+                                        />
+                                    </Typography>
+                                </Box>
                             )}
                         </Paper>
                     </Grid>
