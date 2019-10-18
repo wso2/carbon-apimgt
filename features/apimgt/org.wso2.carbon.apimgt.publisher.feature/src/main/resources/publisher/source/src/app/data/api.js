@@ -235,7 +235,6 @@ class API extends Resource {
         });
     }
     
-
     save(openAPIVersion = 'v3') {
         const promisedAPIResponse = this.client.then((client) => {
             const properties = client.spec.definitions.API.properties;

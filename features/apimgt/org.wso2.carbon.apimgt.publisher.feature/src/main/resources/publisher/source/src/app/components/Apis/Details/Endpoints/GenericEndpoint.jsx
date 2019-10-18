@@ -119,7 +119,6 @@ function GenericEndpoint(props) {
             });
     }
 
-
     return (
         <div className={classes.endpointInputWrapper}>
             <TextField
