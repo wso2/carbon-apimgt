@@ -135,7 +135,7 @@ function LeftMenuItem(props) {
                         strokeColor={strokeColor}
                         width={iconSize}
                         height={iconSize}
-                        icon={props.text}
+                        icon={props.iconText}
                         className={classNames(
                             classes.leftLInk,
                             {
@@ -162,6 +162,7 @@ function LeftMenuItem(props) {
 }
 LeftMenuItem.defaultProps = {
     route: null,
+    iconText: null,
 };
 LeftMenuItem.propTypes = {
     classes: PropTypes.shape({}).isRequired,
@@ -170,6 +171,7 @@ LeftMenuItem.propTypes = {
     text: PropTypes.string.isRequired,
     to: PropTypes.string.isRequired,
     route: PropTypes.string,
+    iconText: PropTypes.string,
     history: PropTypes.shape({
         location: PropTypes.string.isRequired,
     }).isRequired,
