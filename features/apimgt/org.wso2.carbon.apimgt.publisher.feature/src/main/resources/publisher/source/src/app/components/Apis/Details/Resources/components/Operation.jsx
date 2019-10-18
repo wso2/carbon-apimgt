@@ -36,7 +36,6 @@ import Badge from '@material-ui/core/Badge';
 import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined';
 // splitted operation components
 
-import { isRestricted } from 'AppData/AuthManager';
 import DescriptionAndSummary from './operationComponents/DescriptionAndSummary';
 import OperationGovernance from './operationComponents/OperationGovernance';
 import Parameters from './operationComponents/Parameters';
@@ -195,7 +194,7 @@ function Operation(props) {
                                 >
                                     <div>
                                         <IconButton
-                                            disabled={Boolean(isUsedInAPIProduct)}
+                                            disabled={Boolean(isUsedInAPIProduct) || disableUpdate}
                                             onClick={toggleDelete}
                                             aria-label='delete'
                                         >
@@ -213,7 +212,7 @@ function Operation(props) {
                         <DescriptionAndSummary
                             operation={operation}
                             operationsDispatcher={operationsDispatcher}
-                            disableUpdate={isRestricted(['apim:api_create'], api)}
+                            disableUpdate={disableUpdate}
                             target={target}
                             verb={verb}
                         />
