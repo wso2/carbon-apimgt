@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
@@ -78,7 +79,7 @@ public class APIAdminImpl implements APIAdmin {
      */
     public void deleteLabel(String user, String labelId) throws APIManagementException {
         if (isAttachedLabel(user, labelId)) {
-            APIUtil.handleException("Unable to delete label. Label is already attached to a API");
+            APIUtil.handleException("Unable to delete the label. It is attached to an API");
         }
         apiMgtDAO.deleteLabel(labelId);
     }
@@ -122,11 +123,12 @@ public class APIAdminImpl implements APIAdmin {
                 break;
             }
         }
-        if (labelName != null && !labelName.isEmpty()) {
+        if (labelName != null && StringUtils.isEmpty(labelName)) {
             UserAwareAPIProvider userAwareAPIProvider = new UserAwareAPIProvider(user);
             for (API api : apiList) {
                 String uuid = api.getUUID();
-                API lightweightAPIByUUID = userAwareAPIProvider.getLightweightAPIByUUID(uuid, apiProvider.tenantDomain);
+                API lightweightAPIByUUID = userAwareAPIProvider.getLightweightAPIByUUID(uuid, apiProvider.
+                        tenantDomain);
                 List<Label> attachedLabelsWithoutID = lightweightAPIByUUID.getGatewayLabels();
                 for (Label labelWithoutId : attachedLabelsWithoutID) {
                     if (labelName.equalsIgnoreCase(labelWithoutId.getName())) {
