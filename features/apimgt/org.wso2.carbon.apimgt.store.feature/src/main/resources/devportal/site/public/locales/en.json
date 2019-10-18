@@ -94,7 +94,7 @@
   "Apis.Details.Overview.subscribe.to.application.btn": "Subscribe to an Application",
   "Apis.Details.Overview.subscriptions": "Subscriptions >>",
   "Apis.Details.Overview.view.credentials": "View Credentials",
-  "Apis.Details.Sdk.no.sdks": "No SDKs Yet",
+  "Apis.Details.Sdk.no.sdks": "No SDKs",
   "Apis.Details.Sdk.no.sdks.content": "No SDKs available for this API yet",
   "Apis.Details.Subscribe.applications.title": "Applications",
   "Apis.Details.Subscribe.create.new": "Create New Application",
