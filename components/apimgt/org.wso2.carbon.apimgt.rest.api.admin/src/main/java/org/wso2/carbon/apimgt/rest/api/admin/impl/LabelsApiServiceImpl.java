@@ -129,7 +129,7 @@ public class LabelsApiServiceImpl extends LabelsApiService {
                     labelDTO.getId());
             return Response.ok(location).entity(labelDTO).build();
         } catch (APIManagementException | URISyntaxException e) {
-            String errorMessage = "Error while updating Label : " + labelId;
+            String errorMessage = "Error while updating label : " + labelId;
             RestApiUtil.handleInternalServerError(errorMessage, log);
         }
         return null;
