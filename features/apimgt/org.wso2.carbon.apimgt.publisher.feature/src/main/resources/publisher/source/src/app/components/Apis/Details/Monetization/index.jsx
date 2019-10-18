@@ -72,7 +72,7 @@ class Monetization extends Component {
             });
             apiProduct.getMonetization(this.props.api.id).then((status) => {
                 this.setState({ monStatus: status.enabled });
-            });            
+            });
         } else {
             api.getSettings().then((settings) => {
                 if (settings.monetizationAttributes != null) {
