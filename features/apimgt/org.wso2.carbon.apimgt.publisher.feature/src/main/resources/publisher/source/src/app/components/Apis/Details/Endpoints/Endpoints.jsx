@@ -118,8 +118,8 @@ function Endpoints(props) {
             }
             case 'endpoint_type': { // set endpoint type
                 const config = getEndpointTemplateByType(
-                    value,
-                    tmpEndpointConfig.endpoint_type === 'address',
+                    value.category,
+                    value.endpointType === 'address',
                     tmpEndpointConfig,
                 );
                 return { ...initState, endpointConfig: { ...config } };

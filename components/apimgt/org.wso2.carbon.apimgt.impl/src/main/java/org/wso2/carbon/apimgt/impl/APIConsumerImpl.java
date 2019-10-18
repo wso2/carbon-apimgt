@@ -5426,6 +5426,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private Map<String, Object> filterMultipleVersionedAPIs(Map<String, Object> searchResults) {
         Object apiObj = searchResults.get("apis");
         ArrayList<Object> apiSet;
+        ArrayList<APIProduct> apiProductSet = new ArrayList<>();
         if (apiObj instanceof Set) {
             apiSet = new ArrayList<>(((Set) apiObj));
         } else {
@@ -5443,6 +5444,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 } else if (result instanceof Map.Entry) {
                     Map.Entry<Documentation, API> entry = (Map.Entry<Documentation, API>)result;
                     resultApis.add(entry.getValue());
+                } else if (result instanceof APIProduct) {
+                    apiProductSet.add((APIProduct)result);
                 }
             }
 
@@ -5494,12 +5497,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
             }
             apiSet = tempApiSet;
-            apiSet.sort(new ContentSearchResultNameComparator());
+            ArrayList<Object> resultAPIandProductSet = new ArrayList<>();
+            resultAPIandProductSet.addAll(apiSet);
+            resultAPIandProductSet.addAll(apiProductSet);
+            resultAPIandProductSet.sort(new ContentSearchResultNameComparator());
 
             if (apiObj instanceof Set) {
-                searchResults.put("apis", new HashSet<>(apiSet));
+                searchResults.put("apis", new HashSet<>(resultAPIandProductSet));
             } else {
-                searchResults.put("apis", apiSet);
+                searchResults.put("apis", resultAPIandProductSet);
             }
         }
         return searchResults;

@@ -149,6 +149,10 @@ const definition = {
         });
         return tmpErrors;
     }),
+    alias: Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/).required()
+        .error((errors) => {
+            return errors.map(error => ({ ...error, message: 'Alias ' + getMessage(error.type) }));
+        }),
     userRole: userRoleSchema.userRole().role(),
     apiParameter: apiSchema.api().isAPIParameterExist(),
     apiDocument: documentSchema.document().isDocumentPresent(),

@@ -5284,15 +5284,15 @@ public final class APIUtil {
 
             if ("in".equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + RegistryConstants.PATH_SEPARATOR +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
             } else if ("out".equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + RegistryConstants.PATH_SEPARATOR +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
             } else if ("fault".equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + RegistryConstants.PATH_SEPARATOR +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
             }
 

@@ -96,8 +96,8 @@ export default function DefaultAPIForm(props) {
                         value === undefined ||
                         (isAPIProduct && ['version', 'endpoints'].includes(key)))
                 .reduce((acc, cVal) => acc && cVal); // Aggregate the individual validation states
-        // TODO: refactor following redundant validation.
-        // The valid state should available in the above reduced state ~tmkb
+        // API Name , Version & Context is a must that's why `&&` chain
+        // if isAPIProduct gets true version validation has been skipped
         isFormValid =
             isFormValid && Boolean(api.name) && (isAPIProduct || Boolean(api.version)) && Boolean(api.context)
             && (!isAPIProduct || (Boolean(api.policies) && api.policies.length > 0));
