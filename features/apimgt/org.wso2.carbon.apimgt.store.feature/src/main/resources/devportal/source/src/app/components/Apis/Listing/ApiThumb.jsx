@@ -252,7 +252,13 @@ class ApiThumb extends React.Component {
 
         let ImageView;
         if (imageObj) {
-            ImageView = <img height={140} src={imageObj} alt='API Product Thumbnail' className={classes.media} />;
+            ImageView = (<img
+                height={140}
+                width={imageWidth}
+                src={imageObj}
+                alt='API Thumbnail'
+                className={classes.media}
+            />);
         } else {
             ImageView = (
                 <ImageGenerator
