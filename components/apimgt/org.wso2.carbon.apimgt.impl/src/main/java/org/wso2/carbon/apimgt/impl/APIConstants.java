@@ -688,7 +688,7 @@ public final class APIConstants {
     public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS = CORS_CONFIGURATION
             + "Access-Control-Allow-Credentials";
 
-    public static final String API_KEY_TYPE = "AM_KEY_TYPE";
+    public static final String API_KEY_AUTH_TYPE = "AM_KEY_TYPE";
     public static final String API_KEY_TYPE_PRODUCTION = "PRODUCTION";
     public static final String API_KEY_TYPE_SANDBOX = "SANDBOX";
 
