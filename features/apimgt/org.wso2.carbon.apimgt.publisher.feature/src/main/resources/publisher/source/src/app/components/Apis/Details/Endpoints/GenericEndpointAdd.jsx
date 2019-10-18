@@ -81,7 +81,7 @@ function GenericEndpointAdd(props) {
                 onChange={event => setServiceUrl(event.target.value)}
                 variant='outlined'
                 margin='normal'
-                placeholder='Add new endpoint'
+                placeholder='Enter the Endpoint URL and press + button'
                 InputProps={{
                     endAdornment: (
                         <InputAdornment position='end'>

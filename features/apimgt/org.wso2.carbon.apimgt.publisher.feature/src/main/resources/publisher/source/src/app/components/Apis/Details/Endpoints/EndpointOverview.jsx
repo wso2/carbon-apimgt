@@ -171,10 +171,10 @@ function EndpointOverview(props) {
             }
             if (Array.isArray(availableEndpoints)) {
                 return availableEndpoints[0].endpoint_type !== undefined ?
-                    endpointTypes[1] : endpointTypes[0];
+                    endpointTypes[2] : endpointTypes[0];
             }
             return availableEndpoints.endpoint_type !== undefined ?
-                endpointTypes[1] : endpointTypes[0];
+                endpointTypes[2] : endpointTypes[0];
         }
     };
 
@@ -332,6 +332,13 @@ function EndpointOverview(props) {
             delete endpointConfigCopy[category];
         }
         endpointsDispatcher({ action: category, value: modifiedEndpoint });
+    };
+
+    const handleEndpointCategorySelect = (event) => {
+        endpointsDispatcher({
+            action: 'endpoint_type',
+            value: { category: event.target.value, endpointType: endpointType.key },
+        });
     };
 
     /**
@@ -708,6 +715,7 @@ function EndpointOverview(props) {
                                     />
                                 </Typography>
                                 <LoadbalanceFailoverConfig
+                                    handleEndpointCategorySelect={handleEndpointCategorySelect}
                                     toggleAdvanceConfig={toggleAdvanceConfig}
                                     endpointsDispatcher={endpointsDispatcher}
                                     epConfig={(cloneDeep(epConfig))}
