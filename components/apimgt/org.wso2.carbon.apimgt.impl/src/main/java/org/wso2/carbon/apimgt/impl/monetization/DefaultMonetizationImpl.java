@@ -82,6 +82,11 @@ public class DefaultMonetizationImpl implements Monetization {
     }
 
     @Override
+    public Map<String, String> getMonetizedPoliciesToPlanMapping(APIProduct apiProduct) throws MonetizationException {
+        return new HashMap<>();
+    }
+
+    @Override
     public Map<String, String> getCurrentUsageForSubscription(String subscriptionUUID, APIProvider apiProvider)
             throws MonetizationException {
         return new HashMap<String, String>();
@@ -89,6 +94,11 @@ public class DefaultMonetizationImpl implements Monetization {
 
     @Override
     public Map<String, String> getTotalRevenue(API api, APIProvider apiProvider) throws MonetizationException {
+        return new HashMap<String, String>();
+    }
+
+    @Override
+    public Map<String, String> getTotalRevenue(APIProduct apiProduct, APIProvider apiProvider) throws MonetizationException {
         return new HashMap<String, String>();
     }
 

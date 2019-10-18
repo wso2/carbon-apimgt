@@ -330,6 +330,18 @@ public class APIMappingUtil {
         return apiMonetizationInfoDTO;
     }
 
+    public static APIMonetizationInfoDTO getMonetizedTiersDTO(APIProductIdentifier apiProductIdentifier,
+                                                              Map<String, String> monetizedPoliciesToPlanMapping)
+            throws APIManagementException {
+
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
+        APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
+        apiMonetizationInfoDTO.setEnabled(apiProduct.getMonetizationStatus());
+        apiMonetizationInfoDTO.setProperties(monetizedPoliciesToPlanMapping);
+        return apiMonetizationInfoDTO;
+    }
+
     /**
      * Returns the APIIdentifier given the uuid
      *

@@ -62,7 +62,6 @@ public class APIProduct {
     private JSONObject monetizationProperties = new JSONObject();
     private boolean isMonetizationEnabled = false;
 
-
     private Set<Scope> scopes;
 
     /**

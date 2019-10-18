@@ -93,6 +93,8 @@ public interface Monetization {
      */
     Map<String, String> getMonetizedPoliciesToPlanMapping(API api) throws MonetizationException;
 
+    Map<String, String> getMonetizedPoliciesToPlanMapping(APIProduct apiProduct) throws MonetizationException;
+
     /**
      * Get current usage for a subscription
      *
@@ -112,6 +114,8 @@ public interface Monetization {
      * @throws MonetizationException if failed to get total revenue data for a given API
      */
     Map<String, String> getTotalRevenue(API api, APIProvider apiProvider) throws MonetizationException;
+
+    Map<String, String> getTotalRevenue(APIProduct apiProduct, APIProvider apiProvider) throws MonetizationException;
 
     /**
      * Publish the usage for a subscription to the billing engine
