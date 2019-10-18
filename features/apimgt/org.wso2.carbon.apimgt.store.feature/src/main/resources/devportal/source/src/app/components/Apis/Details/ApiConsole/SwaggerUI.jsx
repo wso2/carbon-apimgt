@@ -6,7 +6,6 @@ import SwaggerUILib from './PatchedSwaggerUIReact';
 const disableAuthorizeAndInfoPlugin = function () {
     return {
         wrapComponents: {
-            authorizeBtn: () => () => null,
             info: () => () => null,
         },
     };

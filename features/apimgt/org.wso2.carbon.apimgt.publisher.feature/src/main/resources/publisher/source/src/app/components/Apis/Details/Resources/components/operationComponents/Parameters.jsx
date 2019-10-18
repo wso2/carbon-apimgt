@@ -22,6 +22,9 @@ import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 
+import AddParameter from './AddParameter';
+import ListParameters from './ListParameters';
+
 /**
  *
  * Renders the operation parameters section
@@ -29,10 +32,11 @@ import Typography from '@material-ui/core/Typography';
  * @param {*} props
  * @returns
  */
-export default function Parameters() {
-    // const { operation, operationActionsDispatcher } = props;
-    // TODO: need to restructure the below fragment to a
-    // component with placeholders to give section name and content ~tmkb
+export default function Parameters(props) {
+    const {
+        operation, spec, target, verb, operationsDispatcher, disableUpdate,
+    } = props;
+    const haveParameters = operation.parameters && operation.parameters.length !== 0;
     return (
         <Fragment>
             <Grid item md={12}>
@@ -42,19 +46,37 @@ export default function Parameters() {
                 </Typography>
             </Grid>
             <Grid item md={1} />
+            <Grid item xs={11}>
+                {!disableUpdate && (
+                    <AddParameter target={target} verb={verb} operationsDispatcher={operationsDispatcher} />
+                )}
+            </Grid>
+            <Grid item md={1} />
             <Grid item md={11}>
-                Parameters
+                {haveParameters && (
+                    <ListParameters
+                        disableUpdate={disableUpdate}
+                        target={target}
+                        verb={verb}
+                        operationsDispatcher={operationsDispatcher}
+                        operation={operation}
+                        spec={spec}
+                    />
+                )}
             </Grid>
         </Fragment>
     );
 }
 
 Parameters.propTypes = {
-    operation: PropTypes.shape({
-        target: PropTypes.string.isRequired,
-        verb: PropTypes.string.isRequired,
-        spec: PropTypes.shape({}).isRequired,
-    }).isRequired,
+    target: PropTypes.string.isRequired,
+    verb: PropTypes.string.isRequired,
+    spec: PropTypes.shape({}).isRequired,
+    operationsDispatcher: PropTypes.func.isRequired,
+    operation: PropTypes.shape({}).isRequired,
+    disableUpdate: PropTypes.bool,
 };
 
-Parameters.defaultProps = {};
+Parameters.defaultProps = {
+    disableUpdate: false,
+};

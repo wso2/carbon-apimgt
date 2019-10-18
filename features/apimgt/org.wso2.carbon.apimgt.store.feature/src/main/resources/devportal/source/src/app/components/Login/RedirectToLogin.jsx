@@ -17,10 +17,10 @@
  */
 
 import React from 'react';
-import Configurations from 'Config';
+import Settings from 'Settings';
 import { FormattedMessage } from 'react-intl';
 
-const page = Configurations.app.context + '/services/configs';
+const page = Settings.app.context + '/services/configs';
 
 /**
  *

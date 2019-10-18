@@ -147,26 +147,6 @@ public class SQLConstants {
                     "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
                     "   AND APP.NAME = ?";
 
-    public static final String GET_SUBSCRIBED_API_PRODUCTS_OF_USER_BY_APP_SQL =
-            " SELECT " +
-                    "  APIPRO.API_PRODUCT_PROVIDER AS API_PROVIDER," +
-                    "  APIPRO.API_PRODUCT_NAME AS API_NAME," +
-                    "  APIPRO.API_PRODUCT_CONTEXT AS API_CONTEXT," +
-                    "  APIPRO.API_PRODUCT_VERSION AS API_VERSION," +
-                    "  SP.TIER_ID AS SP_TIER_ID" +
-                    "  FROM" +
-                    "  AM_SUBSCRIPTION SP," +
-                    "  AM_API_PRODUCT APIPRO," +
-                    "  AM_SUBSCRIBER SB," +
-                    "  AM_APPLICATION APP" +
-                    "  WHERE" +
-                    "  SB.TENANT_ID = ?" +
-                    "  AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID" +
-                    "  AND APP.APPLICATION_ID = SP.APPLICATION_ID" +
-                    "  AND APIPRO.API_PRODUCT_ID = SP.API_PRODUCT_ID" +
-                    "  AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
-                    "  AND APP.NAME = ?";
-
     public static final String GET_SUBSCRIBED_APIS_OF_USER_BY_APP_CASE_INSENSITIVE_SQL =
             " SELECT " +
                     "   API.API_PROVIDER AS API_PROVIDER," +
@@ -186,26 +166,6 @@ public class SQLConstants {
                     "   AND API.API_ID = SP.API_ID" +
                     "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
                     "   AND APP.NAME = ?";
-
-    public static final String GET_SUBSCRIBED_API_PRODUCTS_OF_USER_BY_APP_CASE_INSENSITIVE_SQL =
-            " SELECT " +
-                    "  APIPRO.API_PRODUCT_PROVIDER AS API_PROVIDER," +
-                    "  APIPRO.API_PRODUCT_NAME AS API_NAME," +
-                    "  APIPRO.API_PRODUCT_CONTEXT AS API_CONTEXT," +
-                    "  APIPRO.API_PRODUCT_VERSION AS API_VERSION," +
-                    "  SP.TIER_ID AS SP_TIER_ID" +
-                    "  FROM" +
-                    "  AM_SUBSCRIPTION SP," +
-                    "  AM_API_PRODUCT APIPRO," +
-                    "  AM_SUBSCRIBER SB," +
-                    "  AM_APPLICATION APP" +
-                    "  WHERE" +
-                    "  SB.TENANT_ID = ?" +
-                    "  AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID" +
-                    "  AND APP.APPLICATION_ID = SP.APPLICATION_ID" +
-                    "  AND APIPRO.API_PRODUCT_ID = SP.API_PRODUCT_ID" +
-                    "  AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
-                    "  AND APP.NAME = ?";
 
     public static final String GET_SUBSCRIBED_USERS_FOR_API_SQL =
             " SELECT " +
@@ -322,7 +282,6 @@ public class SQLConstants {
             "   AND API.API_ID = SUB.API_ID" +
             "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
 
-    //we are not expecting api product calls through default version todo:reviw
     public static final String VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL =
             " SELECT " +
             "   SUB.TIER_ID," +
@@ -334,9 +293,7 @@ public class SQLConstants {
             "   APP.TOKEN_TYPE," +
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
-            "   API.API_PROVIDER," +
-            "   NULL AS API_PRODUCT_NAME," +
-            "   NULL AS API_PRODUCT_PROVIDER " +
+            "   API.API_PROVIDER " +
             " FROM " +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_SUBSCRIBER SUBS," +
@@ -362,9 +319,7 @@ public class SQLConstants {
             "   APP.TOKEN_TYPE," +
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
-            "   API.API_PROVIDER," +
-            "   NULL AS API_PRODUCT_NAME," +
-            "   NULL AS API_PRODUCT_PROVIDER " +
+            "   API.API_PROVIDER" +
             " FROM " +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_SUBSCRIBER SUBS," +
@@ -378,42 +333,7 @@ public class SQLConstants {
             "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
             "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
             "   AND API.API_ID = SUB.API_ID" +
-            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
-            " UNION " +
-            " SELECT DISTINCT " +
-            "   SUB.TIER_ID," +
-            "   SUBR.USER_ID," +
-            "   SUB.SUB_STATUS," +
-            "   APP.APPLICATION_ID," +
-            "   APP.NAME," +
-            "   APP.APPLICATION_TIER," +
-            "   APP.TOKEN_TYPE," +
-            "   AKM.KEY_TYPE," +
-            "   API.API_NAME," +
-            "   API.API_PROVIDER," +
-            "   APIPRO.API_PRODUCT_NAME," +
-            "   APIPRO.API_PRODUCT_PROVIDER" +
-            " FROM " +
-            "   AM_API AS API," +
-            "   AM_API_URL_MAPPING AS AUM," +
-            "   AM_API_PRODUCT_MAPPING AS APM," +
-            "   AM_SUBSCRIPTION AS SUB," +
-            "   AM_APPLICATION AS APP," +
-            "   AM_SUBSCRIBER AS SUBR," +
-            "   AM_APPLICATION_KEY_MAPPING AS AKM," +
-            "   AM_API_PRODUCT AS APIPRO " +
-            " WHERE " +
-            "   API.API_ID=AUM.API_ID" +
-            "   AND AUM.URL_MAPPING_ID=APM.URL_MAPPING_ID" +
-            "   AND SUB.API_PRODUCT_ID=APM.API_PRODUCT_ID" +
-            "   AND APM.API_PRODUCT_ID=APIPRO.API_PRODUCT_ID" +
-            "   AND APP.APPLICATION_ID=SUB.APPLICATION_ID" +
-            "   AND SUBR.SUBSCRIBER_ID=APP.SUBSCRIBER_ID" +
-            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
-            "   AND API.CONTEXT = ? " +
-            "   AND AKM.CONSUMER_KEY = ? " +
-            "   AND API.API_VERSION = ? " +
-            " ORDER BY API_PRODUCT_NAME ASC";
+            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
 
     public static final String ADVANCED_VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL =
             " SELECT " +
@@ -431,9 +351,7 @@ public class SQLConstants {
                     "   APS.RATE_LIMIT_COUNT," +
                     "   APS.RATE_LIMIT_TIME_UNIT," +
                     "   APS.STOP_ON_QUOTA_REACH," +
-                    "   API.API_ID," +
-                    "   NULL AS API_PRODUCT_NAME," +
-                    "   NULL AS API_PRODUCT_PROVIDER " +
+                    "   API.API_ID" +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUB," +
                     "   AM_SUBSCRIBER SUBS," +
@@ -453,79 +371,38 @@ public class SQLConstants {
 
     public static final String ADVANCED_VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL =
             " SELECT " +
-            "   SUB.TIER_ID," +
-            "   SUBS.USER_ID," +
-            "   SUB.SUB_STATUS," +
-            "   APP.APPLICATION_ID," +
-            "   APP.NAME," +
-            "   APP.APPLICATION_TIER," +
-            "   APP.TOKEN_TYPE," +
-            "   AKM.KEY_TYPE," +
-            "   API.API_NAME," +
-            "   API.API_TIER," +
-            "   API.API_PROVIDER," +
-            "   NULL AS API_PRODUCT_NAME," +
-            "   NULL AS API_PRODUCT_TIER," +
-            "   NULL AS API_PRODUCT_PROVIDER," +
-            "   APS.RATE_LIMIT_COUNT," +
-            "   APS.RATE_LIMIT_TIME_UNIT," +
-            "   APS.STOP_ON_QUOTA_REACH," +
-            "   API.API_ID" +
-            " FROM " +
-            "   AM_SUBSCRIPTION SUB," +
-            "   AM_SUBSCRIBER SUBS," +
-            "   AM_APPLICATION APP," +
-            "   AM_APPLICATION_KEY_MAPPING AKM," +
-            "   AM_API API," +
-            "   AM_POLICY_SUBSCRIPTION APS" +
-            " WHERE " +
-            "   API.CONTEXT = ? " +
-            "   AND AKM.CONSUMER_KEY = ? " +
-            "   AND APS.TENANT_ID = ? " +
-            "   AND API.API_VERSION = ? " +
-            "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
-            "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
-            "   AND API.API_ID = SUB.API_ID" +
-            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
-            "   AND APS.NAME = SUB.TIER_ID" +
-            " UNION " +
-            "SELECT DISTINCT " +
-            "SUB.TIER_ID, " +
-            "SUBR.USER_ID, " +
-            "SUB.SUB_STATUS, " +
-            "APP.APPLICATION_ID, " +
-            "APP.NAME, " +
-            "APP.APPLICATION_TIER, " +
-            "APP.TOKEN_TYPE, " +
-            "AKM.KEY_TYPE, " +
-            "NULL AS API_NAME, " +
-            "NULL AS API_TIER, " +
-            "NULL AS API_PROVIDER, " +
-            "APIPRO.API_PRODUCT_NAME, " +
-            "APIPRO.API_PRODUCT_TIER, " +
-            "APIPRO.API_PRODUCT_PROVIDER, " +
-            "APS.RATE_LIMIT_COUNT, " +
-            "APS.RATE_LIMIT_TIME_UNIT, " +
-            "APS.STOP_ON_QUOTA_REACH, " +
-            "APIPRO.API_PRODUCT_ID AS API_ID " +
-            "FROM " +
-            "AM_API_PRODUCT AS APIPRO, " +
-            "AM_APPLICATION AS APP, " +
-            "AM_SUBSCRIPTION AS SUB, " +
-            "AM_SUBSCRIBER AS SUBR, " +
-            "AM_APPLICATION_KEY_MAPPING AS AKM, " +
-            "AM_POLICY_SUBSCRIPTION AS APS " +
-            "WHERE " +
-            "APIPRO.API_PRODUCT_CONTEXT = ? " +
-            "AND APIPRO.API_PRODUCT_VERSION = ? " +
-            "AND SUB.API_PRODUCT_ID = APIPRO.API_PRODUCT_ID " +
-            "AND APP.APPLICATION_ID = SUB.APPLICATION_ID " +
-            "AND SUBR.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
-            "AND AKM.APPLICATION_ID = APP.APPLICATION_ID " +
-            "AND APS.NAME = SUB.TIER_ID " +
-            "AND APS.TENANT_ID = ? " +
-            "ORDER BY API_PRODUCT_NAME ASC";
-
+                    "   SUB.TIER_ID," +
+                    "   SUBS.USER_ID," +
+                    "   SUB.SUB_STATUS," +
+                    "   APP.APPLICATION_ID," +
+                    "   APP.NAME," +
+                    "   APP.APPLICATION_TIER," +
+                    "   APP.TOKEN_TYPE," +
+                    "   AKM.KEY_TYPE," +
+                    "   API.API_NAME," +
+                    "   API.API_TIER," +
+                    "   API.API_PROVIDER," +
+                    "   APS.RATE_LIMIT_COUNT," +
+                    "   APS.RATE_LIMIT_TIME_UNIT," +
+                    "   APS.STOP_ON_QUOTA_REACH," +
+                    "   API.API_ID" +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUB," +
+                    "   AM_SUBSCRIBER SUBS," +
+                    "   AM_APPLICATION APP," +
+                    "   AM_APPLICATION_KEY_MAPPING AKM," +
+                    "   AM_API API," +
+                    "   AM_POLICY_SUBSCRIPTION APS" +
+                    " WHERE " +
+                    "   API.CONTEXT = ? " +
+                    "   AND AKM.CONSUMER_KEY = ? " +
+                    "   AND APS.TENANT_ID = ? " +
+                    "   AND API.API_VERSION = ? " +
+                    "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
+                    "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
+                    "   AND API.API_ID = SUB.API_ID" +
+                    "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
+                    "   AND APS.NAME = SUB.TIER_ID" ;
 
     public static final String UPDATE_TOKEN_PREFIX = "UPDATE ";
 
@@ -586,38 +463,17 @@ public class SQLConstants {
             "   API_ID = ? " +
             "   AND APPLICATION_ID = ?";
 
-    public static final String CHECK_EXISTING_SUBSCRIPTION_PRODUCT_SQL =
-            " SELECT " +
-            "   SUB_STATUS, SUBS_CREATE_STATE " +
-            " FROM " +
-            "   AM_SUBSCRIPTION " +
-            " WHERE " +
-            "   API_PRODUCT_ID = ? " +
-            "   AND APPLICATION_ID = ?";
-
     public static final String ADD_SUBSCRIPTION_SQL =
             " INSERT INTO " +
             "   AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS,SUBS_CREATE_STATE,CREATED_BY,CREATED_TIME, " +
                     "UPDATED_TIME, UUID) " +
             " VALUES (?,?,?,?,?,?,?,?,?)";
     
-    public static final String ADD_PRODUCT_SUBSCRIPTION_SQL =
-            " INSERT INTO " +
-            "   AM_SUBSCRIPTION (TIER_ID,API_PRODUCT_ID,APPLICATION_ID,SUB_STATUS,SUBS_CREATE_STATE,CREATED_BY,CREATED_TIME, " +
-                    "UPDATED_TIME, UUID) " +
-            " VALUES (?,?,?,?,?,?,?,?,?)";
-
     public static final String GET_SUBSCRIPTION_UUID_SQL =
             " SELECT UUID " +
             " FROM AM_SUBSCRIPTION " +
             " WHERE " +
             "   API_ID = ? " +
-            "   AND APPLICATION_ID = ?";
-    public static final String GET_SUBSCRIPTION_UUID_PRODUCT_SQL =
-            " SELECT UUID " +
-            " FROM AM_SUBSCRIPTION " +
-            " WHERE " +
-            "   API_PRODUCT_ID = ? " +
             "   AND APPLICATION_ID = ?";
     
     public static final String GET_SUBSCRIPTION_STATUS_BY_UUID_SQL =
@@ -643,49 +499,46 @@ public class SQLConstants {
             " SELECT SUB_STATUS FROM AM_SUBSCRIPTION WHERE SUBSCRIPTION_ID = ?";
 
     public static final String GET_SUBSCRIPTION_BY_ID_SQL =
-            "SELECT "
-            + "  T.SUBSCRIPTION_ID, T.API_PRODUCT_PROVIDER, T.API_PRODUCT_NAME, T.API_PRODUCT_VERSION, T.APPLICATION_ID, T.TIER_ID, "
-            + "  T.SUB_STATUS, T.SUBS_CREATE_STATE, T.UUID, T.API_PROVIDER, T.API_NAME, T.API_VERSION, "
-            + "  T.API_PRODUCT_ID "
-            + "FROM "
-            + " ("
-            + "   SELECT SUBS.SUBSCRIPTION_ID , SUBS.APPLICATION_ID, SUBS.TIER_ID,SUBS.SUB_STATUS, SUBS.SUBS_CREATE_STATE, "
-            + "     SUBS.API_ID ,SUBS.API_PRODUCT_ID,SUBS.UUID, NULL AS API_PRODUCT_NAME, NULL AS API_PRODUCT_PROVIDER, "
-            + "     NULL AS API_PRODUCT_VERSION, API.API_NAME, API.API_PROVIDER,  API.API_VERSION "
-            + "   FROM AM_SUBSCRIPTION SUBS , AM_API API " + "   WHERE SUBS.API_ID = API.API_ID "
-            + "   UNION "
-            + "   SELECT SUBS.SUBSCRIPTION_ID , SUBS.APPLICATION_ID, SUBS.TIER_ID, SUBS.SUB_STATUS, SUBS.SUBS_CREATE_STATE, "
-            + "     SUBS.API_ID ,SUBS.API_PRODUCT_ID,SUBS.UUID, PRODUCT.API_PRODUCT_NAME, PRODUCT.API_PRODUCT_PROVIDER, "
-            + "     PRODUCT.API_PRODUCT_VERSION, NULL AS API_NAME, NULL AS API_PROVIDER,  "
-            + "NULL AS API_VERSION "
-            + "   FROM AM_SUBSCRIPTION SUBS , AM_API_PRODUCT PRODUCT "
-            + "   WHERE SUBS.API_PRODUCT_ID = PRODUCT.API_PRODUCT_ID "
-            + "  ) T "
-            + "WHERE T.SUBSCRIPTION_ID  = ?";
+            " SELECT " +
+            "   SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
+            "   API.API_PROVIDER AS API_PROVIDER, " +
+            "   API.API_NAME AS API_NAME, " +
+            "   API.API_VERSION AS API_VERSION, " +
+            "   API.API_TYPE AS API_TYPE, " +
+            "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
+            "   SUBS.TIER_ID AS TIER_ID, " +
+            "   SUBS.SUB_STATUS AS SUB_STATUS, " +
+            "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+            "   SUBS.UUID AS UUID, " +
+            "   API.API_ID AS API_ID " +
+            " FROM " +
+            "   AM_SUBSCRIPTION SUBS," +
+            "   AM_API API " +
+            " WHERE " +
+            "   API.API_ID = SUBS.API_ID " +
+            "   AND SUBSCRIPTION_ID = ?";
     
     public static final String GET_SUBSCRIPTION_BY_UUID_SQL =
-            "SELECT " +
-            "  T.SUBSCRIPTION_ID, T.API_PRODUCT_PROVIDER, T.API_PRODUCT_NAME, T.API_PRODUCT_VERSION, " +
-            "  T.APPLICATION_ID, T.TIER_ID, T.SUB_STATUS," +
-            "  T.SUBS_CREATE_STATE, T.CREATED_TIME, T.UPDATED_TIME, T.UUID, T.API_PROVIDER, T.API_NAME, T.API_VERSION, " +
-            "  T.API_PRODUCT_ID " +
-            "FROM " +
-            " (" + 
-            "    SELECT SUBS.SUBSCRIPTION_ID , SUBS.APPLICATION_ID, SUBS.TIER_ID,SUBS.SUB_STATUS, SUBS.SUBS_CREATE_STATE, " +
-            "      SUBS.CREATED_TIME AS CREATED_TIME, SUBS.UPDATED_TIME AS UPDATED_TIME, SUBS.API_ID ,SUBS.API_PRODUCT_ID," +
-            "      SUBS.UUID, NULL AS API_PRODUCT_NAME, NULL AS API_PRODUCT_PROVIDER, NULL AS API_PRODUCT_VERSION," +
-            "      API.API_NAME, API.API_PROVIDER,  API.API_VERSION " +
-            "    FROM AM_SUBSCRIPTION SUBS , AM_API API " + 
-            "    WHERE SUBS.API_ID = API.API_ID " + 
-            "    UNION " + 
-            "    SELECT SUBS.SUBSCRIPTION_ID , SUBS.APPLICATION_ID, SUBS.TIER_ID, SUBS.SUB_STATUS, SUBS.SUBS_CREATE_STATE, " +
-            "      SUBS.CREATED_TIME AS CREATED_TIME, SUBS.UPDATED_TIME AS UPDATED_TIME, SUBS.API_ID ,SUBS.API_PRODUCT_ID," +
-            "      SUBS.UUID, PRODUCT.API_PRODUCT_NAME, PRODUCT.API_PRODUCT_PROVIDER, " +
-            "      PRODUCT.API_PRODUCT_VERSION, NULL AS API_NAME, NULL AS API_PROVIDER,  NULL AS API_VERSION " +
-            "    FROM AM_SUBSCRIPTION SUBS , AM_API_PRODUCT PRODUCT " + 
-            "    WHERE SUBS.API_PRODUCT_ID = PRODUCT.API_PRODUCT_ID " + 
-            "  ) T " +
-            "WHERE T.UUID  = ?";
+            " SELECT " +
+            "   SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
+            "   API.API_PROVIDER AS API_PROVIDER, " +
+            "   API.API_NAME AS API_NAME, " +
+            "   API.API_VERSION AS API_VERSION, " +
+            "   API.API_TYPE AS API_TYPE, " +
+            "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
+            "   SUBS.TIER_ID AS TIER_ID, " +
+            "   SUBS.SUB_STATUS AS SUB_STATUS, " +
+            "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+            "   SUBS.UUID AS UUID, " +
+            "   SUBS.CREATED_TIME AS CREATED_TIME, " +
+            "   SUBS.UPDATED_TIME AS UPDATED_TIME, " +
+            "   API.API_ID AS API_ID " +
+            " FROM " +
+            "   AM_SUBSCRIPTION SUBS," +
+            "   AM_API API " +
+            " WHERE " +
+            "   API.API_ID = SUBS.API_ID " +
+            "   AND UUID = ?";
 
     public static final String GET_TENANT_SUBSCRIBER_SQL =
             " SELECT " +
@@ -826,7 +679,7 @@ public class SQLConstants {
 
     public static final String GET_PAGINATED_SUBSCRIBED_APIS_SQL =
             " SELECT " +
-            "'" + APIType.API.toString() + "' AS TYPE, " +
+            "   API.API_TYPE AS TYPE, " +
             "   SUBS.UUID AS SUB_UUID, " +
             "   SUBS.SUBSCRIPTION_ID, " +
             "   API.API_PROVIDER AS API_PROVIDER, " +
@@ -849,34 +702,6 @@ public class SQLConstants {
             "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
             "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
             "   AND API.API_ID=SUBS.API_ID" +
-            "   AND APP.NAME= ? " +
-            "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
-
-    public static final String GET_PAGINATED_SUBSCRIBED_API_PRODUCTS_SQL =
-            " SELECT " +
-            "'" + APIType.API_PRODUCT.toString() + "' AS TYPE, " +
-            "   SUBS.UUID AS SUB_UUID, " +
-            "   SUBS.SUBSCRIPTION_ID, " +
-            "   API_PRODUCT.API_PRODUCT_PROVIDER AS API_PROVIDER, " +
-            "   API_PRODUCT.API_PRODUCT_NAME AS API_NAME, " +
-            "   API_PRODUCT.API_PRODUCT_VERSION AS API_VERSION, " +
-            "   SUBS.TIER_ID AS TIER_ID, " +
-            "   APP.APPLICATION_ID AS APP_ID, " +
-            "   APP.UUID AS APP_UUID, " +
-            "   SUBS.SUB_STATUS AS SUB_STATUS, " +
-            "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
-            "   APP.NAME AS APP_NAME, " +
-            "   APP.CALLBACK_URL AS CALLBACK_URL " +
-            " FROM " +
-            "   AM_SUBSCRIBER SUB," +
-            "   AM_APPLICATION APP, " +
-            "   AM_SUBSCRIPTION SUBS, " +
-            "   AM_API_PRODUCT API_PRODUCT " +
-            " WHERE " +
-            "   SUB.TENANT_ID = ? " +
-            "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
-            "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
-            "   AND API_PRODUCT.API_PRODUCT_ID=SUBS.API_PRODUCT_ID " +
             "   AND APP.NAME= ? " +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
@@ -907,7 +732,7 @@ public class SQLConstants {
 
     public static final String GET_SUBSCRIBED_APIS_OF_SUBSCRIBER_SQL =
             " SELECT " +
-            "'" + APIType.API.toString() + "' AS TYPE, " +
+            "   API.API_TYPE AS TYPE, " +
             "   SUBS.SUBSCRIPTION_ID AS SUBS_ID, " +
             "   API.API_PROVIDER AS API_PROVIDER, " +
             "   API.API_NAME AS API_NAME, " +
@@ -932,35 +757,6 @@ public class SQLConstants {
             "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
             "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID" +
             "   AND API.API_ID=SUBS.API_ID " +
-            "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
-
-    public static final String GET_SUBSCRIBED_API_PRODUCTS_OF_SUBSCRIBER_SQL =
-            " SELECT " +
-            "'" + APIType.API_PRODUCT.toString() + "' AS TYPE, " +
-            "   SUBS.SUBSCRIPTION_ID AS SUBS_ID, " +
-            "   API_PRODUCT.API_PRODUCT_PROVIDER AS API_PROVIDER, " +
-            "   API_PRODUCT.API_PRODUCT_NAME AS API_NAME, " +
-            "   API_PRODUCT.API_PRODUCT_VERSION AS API_VERSION, " +
-            "   SUBS.TIER_ID AS TIER_ID, " +
-            "   APP.APPLICATION_ID AS APP_ID, " +
-            "   SUBS.SUB_STATUS AS SUB_STATUS, " +
-            "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
-            "   APP.NAME AS APP_NAME, " +
-            "   APP.TOKEN_TYPE AS APP_TOKEN_TYPE, " +
-            "   APP.CALLBACK_URL AS CALLBACK_URL, " +
-            "   SUBS.UUID AS SUB_UUID, " +
-            "   APP.UUID AS APP_UUID, " +
-            "   APP.CREATED_BY AS OWNER" +
-            " FROM " +
-            "   AM_SUBSCRIBER SUB," +
-            "   AM_APPLICATION APP, " +
-            "   AM_SUBSCRIPTION SUBS, " +
-            "   AM_API_PRODUCT API_PRODUCT " +
-            " WHERE " +
-            "   SUB.TENANT_ID = ? " +
-            "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
-            "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID" +
-            "   AND API_PRODUCT.API_PRODUCT_ID=SUBS.API_PRODUCT_ID " +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
     public static final String GET_API_KEY_BY_SUBSCRIPTION_SQL =
@@ -1298,18 +1094,6 @@ public class SQLConstants {
             "   AND API.API_ID=SUB.API_ID" +
             "   AND SUB.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
-    public static final String GET_SUBSCRIPTION_COUNT_BY_API_PRODUCT_SQL =
-            " SELECT" +
-            "   COUNT(SUB.SUBSCRIPTION_ID) AS SUB_ID " +
-            " FROM " +
-            "   AM_SUBSCRIPTION SUB, " +
-            "   AM_API_PRODUCT APIPRODUCT " +
-            " WHERE APIPRODUCT.API_PRODUCT_PROVIDER=? " +
-            "   AND APIPRODUCT.API_PRODUCT_NAME=?" +
-            "   AND APIPRODUCT.API_PRODUCT_VERSION=?" +
-            "   AND APIPRODUCT.API_PRODUCT_ID=SUB.API_PRODUCT_ID" +
-            "   AND SUB.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
-
     public static final String UPDATE_SUBSCRIPTION_OF_APPLICATION_SQL =
             " UPDATE AM_SUBSCRIPTION " +
             " SET " +
@@ -1446,35 +1230,6 @@ public class SQLConstants {
             " ORDER BY " +
             "   APP.NAME";
 
-    public static final String GET_APP_API_PRODUCT_USAGE_BY_PROVIDER_SQL =
-            " SELECT " +
-            "   SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
-            "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
-            "   SUBS.SUB_STATUS AS SUB_STATUS, " +
-            "   SUBS.TIER_ID AS TIER_ID, " +
-            "   APIPRODUCT.API_PRODUCT_PROVIDER AS API_PRODUCT_PROVIDER, " +
-            "   APIPRODUCT.API_PRODUCT_NAME AS API_PRODUCT_NAME, " +
-            "   APIPRODUCT.API_PRODUCT_VERSION AS API_PRODUCT_VERSION, " +
-            "   SUB.USER_ID AS USER_ID, " +
-            "   APP.NAME AS APPNAME, " +
-            "   SUBS.UUID AS SUB_UUID, " +
-            "   SUBS.TIER_ID AS SUB_TIER_ID, " +
-            "   APP.UUID AS APP_UUID, " +
-            "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE " +
-            " FROM " +
-            "   AM_SUBSCRIPTION SUBS, " +
-            "   AM_APPLICATION APP, " +
-            "   AM_SUBSCRIBER SUB, " +
-            "   AM_API_PRODUCT APIPRODUCT " +
-            " WHERE " +
-            "   SUBS.APPLICATION_ID = APP.APPLICATION_ID " +
-            "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID " +
-            "   AND APIPRODUCT.API_PRODUCT_PROVIDER = ? " +
-            "   AND APIPRODUCT.API_PRODUCT_ID = SUBS.API_PRODUCT_ID " +
-            "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'" +
-            " ORDER BY " +
-            "   APP.NAME";
-
     public static final String GET_SUBSCRIPTIONS_OF_API_SQL =
             " SELECT " +
                     "   SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
@@ -1553,26 +1308,14 @@ public class SQLConstants {
     public static final String GET_API_RATING_SQL =
             "SELECT RATING FROM AM_API_RATINGS WHERE API_ID= ? AND SUBSCRIBER_ID=? ";
 
-    public static final String GET_API_PRODUCT_RATING_SQL =
-            "SELECT RATING FROM AM_API_RATINGS WHERE API_PRODUCT_ID= ? AND SUBSCRIBER_ID=? ";
-
     public static final String ADD_API_RATING_SQL =
             "INSERT INTO AM_API_RATINGS (RATING_ID, RATING, API_ID, SUBSCRIBER_ID)  VALUES (?,?,?,?)";
-
-    public static final String ADD_API_PRODUCT_RATING_SQL =
-            "INSERT INTO AM_API_RATINGS (RATING_ID, RATING, API_PRODUCT_ID, SUBSCRIBER_ID)  VALUES (?,?,?,?)";
 
     public static final String UPDATE_API_RATING_SQL =
             "UPDATE AM_API_RATINGS SET RATING=? WHERE API_ID= ? AND SUBSCRIBER_ID=?";
 
-    public static final String UPDATE_API_PRODUCT_RATING_SQL =
-            "UPDATE AM_API_RATINGS SET RATING=? WHERE API_PRODUCT_ID= ? AND SUBSCRIBER_ID=?";
-
     public static final String GET_API_RATING_ID_SQL =
             "SELECT RATING_ID FROM AM_API_RATINGS WHERE API_ID= ? AND SUBSCRIBER_ID=? ";
-
-    public static final String GET_API_PRODUCT_RATING_ID_SQL =
-            "SELECT RATING_ID FROM AM_API_RATINGS WHERE API_PRODUCT_ID= ? AND SUBSCRIBER_ID=? ";
 
     public static final String REMOVE_RATING_SQL =
             "DELETE FROM AM_API_RATINGS WHERE RATING_ID =? ";
@@ -1581,15 +1324,8 @@ public class SQLConstants {
             "SELECT RATING_ID, API_ID, RATING, SUBSCRIBER_ID FROM AM_API_RATINGS WHERE SUBSCRIBER_ID  = ? "
                     + "AND API_ID= ? ";
 
-    public static final String GET_API_PRODUCT_RATING_INFO_SQL =
-            "SELECT RATING_ID, API_PRODUCT_ID, RATING, SUBSCRIBER_ID FROM AM_API_RATINGS WHERE SUBSCRIBER_ID  = ? "
-                    + "AND API_PRODUCT_ID= ? ";
-
     public static final String GET_API_ALL_RATINGS_SQL =
             "SELECT RATING_ID, API_ID, RATING, SUBSCRIBER_ID FROM AM_API_RATINGS WHERE API_ID= ? ";
-
-    public static final String GET_API_PRODUCT_ALL_RATINGS_SQL =
-            "SELECT RATING_ID, API_PRODUCT_ID, RATING, SUBSCRIBER_ID FROM AM_API_RATINGS WHERE API_PRODUCT_ID= ? ";
 
     public static final String GET_SUBSCRIBER_NAME_FROM_ID_SQL =
             "SELECT USER_ID FROM AM_SUBSCRIBER WHERE SUBSCRIBER_ID = ? ";
@@ -1601,9 +1337,6 @@ public class SQLConstants {
     public static final String REMOVE_FROM_API_RATING_SQL =
             "DELETE FROM AM_API_RATINGS WHERE API_ID=? ";
 
-    public static final String REMOVE_FROM_API_PRODUCT_RATING_SQL =
-            "DELETE FROM AM_API_RATINGS WHERE API_PRODUCT_ID=? ";
-
     public static final String GET_API_AVERAGE_RATING_SQL =
             " SELECT " +
             "   CAST( SUM(RATING) AS DECIMAL)/COUNT(RATING) AS RATING " +
@@ -1613,16 +1346,6 @@ public class SQLConstants {
             "   API_ID =? " +
             " GROUP BY " +
             "   API_ID ";
-
-    public static final String GET_API_PRODUCT_AVERAGE_RATING_SQL =
-            " SELECT " +
-            "   CAST( SUM(RATING) AS DECIMAL)/COUNT(RATING) AS RATING " +
-            " FROM " +
-            "   AM_API_RATINGS " +
-            " WHERE " +
-            "   API_PRODUCT_ID =? " +
-            " GROUP BY " +
-            "   API_PRODUCT_ID ";
 
     public static final String APP_APPLICATION_SQL =
             " INSERT INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, " +
@@ -1988,14 +1711,15 @@ public class SQLConstants {
             "   AND SUB.TENANT_ID = ?";
 
     public static final String GET_API_ID_SQL =
-            "SELECT API.API_ID FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND API.API_VERSION = ?";
+            "SELECT API.API_ID FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND API.API_VERSION = ? ";
+
     public static final String GET_API_PRODUCT_ID_SQL =
-            "SELECT API_PRODUCT_ID AS API_ID FROM AM_API_PRODUCT WHERE API_PRODUCT_PROVIDER = ? AND API_PRODUCT_NAME = ? "
-                    + "AND API_PRODUCT_VERSION = ?";
+            "SELECT API_ID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? "
+                    + "AND API_VERSION = ? AND API_TYPE = '" + APIConstants.API_PRODUCT + "'";
 
     public static final String GET_API_PRODUCT_SQL =
-            "SELECT API_PRODUCT_ID, API_PRODUCT_TIER FROM AM_API_PRODUCT WHERE API_PRODUCT_PROVIDER = ? " +
-                    "AND API_PRODUCT_NAME = ? AND API_PRODUCT_VERSION = ?";
+            "SELECT API_ID, API_TIER FROM AM_API WHERE API_PROVIDER = ? " +
+                    "AND API_NAME = ? AND API_VERSION = ? AND API_TYPE = '" + APIConstants.API_PRODUCT + "'";
 
     public static final String ADD_API_LIFECYCLE_EVENT_SQL =
             " INSERT INTO AM_API_LC_EVENT (API_ID, PREVIOUS_STATE, NEW_STATE, USER_ID, TENANT_ID, EVENT_DATE)" +
@@ -2318,14 +2042,11 @@ public class SQLConstants {
             "   AUM.AUTH_SCHEME," +
             "   AUM.THROTTLING_TIER, " +
             "   AUM.MEDIATION_SCRIPT, " +
-            "   PROD.API_PRODUCT_PROVIDER, " +
-            "   PROD.API_PRODUCT_NAME, " +
-            "   PROD.API_PRODUCT_VERSION " +
+            "   API.API_TYPE " +
             " FROM " +
             "   AM_API_URL_MAPPING AUM " +
             " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
             " LEFT JOIN AM_API_PRODUCT_MAPPING APM ON AUM.URL_MAPPING_ID = APM.URL_MAPPING_ID" +
-            " LEFT JOIN AM_API_PRODUCT PROD ON PROD.API_PRODUCT_ID = APM.API_PRODUCT_ID" +
             " WHERE " +
             "  API.API_PROVIDER = ? AND " +
             "  API.API_NAME = ? AND " +
@@ -2359,10 +2080,6 @@ public class SQLConstants {
             " INSERT INTO AM_API_COMMENTS (COMMENT_ID,COMMENT_TEXT,COMMENTED_USER,DATE_COMMENTED,API_ID)" +
             " VALUES (?,?,?,?,?)";
 
-    public static final String ADD_API_PRODUCT_COMMENT_SQL =
-            " INSERT INTO AM_API_COMMENTS (COMMENT_ID,COMMENT_TEXT,COMMENTED_USER,DATE_COMMENTED,API_PRODUCT_ID)" +
-                    " VALUES (?,?,?,?,?)";
-
     public static final String GET_COMMENT_SQL =
             " SELECT AM_API_COMMENTS.COMMENT_ID AS COMMENT_ID," +
             "   AM_API_COMMENTS.COMMENT_TEXT AS COMMENT_TEXT," +
@@ -2374,18 +2091,6 @@ public class SQLConstants {
             "   AND API.API_VERSION = ? " +
             "   AND API.API_ID = AM_API_COMMENTS.API_ID " +
             "   AND AM_API_COMMENTS.COMMENT_ID = ?";
-
-    public static final String GET_API_PRODUCT_COMMENT_SQL =
-            " SELECT AM_API_COMMENTS.COMMENT_ID AS COMMENT_ID," +
-                    "   AM_API_COMMENTS.COMMENT_TEXT AS COMMENT_TEXT," +
-                    "   AM_API_COMMENTS.COMMENTED_USER AS COMMENTED_USER," +
-                    "   AM_API_COMMENTS.DATE_COMMENTED AS DATE_COMMENTED " +
-                    " FROM AM_API_COMMENTS, AM_API_PRODUCT API_PRODUCT " +
-                    " WHERE API_PRODUCT.API_PRODUCT_PROVIDER = ? " +
-                    "   AND API_PRODUCT.API_PRODUCT_NAME = ? " +
-                    "   AND API_PRODUCT.API_PRODUCT_VERSION = ? " +
-                    "   AND API_PRODUCT.API_PRODUCT_ID = AM_API_COMMENTS.API_PRODUCT_ID " +
-                    "   AND AM_API_COMMENTS.COMMENT_ID = ?";
 
     public static final String GET_COMMENTS_SQL =
             " SELECT AM_API_COMMENTS.COMMENT_ID AS COMMENT_ID," +
@@ -2400,20 +2105,6 @@ public class SQLConstants {
             "   AND API.API_NAME = ? " +
             "   AND API.API_VERSION  = ? " +
             "   AND API.API_ID = AM_API_COMMENTS.API_ID";
-
-    public static final String GET_API_PRODUCT_COMMENTS_SQL =
-            " SELECT AM_API_COMMENTS.COMMENT_ID AS COMMENT_ID," +
-                    "   AM_API_COMMENTS.COMMENT_TEXT AS COMMENT_TEXT," +
-                    "   AM_API_COMMENTS.COMMENTED_USER AS COMMENTED_USER," +
-                    "   AM_API_COMMENTS.DATE_COMMENTED AS DATE_COMMENTED " +
-                    " FROM " +
-                    "   AM_API_COMMENTS, " +
-                    "   AM_API_PRODUCT API_PRODUCT " +
-                    " WHERE " +
-                    "   API_PRODUCT.API_PRODUCT_PROVIDER = ? " +
-                    "   AND API_PRODUCT.API_PRODUCT_NAME = ? " +
-                    "   AND API_PRODUCT.API_PRODUCT_VERSION  = ? " +
-                    "   AND API_PRODUCT.API_PRODUCT_ID = AM_API_COMMENTS.API_PRODUCT_ID";
 
     public static final String DELETE_COMMENT_SQL = "DELETE FROM AM_API_COMMENTS WHERE AM_API_COMMENTS.COMMENT_ID = ?";
 
@@ -2507,17 +2198,6 @@ public class SQLConstants {
             "   AND ASUB.APPLICATION_ID=? " +
             "   AND AW.WF_REFERENCE=ASUB.SUBSCRIPTION_ID " +
             "   AND AW.WF_TYPE=?";
-    public static final String GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_PRODUCT_SQL =
-            "SELECT " +
-            "   AW.WF_EXTERNAL_REFERENCE " +
-            " FROM" +
-            "   AM_WORKFLOWS AW, " +
-            "   AM_SUBSCRIPTION ASUB " +
-            " WHERE" +
-            "   ASUB.API_PRODUCT_ID=? " +
-            "   AND ASUB.APPLICATION_ID=? " +
-            "   AND AW.WF_REFERENCE=ASUB.SUBSCRIPTION_ID " +
-            "   AND AW.WF_TYPE=?";
 
     public static final String GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_POSTGRE_SQL =
             "SELECT" +
@@ -2530,18 +2210,7 @@ public class SQLConstants {
             "   AND ASUB.APPLICATION_ID=?" +
             "   AND AW.WF_REFERENCE::integer=ASUB.SUBSCRIPTION_ID " +
             "   AND AW.WF_TYPE=?";
-
-    public static final String GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_POSTGRE_PRODUCT_SQL =
-            "SELECT" +
-            "   AW.WF_EXTERNAL_REFERENCE" +
-            " FROM" +
-            "   AM_WORKFLOWS AW, " +
-            "   AM_SUBSCRIPTION ASUB  " +
-            " WHERE" +
-            "   ASUB.API_PRODUCT_ID=? " +
-            "   AND ASUB.APPLICATION_ID=?" +
-            "   AND AW.WF_REFERENCE::integer=ASUB.SUBSCRIPTION_ID " +
-            "   AND AW.WF_TYPE=?";
+    
     public static final String GET_EXTERNAL_WORKFLOW_FOR_SUBSCRIPTION_SQL =
             " SELECT " +
             "   WF_EXTERNAL_REFERENCE" +
@@ -2586,9 +2255,6 @@ public class SQLConstants {
 
     public static final String GET_SUBSCRIPTION_STATUS_SQL =
             "SELECT SUB_STATUS FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
-
-    public static final String GET_SUBSCRIPTION_STATUS_PRODUCT_SQL =
-            "SELECT SUB_STATUS FROM AM_SUBSCRIPTION WHERE API_PRODUCT_ID = ? AND APPLICATION_ID = ?";
     
     public static final String GET_SUBSCRIPTION_CREATION_STATUS_SQL =
             "SELECT SUBS_CREATE_STATE FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
@@ -2630,10 +2296,10 @@ public class SQLConstants {
             " INSERT INTO AM_API_SCOPES (API_ID, SCOPE_ID) VALUES (?,?)";
 
     public static final String ADD_PRODUCT_RESOURCE_MAPPING_SQL = "INSERT INTO AM_API_PRODUCT_MAPPING "
-            + "(API_PRODUCT_ID,URL_MAPPING_ID) " + "VALUES (?, ?)";
+            + "(API_ID,URL_MAPPING_ID) " + "VALUES (?, ?)";
 
     public static final String DELETE_FROM_AM_API_PRODUCT_MAPPING_SQL = "DELETE FROM AM_API_PRODUCT_MAPPING WHERE "
-            + "API_PRODUCT_ID = ? ";
+            + "API_ID = ? ";
 
     public static final String GET_API_SCOPES_SQL =
             " SELECT A.SCOPE_ID, A.NAME, A.DISPLAY_NAME, A.DESCRIPTION, C.SCOPE_BINDING " +
@@ -2822,9 +2488,6 @@ public class SQLConstants {
 
     public static final String REMOVE_SUBSCRIPTION_BY_APPLICATION_ID_SQL =
             "DELETE FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ? ";
-    
-    public static final String REMOVE_SUBSCRIPTION_BY_APPLICATION_ID_AND_PRODUCT_SQL =
-            "DELETE FROM AM_SUBSCRIPTION WHERE API_PRODUCT_ID = ? AND APPLICATION_ID = ? ";
 
     public static final String GET_API_NAME_NOT_MATCHING_CONTEXT_SQL =
             "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT NOT LIKE ?";
@@ -3361,50 +3024,29 @@ public class SQLConstants {
 
     public static final String UPDATE_LABEL_SQL = "UPDATE AM_LABELS SET NAME = ?, DESCRIPTION = ?  WHERE LABEL_ID = ?";
 
-    public static final String GET_PUBLISHED_PRODUCT_SQL = 
-            "SELECT API_PRODUCT_ID,UUID,TENANT_DOMAIN,API_PRODUCT_PROVIDER,API_PRODUCT_NAME,VISIBILITY,"
-            + " VISIBILE_ROLES, DESCRIPTION "
-            + "FROM AM_API_PRODUCT WHERE STATE=? AND TENANT_DOMAIN = ?";
-
     public static final String DELETE_API_PRODUCT_SQL = 
-            "DELETE FROM AM_API_PRODUCT WHERE API_PRODUCT_PROVIDER = ? AND API_PRODUCT_NAME = ? AND API_PRODUCT_VERSION = ?";
-
-    public static final String LIST_PRODUCT_RESOURCE_MAPPING = 
-            "SELECT API_NAME, API_PROVIDER , API_VERSION ,T1.API_ID ,API_PRODUCT_ID, HTTP_METHOD, URL_PATTERN, "
-                    + "T1.URL_MAPPING_ID " +
-            "FROM " + 
-            "(SELECT API_NAME ,API_PROVIDER, API_VERSION, API.API_ID,URL.URL_MAPPING_ID "
-            + "FROM AM_API_URL_MAPPING URL, AM_API API "
-            + "WHERE API.API_ID = URL.API_ID) T1 " + 
-            "INNER JOIN " + 
-            "(SELECT API_PRODUCT_ID, HTTP_METHOD, URL_PATTERN, URL.URL_MAPPING_ID "
-            + "FROM AM_API_PRODUCT_MAPPING PRODUCT, AM_API_URL_MAPPING URL "
-            + "WHERE URL.URL_MAPPING_ID  = PRODUCT.URL_MAPPING_ID  AND API_PRODUCT_ID =? ) T2 " + 
-            "ON " + 
-            "(T1.URL_MAPPING_ID =T2.URL_MAPPING_ID )";
+            "DELETE FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? AND API_TYPE = '"
+                    + APIConstants.API_PRODUCT + "'";
 
     public static final String UPDATE_PRODUCT_SQL =
-            " UPDATE AM_API_PRODUCT " +
+            " UPDATE AM_API " +
             " SET" +
-            "   API_PRODUCT_TIER=?," +
+            "   API_TIER=?," +
             "   UPDATED_BY=?," +
             "   UPDATED_TIME=?" +
             " WHERE" +
-            "   API_PRODUCT_NAME=? AND API_PRODUCT_PROVIDER=? AND API_PRODUCT_VERSION=?";
-    
-    public static final String UPDATE_BLOB_API_PRODUCT_BY_COLUMN = 
-            "UPDATE AM_API_PRODUCT SET {column} = ? WHERE UUID = ?";
+            "   API_NAME=? AND API_PROVIDER=? AND API_VERSION=? AND API_TYPE='" + APIConstants.API_PRODUCT +"'";
 
     public static final String GET_PRODUCT_ID =
-            "SELECT API_PRODUCT_ID FROM AM_API_PRODUCT WHERE API_PRODUCT_NAME = ? AND API_PRODUCT_PROVIDER = ? AND "
-            + "API_PRODUCT_VERSION = ?";
+            "SELECT API_ID FROM AM_API WHERE API_NAME = ? AND API_PROVIDER = ? AND "
+            + "API_VERSION = ? AND API_TYPE='" + APIConstants.API_PRODUCT +"'";
 
     public static final String GET_PRODUCT_RESOURCE_MAPPINGS_FOR_API =
             "SELECT "
-            + "API_PRODUCT_NAME, API_PRODUCT_PROVIDER , API_PRODUCT_VERSION, HTTP_METHOD, URL_PATTERN "
-            + "FROM AM_API_URL_MAPPING, AM_API_PRODUCT_MAPPING, AM_API_PRODUCT "
+            + "API_NAME, API_PROVIDER , API_VERSION, HTTP_METHOD, URL_PATTERN "
+            + "FROM AM_API_URL_MAPPING, AM_API_PRODUCT_MAPPING, AM_API "
             + "WHERE AM_API_URL_MAPPING.URL_MAPPING_ID = AM_API_PRODUCT_MAPPING.URL_MAPPING_ID AND "
-            + "AM_API_PRODUCT_MAPPING.API_PRODUCT_ID = AM_API_PRODUCT.API_PRODUCT_ID AND API_ID = ?";
+            + "AM_API_PRODUCT_MAPPING.API_ID = AM_API.API_ID AND AM_API.API_ID = ?";
 
     public static final String GET_URL_TEMPLATES_FOR_API = 
             "SELECT URL_PATTERN , URL_MAPPING_ID, HTTP_METHOD FROM AM_API API , AM_API_URL_MAPPING URL "
@@ -3413,16 +3055,14 @@ public class SQLConstants {
 
     public static final String ADD_API_PRODUCT = 
             "INSERT INTO "
-            + "AM_API_PRODUCT(API_PRODUCT_PROVIDER,API_PRODUCT_NAME,API_PRODUCT_VERSION,API_PRODUCT_CONTEXT,"
-            + "API_PRODUCT_TIER,CREATED_BY,CREATED_TIME) VALUES (?,?,?,?,?,?,?)";
+            + "AM_API(API_PROVIDER, API_NAME, API_VERSION, CONTEXT,"
+            + "API_TIER, CREATED_BY, CREATED_TIME, API_TYPE) VALUES (?,?,?,?,?,?,?,?)";
 
-    public static final String GET_RESOURCES_OF_PRODUCT = "SELECT "
-            + "API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, "
-            + "API_UM.THROTTLING_TIER, API.API_PROVIDER, API.API_NAME, API.API_VERSION, API.CONTEXT " + "FROM "
-            + "AM_API_URL_MAPPING AS API_UM, AM_API_PRODUCT_MAPPING AS PRO_UM, AM_API AS API, AM_API_PRODUCT AS PRO "
-            + "WHERE API_UM.URL_MAPPING_ID = PRO_UM.URL_MAPPING_ID AND API_UM.API_ID = API.API_ID AND "
-            + "PRO_UM.API_PRODUCT_ID = PRO.API_PRODUCT_ID AND PRO.API_PRODUCT_PROVIDER = ? AND PRO.API_PRODUCT_NAME = ? "
-            + "AND PRO.API_PRODUCT_VERSION = ?";
+    public static final String GET_RESOURCES_OF_PRODUCT = 
+            "SELECT API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, "
+            + "API_UM.THROTTLING_TIER, API.API_PROVIDER, API.API_NAME, API.API_VERSION, API.CONTEXT, PRO_UM.API_ID "
+            + "FROM AM_API_URL_MAPPING AS API_UM, AM_API_PRODUCT_MAPPING AS PRO_UM, AM_API AS API "
+            + "WHERE API_UM.URL_MAPPING_ID = PRO_UM.URL_MAPPING_ID AND API_UM.API_ID = API.API_ID AND PRO_UM.API_ID = ?";
 
     /** Throttle related constants**/
 
@@ -3541,10 +3181,10 @@ public class SQLConstants {
 
         public static final String GET_CONDITION_GROUPS_FOR_POLICIES_IN_PRODUCTS_SQL = "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, AUM.URL_PATTERN, AUM.THROTTLING_TIER, " +
                 "AUM.MEDIATION_SCRIPT, AUM.URL_MAPPING_ID, POL.APPLICABLE_LEVEL, GRP.CONDITION_GROUP_ID " +
-                "FROM AM_API_URL_MAPPING AUM, AM_API_PRODUCT_MAPPING APM, AM_API_PRODUCT API, AM_API_THROTTLE_POLICY POL " +
+                "FROM AM_API_URL_MAPPING AUM, AM_API_PRODUCT_MAPPING APM, AM_API API, AM_API_THROTTLE_POLICY POL " +
                 "LEFT OUTER JOIN AM_CONDITION_GROUP GRP ON POL.POLICY_ID  = GRP.POLICY_ID " +
-                "WHERE APM.API_PRODUCT_ID = API.API_PRODUCT_ID " +
-                "AND API.API_PRODUCT_CONTEXT = ? AND API. API_PRODUCT_VERSION = ? AND POL.TENANT_ID = ? " +
+                "WHERE APM.API_ID = API.API_ID " +
+                "AND API.CONTEXT = ? AND API.API_VERSION = ? AND POL.TENANT_ID = ? " +
                 "AND APM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND AUM.THROTTLING_TIER = POL.NAME " +
                 "ORDER BY AUM.URL_MAPPING_ID";
 
