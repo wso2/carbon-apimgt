@@ -52,6 +52,11 @@ import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.api.model.policy.Limit;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
@@ -1417,6 +1422,7 @@ public class APIUtilTest {
         Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
         Mockito.when(throttleProperties.isEnabled()).thenReturn(true);
         Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
+        Mockito.when(policy.getPolicyName()).thenReturn("policy");
         Mockito.when(policy.getDefaultQuotaPolicy()).thenReturn(quotaPolicy);
         Mockito.when(quotaPolicy.getLimit()).thenReturn(limit);
         Mockito.when(registry.getTags(artifactPath)).thenReturn(getTagsFromSet(expectedAPI.getTags()));
@@ -1487,6 +1493,7 @@ public class APIUtilTest {
         Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
         Mockito.when(throttleProperties.isEnabled()).thenReturn(true);
         Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
+        Mockito.when(policy.getPolicyName()).thenReturn("policy");
         Mockito.when(policy.getDefaultQuotaPolicy()).thenReturn(quotaPolicy);
         Mockito.when(quotaPolicy.getLimit()).thenReturn(limit);
         Mockito.when(registry.getTags(artifactPath)).thenReturn(getTagsFromSet(expectedAPI.getTags()));
