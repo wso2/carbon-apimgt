@@ -148,8 +148,7 @@ class CommentOptions extends React.Component {
         return (
             <Grid container spacing={1} className={classes.verticalSpace} key={comment.id}>
                 {/* only the comment owner or admin can delete a comment */}
-                {AuthManager.getUser() && (comment.createdBy === AuthManager.getUser().name
-                    || AuthManager.getUser().name === theme.custom.adminRole) && [
+                {AuthManager.getUser() && (comment.createdBy === AuthManager.getUser().name) && [
                         <Grid item key='key-delete'>
                             <Button
                                 variant="outlined" size="small"
@@ -167,7 +166,7 @@ class CommentOptions extends React.Component {
                         </Grid>,
                     ]}
 
-                {AuthManager.getUser() && comment.parentCommentId == null && [
+                {/* {AuthManager.getUser() && comment.parentCommentId == null && [
                     <Grid item key='key-reply'>
                         <Typography
                             component='a'
@@ -180,7 +179,7 @@ class CommentOptions extends React.Component {
                     <Grid item key='key-reply-vertical-divider'>
                         <VerticalDivider height={15} />
                     </Grid>,
-                ]}
+                ]} */}
 
                 {/* only the comment owner can modify the comment from the exact entry point */}
                 {/* {comment.createdBy === AuthManager.getUser().name

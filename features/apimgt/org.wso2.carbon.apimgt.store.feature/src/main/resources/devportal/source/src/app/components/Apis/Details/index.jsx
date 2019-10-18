@@ -381,20 +381,67 @@ class Details extends React.Component {
                             )}
                         </Link>
                     )}
-                    <LeftMenuItem text='overview' route='overview' to={pathPrefix + 'overview'} />
+                    <LeftMenuItem
+                        text={
+                            <FormattedMessage id='Apis.Details.index.overview' defaultMessage='Overview' />
+                        }
+                        route='overview'
+                        iconText='overview'
+                        to={pathPrefix + 'overview'}
+                    />
                     {!api.advertiseInfo.advertised && (
                         <React.Fragment>
                             { user &&
                             <React.Fragment>
-                                <LeftMenuItem text='credentials' route='credentials' to={pathPrefix + 'credentials'} />
-                                <LeftMenuItem text='comments' route='comments' to={pathPrefix + 'comments'} />
+                                <LeftMenuItem
+                                    text={
+                                        <FormattedMessage
+                                            id='Apis.Details.index.credentials'
+                                            defaultMessage='Credentials'
+                                        />
+                                    }
+                                    route='credentials'
+                                    iconText='credentials'
+                                    to={pathPrefix + 'credentials'}
+                                />
                             </React.Fragment>}
-                            {api.type !== 'WS' && <LeftMenuItem text='test' route='test' to={pathPrefix + 'test'} />}
+                            <LeftMenuItem
+                                text={
+                                    <FormattedMessage id='Apis.Details.index.comments' defaultMessage='Comments' />
+                                }
+                                route='comments'
+                                iconText='comments'
+                                to={pathPrefix + 'comments'}
+                             />
+                            {api.type !== 'WS' && (
+                                <LeftMenuItem
+                                    text={
+                                        <FormattedMessage id='Apis.Details.index.try.out' defaultMessage='Try out' />
+                                    }
+                                    route='test'
+                                    iconText='test'
+                                    to={pathPrefix + 'test'}
+                                />
+                            )}
                         </React.Fragment>
                     )}
-                    <LeftMenuItem text='Documentation' route='documents' to={pathPrefix + 'documents'} />
+                    <LeftMenuItem
+                        text={
+                            <FormattedMessage id='Apis.Details.index.documentation' defaultMessage='Documentation' />
+                        }
+                        route='documents'
+                        iconText='docs'
+                        to={pathPrefix + 'documents'}
+                    />
                     {!api.advertiseInfo.advertised && api.type !== 'WS' && (
-                        <LeftMenuItem text='SDK' route='sdk' to={pathPrefix + 'sdk'} />
+                        <LeftMenuItem
+                            text={
+                                <FormattedMessage id='Apis.Details.index.sdk' defaultMessage='SDK' />
+                            }
+                            route='sdk'
+                            iconText='sdk'
+                            to={pathPrefix + 'sdk'}
+                        />
                     )}
                 </div>
                 <div className={classes.content}>

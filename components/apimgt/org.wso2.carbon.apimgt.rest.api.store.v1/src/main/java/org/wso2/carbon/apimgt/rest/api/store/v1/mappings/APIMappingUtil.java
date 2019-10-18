@@ -538,7 +538,11 @@ public class APIMappingUtil {
     static APIInfoDTO fromAPIToInfoDTO(API api) {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setDescription(api.getDescription());
-        apiInfoDTO.setContext(api.getContext());
+        String context = api.getContextTemplate();
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }
+        apiInfoDTO.setContext(context);
         apiInfoDTO.setId(api.getUUID());
         APIIdentifier apiId = api.getId();
         apiInfoDTO.setName(apiId.getApiName());

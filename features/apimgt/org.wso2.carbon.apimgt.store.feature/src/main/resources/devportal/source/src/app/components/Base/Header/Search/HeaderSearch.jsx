@@ -22,7 +22,6 @@ import PropTypes from 'prop-types';
 import Autosuggest from 'react-autosuggest';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -65,10 +64,6 @@ const styles = theme => ({
     },
     searchBox: {
         padding: '5px 5px 5px 5px',
-    },
-    buttonProgress: {
-        color: theme.palette.secondary.main,
-        marginLeft: -50,
     },
     selectRoot: {
         background: '#fff',
@@ -239,10 +234,9 @@ class HeaderSearch extends React.Component {
     renderSuggestionsContainer(options) {
         const { containerProps, children } = options;
         const { isLoading } = this.state;
-        const { classes } = this.props;
 
         return isLoading ? (
-            <CircularProgress size={24} className={classes.buttonProgress} />
+            null
         ) : (
             <Paper {...containerProps} square>
                 {children}
