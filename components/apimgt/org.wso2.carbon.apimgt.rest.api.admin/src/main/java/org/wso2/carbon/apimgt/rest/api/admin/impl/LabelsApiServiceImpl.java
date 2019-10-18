@@ -57,7 +57,7 @@ public class LabelsApiServiceImpl extends LabelsApiService {
             apiAdmin.deleteLabel(user, labelId);
             return Response.ok().build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while deleting API : " + labelId;
+            String errorMessage = "Error while deleting label : " + labelId;
             RestApiUtil.handleInternalServerError(errorMessage, log);
         }
         return null;
@@ -103,7 +103,7 @@ public class LabelsApiServiceImpl extends LabelsApiService {
                     labelDTO.getId());
             return Response.created(location).entity(labelDTO).build();
         } catch (APIManagementException | URISyntaxException e) {
-            String errorMessage = "Error while adding new Label for API : "
+            String errorMessage = "Error while adding new a label to API : "
                     + body.getName() + "-" + e.getMessage() ;
             RestApiUtil.handleInternalServerError(errorMessage, log);
         }
