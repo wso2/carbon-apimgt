@@ -20,6 +20,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import Loadable from 'react-loadable';
 import Configurations from 'Config';
+import Settings from 'Settings';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import Login from './app/components/Login/Login';
 import Logout from './app/components/Logout';
@@ -102,7 +103,7 @@ class Store extends React.Component {
      * @param {string} tenant tenant name
      */
     SetTenantTheme(tenant) {
-        fetch(`${Configurations.app.context}/site/public/tenant_themes/${tenant}/defaultTheme.json`)
+        fetch(`${Settings.app.context}/site/public/tenant_themes/${tenant}/defaultTheme.json`)
             .then(resp => resp.json())
             .then((data) => {
                 this.setState({ theme: data.themes.light });
@@ -119,7 +120,7 @@ class Store extends React.Component {
      */
     render() {
         const { settings, tenantDomain, theme } = this.state;
-        const { app: { context } } = Configurations;
+        const { app: { context } } = Settings;
         return (
             settings && theme && (
                 <SettingsProvider value={{ settings, tenantDomain, setTenantDomain: this.setTenantDomain }}>
