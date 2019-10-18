@@ -71,6 +71,7 @@ const useStyles = makeStyles(theme => ({
         flexDirection: 'column',
         padding: 10,
         cursor: 'pointer',
+        minWidth: 30,
     },
     goToWrapper: {
         position: 'relative',

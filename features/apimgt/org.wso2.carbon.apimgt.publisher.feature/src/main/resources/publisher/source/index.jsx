@@ -15,6 +15,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// These must be the first lines in source/index.js
+import 'react-app-polyfill/ie11';
+import 'react-app-polyfill/stable';
 
 import ReactDOM from 'react-dom';
 import React from 'react';

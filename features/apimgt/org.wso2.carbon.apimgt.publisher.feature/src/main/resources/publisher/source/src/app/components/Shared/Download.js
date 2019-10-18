@@ -59,4 +59,4 @@ const downloadFile = function (response) {
         }, 100);
     }
 };
-exports.downloadFile = downloadFile;
+export default downloadFile;
