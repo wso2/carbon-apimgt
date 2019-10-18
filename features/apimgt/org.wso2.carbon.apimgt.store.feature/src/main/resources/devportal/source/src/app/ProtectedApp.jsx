@@ -19,7 +19,7 @@
 import React, { Component } from 'react';
 import qs from 'qs';
 import { addLocaleData, defineMessages, IntlProvider } from 'react-intl';
-import Configurations from 'Config';
+import Settings from 'Settings';
 import Tenants from 'AppData/Tenants';
 import SettingsContext from 'AppComponents/Shared/SettingsContext';
 import queryString from 'query-string';
@@ -151,7 +151,7 @@ export default class ProtectedApp extends Component {
      * @param {string} locale Locale name
      */
     loadLocale(locale = 'en') {
-        fetch(`${Configurations.app.context}/site/public/locales/${locale}.json`)
+        fetch(`${Settings.app.context}/site/public/locales/${locale}.json`)
             .then(resp => resp.json())
             .then((data) => {
                 // eslint-disable-next-line global-require, import/no-dynamic-require
