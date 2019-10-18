@@ -27,6 +27,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.openjpa.util.ApplicationIds;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -1337,6 +1338,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         applicationDTO.setName(application.getName());
         applicationDTO.setOwner(application.getOwner());
         applicationDTO.setTier(application.getTier());
+        applicationDTO.setUuid(application.getUUID());
         jwtTokenInfoDTO.setApplication(applicationDTO);
 
         jwtTokenInfoDTO.setSubscriber(userName);
@@ -5425,6 +5427,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             updatedDefinition = oasParser.getOASDefinitionForStore(apiProduct, definition, hostWithScheme);
         }
         return updatedDefinition;
+    }
+
+    public void revokeAPIKey(String signature, long expiryTime, String tenantDomain) throws APIManagementException {
+        apiMgtDAO.addRevokedJWTSignature(signature, APIConstants.API_KEY_TYPE, expiryTime, tenantDomain);
     }
 
     private Map<String, Object> filterMultipleVersionedAPIs(Map<String, Object> searchResults) {

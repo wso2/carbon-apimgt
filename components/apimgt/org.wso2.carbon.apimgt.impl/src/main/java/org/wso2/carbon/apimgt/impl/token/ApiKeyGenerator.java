@@ -75,7 +75,9 @@ public class ApiKeyGenerator {
         jwtClaimsSetBuilder.claim("sub", jwtTokenInfoDTO.getEndUserName());
         jwtClaimsSetBuilder.claim("jti", UUID.randomUUID().toString());
         jwtClaimsSetBuilder.claim("iat", currentTime);
-        if (expireIn != -1) { jwtClaimsSetBuilder.claim("exp", expireIn); }
+        if (expireIn != -1) {
+            jwtClaimsSetBuilder.claim("exp", expireIn);
+        }
         jwtClaimsSetBuilder.claim("subscribedAPIs", jwtTokenInfoDTO.getSubscribedApiDTOList());
         jwtClaimsSetBuilder.claim("tierInfo", jwtTokenInfoDTO.getSubscriptionPolicyDTOList());
         jwtClaimsSetBuilder.claim("application", jwtTokenInfoDTO.getApplication());

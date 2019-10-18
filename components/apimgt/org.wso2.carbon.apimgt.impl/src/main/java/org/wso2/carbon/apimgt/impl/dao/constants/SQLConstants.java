@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.impl.dao.constants;
 
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIType;
 
 public class SQLConstants {
     public static final String GET_API_FOR_CONTEXT_TEMPLATE_SQL =
@@ -3322,7 +3321,7 @@ public class SQLConstants {
     public static class RevokedJWTConstants {
 
         public static final String ADD_JWT_SIGNATURE = "INSERT INTO AM_REVOKED_JWT (UUID, SIGNATURE," +
-                "EXPIRY_TIMESTAMP, TENANT_DOMAIN) VALUES(?,?, ?, ?)";
+                "EXPIRY_TIMESTAMP, TENANT_ID, TOKEN_TYPE) VALUES(?,?,?,?,?)";
         public static final String DELETE_REVOKED_JWT = "DELETE FROM AM_REVOKED_JWT WHERE EXPIRY_TIMESTAMP < ?";
     }
 }

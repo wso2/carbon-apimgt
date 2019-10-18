@@ -25,6 +25,8 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
+import java.security.KeyStore;
+
 public class ServiceReferenceHolder {
 
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
@@ -36,6 +38,7 @@ public class ServiceReferenceHolder {
     private TenantIndexingLoader indexLoader;
     private OutputEventAdapterService outputEventAdapterService;
     private APIMgtWorkflowDataPublisher apiMgtWorkflowDataPublisher;
+    private KeyStore trustStore;
 
     public static ConfigurationContextService getContextService() {
         return contextService;
@@ -106,5 +109,13 @@ public class ServiceReferenceHolder {
 
     public void setApiMgtWorkflowDataPublisher(APIMgtWorkflowDataPublisher apiMgtWorkflowDataPublisher) {
         this.apiMgtWorkflowDataPublisher = apiMgtWorkflowDataPublisher;
+    }
+
+    public KeyStore getTrustStore() {
+        return trustStore;
+    }
+
+    public void setTrustStore(KeyStore trustStore) {
+        this.trustStore = trustStore;
     }
 }

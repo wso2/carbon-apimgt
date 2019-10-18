@@ -18,12 +18,12 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import javax.xml.namespace.QName;
 
 /**
  * This class represents the constants that are used for APIManager implementation
@@ -353,6 +353,8 @@ public final class APIConstants {
     public static final String IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD = "VALIDITY_PERIOD";
     public static final String IDENTITY_OAUTH2_FIELD_USER_DOMAIN = "USER_DOMAIN";
     public static final String DOT = ".";
+    public static final String DEFAULT = "DEFAULT";
+    public static final String API_KEY_TYPE = "API_KEY";
     public static final String EXP = "exp";
     public static final String JWT = "JWT";
     public static final String JWT_DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
@@ -1544,6 +1546,7 @@ public final class APIConstants {
     public static class JwtTokenConstants {
         public static final String APPLICATION = "application";
         public static final String APPLICATION_ID = "id";
+        public static final String APPLICATION_UUID = "uuid";
         public static final String APPLICATION_NAME = "name";
         public static final String APPLICATION_TIER = "tier";
         public static final String APPLICATION_OWNER = "owner";
@@ -1786,4 +1789,11 @@ public final class APIConstants {
     public static final int MAX_LENGTH_VERSION = 30;
     public static final int MAX_LENGTH_PROVIDER = 50;
     public static final int MAX_LENGTH_CONTEXT = 82; //context becomes context + version + two '/'. so max context is 50
+
+    /**
+     * Constants for trust store access
+     *
+     * */
+    public static final String TRUST_STORE_PASSWORD = "Security.TrustStore.Password";
+    public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
 }

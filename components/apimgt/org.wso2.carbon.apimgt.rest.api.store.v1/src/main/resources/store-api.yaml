@@ -2012,6 +2012,50 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ######################################################
+  # The "Generate API Key" Processing Function resource API
+  ######################################################
+  '/applications/{applicationId}/api-keys/{keyType}/revoke':
+
+    #-----------------------------------------------------
+    # Revoke apikey for an application
+    #-----------------------------------------------------
+    post:
+      security:
+        - OAuth2Security:
+            - apim:api_key
+      summary: Revoke API Key
+      description: |
+        Revoke a self contained API Key for the application
+      parameters:
+        - $ref: '#/parameters/applicationId'
+        - $ref: '#/parameters/keyType'
+        - in: body
+          name: body
+          description: |
+            API Key revoke request object
+          schema:
+            $ref: '#/definitions/APIKeyRevokeRequest'
+        - $ref: '#/parameters/If-Match'
+      tags:
+        - API Keys
+      responses:
+        200:
+          description: |
+            OK.
+            apikey revoked successfully.
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
 
   '/applications/{applicationId}/scopes':
     get:
@@ -4676,6 +4720,16 @@ definitions:
       additionalProperties:
         type: object
         description: Additional parameters if Authorization server needs any
+
+  #-----------------------------------------------------
+  # The APIKey Revoke Request schema
+  #-----------------------------------------------------
+  APIKeyRevokeRequest :
+    title: API Key revoke request object
+    properties:
+      apiKey:
+        type: string
+        description: API Key to revoke
 
 #-----------------------------------------------------
 # Scope Info resource

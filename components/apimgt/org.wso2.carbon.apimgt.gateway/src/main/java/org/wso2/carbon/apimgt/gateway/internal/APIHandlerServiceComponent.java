@@ -23,8 +23,13 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
@@ -45,20 +50,8 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
+import java.io.File;
 
 @Component(
          name = "org.wso2.carbon.apimgt.handlers", 
@@ -116,22 +109,6 @@ public class APIHandlerServiceComponent {
                 // Start JWT revoked map cleaner.
                 RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
                 revokedJWTMapCleaner.startJWTRevokedMapCleaner();
-
-                // Read the trust store
-                ServerConfiguration config = CarbonUtils.getServerConfiguration();
-                String trustStorePassword = config.getFirstProperty(APIMgtGatewayConstants.TRUST_STORE_PASSWORD);
-                String trustStoreLocation = config.getFirstProperty(APIMgtGatewayConstants.TRUST_STORE_LOCATION);
-                if (trustStoreLocation != null && trustStorePassword != null) {
-                    try (FileInputStream trustStoreStream = new FileInputStream(new File(trustStoreLocation))) {
-                        KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                        trustStore.load(trustStoreStream, trustStorePassword.toCharArray());
-                        ServiceReferenceHolder.getInstance().setTrustStore(trustStore);
-                    } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
-                        log.error("Error in loading trust store.", e);
-                    }
-                } else {
-                    log.error("Error in loading trust store. Configurations are not set.");
-                }
             }
         } catch (APIManagementException | AxisFault e) {
             log.error("Error while initializing the API Gateway (APIHandlerServiceComponent) component", e);
