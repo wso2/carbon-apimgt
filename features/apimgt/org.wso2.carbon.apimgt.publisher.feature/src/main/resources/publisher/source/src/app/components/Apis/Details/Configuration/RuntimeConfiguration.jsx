@@ -420,6 +420,14 @@ export default function RuntimeConfiguration() {
                                     <Endpoints api={api} />
                                 </React.Fragment>
                             )}
+                            {api.isAPIProduct() && (
+                                <Typography variant='body1'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Configuration.RuntimeConfiguration.backend.api.produt.endpoint'
+                                        defaultMessage='Please refer respective APIs for endpoint information'
+                                    />
+                                </Typography>
+                            )}
                         </Paper>
                     </Grid>
                 </Grid>
