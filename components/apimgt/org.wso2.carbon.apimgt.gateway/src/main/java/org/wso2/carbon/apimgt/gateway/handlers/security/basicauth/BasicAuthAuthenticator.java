@@ -129,11 +129,6 @@ public class BasicAuthAuthenticator implements Authenticator {
         String authenticationScheme;
 
         List<VerbInfoDTO> verbInfoList;
-        //set default condition group
-        ConditionGroupDTO[] conditionGroups = new ConditionGroupDTO[1];
-        ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
-        defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
-        conditionGroups[0] = defaultGroup;
 
         if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
             HashMap<String, Boolean> operationAuthSchemeMappingList =
@@ -155,7 +150,6 @@ public class BasicAuthAuthenticator implements Authenticator {
                 }
                 verbInfoDTO.setThrottling(operationThrottlingMappingList.get(operation));
                 verbInfoDTO.setRequestKey(apiContext + "/" + apiVersion + operation + ":" + httpMethod);
-                verbInfoDTO.setConditionGroups(conditionGroups);
                 verbInfoList.add(verbInfoDTO);
             }
         } else {
@@ -165,7 +159,6 @@ public class BasicAuthAuthenticator implements Authenticator {
             verbInfoDTO.setAuthType(authenticationScheme);
             verbInfoDTO.setThrottling(OpenAPIUtils.getResourceThrottlingTier(openAPI, synCtx));
             verbInfoDTO.setRequestKey(apiContext + "/" + apiVersion + matchingResource + ":" + httpMethod);
-            verbInfoDTO.setConditionGroups(conditionGroups);
             verbInfoList.add(verbInfoDTO);
         }
 

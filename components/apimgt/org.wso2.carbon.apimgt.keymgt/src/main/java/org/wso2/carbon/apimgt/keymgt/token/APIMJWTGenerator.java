@@ -50,7 +50,7 @@ public class APIMJWTGenerator extends JWTGenerator {
     private static final Log log = LogFactory.getLog(APIMJWTGenerator.class);
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
     private String signatureAlgorithm = SHA256_WITH_RSA;
-
+    private static Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
     private String userAttributeSeparator = APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT;
 
     public String generateJWT(JwtTokenInfoDTO jwtTokenInfoDTO) throws APIManagementException {
@@ -59,13 +59,13 @@ public class APIMJWTGenerator extends JWTGenerator {
 
         String base64UrlEncodedHeader = "";
         if (jwtHeader != null) {
-            base64UrlEncodedHeader = Base64.getUrlEncoder().encodeToString(jwtHeader.getBytes(Charset.defaultCharset()));
+            base64UrlEncodedHeader = encoder.encodeToString(jwtHeader.getBytes(Charset.defaultCharset()));
         }
 
         String jwtBody = buildBody(jwtTokenInfoDTO);
         String base64UrlEncodedBody = "";
         if (jwtBody != null) {
-            base64UrlEncodedBody = Base64.getUrlEncoder().encodeToString(jwtBody.getBytes());
+            base64UrlEncodedBody = encoder.encodeToString(jwtBody.getBytes());
         }
 
         if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
@@ -78,7 +78,7 @@ public class APIMJWTGenerator extends JWTGenerator {
             if (log.isDebugEnabled()) {
                 log.debug("signed assertion value : " + new String(signedAssertion, Charset.defaultCharset()));
             }
-            String base64UrlEncodedAssertion = Base64.getUrlEncoder().encodeToString(signedAssertion);
+            String base64UrlEncodedAssertion = encoder.encodeToString(signedAssertion);
 
             return base64UrlEncodedHeader + '.' + base64UrlEncodedBody + '.' + base64UrlEncodedAssertion;
         } else {

@@ -218,10 +218,12 @@ export default class Application extends Resource {
         });
     }
 
-    static all() {
+    static all(limit = 3, offset = null, sortOrder = 'asc', sortBy = 'name') {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
         const promisedAll = apiClient.client.then((client) => {
-            return client.apis.Applications.get_applications({}, this._requestMetaData());
+            return client.apis.Applications.get_applications({
+                limit, offset, sortOrder, sortBy,
+            }, this._requestMetaData());
         });
         return promisedAll.then(response => response.obj);
     }
