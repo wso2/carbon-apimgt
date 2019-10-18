@@ -86,6 +86,7 @@ function EndpointListing(props) {
         addNewEndpoint,
         removeEndpoint,
         setAdvancedConfigOpen,
+        apiId,
     } = props;
     const [endpointType, setEndpointType] = useState(epType);
     const [endpoints, setEndpoints] = useState([{ url: 'http://myservice/endpoint' }]);
@@ -135,6 +136,7 @@ function EndpointListing(props) {
                                         editEndpoint={editEndpoint}
                                         deleteEndpoint={removeEndpoint}
                                         setAdvancedConfigOpen={setAdvancedConfigOpen}
+                                        apiId={apiId}
                                     />
                                 );
                             }
@@ -162,6 +164,7 @@ EndpointListing.propTypes = {
     removeEndpoint: PropTypes.func.isRequired,
     editEndpoint: PropTypes.func.isRequired,
     setAdvancedConfigOpen: PropTypes.func.isRequired,
+    apiId: PropTypes.string.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(EndpointListing));

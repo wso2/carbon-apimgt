@@ -25,8 +25,12 @@ import {
 } from '@material-ui/core';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
+import green from '@material-ui/core/colors/green';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Chip from '@material-ui/core/Chip';
 import { isRestricted } from 'AppData/AuthManager';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
+import API from 'AppData/api';
 
 const styles = theme => ({
     endpointInputWrapper: {
@@ -44,10 +48,22 @@ const styles = theme => ({
     iconButton: {
         padding: theme.spacing(),
     },
+    iconButtonValid: {
+        padding: theme.spacing(),
+        color: green[500],
+    },
     divider: {
         width: 1,
         height: 28,
         margin: 4,
+    },
+    endpointValidChip: {
+        color: 'green',
+        border: '1px solid green',
+    },
+    endpointInvalidChip: {
+        color: 'red',
+        border: '1px solid red',
     },
 });
 /**
@@ -70,13 +86,39 @@ function GenericEndpoint(props) {
         readOnly,
         autoFocus,
         name,
+        apiId,
     } = props;
     const [serviceUrl, setServiceUrl] = useState(endpointURL);
     const { api } = useContext(APIContext);
+    const [isEndpointValid, setIsEndpointValid] = useState();
+    const [statusCode, setStatusCode] = useState('');
+    const [isUpdating, setUpdating] = useState(false);
+
 
     useEffect(() => {
         setServiceUrl(endpointURL);
     }, [endpointURL]);
+
+    function testEndpoint(endpoint, apiID) {
+        setUpdating(true);
+        const restApi = new API();
+        restApi.testEndpoint(endpoint, apiID)
+            .then((result) => {
+                if (result.body.error !== null) {
+                    setStatusCode(result.body.error);
+                } else {
+                    setStatusCode(result.body.statusCode + ' ' + result.body.statusMessage);
+                }
+                if (result.body.statusCode === 200) {
+                    setIsEndpointValid(true);
+                } else {
+                    setIsEndpointValid(false);
+                }
+            }).finally(() => {
+                setUpdating(false);
+            });
+    }
+
 
     return (
         <div className={classes.endpointInputWrapper}>
@@ -102,15 +144,24 @@ function GenericEndpoint(props) {
                     autoFocus,
                     endAdornment: (
                         <InputAdornment position='end'>
+                            {statusCode && <Chip
+                                label={statusCode}
+                                className={isEndpointValid ? classes.endpointValidChip : classes.endpointInvalidChip}
+                                variant='outlined'
+                            />}
+
                             <IconButton
-                                className={classes.iconButton}
-                                aria-label='Settings'
-                                // onClick={() => testEndpoint(index, type, category)}
-                                disabled={(isRestricted(['apim:api_create'], api))}
+                                className={isEndpointValid ? classes.iconButtonValid : classes.iconButton}
+                                aria-label='TestEndpoint'
+                                onClick={() => testEndpoint(serviceUrl, apiId)}
+                                disabled={(isRestricted(['apim:api_create'], api)) || isUpdating}
                             >
-                                <Icon>
+                                {isUpdating ?
+                                    <CircularProgress size={20} /> :
+                                    <Icon>
                                     check_circle
-                                </Icon>
+                                    </Icon>
+                                }
                             </IconButton>
                             {type === 'prototyped' ?
                                 <div /> :
@@ -164,6 +215,7 @@ GenericEndpoint.propTypes = {
     readOnly: PropTypes.bool,
     autoFocus: PropTypes.bool,
     name: PropTypes.string,
+    apiId: PropTypes.string.isRequired,
 };
 
 export default withStyles(styles)(GenericEndpoint);
