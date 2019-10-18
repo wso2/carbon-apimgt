@@ -265,7 +265,7 @@ class Sdk extends React.Component {
                     <Typography component='p'>
                         <FormattedMessage
                             id='Apis.Details.Sdk.no.sdks.content'
-                            defaultMessage='No SDKs available for this API yet'
+                            defaultMessage='No SDKs available for this API'
                         />
                     </Typography>
                 </InlineMessage>
