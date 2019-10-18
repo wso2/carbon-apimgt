@@ -33,11 +33,11 @@ import ApplicationCreateBase from './Create/ApplicationCreateBase';
 
 /**
  * Component used to handle application creation
- * @class ApplicationFormHanlder
+ * @class ApplicationFormHandler
  * @extends {React.Component}
  * @param {any} value @inheritDoc
  */
-class ApplicationFormHanlder extends React.Component {
+class ApplicationFormHandler extends React.Component {
     static contextType = Settings;
 
     /**
@@ -67,7 +67,7 @@ class ApplicationFormHanlder extends React.Component {
     /**
      * Get all the throttling Policies from backend and
      * update the state
-     * @memberof ApplicationFormHanlder
+     * @memberof ApplicationFormHandler
      */
     componentDidMount() {
         const { match: { params } } = this.props;
@@ -82,7 +82,7 @@ class ApplicationFormHanlder extends React.Component {
     /**
      * @param {object} name application attribute name
      * @returns {Object} attribute value
-     * @memberof ApplicationFormHanlder
+     * @memberof ApplicationFormHandler
      */
     getAttributeValue = (name) => {
         const { applicationRequest } = this.state;
@@ -92,7 +92,7 @@ class ApplicationFormHanlder extends React.Component {
     /**
      * Initilaize the component if it is in applicatioin edit state
      * @param {String} applicationId application id
-     * @memberof ApplicationFormHanlder
+     * @memberof ApplicationFormHandler
      */
     initiApplicationEditState = (applicationId) => {
         const { applicationRequest } = this.state;
@@ -130,7 +130,7 @@ class ApplicationFormHanlder extends React.Component {
     }
     /**
      * Used to initialize the component state
-     * @memberof ApplicationFormHanlder
+     * @memberof ApplicationFormHandler
      */
     initApplicationCreateState = () => {
         // Get all the tiers to populate the drop down.
@@ -174,7 +174,7 @@ class ApplicationFormHanlder extends React.Component {
     /**
      * @param {object} name application attribute name
      * @returns {void}
-     * @memberof ApplicationFormHanlder
+     * @memberof ApplicationFormHandler
      */
     handleAttributesChange = name => (event) => {
         const { applicationRequest } = this.state;
@@ -185,7 +185,7 @@ class ApplicationFormHanlder extends React.Component {
     /**
      * @param {object} name application attribute name
      * @returns {void}
-     * @memberof ApplicationFormHanlder
+     * @memberof ApplicationFormHandler
      */
     isRequiredAttribute = (name) => {
         const { allAppAttributes } = this.state;
@@ -235,7 +235,7 @@ class ApplicationFormHanlder extends React.Component {
     /**
      * Validate and send the application create
      * request to the backend
-     * @memberof ApplicationFormHanlder
+     * @memberof ApplicationFormHandler
      */
     saveApplication = () => {
         const { applicationRequest } = this.state;
@@ -247,7 +247,7 @@ class ApplicationFormHanlder extends React.Component {
             .then((response) => {
                 console.log('Application created successfully.');
                 Alert.info(intl.formatMessage({
-                    id: 'Applications.Create.ApplicationFormHanlder.Application.created.successfully',
+                    id: 'Applications.Create.ApplicationFormHandler.Application.created.successfully',
                     defaultMessage: 'Application created successfully.',
                 }));
                 const appId = response.body.applicationId;
@@ -258,7 +258,7 @@ class ApplicationFormHanlder extends React.Component {
                 if (response && response.body) {
                     const message = response.body.description || intl.formatMessage({
                         defaultMessage: 'Error while creating the application',
-                        id: 'Applications.Create.ApplicationFormHanlder.error.while.creating.the.application',
+                        id: 'Applications.Create.ApplicationFormHandler.error.while.creating.the.application',
                     });
                     Alert.error(message);
                 } else {
@@ -285,7 +285,7 @@ class ApplicationFormHanlder extends React.Component {
                 const appId = response.body.applicationId;
                 history.push(`/applications/${appId}`);
                 Alert.info(intl.formatMessage({
-                    id: 'Applications.ApplicationFormHanlder.app.updated.success',
+                    id: 'Applications.ApplicationFormHandler.app.updated.success',
                     defaultMessage: 'Application updated successfully',
                 }));
                 console.log('Application updated successfully.');
@@ -307,7 +307,7 @@ class ApplicationFormHanlder extends React.Component {
         if (!value || value.trim() === '') {
             this.setState({ isNameValid: false });
             return Promise.reject(new Error(intl.formatMessage({
-                id: 'Applications.Create.ApplicationFormHanlder.app.name.required',
+                id: 'Applications.Create.ApplicationFormHandler.app.name.required',
                 defaultMessage: 'Application name is required',
             })));
         }
@@ -357,7 +357,7 @@ class ApplicationFormHanlder extends React.Component {
 
     /**
      * @inheritdoc
-     * @memberof ApplicationFormHanlder
+     * @memberof ApplicationFormHandler
      */
     render() {
         const {
@@ -368,13 +368,13 @@ class ApplicationFormHanlder extends React.Component {
             <React.Fragment>
                 <Typography variant='h5'>
                     <FormattedMessage
-                        id='Applications.Create.ApplicationFormHanlder.create.application.heading'
+                        id='Applications.Create.ApplicationFormHandler.create.application.heading'
                         defaultMessage='Create an application'
                     />
                 </Typography>
                 <Typography variant='caption'>
                     <FormattedMessage
-                        id='Applications.Create.ApplicationFormHanlder.create.application.sub.heading'
+                        id='Applications.Create.ApplicationFormHandler.create.application.sub.heading'
                         defaultMessage={
                             'Create an application providing name, quota and token type parameters' +
                             ' and optionally description'
@@ -387,13 +387,13 @@ class ApplicationFormHanlder extends React.Component {
             <React.Fragment>
                 <Typography variant='h5'>
                     <FormattedMessage
-                        id='Applications.Create.ApplicationFormHanlder.edit.application.heading'
+                        id='Applications.Create.ApplicationFormHandler.edit.application.heading'
                         defaultMessage='Edit application'
                     />
                 </Typography>
                 <Typography variant='caption'>
                     <FormattedMessage
-                        id='Applications.Create.ApplicationFormHanlder.edit.application.sub.heading'
+                        id='Applications.Create.ApplicationFormHandler.edit.application.sub.heading'
                         defaultMessage={
                             'Edit this application. Name, quota and token type are madatory parameters' +
                             ' and description is optional'
@@ -428,7 +428,7 @@ class ApplicationFormHanlder extends React.Component {
                                     onClick={isEdit ? this.saveEdit : this.saveApplication}
                                 >
                                     <FormattedMessage
-                                        id='Applications.Create.ApplicationFormHanlder.save'
+                                        id='Applications.Create.ApplicationFormHandler.save'
                                         defaultMessage='SAVE'
                                     />
                                 </Button>
@@ -437,7 +437,7 @@ class ApplicationFormHanlder extends React.Component {
                                 <Link to='/applications/'>
                                     <Button variant='text'>
                                         <FormattedMessage
-                                            id='Applications.Create.ApplicationFormHanlder.cancel'
+                                            id='Applications.Create.ApplicationFormHandler.cancel'
                                             defaultMessage='CANCEL'
                                         />
                                     </Button>
@@ -451,7 +451,7 @@ class ApplicationFormHanlder extends React.Component {
     }
 }
 
-ApplicationFormHanlder.propTypes = {
+ApplicationFormHandler.propTypes = {
     intl: PropTypes.shape({
         formatMessage: PropTypes.func.isRequired,
     }).isRequired,
@@ -465,4 +465,4 @@ ApplicationFormHanlder.propTypes = {
     }).isRequired,
 };
 
-export default injectIntl(ApplicationFormHanlder);
+export default injectIntl(ApplicationFormHandler);

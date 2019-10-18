@@ -28,21 +28,16 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import Icon from '@material-ui/core/Icon';
 import AuthManager from 'AppData/AuthManager';
 import Paper from '@material-ui/core/Paper';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
 import Button from '@material-ui/core/Button';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import Select from '@material-ui/core/Select';
-import CONSTS from 'AppData/Constants';
+import Box from '@material-ui/core/Box';
 import { ApiContext } from '../ApiContext';
 import Progress from '../../../Shared/Progress';
 import Api from '../../../../data/api';
 import SwaggerUI from './SwaggerUI';
 import Application from '../../../../data/Application';
-
+import SelectAppPanel from './SelectAppPanel';
 /**
  * @inheritdoc
  * @param {*} theme theme
@@ -54,27 +49,18 @@ const styles = theme => ({
     inputAdornmentStart: {
         width: '100%',
     },
-    inputText: {
-        marginLeft: theme.spacing.unit * 5,
-        minWidth: theme.spacing.unit * 50,
+    paper: {
+        margin: theme.spacing(1),
+        padding: theme.spacing(1),
     },
     grid: {
-        spacing: 20,
         marginTop: theme.spacing.unit * 4,
         marginBottom: theme.spacing.unit * 4,
-        paddingLeft: theme.spacing.unit * 11,
         paddingRight: theme.spacing.unit * 2,
+        justifyContent: 'center',
     },
     userNotificationPaper: {
         padding: theme.spacing.unit * 2,
-    },
-    formControl: {
-        display: 'flex',
-        flexDirection: 'row',
-        paddingRight: theme.spacing.unit * 2,
-    },
-    gridWrapper: {
-        paddingTop: theme.spacing.unit * 2,
     },
 });
 /**
@@ -117,7 +103,7 @@ class ApiConsole extends React.Component {
         let subscriptions;
         let selectedApplication;
         let keys;
-        let selectedKeyType;
+        let selectedKeyType = 'PRODUCTION';
         let accessToken;
 
         this.apiClient = new Api();
@@ -357,182 +343,178 @@ class ApiConsole extends React.Component {
 
         return (
             <React.Fragment>
-                <Grid container className={classes.grid}>
-                    {!user && (
-                        <Grid item md={6}>
-                            <Paper className={classes.userNotificationPaper}>
-                                <Typography variant='h5' component='h3'>
-                                    <Icon>warning</Icon>
-                                    {' '}
-                                    <FormattedMessage id='notice' defaultMessage='Notice' />
-                                </Typography>
-                                <Typography component='p'>
-                                    <FormattedMessage
-                                        id='api.console.require.access.token'
-                                        defaultMessage={'You require an access token to try the API. Please log '
+                <Paper className={classes.paper}>
+                    <Grid container className={classes.grid}>
+                        {!user && (
+                            <Grid item md={6}>
+                                <Paper className={classes.userNotificationPaper}>
+                                    <Typography variant='h5' component='h3'>
+                                        <Icon>warning</Icon>
+                                        {' '}
+                                        <FormattedMessage id='notice' defaultMessage='Notice' />
+                                    </Typography>
+                                    <Typography component='p'>
+                                        <FormattedMessage
+                                            id='api.console.require.access.token'
+                                            defaultMessage={'You require an access token to try the API. Please log '
                                             + 'in and subscribe to the API to generate an access token. If you already '
                                             + 'have an access token, please provide it below.'}
+                                        />
+                                    </Typography>
+                                </Paper>
+                            </Grid>
+                        )}
+                        <Grid xs={12} md={12}>
+                            <Box display='block' >
+                                {user && subscriptions && subscriptions.length > 0 && (
+                                    <SelectAppPanel
+                                        subscriptions={subscriptions}
+                                        handleChanges={this.handleChanges}
+                                        selectedApplication={selectedApplication}
+                                        selectedKeyType={selectedKeyType}
+                                        selectedEnvironment={selectedEnvironment}
+                                        environments={environments}
                                     />
-                                </Typography>
-                            </Paper>
-                        </Grid>
-                    )}
-                    {user && subscriptions && (
-                        <Grid container>
-                            <Grid item md={4} xs={4} className={classes.gridWrapper}>
-                                <FormControl className={classes.formControl} disabled={subscriptions.length === 0}>
-                                    <InputLabel htmlFor='application-selection'>
-                                        <FormattedMessage id='applications' defaultMessage='Applications' />
-                                    </InputLabel>
-                                    <Select
-                                        name='selectedApplication'
-                                        value={selectedApplication}
-                                        onChange={this.handleChanges}
-                                        input={<Input name='subscription' id='application-selection' />}
-                                        fullWidth
-                                    >
-                                        {subscriptions.map(sub => (
-                                            <MenuItem value={sub.applicationInfo.applicationId}>
-                                                {sub.applicationInfo.name}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                                {subscriptions.length === 0
-                                    && (
-                                        <FormHelperText>
+                                )}
+                                {subscriptions.length === 0 && (
+                                    <Box display='flex' justifyContent='center'>
+                                        <Typography variant='body1' gutterBottom>
                                             <FormattedMessage
-                                                id='require.application.subscribe'
+                                                id='Apis.Details.ApiConsole.ApiConsole.please.subscribe.to.application'
                                                 defaultMessage='Please subscribe to an application'
                                             />
-                                        </FormHelperText>
-                                    )
-                                }
-                            </Grid>
-                            <Grid item md={4} xs={4} className={classes.gridWrapper}>
-                                <FormControl className={classes.formControl} disabled={subscriptions.length === 0}>
-                                    <InputLabel htmlFor='key-type-selection'>
-                                        <FormattedMessage id='key' defaultMessage='Key' />
-                                    </InputLabel>
-                                    <Select
-                                        name='selectedKeyType'
-                                        value={selectedKeyType}
-                                        onChange={this.handleChanges}
-                                        input={<Input name='subscription' id='key-type-selection' />}
-                                        fullWidth
-                                    >
-                                        <MenuItem value='PRODUCTION'>
-                                            PRODUCTION
-                                        </MenuItem>
-                                        <MenuItem value='SANDBOX'>
-                                            SANDBOX
-                                        </MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-                        </Grid>
-                    )}
-                    {((environments && environments.length > 0) || (labels && labels.length > 0)) && (
-                        <Grid item md={8} xs={8} className={classes.gridWrapper}>
-                            <FormControl className={classes.formControl}>
-                                <InputLabel htmlFor='environment-selection'>
-                                    <FormattedMessage id='environment' defaultMessage='Environment' />
-                                </InputLabel>
-                                <Select
-                                    name='selectedEnvironment'
-                                    value={selectedEnvironment}
-                                    onChange={this.handleChanges}
-                                    input={<Input name='environment' id='environment-selection' />}
-                                    fullWidth
-                                >
-                                    {environments && environments.length > 0 && (
-                                        <MenuItem value='' disabled>
-                                            <em>
-                                                <FormattedMessage id='api.gateways' defaultMessage='API Gateways' />
-                                            </em>
-                                        </MenuItem>
-                                    )}
-                                    {environments && (
-                                        environments.map(env => (
-                                            <MenuItem value={env}>
-                                                {env}
-                                            </MenuItem>
-                                        )))}
-                                    {labels && labels.length > 0 && (
-                                        <MenuItem value='' disabled>
-                                            <em>
-                                                <FormattedMessage id='micro.gateways' defaultMessage='Micro Gateways' />
-                                            </em>
-                                        </MenuItem>
-                                    )}
-                                    {labels && (
-                                        labels.map(label => (
-                                            <MenuItem value={label}>
-                                                {label}
-                                            </MenuItem>
-                                        ))
-                                    )}
-                                </Select>
-                            </FormControl>
-                        </Grid>
-                    )}
-                    <Grid container md={9} xs={8} justify='center'>
-                        <Grid item md={9} xs={8} className={classes.gridWrapper}>
-                            <TextField
-                                margin='normal'
-                                variant='outlined'
-                                className={classes.inputText}
-                                label={<FormattedMessage id='access.token' defaultMessage='Access Token' />}
-                                name='accessToken'
-                                onChange={this.handleChanges}
-                                type={showToken ? 'text' : 'password'}
-                                value={accessToken || ''}
-                                helperText={
-                                    <FormattedMessage id='enter.access.token' defaultMessage='Enter access Token' />}
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position='end'>
-                                            <IconButton
-                                                edge='end'
-                                                aria-label='Toggle token visibility'
-                                                onClick={this.handleClickShowToken}
-                                            >
-                                                {showToken ? <Icon>visibility_off</Icon> : <Icon>visibility</Icon>}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                    startAdornment: (
-                                        <InputAdornment className={classes.inputAdornmentStart} position='start'>
-                                            {authorizationHeader}
-                                            {' '}
-                                            :Bearer
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                        </Grid>
-                    </Grid>
-                    <Grid xs={12} container>
-                        <Grid xs={10} />
-                        <Grid xs={2}>
-                            <a href={downloadLink} download={fileName}>
-                                <Button size='small'>
-                                    <CloudDownloadRounded className={classes.buttonIcon} />
-                                    <FormattedMessage
-                                        id='Apis.Details.APIConsole.APIConsole.download.swagger'
-                                        defaultMessage='Swagger ( /swagger.json )'
-                                    />
-                                </Button>
-                            </a>
-                        </Grid>
-                    </Grid>
-                </Grid>
+                                        </Typography>
+                                    </Box>
 
-                <SwaggerUI
-                    accessTokenProvider={this.accessTokenProvider}
-                    spec={swagger}
-                    authorizationHeader={authorizationHeader}
-                />
+                                )}
+                                <Box display='flex' justifyContent='center'>
+                                    <Grid xs={12} md={6}>
+                                        {((environments && environments.length > 0) || (labels && labels.length > 0))
+                                         && (
+                                             <TextField
+                                                 fullWidth
+                                                 select
+                                                 label={<FormattedMessage
+                                                     defaultMessage='Environment'
+                                                     id='Apis.Details.ApiConsole.environment'
+                                                 />}
+                                                 value={selectedEnvironment}
+                                                 name='selectedEnvironment'
+                                                 onChange={this.handleChanges}
+                                                 SelectProps={environments}
+                                                 helperText={<FormattedMessage
+                                                     defaultMessage='Please select an environment'
+                                                     id='Apis.Details.ApiConsole.SelectAppPanel.select.an.environment'
+                                                 />}
+                                                 margin='normal'
+                                                 variant='outlined'
+                                             >
+                                                 {environments && environments.length > 0 && (
+                                                     <MenuItem value='' disabled>
+                                                         <em>
+                                                             <FormattedMessage
+                                                                 id='api.gateways'
+                                                                 defaultMessage='API Gateways'
+                                                             />
+                                                         </em>
+                                                     </MenuItem>
+                                                 )}
+                                                 {environments && (
+                                                     environments.map(env => (
+                                                         <MenuItem value={env}>
+                                                             {env}
+                                                         </MenuItem>
+                                                     )))}
+                                                 {labels && labels.length > 0 && (
+                                                     <MenuItem value='' disabled>
+                                                         <em>
+                                                             <FormattedMessage
+                                                                 id='micro.gateways'
+                                                                 defaultMessage='Micro Gateways'
+                                                             />
+                                                         </em>
+                                                     </MenuItem>
+                                                 )}
+                                                 {labels && (
+                                                     labels.map(label => (
+                                                         <MenuItem value={label}>
+                                                             {label}
+                                                         </MenuItem>
+                                                     ))
+                                                 )}
+                                             </TextField>
+                                         )}
+                                    </Grid>
+                                </Box>
+                                <Box display='flex' justifyContent='center'>
+                                    <Grid x={12} md={6}>
+                                        <TextField
+                                            fullWidth
+                                            margin='normal'
+                                            variant='outlined'
+                                            label={<FormattedMessage id='access.token' defaultMessage='Access Token' />}
+                                            name='accessToken'
+                                            onChange={this.handleChanges}
+                                            type={showToken ? 'text' : 'password'}
+                                            value={accessToken || ''}
+                                            helperText={
+                                                <FormattedMessage
+                                                    id='enter.access.token'
+                                                    defaultMessage='Enter access Token'
+                                                />}
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <InputAdornment position='end'>
+                                                        <IconButton
+                                                            edge='end'
+                                                            aria-label='Toggle token visibility'
+                                                            onClick={this.handleClickShowToken}
+                                                        >
+                                                            {showToken ? <Icon>visibility_off</Icon>
+                                                                : <Icon>visibility</Icon>}
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                ),
+                                                startAdornment: (
+                                                    <InputAdornment
+                                                        className={classes.inputAdornmentStart}
+                                                        position='start'
+                                                    >
+                                                        {authorizationHeader}
+                                                        {' '}
+                                            :Bearer
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    </Grid>
+                                </Box>
+                            </Box>
+                        </Grid>
+
+                        <Grid xs={12} container>
+                            <Grid xs={10} />
+                            <Grid xs={2}>
+                                <a href={downloadLink} download={fileName}>
+                                    <Button size='small'>
+                                        <CloudDownloadRounded className={classes.buttonIcon} />
+                                        <FormattedMessage
+                                            id='Apis.Details.APIConsole.APIConsole.download.swagger'
+                                            defaultMessage='Swagger ( /swagger.json )'
+                                        />
+                                    </Button>
+                                </a>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Paper>
+                <Paper className={classes.paper}>
+                    <SwaggerUI
+                        accessTokenProvider={this.accessTokenProvider}
+                        spec={swagger}
+                        authorizationHeader={authorizationHeader}
+                    />
+                </Paper>
             </React.Fragment>
         );
     }
