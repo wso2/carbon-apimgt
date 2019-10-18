@@ -54,7 +54,6 @@ const styles = theme => ({
     createNewVersionWrapper: {
         display: 'flex',
         justifyContent: 'flex-end',
-        paddingRight: theme.spacing.unit * 2,
     },
     createNewVersion: {
         display: 'flex',
@@ -88,6 +87,7 @@ function CreateNewVersionButton(props) {
                     <Link
                         className={classes.createNewVersion}
                         to={'/apis/' + api.id + '/new_version'}
+                        style={{ minWidth: 95 }}
                     >
 
                         <div>

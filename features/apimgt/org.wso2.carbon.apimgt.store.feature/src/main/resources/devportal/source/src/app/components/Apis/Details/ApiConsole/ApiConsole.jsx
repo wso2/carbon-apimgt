@@ -353,7 +353,7 @@ class ApiConsole extends React.Component {
             return 'API Not found !';
         }
 
-        const { authorizationHeader = 'Authorization' } = api;
+        const authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
 
         return (
             <React.Fragment>

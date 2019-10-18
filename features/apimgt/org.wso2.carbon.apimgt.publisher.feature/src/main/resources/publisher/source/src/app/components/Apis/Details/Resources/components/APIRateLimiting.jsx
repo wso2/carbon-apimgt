@@ -139,7 +139,7 @@ function APIRateLimiting(props) {
                     <Divider light variant='middle' />
                 </Grid>
                 <Grid item md={1} xs={1} />
-                <Grid item md={3} xs={11}>
+                <Grid item md={5} xs={11}>
                     <FormControl component='fieldset'>
                         <FormLabel component='legend'>Rate limiting level</FormLabel>
                         <RadioGroup
@@ -169,7 +169,7 @@ function APIRateLimiting(props) {
                         </RadioGroup>
                     </FormControl>
                 </Grid>
-                <Grid item md={8} xs={12}>
+                <Grid item md={6} xs={12}>
                     <Box minHeight={70} borderLeft={1} pl={10}>
                         {isResourceLevel ? (
                             operationRateLimitMessage

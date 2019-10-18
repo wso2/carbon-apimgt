@@ -7695,7 +7695,7 @@ public final class APIUtil {
     }
 
     public static Map<String, Tier> getTiersFromPolicies(String policyLevel, int tenantId) throws APIManagementException {
-        Map<String, Tier> tierMap = new HashMap<String, Tier>();
+        Map<String, Tier> tierMap = new TreeMap<String, Tier>();
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         Policy[] policies;
         if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {

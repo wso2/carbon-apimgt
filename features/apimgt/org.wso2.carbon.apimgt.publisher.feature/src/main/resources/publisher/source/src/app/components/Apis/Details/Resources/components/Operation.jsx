@@ -33,6 +33,7 @@ import Utils from 'AppData/Utils';
 import DeleteIcon from '@material-ui/icons/Delete';
 import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
+import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined';
 // splitted operation components
 
 import DescriptionAndSummary from './operationComponents/DescriptionAndSummary';
@@ -94,6 +95,9 @@ function Operation(props) {
             },
         };
     });
+    const apiOperation = api.operations[target] && api.operations[target][verb.toUpperCase()];
+    const isUsedInAPIProduct =
+        apiOperation && Array.isArray(apiOperation.usedProductIds) && apiOperation.usedProductIds.length;
 
     /**
      *
@@ -144,7 +148,7 @@ function Operation(props) {
                     classes={{ content: classes.contentNoMargin }}
                 >
                     <Grid container direction='row' justify='space-between' alignItems='center' spacing={0}>
-                        <Grid item md={10}>
+                        <Grid item md={6}>
                             <Badge invisible={!operation['x-wso2-new']} color='error' variant='dot'>
                                 <Button
                                     disableFocusRipple
@@ -168,15 +172,36 @@ function Operation(props) {
                                 </Typography>
                             </Typography>
                         </Grid>
+                        {Boolean(isUsedInAPIProduct) && (
+                            <Grid item md={4}>
+                                <Box display='flex'>
+                                    <ReportProblemOutlinedIcon fontSize='small' />
+                                    <Box display='flex' ml={1} mt={1 / 4} fontSize='caption.fontSize'>
+                                        This operation is used in {isUsedInAPIProduct} API product(s)
+                                    </Box>
+                                </Box>
+                            </Grid>
+                        )}
                         {!(disableDelete || markAsDelete) && (
                             <Grid item md={1}>
-                                <IconButton
-                                    disabled={disableUpdate}
-                                    onClick={toggleDelete}
-                                    aria-label='delete'
+                                <Tooltip
+                                    title={
+                                        isUsedInAPIProduct
+                                            ? "Can't delete operation when used in an API product"
+                                            : 'Delete'
+                                    }
+                                    aria-label='Delete operation'
                                 >
-                                    <DeleteIcon fontSize='small' />
-                                </IconButton>
+                                    <div>
+                                        <IconButton
+                                            disabled={Boolean(isUsedInAPIProduct) || disableUpdate}
+                                            onClick={toggleDelete}
+                                            aria-label='delete'
+                                        >
+                                            <DeleteIcon fontSize='small' />
+                                        </IconButton>
+                                    </div>
+                                </Tooltip>
                             </Grid>
                         )}
                     </Grid>
@@ -204,10 +229,11 @@ function Operation(props) {
                         {!hideParameters && (
                             <Parameters
                                 operation={operation}
-                                operationActionsDispatcher={operationsDispatcher}
+                                operationsDispatcher={operationsDispatcher}
                                 operationRateLimits={operationRateLimits}
                                 api={api}
                                 disableUpdate={disableUpdate}
+                                spec={spec}
                                 target={target}
                                 verb={verb}
                             />
@@ -222,7 +248,7 @@ Operation.defaultProps = {
     highlight: false,
     disableUpdate: false,
     /* Set following prop to false , After implementing the `Parameter` section */
-    hideParameters: true,
+    hideParameters: false,
     disableDelete: false,
     onMarkAsDelete: () => {},
     markAsDelete: false,

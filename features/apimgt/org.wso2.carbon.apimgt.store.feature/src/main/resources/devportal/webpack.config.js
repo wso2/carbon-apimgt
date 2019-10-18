@@ -84,6 +84,7 @@ const config = {
     },
     externals: {
         Config: 'Configurations',
+        Settings: 'Settings',
         MaterialIcons: 'MaterialIcons',
     },
 };

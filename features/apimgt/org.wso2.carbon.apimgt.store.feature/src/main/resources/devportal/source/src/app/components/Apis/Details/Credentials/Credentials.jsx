@@ -288,7 +288,7 @@ class Credentials extends React.Component {
                                         id='Apis.Details.Credentials.Credentials.'
                                         defaultMessage={`API Credentials are grouped in to applications. An application 
                                         is primarily used to decouple the consumer from the APIs. It allows you to 
-                                        Generate and use a single key for multiple APIs and subscribe multiple times to 
+                                        generate and use a single key for multiple APIs and subscribe multiple times to 
                                         a single API with different SLA levels.`}
                                     />
                                 </Typography>

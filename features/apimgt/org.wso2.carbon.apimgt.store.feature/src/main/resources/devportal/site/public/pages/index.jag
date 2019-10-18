@@ -18,28 +18,31 @@
   -->
 
 <html lang="en">
-
+<%
+    var settings = require("/site/public/theme/settings.js");
+%>
 <head>
-  <base href="/devportal/" />
+  <base href="<%= settings.Settings.app.context %>/" />
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
   <title>WSO2 APIM Developer Portal</title>
 
-  <link rel="shortcut icon" href="/devportal/site/public/images/favicon.ico">
-  <link rel="icon" type="image/x-icon" href="/devportal/site/public/images/_favicon.ico">
-  <link href="/devportal/site/public/css/main.css" type="text/css" rel="stylesheet" />
+  <link rel="shortcut icon" href="<%= settings.Settings.app.context %>/site/public/images/favicon.ico">
+  <link rel="icon" type="image/x-icon" href="<%= settings.Settings.app.context %>/site/public/images/_favicon.ico">
+  <link href="<%= settings.Settings.app.context %>/site/public/css/main.css" type="text/css" rel="stylesheet" />
 </head>
 
 <body>
   <div id="react-root">
     <div class="apim-dual-ring"></div>
   </div>
-  <script type="text/javascript" src="/devportal/site/public/theme/defaultTheme.js"></script>
-  <script src="/devportal/site/public/fonts/iconfont/MaterialIcons.js"></script>
-  <script src="/devportal/site/public/dist/index.bundle.js"></script>
-  <link rel="stylesheet" href="/devportal/site/public/fonts/iconfont/material-icons.css">
+  <script type="text/javascript" src="<%= settings.Settings.app.context %>/site/public/theme/defaultTheme.js"></script>
+  <script type="text/javascript" src="<%= settings.Settings.app.context %>/site/public/theme/settings.js"></script>
+  <script src="<%= settings.Settings.app.context %>/site/public/fonts/iconfont/MaterialIcons.js"></script>
+  <script src="<%= settings.Settings.app.context %>/site/public/dist/index.bundle.js"></script>
+  <link rel="stylesheet" href="<%= settings.Settings.app.context %>/site/public/fonts/iconfont/material-icons.css">
 </body>
 
 </html>
