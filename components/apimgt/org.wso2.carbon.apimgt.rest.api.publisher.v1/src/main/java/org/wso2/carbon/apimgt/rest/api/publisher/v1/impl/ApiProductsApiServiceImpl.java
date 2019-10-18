@@ -448,6 +448,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
+    public Response apiProductsApiProductIdIsOutdatedGet(String apiProductId, String accept, String ifNoneMatch,
+                                                         MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    @Override
     public Response apiProductsApiProductIdPut(String apiProductId, APIProductDTO body, String ifMatch,
             MessageContext messageContext) {
         try {
