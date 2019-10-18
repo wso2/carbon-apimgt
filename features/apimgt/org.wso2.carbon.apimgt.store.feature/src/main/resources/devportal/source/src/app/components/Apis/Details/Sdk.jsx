@@ -29,9 +29,19 @@ import JSFileDownload from 'js-file-download';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import { FormattedMessage, injectIntl, } from 'react-intl';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import AuthManager from 'AppData/AuthManager';
 import Api from '../../../data/api';
+
+const styles = theme => ({
+    genericMessageWrapper: {
+        margin: theme.spacing(2),
+    },
+});
+
 /**
  *
  *
@@ -158,13 +168,12 @@ class Sdk extends React.Component {
      */
     render() {
         const language_list = this.state.items;
-        const { onlyIcons, intl } = this.props;
+        const { onlyIcons, intl, classes } = this.props;
         if (onlyIcons) {
             return (
                 language_list && (
                     <React.Fragment>
-                        {language_list.map(
-                            (language, index) => index < 3 && (
+                        {language_list.map((language, index) => index < 3 && (
                                 <Grid item xs={4}>
                                     <a
                                         onClick={event => this.handleClick(event, language)}
@@ -183,8 +192,7 @@ class Sdk extends React.Component {
                                         />
                                     </a>
                                 </Grid>
-                            ),
-                        )}
+                            ),)}
                     </React.Fragment>
                 )
             );
@@ -246,22 +254,28 @@ class Sdk extends React.Component {
                 </Grid>
             </Grid>
         ) : (
-            <Paper>
-                <Grid container style={{ marginLeft: '10%', marginRight: '10%', width: '100%' }} align='center'>
-                    <Grid item xs={12} sm={6} md={9} lg={9} xl={10}>
-                        <Paper>
-                            <Typography>
-                                <Icon>info</Icon>
-                                <FormattedMessage
-                                    id='Apis.Details.Sdk.no.lanuages'
-                                    defaultMessage='No languages are configured.'
-                                />
-                            </Typography>
-                        </Paper>
-                    </Grid>
-                </Grid>
-            </Paper>
+            <div className={classes.genericMessageWrapper}>
+                <InlineMessage type='info' className={classes.dialogContainer}>
+                    <Typography variant='h5' component='h3'>
+                        <FormattedMessage
+                            id='Apis.Details.Sdk.no.sdks'
+                            defaultMessage='No SDKs Yet'
+                        />
+                    </Typography>
+                    <Typography component='p'>
+                        <FormattedMessage
+                            id='Apis.Details.Sdk.no.sdks.content'
+                            defaultMessage='No SDKs available for this API yet'
+                        />
+                    </Typography>
+                </InlineMessage>
+            </div>
         );
     }
 }
-export default injectIntl(Sdk);
+
+Sdk.propTypes = {
+    classes: PropTypes.instanceOf(Object).isRequired,
+};
+
+export default injectIntl(withStyles(styles)(Sdk));
