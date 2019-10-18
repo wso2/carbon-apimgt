@@ -26,12 +26,20 @@ const suggestions = {
             route: 'overview',
         },
         {
+            label: 'Runtime Configurations',
+            route: 'runtime-configuration',
+        },
+        {
             label: 'Transport Level Security',
             route: 'runtime-configuration',
         },
         {
             label: 'Mutual SSL',
             route: 'runtime-configuration',
+        },
+        {
+            label: 'Design Configurations',
+            route: 'configuration',
         },
         {
             label: 'Manage SSL Certificates',
@@ -62,11 +70,27 @@ const suggestions = {
             route: 'runtime-configuration',
         },
         {
-            label: 'CORS',
+            label: 'CORS Configuration',
             route: 'runtime-configuration',
         },
         {
             label: 'Backend Throughput',
+            route: 'runtime-configuration',
+        },
+        {
+            label: 'Message Mediation',
+            route: 'runtime-configuration',
+        },
+        {
+            label: 'Response',
+            route: 'runtime-configuration',
+        },
+        {
+            label: 'Request',
+            route: 'runtime-configuration',
+        },
+        {
+            label: 'Backend',
             route: 'runtime-configuration',
         },
         {
@@ -86,8 +110,8 @@ const suggestions = {
             route: 'runtime-configuration',
         },
         {
-            label: 'Access control',
-            route: 'runtime-configuration',
+            label: 'Publisher Access Control',
+            route: 'configuration',
         },
         {
             label: 'Developer Portal Visibility',
@@ -193,18 +217,6 @@ const suggestions = {
         },
         {
             label: 'Mediation Policies',
-            route: 'runtime-configuration',
-        },
-        {
-            label: 'In Flow',
-            route: 'runtime-configuration',
-        },
-        {
-            label: 'Out Flow',
-            route: 'runtime-configuration',
-        },
-        {
-            label: 'Fault Flow',
             route: 'runtime-configuration',
         },
         {
@@ -323,6 +335,18 @@ const suggestions = {
             label: 'Schema validation',
             route: 'runtime-configuration',
         },
+        {
+            label: 'Fault',
+            route: 'runtime-configuration',
+        },
+        {
+            label: 'Endpoints',
+            route: 'runtime-configuration',
+        },
+        {
+            label: 'Properties',
+            route: 'properties',
+        },
     ],
     productOnly: [
         {
@@ -402,6 +426,142 @@ const suggestions = {
         {
             label: 'Add New Scope',
             route: 'scopes',
+        },
+        {
+            label: 'Fault',
+            route: 'runtime-configuration',
+        },
+        {
+            label: 'Endpoints',
+            route: 'runtime-configuration',
+        },
+        {
+            label: 'Environments',
+            route: 'environments',
+        },
+        {
+            label: 'API Gateways',
+            route: 'environments',
+        },
+        {
+            label: 'Microgateway Labels',
+            route: 'environments',
+        },
+        {
+            label: 'Lifecycle',
+            route: 'lifecycle',
+        },
+        {
+            label: 'Publish API',
+            route: 'lifecycle',
+        },
+        {
+            label: 'Block API',
+            route: 'lifecycle',
+        },
+        {
+            label: 'Depricate API',
+            route: 'lifecycle',
+        },
+        {
+            label: 'Change Lifecycle',
+            route: 'lifecycle',
+        },
+        {
+            label: 'Deploy as a Prototype API',
+            route: 'lifecycle',
+        },
+        {
+            label: 'Requirements',
+            route: 'lifecycle',
+        },
+        {
+            label: 'Subscriptions',
+            route: 'subscriptions',
+        },
+        {
+            label: 'Subscription Policies',
+            route: 'subscriptions',
+        },
+        {
+            label: 'Subscription Availability',
+            route: 'subscriptions',
+        },
+        {
+            label: 'Monetization',
+            route: 'monetization',
+        },
+        {
+            label: 'Monetization Properties',
+            route: 'monetization',
+        },
+        {
+            label: 'Commercial Policies',
+            route: 'monetization',
+        },
+        {
+            label: 'Create New Version',
+            route: 'new_version',
+        },
+        {
+            label: 'Prototyped API',
+            route: 'endpoints',
+        },
+        {
+            label: 'AWS Lambda Endpoints',
+            route: 'endpoints',
+        },
+        {
+            label: 'HTTP/HTTPS Endpoints',
+            route: 'endpoints',
+        },
+        {
+            label: 'HTTP/SOAP Endpoints',
+            route: 'endpoints',
+        },
+        {
+            label: 'Dynamic Endpoints',
+            route: 'endpoints',
+        },
+        {
+            label: 'Endpoint Security',
+            route: 'endpoints',
+        },
+        {
+            label: 'Certificates',
+            route: 'endpoints',
+        },
+        {
+            label: 'Production Endpoint',
+            route: 'endpoints',
+        },
+        {
+            label: 'Sandbox Endpoint',
+            route: 'endpoints',
+        },
+        {
+            label: 'Failover Endpoint',
+            route: 'endpoints',
+        },
+        {
+            label: 'Load Balance Endpoint',
+            route: 'endpoints',
+        },
+        {
+            label: 'Endpoints',
+            route: 'endpoints',
+        },
+        {
+            label: 'Fault',
+            route: 'runtime-configuration',
+        },
+        {
+            label: 'Endpoints',
+            route: 'runtime-configuration',
+        },
+        {
+            label: 'Properties',
+            route: 'properties',
         },
     ],
 };
