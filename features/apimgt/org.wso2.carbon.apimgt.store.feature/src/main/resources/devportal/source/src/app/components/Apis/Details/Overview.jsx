@@ -441,7 +441,7 @@ function Overview(props) {
                                 <Grid container className={classes.root} spacing={2}>
                                     {api &&
                                         <Grid item xs={12}>
-                                            <Comments apiId={api.id} api={api} showLatest isOverview setCount={setCount} />
+                                            <Comments apiId={api.id} showLatest isOverview setCount={setCount} />
                                         </Grid>
                                     }
                                     {totalComments === 0 &&
