@@ -168,7 +168,7 @@ function LoadbalanceFailoverConfig(props) {
                 return (
                     <FormattedMessage
                         id='Apis.Details.Endpoints.LoadbalanceFailoverConfig.none.heading'
-                        defaultMessage='None Configured'
+                        defaultMessage='Not Configured'
                     />
                 );
             case 'failover':
