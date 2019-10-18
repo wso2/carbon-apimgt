@@ -2796,15 +2796,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String tenantDomain = MultitenantUtils.getTenantDomain(tenantAwareUsername);
         final boolean isApiProduct = apiTypeWrapper.isAPIProduct();
         String state;
-
+        String apiContext;
+        
         if (isApiProduct) {
             product = apiTypeWrapper.getApiProduct();
             state = product.getState();
             identifier = product.getId();
+            apiContext = product.getContext();
         } else {
             api = apiTypeWrapper.getApi();
             state = api.getStatus();
             identifier = api.getId();
+            apiContext = api.getContext();
         }
 
         WorkflowResponse workflowResponse = null;
@@ -2832,17 +2835,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setWorkflowReference(String.valueOf(subscriptionId));
                 workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
                 workflowDTO.setCallbackUrl(addSubscriptionWFExecutor.getCallbackURL());
-                if (!isApiProduct) {
-                    workflowDTO.setApiName(identifier.getName());
-                    workflowDTO.setApiContext(api.getContext());
-                    workflowDTO.setApiVersion(api.getId().getVersion());
-                    workflowDTO.setApiProvider(identifier.getProviderName());
-                    workflowDTO.setTierName(identifier.getTier());
-                } else {
-                    workflowDTO.setProductIdentifier(product.getId());
-                    workflowDTO.setApiProvider(identifier.getProviderName());
-                    workflowDTO.setTierName(identifier.getTier());
-                }
+                workflowDTO.setApiName(identifier.getName());
+                workflowDTO.setApiContext(apiContext);
+                workflowDTO.setApiVersion(identifier.getVersion());
+                workflowDTO.setApiProvider(identifier.getProviderName());
+                workflowDTO.setTierName(identifier.getTier());
                 workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
                 workflowDTO.setApplicationId(applicationId);
                 workflowDTO.setSubscriber(userId);
@@ -2912,11 +2909,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 subscriptionUUID = addedSubscription.getUUID();
 
                 JSONObject subsLogObject = new JSONObject();
-                if (!isApiProduct) {
-                    subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
-                } else {
-                    subsLogObject.put(APIConstants.AuditLogConstants.API_PRODUCT_NAME, identifier.getName());
-                }
+                subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
                 subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
                 subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
                 subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
@@ -2931,9 +2924,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             if (log.isDebugEnabled()) {
-                String logMessage = "API/Product Name: " + identifier.getName() + ", API Version " + identifier.getVersion()
-                        + ", Subscription Status: " + subscriptionStatus + " subscribe by " + userId
-                        + " for app " + applicationName;
+                String logMessage = "API Name: " + identifier.getName() + ", API Version " + identifier.getVersion()
+                        + ", Subscription Status: " + subscriptionStatus + " subscribe by " + userId + " for app "
+                        + applicationName;
                 log.debug(logMessage);
             }
 
@@ -3022,15 +3015,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             workflowDTO.setApiProvider(identifier.getProviderName());
             API api = null;
+            APIProduct product = null;
+            String context = null;
             if (apiIdentifier != null) {
                 api = getAPI(apiIdentifier);
-                workflowDTO.setApiContext(api.getContext());
-                workflowDTO.setApiName(apiIdentifier.getApiName());
-                workflowDTO.setApiVersion(apiIdentifier.getVersion());
+                context = api.getContext();
             } else if (apiProdIdentifier != null) {
-                workflowDTO.setProductIdentifier(apiProdIdentifier);
+                product = getAPIProduct(apiProdIdentifier);
+                context = product.getContext();
             }
-
+            workflowDTO.setApiContext(context);
+            workflowDTO.setApiName(identifier.getName());
+            workflowDTO.setApiVersion(identifier.getVersion());
             workflowDTO.setApplicationName(applicationName);
             workflowDTO.setTenantDomain(tenantDomain);
             workflowDTO.setTenantId(tenantId);
@@ -3078,12 +3074,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             JSONObject subsLogObject = new JSONObject();
-            if (apiIdentifier != null) {
-                subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, apiIdentifier.getApiName());
-            } else if (apiProdIdentifier != null) {
-                subsLogObject.put(APIConstants.AuditLogConstants.API_PRODUCT_NAME, apiProdIdentifier.getName());
-            }
-
+            subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
             subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
             subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
             subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);

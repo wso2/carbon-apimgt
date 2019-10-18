@@ -178,6 +178,7 @@ export default function OperationGovernance(props) {
             <Grid item md={5} >
                 <Tooltip title='Remove scope'>
                     <IconButton
+                        disabled={disableUpdate}
                         onClick={() => operationsDispatcher({ action: 'scopes', data: { target, verb, value: [] } })}
                         aria-label='delete'
                     >
