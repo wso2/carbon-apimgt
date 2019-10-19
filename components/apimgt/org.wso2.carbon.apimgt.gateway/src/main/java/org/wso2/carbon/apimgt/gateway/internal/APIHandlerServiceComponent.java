@@ -107,11 +107,14 @@ public class APIHandlerServiceComponent {
                         webServiceThrottleDataRetriever.startWebServiceThrottleDataRetriever();
                         KeyTemplateRetriever webServiceBlockConditionsRetriever = new KeyTemplateRetriever();
                         webServiceBlockConditionsRetriever.startKeyTemplateDataRetriever();
+
+                        // Start web service based revoked JWT tokens retriever.
+                        // Advanced throttle properties & blocking conditions have to be enabled for JWT token retrieval due to the throttle config dependency for this feature.
+                        RevokedJWTTokensRetriever webServiceRevokedJWTTokensRetriever = new RevokedJWTTokensRetriever();
+                        webServiceRevokedJWTTokensRetriever.startRevokedJWTTokensRetriever();
                     }
                 }
-                // Start web service based revoked JWT tokens retriever.
-                RevokedJWTTokensRetriever webServiceRevokedJWTTokensRetriever = new RevokedJWTTokensRetriever();
-                webServiceRevokedJWTTokensRetriever.startRevokedJWTTokensRetriever();
+
 
                 // Start JWT revoked map cleaner.
                 RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();

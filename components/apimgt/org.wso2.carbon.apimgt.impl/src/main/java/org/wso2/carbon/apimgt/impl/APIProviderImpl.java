@@ -186,6 +186,7 @@ import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.retrieveSavedEmailList;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -1910,6 +1911,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         Set<API> associatedAPIs = getAssociatedAPIs(apiProduct);
+        List<APIIdentifier> apisWithoutEndpoints = new ArrayList<>();
+
+        for (API api : associatedAPIs) {
+            String endpointConfig = api.getEndpointConfig();
+
+            if (StringUtils.isEmpty(endpointConfig)) {
+                apisWithoutEndpoints.add(api.getId());
+            }
+        }
+
+        if (!apisWithoutEndpoints.isEmpty()) {
+            throw new APIManagementException("Cannot publish API Product: " + apiProductId + " to gateway",
+            ExceptionCodes.from(ExceptionCodes.API_PRODUCT_RESOURCE_ENDPOINT_UNDEFINED, apiProductId.toString(),
+            apisWithoutEndpoints.toString()));
+        }
+
         failedEnvironment = gatewayManager.publishToGateway(apiProduct, builder, tenantDomain, associatedAPIs);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + apiProductId.getName() + ", API Version " + apiProductId.getVersion()
@@ -2001,6 +2018,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     * This method used to validate and set transports in api
+     * @param api
+     * @throws APIManagementException
+     */
     private void validateAndSetTransports(API api) throws APIManagementException {
         String transports = api.getTransports();
         if (!StringUtils.isEmpty(transports) && !("null".equalsIgnoreCase(transports))) {
@@ -2018,80 +2040,112 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
+     * This method used to validate and set transports in api product
+     * @param apiProduct
+     * @throws APIManagementException
+     */
+    private void validateAndSetTransports(APIProduct apiProduct) throws APIManagementException {
+        String transports = apiProduct.getTransports();
+        if (!StringUtils.isEmpty(transports) && !("null".equalsIgnoreCase(transports))) {
+            if (transports.contains(",")) {
+                StringTokenizer st = new StringTokenizer(transports, ",");
+                while (st.hasMoreTokens()) {
+                    checkIfValidTransport(st.nextToken());
+                }
+            } else {
+                checkIfValidTransport(transports);
+            }
+        } else {
+            apiProduct.setTransports(Constants.TRANSPORT_HTTP + ',' + Constants.TRANSPORT_HTTPS);
+        }
+    }
+
+    /**
+     * This method used to select security level according to given api Security
+     * @param apiSecurity
+     * @return
+     */
+    private ArrayList<String> selectSecurityLevels(String apiSecurity) {
+        ArrayList<String> securityLevels = new ArrayList<>();
+        String[] apiSecurityLevels = apiSecurity.split(",");
+        boolean isOauth2 = false;
+        boolean isMutualSSL = false;
+        boolean isBasicAuth = false;
+        boolean isApiKey = false;
+        boolean isMutualSSLMandatory = false;
+        boolean isOauthBasicAuthMandatory = false;
+
+        boolean securitySchemeFound = false;
+
+        for (String apiSecurityLevel : apiSecurityLevels) {
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                isOauth2 = true;
+                securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+                securitySchemeFound = true;
+            }
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                isMutualSSL = true;
+                securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL);
+                securitySchemeFound = true;
+            }
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_BASIC_AUTH)) {
+                isBasicAuth = true;
+                securityLevels.add(APIConstants.API_SECURITY_BASIC_AUTH);
+                securitySchemeFound = true;
+            }
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY)){
+                isApiKey = true;
+                securityLevels.add(APIConstants.API_SECURITY_API_KEY);
+                securitySchemeFound = true;
+            }
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
+                isMutualSSLMandatory = true;
+                securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
+            }
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
+                isOauthBasicAuthMandatory = true;
+                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
+            }
+        }
+
+        // If no security schema found, set OAuth2 as default
+        if (!securitySchemeFound) {
+            isOauth2 = true;
+            securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+        }
+        // If Only OAuth2/Basic-Auth specified, set it as mandatory
+        if (!isMutualSSL && !isOauthBasicAuthMandatory) {
+            securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
+        }
+        // If Only Mutual SSL specified, set it as mandatory
+        if (!isBasicAuth && !isOauth2 && !isApiKey && !isMutualSSLMandatory) {
+            securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
+        }
+        // If OAuth2/Basic-Auth and Mutual SSL protected and not specified the mandatory scheme,
+        // set OAuth2/Basic-Auth as mandatory
+        if ((isOauth2 || isBasicAuth || isApiKey) && isMutualSSL && !isOauthBasicAuthMandatory && !isMutualSSLMandatory) {
+            securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
+        }
+        return securityLevels;
+    }
+
+    /**
      * To validate the API Security options and set it.
      *
      * @param api Relevant API that need to be validated.
      */
     private void validateAndSetAPISecurity(API api) {
         String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
-        if (api.getApiSecurity() != null) {
-            apiSecurity = api.getApiSecurity();
-            ArrayList<String> securityLevels = new ArrayList<>();
-            String[] apiSecurityLevels = apiSecurity.split(",");
-            boolean isOauth2 = false;
-            boolean isMutualSSL = false;
-            boolean isBasicAuth = false;
-            boolean isApiKey = false;
-            boolean isMutualSSLMandatory = false;
-            boolean isOauthBasicAuthMandatory = false;
-
-            boolean securitySchemeFound = false;
-
-            for (String apiSecurityLevel : apiSecurityLevels) {
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
-                    isOauth2 = true;
-                    securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
-                    securitySchemeFound = true;
-                }
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
-                    isMutualSSL = true;
-                    securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL);
-                    securitySchemeFound = true;
-                }
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_BASIC_AUTH)) {
-                    isBasicAuth = true;
-                    securityLevels.add(APIConstants.API_SECURITY_BASIC_AUTH);
-                    securitySchemeFound = true;
-                }
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY)){
-                    isApiKey = true;
-                    securityLevels.add(APIConstants.API_SECURITY_API_KEY);
-                    securitySchemeFound = true;
-                }
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
-                    isMutualSSLMandatory = true;
-                    securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
-                }
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
-                    isOauthBasicAuthMandatory = true;
-                    securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
-                }
-            }
-
-            // If no security schema found, set OAuth2 as default
-            if (!securitySchemeFound) {
-                isOauth2 = true;
-                securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
-            }
-            // If Only OAuth2/Basic-Auth specified, set it as mandatory
-            if (!isMutualSSL && !isOauthBasicAuthMandatory) {
-                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
-            }
-            // If Only Mutual SSL specified, set it as mandatory
-            if (!isBasicAuth && !isOauth2 && !isApiKey && !isMutualSSLMandatory) {
-                securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
-            }
-            // If OAuth2/Basic-Auth and Mutual SSL protected and not specified the mandatory scheme,
-            // set OAuth2/Basic-Auth as mandatory
-            if ((isOauth2 || isBasicAuth || isApiKey) && isMutualSSL && !isOauthBasicAuthMandatory && !isMutualSSLMandatory) {
-                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
-            }
-
+        String security = api.getApiSecurity();
+        if (security!= null) {
+            apiSecurity = security;
+            ArrayList<String> securityLevels = selectSecurityLevels(apiSecurity);
             apiSecurity = String.join(",", securityLevels);
         }
         if (log.isDebugEnabled()) {
             log.debug("API " + api.getId() + " has following enabled protocols : " + apiSecurity);
         }
+
         api.setApiSecurity(apiSecurity);
         if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
                 !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
@@ -2100,6 +2154,36 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         + "subscription tiers associated with it");
             }
             api.removeAllTiers();
+        }
+    }
+
+    /**
+     * To validate the API Security options and set it.
+     *
+     * @param apiProduct Relevant APIProduct that need to be validated.
+     */
+    private void validateAndSetAPISecurity(APIProduct apiProduct) {
+        String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+        String security = apiProduct.getApiSecurity();
+        if (security!= null) {
+            apiSecurity = security;
+            ArrayList<String> securityLevels = selectSecurityLevels(apiSecurity);
+            apiSecurity = String.join(",", securityLevels);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("APIProduct " + apiProduct.getId() + " has following enabled protocols : " + apiSecurity);
+        }
+        apiProduct.setApiSecurity(apiSecurity);
+
+
+        if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
+                !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
+            if (log.isDebugEnabled()) {
+                log.debug( "API Product " + apiProduct.getId() + " does not supports oauth2 security, hence removing all the "
+                        + "subscription tiers associated with it");
+            }
+            apiProduct.removeAllTiers();
+
         }
     }
 
@@ -2400,7 +2484,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     , corsProperties);
         }
 
+        APIIdentifier apiProductIdentifier = new APIIdentifier(apiProduct.getId().getProviderName(),
+                apiProduct.getId().getName(), apiProduct.getId().getVersion());
+
+        List<ClientCertificateDTO> clientCertificateDTOS = null;
+        if (isClientCertificateBasedAuthenticationConfigured()) {
+            clientCertificateDTOS = certificateManager.searchClientCertificates(tenantId, null, apiProductIdentifier);
+        }
+        Map<String, String> clientCertificateObject = null;
+        CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
+        if (clientCertificateDTOS != null) {
+            clientCertificateObject = new HashMap<>();
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
+                clientCertificateObject.put(certificateMgtUtils
+                                .getUniqueIdentifierOfCertificate(clientCertificateDTO.getCertificate()),
+                        clientCertificateDTO.getTierName());
+            }
+        }
+
         Map<String, String> authProperties = new HashMap<String, String>();
+        if (!StringUtils.isBlank(authorizationHeader)) {
+            authProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
+        }
+        String apiSecurity = apiProduct.getApiSecurity();
+        String apiLevelPolicy = apiProduct.getProductLevelPolicy();
+        authProperties.put(APIConstants.API_SECURITY, apiSecurity);
+        authProperties.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
+        if (clientCertificateObject != null) {
+            authProperties.put(APIConstants.CERTIFICATE_INFORMATION, clientCertificateObject.toString());
+        }
 
         //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
         String removeHeaderFromOutMessage = APIUtil
@@ -6728,7 +6840,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void addAPIProductWithoutPublishingToGateway(APIProduct product) throws APIManagementException {
+    public Map<API, List<APIProductResource>> addAPIProductWithoutPublishingToGateway(APIProduct product) throws APIManagementException {
+        Map<API, List<APIProductResource>> apiToProductResourceMapping = new HashMap<>();
+
         validateApiProductInfo(product);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
@@ -6756,6 +6870,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 continue;
             }
             if (api != null) {
+                api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
+                if (!apiToProductResourceMapping.containsKey(api)) {
+                    apiToProductResourceMapping.put(api, new ArrayList<>());
+                }
+
+                List<APIProductResource> apiProductResources = apiToProductResourceMapping.get(api);
+                apiProductResources.add(apiProductResource);
+
                 apiProductResource.setApiIdentifier(api.getId());
                 apiProductResource.setProductIdentifier(product.getId());
                 apiProductResource.setEndpointConfig(api.getEndpointConfig());
@@ -6788,6 +6910,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //now we have validated APIs and it's resources inside the API product. Add it to database
 
         apiMgtDAO.addAPIProduct(product, tenantDomain);
+
+        return apiToProductResourceMapping;
     }
 
     @Override
@@ -6936,7 +7060,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException {
+    public Map<API, List<APIProductResource>> updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException {
+        Map<API, List<APIProductResource>> apiToProductResourceMapping = new HashMap<>();
         //validate resources and set api identifiers and resource ids to product
         List<APIProductResource> resources = product.getProductResources();
         for (APIProductResource apiProductResource : resources) {
@@ -6951,6 +7076,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else {
                 api = super.getAPIbyUUID(apiProductResource.getApiId(), tenantDomain);
             }
+
+            api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
+
+            if (!apiToProductResourceMapping.containsKey(api)) {
+                apiToProductResourceMapping.put(api, new ArrayList<>());
+            }
+
+            List<APIProductResource> apiProductResources = apiToProductResourceMapping.get(api);
+            apiProductResources.add(apiProductResource);
+
             // if API does not exist, getLightweightAPIByUUID() method throws exception. so no need to handle NULL
             apiProductResource.setApiIdentifier(api.getId());
             apiProductResource.setProductIdentifier(product.getId());
@@ -6962,7 +7097,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // TODO handle if no resource is defined. either throw an error or add all the resources of that API
                 // to the product
             } else {
-                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getResourceURI();
+                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                 if (templateMap.containsKey(key)) {
 
                     //Since the template ID is not set from the request, we manually set it.
@@ -6970,7 +7105,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 } else {
                     throw new APIManagementException("API with id " + apiProductResource.getApiId()
-                            + " does not have a resource " + uriTemplate.getResourceURI()
+                            + " does not have a resource " + uriTemplate.getUriTemplate()
                             + " with http method " + uriTemplate.getHTTPVerb());
                 }
             }
@@ -6998,6 +7133,38 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new FaultGatewaysException(failedGateways);
         }
 
+        return apiToProductResourceMapping;
+    }
+
+    @Override
+    public void updateLocalEntry(APIProduct product) throws FaultGatewaysException {
+        APIProductIdentifier apiProductId = product.getId();
+
+        String provider = apiProductId.getProviderName();
+        if (provider.contains("AT")) {
+            provider = provider.replace("-AT-", "@");
+            tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        } else {
+            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        }
+
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        Map<String, String> failedToPublishEnvironments = gatewayManager.updateLocalEntry(product, tenantDomain);
+
+        Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
+
+        if (!failedToPublishEnvironments.isEmpty()) {
+            Set<String> publishedEnvironments = new HashSet<String>(product.getEnvironments());
+            publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
+            product.setEnvironments(publishedEnvironments);
+            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
+            failedGateways.put("UNPUBLISHED", Collections.<String, String>emptyMap());
+        }
+
+        if (!failedGateways.isEmpty() &&
+                (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {
+            throw new FaultGatewaysException(failedGateways);
+        }
     }
 
     @Override
@@ -7043,6 +7210,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(errorMessage);
             throw new APIManagementException(errorMessage);
         }
+
+        //Validate Transports and Security
+        validateAndSetTransports(apiProduct);
+        validateAndSetAPISecurity(apiProduct);
 
         boolean transactionCommitted = false;
         try {
@@ -7144,6 +7315,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void updateApiProductArtifact(APIProduct apiProduct, boolean updateMetadata, boolean updatePermissions)
             throws APIManagementException {
+
+        //Validate Transports and Security
+        validateAndSetTransports(apiProduct);
+        validateAndSetAPISecurity(apiProduct);
 
         boolean transactionCommitted = false;
         try {

@@ -5179,6 +5179,65 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ###########################################################
+  # Resource for checking if a given API Product is outdated
+  ###########################################################
+
+  /api-products/{apiProductId}/is-outdated:
+    #----------------------------------------------------------------------------------------------------------
+    # Retrieves the status indicating if an API Product is outdated due to updating of dependent APIs
+    #----------------------------------------------------------------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+      summary: Get if API Product is outdated
+      description: |
+        This operation can be used to retrieve the status indicating if an API Product is outdated due to updating of dependent APIs
+      parameters:
+        - $ref: '#/parameters/apiProductId'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+      tags:
+        - API Products
+      responses:
+        200:
+          description: |
+            OK.
+            Requested swagger document of the API is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+          schema:
+            $ref: '#/definitions/APIProductOutdatedStatus'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
 
 ######################################################
   # The "Document Collection" resource API Product
@@ -7088,6 +7147,15 @@ definitions:
         enum:
           - CREATED
           - PUBLISHED
+      enableSchemaValidation:
+        type: boolean
+        example: false
+      responseCachingEnabled:
+        type: boolean
+        example: true
+      cacheTimeout:
+        type: integer
+        example: 300
       visibility:
         type: string
         description: The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED.
@@ -7260,6 +7328,18 @@ definitions:
           $ref: '#/definitions/ResourcePath'
       pagination:
         $ref: '#/definitions/Pagination'
+
+  #-----------------------------------------------------
+  # The APIProduct outdated status resource
+  #-----------------------------------------------------
+  APIProductOutdatedStatus:
+    title: APIProduct is outdated status
+    properties:
+      isOutdated:
+        type: boolean
+        description: |
+          Indicates if an API Product is outdated
+        example: true
 
   #-----------------------------------------------------
   # API Business Information resource

@@ -29,6 +29,7 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import SearchOutlined from '@material-ui/icons/SearchOutlined';
 import { Link } from 'react-router-dom';
 import ProductIcon from 'AppComponents/Shared/CustomIcon';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import API from 'AppData/api';
 import SearchParser from './SearchParser';
@@ -45,6 +46,14 @@ function renderInput(inputProps) {
     const {
         classes, ref, isLoading, onChange, ...other
     } = inputProps; // `isLoading` has destructured here to prevent passing unintended prop to TextField
+    let loadingAdorment = null;
+    if (isLoading) {
+        loadingAdorment = (
+            <InputAdornment position='end'>
+                <CircularProgress />
+            </InputAdornment>
+        );
+    }
     return (
         <TextField
             id='searchQuery'
@@ -57,6 +66,7 @@ function renderInput(inputProps) {
                         <SearchOutlined />
                     </InputAdornment>
                 ),
+                endAdornment: loadingAdorment,
                 onChange,
                 ...other,
             }}
