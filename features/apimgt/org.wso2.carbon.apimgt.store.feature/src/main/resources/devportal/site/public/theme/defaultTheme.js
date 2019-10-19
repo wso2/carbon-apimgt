@@ -70,6 +70,7 @@ const Configurations = {
                     iconOddColor: '#347eff',
                     iconEvenColor: '#89b4ff',
                     listGridSelectedColor: '#347eff', // Defines color of the selected icon ( grid/ list ) view of the api listing page
+                    tagChipBackground: '#7dd7f5',
                 },
                 listView: {
                     tableHeadBackground: '#fff',
