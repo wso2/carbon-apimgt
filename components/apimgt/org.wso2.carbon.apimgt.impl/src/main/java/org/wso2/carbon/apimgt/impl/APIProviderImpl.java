@@ -186,6 +186,7 @@ import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.retrieveSavedEmailList;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -1910,6 +1911,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         Set<API> associatedAPIs = getAssociatedAPIs(apiProduct);
+        List<APIIdentifier> apisWithoutEndpoints = new ArrayList<>();
+
+        for (API api : associatedAPIs) {
+            String endpointConfig = api.getEndpointConfig();
+
+            if (StringUtils.isEmpty(endpointConfig)) {
+                apisWithoutEndpoints.add(api.getId());
+            }
+        }
+
+        if (!apisWithoutEndpoints.isEmpty()) {
+            throw new APIManagementException("Cannot publish API Product: " + apiProductId + " to gateway",
+            ExceptionCodes.from(ExceptionCodes.API_PRODUCT_RESOURCE_ENDPOINT_UNDEFINED, apiProductId.toString(),
+            apisWithoutEndpoints.toString()));
+        }
+
         failedEnvironment = gatewayManager.publishToGateway(apiProduct, builder, tenantDomain, associatedAPIs);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + apiProductId.getName() + ", API Version " + apiProductId.getVersion()
@@ -6728,7 +6745,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void addAPIProductWithoutPublishingToGateway(APIProduct product) throws APIManagementException {
+    public Map<API, List<APIProductResource>> addAPIProductWithoutPublishingToGateway(APIProduct product) throws APIManagementException {
+        Map<API, List<APIProductResource>> apiToProductResourceMapping = new HashMap<>();
+
         validateApiProductInfo(product);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
@@ -6756,6 +6775,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 continue;
             }
             if (api != null) {
+                api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
+                if (!apiToProductResourceMapping.containsKey(api)) {
+                    apiToProductResourceMapping.put(api, new ArrayList<>());
+                }
+
+                List<APIProductResource> apiProductResources = apiToProductResourceMapping.get(api);
+                apiProductResources.add(apiProductResource);
+
                 apiProductResource.setApiIdentifier(api.getId());
                 apiProductResource.setProductIdentifier(product.getId());
                 apiProductResource.setEndpointConfig(api.getEndpointConfig());
@@ -6788,6 +6815,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //now we have validated APIs and it's resources inside the API product. Add it to database
 
         apiMgtDAO.addAPIProduct(product, tenantDomain);
+
+        return apiToProductResourceMapping;
     }
 
     @Override
@@ -6936,7 +6965,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException {
+    public Map<API, List<APIProductResource>> updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException {
+        Map<API, List<APIProductResource>> apiToProductResourceMapping = new HashMap<>();
         //validate resources and set api identifiers and resource ids to product
         List<APIProductResource> resources = product.getProductResources();
         for (APIProductResource apiProductResource : resources) {
@@ -6951,6 +6981,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else {
                 api = super.getAPIbyUUID(apiProductResource.getApiId(), tenantDomain);
             }
+
+            api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
+
+            if (!apiToProductResourceMapping.containsKey(api)) {
+                apiToProductResourceMapping.put(api, new ArrayList<>());
+            }
+
+            List<APIProductResource> apiProductResources = apiToProductResourceMapping.get(api);
+            apiProductResources.add(apiProductResource);
+
             // if API does not exist, getLightweightAPIByUUID() method throws exception. so no need to handle NULL
             apiProductResource.setApiIdentifier(api.getId());
             apiProductResource.setProductIdentifier(product.getId());
@@ -6962,7 +7002,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // TODO handle if no resource is defined. either throw an error or add all the resources of that API
                 // to the product
             } else {
-                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getResourceURI();
+                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                 if (templateMap.containsKey(key)) {
 
                     //Since the template ID is not set from the request, we manually set it.
@@ -6970,7 +7010,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 } else {
                     throw new APIManagementException("API with id " + apiProductResource.getApiId()
-                            + " does not have a resource " + uriTemplate.getResourceURI()
+                            + " does not have a resource " + uriTemplate.getUriTemplate()
                             + " with http method " + uriTemplate.getHTTPVerb());
                 }
             }
@@ -6998,6 +7038,38 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new FaultGatewaysException(failedGateways);
         }
 
+        return apiToProductResourceMapping;
+    }
+
+    @Override
+    public void updateLocalEntry(APIProduct product) throws FaultGatewaysException {
+        APIProductIdentifier apiProductId = product.getId();
+
+        String provider = apiProductId.getProviderName();
+        if (provider.contains("AT")) {
+            provider = provider.replace("-AT-", "@");
+            tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        } else {
+            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        }
+
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        Map<String, String> failedToPublishEnvironments = gatewayManager.updateLocalEntry(product, tenantDomain);
+
+        Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
+
+        if (!failedToPublishEnvironments.isEmpty()) {
+            Set<String> publishedEnvironments = new HashSet<String>(product.getEnvironments());
+            publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
+            product.setEnvironments(publishedEnvironments);
+            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
+            failedGateways.put("UNPUBLISHED", Collections.<String, String>emptyMap());
+        }
+
+        if (!failedGateways.isEmpty() &&
+                (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {
+            throw new FaultGatewaysException(failedGateways);
+        }
     }
 
     @Override
