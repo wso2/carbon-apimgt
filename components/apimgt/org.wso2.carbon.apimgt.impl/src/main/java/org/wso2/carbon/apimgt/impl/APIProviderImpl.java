@@ -1291,8 +1291,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
 
         //Validate Transports
-        validateAndSetTransports(api, null);
-        validateAndSetAPISecurity(api, null);
+        validateAndSetTransports(api);
+        validateAndSetAPISecurity(api);
         boolean transactionCommitted = false;
         try {
             registry.beginTransaction();
@@ -2018,8 +2018,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void validateAndSetTransports(API api, APIProduct apiProduct) throws APIManagementException {
-        String transports = apiProduct == null ? api.getTransports() : apiProduct.getTransports();
+    /**
+     * This method used to validate and set transports in api
+     * @param api
+     * @throws APIManagementException
+     */
+    private void validateAndSetTransports(API api) throws APIManagementException {
+        String transports = api.getTransports();
         if (!StringUtils.isEmpty(transports) && !("null".equalsIgnoreCase(transports))) {
             if (transports.contains(",")) {
                 StringTokenizer st = new StringTokenizer(transports, ",");
@@ -2030,12 +2035,98 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 checkIfValidTransport(transports);
             }
         } else {
-            if (apiProduct == null) {
-                api.setTransports(Constants.TRANSPORT_HTTP + ',' + Constants.TRANSPORT_HTTPS);
+            api.setTransports(Constants.TRANSPORT_HTTP + ',' + Constants.TRANSPORT_HTTPS);
+        }
+    }
+
+    /**
+     * This method used to validate and set transports in api product
+     * @param apiProduct
+     * @throws APIManagementException
+     */
+    private void validateAndSetTransports(APIProduct apiProduct) throws APIManagementException {
+        String transports = apiProduct.getTransports();
+        if (!StringUtils.isEmpty(transports) && !("null".equalsIgnoreCase(transports))) {
+            if (transports.contains(",")) {
+                StringTokenizer st = new StringTokenizer(transports, ",");
+                while (st.hasMoreTokens()) {
+                    checkIfValidTransport(st.nextToken());
+                }
             } else {
-                apiProduct.setTransports(Constants.TRANSPORT_HTTP + ',' + Constants.TRANSPORT_HTTPS);
+                checkIfValidTransport(transports);
+            }
+        } else {
+            apiProduct.setTransports(Constants.TRANSPORT_HTTP + ',' + Constants.TRANSPORT_HTTPS);
+        }
+    }
+
+    /**
+     * This method used to select security level according to given api Security
+     * @param apiSecurity
+     * @return
+     */
+    private ArrayList<String> selectSecurityLevels(String apiSecurity) {
+        ArrayList<String> securityLevels = new ArrayList<>();
+        String[] apiSecurityLevels = apiSecurity.split(",");
+        boolean isOauth2 = false;
+        boolean isMutualSSL = false;
+        boolean isBasicAuth = false;
+        boolean isApiKey = false;
+        boolean isMutualSSLMandatory = false;
+        boolean isOauthBasicAuthMandatory = false;
+
+        boolean securitySchemeFound = false;
+
+        for (String apiSecurityLevel : apiSecurityLevels) {
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                isOauth2 = true;
+                securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+                securitySchemeFound = true;
+            }
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                isMutualSSL = true;
+                securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL);
+                securitySchemeFound = true;
+            }
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_BASIC_AUTH)) {
+                isBasicAuth = true;
+                securityLevels.add(APIConstants.API_SECURITY_BASIC_AUTH);
+                securitySchemeFound = true;
+            }
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY)){
+                isApiKey = true;
+                securityLevels.add(APIConstants.API_SECURITY_API_KEY);
+                securitySchemeFound = true;
+            }
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
+                isMutualSSLMandatory = true;
+                securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
+            }
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
+                isOauthBasicAuthMandatory = true;
+                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
             }
         }
+
+        // If no security schema found, set OAuth2 as default
+        if (!securitySchemeFound) {
+            isOauth2 = true;
+            securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+        }
+        // If Only OAuth2/Basic-Auth specified, set it as mandatory
+        if (!isMutualSSL && !isOauthBasicAuthMandatory) {
+            securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
+        }
+        // If Only Mutual SSL specified, set it as mandatory
+        if (!isBasicAuth && !isOauth2 && !isApiKey && !isMutualSSLMandatory) {
+            securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
+        }
+        // If OAuth2/Basic-Auth and Mutual SSL protected and not specified the mandatory scheme,
+        // set OAuth2/Basic-Auth as mandatory
+        if ((isOauth2 || isBasicAuth || isApiKey) && isMutualSSL && !isOauthBasicAuthMandatory && !isMutualSSLMandatory) {
+            securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
+        }
+        return securityLevels;
     }
 
     /**
@@ -2043,98 +2134,56 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *
      * @param api Relevant API that need to be validated.
      */
-    private void validateAndSetAPISecurity(API api, APIProduct apiProduct) {
+    private void validateAndSetAPISecurity(API api) {
         String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
-        String security = apiProduct == null ? api.getApiSecurity() : apiProduct.getApiSecurity();
+        String security = api.getApiSecurity();
         if (security!= null) {
             apiSecurity = security;
-            ArrayList<String> securityLevels = new ArrayList<>();
-            String[] apiSecurityLevels = apiSecurity.split(",");
-            boolean isOauth2 = false;
-            boolean isMutualSSL = false;
-            boolean isBasicAuth = false;
-            boolean isApiKey = false;
-            boolean isMutualSSLMandatory = false;
-            boolean isOauthBasicAuthMandatory = false;
-
-            boolean securitySchemeFound = false;
-
-            for (String apiSecurityLevel : apiSecurityLevels) {
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
-                    isOauth2 = true;
-                    securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
-                    securitySchemeFound = true;
-                }
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
-                    isMutualSSL = true;
-                    securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL);
-                    securitySchemeFound = true;
-                }
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_BASIC_AUTH)) {
-                    isBasicAuth = true;
-                    securityLevels.add(APIConstants.API_SECURITY_BASIC_AUTH);
-                    securitySchemeFound = true;
-                }
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY)){
-                    isApiKey = true;
-                    securityLevels.add(APIConstants.API_SECURITY_API_KEY);
-                    securitySchemeFound = true;
-                }
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
-                    isMutualSSLMandatory = true;
-                    securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
-                }
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
-                    isOauthBasicAuthMandatory = true;
-                    securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
-                }
-            }
-
-            // If no security schema found, set OAuth2 as default
-            if (!securitySchemeFound) {
-                isOauth2 = true;
-                securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
-            }
-            // If Only OAuth2/Basic-Auth specified, set it as mandatory
-            if (!isMutualSSL && !isOauthBasicAuthMandatory) {
-                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
-            }
-            // If Only Mutual SSL specified, set it as mandatory
-            if (!isBasicAuth && !isOauth2 && !isApiKey && !isMutualSSLMandatory) {
-                securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
-            }
-            // If OAuth2/Basic-Auth and Mutual SSL protected and not specified the mandatory scheme,
-            // set OAuth2/Basic-Auth as mandatory
-            if ((isOauth2 || isBasicAuth || isApiKey) && isMutualSSL && !isOauthBasicAuthMandatory && !isMutualSSLMandatory) {
-                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
-            }
-
+            ArrayList<String> securityLevels = selectSecurityLevels(apiSecurity);
             apiSecurity = String.join(",", securityLevels);
         }
         if (log.isDebugEnabled()) {
             log.debug("API " + api.getId() + " has following enabled protocols : " + apiSecurity);
         }
 
-        String apiType;
-        if (apiProduct == null) {
-            apiType = "API";
-            api.setApiSecurity(apiSecurity);
-        } else {
-            apiType = "APIProduct";
-            apiProduct.setApiSecurity(apiSecurity);
+        api.setApiSecurity(apiSecurity);
+        if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
+                !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
+            if (log.isDebugEnabled()) {
+                log.debug("API " + api.getId() + " does not supports oauth2 security, hence removing all the "
+                        + "subscription tiers associated with it");
+            }
+            api.removeAllTiers();
         }
+    }
+
+    /**
+     * To validate the API Security options and set it.
+     *
+     * @param apiProduct Relevant APIProduct that need to be validated.
+     */
+    private void validateAndSetAPISecurity(APIProduct apiProduct) {
+        String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+        String security = apiProduct.getApiSecurity();
+        if (security!= null) {
+            apiSecurity = security;
+            ArrayList<String> securityLevels = selectSecurityLevels(apiSecurity);
+            apiSecurity = String.join(",", securityLevels);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("APIProduct " + apiProduct.getId() + " has following enabled protocols : " + apiSecurity);
+        }
+        apiProduct.setApiSecurity(apiSecurity);
+
 
         if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
                 !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
             if (log.isDebugEnabled()) {
-                log.debug(apiType + " " + api.getId() + " does not supports oauth2 security, hence removing all the "
+                log.debug( "API Product " + apiProduct.getId() + " does not supports oauth2 security, hence removing all the "
                         + "subscription tiers associated with it");
             }
-            if (apiProduct == null) {
-                api.removeAllTiers();
-            } else {
-                apiProduct.removeAllTiers();
-            }
+            apiProduct.removeAllTiers();
+
         }
     }
 
@@ -3212,8 +3261,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         //Validate Transports
-        validateAndSetTransports(api, null);
-        validateAndSetAPISecurity(api, null);
+        validateAndSetTransports(api);
+        validateAndSetAPISecurity(api);
         boolean transactionCommitted = false;
         try {
             registry.beginTransaction();
@@ -7163,8 +7212,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         //Validate Transports and Security
-        validateAndSetTransports(null, apiProduct);
-        validateAndSetAPISecurity(null, apiProduct);
+        validateAndSetTransports(apiProduct);
+        validateAndSetAPISecurity(apiProduct);
 
         boolean transactionCommitted = false;
         try {
@@ -7268,8 +7317,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
 
         //Validate Transports and Security
-        validateAndSetTransports(null, apiProduct);
-        validateAndSetAPISecurity(null, apiProduct);
+        validateAndSetTransports(apiProduct);
+        validateAndSetAPISecurity(apiProduct);
 
         boolean transactionCommitted = false;
         try {

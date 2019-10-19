@@ -8996,7 +8996,7 @@ public final class APIUtil {
             try {
                 cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
             } catch (NumberFormatException e) {
-                //ignore
+                log.error("Error in converting cache time out value due to " + e.getMessage(), e);
             }
             apiProduct.setCacheTimeout(cacheTimeout);
 
