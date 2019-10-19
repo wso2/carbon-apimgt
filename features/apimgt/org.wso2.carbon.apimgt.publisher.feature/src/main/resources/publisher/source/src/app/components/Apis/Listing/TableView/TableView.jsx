@@ -31,7 +31,8 @@ import DocThumb from 'AppComponents/Apis/Listing/components/ImageGenerator/DocTh
 import { Progress } from 'AppComponents/Shared';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import SampleAPI from 'AppComponents/Apis/Listing/SampleAPI/SampleAPI';
-import SampleAPIProduct from 'AppComponents/Apis/Listing/SampleAPI/SampleAPIProduct';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import Typography from '@material-ui/core/Typography';
 import TopMenu from 'AppComponents/Apis/Listing/components/TopMenu';
 
 const styles = theme => ({
@@ -432,7 +433,29 @@ class TableView extends React.Component {
                         isAPIProduct={isAPIProduct}
                         listType={listType}
                     />
-                    <div className={classes.contentInside}>{isAPIProduct ? <SampleAPIProduct /> : <SampleAPI />}</div>
+                    <div className={classes.contentInside}>{isAPIProduct ? (
+                        <InlineMessage type='info' height={140}>
+                            <div className={classes.contentWrapper}>
+                                <Typography variant='h5' component='h3' className={classes.head}>
+                                    <FormattedMessage
+                                        id='Apis.Listing.SampleAPIProduct.manager'
+                                        defaultMessage='Welcome to WSO2 API Manager'
+                                    />
+                                </Typography>
+                                <Typography component='p' className={classes.content}>
+                                    <FormattedMessage
+                                        id='Apis.Listing.SampleAPIProduct.description'
+                                        defaultMessage={
+                                            'The API resources in an API product can come from' +
+                                                ' one or more APIs, so you can mix and match resources from multiple ' +
+                                                ' API resources to create specialized feature sets.'
+                                        }
+                                    />
+                                </Typography>
+                            </div>
+                        </InlineMessage>
+                    ) : <SampleAPI />}
+                    </div>
                 </React.Fragment>
             );
         }
