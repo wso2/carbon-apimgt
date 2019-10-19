@@ -19,10 +19,15 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
+import { InputAdornment, IconButton, Icon } from '@material-ui/core';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Chip from '@material-ui/core/Chip';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
+import green from '@material-ui/core/colors/green';
 import APIValidation from 'AppData/APIValidation';
+import API from 'AppData/api';
 
 import SelectPolicies from './SelectPolicies';
 
@@ -39,6 +44,25 @@ const useStyles = makeStyles(theme => ({
             whiteSpace: 'nowrap',
             overflow: 'hidden',
         },
+    },
+    endpointValidChip: {
+        color: 'green',
+        border: '1px solid green',
+    },
+    endpointInvalidChip: {
+        color: '#ffd53a',
+        border: '1px solid #ffd53a',
+    },
+    endpointErrorChip: {
+        color: 'red',
+        border: '1px solid red',
+    },
+    iconButton: {
+        padding: theme.spacing(),
+    },
+    iconButtonValid: {
+        padding: theme.spacing(),
+        color: green[500],
     },
 }));
 
@@ -80,6 +104,11 @@ export default function DefaultAPIForm(props) {
     } = props;
     const classes = useStyles();
     const [validity, setValidity] = useState({});
+    const [isEndpointValid, setIsEndpointValid] = useState();
+    const [statusCode, setStatusCode] = useState('');
+    const [isUpdating, setUpdating] = useState(false);
+    const [isErrorCode, setIsErrorCode] = useState(false);
+    const iff = (condition, then, otherwise) => (condition ? then : otherwise);
 
     // Check the provided API validity on mount, TODO: Better to use Joi schema here ~tmkb
     useEffect(() => {
@@ -181,6 +210,29 @@ export default function DefaultAPIForm(props) {
                 break;
             }
         }
+    }
+
+    function testEndpoint(endpoint) {
+        setUpdating(true);
+        const restApi = new API();
+        restApi.testEndpoint(endpoint)
+            .then((result) => {
+                if (result.body.error !== null) {
+                    setStatusCode(result.body.error);
+                    setIsErrorCode(true);
+                } else {
+                    setStatusCode(result.body.statusCode + ' ' + result.body.statusMessage);
+                    setIsErrorCode(false);
+                }
+                if (result.body.statusCode >= 200 && result.body.statusCode < 300) {
+                    setIsEndpointValid(true);
+                    setIsErrorCode(false);
+                } else {
+                    setIsEndpointValid(false);
+                }
+            }).finally(() => {
+                setUpdating(false);
+            });
     }
 
     return (
@@ -350,6 +402,33 @@ export default function DefaultAPIForm(props) {
                         error={validity.endpointURL}
                         margin='normal'
                         variant='outlined'
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position='end'>
+                                    {statusCode && <Chip
+                                        label={statusCode}
+                                        className={isEndpointValid ? classes.endpointValidChip : iff(
+                                            isErrorCode,
+                                            classes.endpointErrorChip, classes.endpointInvalidChip,
+                                        )}
+                                        variant='outlined'
+                                    />}
+                                    <IconButton
+                                        className={isEndpointValid ? classes.iconButtonValid : classes.iconButton}
+                                        aria-label='TestEndpoint'
+                                        onClick={() => testEndpoint(api.endpoint)}
+                                        disabled={isUpdating}
+                                    >
+                                        {isUpdating ?
+                                            <CircularProgress size={20} /> :
+                                            <Icon>
+                                            check_circle
+                                            </Icon>
+                                        }
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                     />
                 )}
 

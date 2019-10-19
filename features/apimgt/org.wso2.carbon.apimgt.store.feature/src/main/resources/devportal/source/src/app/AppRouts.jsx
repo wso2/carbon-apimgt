@@ -20,7 +20,7 @@ import { withStyles } from '@material-ui/core';
 import TagCloudListing from 'AppComponents/Apis/Listing/TagCloudListing';
 import Apis from 'AppComponents/Apis/Apis';
 import Landing from 'AppComponents/LandingPage/Landing';
-import ApplicationFormHanlder from 'AppComponents/Applications/ApplicationFormHanlder';
+import ApplicationFormHandler from 'AppComponents/Applications/ApplicationFormHandler';
 import { PageNotFound, ScopeNotFound } from 'AppComponents/Base/Errors';
 import RedirectToLogin from 'AppComponents/Login/RedirectToLogin';
 import SettingsBase from 'AppComponents/Settings/SettingsBase';
@@ -60,8 +60,8 @@ function AppRouts(props) {
                 [
                     <Route path='/settings' component={SettingsBase} />,
                     <Route exact path='/applications' component={Listing} />,
-                    <Route path='/applications/create' component={ApplicationFormHanlder} />,
-                    <Route path='/applications/:application_id/edit' component={ApplicationFormHanlder} />,
+                    <Route path='/applications/create' component={ApplicationFormHandler} />,
+                    <Route path='/applications/:application_id/edit' component={ApplicationFormHandler} />,
                     <Route path='/applications/:application_uuid/' component={Details} />,
                 ]
             ) : (

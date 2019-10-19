@@ -23,10 +23,8 @@ import Tooltip from '@material-ui/core/Tooltip';
 import FileCopy from '@material-ui/icons/FileCopy';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import { FormattedMessage } from 'react-intl';
 import InlineMessage from '../InlineMessage';
-import ViewSecret from './ViewSecret';
 /**
  *
  *
@@ -58,10 +56,6 @@ const styles = theme => ({
         display: 'flex',
         marginTop: 20,
     },
-    secretWrapper: {
-        display: 'flex',
-        marginBottom: 20,
-    },
     prodLabel: {
         lineHeight: '30px',
         marginRight: 10,
@@ -72,24 +66,24 @@ const styles = theme => ({
         maxWidth: theme.custom.contentAreaWidth - theme.custom.leftMenu.width,
     },
     root: {
-        marginTop: 20,
+        marginBottom: 20,
     },
 });
 /**
  *
  *
- * @class ViewToken
+ * @class ViewSecret
  * @extends {React.Component}
  */
-class ViewToken extends React.Component {
+class ViewSecret extends React.Component {
     state = {
-        tokenCopied: false,
+        secretCopied: false,
     };
 
     /**
      *
      *
-     * @memberof ViewToken
+     * @memberof ViewSecret
      */
     onCopy = name => () => {
         this.setState({
@@ -107,9 +101,10 @@ class ViewToken extends React.Component {
 
     /**
      * Generate a comma separate string of token scopes
+     *
      * @param {string} tokenScopes token scopes
      * @returns {String} scopeString comma separated string of token scopes
-     * @memberof ViewToken
+     * @memberof ViewSecret
      */
     getTokeScopesString(tokenScopes) {
         if (tokenScopes) {
@@ -122,56 +117,37 @@ class ViewToken extends React.Component {
      *
      *
      * @returns
-     * @memberof ViewToken
+     * @memberof ViewSecret
      */
     render() {
-        const {
-            classes, token, consumerSecret,
-        } = this.props;
-        const { tokenCopied } = this.state;
+        const { classes, secret } = this.props;
+        const { secretCopied } = this.state;
         return (
             <div className={classes.root}>
-                {consumerSecret && (
-                    <div className={classes.secretWrapper}>
-                        <ViewSecret secret={{ consumerSecret }} />
-                    </div>
-                )}
                 <InlineMessage type='warn'>
                     <Typography variant='h5' component='h3'>
-                        {(token.isOauth) && <FormattedMessage
-                            id='Shared.AppsAndKeys.ViewToken.please.copy'
-                            defaultMessage='Please Copy the Access Token'
+                        <FormattedMessage
+                            id='Shared.AppsAndKeys.ViewSecret.please.copy.secret'
+                            defaultMessage='Please Copy the Consumer Secret'
                         />
-                        }
-                        {(!token.isOauth) && <FormattedMessage
-                            id='Shared.AppsAndKeys.ViewToken.please.copy.apikey'
-                            defaultMessage='Please Copy the Api Key'
-                        />
-                        }
                     </Typography>
                     <Typography component='p'>
                         <FormattedMessage
-                            id='Shared.AppsAndKeys.ViewToken.please.copy.help'
-                            defaultMessage={`Please copy this generated token value as it will be displayed only for 
-                            the current browser session. ( After a page refresh, the token is not visible in the UI )`}
+                            id='Shared.AppsAndKeys.ViewSecret.please.copy.secret.help'
+                            defaultMessage={`Please make a note of the regenerated consumer 
+                            secret value as it will be displayed only once.`}
                         />
                     </Typography>
                 </InlineMessage>
                 <div className={classes.epWrapper}>
                     <Typography className={classes.prodLabel}>
-                        {(token.isOauth) && <FormattedMessage
-                            id='Shared.AppsAndKeys.ViewToken.access.token'
-                            defaultMessage='Access Token'
+                        <FormattedMessage
+                            id='Shared.AppsAndKeys.ViewSecret.consumer.secret'
+                            defaultMessage='Consumer Secret'
                         />
-                        }
-                        {(!token.isOauth) && <FormattedMessage
-                            id='Shared.AppsAndKeys.ViewToken.apikey'
-                            defaultMessage='Api Key'
-                        />
-                        }
                     </Typography>
                     <TextField
-                        defaultValue={token.accessToken}
+                        defaultValue={secret.consumerSecret}
                         id='bootstrap-input'
                         multiline
                         rows={4}
@@ -187,51 +163,22 @@ class ViewToken extends React.Component {
                             className: classes.bootstrapFormLabel,
                         }}
                     />
-                    <Tooltip title={tokenCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
-                        <CopyToClipboard text={token.accessToken} onCopy={this.onCopy('tokenCopied')}>
+                    <Tooltip title={secretCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
+                        <CopyToClipboard text={secret.consumerSecret} onCopy={this.onCopy('secretCopied')}>
                             <FileCopy color='secondary'>file_copy</FileCopy>
                         </CopyToClipboard>
                     </Tooltip>
                 </div>
-                <FormHelperText>
-                    <FormattedMessage
-                        id='Shared.AppsAndKeys.ViewToken.info.first'
-                        defaultMessage='Above token has a validity period of '
-                    />
-                    {token.validityTime}
-                    <FormattedMessage
-                        id='Shared.AppsAndKeys.ViewToken.info.second'
-                        defaultMessage=' seconds'
-                    />
-                    {token.isOauth && <FormattedMessage
-                        id='Shared.AppsAndKeys.ViewToken.info.third'
-                        defaultMessage=' and the token has ('
-                    />
-                    }
-                    {this.getTokeScopesString(token.tokenScopes)}
-                    {token.isOauth && <FormattedMessage
-                        id='Shared.AppsAndKeys.ViewToken.info.fourth'
-                        defaultMessage=') scopes'
-                    />
-                    }.
-                </FormHelperText>
             </div>
         );
     }
 }
 
-ViewToken.defaultProps = {
-    consumerSecret: null,
-};
-
-ViewToken.propTypes = {
+ViewSecret.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    token: PropTypes.shape({
-        accessToken: PropTypes.string.isRequired,
-        validityTime: PropTypes.number.isRequired,
-        tokenScopes: PropTypes.array.isRequired,
+    secret: PropTypes.shape({
+        consumerSecret: PropTypes.string.isRequired,
     }).isRequired,
-    consumerSecret: PropTypes.string,
 };
 
-export default withStyles(styles)(ViewToken);
+export default withStyles(styles)(ViewSecret);
