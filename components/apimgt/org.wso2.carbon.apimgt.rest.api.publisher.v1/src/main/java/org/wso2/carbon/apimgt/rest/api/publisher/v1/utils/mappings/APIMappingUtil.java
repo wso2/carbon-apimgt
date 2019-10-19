@@ -1633,6 +1633,15 @@ public class APIMappingUtil {
         List<String> tagsToReturn = new ArrayList<>(apiTags);
         productDto.setTags(tagsToReturn);
 
+        productDto.setEnableSchemaValidation(product.isEnabledSchemaValidation());
+
+        if (APIConstants.ENABLED.equals(product.getResponseCache())) {
+            productDto.setResponseCachingEnabled(Boolean.TRUE);
+        } else {
+            productDto.setResponseCachingEnabled(Boolean.FALSE);
+        }
+
+        productDto.setCacheTimeout(product.getCacheTimeout());
         APIProductBusinessInformationDTO businessInformation = new APIProductBusinessInformationDTO();
         businessInformation.setBusinessOwner(product.getBusinessOwner());
         businessInformation.setBusinessOwnerEmail(product.getBusinessOwnerEmail());
@@ -1826,6 +1835,21 @@ public class APIMappingUtil {
         List<String> apiProductTags = dto.getTags();
         Set<String> tagsToReturn = new HashSet<>(apiProductTags);
         product.addTags(tagsToReturn);
+
+        if (dto.isEnableSchemaValidation() != null) {
+            product.setEnableSchemaValidation(dto.isEnableSchemaValidation());
+        }
+
+        if (dto.isResponseCachingEnabled() != null && dto.isResponseCachingEnabled()) {
+            product.setResponseCache(APIConstants.ENABLED);
+        } else {
+            product.setResponseCache(APIConstants.DISABLED);
+        }
+        if (dto.getCacheTimeout() != null) {
+            product.setCacheTimeout(dto.getCacheTimeout());
+        } else {
+            product.setCacheTimeout(APIConstants.API_RESPONSE_CACHE_TIMEOUT);
+        }
 
         if(dto.getBusinessInformation() != null) {
             product.setBusinessOwner(dto.getBusinessInformation().getBusinessOwner());
