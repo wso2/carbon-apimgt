@@ -26,6 +26,7 @@ import Button from '@material-ui/core/Button';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
 import CONSTS from 'AppData/Constants';
+import Progress from 'AppComponents/Shared/Progress';
 import { FormattedMessage } from 'react-intl';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import SubscriptionsTable from './SubscriptionsTable';
@@ -58,13 +59,15 @@ function Subscriptions(props) {
     const [tenants, setTenants] = useState(null);
     const [policies, setPolices] = useState({});
     const [availability, setAvailability] = useState({});
-    const [tenantList, setTenantList] = React.useState([]);
+    const [tenantList, setTenantList] = useState([]);
     const [subscriptions, setSubscriptions] = useState(null);
+    const [updateInProgress, setUpdateInProgress] = useState(false);
 
     /**
      * Save subscription information (policies, subscriptionAvailability, subscriptionAvailableTenants)
      */
     function saveAPI() {
+        setUpdateInProgress(true);
         const { subscriptionAvailability } = availability;
         const newApi = {
             policies,
@@ -78,11 +81,16 @@ function Subscriptions(props) {
             .catch((error) => {
                 console.error(error);
                 Alert.error('Error occurred while updating subscription configurations');
+            }).finally(() => {
+                setUpdateInProgress(false);
             });
     }
 
-
     useEffect(() => {
+        if (api) {
+            setAvailability({ subscriptionAvailability: api.subscriptionAvailability });
+            setTenantList(api.subscriptionAvailableTenants);
+        }
         restApi.getTenantsByState(CONSTS.TENANT_STATE_ACTIVE)
             .then((result) => {
                 setTenants(result.body.count);
@@ -115,6 +123,7 @@ function Subscriptions(props) {
                     setTenantList={setTenantList}
                 />
             )}
+            { updateInProgress && <Progress /> }
             <Grid
                 container
                 direction='row'

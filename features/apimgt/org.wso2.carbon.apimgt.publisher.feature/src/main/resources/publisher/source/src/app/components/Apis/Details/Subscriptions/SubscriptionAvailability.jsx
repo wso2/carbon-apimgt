@@ -76,7 +76,9 @@ const useStyles = makeStyles(theme => ({
  */
 export default function SimpleSelect(props) {
     const classes = useStyles();
-    const { api, setAvailability, setTenantList } = props;
+    const {
+        api, setAvailability, tenantList, setTenantList,
+    } = props;
     let currentAvailability;
     if (api.subscriptionAvailability === null || api.subscriptionAvailability === 'CURRENT_TENANT') {
         currentAvailability = 'currentTenant';
@@ -183,7 +185,7 @@ export default function SimpleSelect(props) {
                         </Grid>
                         {isSpecificTenants ? (
                             <Grid item xs={8} className={classes.tenantsList} >
-                                <TenantAutocomplete setTenantList={setTenantList} api={api} />
+                                <TenantAutocomplete setTenantList={setTenantList} tenantList={tenantList} api={api} />
                             </Grid>
                         ) : <Grid item xs={8} />}
                     </Grid>
@@ -198,5 +200,6 @@ SimpleSelect.propTypes = {
     api: PropTypes.shape({ policies: PropTypes.array }).isRequired,
     setAvailability: PropTypes.func.isRequired,
     setTenantList: PropTypes.func.isRequired,
+    tenantList: PropTypes.shape([]).isRequired,
 };
 
