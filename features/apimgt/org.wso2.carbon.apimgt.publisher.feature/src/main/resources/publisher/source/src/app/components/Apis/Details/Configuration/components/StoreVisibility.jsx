@@ -55,7 +55,7 @@ const useStyles = makeStyles(theme => ({
  */
 export default function StoreVisibility(props) {
     const [roleValidity, setRoleValidity] = useState(true);
-    const [roleExists, setRoleExists] = useState(false);
+    const [roleExists, setRoleExists] = useState(true);
     const { api, configDispatcher } = props;
     const [invalidRoles, setInvalidRoles] = useState([]);
     const isRestrictedByRoles = api.visibility === 'RESTRICTED';
@@ -212,7 +212,7 @@ export default function StoreVisibility(props) {
                 </Tooltip>
             </Box>
             {isRestrictedByRoles && (
-                <Box py={2}>
+                <Box py={2} style={{ marginTop: -10, marginBottom: 10 }}>
                     <ChipInput
                         fullWidth
                         variant='outlined'
