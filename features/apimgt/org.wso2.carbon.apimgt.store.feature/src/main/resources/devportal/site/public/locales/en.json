@@ -107,7 +107,7 @@
   "Apis.Details.Subscribe.subscribe.to.this": "Subscribed to this API",
   "Apis.Details.Subscribe.subscribed.to.all": "You have subscribed to all the available applications. You need to create a\n                                                                        new application to subscribe to this API again.",
   "Apis.Details.Subscribe.subscriptions.title": "Subscriptions",
-  "Apis.Details.Subscribe.test.description": "Create an Application and subscribe this API to that Application.\n                                                An application is a logical collection of APIs.\n                                                Applications allow you to use a single access token to invoke a collection\n                                                of APIs and to subscribe to one API multiple times with different SLA levels.\n                                                The DefaultApplication is pre-created and allows unlimited access by default.",
+  "Apis.Details.Subscribe.test.description": "Create an application and subscribe to this API\n                                                An application is a logical collection of APIs.\n                                                Applications allow you to use a single access token to invoke a collection\n                                                of APIs and to subscribe to one API multiple times with different SLA levels.\n                                                The DefaultApplication is pre-created and allows unlimited access by default.",
   "Apis.Details.Subscribe.test.this.api": "Test this API?",
   "Apis.Details.Subscribe.use.google.location.service": "Use Google's location service?",
   "Apis.Details.Subscribe.view.all.link": "View All",
