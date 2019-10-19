@@ -304,6 +304,7 @@ function LoadbalanceFailoverConfig(props) {
                                             editEndpoint={editEndpoint}
                                             setAdvancedConfigOpen={toggleAdvanceConfig}
                                             category='production_endpoints'
+                                            apiId={api.id}
                                         />
                                     </Grid>
                                     }
@@ -332,6 +333,7 @@ function LoadbalanceFailoverConfig(props) {
                                             editEndpoint={editEndpoint}
                                             setAdvancedConfigOpen={toggleAdvanceConfig}
                                             category='sandbox_endpoints'
+                                            apiId={api.id}
                                         />
                                     </Grid>
                                     }
