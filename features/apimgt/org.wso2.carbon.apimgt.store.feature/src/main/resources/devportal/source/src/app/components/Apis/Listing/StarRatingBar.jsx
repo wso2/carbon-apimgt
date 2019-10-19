@@ -26,6 +26,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import Api from 'AppData/api';
 import AuthManager from 'AppData/AuthManager';
 import StarRatingSummary from 'AppComponents/Apis/Details/StarRatingSummary';
+import Rating from "@material-ui/lab/Rating";
 
 /**
  *
@@ -196,16 +197,7 @@ class StarRatingBar extends React.Component {
                             </React.Fragment>
                         ) : (
                             <React.Fragment>
-                                {[1, 2, 3, 4, 5].map(i => (
-                                    <StarRate
-                                        key={i}
-                                        className={
-                                            apiRating >= (i - 0.5)
-                                                ? classes.starRate
-                                                : classes.noStarRate
-                                        }
-                                    />
-                                ))}
+                                <Rating name='half-rating' value={apiRating} precision={0.1} readOnly={true} />
                             </React.Fragment>
                         )}
                     </React.Fragment>

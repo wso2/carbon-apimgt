@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
@@ -453,6 +454,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
+    public Response apiProductsApiProductIdIsOutdatedGet(String apiProductId, String accept, String ifNoneMatch,
+                                                         MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    @Override
     public Response apiProductsApiProductIdPut(String apiProductId, APIProductDTO body, String ifMatch,
             MessageContext messageContext) {
         try {
@@ -499,14 +506,11 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             product.setID(productIdentifier);
             product.setUuid(apiProductId);
 
-            APIDefinition parser = new OAS3Parser();
-            SwaggerData swaggerData = new SwaggerData(product);
-            String apiDefinition = parser.generateAPIDefinition(swaggerData);
-            apiProvider.saveSwaggerDefinition(product, apiDefinition);
+            Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.updateAPIProduct(product);
+            updateAPIProductSwagger(apiToProductResourceMapping, product, apiProvider);
+
             //preserve monetization status in the update flow
             apiProvider.configureMonetizationInAPIProductArtifact(product);
-            apiProvider.updateAPIProduct(product);
-
             APIProduct updatedProduct = apiProvider.getAPIProduct(productIdentifier);
             APIProductDTO updatedProductDTO = APIMappingUtil.fromAPIProducttoDTO(updatedProduct);
             return Response.ok().entity(updatedProductDTO).build();
@@ -667,7 +671,6 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         String provider = null;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             String username = RestApiUtil.getLoggedInUsername();
             // if not add product
             provider = body.getProvider();
@@ -685,10 +688,6 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 provider = username;
             }
 
-            /*if (apiProvider.isProductExist(body.getName(), provider, tenantDomain)) {
-                RestApiUtil.handleBadRequest(
-                        "Product with name " + body.getName() + " for provider " + provider + " already exists", log);
-            }*/
             List<String> tiersFromDTO = body.getPolicies();
             Set<Tier> definedTiers = apiProvider.getTiers();
             List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
@@ -718,14 +717,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
             APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(body, provider);
 
-            apiProvider.addAPIProductWithoutPublishingToGateway(productToBeAdded);
+            Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.addAPIProductWithoutPublishingToGateway(productToBeAdded);
+            addAPIProductSwagger(apiToProductResourceMapping, productToBeAdded, apiProvider);
+
             APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
-
-            APIDefinition parser = new OAS3Parser();
-            SwaggerData swaggerData = new SwaggerData(productToBeAdded);
-            String apiDefinition = parser.generateAPIDefinition(swaggerData);
-            apiProvider.saveSwagger20Definition(productToBeAdded.getId(), apiDefinition);
-
             APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
 
             apiProvider.saveToGateway(createdProduct);
@@ -745,6 +740,36 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    private void addAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping,
+                                      APIProduct product, APIProvider apiProvider)
+            throws APIManagementException {
+        APIDefinition parser = new OAS3Parser();
+        SwaggerData swaggerData = new SwaggerData(product);
+        String apiProductSwagger = parser.generateAPIDefinition(swaggerData);
+
+        apiProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping, apiProductSwagger);
+
+        apiProvider.saveSwagger20Definition(product.getId(), apiProductSwagger);
+        product.setDefinition(apiProductSwagger);
+    }
+
+    private void updateAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping,
+                                         APIProduct product, APIProvider apiProvider)
+            throws APIManagementException, FaultGatewaysException {
+        APIDefinition parser = new OAS3Parser();
+        SwaggerData updatedData = new SwaggerData(product);
+        String existingProductSwagger = apiProvider.getAPIDefinitionOfAPIProduct(product);
+        String updatedProductSwagger = parser.generateAPIDefinition(updatedData, existingProductSwagger);
+
+        updatedProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping,
+                    updatedProductSwagger);
+
+        apiProvider.saveSwagger20Definition(product.getId(), updatedProductSwagger);
+        product.setDefinition(updatedProductSwagger);
+
+        apiProvider.updateLocalEntry(product);
     }
 
     /**

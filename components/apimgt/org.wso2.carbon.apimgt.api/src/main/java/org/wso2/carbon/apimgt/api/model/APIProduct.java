@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -56,13 +57,13 @@ public class APIProduct {
     private List<APIProductResource> productResources = new ArrayList<>();
     private String definition;
     private JSONObject additionalProperties = new JSONObject();
-    private Set<String> environments;
-    private List<Label> gatewayLabels;
+    private Set<String> environments = new HashSet<>();
+    private List<Label> gatewayLabels = new ArrayList<>();
+    private boolean enableSchemaValidation = false;
+    private Set<Scope> scopes = new HashSet<>();
 
     private JSONObject monetizationProperties = new JSONObject();
     private boolean isMonetizationEnabled = false;
-
-    private Set<Scope> scopes;
 
     /**
      * API security at the gateway level.
@@ -362,6 +363,24 @@ public class APIProduct {
         return accessControlRoles;
     }
 
+    /**
+     * Check the status of the Json schema validation property.
+     *
+     * @return Status of the validator property.
+     */
+    public boolean isEnabledSchemaValidation() {
+        return enableSchemaValidation;
+    }
+
+    /**
+     * To set the JSON schema validation enable/disable.
+     *
+     * @param enableSchemaValidation Given Status.
+     */
+    public void setEnableSchemaValidation(boolean enableSchemaValidation) {
+        this.enableSchemaValidation = enableSchemaValidation;
+    }
+
     public String getApiSecurity() {
         return apiSecurity;
     }
@@ -392,6 +411,10 @@ public class APIProduct {
 
     public void setScopes(Set<Scope> scopes) {
         this.scopes = scopes;
+    }
+
+    public void addScope(Scope scope) {
+        this.scopes.add(scope);
     }
 
     public void setCreatedTime(Date createdTime) {
@@ -488,5 +511,12 @@ public class APIProduct {
 
     public void setProductLevelPolicy(String productLevelPolicy) {
         this.productLevelPolicy = productLevelPolicy;
+    }
+
+    /**
+     * Removes all Tiers from the API object.
+     */
+    public void removeAllTiers() {
+        availableTiers.clear();
     }
 }

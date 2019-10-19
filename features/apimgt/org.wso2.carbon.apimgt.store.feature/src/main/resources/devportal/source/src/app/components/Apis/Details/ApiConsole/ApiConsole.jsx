@@ -376,7 +376,7 @@ class ApiConsole extends React.Component {
                                         environments={environments}
                                     />
                                 )}
-                                {subscriptions.length === 0 && (
+                                {subscriptions && subscriptions.length === 0 && (
                                     <Box display='flex' justifyContent='center'>
                                         <Typography variant='body1' gutterBottom>
                                             <FormattedMessage

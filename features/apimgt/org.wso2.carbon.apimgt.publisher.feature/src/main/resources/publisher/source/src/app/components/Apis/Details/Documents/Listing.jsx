@@ -411,20 +411,22 @@ class Listing extends React.Component {
                             defaultMessage='Documents'
                         />
                     </Typography>
-                    <ScopeValidation
-                        resourcePath={isAPIProduct ? resourcePath.API_PRODUCTS : resourcePath.API_CHANGE_LC}
-                        resourceMethod={resourceMethod.POST}
-                    >
-                        <Link to={!isRestricted(['apim:api_create'], api) && url}>
-                            <Button size='small' className={classes.button} disabled={isRestricted(['apim:api_create'], api)}>
-                                <AddCircle className={classes.buttonIcon} />
-                                <FormattedMessage
-                                    id='Apis.Details.Documents.Listing.add.new.document.button'
-                                    defaultMessage='Add New Document'
-                                />
-                            </Button>
-                        </Link>
-                    </ScopeValidation>
+                    {docs && docs.length > 0 && (
+                        <ScopeValidation
+                            resourcePath={isAPIProduct ? resourcePath.API_PRODUCTS : resourcePath.API_CHANGE_LC}
+                            resourceMethod={resourceMethod.POST}
+                        >
+                            <Link to={!isRestricted(['apim:api_create'], api) && url}>
+                                <Button size='small' className={classes.button} disabled={isRestricted(['apim:api_create'], api)}>
+                                    <AddCircle className={classes.buttonIcon} />
+                                    <FormattedMessage
+                                        id='Apis.Details.Documents.Listing.add.new.document.button'
+                                        defaultMessage='Add New Document'
+                                    />
+                                </Button>
+                            </Link>
+                        </ScopeValidation>
+                    )}
                 </div>
                 <div className={classes.contentWrapper}>
                     {showAddDocs && (

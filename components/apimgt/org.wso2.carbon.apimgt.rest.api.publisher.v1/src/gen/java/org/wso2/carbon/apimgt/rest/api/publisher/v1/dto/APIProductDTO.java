@@ -64,6 +64,9 @@ public enum StateEnum {
 }
 
     private StateEnum state = null;
+    private Boolean enableSchemaValidation = null;
+    private Boolean responseCachingEnabled = null;
+    private Integer cacheTimeout = null;
 
 @XmlType(name="VisibilityEnum")
 @XmlEnum(String.class)
@@ -311,6 +314,57 @@ public enum SubscriptionAvailabilityEnum {
   }
   public void setState(StateEnum state) {
     this.state = state;
+  }
+
+  /**
+   **/
+  public APIProductDTO enableSchemaValidation(Boolean enableSchemaValidation) {
+    this.enableSchemaValidation = enableSchemaValidation;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("enableSchemaValidation")
+  public Boolean isEnableSchemaValidation() {
+    return enableSchemaValidation;
+  }
+  public void setEnableSchemaValidation(Boolean enableSchemaValidation) {
+    this.enableSchemaValidation = enableSchemaValidation;
+  }
+
+  /**
+   **/
+  public APIProductDTO responseCachingEnabled(Boolean responseCachingEnabled) {
+    this.responseCachingEnabled = responseCachingEnabled;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("responseCachingEnabled")
+  public Boolean isResponseCachingEnabled() {
+    return responseCachingEnabled;
+  }
+  public void setResponseCachingEnabled(Boolean responseCachingEnabled) {
+    this.responseCachingEnabled = responseCachingEnabled;
+  }
+
+  /**
+   **/
+  public APIProductDTO cacheTimeout(Integer cacheTimeout) {
+    this.cacheTimeout = cacheTimeout;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "300", value = "")
+  @JsonProperty("cacheTimeout")
+  public Integer getCacheTimeout() {
+    return cacheTimeout;
+  }
+  public void setCacheTimeout(Integer cacheTimeout) {
+    this.cacheTimeout = cacheTimeout;
   }
 
   /**
@@ -604,7 +658,7 @@ public enum SubscriptionAvailabilityEnum {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
   @JsonProperty("monetization")
   public APIMonetizationInfoDTO getMonetization() {
@@ -734,6 +788,9 @@ public enum SubscriptionAvailabilityEnum {
         Objects.equals(provider, apIProduct.provider) &&
         Objects.equals(thumbnailUri, apIProduct.thumbnailUri) &&
         Objects.equals(state, apIProduct.state) &&
+        Objects.equals(enableSchemaValidation, apIProduct.enableSchemaValidation) &&
+        Objects.equals(responseCachingEnabled, apIProduct.responseCachingEnabled) &&
+        Objects.equals(cacheTimeout, apIProduct.cacheTimeout) &&
         Objects.equals(visibility, apIProduct.visibility) &&
         Objects.equals(visibleRoles, apIProduct.visibleRoles) &&
         Objects.equals(visibleTenants, apIProduct.visibleTenants) &&
@@ -761,7 +818,7 @@ public enum SubscriptionAvailabilityEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes);
+    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, enableSchemaValidation, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes);
   }
 
   @Override
@@ -776,6 +833,9 @@ public enum SubscriptionAvailabilityEnum {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
+    sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
+    sb.append("    responseCachingEnabled: ").append(toIndentedString(responseCachingEnabled)).append("\n");
+    sb.append("    cacheTimeout: ").append(toIndentedString(cacheTimeout)).append("\n");
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("    visibleRoles: ").append(toIndentedString(visibleRoles)).append("\n");
     sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
