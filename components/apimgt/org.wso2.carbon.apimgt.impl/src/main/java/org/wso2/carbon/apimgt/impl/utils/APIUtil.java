@@ -1322,6 +1322,14 @@ public final class APIUtil {
                     !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
             }
+
+            //set monetization status (i.e - enabled or disabled)
+            artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS, Boolean.toString(apiProduct.getMonetizationStatus()));
+            //set additional monetization data
+            if (apiProduct.getMonetizationProperties() != null) {
+                artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES,
+                        apiProduct.getMonetizationProperties().toJSONString());
+            }
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + apiProduct.getId().getName();
             log.error(msg, e);
@@ -9029,7 +9037,15 @@ public final class APIUtil {
             }
 
             apiProduct.setProductResources(resources);
-
+            //set data and status related to monetization
+            apiProduct.setMonetizationStatus(Boolean.parseBoolean(artifact.getAttribute
+                    (APIConstants.Monetization.API_MONETIZATION_STATUS)));
+            String monetizationInfo = artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
+            if (StringUtils.isNotBlank(monetizationInfo)) {
+                JSONParser parser = new JSONParser();
+                JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
+                apiProduct.setMonetizationProperties(jsonObj);
+            }
         } catch (GovernanceException e) {
             String msg = "Failed to get API Product for artifact ";
             throw new APIManagementException(msg, e);
@@ -9038,6 +9054,9 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         } catch (UserStoreException e) {
             String msg = "Failed to get User Realm of API Product Provider";
+            throw new APIManagementException(msg, e);
+        } catch (ParseException e) {
+            String msg = "Failed to get parse monetization information.";
             throw new APIManagementException(msg, e);
         }
         return apiProduct;

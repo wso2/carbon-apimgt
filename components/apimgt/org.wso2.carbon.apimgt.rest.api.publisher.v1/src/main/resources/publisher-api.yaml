@@ -7254,6 +7254,8 @@ definitions:
         additionalProperties:
           type: string
         description : Map of custom properties of API
+      monetization:
+        $ref: '#/definitions/APIMonetizationInfo'
       businessInformation:
         $ref: '#/definitions/APIProductBusinessInformation'
       corsConfiguration:

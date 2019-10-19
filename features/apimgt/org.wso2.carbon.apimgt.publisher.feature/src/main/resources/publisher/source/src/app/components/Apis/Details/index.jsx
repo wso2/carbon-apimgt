@@ -576,7 +576,7 @@ class Details extends Component {
                             to={pathPrefix + 'documents'}
                             Icon={<DocumentsIcon />}
                         />
-                        {!isAPIProduct && !api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
+                        { !api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.monetization',
@@ -698,6 +698,10 @@ class Details extends Component {
                                     path={Details.subPaths.MONETIZATION}
                                     component={() => <Monetization api={api} />}
                                 />
+                                <Route
+                                    path={Details.subPaths.MONETIZATION_PRODUCT}
+                                    component={() => <Monetization api={api} />}
+                                />
                                 <Route path={Details.subPaths.EXTERNAL_STORES} component={ExternalStores} />
                             </Switch>
                         </div>
@@ -744,6 +748,7 @@ Details.subPaths = {
     PROPERTIES_PRODUCT: '/api-products/:apiprod_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
     MONETIZATION: '/apis/:api_uuid/monetization',
+    MONETIZATION_PRODUCT: '/api-products/:apiprod_uuid/monetization',
     EXTERNAL_STORES: '/apis/:api_uuid/external-devportals',
 };
 

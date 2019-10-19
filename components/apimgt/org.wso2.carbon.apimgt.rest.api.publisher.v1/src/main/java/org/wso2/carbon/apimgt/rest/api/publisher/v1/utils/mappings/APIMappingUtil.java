@@ -290,6 +290,26 @@ public class APIMappingUtil {
         return apiMonetizationInfoDTO;
     }
 
+    public static APIMonetizationInfoDTO getMonetizationInfoDTO(APIProductIdentifier apiProductIdentifier)
+            throws APIManagementException {
+
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
+        APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
+        //set the information related to monetization to the DTO
+        apiMonetizationInfoDTO.setEnabled(apiProduct.getMonetizationStatus());
+        Map<String, String> monetizationPropertiesMap = new HashMap<>();
+        if (apiProduct.getMonetizationProperties() != null) {
+            JSONObject monetizationProperties = apiProduct.getMonetizationProperties();
+            for (Object propertyKey : monetizationProperties.keySet()) {
+                String key = (String) propertyKey;
+                monetizationPropertiesMap.put(key, (String) monetizationProperties.get(key));
+            }
+        }
+        apiMonetizationInfoDTO.setProperties(monetizationPropertiesMap);
+        return apiMonetizationInfoDTO;
+    }
+
     /**
      * Get map of monetized policies to plan mapping
      *
@@ -306,6 +326,18 @@ public class APIMappingUtil {
         API api = apiProvider.getAPI(apiIdentifier);
         APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
         apiMonetizationInfoDTO.setEnabled(api.getMonetizationStatus());
+        apiMonetizationInfoDTO.setProperties(monetizedPoliciesToPlanMapping);
+        return apiMonetizationInfoDTO;
+    }
+
+    public static APIMonetizationInfoDTO getMonetizedTiersDTO(APIProductIdentifier apiProductIdentifier,
+                                                              Map<String, String> monetizedPoliciesToPlanMapping)
+            throws APIManagementException {
+
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
+        APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
+        apiMonetizationInfoDTO.setEnabled(apiProduct.getMonetizationStatus());
         apiMonetizationInfoDTO.setProperties(monetizedPoliciesToPlanMapping);
         return apiMonetizationInfoDTO;
     }
