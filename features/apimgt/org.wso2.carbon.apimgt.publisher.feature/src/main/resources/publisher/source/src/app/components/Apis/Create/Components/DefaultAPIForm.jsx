@@ -50,6 +50,10 @@ const useStyles = makeStyles(theme => ({
         border: '1px solid green',
     },
     endpointInvalidChip: {
+        color: '#ffd53a',
+        border: '1px solid #ffd53a',
+    },
+    endpointErrorChip: {
         color: 'red',
         border: '1px solid red',
     },
@@ -103,6 +107,8 @@ export default function DefaultAPIForm(props) {
     const [isEndpointValid, setIsEndpointValid] = useState();
     const [statusCode, setStatusCode] = useState('');
     const [isUpdating, setUpdating] = useState(false);
+    const [isErrorCode, setIsErrorCode] = useState(false);
+    const iff = (condition, then, otherwise) => (condition ? then : otherwise);
 
     // Check the provided API validity on mount, TODO: Better to use Joi schema here ~tmkb
     useEffect(() => {
@@ -213,11 +219,14 @@ export default function DefaultAPIForm(props) {
             .then((result) => {
                 if (result.body.error !== null) {
                     setStatusCode(result.body.error);
+                    setIsErrorCode(true);
                 } else {
                     setStatusCode(result.body.statusCode + ' ' + result.body.statusMessage);
+                    setIsErrorCode(false);
                 }
-                if (result.body.statusCode === 200) {
+                if (result.body.statusCode >= 200 && result.body.statusCode < 300) {
                     setIsEndpointValid(true);
+                    setIsErrorCode(false);
                 } else {
                     setIsEndpointValid(false);
                 }
@@ -398,8 +407,10 @@ export default function DefaultAPIForm(props) {
                                 <InputAdornment position='end'>
                                     {statusCode && <Chip
                                         label={statusCode}
-                                        className={isEndpointValid ?
-                                            classes.endpointValidChip : classes.endpointInvalidChip}
+                                        className={isEndpointValid ? classes.endpointValidChip : iff(
+                                            isErrorCode,
+                                            classes.endpointErrorChip, classes.endpointInvalidChip,
+                                        )}
                                         variant='outlined'
                                     />}
                                     <IconButton
