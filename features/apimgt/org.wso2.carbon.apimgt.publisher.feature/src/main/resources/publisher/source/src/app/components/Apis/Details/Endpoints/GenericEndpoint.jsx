@@ -62,6 +62,10 @@ const styles = theme => ({
         border: '1px solid green',
     },
     endpointInvalidChip: {
+        color: '#ffd53a',
+        border: '1px solid #ffd53a',
+    },
+    endpointErrorChip: {
         color: 'red',
         border: '1px solid red',
     },
@@ -93,7 +97,8 @@ function GenericEndpoint(props) {
     const [isEndpointValid, setIsEndpointValid] = useState();
     const [statusCode, setStatusCode] = useState('');
     const [isUpdating, setUpdating] = useState(false);
-
+    const [isErrorCode, setIsErrorCode] = useState(false);
+    const iff = (condition, then, otherwise) => (condition ? then : otherwise);
 
     useEffect(() => {
         setServiceUrl(endpointURL);
@@ -106,11 +111,14 @@ function GenericEndpoint(props) {
             .then((result) => {
                 if (result.body.error !== null) {
                     setStatusCode(result.body.error);
+                    setIsErrorCode(true);
                 } else {
                     setStatusCode(result.body.statusCode + ' ' + result.body.statusMessage);
+                    setIsErrorCode(false);
                 }
-                if (result.body.statusCode === 200) {
+                if (result.body.statusCode >= 200 && result.body.statusCode < 300) {
                     setIsEndpointValid(true);
+                    setIsErrorCode(false);
                 } else {
                     setIsEndpointValid(false);
                 }
@@ -145,7 +153,10 @@ function GenericEndpoint(props) {
                         <InputAdornment position='end'>
                             {statusCode && <Chip
                                 label={statusCode}
-                                className={isEndpointValid ? classes.endpointValidChip : classes.endpointInvalidChip}
+                                className={isEndpointValid ? classes.endpointValidChip : iff(
+                                    isErrorCode,
+                                    classes.endpointErrorChip, classes.endpointInvalidChip,
+                                )}
                                 variant='outlined'
                             />}
 
