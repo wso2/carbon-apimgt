@@ -24,6 +24,7 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Alert from 'AppComponents/Shared/Alert';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import API from 'AppData/api';
 import CONSTS from 'AppData/Constants';
 import Progress from 'AppComponents/Shared/Progress';
@@ -54,12 +55,13 @@ const useStyles = makeStyles(theme => ({
  */
 function Subscriptions(props) {
     const classes = useStyles();
-    const { api, updateAPI } = props;
+    const [api] = useAPI();
+    const { updateAPI } = props;
     const restApi = new API();
     const [tenants, setTenants] = useState(null);
     const [policies, setPolices] = useState({});
-    const [availability, setAvailability] = useState({});
-    const [tenantList, setTenantList] = useState([]);
+    const [availability, setAvailability] = useState({ subscriptionAvailability: api.subscriptionAvailability });
+    const [tenantList, setTenantList] = useState(api.subscriptionAvailableTenants);
     const [subscriptions, setSubscriptions] = useState(null);
     const [updateInProgress, setUpdateInProgress] = useState(false);
 
@@ -87,10 +89,6 @@ function Subscriptions(props) {
     }
 
     useEffect(() => {
-        if (api) {
-            setAvailability({ subscriptionAvailability: api.subscriptionAvailability });
-            setTenantList(api.subscriptionAvailableTenants);
-        }
         restApi.getTenantsByState(CONSTS.TENANT_STATE_ACTIVE)
             .then((result) => {
                 setTenants(result.body.count);
@@ -188,7 +186,6 @@ function Subscriptions(props) {
 }
 
 Subscriptions.propTypes = {
-    api: PropTypes.shape({}).isRequired,
     updateAPI: PropTypes.func.isRequired,
 };
 
