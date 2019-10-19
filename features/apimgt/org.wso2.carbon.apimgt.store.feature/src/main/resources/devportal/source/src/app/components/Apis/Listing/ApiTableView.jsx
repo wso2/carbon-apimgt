@@ -78,10 +78,12 @@ class ApiTableView extends React.Component {
                         backgroundColor: 'transparent',
                         marginLeft: 40,
                         marginBottom: 20,
+                        width: '100%',
                     },
                     paper: {
                         boxShadow: 'none',
                         backgroundColor: 'transparent',
+                        width: '100%',
                     },
                     tableRoot: {
                         border: 'solid 1px #fff',
@@ -91,6 +93,9 @@ class ApiTableView extends React.Component {
                         },
                         '& a > div': {
                             paddingRight: 10,
+                        },
+                        '& td': {
+                            whiteSpace: 'nowrap',
                         },
                         '& tr:nth-child(even)': {
                             backgroundColor: theme.custom.listView.tableBodyEvenBackgrund,
@@ -113,6 +118,7 @@ class ApiTableView extends React.Component {
                 MUIDataTableBodyCell: {
                     root: {
                         backgroundColor: 'transparent',
+                        width: '100%',
                     },
                 },
             },
@@ -434,6 +440,8 @@ class ApiTableView extends React.Component {
         }
         if (page === 0 && this.count <= rowsPerPage) {
             options.pagination = false;
+        } else {
+            options.pagination = true;
         }
         if (loading) {
             return <Loading />;

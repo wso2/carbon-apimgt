@@ -18,14 +18,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
+import Paper from '@material-ui/core/Paper';
 import { FormattedMessage } from 'react-intl';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
 import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
-import CustomIcon from '../../Shared/CustomIcon';
+import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import ApiBreadcrumbs from './ApiBreadcrumbs';
 import ApiTableView from './ApiTableView';
 import { ApiContext } from '../Details/ApiContext';
+import TagCloudListingTags from './TagCloudListingTags';
+import ApiTagCloud from './ApiTagCloud';
 
 const styles = theme => ({
     rightIcon: {
@@ -69,12 +73,20 @@ const styles = theme => ({
     },
     listContentWrapper: {
         padding: `0 ${theme.spacing.unit * 3}px`,
+        display: 'flex',
     },
     iconDefault: {
         color: theme.palette.getContrastText(theme.custom.infoBar.background),
     },
     iconSelected: {
         color: theme.custom.infoBar.listGridSelectedColor,
+    },
+    paper: {
+        minWidth: theme.custom.tagWise.fixedStyles.width,
+        width: theme.custom.tagWise.fixedStyles.width,
+        background: theme.custom.tagWise.fixedStyles.background,
+        color: theme.palette.getContrastText(theme.custom.tagWise.fixedStyles.background),
+        margin: `${theme.spacing(2)}px ${theme.spacing(2)}px 0 0`,
     },
 });
 
@@ -121,8 +133,32 @@ class CommonListing extends React.Component {
             classes,
             location: { search },
         } = this.props;
+        const {
+            custom: {
+                tagWise: { key, active, style },
+                tagCloud: { active: tagCloudActive },
+            },
+        } = theme;
         const { listType } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
+
+        const searchParam = new URLSearchParams(search);
+        const searchQuery = searchParam.get('query');
+        let selectedTag = null;
+        if (search && searchQuery !== null) {
+            // For the tagWise search
+            if (active && key) {
+                const splits = searchQuery.split(':');
+                if (splits.length > 1 && splits[1].search(key) != -1) {
+                    const splitTagArray = splits[1].split(key);
+                    if (splitTagArray.length > 0) {
+                        selectedTag = splitTagArray[0];
+                    }
+                } else if (splits.length > 1 && splits[0] === 'tag'){
+                    selectedTag = splits[1];
+                }
+            }
+        }
         return (
             <main className={classes.content}>
                 <div className={classes.appBar}>
@@ -153,16 +189,23 @@ class CommonListing extends React.Component {
                             </Icon>
                         </IconButton>
                         <IconButton className={classes.button} onClick={() => this.setListType('grid')}>
-                            <Icon className={classNames(
-                                { [classes.iconSelected]: listType === 'grid' },
-                                { [classes.iconDefault]: listType === 'list' },
-                            )}
-                            >grid_on
+                            <Icon
+                                className={classNames(
+                                    { [classes.iconSelected]: listType === 'grid' },
+                                    { [classes.iconDefault]: listType === 'list' },
+                                )}
+                            >
+                                grid_on
                             </Icon>
                         </IconButton>
                     </div>
                 </div>
+                {active && <ApiBreadcrumbs selectedTag={selectedTag} />}
                 <div className={classes.listContentWrapper}>
+                    <Paper className={classes.paper}>
+                        {active && style === 'fixed-left' && <TagCloudListingTags />}
+                        {tagCloudActive && <ApiTagCloud />}
+                    </Paper>
                     {listType === 'grid' && (
                         <ApiContext.Provider value={{ apiType }}>
                             <ApiTableView gridView query={search} />

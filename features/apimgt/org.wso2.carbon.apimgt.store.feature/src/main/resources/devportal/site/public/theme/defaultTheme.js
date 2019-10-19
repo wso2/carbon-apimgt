@@ -190,12 +190,28 @@ const Configurations = {
                         ],
                     },
                 },
-                tagWiseMode: false,
-                tagThumbnail: {
-                    width: 150,
-                    defaultTagImage: '/devportal/site/public/images/api/api-default.png',
+                tagWise: {
+                    active: true,
+                    style: 'fixed-left', // If 'page' it will show a different page. Else if 'fixed-left' will show a fixed menu with all the group tags on the left.
+                    thumbnail: { // These params will be applyed only if the style is 'page'
+                        width: 150,
+                        image: '/devportal/site/public/images/api/api-default.png',
+                    },
+                    fixedStyles: { // These params will be applyed only if the style is 'fixed-left'
+                        width: 200,
+                        background: 'rgba(255,255,255,100)',
+                        hasIcon: false,
+                    },
+                    key: '-group',
+                    showAllApis: true,
                 },
-                tagGroupKey: '-group',
+                tagCloud: {
+                    active: true,
+                    colorOptions: { // This is the Options object passed to TagCloud component of https://www.npmjs.com/package/react-tagcloud 
+                        luminosity: 'dark',
+                        hue: 'blue',
+                    },
+                },
             },
         },
     },
