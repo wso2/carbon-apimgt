@@ -125,7 +125,8 @@ export default function DefaultAPIForm(props) {
                         value === undefined ||
                         (isAPIProduct && ['version', 'endpoints'].includes(key)))
                 .reduce((acc, cVal) => acc && cVal); // Aggregate the individual validation states
-        // API Name , Version & Context is a must that's why `&&` chain
+        // TODO: refactor following redundant validation.
+        // The valid state should available in the above reduced state ~tmkb
         // if isAPIProduct gets true version validation has been skipped
         isFormValid =
             isFormValid && Boolean(api.name) && (isAPIProduct || Boolean(api.version)) && Boolean(api.context)
@@ -145,7 +146,8 @@ export default function DefaultAPIForm(props) {
                 const nameValidity = APIValidation.apiName.required().validate(value, { abortEarly: false }).error;
                 if (nameValidity === null) {
                     APIValidation.apiParameter.validate(field + ':' + value).then((result) => {
-                        if (result.body.list.length > 0) {
+                        if (result.body.list.length > 0 && value.toLowerCase() === result.body.list[0]
+                            .name.toLowerCase()) {
                             updateValidity({
                                 ...validity,
                                 name: { details: [{ message: 'Name ' + value + ' already exists' }] },
@@ -163,8 +165,10 @@ export default function DefaultAPIForm(props) {
                 const contextValidity = APIValidation.apiContext.required()
                     .validate(value, { abortEarly: false }).error;
                 if (contextValidity === null) {
-                    const apiContext = value.includes('/') ? value + '/' + (isAPIProduct ? '1.0.0' : api.version)
-                        : '/' + value + '/' + (isAPIProduct ? '1.0.0' : api.version);
+                    let apiContext = value.includes('/') ? value + '/' + api.version : '/' + value + '/' + api.version;
+                    if (isAPIProduct) {
+                        apiContext = value.includes('/') ? value : '/' + value;
+                    }
                     APIValidation.apiParameter.validate(field + ':' + apiContext).then((result) => {
                         if (result.body.list.length > 0) {
                             updateValidity({
@@ -183,9 +187,8 @@ export default function DefaultAPIForm(props) {
             case 'version': {
                 const versionValidity = APIValidation.apiVersion.required().validate(value).error;
                 if (versionValidity === null) {
-                    const apiVersion = api.context.includes('/')
-                        ? api.context + '/' + value
-                        : '/' + api.context + '/' + value;
+                    const apiVersion = api.context.includes('/') ? api.context + '/' + value : '/'
+                    + api.context + '/' + value;
                     APIValidation.apiParameter.validate('context:' + apiVersion).then((result) => {
                         if (result.body.list.length > 0) {
                             updateValidity({
