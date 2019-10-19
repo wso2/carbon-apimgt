@@ -59,7 +59,7 @@ public class APIProduct {
     private JSONObject additionalProperties = new JSONObject();
     private Set<String> environments = new HashSet<>();
     private List<Label> gatewayLabels = new ArrayList<>();
-
+    private boolean enableSchemaValidation = false;
     private Set<Scope> scopes = new HashSet<>();
 
     /**
@@ -345,6 +345,25 @@ public class APIProduct {
         return accessControlRoles;
     }
 
+    /**
+     * Check the status of the Json schema validation property.
+     *
+     * @return Status of the validator property.
+     */
+    public boolean isEnabledSchemaValidation() {
+        return enableSchemaValidation;
+    }
+
+    /**
+     * To set the JSON schema validation enable/disable.
+     *
+     * @param enableSchemaValidation Given Status.
+     */
+    public void setEnableSchemaValidation(boolean enableSchemaValidation) {
+        this.enableSchemaValidation = enableSchemaValidation;
+    }
+
+
     public String getApiSecurity() {
         return apiSecurity;
     }
@@ -475,5 +494,12 @@ public class APIProduct {
 
     public void setProductLevelPolicy(String productLevelPolicy) {
         this.productLevelPolicy = productLevelPolicy;
+    }
+
+    /**
+     * Removes all Tiers from the API object.
+     */
+    public void removeAllTiers() {
+        availableTiers.clear();
     }
 }

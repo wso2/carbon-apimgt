@@ -1291,8 +1291,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
 
         //Validate Transports
-        validateAndSetTransports(api);
-        validateAndSetAPISecurity(api);
+        validateAndSetTransports(api, null);
+        validateAndSetAPISecurity(api, null);
         boolean transactionCommitted = false;
         try {
             registry.beginTransaction();
@@ -2018,8 +2018,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void validateAndSetTransports(API api) throws APIManagementException {
-        String transports = api.getTransports();
+    private void validateAndSetTransports(API api, APIProduct apiProduct) throws APIManagementException {
+        String transports = apiProduct == null ? api.getTransports() : apiProduct.getTransports();
         if (!StringUtils.isEmpty(transports) && !("null".equalsIgnoreCase(transports))) {
             if (transports.contains(",")) {
                 StringTokenizer st = new StringTokenizer(transports, ",");
@@ -2030,7 +2030,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 checkIfValidTransport(transports);
             }
         } else {
-            api.setTransports(Constants.TRANSPORT_HTTP + ',' + Constants.TRANSPORT_HTTPS);
+            if (apiProduct == null) {
+                api.setTransports(Constants.TRANSPORT_HTTP + ',' + Constants.TRANSPORT_HTTPS);
+            } else {
+                apiProduct.setTransports(Constants.TRANSPORT_HTTP + ',' + Constants.TRANSPORT_HTTPS);
+            }
         }
     }
 
@@ -2039,10 +2043,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *
      * @param api Relevant API that need to be validated.
      */
-    private void validateAndSetAPISecurity(API api) {
+    private void validateAndSetAPISecurity(API api, APIProduct apiProduct) {
         String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
-        if (api.getApiSecurity() != null) {
-            apiSecurity = api.getApiSecurity();
+        String security = apiProduct == null ? api.getApiSecurity() : apiProduct.getApiSecurity();
+        if (security!= null) {
+            apiSecurity = security;
             ArrayList<String> securityLevels = new ArrayList<>();
             String[] apiSecurityLevels = apiSecurity.split(",");
             boolean isOauth2 = false;
@@ -2109,14 +2114,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (log.isDebugEnabled()) {
             log.debug("API " + api.getId() + " has following enabled protocols : " + apiSecurity);
         }
-        api.setApiSecurity(apiSecurity);
+
+        String apiType;
+        if (apiProduct == null) {
+            apiType = "API";
+            api.setApiSecurity(apiSecurity);
+        } else {
+            apiType = "APIProduct";
+            apiProduct.setApiSecurity(apiSecurity);
+        }
+
         if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
                 !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
             if (log.isDebugEnabled()) {
-                log.debug("API " + api.getId() + " does not supports oauth2 security, hence removing all the "
+                log.debug(apiType + " " + api.getId() + " does not supports oauth2 security, hence removing all the "
                         + "subscription tiers associated with it");
             }
-            api.removeAllTiers();
+            if (apiProduct == null) {
+                api.removeAllTiers();
+            } else {
+                apiProduct.removeAllTiers();
+            }
         }
     }
 
@@ -2417,7 +2435,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     , corsProperties);
         }
 
+        APIIdentifier apiProductIdentifier = new APIIdentifier(apiProduct.getId().getProviderName(),
+                apiProduct.getId().getName(), apiProduct.getId().getVersion());
+
+        List<ClientCertificateDTO> clientCertificateDTOS = null;
+        if (isClientCertificateBasedAuthenticationConfigured()) {
+            clientCertificateDTOS = certificateManager.searchClientCertificates(tenantId, null, apiProductIdentifier);
+        }
+        Map<String, String> clientCertificateObject = null;
+        CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
+        if (clientCertificateDTOS != null) {
+            clientCertificateObject = new HashMap<>();
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
+                clientCertificateObject.put(certificateMgtUtils
+                                .getUniqueIdentifierOfCertificate(clientCertificateDTO.getCertificate()),
+                        clientCertificateDTO.getTierName());
+            }
+        }
+
         Map<String, String> authProperties = new HashMap<String, String>();
+        if (!StringUtils.isBlank(authorizationHeader)) {
+            authProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
+        }
+        String apiSecurity = apiProduct.getApiSecurity();
+        String apiLevelPolicy = apiProduct.getProductLevelPolicy();
+        authProperties.put(APIConstants.API_SECURITY, apiSecurity);
+        authProperties.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
+        if (clientCertificateObject != null) {
+            authProperties.put(APIConstants.CERTIFICATE_INFORMATION, clientCertificateObject.toString());
+        }
 
         //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
         String removeHeaderFromOutMessage = APIUtil
@@ -3166,8 +3212,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         //Validate Transports
-        validateAndSetTransports(api);
-        validateAndSetAPISecurity(api);
+        validateAndSetTransports(api, null);
+        validateAndSetAPISecurity(api, null);
         boolean transactionCommitted = false;
         try {
             registry.beginTransaction();
@@ -7116,6 +7162,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage);
         }
 
+        //Validate Transports and Security
+        validateAndSetTransports(null, apiProduct);
+        validateAndSetAPISecurity(null, apiProduct);
+
         boolean transactionCommitted = false;
         try {
             registry.beginTransaction();
@@ -7216,6 +7266,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void updateApiProductArtifact(APIProduct apiProduct, boolean updateMetadata, boolean updatePermissions)
             throws APIManagementException {
+
+        //Validate Transports and Security
+        validateAndSetTransports(null, apiProduct);
+        validateAndSetAPISecurity(null, apiProduct);
 
         boolean transactionCommitted = false;
         try {

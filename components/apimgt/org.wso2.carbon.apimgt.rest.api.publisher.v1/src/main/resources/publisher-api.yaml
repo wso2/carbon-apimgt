@@ -7147,6 +7147,15 @@ definitions:
         enum:
           - CREATED
           - PUBLISHED
+      enableSchemaValidation:
+        type: boolean
+        example: false
+      responseCachingEnabled:
+        type: boolean
+        example: true
+      cacheTimeout:
+        type: integer
+        example: 300
       visibility:
         type: string
         description: The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED.
