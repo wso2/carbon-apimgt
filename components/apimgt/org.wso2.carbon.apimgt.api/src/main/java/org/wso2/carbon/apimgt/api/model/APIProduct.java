@@ -363,7 +363,6 @@ public class APIProduct {
         this.enableSchemaValidation = enableSchemaValidation;
     }
 
-
     public String getApiSecurity() {
         return apiSecurity;
     }
