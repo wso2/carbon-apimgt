@@ -9,7 +9,6 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
@@ -36,8 +35,6 @@ public interface ApiProductsApiService {
       public Response apiProductsApiProductIdDocumentsGet(String apiProductId, Integer limit, Integer offset, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsApiProductIdDocumentsPost(String apiProductId, DocumentDTO body, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsApiProductIdGet(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdMonetizationGet(String apiProductId, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdMonetizePost(String apiProductId, APIMonetizationInfoDTO body, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsApiProductIdPut(String apiProductId, APIProductDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsApiProductIdSwaggerGet(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsApiProductIdThumbnailGet(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;

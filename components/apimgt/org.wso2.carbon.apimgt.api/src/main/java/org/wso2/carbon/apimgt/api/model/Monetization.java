@@ -67,9 +67,6 @@ public interface Monetization {
     boolean enableMonetization(String tenantDomain, API api,
                                Map<String, String> monetizationProperties) throws MonetizationException;
 
-    boolean enableMonetization(String tenantDomain, APIProduct apiProduct,
-                               Map<String, String> monetizationProperties) throws MonetizationException;
-
     /**
      * Disable monetization for a API
      *
@@ -82,8 +79,6 @@ public interface Monetization {
     boolean disableMonetization(String tenantDomain, API api,
                                 Map<String, String> monetizationProperties) throws MonetizationException;
 
-    boolean disableMonetization(String tenantDomain, APIProduct apiProduct,
-                                Map<String, String> monetizationProperties) throws MonetizationException;
     /**
      * Get mapping of tiers and billing engine plans
      *
@@ -92,8 +87,6 @@ public interface Monetization {
      * @throws MonetizationException if failed to get tier to billing plan mapping
      */
     Map<String, String> getMonetizedPoliciesToPlanMapping(API api) throws MonetizationException;
-
-    Map<String, String> getMonetizedPoliciesToPlanMapping(APIProduct apiProduct) throws MonetizationException;
 
     /**
      * Get current usage for a subscription
@@ -114,8 +107,6 @@ public interface Monetization {
      * @throws MonetizationException if failed to get total revenue data for a given API
      */
     Map<String, String> getTotalRevenue(API api, APIProvider apiProvider) throws MonetizationException;
-
-    Map<String, String> getTotalRevenue(APIProduct apiProduct, APIProvider apiProvider) throws MonetizationException;
 
     /**
      * Publish the usage for a subscription to the billing engine

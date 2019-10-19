@@ -9009,7 +9009,6 @@ public final class APIUtil {
 
                 resource.setEndpointConfig(api.getEndpointConfig());
             }
-
             apiProduct.setProductResources(resources);
             //set data and status related to monetization
             apiProduct.setMonetizationStatus(Boolean.parseBoolean(artifact.getAttribute

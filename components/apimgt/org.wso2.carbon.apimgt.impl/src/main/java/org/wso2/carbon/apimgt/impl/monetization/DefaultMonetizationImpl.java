@@ -21,7 +21,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
@@ -59,30 +58,13 @@ public class DefaultMonetizationImpl implements Monetization {
     }
 
     @Override
-    public boolean enableMonetization(String tenantDomain, APIProduct apiProduct, Map<String, String> monetizationProperties)
-            throws MonetizationException {
-        return true;
-    }
-
-    @Override
     public boolean disableMonetization(String tenantDomain, API api, Map<String, String> monetizationProperties)
             throws MonetizationException {
         return true;
     }
 
     @Override
-    public boolean disableMonetization(String tenantDomain, APIProduct apiProduct, Map<String, String> monetizationProperties)
-            throws MonetizationException {
-        return true;
-    }
-
-    @Override
     public Map<String, String> getMonetizedPoliciesToPlanMapping(API api) throws MonetizationException {
-        return new HashMap<>();
-    }
-
-    @Override
-    public Map<String, String> getMonetizedPoliciesToPlanMapping(APIProduct apiProduct) throws MonetizationException {
         return new HashMap<>();
     }
 
@@ -94,11 +76,6 @@ public class DefaultMonetizationImpl implements Monetization {
 
     @Override
     public Map<String, String> getTotalRevenue(API api, APIProvider apiProvider) throws MonetizationException {
-        return new HashMap<String, String>();
-    }
-
-    @Override
-    public Map<String, String> getTotalRevenue(APIProduct apiProduct, APIProvider apiProvider) throws MonetizationException {
         return new HashMap<String, String>();
     }
 
