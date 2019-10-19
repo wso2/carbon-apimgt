@@ -7,7 +7,7 @@
   "Apis.Create.APIProduct.APIProductCreateWrapper.heading": "Create an API Product",
   "Apis.Create.APIProduct.APIProductCreateWrapper.next": "Next",
   "Apis.Create.APIProduct.APIProductCreateWrapper.resources": "Add Resources",
-  "Apis.Create.APIProduct.APIProductCreateWrapper.save": "Save",
+  "Apis.Create.APIProduct.APIProductCreateWrapper.publish": "Publish",
   "Apis.Create.APIProduct.APIProductCreateWrapper.sub.heading": "Create an API Product by providing a Name, a Context, Resources, and Business Plans (optional).",
   "Apis.Create.Components.APICreateTopMenu.back.to.listing": "APIs",
   "Apis.Create.Components.APIInputForm.api.name.placeholder": "eTicketing",
