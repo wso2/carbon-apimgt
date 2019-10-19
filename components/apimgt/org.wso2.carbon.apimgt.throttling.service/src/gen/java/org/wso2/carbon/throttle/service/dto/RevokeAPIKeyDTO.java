@@ -1,39 +1,34 @@
 package org.wso2.carbon.throttle.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import javax.validation.constraints.*;
+import io.swagger.annotations.ApiModelProperty;
 
-
-import io.swagger.annotations.*;
 import java.util.Objects;
-
-import javax.xml.bind.annotation.*;
 
 
 
 public class RevokeAPIKeyDTO   {
   
-  private String signature = null;
+  private String apiKey = null;
   private Long expiryTime = null;
-  private Long tenantId = null;
+  private Integer tenantId = null;
 
   /**
    * Signature of the API Key token.
    **/
-  public RevokeAPIKeyDTO signature(String signature) {
-    this.signature = signature;
+  public RevokeAPIKeyDTO apiKey(String apiKey) {
+    this.apiKey = apiKey;
     return this;
   }
 
   
   @ApiModelProperty(value = "Signature of the API Key token.")
   @JsonProperty("signature")
-  public String getSignature() {
-    return signature;
+  public String getApiKey() {
+    return apiKey;
   }
-  public void setSignature(String signature) {
-    this.signature = signature;
+  public void setApiKey(String apiKey) {
+    this.apiKey = apiKey;
   }
 
   /**
@@ -57,7 +52,7 @@ public class RevokeAPIKeyDTO   {
   /**
    * expiry timestamp.
    **/
-  public RevokeAPIKeyDTO tenantId(Long tenantId) {
+  public RevokeAPIKeyDTO tenantId(Integer tenantId) {
     this.tenantId = tenantId;
     return this;
   }
@@ -65,10 +60,10 @@ public class RevokeAPIKeyDTO   {
   
   @ApiModelProperty(value = "expiry timestamp.")
   @JsonProperty("tenantId")
-  public Long getTenantId() {
+  public Integer getTenantId() {
     return tenantId;
   }
-  public void setTenantId(Long tenantId) {
+  public void setTenantId(Integer tenantId) {
     this.tenantId = tenantId;
   }
 
@@ -82,14 +77,14 @@ public class RevokeAPIKeyDTO   {
       return false;
     }
     RevokeAPIKeyDTO revokeAPIKey = (RevokeAPIKeyDTO) o;
-    return Objects.equals(signature, revokeAPIKey.signature) &&
+    return Objects.equals(apiKey, revokeAPIKey.apiKey) &&
         Objects.equals(expiryTime, revokeAPIKey.expiryTime) &&
         Objects.equals(tenantId, revokeAPIKey.tenantId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(signature, expiryTime, tenantId);
+    return Objects.hash(apiKey, expiryTime, tenantId);
   }
 
   @Override
@@ -97,7 +92,7 @@ public class RevokeAPIKeyDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class RevokeAPIKeyDTO {\n");
     
-    sb.append("    signature: ").append(toIndentedString(signature)).append("\n");
+    sb.append("    signature: ").append(toIndentedString(apiKey)).append("\n");
     sb.append("    expiryTime: ").append(toIndentedString(expiryTime)).append("\n");
     sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
     sb.append("}");

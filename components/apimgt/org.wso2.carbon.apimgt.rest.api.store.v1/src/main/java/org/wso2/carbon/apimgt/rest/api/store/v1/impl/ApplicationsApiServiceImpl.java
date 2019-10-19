@@ -373,7 +373,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                     expiryTime = APIUtil.getExpiryifJWT(apiKey);
                                 }
                                 String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-                                apiConsumer.revokeAPIKey(splitToken[2], expiryTime, tenantDomain);
+                                apiConsumer.revokeAPIKey(apiKey, expiryTime, tenantDomain);
                             } else {
                                 if (log.isDebugEnabled()) {
                                     log.debug("Application uuid " + applicationId + " isn't matched with the " +

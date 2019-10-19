@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axis2.util.JavaUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -26,6 +27,11 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -126,7 +132,10 @@ import javax.wsdl.Definition;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -5419,8 +5428,47 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return updatedDefinition;
     }
 
-    public void revokeAPIKey(String signature, long expiryTime, String tenantDomain) throws APIManagementException {
-        apiMgtDAO.addRevokedJWTSignature(signature, APIConstants.API_KEY_AUTH_TYPE, expiryTime, tenantDomain);
+    public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
+        String baseUrl = APIConstants.HTTPS_PROTOCOL_URL_PREFIX + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
+                System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.UTILITY_WEB_APP_EP;
+        String apiKeyRevokeEp = baseUrl + APIConstants.API_KEY_REVOKE_PATH;
+        HttpPost method = new HttpPost(apiKeyRevokeEp);
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        URL keyMgtURL = null;
+        try {
+            keyMgtURL = new URL(apiKeyRevokeEp);
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+            String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+            byte[] credentials = Base64.encodeBase64((username + ":" + password).getBytes
+                    (StandardCharsets.UTF_8));
+            int keyMgtPort = keyMgtURL.getPort();
+            String keyMgtProtocol = keyMgtURL.getProtocol();
+            method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
+            HttpClient httpClient = APIUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
+            JSONObject revokeRequestPayload = new JSONObject();
+            revokeRequestPayload.put("apiKey", apiKey);
+            revokeRequestPayload.put("expiryTime", expiryTime);
+            revokeRequestPayload.put("tenantId", tenantId);
+            StringEntity requestEntity = new StringEntity(revokeRequestPayload.toString());
+            requestEntity.setContentType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            method.setEntity(requestEntity);
+            HttpResponse httpResponse = null;
+            httpResponse = httpClient.execute(method);
+            if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
+                log.error("API Key revocation is unsuccessful with token signature " + APIUtil.getMaskedToken(apiKey));
+                throw new APIManagementException("Error while revoking API Key");
+            }
+        } catch (MalformedURLException e) {
+            String msg = "Error while constructing key manager URL " + apiKeyRevokeEp;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (IOException e) {
+            String msg = "Error while executing the http client " + apiKeyRevokeEp;
+            log.error(msg, ApikeyApiServiceImpl.javae);
+            throw new APIManagementException(msg, e);
+        }
     }
 
     private Map<String, Object> filterMultipleVersionedAPIs(Map<String, Object> searchResults) {

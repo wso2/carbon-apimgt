@@ -59,13 +59,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.util.Collection;
 import java.util.HashMap;
@@ -611,7 +604,7 @@ public class GatewayUtils {
         Certificate publicCert = null;
         //Read the client-truststore.jks into a KeyStore
         try {
-            publicCert = APIUtil.getCertificateFromTrustStore(alias)
+            publicCert = APIUtil.getCertificateFromTrustStore(alias);
         } catch (APIManagementException e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);

@@ -15,16 +15,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.impl.publishers;
+package org.wso2.carbon.apimgt.keymgt.events;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.keymgt.token.TokenRevocationNotifier;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 
 /**
  * Publisher class to notify the token revocation requests
  */
 public class RevocationRequestPublisher {
+    private static final Log log = LogFactory.getLog(RevocationRequestPublisher.class);
+
     private static RevocationRequestPublisher revocationRequestPublisher = null;
     private boolean realtimeNotifierEnabled;
     private boolean persistentNotifierEnabled;
@@ -32,12 +38,20 @@ public class RevocationRequestPublisher {
     private Properties persistentNotifierProperties;
     private TokenRevocationNotifier tokenRevocationNotifier;
 
-
     private RevocationRequestPublisher() {
         realtimeNotifierProperties = APIManagerConfiguration.getRealtimeTokenRevocationNotifierProperties();
         persistentNotifierProperties = APIManagerConfiguration.getPersistentTokenRevocationNotifiersProperties();
         realtimeNotifierEnabled = realtimeNotifierProperties != null;
         persistentNotifierEnabled = persistentNotifierProperties != null;
+        String className = APIManagerConfiguration.getTokenRevocationClassName();
+        try {
+            tokenRevocationNotifier = (TokenRevocationNotifier) Class.forName(className).getConstructor()
+                    .newInstance();
+            log.debug("Oauth interceptor initialized");
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException
+                | ClassNotFoundException e) {
+            log.error("Oauth interceptor object creation error", e);
+        }
     }
 
     public static synchronized RevocationRequestPublisher getInstance () {
@@ -47,7 +61,19 @@ public class RevocationRequestPublisher {
         return revocationRequestPublisher;
     }
 
-    public void publishRevocationEvents(String token, long expiryTime) {
-
+    public void publishRevocationEvents(String token, long expiryTime, Properties properties) {
+        realtimeNotifierProperties.setProperty("expiryTime", Long.toString(expiryTime));
+        if (realtimeNotifierEnabled) {
+            log.debug("Realtime message sending is enabled");
+            tokenRevocationNotifier.sendMessageOnRealtime(token, realtimeNotifierProperties);
+        } else {
+            log.debug("Realtime message sending isn't enabled or configured properly");
+        }
+        if (persistentNotifierEnabled) {
+            log.debug("Persistent message sending is enabled");
+            tokenRevocationNotifier.sendMessageToPersistentStorage(token, persistentNotifierProperties);
+        } else {
+            log.debug("Persistent message sending isn't enabled or configured properly");
+        }
     }
 }
