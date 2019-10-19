@@ -652,7 +652,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
                 SwaggerData swaggerData = new SwaggerData(apiToUpdate);
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
-                apiProvider.saveSwagger20Definition(apiToUpdate.getId(), newDefinition);
+                apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition);
             }
 
             apiProvider.manageAPI(apiToUpdate);
