@@ -323,7 +323,7 @@ public enum SubscriptionAvailabilityEnum {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "false", value = "")
   @JsonProperty("enableSchemaValidation")
   public Boolean isEnableSchemaValidation() {
@@ -340,7 +340,7 @@ public enum SubscriptionAvailabilityEnum {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "true", value = "")
   @JsonProperty("responseCachingEnabled")
   public Boolean isResponseCachingEnabled() {
@@ -357,7 +357,7 @@ public enum SubscriptionAvailabilityEnum {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "300", value = "")
   @JsonProperty("cacheTimeout")
   public Integer getCacheTimeout() {
@@ -658,7 +658,7 @@ public enum SubscriptionAvailabilityEnum {
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "")
   @JsonProperty("monetization")
   public APIMonetizationInfoDTO getMonetization() {
@@ -818,7 +818,7 @@ public enum SubscriptionAvailabilityEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, enableSchemaValidation, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes);
+    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, enableSchemaValidation, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes);
   }
 
   @Override
