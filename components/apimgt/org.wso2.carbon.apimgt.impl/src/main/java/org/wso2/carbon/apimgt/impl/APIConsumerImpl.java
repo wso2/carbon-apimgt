@@ -5466,7 +5466,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIManagementException(msg, e);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + apiKeyRevokeEp;
-            log.error(msg, ApikeyApiServiceImpl.javae);
+            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }
