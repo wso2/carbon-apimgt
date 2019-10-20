@@ -26,7 +26,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import Api from 'AppData/api';
 import AuthManager from 'AppData/AuthManager';
 import StarRatingSummary from 'AppComponents/Apis/Details/StarRatingSummary';
-import Rating from "@material-ui/lab/Rating";
+import Rating from '@material-ui/lab/Rating';
 
 /**
  *
@@ -72,7 +72,12 @@ class StarRatingBar extends React.Component {
         this.removeUserRating = this.removeUserRating.bind(this);
         this.doRate = this.doRate.bind(this);
     }
-
+    componentDidUpdate(prevProps) {
+        // Typical usage (don't forget to compare props):
+        if (this.props.ratingUpdate !== prevProps.ratingUpdate) {
+            this.getApiRating();
+        }
+    }
     /**
      *
      *
@@ -112,13 +117,14 @@ class StarRatingBar extends React.Component {
      * @memberof StarRatingBar
      */
     doRate(rateIndex) {
-        const { apiId } = this.props;
+        const { apiId, setRatingUpdate } = this.props;
         const api = new Api();
         const ratingInfo = { rating: rateIndex };
         const promise = api.addRating(apiId, ratingInfo);
         promise
             .then(() => {
                 this.getApiRating();
+                setRatingUpdate();
             })
             .catch((error) => {
                 Alert.error('Error occured while adding ratings');
@@ -134,11 +140,14 @@ class StarRatingBar extends React.Component {
      * @memberof StarRatingBar
      */
     removeUserRating() {
-        const { apiId } = this.props;
+        const { apiId, setRatingUpdate } = this.props;
         const api = new Api();
         // remove user rating
         api.removeRatingOfUser(apiId, null)
-            .then(() => this.getApiRating())
+            .then(() => {
+                this.getApiRating();
+                setRatingUpdate();
+            })
             .catch((error) => {
                 Alert.error('Error occured while removing ratings');
                 if (process.env.NODE_ENV !== 'production') {
@@ -155,16 +164,10 @@ class StarRatingBar extends React.Component {
      */
     render() {
         const {
-            avgRating,
-            userRating,
-            count,
-            total,
+            avgRating, userRating, count, total,
         } = this.state;
         const {
-            classes,
-            isEditable,
-            showSummary,
-            apiRating,
+            classes, isEditable, showSummary, apiRating,
         } = this.props;
         return (
             <React.Fragment>
@@ -176,28 +179,21 @@ class StarRatingBar extends React.Component {
                             <React.Fragment>
                                 <div className={classes.userRating}>
                                     {[1, 2, 3, 4, 5].map(i => (
-                                        <Link>
                                             <StarRate
                                                 key={i}
-                                                className={userRating >= i
-                                                    ? classes.starRate
-                                                    : classes.noStarRate
-                                                }
+                                                className={userRating >= i ? classes.starRate : classes.noStarRate}
                                                 onClick={() => this.doRate(i)}
                                             />
-                                        </Link>
                                     ))}
-                                    <Link>
                                         <Cancel
                                             className={classes.removeRating}
                                             onClick={() => this.removeUserRating()}
                                         />
-                                    </Link>
                                 </div>
                             </React.Fragment>
                         ) : (
                             <React.Fragment>
-                                <Rating name='half-rating' value={apiRating} precision={0.1} readOnly={true} />
+                                <Rating name='half-rating' value={apiRating} precision={0.1} readOnly />
                             </React.Fragment>
                         )}
                     </React.Fragment>
@@ -218,6 +214,8 @@ StarRatingBar.propTypes = {
     isEditable: PropTypes.bool.isRequired,
     showSummary: PropTypes.bool.isRequired,
     apiRating: PropTypes.string,
+    ratingUpdate: PropTypes.number.isRequired,
+    setRatingUpdate: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(StarRatingBar);

@@ -47,7 +47,7 @@ const styles = theme => ({
         marginRight: 10,
     },
     inputAdornmentStart: {
-        width: '100%',
+        minWidth: theme.spacing(18),
     },
     paper: {
         margin: theme.spacing(1),
@@ -61,6 +61,11 @@ const styles = theme => ({
     },
     userNotificationPaper: {
         padding: theme.spacing.unit * 2,
+    },
+    titleSub: {
+        marginLeft: theme.spacing(2),
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
     },
 });
 /**
@@ -340,12 +345,16 @@ class ApiConsole extends React.Component {
         }
 
         const authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
+        const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
 
         return (
             <React.Fragment>
+                <Typography variant='h4' className={classes.titleSub}>
+                    <FormattedMessage id='Apis.Details.ApiConsole.ApiConsole.title' defaultMessage='Try Out' />
+                </Typography>
                 <Paper className={classes.paper}>
                     <Grid container className={classes.grid}>
-                        {!user && (
+                        {!isPrototypedAPI && !user && (
                             <Grid item md={6}>
                                 <Paper className={classes.userNotificationPaper}>
                                     <Typography variant='h5' component='h3'>
@@ -364,8 +373,9 @@ class ApiConsole extends React.Component {
                                 </Paper>
                             </Grid>
                         )}
+                        {!isPrototypedAPI &&
                         <Grid xs={12} md={12}>
-                            <Box display='block' >
+                            <Box display='block'>
                                 {user && subscriptions && subscriptions.length > 0 && (
                                     <SelectAppPanel
                                         subscriptions={subscriptions}
@@ -390,60 +400,60 @@ class ApiConsole extends React.Component {
                                 <Box display='flex' justifyContent='center'>
                                     <Grid xs={12} md={6}>
                                         {((environments && environments.length > 0) || (labels && labels.length > 0))
-                                         && (
-                                             <TextField
-                                                 fullWidth
-                                                 select
-                                                 label={<FormattedMessage
-                                                     defaultMessage='Environment'
-                                                     id='Apis.Details.ApiConsole.environment'
-                                                 />}
-                                                 value={selectedEnvironment}
-                                                 name='selectedEnvironment'
-                                                 onChange={this.handleChanges}
-                                                 SelectProps={environments}
-                                                 helperText={<FormattedMessage
-                                                     defaultMessage='Please select an environment'
-                                                     id='Apis.Details.ApiConsole.SelectAppPanel.select.an.environment'
-                                                 />}
-                                                 margin='normal'
-                                                 variant='outlined'
-                                             >
-                                                 {environments && environments.length > 0 && (
-                                                     <MenuItem value='' disabled>
-                                                         <em>
-                                                             <FormattedMessage
-                                                                 id='api.gateways'
-                                                                 defaultMessage='API Gateways'
-                                                             />
-                                                         </em>
-                                                     </MenuItem>
-                                                 )}
-                                                 {environments && (
-                                                     environments.map(env => (
-                                                         <MenuItem value={env}>
-                                                             {env}
-                                                         </MenuItem>
-                                                     )))}
-                                                 {labels && labels.length > 0 && (
-                                                     <MenuItem value='' disabled>
-                                                         <em>
-                                                             <FormattedMessage
-                                                                 id='micro.gateways'
-                                                                 defaultMessage='Micro Gateways'
-                                                             />
-                                                         </em>
-                                                     </MenuItem>
-                                                 )}
-                                                 {labels && (
-                                                     labels.map(label => (
-                                                         <MenuItem value={label}>
-                                                             {label}
-                                                         </MenuItem>
-                                                     ))
-                                                 )}
-                                             </TextField>
-                                         )}
+                                        && (
+                                            <TextField
+                                                fullWidth
+                                                select
+                                                label={<FormattedMessage
+                                                    defaultMessage='Environment'
+                                                    id='Apis.Details.ApiConsole.environment'
+                                                />}
+                                                value={selectedEnvironment}
+                                                name='selectedEnvironment'
+                                                onChange={this.handleChanges}
+                                                SelectProps={environments}
+                                                helperText={<FormattedMessage
+                                                    defaultMessage='Please select an environment'
+                                                    id='Apis.Details.ApiConsole.SelectAppPanel.select.an.environment'
+                                                />}
+                                                margin='normal'
+                                                variant='outlined'
+                                            >
+                                                {environments && environments.length > 0 && (
+                                                    <MenuItem value='' disabled>
+                                                        <em>
+                                                            <FormattedMessage
+                                                                id='api.gateways'
+                                                                defaultMessage='API Gateways'
+                                                            />
+                                                        </em>
+                                                    </MenuItem>
+                                                )}
+                                                {environments && (
+                                                    environments.map(env => (
+                                                        <MenuItem value={env}>
+                                                            {env}
+                                                        </MenuItem>
+                                                    )))}
+                                                {labels && labels.length > 0 && (
+                                                    <MenuItem value='' disabled>
+                                                        <em>
+                                                            <FormattedMessage
+                                                                id='micro.gateways'
+                                                                defaultMessage='Micro Gateways'
+                                                            />
+                                                        </em>
+                                                    </MenuItem>
+                                                )}
+                                                {labels && (
+                                                    labels.map(label => (
+                                                        <MenuItem value={label}>
+                                                            {label}
+                                                        </MenuItem>
+                                                    ))
+                                                )}
+                                            </TextField>
+                                        )}
                                     </Grid>
                                 </Box>
                                 <Box display='flex' justifyContent='center'>
@@ -480,9 +490,7 @@ class ApiConsole extends React.Component {
                                                         className={classes.inputAdornmentStart}
                                                         position='start'
                                                     >
-                                                        {authorizationHeader}
-                                                        {' '}
-                                            :Bearer
+                                                        {`${authorizationHeader}: Bearer`}
                                                     </InputAdornment>
                                                 ),
                                             }}
@@ -491,6 +499,7 @@ class ApiConsole extends React.Component {
                                 </Box>
                             </Box>
                         </Grid>
+                        }
 
                         <Grid xs={12} container>
                             <Grid xs={10} />

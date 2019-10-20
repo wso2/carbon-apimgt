@@ -18,17 +18,17 @@
 
 import React from 'react';
 import Notification from 'rc-notification';
-import { injectIntl } from 'react-intl';
 import Configurations from 'Config';
-import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import Message from './Message';
 
 const theme = createMuiTheme(Configurations.themes.light);
 
 /**
- * Common alerting/message displaying component for Dev Portal, Pre-set vertical: 'top',
+ * Common alerting/message displaying component for Store application, Pre-set vertical: 'top',
  horizontal: 'center' and close action for consistent UX through out the app.
+ Alert messages are mounted outside the app's root DOM element
  */
 class Alert {
     /**
@@ -40,7 +40,7 @@ class Alert {
      * @memberof Alert
      */
     constructor(message, type, duration, onClose) {
-        this.defaultTop = 1;
+        this.defaultTop = Alert.defaultTop;
         this.key = Alert.count++;
         this.type = type;
         this.message = message;
@@ -67,12 +67,9 @@ class Alert {
                     key: this.key,
                     duration: this.duration,
                     content: (
-                        <div>
-                            <MuiThemeProvider theme={theme}>
-                                <Message handleClose={this.remove} message={this.message} type={this.type} />
-                            </MuiThemeProvider>
-
-                        </div>
+                        <MuiThemeProvider theme={theme}>
+                            <Message handleClose={this.remove} message={this.message} type={this.type} />
+                        </MuiThemeProvider>
                     ),
                 });
             })
@@ -103,7 +100,13 @@ class Alert {
                 Notification.newInstance(
                     {
                         transitionName: 'move-down',
-                        style: { top: 0, marginLeft: '45%', position: 'absolute' },
+                        style: {
+                            zIndex: theme.zIndex.snackbar,
+                            top: 0,
+                            right: 0,
+                            marginLeft: '2%',
+                            position: 'fixed',
+                        },
                     },
                     (instance) => {
                         Alert.messageInstance = instance;
@@ -121,12 +124,13 @@ class Alert {
      * @param {Object} options i:e {top: '10px', duration: 30}
      */
     static config(options) {
-        if (options.top !== undefined) {
-            Alert.defaultTop = options.top;
+        const { top, duration } = options;
+        if (top !== undefined) {
+            Alert.defaultTop = top;
             Alert.messageInstance = null; // delete messageInstance for new defaultTop
         }
-        if (options.duration !== undefined) {
-            Alert.defaultDuration = options.duration;
+        if (duration !== undefined) {
+            Alert.defaultDuration = duration;
         }
     }
 }
@@ -138,32 +142,40 @@ Alert.count = 1;
 Alert.defaultDuration = 5;
 /* In seconds */
 Alert.defaultTop = 0;
-
-export default injectIntl({
+Alert.CONSTS = {
+    INFO: 'info',
+    SUCCESS: 'success',
+    ERROR: 'error',
+    WARN: 'warning',
+    LOADING: 'loading',
+};
+Object.freeze(Alert.CONSTS);
+export default {
     info: (message, duration, onClose) => {
-        const msg = new Alert(message, 'info', duration, onClose);
+        const msg = new Alert(message, Alert.CONSTS.INFO, duration, onClose);
         msg.show();
         return msg;
     },
     success: (message, duration, onClose) => {
-        const msg = new Alert(message, 'success', duration, onClose);
+        const msg = new Alert(message, Alert.CONSTS.SUCCESS, duration, onClose);
         msg.show();
         return msg;
     },
     error: (message, duration, onClose) => {
-        const msg = new Alert(message, 'error', duration, onClose);
+        const msg = new Alert(message, Alert.CONSTS.ERROR, duration, onClose);
         msg.show();
         return msg;
     },
     warning: (message, duration, onClose) => {
-        const msg = new Alert(message, 'warning', duration, onClose);
+        const msg = new Alert(message, Alert.CONSTS.WARN, duration, onClose);
         msg.show();
         return msg;
     },
     loading: (message, duration, onClose) => {
-        const msg = new Alert(message, 'loading', duration, onClose);
+        const msg = new Alert(message, Alert.CONSTS.LOADING, duration, onClose);
         msg.show();
         return msg;
     },
     configs: Alert.config,
-});
+    CONSTS: Alert.CONSTS,
+};

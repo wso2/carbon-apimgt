@@ -51,6 +51,7 @@ const styles = theme => ({
     root: {
         padding: theme.spacing.unit * 3,
         color: theme.palette.getContrastText(theme.palette.background.paper),
+        margin: -1 * theme.spacing(0,2),
     },
     iconClass: {
         marginRight: 10,
@@ -96,7 +97,7 @@ const styles = theme => ({
         marginLeft: theme.spacing.unit * 2,
     },
     marginTop: {
-        marginTop: theme.spacing(2),
+        marginTop: theme.spacing(8),
     },
     subsToApp: {
         marginTop: theme.spacing(2),
@@ -255,32 +256,17 @@ function Overview(props) {
                                     root: classes.noCredentialsRoot,
                                 }}
                             >
-                                <Grid item xs={12}>
-                                    <Typography variant='subtitle2'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Overview.subscribe.to.application'
-                                            defaultMessage='Generate Credentials'
-                                        />
-                                    </Typography>
-                                    <Typography variant='body2'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Overview.credential.wizard.info.body'
-                                            defaultMessage={
-                                                'Use the Key Generation Wizard. '
-                                                + 'Create a new application -> '
-                                                + 'Subscribe -> Generate keys and '
-                                                + 'Access Token to invoke this API.'
-                                            }
-                                        />
-                                    </Typography>
-                                    <Link to={`/apis/${api.id}/credentials/wizard`}>
-                                        <Button variant='contained' color='primary' size='large'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Overview.no.subscription.message'
-                                                defaultMessage='No Subscriptions Allowed'
-                                            />
-                                        </Button>
-                                    </Link>
+                                <Grid container className={classes.root} spacing={2}>
+                                    <Grid item xs={12} className={classes.marginTop}>
+                                        <div className={classes.emptyBox}>
+                                            <Typography variant='body2'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Overview.no.subscription.message'
+                                                    defaultMessage='Subscriptions Are Not Allowed'
+                                                />
+                                            </Typography>
+                                        </div>
+                                    </Grid>
                                 </Grid>
                             </ExpansionPanelDetails>
                         ) : (
@@ -545,7 +531,7 @@ function Overview(props) {
                     </ExpansionPanelDetails>
                     <Divider />
                     <ExpansionPanelActions className={classes.actionPanel}>
-                        <Link to={'/apis/' + api.id + '/docs'} className={classes.button}>
+                        <Link to={'/apis/' + api.id + '/documents'} className={classes.button}>
                             <Button size='small' color='primary'>
                                 <FormattedMessage
                                     id='Apis.Details.Overview.comments.show.more'
