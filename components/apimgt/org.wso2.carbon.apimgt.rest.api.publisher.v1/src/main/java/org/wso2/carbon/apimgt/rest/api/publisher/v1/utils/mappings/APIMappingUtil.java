@@ -375,8 +375,8 @@ public class APIMappingUtil {
 
     /**
      * Converts a List object of URITemplates into APIOperations DTO List
-     * @param uriTemplateList
-     * @return
+     * @param uriTemplateList uriTemplateList
+     * @return List of APIOperationsDTO object
      */
     public static List<APIOperationsDTO> fromURITemplateListToOprationList(List<URITemplate> uriTemplateList) {
         int index = 0;
@@ -390,8 +390,8 @@ public class APIMappingUtil {
 
     /**
      * Converts a uriTemplate to APIOperations DTO
-     * @param uriTemplate
-     * @return
+     * @param uriTemplate uriTemplate
+     * @return APIOperationsDTO object
      */
     private static APIOperationsDTO fromURITemplateToOperationList(URITemplate uriTemplate) {
         APIOperationsDTO operation = new APIOperationsDTO();

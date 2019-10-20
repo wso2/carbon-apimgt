@@ -76,13 +76,13 @@ public class GraphQLSchemaDefinition {
             if (entry.getValue().getName().equals(APIConstants.GRAPHQL_QUERY) ||
                     entry.getValue().getName().equals(APIConstants.GRAPHQL_MUTATION)
                     || entry.getValue().getName().equals(APIConstants.GRAPHQL_SUBSCRIPTION)) {
-                if (type != null && type.equals(entry.getValue().getName().toUpperCase())) {
+                if (type == null) {
                     addOperations(entry, operationArray);
-                } else if (type != null && type.equals(entry.getValue().getName().toUpperCase())) {
+                } else if (type.equals(entry.getValue().getName().toUpperCase())) {
                     addOperations(entry, operationArray);
-                } else if (type != null &&  type.equals(entry.getValue().getName().toUpperCase())) {
+                } else if (type.equals(entry.getValue().getName().toUpperCase())) {
                     addOperations(entry, operationArray);
-                } else if (type == null) {
+                } else if (type.equals(entry.getValue().getName().toUpperCase())) {
                     addOperations(entry, operationArray);
                 }
             }
@@ -90,9 +90,10 @@ public class GraphQLSchemaDefinition {
         return operationArray;
     }
 
-
-    /*
-
+    /**
+     *
+     * @param entry Entry
+     * @param operationArray operationArray
      */
     private void addOperations(Map.Entry<String, TypeDefinition> entry, List<URITemplate> operationArray) {
         for (FieldDefinition fieldDef : ((ObjectTypeDefinition) entry.getValue()).getFieldDefinitions()) {
