@@ -184,11 +184,18 @@ class Credentials extends React.Component {
             apiType,
         )
             .then((response) => {
-                console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
-                Alert.info(intl.formatMessage({
-                    defaultMessage: 'Subscribed successfully',
-                    id: 'Apis.Details.Credentials.Credentials.subscribed.successfully',
-                }));
+                if (response.body.status === 'ON_HOLD') {
+                    Alert.info(intl.formatMessage({
+                        defaultMessage: 'Your subscription request has been submitted and is now awaiting approval.',
+                        id: 'subscription.pending',
+                    }));
+                } else {
+                    console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
+                    Alert.info(intl.formatMessage({
+                        defaultMessage: 'Subscribed successfully',
+                        id: 'Apis.Details.Credentials.Credentials.subscribed.successfully',
+                    }));
+                }
                 if (updateSubscriptionData) updateSubscriptionData(this.updateData);
             })
             .catch((error) => {
