@@ -47,7 +47,7 @@ const styles = theme => ({
         marginRight: 10,
     },
     inputAdornmentStart: {
-        width: '100%',
+        minWidth: theme.spacing(18),
     },
     paper: {
         margin: theme.spacing(1),
@@ -490,9 +490,7 @@ class ApiConsole extends React.Component {
                                                         className={classes.inputAdornmentStart}
                                                         position='start'
                                                     >
-                                                        {authorizationHeader}
-                                                        {' '}
-                                            :Bearer
+                                                        {`${authorizationHeader}: Bearer`}
                                                     </InputAdornment>
                                                 ),
                                             }}
