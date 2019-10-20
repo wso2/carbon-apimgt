@@ -526,11 +526,13 @@ public class SchemaValidator extends AbstractHandler {
             int index = path.lastIndexOf(APIMgtGatewayConstants.FORWARD_SLASH);
             searchLastIndex = path.substring(index + 1);
         }
+        
         String nodeVal = path.replaceAll("" + APIMgtGatewayConstants.FORWARD_SLASH, ".");
         String name = null;
         Object object = JsonPath.read(swagger, APIMgtGatewayConstants.JSON_PATH + nodeVal);
-        ObjectMapper mapper = new ObjectMapper();
         String value;
+        ObjectMapper mapper = new ObjectMapper();
+
         JsonNode jsonSchema = mapper.convertValue(object, JsonNode.class);
         if (jsonSchema.get(0) != null) {
             value = jsonSchema.get(0).toString();
@@ -584,7 +586,6 @@ public class SchemaValidator extends AbstractHandler {
             ).append(searchLastIndex);
             Object nameObj = JsonPath.read(swagger, requestSchemaPath.toString());
             mapper = new ObjectMapper();
-
             try {
                 JsonNode jsonNode = mapper.convertValue(nameObj, JsonNode.class);
                 generateSchema(jsonNode);
@@ -598,7 +599,6 @@ public class SchemaValidator extends AbstractHandler {
                         "the particular request", e);
             }
             schemaContent = name;
-
         } else {
             schemaContent = value;
             return schemaContent;
