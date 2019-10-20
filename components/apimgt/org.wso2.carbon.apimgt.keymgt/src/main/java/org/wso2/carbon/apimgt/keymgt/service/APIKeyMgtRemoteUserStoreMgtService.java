@@ -33,7 +33,7 @@ public class APIKeyMgtRemoteUserStoreMgtService extends AbstractAdmin {
     private static final Log log = LogFactory.getLog(APIKeyMgtRemoteUserStoreMgtService.class);
 
     /**
-     * validates a username,password combination. Works for any tenant
+     * validates a username,password combination. Works for any tenant domain.
      * @param username username of the user(including tenant domain)
      * @param password password of the user
      * @return true if username,password is correct
@@ -63,7 +63,7 @@ public class APIKeyMgtRemoteUserStoreMgtService extends AbstractAdmin {
     }
 
     /**
-     * Get the role list of a user
+     * Get the role list of a user. Works for any tenant domain.
      * @param username username with tenant domain
      * @return list of roles
      * @throws APIManagementException
