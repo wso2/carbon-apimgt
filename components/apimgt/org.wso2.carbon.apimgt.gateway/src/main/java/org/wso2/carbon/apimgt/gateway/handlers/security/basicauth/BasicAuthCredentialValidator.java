@@ -69,8 +69,6 @@ public class BasicAuthCredentialValidator {
 
     protected Log log = LogFactory.getLog(getClass());
     private APIKeyMgtRemoteUserStoreMgtServiceStub apiKeyMgtRemoteUserStoreMgtServiceStub;
-    private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
-
 
     /**
      * Initialize the validator with the synapse environment.
@@ -96,9 +94,6 @@ public class BasicAuthCredentialValidator {
                     "APIKeyMgtRemoteUserStoreMgtService");
             ServiceClient client = apiKeyMgtRemoteUserStoreMgtServiceStub._getServiceClient();
             Options options = client.getOptions();
-            options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
-            options.setProperty(HTTPConstants.SO_TIMEOUT, TIMEOUT_IN_MILLIS);
-            options.setProperty(HTTPConstants.CONNECTION_TIMEOUT, TIMEOUT_IN_MILLIS);
             options.setCallTransportCleanup(true);
             options.setManageSession(true);
             CarbonUtils.setBasicAccessSecurityHeaders(username, password, client);
