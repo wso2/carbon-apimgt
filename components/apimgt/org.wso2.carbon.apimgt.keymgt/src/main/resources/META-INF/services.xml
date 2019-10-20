@@ -44,6 +44,15 @@
         <parameter name="AuthorizationAction" locked="true">/permission/admin/manage</parameter>
     </service>
 
+    <service name="APIKeyMgtRemoteUserStoreMgtService" scope="transportsession">
+        <transports><transport>https</transport></transports>
+        <schema schemaNamespace="http://org.apache.axis2/xsd" elementFormDefaultQualified="true" />
+        <description>API Key Mgt functionality related to application developers.</description>
+        <parameter name="ServiceClass">org.wso2.carbon.apimgt.keymgt.service.APIKeyMgtRemoteUserStoreMgtService</parameter>
+        <parameter name="DoAuthentication" locked="true">true</parameter>
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
+    </service>
+
     <parameter name="adminService" locked="true">true</parameter>
     <parameter name="hiddenService" locked="true">true</parameter>
 </serviceGroup>

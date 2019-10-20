@@ -18,8 +18,10 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.basicauth;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,8 +36,11 @@ import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
-import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
-import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
+import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtService;
+import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException;
+import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceStub;
+import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceAPIManagementException;
+import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceStub;
 import org.wso2.carbon.um.ws.api.stub.RemoteUserStoreManagerServiceStub;
 import org.wso2.carbon.um.ws.api.stub.RemoteUserStoreManagerServiceUserStoreExceptionException;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -44,8 +49,6 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.cache.Cache;
-import javax.cache.Caching;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -54,6 +57,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import javax.cache.Cache;
+import javax.cache.Caching;
 
 /**
  * This class will validate the basic auth credentials.
@@ -63,9 +68,9 @@ public class BasicAuthCredentialValidator {
     private boolean gatewayKeyCacheEnabled;
 
     protected Log log = LogFactory.getLog(getClass());
-    private AuthenticationAdminStub authAdminStub;
-    private RemoteUserStoreManagerServiceStub remoteUserStoreManagerServiceStub;
-    private String host;
+    private APIKeyMgtRemoteUserStoreMgtServiceStub apiKeyMgtRemoteUserStoreMgtServiceStub;
+    private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
+
 
     /**
      * Initialize the validator with the synapse environment.
@@ -78,6 +83,8 @@ public class BasicAuthCredentialValidator {
 
         ConfigurationContext configurationContext = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
         String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
         if (url == null) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
@@ -85,26 +92,18 @@ public class BasicAuthCredentialValidator {
         }
 
         try {
-            authAdminStub = new AuthenticationAdminStub(configurationContext, url +
-                    "AuthenticationAdmin");
+            apiKeyMgtRemoteUserStoreMgtServiceStub = new APIKeyMgtRemoteUserStoreMgtServiceStub(configurationContext, url +
+                    "APIKeyMgtRemoteUserStoreMgtService");
+            ServiceClient client = apiKeyMgtRemoteUserStoreMgtServiceStub._getServiceClient();
+            Options options = client.getOptions();
+            options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
+            options.setProperty(HTTPConstants.SO_TIMEOUT, TIMEOUT_IN_MILLIS);
+            options.setProperty(HTTPConstants.CONNECTION_TIMEOUT, TIMEOUT_IN_MILLIS);
+            options.setCallTransportCleanup(true);
+            options.setManageSession(true);
+            CarbonUtils.setBasicAccessSecurityHeaders(username, password, client);
         } catch (AxisFault axisFault) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage(), axisFault);
-        }
-
-        try {
-            remoteUserStoreManagerServiceStub = new RemoteUserStoreManagerServiceStub(configurationContext, url +
-                    "RemoteUserStoreManagerService");
-        } catch (AxisFault axisFault) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage(), axisFault);
-        }
-        ServiceClient svcClient = remoteUserStoreManagerServiceStub._getServiceClient();
-        CarbonUtils.setBasicAccessSecurityHeaders(config.getFirstProperty(APIConstants.AUTH_MANAGER_USERNAME),
-                config.getFirstProperty(APIConstants.AUTH_MANAGER_PASSWORD), svcClient);
-
-        try {
-            host = new URL(url).getHost();
-        } catch (MalformedURLException e) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
         }
     }
 
@@ -136,8 +135,8 @@ public class BasicAuthCredentialValidator {
 
         boolean authenticated;
         try {
-            authenticated = authAdminStub.login(username, password, host);
-        } catch (RemoteException | LoginAuthenticationExceptionException e) {
+            authenticated = apiKeyMgtRemoteUserStoreMgtServiceStub.authenticate(username, password);
+        } catch (APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException | RemoteException e) {
             log.debug("Basic Authentication: Username and Password authentication failure");
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
         }
@@ -258,27 +257,10 @@ public class BasicAuthCredentialValidator {
 
     private String[] getUserRoles(String username) throws APISecurityException {
         String[] userRoles;
-        String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            try {
-                userRoles = remoteUserStoreManagerServiceStub
-                        .getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
-            } catch (RemoteException | RemoteUserStoreManagerServiceUserStoreExceptionException e) {
-                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
-            }
-        } else {
-            try {
-                int tenantId = ServiceReferenceHolder.getInstance()
-                        .getRealmService().getTenantManager().getTenantId(tenantDomain);
-
-                UserStoreManager manager = ServiceReferenceHolder
-                        .getInstance().getRealmService()
-                        .getTenantUserRealm(tenantId).getUserStoreManager();
-
-                userRoles = manager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
-            } catch (UserStoreException e) {
-                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
-            }
+        try {
+            userRoles = apiKeyMgtRemoteUserStoreMgtServiceStub.getUserRoles(username);
+        } catch (APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException | RemoteException e) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
         }
         return userRoles;
     }

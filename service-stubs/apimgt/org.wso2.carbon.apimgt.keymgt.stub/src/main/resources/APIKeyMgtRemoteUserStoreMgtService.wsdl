@@ -1,0 +1,172 @@
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax2139="http://api.apimgt.carbon.wso2.org/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://service.keymgt.apimgt.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://service.keymgt.apimgt.carbon.wso2.org">
+<wsdl:documentation>APIKeyMgtRemoteUserStoreMgtService</wsdl:documentation>
+    <wsdl:types>
+        <xs:schema xmlns:ax2140="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
+            <xs:import namespace="http://api.apimgt.carbon.wso2.org/xsd"/>
+            <xs:element name="APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="APIManagementException" nillable="true" type="ax2140:APIManagementException"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="authenticate">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="username" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="password" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="authenticateResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getUserRoles">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="username" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getUserRolesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://api.apimgt.carbon.wso2.org/xsd">
+            <xs:complexType name="APIManagementException">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="errorHandler" nillable="true" type="ax2139:ErrorHandler"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType abstract="true" name="ErrorHandler">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="errorCode" type="xs:long"/>
+                    <xs:element minOccurs="0" name="errorDescription" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="errorMessage" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="httpStatusCode" type="xs:int"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="authenticateRequest">
+        <wsdl:part name="parameters" element="ns1:authenticate"/>
+    </wsdl:message>
+    <wsdl:message name="authenticateResponse">
+        <wsdl:part name="parameters" element="ns1:authenticateResponse"/>
+    </wsdl:message>
+    <wsdl:message name="APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException">
+        <wsdl:part name="parameters" element="ns1:APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException"/>
+    </wsdl:message>
+    <wsdl:message name="getUserRolesRequest">
+        <wsdl:part name="parameters" element="ns1:getUserRoles"/>
+    </wsdl:message>
+    <wsdl:message name="getUserRolesResponse">
+        <wsdl:part name="parameters" element="ns1:getUserRolesResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="APIKeyMgtRemoteUserStoreMgtServicePortType">
+        <wsdl:operation name="authenticate">
+            <wsdl:input message="tns:authenticateRequest" wsaw:Action="urn:authenticate"/>
+            <wsdl:output message="tns:authenticateResponse" wsaw:Action="urn:authenticateResponse"/>
+            <wsdl:fault message="tns:APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException" name="APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException" wsaw:Action="urn:authenticateAPIKeyMgtRemoteUserStoreMgtServiceAPIManagementException"/>
+        </wsdl:operation>
+        <wsdl:operation name="getUserRoles">
+            <wsdl:input message="tns:getUserRolesRequest" wsaw:Action="urn:getUserRoles"/>
+            <wsdl:output message="tns:getUserRolesResponse" wsaw:Action="urn:getUserRolesResponse"/>
+            <wsdl:fault message="tns:APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException" name="APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException" wsaw:Action="urn:getUserRolesAPIKeyMgtRemoteUserStoreMgtServiceAPIManagementException"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="APIKeyMgtRemoteUserStoreMgtServiceSoap11Binding" type="tns:APIKeyMgtRemoteUserStoreMgtServicePortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="authenticate">
+            <soap:operation soapAction="urn:authenticate" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException">
+                <soap:fault use="literal" name="APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getUserRoles">
+            <soap:operation soapAction="urn:getUserRoles" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException">
+                <soap:fault use="literal" name="APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="APIKeyMgtRemoteUserStoreMgtServiceSoap12Binding" type="tns:APIKeyMgtRemoteUserStoreMgtServicePortType">
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="authenticate">
+            <soap12:operation soapAction="urn:authenticate" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException">
+                <soap12:fault use="literal" name="APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getUserRoles">
+            <soap12:operation soapAction="urn:getUserRoles" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException">
+                <soap12:fault use="literal" name="APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="APIKeyMgtRemoteUserStoreMgtServiceHttpBinding" type="tns:APIKeyMgtRemoteUserStoreMgtServicePortType">
+        <http:binding verb="POST"/>
+        <wsdl:operation name="authenticate">
+            <http:operation location="authenticate"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getUserRoles">
+            <http:operation location="getUserRoles"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="APIKeyMgtRemoteUserStoreMgtService">
+        <wsdl:port name="APIKeyMgtRemoteUserStoreMgtServiceHttpsSoap11Endpoint" binding="tns:APIKeyMgtRemoteUserStoreMgtServiceSoap11Binding">
+            <soap:address location="https://Fazlans-MacBook-Pro.local:8243/services/APIKeyMgtRemoteUserStoreMgtService.APIKeyMgtRemoteUserStoreMgtServiceHttpsSoap11Endpoint"/>
+        </wsdl:port>
+        <wsdl:port name="APIKeyMgtRemoteUserStoreMgtServiceHttpsSoap12Endpoint" binding="tns:APIKeyMgtRemoteUserStoreMgtServiceSoap12Binding">
+            <soap12:address location="https://Fazlans-MacBook-Pro.local:8243/services/APIKeyMgtRemoteUserStoreMgtService.APIKeyMgtRemoteUserStoreMgtServiceHttpsSoap12Endpoint"/>
+        </wsdl:port>
+        <wsdl:port name="APIKeyMgtRemoteUserStoreMgtServiceHttpsEndpoint" binding="tns:APIKeyMgtRemoteUserStoreMgtServiceHttpBinding">
+            <http:address location="https://Fazlans-MacBook-Pro.local:8243/services/APIKeyMgtRemoteUserStoreMgtService.APIKeyMgtRemoteUserStoreMgtServiceHttpsEndpoint"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
