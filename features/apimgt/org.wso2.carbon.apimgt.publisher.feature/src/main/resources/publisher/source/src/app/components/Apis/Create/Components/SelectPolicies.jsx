@@ -32,8 +32,10 @@ export default function SelectPolicies(props) {
     useEffect(() => {
         API.policies('subscription').then(response => setPolicies(response.body));
     }, []);
-    const onClickAway = ({ target: { value } }) => {
-        validate('policies', value);
+    const onClickAway = () => {
+        if (isAPIProduct) {
+            validate('policies', selectedPolicies);
+        }
     };
     if (!policies.list) {
         return <CircularProgress />;
@@ -91,3 +93,4 @@ SelectPolicies.defaultProps = {
     isAPIProduct: PropTypes.bool.isRequired,
     helperText: 'Select one or more throttling policies for the ',
 };
+
