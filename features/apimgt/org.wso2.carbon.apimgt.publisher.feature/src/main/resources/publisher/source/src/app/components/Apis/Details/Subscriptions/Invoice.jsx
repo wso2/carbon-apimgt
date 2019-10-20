@@ -22,6 +22,7 @@ import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
 import MUIDataTable from 'mui-datatables';
 import API from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
 import { FormattedMessage } from 'react-intl';
 
 const columns = ['Name', 'Value'];
@@ -55,18 +56,34 @@ function Invoice(props) {
     const handlePopup = () => {
         setShowPopup(true);
         setInvoice(null);
-        const promiseInvoice = api.getMonetizationInvoice(subscriptionId);
-        promiseInvoice.then((response) => {
-            const invoiceData = [];
-            Object.keys(response.properties).map((invoiceItem) => {
-                const insideArray = [];
-                insideArray.push(invoiceItem);
-                insideArray.push(response.properties[invoiceItem]);
-                invoiceData.push(insideArray);
-                return true;
+        if (api.apiType == 'APIProduct') {
+            const apiProduct = new APIProduct(api.name, api.context, api.policies);
+            const promiseInvoice = apiProduct.getMonetizationInvoice(subscriptionId);
+            promiseInvoice.then((response) => {
+                const invoiceData = [];
+                Object.keys(response.properties).map((invoiceItem) => {
+                    const insideArray = [];
+                    insideArray.push(invoiceItem);
+                    insideArray.push(response.properties[invoiceItem]);
+                    invoiceData.push(insideArray);
+                    return true;
+                });
+                setInvoice(invoiceData);
             });
-            setInvoice(invoiceData);
-        });
+        } else {
+            const promiseInvoice = api.getMonetizationInvoice(subscriptionId);
+            promiseInvoice.then((response) => {
+                const invoiceData = [];
+                Object.keys(response.properties).map((invoiceItem) => {
+                    const insideArray = [];
+                    insideArray.push(invoiceItem);
+                    insideArray.push(response.properties[invoiceItem]);
+                    invoiceData.push(insideArray);
+                    return true;
+                });
+                setInvoice(invoiceData);
+            });
+        }
     };
 
     /**
