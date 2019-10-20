@@ -245,13 +245,21 @@ class ApplicationFormHandler extends React.Component {
             .then(() => this.validateAttributes(applicationRequest.attributes))
             .then(() => api.createApplication(applicationRequest))
             .then((response) => {
-                console.log('Application created successfully.');
-                Alert.info(intl.formatMessage({
-                    id: 'Applications.Create.ApplicationFormHandler.Application.created.successfully',
-                    defaultMessage: 'Application created successfully.',
-                }));
-                const appId = response.body.applicationId;
-                history.push(`/applications/${appId}`);
+                if (response.body.status === 'CREATED') {
+                    Alert.info(intl.formatMessage({
+                        id: 'application.creation.pending',
+                        defaultMessage: 'A request to register this application has been sent.',
+                    }));
+                    history.push('/applications');
+                } else {
+                    console.log('Application created successfully.');
+                    Alert.info(intl.formatMessage({
+                        id: 'Applications.Create.ApplicationFormHandler.Application.created.successfully',
+                        defaultMessage: 'Application created successfully.',
+                    }));
+                    const appId = response.body.applicationId;
+                    history.push(`/applications/${appId}`);
+                }
             })
             .catch((error) => {
                 const { response } = error;
