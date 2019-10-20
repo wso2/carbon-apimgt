@@ -546,7 +546,7 @@ function Overview(props) {
                     </ExpansionPanelDetails>
                     <Divider />
                     <ExpansionPanelActions className={classes.actionPanel}>
-                        <Link to={'/apis/' + api.id + '/docs'} className={classes.button}>
+                        <Link to={'/apis/' + api.id + '/documents'} className={classes.button}>
                             <Button size='small' color='primary'>
                                 <FormattedMessage
                                     id='Apis.Details.Overview.comments.show.more'

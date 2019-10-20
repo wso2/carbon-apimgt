@@ -29,6 +29,8 @@ import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import withSettings from 'AppComponents/Shared/withSettingsContext';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import Alert from 'AppComponents/Shared/Alert';
+import Icon from '@material-ui/core/Icon';
+import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import ImageGenerator from './ImageGenerator';
 import ApiThumb from './ApiThumb';
 import DocThumb from './DocThumb';
@@ -42,6 +44,14 @@ const styles = theme => ({
             color: `${theme.custom.thumbnail.iconColor} !important`,
             fontSize: `${theme.custom.thumbnail.listViewIconSize}px !important`,
         },
+    },
+    apiNameLink: {
+        display: 'flex',
+        alignItems: 'center',
+        '& span': {
+            marginLeft: theme.spacing(1),
+        },
+        color: theme.palette.getContrastText(theme.custom.listView.tableBodyEvenBackgrund),
     },
 });
 /**
@@ -290,20 +300,32 @@ class ApiTableView extends React.Component {
                             if (artifact) {
                                 if (artifact.type === 'DOC') {
                                     return (
-                                        <Link to={'/apis/' + artifact.apiUUID + '/docs'}>
-                                            <ImageGenerator api={artifact} width={30} height={30} />
-                                            <FormattedMessage
-                                                id='Apis.Listing.TableView.TableView.doc.flag'
-                                                defaultMessage='[Doc] '
-                                            />
-                                            {apiName}
+                                        <Link
+                                            to={'/apis/' + artifact.apiUUID + '/documents'}
+                                            className={classes.apiNameLink}
+                                        >
+                                            <Icon>library_books</Icon>
+
+                                            <span>
+                                                {' '}
+                                                <FormattedMessage
+                                                    id='Apis.Listing.TableView.TableView.doc.flag'
+                                                    defaultMessage='[Doc] '
+                                                />{' '}
+                                                {apiName}
+                                            </span>
                                         </Link>
                                     );
                                 }
                                 return (
-                                    <Link to={'/apis/' + apiId + '/overview'} className={classes.rowImageOverride}>
-                                        <ImageGenerator api={artifact} width={30} height={30} />
-                                        {apiName}
+                                    <Link
+                                        to={'/apis/' + apiId + '/overview'}
+                                        className={classes.rowImageOverride}
+                                        className={classes.apiNameLink}
+                                    >
+                                        <CustomIcon width={16} height={16} icon='api' strokeColor='#444444' />
+
+                                        <span>{apiName}</span>
                                     </Link>
                                 );
                             }
