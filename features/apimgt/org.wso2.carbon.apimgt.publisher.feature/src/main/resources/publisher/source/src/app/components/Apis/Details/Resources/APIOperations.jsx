@@ -16,8 +16,9 @@
  * under the License.
  */
 import React from 'react';
-import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import Box from '@material-ui/core/Box';
+import { FormattedMessage } from 'react-intl';
 
 import Resources from './Resources';
 
@@ -30,15 +31,16 @@ import Resources from './Resources';
  */
 export default function APIOperations() {
     return (
-        <Grid container spacing={3}>
-            <Grid item md={12}>
+        <React.Fragment>
+            <Box mb={4}>
                 <Typography variant='h4' gutterBottom>
-                    Resources
+                    <FormattedMessage
+                        id='Apis.Details.Resources.APIOperations.title'
+                        defaultMessage='Resources'
+                    />
                 </Typography>
-            </Grid>
-            <Grid item md={12}>
-                <Resources />
-            </Grid>
-        </Grid>
+            </Box>
+            <Resources />
+        </React.Fragment>
     );
 }
