@@ -29,7 +29,6 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import Tooltip from '@material-ui/core/Tooltip';
 import TextField from '@material-ui/core/TextField';
 import Icon from '@material-ui/core/Icon';
-import InputAdornment from '@material-ui/core/InputAdornment';
 import API from 'AppData/api';
 import Utils from 'AppData/Utils';
 import Alert from 'AppComponents/Shared/Alert';
@@ -156,7 +155,7 @@ class Environments extends React.Component {
      */
     render() {
         const { api } = this.context;
-        const { classes, intl, } = this.props;
+        const { classes, intl } = this.props;
         const { urlCopied } = this.state;
 
 
@@ -236,7 +235,7 @@ class Environments extends React.Component {
                                                 >
                                                     <CopyToClipboard
                                                         text={endpoint.URLs.http}
-                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                        onCopy={() => this.onCopy('urlCopied')}
                                                     >
                                                         <Icon color='secondary'>insert_drive_file</Icon>
                                                     </CopyToClipboard>
@@ -278,7 +277,7 @@ class Environments extends React.Component {
                                                 >
                                                     <CopyToClipboard
                                                         text={endpoint.URLs.https}
-                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                        onCopy={() => this.onCopy('urlCopied')}
                                                     >
                                                         <Icon color='secondary'>insert_drive_file</Icon>
                                                     </CopyToClipboard>
@@ -320,7 +319,7 @@ class Environments extends React.Component {
                                                 >
                                                     <CopyToClipboard
                                                         text={endpoint.URLs.ws}
-                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                        onCopy={() => this.onCopy('urlCopied')}
                                                     >
                                                         <Icon color='secondary'>insert_drive_file</Icon>
                                                     </CopyToClipboard>
@@ -362,7 +361,7 @@ class Environments extends React.Component {
                                                 >
                                                     <CopyToClipboard
                                                         text={endpoint.URLs.wss}
-                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                        onCopy={() => this.onCopy('urlCopied')}
                                                     >
                                                         <Icon color='secondary'>insert_drive_file</Icon>
                                                     </CopyToClipboard>
@@ -374,12 +373,12 @@ class Environments extends React.Component {
                                                 endpoint.defaultVersionURLs.https !== null ||
                                                 endpoint.defaultVersionURLs.ws !== null ||
                                                 endpoint.defaultVersionURLs.wss !== null) && (
-                                                <Typography className={classes.heading}>
-                                                <FormattedMessage
-                                                        id='Apis.Details.InfoBar.default.gateway.urls'
-                                                        defaultMessage='Default Gateway URLs'
-                                                    />
-                                            </Typography>
+                                            <Typography className={classes.heading}>
+                                                    <FormattedMessage
+                                                    id='Apis.Details.InfoBar.default.gateway.urls'
+                                                    defaultMessage='Default Gateway URLs'
+                                                />
+                                                </Typography>
                                         )}
                                         {endpoint.defaultVersionURLs !== null &&
                                             endpoint.defaultVersionURLs.http !== null && (
@@ -417,7 +416,7 @@ class Environments extends React.Component {
                                                 >
                                                     <CopyToClipboard
                                                         text={endpoint.defaultVersionURLs.http}
-                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                        onCopy={() => this.onCopy('urlCopied')}
                                                     >
                                                         <Icon color='secondary'>file_copy</Icon>
                                                     </CopyToClipboard>
@@ -460,7 +459,7 @@ class Environments extends React.Component {
                                                 >
                                                     <CopyToClipboard
                                                         text={endpoint.defaultVersionURLs.https}
-                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                        onCopy={() => this.onCopy('urlCopied')}
                                                     >
                                                         <Icon color='secondary'>file_copy</Icon>
                                                     </CopyToClipboard>
@@ -503,7 +502,7 @@ class Environments extends React.Component {
                                                 >
                                                     <CopyToClipboard
                                                         text={endpoint.defaultVersionURLs.ws}
-                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                        onCopy={() => this.onCopy('urlCopied')}
                                                     >
                                                         <Icon color='secondary'>file_copy</Icon>
                                                     </CopyToClipboard>
@@ -546,7 +545,7 @@ class Environments extends React.Component {
                                                 >
                                                     <CopyToClipboard
                                                         text={endpoint.defaultVersionURLs.wss}
-                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                        onCopy={() => this.onCopy('urlCopied')}
                                                     >
                                                         <Icon color='secondary'>file_copy</Icon>
                                                     </CopyToClipboard>
