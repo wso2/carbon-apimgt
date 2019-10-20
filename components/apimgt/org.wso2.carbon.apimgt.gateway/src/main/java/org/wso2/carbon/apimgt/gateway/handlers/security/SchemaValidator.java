@@ -102,15 +102,13 @@ public class SchemaValidator extends AbstractHandler {
             JSONObject payloadObject = getMessageContent(messageContext);
             if (!APIConstants.SupportedHTTPVerbs.GET.name().equals(requestMethod) &&
                     payloadObject != null && !APIMgtGatewayConstants.EMPTY_ARRAY.equals(payloadObject)) {
-                try {
                     validateRequest(messageContext);
-                } catch (APIManagementException e) {
-                    logger.error("Error occurred while validating the API request", e);
-                }
             }
         } catch (IOException | XMLStreamException e) {
             logger.error("Error occurred while building the API request", e);
-        }
+        }  catch (APIManagementException e) {
+        logger.error("Error occurred while validating the API request", e);
+    }
         return true;
     }
 
@@ -128,7 +126,6 @@ public class SchemaValidator extends AbstractHandler {
         try {
             RelayUtils.buildMessage(axis2MC);
             logger.info("Successfully built the response message");
-
         } catch (IOException e) {
             logger.error("Error occurred while building the API response", e);
         } catch (XMLStreamException e) {
@@ -143,7 +140,6 @@ public class SchemaValidator extends AbstractHandler {
         } catch (APIManagementException e) {
             logger.error("Error occurred while validating the API response", e);
         }
-
         return true;
     }
 
@@ -279,7 +275,6 @@ public class SchemaValidator extends AbstractHandler {
     private String extractSchemaFromRequest(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
                 messageContext).getAxis2MessageContext();
-
         String resourcePath = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE).toString();
         String requestMethod = axis2MC.getProperty(APIMgtGatewayConstants.HTTP_REQUEST_METHOD).toString();
         String schema;
@@ -348,7 +343,6 @@ public class SchemaValidator extends AbstractHandler {
         if (schemaCon != null) {
             if (!schemaCon.toString().equals("[]")) {
                 return extractReference(schemaCon.toString());
-
             } else {
                 StringBuilder pathBuilder = new StringBuilder();
                 pathBuilder.append(APIMgtGatewayConstants.PATHS).append(electedResource).
@@ -526,7 +520,7 @@ public class SchemaValidator extends AbstractHandler {
             int index = path.lastIndexOf(APIMgtGatewayConstants.FORWARD_SLASH);
             searchLastIndex = path.substring(index + 1);
         }
-        
+
         String nodeVal = path.replaceAll("" + APIMgtGatewayConstants.FORWARD_SLASH, ".");
         String name = null;
         Object object = JsonPath.read(swagger, APIMgtGatewayConstants.JSON_PATH + nodeVal);
