@@ -9,26 +9,26 @@ import java.util.Objects;
 
 public class RevokeAPIKeyDTO   {
   
-  private String apiKey = null;
+  private String apikey = null;
   private Long expiryTime = null;
   private Integer tenantId = null;
 
   /**
-   * Signature of the API Key token.
+   * API Key token.
    **/
-  public RevokeAPIKeyDTO apiKey(String apiKey) {
-    this.apiKey = apiKey;
+  public RevokeAPIKeyDTO apikey(String apikey) {
+    this.apikey = apikey;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Signature of the API Key token.")
-  @JsonProperty("signature")
-  public String getApiKey() {
-    return apiKey;
+  @ApiModelProperty(value = "API Key token.")
+  @JsonProperty("apikey")
+  public String getApikey() {
+    return apikey;
   }
-  public void setApiKey(String apiKey) {
-    this.apiKey = apiKey;
+  public void setApikey(String apikey) {
+    this.apikey = apikey;
   }
 
   /**
@@ -77,14 +77,14 @@ public class RevokeAPIKeyDTO   {
       return false;
     }
     RevokeAPIKeyDTO revokeAPIKey = (RevokeAPIKeyDTO) o;
-    return Objects.equals(apiKey, revokeAPIKey.apiKey) &&
+    return Objects.equals(apikey, revokeAPIKey.apikey) &&
         Objects.equals(expiryTime, revokeAPIKey.expiryTime) &&
         Objects.equals(tenantId, revokeAPIKey.tenantId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiKey, expiryTime, tenantId);
+    return Objects.hash(apikey, expiryTime, tenantId);
   }
 
   @Override
@@ -92,7 +92,7 @@ public class RevokeAPIKeyDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class RevokeAPIKeyDTO {\n");
     
-    sb.append("    signature: ").append(toIndentedString(apiKey)).append("\n");
+    sb.append("    apikey: ").append(toIndentedString(apikey)).append("\n");
     sb.append("    expiryTime: ").append(toIndentedString(expiryTime)).append("\n");
     sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
     sb.append("}");

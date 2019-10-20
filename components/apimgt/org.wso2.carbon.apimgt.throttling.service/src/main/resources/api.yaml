@@ -229,9 +229,9 @@ definitions:
         description: expiry timestamp.
   RevokeAPIKey:
     properties:
-      signature:
+      apiKey:
         type: string
-        description: Signature of the API Key token.
+        description: API Key token.
       expiryTime:
         type: integer
         format: int64

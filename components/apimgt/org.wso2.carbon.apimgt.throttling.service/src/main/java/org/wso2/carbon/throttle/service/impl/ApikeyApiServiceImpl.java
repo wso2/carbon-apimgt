@@ -23,7 +23,7 @@ public class ApikeyApiServiceImpl implements ApikeyApiService {
             boolean hasPermission = APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN);
             if(hasPermission) {
                 APIKeyRevokeService apiKeyRevokeService = APIKeyRevokeServiceImpl.getInstance();
-                apiKeyRevokeService.revokeAPIKey(body.getApiKey(), body.getExpiryTime(), body.getTenantId());
+                apiKeyRevokeService.revokeAPIKey(body.getApikey(), body.getExpiryTime(), body.getTenantId());
             } else {
                 RestApiUtil.handleAuthorizationFailure("User doesn't have sufficient permissions", username,log);
             }

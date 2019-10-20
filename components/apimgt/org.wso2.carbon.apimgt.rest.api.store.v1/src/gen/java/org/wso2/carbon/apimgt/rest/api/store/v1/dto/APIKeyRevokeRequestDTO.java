@@ -1,38 +1,32 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import javax.validation.constraints.*;
+import io.swagger.annotations.ApiModelProperty;
 
-
-import io.swagger.annotations.*;
 import java.util.Objects;
-
-import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
 public class APIKeyRevokeRequestDTO   {
   
-    private String apiKey = null;
+    private String apikey = null;
 
   /**
    * API Key to revoke
    **/
-  public APIKeyRevokeRequestDTO apiKey(String apiKey) {
-    this.apiKey = apiKey;
+  public APIKeyRevokeRequestDTO apikey(String apikey) {
+    this.apikey = apikey;
     return this;
   }
 
   
   @ApiModelProperty(value = "API Key to revoke")
-  @JsonProperty("apiKey")
-  public String getApiKey() {
-    return apiKey;
+  @JsonProperty("apikey")
+  public String getApikey() {
+    return apikey;
   }
-  public void setApiKey(String apiKey) {
-    this.apiKey = apiKey;
+  public void setApikey(String apikey) {
+    this.apikey = apikey;
   }
 
 
@@ -45,12 +39,12 @@ public class APIKeyRevokeRequestDTO   {
       return false;
     }
     APIKeyRevokeRequestDTO apIKeyRevokeRequest = (APIKeyRevokeRequestDTO) o;
-    return Objects.equals(apiKey, apIKeyRevokeRequest.apiKey);
+    return Objects.equals(apikey, apIKeyRevokeRequest.apikey);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiKey);
+    return Objects.hash(apikey);
   }
 
   @Override
@@ -58,7 +52,7 @@ public class APIKeyRevokeRequestDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIKeyRevokeRequestDTO {\n");
     
-    sb.append("    apiKey: ").append(toIndentedString(apiKey)).append("\n");
+    sb.append("    apikey: ").append(toIndentedString(apikey)).append("\n");
     sb.append("}");
     return sb.toString();
   }

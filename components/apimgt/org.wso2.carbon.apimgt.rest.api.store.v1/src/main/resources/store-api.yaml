@@ -4729,7 +4729,7 @@ definitions:
   APIKeyRevokeRequest :
     title: API Key revoke request object
     properties:
-      apiKey:
+      apikey:
         type: string
         description: API Key to revoke
 

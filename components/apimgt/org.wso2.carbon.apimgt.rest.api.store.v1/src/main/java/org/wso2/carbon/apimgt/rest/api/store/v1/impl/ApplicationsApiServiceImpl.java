@@ -351,7 +351,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                                                       APIKeyRevokeRequestDTO body, String ifMatch,
                                                                       MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
-        String apiKey = body.getApiKey();
+        String apiKey = body.getApikey();
         if (!StringUtils.isEmpty(apiKey) && APIUtil.isValidJWT(apiKey)) {
             try {
                 String splitToken[] = apiKey.split("\\.");
