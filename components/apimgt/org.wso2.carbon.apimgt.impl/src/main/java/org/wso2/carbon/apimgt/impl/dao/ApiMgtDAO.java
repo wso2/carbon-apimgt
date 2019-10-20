@@ -13968,7 +13968,7 @@ public class ApiMgtDAO {
         return productMappings;
     }
 
-    private int getAPIProductId(APIProductIdentifier identifier) throws APIManagementException {
+    public int getAPIProductId(APIProductIdentifier identifier) throws APIManagementException {
         Connection conn = null;
         String queryGetProductId = SQLConstants.GET_PRODUCT_ID;
         PreparedStatement preparedStatement = null;

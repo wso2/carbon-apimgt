@@ -185,6 +185,10 @@
         "Roles": "admin,Internal/subscriber"
       },
       {
+        "Name": "apim_analytics:analytics_viewer",
+        "Roles": "admin,Internal/analytics"
+      },
+      {
         "Name": "apim_analytics:everyone",
         "Roles": "Internal/everyone"
       },
@@ -194,7 +198,7 @@
       },
       {
         "Name": "apim:sub_alert_manage",
-        "Roles": "admin,Internal/creator"
+        "Roles": "admin,Internal/subscriber"
       },
       {
         "Name": "apim:tenantInfo",

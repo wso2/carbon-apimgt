@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -89,7 +90,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsGet(String groupId, String query, String sortBy, String sortOrder,
-                                    Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) {
+            Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -101,7 +102,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();
 
         String username = RestApiUtil.getLoggedInUsername();
-
+        
         // todo: Do a second level filtering for the incoming group ID.
         // todo: eg: use case is when there are lots of applications which is accessible to his group "g1", he wants to see
         // todo: what are the applications shared to group "g2" among them. 
@@ -138,11 +139,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     /**
      * Creates a new application
      *
-     * @param body request body containing application details
+     * @param body        request body containing application details
      * @return 201 response if successful
      */
     @Override
-    public Response applicationsPost(ApplicationDTO body, MessageContext messageContext) {
+    public Response applicationsPost(ApplicationDTO body, MessageContext messageContext){
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -199,8 +200,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     /**
      * Get an application by Id
      *
-     * @param applicationId application identifier
-     * @param ifNoneMatch   If-None-Match header value
+     * @param applicationId   application identifier
+     * @param ifNoneMatch     If-None-Match header value
      * @return response containing the required application object
      */
     @Override
@@ -234,7 +235,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 application.setApplicationAttributes(applicationAttributes);
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                     ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
-                    JSONArray scopes = apiConsumer.getScopesForApplicationSubscription(username, application.getId());
+                    applicationDTO.setHashEnabled(OAuthServerConfiguration.getInstance().isClientSecretHashEnabled());
+                    JSONArray scopes= apiConsumer.getScopesForApplicationSubscription(username, application.getId());
                     applicationDTO.setSubscriptionScopes(scopes);
                     return Response.ok().entity(applicationDTO).build();
                 } else {
@@ -252,9 +254,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     /**
      * Update an application by Id
      *
-     * @param applicationId application identifier
-     * @param body          request body containing application details
-     * @param ifMatch       If-Match header value
+     * @param applicationId     application identifier
+     * @param body              request body containing application details
+     * @param ifMatch           If-Match header value
      * @return response containing the updated application object
      */
     @Override
@@ -263,11 +265,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
-
+            
             if (oldApplication == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
-
+            
             if (!RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
@@ -279,7 +281,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (applicationAttributes != null) {
                 body.setAttributes(applicationAttributes);
             }
-
+            
             //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
 
@@ -293,7 +295,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil
                     .fromApplicationtoDTO(updatedApplication);
             return Response.ok().entity(updatedApplicationDTO).build();
-
+                
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToApplicationNameWhiteSpaceValidation(e)) {
                 RestApiUtil.handleBadRequest("Application name cannot contains leading or trailing white spaces", log);
@@ -429,8 +431,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     /**
      * Deletes an application by id
      *
-     * @param applicationId application identifier
-     * @param ifMatch       If-Match header value
+     * @param applicationId     application identifier
+     * @param ifMatch           If-Match header value
      * @return 200 Response if successfully deleted the application
      */
     @Override
@@ -458,8 +460,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     /**
      * Generate keys for a application
      *
-     * @param applicationId application identifier
-     * @param body          request body
+     * @param applicationId     application identifier
+     * @param body              request body
      * @return A response object containing application keys
      */
     @Override
@@ -544,16 +546,15 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
     /**
      * Clean up application keys
-     *
-     * @param applicationId  Application Id
-     * @param keyType        Key Type whether PRODUCTION or SANDBOX
+     * @param applicationId Application Id
+     * @param keyType Key Type whether PRODUCTION or SANDBOX
      * @param ifMatch
      * @param messageContext
      * @return
      */
     @Override
     public Response applicationsApplicationIdKeysKeyTypeCleanUpPost(String applicationId, String keyType, String ifMatch,
-                                                                    MessageContext messageContext) {
+                             MessageContext messageContext) {
 
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -596,7 +597,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
     @Override
     public Response applicationsApplicationIdKeysKeyTypeGenerateTokenPost(String applicationId,
-                                                                          String keyType, ApplicationTokenGenerateRequestDTO body, String ifMatch, MessageContext messageContext) {
+            String keyType, ApplicationTokenGenerateRequestDTO body, String ifMatch, MessageContext messageContext) {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
@@ -659,7 +660,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdKeysKeyTypeGet(String applicationId, String keyType,
-                                                            String groupId, MessageContext messageContext) {
+            String groupId, MessageContext messageContext) {
         return Response.ok().entity(getApplicationKeyByAppIDAndKeyType(applicationId, keyType)).build();
     }
 
@@ -692,7 +693,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdKeysKeyTypePut(String applicationId, String keyType,
-                                                            ApplicationKeyDTO body, MessageContext messageContext) {
+            ApplicationKeyDTO body, MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -738,7 +739,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdKeysKeyTypeRegenerateSecretPost(String applicationId,
-                                                                             String keyType, MessageContext messageContext) {
+            String keyType, MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             List<APIKey> applicationKeys = getApplicationKeys(applicationId);
@@ -810,7 +811,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
     @Override
     public Response applicationsApplicationIdScopesGet(String applicationId, Boolean filterByUserRoles,
-                                                       String ifNoneMatch, MessageContext messageContext) {
+            String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }

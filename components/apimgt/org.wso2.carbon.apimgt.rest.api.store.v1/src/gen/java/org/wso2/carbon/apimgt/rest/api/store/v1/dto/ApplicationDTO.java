@@ -65,6 +65,7 @@ public enum TokenTypeEnum {
     private Map<String, String> attributes = new HashMap<>();
     private List<String> subscriptionScopes = new ArrayList<>();
     private String owner = null;
+    private Boolean hashEnabled = null;
 
   /**
    **/
@@ -274,6 +275,23 @@ public enum TokenTypeEnum {
     this.owner = owner;
   }
 
+  /**
+   **/
+  public ApplicationDTO hashEnabled(Boolean hashEnabled) {
+    this.hashEnabled = hashEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("hashEnabled")
+  public Boolean isHashEnabled() {
+    return hashEnabled;
+  }
+  public void setHashEnabled(Boolean hashEnabled) {
+    this.hashEnabled = hashEnabled;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -295,12 +313,13 @@ public enum TokenTypeEnum {
         Objects.equals(keys, application.keys) &&
         Objects.equals(attributes, application.attributes) &&
         Objects.equals(subscriptionScopes, application.subscriptionScopes) &&
-        Objects.equals(owner, application.owner);
+        Objects.equals(owner, application.owner) &&
+        Objects.equals(hashEnabled, application.hashEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner);
+    return Objects.hash(applicationId, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner, hashEnabled);
   }
 
   @Override
@@ -320,6 +339,7 @@ public enum TokenTypeEnum {
     sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
     sb.append("    subscriptionScopes: ").append(toIndentedString(subscriptionScopes)).append("\n");
     sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
+    sb.append("    hashEnabled: ").append(toIndentedString(hashEnabled)).append("\n");
     sb.append("}");
     return sb.toString();
   }

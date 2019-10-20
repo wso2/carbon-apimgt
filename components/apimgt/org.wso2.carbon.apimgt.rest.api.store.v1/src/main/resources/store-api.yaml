@@ -4073,6 +4073,8 @@ definitions:
           Application created user
         type: string
         example: admin
+      hashEnabled:
+        type: boolean
 
 #-----------------------------------------------------
 # The Application Info resource

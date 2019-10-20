@@ -47,8 +47,6 @@ public class PublisherAlertConfigurator extends AlertConfigurator {
         if (log.isDebugEnabled()) {
             log.debug("Persisting subscribing alert types " + alertTypesMap.get("ids") + "in database.");
         }
-        apiMgtDAO.addAlertTypesConfigInfo(userName, emails, alertTypesMap.get("ids"),
-                AlertMgtConstants.PUBLISHER_AGENT);
 
         String query =
                 "select '" + userName + "' as userId, '" + alertTypesMap.get("names") + "' as alertTypes, '" + emails
@@ -63,6 +61,8 @@ public class PublisherAlertConfigurator extends AlertConfigurator {
                         + "ApimAlertStakeholderInfo.userId == userId and "
                         + "ApimAlertStakeholderInfo.isPublisher == isPublisher";
         APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_ALERT_STAKEHOLDER_APP, query);
+        apiMgtDAO.addAlertTypesConfigInfo(userName, emails, alertTypesMap.get("ids"),
+                AlertMgtConstants.PUBLISHER_AGENT);
     }
 
     @Override
