@@ -42,7 +42,7 @@
   "Apis.Details.Credentials.SubscriptionTableRow.sandbox.keys": "SANDBOX KEYS",
   "Apis.Details.Credentials.SubscriptionTableRow.unsubscribe": "UNSUBSCRIBE",
   "Apis.Details.Credentials.Wizard.Wizard.Cancel": "CANCEL",
-  "Apis.Details.Credentials.Wizard.Wizard.approval.request.for.this.step.has": "Approval request for this step has been Sent",
+  "Apis.Details.Credentials.Wizard.Wizard.approval.request.for.this.step.has": "A request to register this step has been sent.",
   "Apis.Details.Credentials.Wizard.Wizard.finish": "Finish",
   "Apis.Details.Credentials.Wizard.Wizard.next": "Next",
   "Apis.Details.Credentials.Wizard.Wizard.rest": "Reset",
@@ -333,5 +333,7 @@
   "key": "Key",
   "micro.gateways": "Micro Gateways",
   "notice": "Notice",
-  "require.application.subscribe": "Please subscribe to an application"
+  "require.application.subscribe": "Please subscribe to an application",
+  "subscription.pending": "Your subscription request has been submitted and is now awaiting approval.",
+  "application.creation.pending": "A request to register this application has been sent."
 }
