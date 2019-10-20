@@ -281,10 +281,17 @@ class Credentials extends React.Component {
                     <React.Fragment>
                         <InlineMessage type='info' className={classes.dialogContainer}>
                             <Typography variant='h5' component='h3'>
-                                Credentials
+                                <FormattedMessage
+                                    id={'Apis.Details.Credentials.Credentials.generate.credentials'}
+                                    defaultMessage={'Generate Credentials'}
+                                />
                             </Typography>
                             <Typography component='p'>
-                                You do not need credentials to access Prototyped APIs
+                                <FormattedMessage
+                                    id={'Apis.Details.Credentials.Credentials.you.do.not.need'
+                                        + '.credentials.to.access.prototyped.api'}
+                                    defaultMessage={'You do not need credentials to access Prototyped APIs'}
+                                />
                             </Typography>
                         </InlineMessage>
                     </React.Fragment>
@@ -357,8 +364,8 @@ class Credentials extends React.Component {
                                             >
                                                 <FormattedMessage
                                                     id={'Apis.Details.Credentials.' +
-                                                    'SubscibeButtonPanel.subscribe.wizard'}
-                                                    defaultMessage='Wizard'
+                                                    'SubscibeButtonPanel.subscribe.wizard.with.new.app'}
+                                                    defaultMessage='Subscribe with a new application'
                                                 />
                                             </Button>
                                         </Link>
