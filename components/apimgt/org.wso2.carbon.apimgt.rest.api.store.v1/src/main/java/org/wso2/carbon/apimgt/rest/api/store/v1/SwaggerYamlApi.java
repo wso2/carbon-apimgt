@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;
@@ -37,6 +39,8 @@ import javax.ws.rs.core.Response;
 public class SwaggerYamlApi {
 
     private static final Log log = LogFactory.getLog(SwaggerYamlApi.class);
+    private static final String LOCK_STORE_OPENAPI_DEF = "LOCK_STORE_OPENAPI_DEF";
+    private String openAPIDef = null;
 
     /**
      * Retrieves swagger definition of Store REST API and returns
@@ -54,11 +58,18 @@ public class SwaggerYamlApi {
 
             @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported") })
 
-    public Response swaggerYamlGet() {
+    public Response swaggerYamlGet() throws APIManagementException {
         try {
-            String definition = IOUtils
-                    .toString(this.getClass().getResourceAsStream("/store-api.yaml"), "UTF-8");
-            return Response.ok().entity(definition).build();
+            if (openAPIDef == null) {
+                synchronized (LOCK_STORE_OPENAPI_DEF) {
+                    if (openAPIDef == null) {
+                        String definition = IOUtils
+                                .toString(this.getClass().getResourceAsStream("/store-api.yaml"), "UTF-8");
+                        openAPIDef = new OAS2Parser().removeExamplesFromSwagger(definition);
+                    }
+                }
+            }
+            return Response.ok().entity(openAPIDef).build();
         } catch (IOException e) {
             String errorMessage = "Error while retrieving the swagger definition of the Store API";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
