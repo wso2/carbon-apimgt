@@ -5,8 +5,17 @@ import MenuItem from '@material-ui/core/MenuItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Checkbox from '@material-ui/core/Checkbox';
 import CircularProgress from '@material-ui/core/CircularProgress';
-
+import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
+import { makeStyles } from '@material-ui/core/styles';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+
+const useStyles = makeStyles(theme => ({
+    mandatoryStar: {
+        color: theme.palette.error.main,
+        marginLeft: theme.spacing(0.1),
+    },
+}));
 
 /**
  * Trottling Policies dropdown selector used in minimized API Create form
@@ -16,47 +25,63 @@ import API from 'AppData/api';
  */
 export default function SelectPolicies(props) {
     const {
-        onChange, policies: selectedPolicies, multiple, required, helperText, isAPIProduct,
+        onChange, policies: selectedPolicies, multiple, helperText, isAPIProduct, validate,
     } = props;
     const [policies, setPolicies] = useState({});
+    const classes = useStyles();
     useEffect(() => {
         API.policies('subscription').then(response => setPolicies(response.body));
     }, []);
-
+    const onClickAway = () => {
+        if (isAPIProduct) {
+            validate('policies', selectedPolicies);
+        }
+    };
     if (!policies.list) {
         return <CircularProgress />;
     } else {
         return (
-            <TextField
-                required={required}
-                fullWidth
-                id='itest-id-apipolicies-input'
-                select
-                label='Business plan(s)'
-                value={selectedPolicies}
-                name='policies'
-                onChange={onChange}
-                SelectProps={{
-                    multiple,
-                    renderValue: selected => (Array.isArray(selected) ? selected.join(', ') : selected),
-                }}
-                helperText={isAPIProduct ? helperText + 'API Product' : helperText + 'API'}
-                margin='normal'
-                variant='outlined'
-            >
-                {policies.list.map(policy => (
-                    <MenuItem
-                        dense
-                        disableGutters={multiple}
-                        id={policy.name}
-                        key={policy.name}
-                        value={policy.displayName}
-                    >
-                        {multiple && <Checkbox color='primary' checked={selectedPolicies.includes(policy.name)} />}
-                        <ListItemText primary={policy.displayName} secondary={policy.description} />
-                    </MenuItem>
-                ))}
-            </TextField>
+            <ClickAwayListener onClickAway={onClickAway}>
+                <TextField
+                    fullWidth
+                    select
+                    label={
+                        <React.Fragment>
+                            <FormattedMessage
+                                id='Apis.Create.Components.SelectPolicies.busimess.plans'
+                                defaultMessage='Business plan(s)'
+                            />
+                            {isAPIProduct && (<sup className={classes.mandatoryStar}>*</sup>)}
+                        </React.Fragment>
+                    }
+                    value={selectedPolicies}
+                    name='policies'
+                    onChange={onChange}
+                    SelectProps={{
+                        multiple,
+                        renderValue: selected => (Array.isArray(selected) ? selected.join(', ') : selected),
+                    }}
+                    helperText={isAPIProduct ? helperText + 'API Product' : helperText + 'API'}
+                    margin='normal'
+                    variant='outlined'
+                    InputProps={{
+                        id: 'itest-id-apipolicies-input',
+                    }}
+                >
+                    {policies.list.map(policy => (
+                        <MenuItem
+                            dense
+                            disableGutters={multiple}
+                            id={policy.name}
+                            key={policy.name}
+                            value={policy.displayName}
+                        >
+                            {multiple && <Checkbox color='primary' checked={selectedPolicies.includes(policy.name)} />}
+                            <ListItemText primary={policy.displayName} secondary={policy.description} />
+                        </MenuItem>
+                    ))}
+                </TextField>
+            </ClickAwayListener>
         );
     }
 }
@@ -68,3 +93,4 @@ SelectPolicies.defaultProps = {
     isAPIProduct: PropTypes.bool.isRequired,
     helperText: 'Select one or more throttling policies for the ',
 };
+

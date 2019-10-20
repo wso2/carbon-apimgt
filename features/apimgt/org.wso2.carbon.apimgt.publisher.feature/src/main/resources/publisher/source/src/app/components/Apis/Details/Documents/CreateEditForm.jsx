@@ -39,7 +39,6 @@ import Alert from 'AppComponents/Shared/Alert';
 const styles = theme => ({
     button: {
         marginLeft: theme.spacing.unit * 2,
-        textTransform: theme.custom.leftMenuTextStyle,
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
     contentWrapper: {
@@ -552,7 +551,7 @@ class CreateEditForm extends React.Component {
                                         'Apis.Details.Documents.CreateEditForm.document.create.type.other.document.' +
                                         'category'
                                     }
-                                    defaultMessage='Other Document Category *'
+                                    defaultMessage='Other Document Type *'
                                 />
                             }
                             helperText={
@@ -561,7 +560,7 @@ class CreateEditForm extends React.Component {
                                         'Apis.Details.Documents.CreateEditForm.document.create.type.other.document.' +
                                         'category.helper.text'
                                     }
-                                    defaultMessage='Provide the document category'
+                                    defaultMessage='Provide the document type'
                                 />
                             }
                             type='text'

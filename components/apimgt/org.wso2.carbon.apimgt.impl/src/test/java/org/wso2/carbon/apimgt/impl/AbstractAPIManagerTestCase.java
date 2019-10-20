@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -784,6 +785,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test
     public void testAddResourceFile() throws APIManagementException, RegistryException, IOException {
+        Identifier identifier = Mockito.mock(Identifier.class);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
         Resource resource = new ResourceImpl();
         Mockito.when(registry.newResource()).thenReturn(resource);
@@ -791,17 +793,17 @@ public class AbstractAPIManagerTestCase {
         String contentType = "sampleType";
         ResourceFile resourceFile = new ResourceFile(null, contentType);
         try {
-            abstractAPIManager.addResourceFile(resourcePath, resourceFile);
+            abstractAPIManager.addResourceFile(identifier, resourcePath, resourceFile);
             Assert.fail("Registry exception not thrown for error scenario");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Error while adding the resource to the registry"));
         }
         InputStream in = IOUtils.toInputStream("sample content", "UTF-8");
         resourceFile = new ResourceFile(in, contentType);
-        String returnedPath = abstractAPIManager.addResourceFile(resourcePath, resourceFile);
+        String returnedPath = abstractAPIManager.addResourceFile(identifier, resourcePath, resourceFile);
         Assert.assertTrue(returnedPath.contains(resourcePath) && returnedPath.contains("/t/"));
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN;
-        returnedPath = abstractAPIManager.addResourceFile(resourcePath, resourceFile);
+        returnedPath = abstractAPIManager.addResourceFile(identifier, resourcePath, resourceFile);
         Assert.assertTrue(returnedPath.contains(resourcePath) && !returnedPath.contains("/t/"));
 
     }
@@ -1827,16 +1829,19 @@ public class AbstractAPIManagerTestCase {
         resource.setContent(mediationPolicyContent);
         Mockito.when(registry.get("mediation1")).thenReturn(resource);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
+
+        Identifier identifier = Mockito.mock(Identifier.class);
         try {
-            abstractAPIManager.getApiSpecificMediationPolicy(parentCollectionPath, SAMPLE_RESOURCE_ID);
+            abstractAPIManager.getApiSpecificMediationPolicy(identifier, parentCollectionPath, SAMPLE_RESOURCE_ID);
             Assert.fail("Registry exception not thrown for error scenario");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Error while obtaining registry objects"));
         }
-        Assert.assertNull(abstractAPIManager.getApiSpecificMediationPolicy(parentCollectionPath, SAMPLE_RESOURCE_ID));
+        Assert.assertNull(
+                abstractAPIManager.getApiSpecificMediationPolicy(identifier, parentCollectionPath, SAMPLE_RESOURCE_ID));
         Assert.assertEquals(
-                abstractAPIManager.getApiSpecificMediationPolicy(parentCollectionPath, SAMPLE_RESOURCE_ID).getName(),
-                "default-endpoint");
+                abstractAPIManager.getApiSpecificMediationPolicy(identifier, parentCollectionPath, SAMPLE_RESOURCE_ID)
+                        .getName(), "default-endpoint");
         PowerMockito.mockStatic(IOUtils.class);
         PowerMockito.mockStatic(AXIOMUtil.class);
         PowerMockito.when(IOUtils.toString((InputStream) Mockito.any(), Mockito.anyString()))
@@ -1844,13 +1849,13 @@ public class AbstractAPIManagerTestCase {
         PowerMockito.when(AXIOMUtil.stringToOM(Mockito.anyString())).thenThrow(XMLStreamException.class);
 
         try {
-            abstractAPIManager.getApiSpecificMediationPolicy(parentCollectionPath, SAMPLE_RESOURCE_ID);
+            abstractAPIManager.getApiSpecificMediationPolicy(identifier, parentCollectionPath, SAMPLE_RESOURCE_ID);
             Assert.fail("IO exception not thrown for error scenario");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Error occurred while converting content stream into string"));
         }
         try {
-            abstractAPIManager.getApiSpecificMediationPolicy(parentCollectionPath, SAMPLE_RESOURCE_ID);
+            abstractAPIManager.getApiSpecificMediationPolicy(identifier, parentCollectionPath, SAMPLE_RESOURCE_ID);
             Assert.fail("XMLStream exception  not thrown for error scenario");
         } catch (APIManagementException e) {
             Assert.assertTrue(
@@ -1858,7 +1863,7 @@ public class AbstractAPIManagerTestCase {
         }
         resource.setContent(null);
         try {
-            abstractAPIManager.getApiSpecificMediationPolicy(parentCollectionPath, SAMPLE_RESOURCE_ID);
+            abstractAPIManager.getApiSpecificMediationPolicy(identifier, parentCollectionPath, SAMPLE_RESOURCE_ID);
             Assert.fail("Registry exception not thrown for error scenario");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Error occurred while accessing content stream of mediation"));
@@ -1868,17 +1873,20 @@ public class AbstractAPIManagerTestCase {
     @Test
     public void testDeleteApiSpecificMediationPolicy() throws RegistryException, APIManagementException {
         String resourcePath = "config/mediation/";
+        Identifier identifier = Mockito.mock(Identifier.class);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapperExtended(null, null, registry, null);
         Mockito.when(registry.resourceExists(Mockito.anyString())).thenReturn(true, false, true, false);
         Mockito.doThrow(RegistryException.class).doNothing().when(registry).delete(Mockito.anyString());
         try {
-            abstractAPIManager.deleteApiSpecificMediationPolicy(resourcePath, SAMPLE_RESOURCE_ID);
+            abstractAPIManager.deleteApiSpecificMediationPolicy(identifier, resourcePath, SAMPLE_RESOURCE_ID);
             Assert.fail("Registry exception not thrown for error scenario");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Failed to delete specific mediation policy"));
         }
-        Assert.assertFalse(abstractAPIManager.deleteApiSpecificMediationPolicy(resourcePath, SAMPLE_RESOURCE_ID));
-        Assert.assertTrue(abstractAPIManager.deleteApiSpecificMediationPolicy(resourcePath, SAMPLE_RESOURCE_ID));
+        Assert.assertFalse(
+                abstractAPIManager.deleteApiSpecificMediationPolicy(identifier, resourcePath, SAMPLE_RESOURCE_ID));
+        Assert.assertTrue(
+                abstractAPIManager.deleteApiSpecificMediationPolicy(identifier, resourcePath, SAMPLE_RESOURCE_ID));
     }
 
     @Test

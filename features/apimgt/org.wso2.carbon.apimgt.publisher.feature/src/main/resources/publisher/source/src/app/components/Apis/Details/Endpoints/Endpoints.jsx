@@ -110,12 +110,16 @@ function Endpoints(props) {
                 return { ...initState, endpointConfig: config };
             }
             case 'endpointSecurity': { // set endpoint security
-                return { ...initState, endpointSecurity: value };
+                const tmpSecurityInfo = cloneDeep(value);
+                if (value && tmpSecurityInfo.password === '**********') {
+                    tmpSecurityInfo.password = '';
+                }
+                return { ...initState, endpointSecurity: tmpSecurityInfo };
             }
             case 'endpoint_type': { // set endpoint type
                 const config = getEndpointTemplateByType(
-                    value,
-                    tmpEndpointConfig.endpoint_type === 'address',
+                    value.category,
+                    value.endpointType === 'address',
                     tmpEndpointConfig,
                 );
                 return { ...initState, endpointConfig: { ...config } };
@@ -177,7 +181,7 @@ function Endpoints(props) {
     const validate = (implementationType) => {
         const { endpointConfig, endpointSecurity } = apiObject;
         if (endpointSecurity) {
-            if (endpointSecurity.username === '' || endpointSecurity.password === '') {
+            if (endpointSecurity.username === '' || endpointSecurity.password === null) {
                 return {
                     isValid: false,
                     message: intl.formatMessage({
@@ -311,7 +315,7 @@ function Endpoints(props) {
                 <div className={classes.root}>
                     <Grid container spacing={16} className={classes.titleGrid}>
                         <Grid item>
-                            <Typography variant='h4' align='left' className={classes.titleWrapper}>
+                            <Typography variant='h4' align='left' gutterBottom>
                                 <FormattedMessage
                                     id='Apis.Details.Endpoints.Endpoints.endpoints.header'
                                     defaultMessage='Endpoints'

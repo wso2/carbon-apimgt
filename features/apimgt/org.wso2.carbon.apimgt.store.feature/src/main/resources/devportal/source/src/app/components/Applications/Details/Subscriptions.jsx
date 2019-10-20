@@ -196,7 +196,8 @@ class Subscriptions extends React.Component {
                 const { list } = response.obj;
                 const subscribedIds = this.getIdsOfSubscribedEntities();
                 const unsubscribedAPIList = list
-                    .filter(api => !subscribedIds.includes(api.id) && !api.advertiseInfo.advertised)
+                    .filter(api => (!subscribedIds.includes(api.id) && !api.advertiseInfo.advertised)
+                     && api.isSubscriptionAvailable)
                     .map((filteredApi) => {
                         return {
                             Id: filteredApi.id,
@@ -243,10 +244,18 @@ class Subscriptions extends React.Component {
                         defaultMessage: 'Error occurred during subscription',
                     }));
                 } else {
-                    Alert.info(intl.formatMessage({
-                        id: 'Applications.Details.Subscriptions.subscription.successful',
-                        defaultMessage: 'Subscription successful',
-                    }));
+                    if (response.body.status === 'ON_HOLD') {
+                        Alert.info(intl.formatMessage({
+                            defaultMessage: 'Your subscription request has been submitted and is now awaiting ' +
+                            'approval.',
+                            id: 'subscription.pending',
+                        }));
+                    } else {
+                        Alert.info(intl.formatMessage({
+                            id: 'Applications.Details.Subscriptions.subscription.successful',
+                            defaultMessage: 'Subscription successful',
+                        }));
+                    }
                     this.updateSubscriptions(applicationId);
                 }
             })

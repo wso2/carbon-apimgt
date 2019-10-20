@@ -102,10 +102,10 @@ const styles = theme => ({
     },
 });
 function LinkGenerator(props) {
-    return props.isAPIProduct ? (
-        <Link to={'/api-products/' + props.apiId + '/documents/' + props.docId + '/view'}>{props.docName}</Link>
+    return props.apiType === 'APIProduct' ? (
+        <Link to={'/api-products/' + props.apiId + '/documents/' + props.docId + '/details'}>{props.docName}</Link>
     ) : (
-        <Link to={'/apis/' + props.apiId + '/documents/' + props.docId + '/view'}>{props.docName}</Link>
+        <Link to={'/apis/' + props.apiId + '/documents/' + props.docId + '/details'}>{props.docName}</Link>
     );
 }
 class Listing extends React.Component {
@@ -272,6 +272,7 @@ class Listing extends React.Component {
                                                     docId={docId}
                                                     apiId={this.apiId}
                                                     getDocumentsList={this.getDocumentsList}
+                                                    api
                                                 />
                                             </td>
                                             <td>
@@ -281,6 +282,7 @@ class Listing extends React.Component {
                                                     apiId={this.apiId}
                                                     getDocumentsList={this.getDocumentsList}
                                                     apiType={api.apiType}
+                                                    api
                                                 />
                                             </td>
                                         </tr>
@@ -305,6 +307,7 @@ class Listing extends React.Component {
                                                     docId={docId}
                                                     apiId={this.apiId}
                                                     getDocumentsList={this.getDocumentsList}
+                                                    api
                                                 />
                                             </td>
                                             <td>
@@ -314,6 +317,7 @@ class Listing extends React.Component {
                                                     apiId={this.apiId}
                                                     getDocumentsList={this.getDocumentsList}
                                                     apiType={api.apiType}
+                                                    api
                                                 />
                                             </td>
                                         </tr>
@@ -339,6 +343,7 @@ class Listing extends React.Component {
                                                     docId={docId}
                                                     apiId={this.apiId}
                                                     getDocumentsList={this.getDocumentsList}
+                                                    api
                                                 />
                                             </td>
                                             <td>
@@ -348,6 +353,7 @@ class Listing extends React.Component {
                                                     apiId={this.apiId}
                                                     getDocumentsList={this.getDocumentsList}
                                                     apiType={api.apiType}
+                                                    api
                                                 />
                                             </td>
                                         </tr>
@@ -367,6 +373,7 @@ class Listing extends React.Component {
                                                     docId={docId}
                                                     apiId={this.apiId}
                                                     getDocumentsList={this.getDocumentsList}
+                                                    api
                                                 />
                                             </td>
                                             <td>
@@ -376,6 +383,7 @@ class Listing extends React.Component {
                                                     apiId={this.apiId}
                                                     getDocumentsList={this.getDocumentsList}
                                                     apiType={api.apiType}
+                                                    api
                                                 />
                                             </td>
                                         </tr>
@@ -403,20 +411,22 @@ class Listing extends React.Component {
                             defaultMessage='Documents'
                         />
                     </Typography>
-                    <ScopeValidation
-                        resourcePath={isAPIProduct ? resourcePath.API_PRODUCTS : resourcePath.API_CHANGE_LC}
-                        resourceMethod={resourceMethod.POST}
-                    >
-                        <Link to={url}>
-                            <Button size='small' className={classes.button}>
-                                <AddCircle className={classes.buttonIcon} />
-                                <FormattedMessage
-                                    id='Apis.Details.Documents.Listing.add.new.document.button'
-                                    defaultMessage='Add New Document'
-                                />
-                            </Button>
-                        </Link>
-                    </ScopeValidation>
+                    {docs && docs.length > 0 && (
+                        <ScopeValidation
+                            resourcePath={isAPIProduct ? resourcePath.API_PRODUCTS : resourcePath.API_CHANGE_LC}
+                            resourceMethod={resourceMethod.POST}
+                        >
+                            <Link to={!isRestricted(['apim:api_create'], api) && url}>
+                                <Button size='small' className={classes.button} disabled={isRestricted(['apim:api_create'], api)}>
+                                    <AddCircle className={classes.buttonIcon} />
+                                    <FormattedMessage
+                                        id='Apis.Details.Documents.Listing.add.new.document.button'
+                                        defaultMessage='Add New Document'
+                                    />
+                                </Button>
+                            </Link>
+                        </ScopeValidation>
+                    )}
                 </div>
                 <div className={classes.contentWrapper}>
                     {showAddDocs && (
@@ -449,8 +459,8 @@ class Listing extends React.Component {
                                     />
                                 </Typography>
                                 <div className={classes.actions}>
-                                    <Link to={url}>
-                                        <Button variant='contained' color='primary' className={classes.button}>
+                                    <Link to={!isRestricted(['apim:api_create'], api) && url}>
+                                        <Button variant='contained' color='primary' className={classes.button} disabled={isRestricted(['apim:api_create'], api)}>
                                             <FormattedMessage
                                                 id='Apis.Details.Documents.Listing.add.new.msg.button'
                                                 defaultMessage='Add New Document'

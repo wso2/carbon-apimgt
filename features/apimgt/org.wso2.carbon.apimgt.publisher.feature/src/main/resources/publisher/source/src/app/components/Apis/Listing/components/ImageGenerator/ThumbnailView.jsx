@@ -37,6 +37,7 @@ import Typography from '@material-ui/core/Typography';
 import EditIcon from '@material-ui/icons/Edit';
 import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
 import Dropzone from 'react-dropzone';
 import { SketchPicker } from 'react-color';
@@ -44,6 +45,7 @@ import Api from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import MaterialIcons from 'MaterialIcons';
 import Alert from 'AppComponents/Shared/Alert';
+import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import ImageGenerator from './ImageGenerator';
 import Background from './Background';
 
@@ -222,6 +224,7 @@ class ThumbnailView extends Component {
             colorUpdate: null,
             backgroundIndex: null,
             backgroundIndexUpdate: null,
+            uploading: false,
         };
         this.handleClick = this.handleClick.bind(this);
         this.handleClose = this.handleClose.bind(this);
@@ -231,33 +234,15 @@ class ThumbnailView extends Component {
      * Load required data for showing the thumbnail view
      */
     componentDidMount() {
-        const { api: { apiType, id, type } } = this.props;
-        if (type !== 'DOC') {
-            const promisedThumbnail = apiType === Api.CONSTS.APIProduct ? new APIProduct().getAPIProductThumbnail(id) :
-                new Api().getAPIThumbnail(id);
-
-            promisedThumbnail.then((response) => {
-                if (response && response.data) {
-                    if (response.headers['content-type'] === 'application/json') {
-                        const iconJson = JSON.parse(response.data);
-                        this.setState({
-                            selectedIcon: iconJson.key,
-                            selectedIconUpdate: iconJson.key,
-                            category: iconJson.category,
-                            color: iconJson.color,
-                            colorUpdate: iconJson.color,
-                            backgroundIndex: iconJson.backgroundIndex,
-                            backgroundIndexUpdate: iconJson.backgroundIndex,
-                        });
-                    } else if (response && response.data.size > 0) {
-                        const url = windowURL.createObjectURL(response.data);
-                        this.setState({ thumbnail: url });
-                    }
-                }
-            });
-        }
+        this.loadImage();
     }
 
+    componentDidUpdate(prevProps) {
+        // Typical usage (don't forget to compare props):
+        if (this.props.imageUpdate !== prevProps.imageUpdate) {
+            this.loadImage();
+        }
+    }
     /**
      * Clean up resource
      */
@@ -275,7 +260,43 @@ class ThumbnailView extends Component {
     onDrop(acceptedFile) {
         this.setState({ file: acceptedFile });
     }
+    /**
+     * Load the image from the backend and keeps in the component state
+     *
+     * @memberof ThumbnailView
+     */
+    loadImage() {
+        const {
+            api: { apiType, id, type },
+        } = this.props;
+        if (type !== 'DOC') {
+            const promisedThumbnail =
+                apiType === Api.CONSTS.APIProduct
+                    ? new APIProduct().getAPIProductThumbnail(id)
+                    : new Api().getAPIThumbnail(id);
 
+            promisedThumbnail.then((response) => {
+                if (response && response.data) {
+                    if (response.headers['content-type'] === 'application/json') {
+                        const iconJson = JSON.parse(response.data);
+                        this.setState({
+                            selectedIcon: iconJson.key,
+                            selectedIconUpdate: iconJson.key,
+                            category: iconJson.category,
+                            color: iconJson.color,
+                            colorUpdate: iconJson.color,
+                            backgroundIndex: iconJson.backgroundIndex,
+                            backgroundIndexUpdate: iconJson.backgroundIndex,
+                            thumbnail: null,
+                        });
+                    } else if (response && response.data.size > 0) {
+                        const url = windowURL.createObjectURL(response.data);
+                        this.setState({ thumbnail: url });
+                    }
+                }
+            });
+        }
+    }
     /**
      * @param {SyntheticEvent} e React event object
      */
@@ -327,10 +348,15 @@ class ThumbnailView extends Component {
      * @param {File} file new thumbnail image file
      */
     uploadThumbnail(selectedTab, apiId, file, intl) {
-        const { api: { apiType, id } } = this.props;
-        const promisedThumbnail = apiType === Api.CONSTS.APIProduct ?
-            new APIProduct().addAPIProductThumbnail(id, file) :
-            new Api().addAPIThumbnail(id, file);
+        this.setState({ uploading: true });
+        const {
+            api: { apiType, id },
+            setImageUpdate,
+        } = this.props;
+        const promisedThumbnail =
+            apiType === Api.CONSTS.APIProduct
+                ? new APIProduct().addAPIProductThumbnail(id, file)
+                : new Api().addAPIThumbnail(id, file);
 
         promisedThumbnail
             .then(() => {
@@ -349,6 +375,7 @@ class ThumbnailView extends Component {
                         backgroundIndex: this.state.backgroundIndexUpdate,
                     });
                 }
+                setImageUpdate();
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -358,6 +385,9 @@ class ThumbnailView extends Component {
                     id: 'Apis.Listing.components.ImageGenerator.ThumbnailView.thumbnail.upload.error',
                     defaultMessage: 'Error occurred while uploading new thumbnail. Please try again.',
                 }));
+            })
+            .finally(() => {
+                this.setState({ uploading: false });
             });
     }
 
@@ -393,13 +423,13 @@ class ThumbnailView extends Component {
     };
     saveDisableEnable() {
         const {
-            file, selectedTab, selectedIconUpdate, colorUpdate, backgroundIndexUpdate,
+            file, selectedTab, selectedIconUpdate, colorUpdate, backgroundIndexUpdate, uploading,
         } = this.state;
         if (selectedTab === 'upload') {
-            return !(file && file[0]); // If no files is uploaded retrun true
+            return !(file && file[0]) || uploading; // If no files is uploaded retrun true
         } else {
             // If one of them is selected we return false
-            return !(selectedIconUpdate || backgroundIndexUpdate || colorUpdate);
+            return !(selectedIconUpdate || backgroundIndexUpdate || colorUpdate) || uploading;
         }
     }
     /**
@@ -411,15 +441,23 @@ class ThumbnailView extends Component {
         } = this.props;
         const colorPairs = theme.custom.thumbnail.backgrounds;
         const {
-            file, thumbnail, selectedTab, selectedIcon, selectedIconUpdate, color,
-            colorUpdate, backgroundIndex, backgroundIndexUpdate,
+            file,
+            thumbnail,
+            selectedTab,
+            selectedIcon,
+            selectedIconUpdate,
+            color,
+            colorUpdate,
+            backgroundIndex,
+            backgroundIndexUpdate,
+            uploading,
         } = this.state;
         let { category } = this.state;
         if (!category) category = MaterialIcons.categories[0].name;
         let overviewPath = '';
         if (api.apiType) {
-            overviewPath = (api.apiType === Api.CONSTS.APIProduct) ?
-                `/api-products/${api.id}/overview` : `/apis/${api.id}/overview`;
+            overviewPath =
+                api.apiType === Api.CONSTS.APIProduct ? `/api-products/${api.id}/overview` : `/apis/${api.id}/overview`;
         } else {
             overviewPath = `/apis/${api.apiUUID}/documents/${api.id}/details`;
         }
@@ -490,18 +528,22 @@ class ThumbnailView extends Component {
                             <FormControlLabel
                                 value='design'
                                 control={<Radio color='primary' />}
-                                label={<FormattedMessage
-                                    id='Apis.Listing.components.ImageGenerator.ThumbnailView.design'
-                                    defaultMessage='Design'
-                                />}
+                                label={
+                                    <FormattedMessage
+                                        id='Apis.Listing.components.ImageGenerator.ThumbnailView.design'
+                                        defaultMessage='Design'
+                                    />
+                                }
                             />
                             <FormControlLabel
                                 value='upload'
                                 control={<Radio color='primary' />}
-                                label={<FormattedMessage
-                                    id='Apis.Listing.components.ImageGenerator.ThumbnailView.upload'
-                                    defaultMessage='Upload'
-                                />}
+                                label={
+                                    <FormattedMessage
+                                        id='Apis.Listing.components.ImageGenerator.ThumbnailView.upload'
+                                        defaultMessage='Upload'
+                                    />
+                                }
                             />
                         </RadioGroup>
                     </Paper>
@@ -571,8 +613,10 @@ class ThumbnailView extends Component {
                                     <div className={classes.subtitleWrapper}>
                                         <Typography component='p' variant='subtitle2' className={classes.subtitle}>
                                             <FormattedMessage
-                                                id={'Apis.Listing.components' +
-                                                '.ImageGenerator.ThumbnailView.select.category'}
+                                                id={
+                                                    'Apis.Listing.components' +
+                                                    '.ImageGenerator.ThumbnailView.select.category'
+                                                }
                                                 defaultMessage='Select Category'
                                             />
                                         </Typography>
@@ -602,8 +646,10 @@ class ThumbnailView extends Component {
                                     <div className={classes.subtitleWrapper}>
                                         <Typography component='p' variant='subtitle2' className={classes.subtitle}>
                                             <FormattedMessage
-                                                id={'Apis.Listing.components.ImageGenerator.ThumbnailView.select.' +
-                                                'color.for.the.icon'}
+                                                id={
+                                                    'Apis.Listing.components.ImageGenerator.ThumbnailView.select.' +
+                                                    'color.for.the.icon'
+                                                }
                                                 defaultMessage='Select a color for the icon'
                                             />
                                         </Typography>
@@ -615,8 +661,10 @@ class ThumbnailView extends Component {
                                     <div className={classes.subtitleWrapper}>
                                         <Typography component='p' variant='subtitle2' className={classes.subtitle}>
                                             <FormattedMessage
-                                                id={'Apis.Listing.components.ImageGenerator.' +
-                                                'ThumbnailView.select.background'}
+                                                id={
+                                                    'Apis.Listing.components.ImageGenerator.' +
+                                                    'ThumbnailView.select.background'
+                                                }
                                                 defaultMessage='Select a Background'
                                             />
                                         </Typography>
@@ -642,11 +690,39 @@ class ThumbnailView extends Component {
                             size='small'
                             onClick={this.handleClick('btnUploadAPIThumb', intl)}
                         >
-                            <FormattedMessage
-                                id='Apis.Listing.components.ImageGenerator.ThumbnailView.upload.btn'
-                                defaultMessage='Upload'
-                            />
+                            {selectedTab === 'design' && uploading && (
+                                <React.Fragment>
+                                    <FormattedMessage
+                                        id='Apis.Listing.components.ImageGenerator.ThumbnailView.saving.btn'
+                                        defaultMessage='Saving'
+                                    />
+                                    <CircularProgress size={16} />
+                                </React.Fragment>
+                            )}
+                            {selectedTab === 'design' && !uploading && (
+                                <FormattedMessage
+                                    id='Apis.Listing.components.ImageGenerator.ThumbnailView.save.btn'
+                                    defaultMessage='Save'
+                                />
+                            )}
+
+                            {selectedTab !== 'design' && uploading && (
+                                <React.Fragment>
+                                    <FormattedMessage
+                                        id='Apis.Listing.components.ImageGenerator.ThumbnailView.uploading.btn'
+                                        defaultMessage='Uploading'
+                                    />
+                                    <CircularProgress size={16} />
+                                </React.Fragment>
+                            )}
+                            {selectedTab !== 'design' && !uploading && (
+                                <FormattedMessage
+                                    id='Apis.Listing.components.ImageGenerator.ThumbnailView.upload.btn'
+                                    defaultMessage='Upload'
+                                />
+                            )}
                         </Button>
+
                         <Button variant='contained' size='small' onClick={this.handleClose}>
                             <FormattedMessage
                                 id='Apis.Listing.components.ImageGenerator.ThumbnailView.cancel.btn'
@@ -674,6 +750,8 @@ ThumbnailView.propTypes = {
     isEditable: PropTypes.bool,
     intl: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
+    imageUpdate: PropTypes.number.isRequired,
+    setImageUpdate: PropTypes.func.isRequired,
 };
 
-export default injectIntl(withStyles(styles, { withTheme: true })(ThumbnailView));
+export default injectIntl(withAPI(withStyles(styles, { withTheme: true })(ThumbnailView)));

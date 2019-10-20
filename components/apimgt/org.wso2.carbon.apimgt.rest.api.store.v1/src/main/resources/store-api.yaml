@@ -2299,6 +2299,7 @@ paths:
         - $ref: '#/parameters/applicationId-Q'
         - $ref: '#/parameters/apiType-Q'
         - $ref: '#/parameters/groupId'
+        - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/If-None-Match'
@@ -2349,6 +2350,7 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Subscription'
+        - $ref: '#/parameters/requestedTenant'
       tags:
         - Subscriptions
       responses:
@@ -2419,6 +2421,7 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Subscription'
+        - $ref: '#/parameters/requestedTenant'
       tags:
         - Subscriptions
       responses:
@@ -3704,6 +3707,9 @@ definitions:
         $ref: '#/definitions/AdvertiseInfo'
       businessInformation:
         $ref: '#/definitions/APIBusinessInformation'
+      isSubscriptionAvailable:
+        type: boolean
+        example: false
 
 #-----------------------------------------------------
 # The Standard API resource
@@ -3902,6 +3908,9 @@ definitions:
       advertiseInfo:
         description: The advertise info of the API
         $ref: '#/definitions/AdvertiseInfo'
+      isSubscriptionAvailable:
+        type: boolean
+        example: false
 
 #-----------------------------------------------------
 # The Label resource
@@ -4020,6 +4029,8 @@ definitions:
           Application created user
         type: string
         example: admin
+      hashEnabled:
+        type: boolean
 
 #-----------------------------------------------------
 # The Application Info resource
@@ -4886,7 +4897,12 @@ definitions:
           thumbnailUri:
             type: string
             example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
-
+          businessInformation:
+            $ref: '#/definitions/APIBusinessInformation'
+          avgRating:
+            type: string
+            description: Average rating of the API
+            example: 4.5
   DocumentSearchResult:
     title: Document Result
     allOf:

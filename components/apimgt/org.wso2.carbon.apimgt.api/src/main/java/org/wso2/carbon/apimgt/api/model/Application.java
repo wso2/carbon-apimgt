@@ -272,4 +272,8 @@ public class Application {
     public int getSubscriptionCount() {
         return subscriptionCount;
     }
+
+    public void updateSubscriber(Subscriber subscriber) {
+        this.subscriber = subscriber;
+    }
 }

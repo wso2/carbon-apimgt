@@ -53,10 +53,11 @@ public class LabelsApiServiceImpl extends LabelsApiService {
     public Response labelsLabelIdDelete(String labelId, String ifMatch, String ifUnmodifiedSince) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            apiAdmin.deleteLabel(labelId);
+            String user = RestApiUtil.getLoggedInUsername();
+            apiAdmin.deleteLabel(user, labelId);
             return Response.ok().build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while deleting API : " + labelId;
+            String errorMessage = "Error while deleting label : " + labelId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -102,7 +103,7 @@ public class LabelsApiServiceImpl extends LabelsApiService {
                     labelDTO.getId());
             return Response.created(location).entity(labelDTO).build();
         } catch (APIManagementException | URISyntaxException e) {
-            String errorMessage = "Error while adding new Label for API : "
+            String errorMessage = "Error while adding new a label to API : "
                     + body.getName() + "-" + e.getMessage() ;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
@@ -128,7 +129,7 @@ public class LabelsApiServiceImpl extends LabelsApiService {
                     labelDTO.getId());
             return Response.ok(location).entity(labelDTO).build();
         } catch (APIManagementException | URISyntaxException e) {
-            String errorMessage = "Error while updating Label : " + labelId;
+            String errorMessage = "Error while updating label : " + labelId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;

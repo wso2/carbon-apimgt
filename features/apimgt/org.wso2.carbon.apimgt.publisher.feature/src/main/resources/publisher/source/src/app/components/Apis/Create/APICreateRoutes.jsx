@@ -20,7 +20,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import { PageNotFound } from 'AppComponents/Base/Errors/index';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 
 import APICreateDefault from './Default/APICreateDefault';
 import APIProductCreateWrapper from './APIProduct/APIProductCreateWrapper';
@@ -54,7 +54,7 @@ function APICreateRoutes(props) {
                 <Route path='/apis/create/openapi' component={ApiCreateSwagger} />
                 <Route path='/apis/create/wsdl' component={ApiCreateWSDL} />
                 <Route path='/apis/create/ws' component={ApiCreateWebSocket} />
-                <Route component={PageNotFound} />
+                <Route component={ResourceNotFound} />
             </Switch>
         </main>
     );

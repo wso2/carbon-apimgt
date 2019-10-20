@@ -27,6 +27,8 @@ import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import Search from '@material-ui/icons/Search';
 import LastPageIcon from '@material-ui/icons/LastPage';
 import Paper from '@material-ui/core/Paper';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Grid from '@material-ui/core/Grid';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -35,7 +37,6 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Tooltip from '@material-ui/core/Tooltip';
-import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
 import PropTypes from 'prop-types';
 
@@ -273,7 +274,7 @@ class SubscriptionsTable extends Component {
         super(props);
         this.api = props.api;
         this.state = {
-            subscriptions: [],
+            subscriptions: null,
             totalSubscription: 0,
             page: 0,
             rowsPerPage: 5,
@@ -628,16 +629,17 @@ class SubscriptionsTable extends Component {
             subscriptions, page, rowsPerPage, totalSubscription, rowsPerPageOptions, emptyColumnHeight,
         } = this.state;
         const { classes, intl, api } = this.props;
+        if (!subscriptions) {
+            return (
+                <Grid container direction='row' justify='center' alignItems='center'>
+                    <Grid item>
+                        <CircularProgress />
+                    </Grid>
+                </Grid>
+            );
+        }
         return (
             <React.Fragment>
-                <div className={classes.titleWrapper}>
-                    <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        <FormattedMessage
-                            id='Apis.Details.Subscriptions.SubscriptionsTable.manage.subscriptions'
-                            defaultMessage='Manage Subscriptions'
-                        />
-                    </Typography>
-                </div>
                 <Paper>
                     <Tooltip
                         title={intl.formatMessage({

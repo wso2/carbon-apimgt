@@ -30,17 +30,20 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
 
 /**
- *
- * @param {*} order order
- * @param {*} orderBy orderby
- * @returns {Boolean}
+ * @inheritdoc
+ * @param {*} theme theme object
  */
-function getSorting(order, orderBy) {
-    return order === 'desc' ? (a, b) => (b[orderBy] < a[orderBy] ? -1 : 1)
-        : (a, b) => (a[orderBy] < b[orderBy] ? -1 : 1);
-}
+const styles = theme => ({
+    fullHeight: {
+        height: '100%',
+    },
+    tableRow: {
+        height: theme.spacing(5),
+    },
+});
 /**
  *
  *
@@ -69,10 +72,9 @@ class AppsTableContent extends Component {
      */
     render() {
         const {
-            apps, toggleDeleteConfirmation, page, rowsPerPage, order, orderBy,
+            apps, toggleDeleteConfirmation, classes, rowsPerPage,
         } = this.props;
         const { notFound } = this.state;
-        const emptyRowsPerPage = rowsPerPage - Math.min(rowsPerPage, apps.size - page * rowsPerPage);
         let appsTableData = [];
 
         if (apps) {
@@ -85,13 +87,11 @@ class AppsTableContent extends Component {
             return <ResourceNotFound />;
         }
         return (
-            <TableBody>
+            <TableBody className={classes.fullHeight}>
                 {appsTableData
-                    .sort(getSorting(order, orderBy))
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((app) => {
                         return (
-                            <TableRow key={app.applicationId}>
+                            <TableRow className={classes.tableRow} key={app.applicationId}>
                                 <TableCell align='left'>
                                     {app.status === this.APPLICATION_STATES.APPROVED ? (
                                         <Link to={'/applications/' + app.applicationId}>{app.name}</Link>
@@ -193,21 +193,17 @@ class AppsTableContent extends Component {
                             </TableRow>
                         );
                     })}
-                {emptyRowsPerPage > 0 && (
-                    <TableRow style={{ height: 49 * emptyRowsPerPage }}>
+                {apps.size < 8 && (
+                    <TableRow>
                         <TableCell colSpan={6} />
-                    </TableRow>
-                )}
+                    </TableRow>)}
             </TableBody>
         );
     }
 }
 AppsTableContent.propTypes = {
     toggleDeleteConfirmation: PropTypes.func.isRequired,
-    page: PropTypes.number.isRequired,
-    rowsPerPage: PropTypes.number.isRequired,
-    order: PropTypes.string.isRequired,
-    orderBy: PropTypes.string.isRequired,
     apps: PropTypes.instanceOf(Map).isRequired,
 };
-export default AppsTableContent;
+export default withStyles(styles)(AppsTableContent);
+

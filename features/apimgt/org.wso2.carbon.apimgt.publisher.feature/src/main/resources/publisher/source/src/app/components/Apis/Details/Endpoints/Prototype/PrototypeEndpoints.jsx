@@ -156,6 +156,7 @@ function PrototypeEndpoints(props) {
                                 category='prototyped'
                                 editEndpoint={editPrototypeEndpoint}
                                 setAdvancedConfigOpen={null}
+                                apiId={api.id}
                             />
                         </Paper>
                     }

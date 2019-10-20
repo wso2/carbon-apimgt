@@ -185,7 +185,14 @@ function EditMediationPolicy(props) {
             })
             .catch((errorResponse) => {
                 console.log(errorResponse);
-                Alert.error(JSON.stringify(errorResponse));
+                if (errorResponse.response.body.description !== null) {
+                    Alert.error(errorResponse.response.body.description);
+                } else {
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.MediationPolicies.Edit.AddMediationPolicy.error',
+                        defaultMessage: 'Error when adding mediation policy',
+                    }));
+                }
             });
     };
     /**
@@ -471,7 +478,12 @@ function EditMediationPolicy(props) {
                         defaultMessage='Cancel'
                     />
                 </Button>
-                <Button onClick={doneEditing} color='primary' variant='contained'>
+                <Button
+                    onClick={doneEditing}
+                    color='primary'
+                    variant='contained'
+                    disabled={provideBy === 'custom' && seqCustom && seqCustom.length === 0}
+                >
                     <FormattedMessage
                         id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.select.btn'
                         defaultMessage='Select'

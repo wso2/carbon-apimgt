@@ -291,13 +291,14 @@ public interface APIManager {
 
     /**
      * Associates the given icon image with the specified path.
-     *
+     * @param identifier ID representing the API
      * @param resourcePath a String representing the relative path of a resource.
      * @param resourceFile to be saved
      * @return a String URL pointing to the image that was added
      * @throws APIManagementException if an error occurs while adding the icon image
      */
-    String addResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException;
+    String addResourceFile(Identifier identifier, String resourcePath, ResourceFile resourceFile)
+            throws APIManagementException;
 
     /**
      * Retrieves the icon image associated with a particular API as a stream.
@@ -565,13 +566,13 @@ public interface APIManager {
 
     /**
      * Returns Registry resource matching given mediation policy identifier
-     *
+     * @param identifier ID representing the API
      * @param uuid         mediation policy identifier
      * @param resourcePath registry path to the API resource
      * @return Registry resource matches given identifier or null
      * @throws APIManagementException If fails to get the resource matching given identifier
      */
-    Resource getApiSpecificMediationResourceFromUuid(String uuid, String resourcePath)
+    Resource getApiSpecificMediationResourceFromUuid(Identifier identifier, String uuid, String resourcePath)
             throws APIManagementException;
 
     /**
@@ -594,12 +595,12 @@ public interface APIManager {
 
     /**
      * Returns API specific mediation policy specified by the identifier
-     *
+     * @param identifier ID representing the API
      * @param apiResourcePath   registry path to the API resource
      * @param mediationPolicyId mediation policy identifier
      * @return Mediation object of given identifier or null
      */
-    Mediation getApiSpecificMediationPolicy(String apiResourcePath, String mediationPolicyId)
+    Mediation getApiSpecificMediationPolicy(Identifier identifier, String apiResourcePath, String mediationPolicyId)
             throws APIManagementException;
 
     /**
@@ -609,7 +610,7 @@ public interface APIManager {
      * @param mediationPolicyId mediation policy identifier
      * @throws APIManagementException If failed to delete the given mediation policy
      */
-    Boolean deleteApiSpecificMediationPolicy(String apiResourcePath, String mediationPolicyId)
+    Boolean deleteApiSpecificMediationPolicy(Identifier identifier, String apiResourcePath, String mediationPolicyId)
             throws APIManagementException;
 
     /**
@@ -767,13 +768,14 @@ public interface APIManager {
 
     /**
      * Associates the given product resource with the specified path.
-     *
+     * @param identifier ID representing the API Product
      * @param resourcePath a String representing the relative path of a resource.
      * @param resourceFile to be saved
      * @return a String URL pointing to the image that was added
      * @throws APIManagementException if an error occurs while adding the icon image
      */
-    String addProductResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException;
+    String addProductResourceFile(APIProductIdentifier identifier, String resourcePath, ResourceFile resourceFile)
+            throws APIManagementException;
 
     /**
      * Get an api product documentation by artifact Id

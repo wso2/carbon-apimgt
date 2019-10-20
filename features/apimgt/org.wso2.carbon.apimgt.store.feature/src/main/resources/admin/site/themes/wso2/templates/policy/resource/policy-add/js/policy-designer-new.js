@@ -265,13 +265,18 @@ var validIPRange = function (startIP, endIP) {
     }
     var startIPBlocks = startIP.split(".");
     var endIPBlocks = endIP.split(".");
-
+    var startIp = 0;
+    var endIp = 0;
     for (var i = 0; i < 4; i++) {
-        if (startIPBlocks[i] >= endIPBlocks[i]) {
-            return false;
-        }
+        startIp = startIp + startIPBlocks[i]* Math.pow(256, 3-i);
     }
-    return true;
+    for (var i = 0; i < 4; i++) {
+        endIp = endIp + endIPBlocks[i] * Math.pow(256, 3-i);
+    }
+    if(startIp < endIp){
+        return true;
+    }
+    return false;
 };
 
 var onDateConditionChange = function (id, optionTextOb) {

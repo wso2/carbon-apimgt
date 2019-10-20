@@ -74,7 +74,7 @@ const lifecyclePending = (props) => {
                 <Box display='flex' mt={2}>
                     <Button
                         size='small'
-                        variant='outlined'
+                        variant='contained'
                         color='primary'
                         onClick={() => setOpen(true)}
                     >
@@ -110,7 +110,7 @@ const lifecyclePending = (props) => {
                     </Button>
                     <Button
                         size='small'
-                        variant='outlined'
+                        variant='text'
                         color='primary'
                         onClick={deleteTask}
                     >

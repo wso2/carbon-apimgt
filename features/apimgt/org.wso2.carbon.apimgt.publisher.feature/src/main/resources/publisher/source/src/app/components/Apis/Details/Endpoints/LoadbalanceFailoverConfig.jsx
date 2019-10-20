@@ -76,8 +76,9 @@ const styles = theme => ({
         marginTop: theme.spacing(2),
         marginBottom: theme.spacing(2),
     },
-    lpConfigWrapper: {
-        display: 'flex',
+    lbConfigBtn: {
+        position: 'relative',
+        top: '10px',
     },
     endpointName: {
         fontWeight: 600,
@@ -87,7 +88,7 @@ const styles = theme => ({
 const endpointTypes = [
     { key: 'none', value: 'None' },
     { key: 'failover', value: 'Failover' },
-    { key: 'load_balance', value: 'Loadbalanced' },
+    { key: 'load_balance', value: 'Load Balanced' },
 ];
 
 /**
@@ -103,6 +104,7 @@ function LoadbalanceFailoverConfig(props) {
         endpointsDispatcher,
         toggleAdvanceConfig,
         globalEpType,
+        handleEndpointCategorySelect,
     } = props;
     const { api } = useContext(APIContext);
     const [isConfigExpanded, setConfigExpand] = useState(false);
@@ -166,7 +168,7 @@ function LoadbalanceFailoverConfig(props) {
                 return (
                     <FormattedMessage
                         id='Apis.Details.Endpoints.LoadbalanceFailoverConfig.none.heading'
-                        defaultMessage='Nothing Configured'
+                        defaultMessage='Not Configured'
                     />
                 );
             case 'failover':
@@ -208,7 +210,7 @@ function LoadbalanceFailoverConfig(props) {
     const editEndpoint = () => {};
     const handleEndpointTypeSelect = (event) => {
         setEndpointType(event.target.value);
-        endpointsDispatcher({ action: 'endpoint_type', value: event.target.value });
+        handleEndpointCategorySelect(event);
     };
 
     return (
@@ -264,6 +266,7 @@ function LoadbalanceFailoverConfig(props) {
                                 </TextField>
                                 <div className={classes.lpConfigWrapper}>
                                     <IconButton
+                                        className={classes.lbConfigBtn}
                                         disabled={epConfig.endpoint_type !== 'load_balance'}
                                         aria-label='Delete'
                                         onClick={() => setLBConfigOpen(true)}
@@ -301,6 +304,7 @@ function LoadbalanceFailoverConfig(props) {
                                             editEndpoint={editEndpoint}
                                             setAdvancedConfigOpen={toggleAdvanceConfig}
                                             category='production_endpoints'
+                                            apiId={api.id}
                                         />
                                     </Grid>
                                     }
@@ -329,6 +333,7 @@ function LoadbalanceFailoverConfig(props) {
                                             editEndpoint={editEndpoint}
                                             setAdvancedConfigOpen={toggleAdvanceConfig}
                                             category='sandbox_endpoints'
+                                            apiId={api.id}
                                         />
                                     </Grid>
                                     }
@@ -369,6 +374,7 @@ LoadbalanceFailoverConfig.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     endpointsDispatcher: PropTypes.func.isRequired,
     toggleAdvanceConfig: PropTypes.func.isRequired,
+    handleEndpointCategorySelect: PropTypes.func.isRequired,
     globalEpType: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
 };

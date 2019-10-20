@@ -1,4 +1,3 @@
-const APP_CONTEXT = '/devportal';
 const Configurations = {
     themes: {
         light: {
@@ -39,14 +38,15 @@ const Configurations = {
                     border: 'solid 1px #cccccc',
                 },
                 appBar: {
-                    logo: '/devportal/site/public/images/logo.png',
+                    logo: '/devportal/site/public/images/logo-custom.svg',
+                    logoHeight: 40,
                     background: '#207bb0',
                     activeBackground: '#f62921',
                     showSearch: true,
                     drawerWidth: 200,
                 },
                 leftMenu: {
-                    position: 'vertical-left', // Sets the position of the left menu ( 'horizontal', 'vertical-left', 'vertical-right')
+                    position: 'horizontal', // Sets the position of the left menu ( 'horizontal', 'vertical-left', 'vertical-right')
                     style: 'no text', //  other values ('icon top', 'icon left', 'no icon', 'no text')
                     iconSize: 24,
                     leftMenuTextStyle: 'uppercase',
@@ -127,7 +127,7 @@ const Configurations = {
                 },
                 noApiImage: '/devportal/site/public/images/nodata.svg',
                 landingPage: {
-                    active: false,
+                    active: true,
                     carousel: {
                         active: true,
                         slides: [
@@ -196,19 +196,5 @@ const Configurations = {
                 tagGroupKey: '-group',
             },
         },
-    },
-    app: {
-        context: APP_CONTEXT,
-    },
-    grantTypes: {
-        authorization_code: 'Code',
-        implicit: 'Implicit',
-        refresh_token: 'Refresh Token',
-        password: 'Password',
-        'iwa:ntlm': 'IWA-NTLM',
-        client_credentials: 'Client Credentials',
-        'urn:ietf:params:oauth:grant-type:saml2-bearer': 'SAML2',
-        'urn:ietf:params:oauth:grant-type:jwt-bearer': 'JWT',
-        kerberos: 'Kerberos',
     },
 };

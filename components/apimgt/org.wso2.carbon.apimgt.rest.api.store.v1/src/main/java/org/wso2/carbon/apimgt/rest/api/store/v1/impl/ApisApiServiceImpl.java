@@ -455,7 +455,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdRatingsGet(String apiId, Integer limit, Integer offset, String xWSO2Tenant,
+    public Response apisApiIdRatingsGet(String id, Integer limit, Integer offset, String xWSO2Tenant,
             MessageContext messageContext) {
         //pre-processing
         //setting default limit and offset values if they are not set
@@ -469,7 +469,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(id, requestedTenantDomain);
 
             Identifier identifier;
             if (apiTypeWrapper.isAPIProduct()) {
@@ -488,20 +488,20 @@ public class ApisApiServiceImpl implements ApisApiService {
             for (int i = 0; i < array.size(); i++) {
                 JSONObject obj = (JSONObject) array.get(i);
                 RatingDTO ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
-                ratingDTO.setApiId(apiId);
+                ratingDTO.setApiId(id);
                 ratingDTOList.add(ratingDTO);
             }
             RatingListDTO ratingListDTO = APIMappingUtil.fromRatingListToDTO(ratingDTOList, offset, limit);
             ratingListDTO.setUserRating(userRating);
             ratingListDTO.setAvgRating(String.valueOf(avgRating));
-            APIMappingUtil.setRatingPaginationParams(ratingListDTO, apiId, offset, limit, ratingDTOList.size());
+            APIMappingUtil.setRatingPaginationParams(ratingListDTO, id, offset, limit, ratingDTOList.size());
             return Response.ok().entity(ratingListDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(
-                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API, apiId, e, log);
+                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API, id, e, log);
             } else {
-                RestApiUtil.handleInternalServerError("Error while retrieving ratings for API " + apiId, e, log);
+                RestApiUtil.handleInternalServerError("Error while retrieving ratings for API " + id, e, log);
             }
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
@@ -655,7 +655,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdUserRatingPut(String apiId, RatingDTO body, String xWSO2Tenant,
+    public Response apisApiIdUserRatingPut(String id, RatingDTO body, String xWSO2Tenant,
             MessageContext messageContext) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
@@ -667,58 +667,65 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
             //this will fail if user doesn't have access to the API or the API does not exist
-            API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
-            APIIdentifier apiIdentifier = api.getId();
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(id, requestedTenantDomain);
+
+            Identifier identifier;
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
+
             if (body != null) {
                 rating = body.getRating();
             }
             switch (rating) {
                 //Below case 0[Rate 0] - is to remove ratings from a user
                 case 0: {
-                    apiConsumer.rateAPI(apiIdentifier, APIRating.RATING_ZERO, username);
+                    apiConsumer.rateAPI(identifier, APIRating.RATING_ZERO, username);
                     break;
                 }
                 case 1: {
-                    apiConsumer.rateAPI(apiIdentifier, APIRating.RATING_ONE, username);
+                    apiConsumer.rateAPI(identifier, APIRating.RATING_ONE, username);
                     break;
                 }
                 case 2: {
-                    apiConsumer.rateAPI(apiIdentifier, APIRating.RATING_TWO, username);
+                    apiConsumer.rateAPI(identifier, APIRating.RATING_TWO, username);
                     break;
                 }
                 case 3: {
-                    apiConsumer.rateAPI(apiIdentifier, APIRating.RATING_THREE, username);
+                    apiConsumer.rateAPI(identifier, APIRating.RATING_THREE, username);
                     break;
                 }
                 case 4: {
-                    apiConsumer.rateAPI(apiIdentifier, APIRating.RATING_FOUR, username);
+                    apiConsumer.rateAPI(identifier, APIRating.RATING_FOUR, username);
                     break;
                 }
                 case 5: {
-                    apiConsumer.rateAPI(apiIdentifier, APIRating.RATING_FIVE, username);
+                    apiConsumer.rateAPI(identifier, APIRating.RATING_FIVE, username);
                     break;
                 }
                 default: {
                     throw new IllegalArgumentException("Can't handle " + rating);
                 }
             }
-            JSONObject obj = apiConsumer.getUserRatingInfo(apiIdentifier, username);
+            JSONObject obj = apiConsumer.getUserRatingInfo(identifier, username);
             RatingDTO ratingDTO = new RatingDTO();
             if (obj != null && !obj.isEmpty()) {
                 ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
-                ratingDTO.setApiId(apiId);
+                ratingDTO.setApiId(id);
             }
             return Response.ok().entity(ratingDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API, apiId, e, log);
+                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API, id, e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(
-                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API, apiId, e, log);
+                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API, id, e, log);
             } else {
                 RestApiUtil
-                        .handleInternalServerError("Error while adding/updating user rating for API " + apiId, e, log);
+                        .handleInternalServerError("Error while adding/updating user rating for API " + id, e, log);
             }
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
@@ -728,7 +735,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdUserRatingGet(String apiId, String xWSO2Tenant, String ifNoneMatch,
+    public Response apisApiIdUserRatingGet(String id, String xWSO2Tenant, String ifNoneMatch,
             MessageContext messageContext) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
@@ -739,24 +746,29 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
             //this will fail if user doesn't have access to the API or the API does not exist
-            API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
-            APIIdentifier apiIdentifier = api.getId();
-            JSONObject obj = apiConsumer.getUserRatingInfo(apiIdentifier, username);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(id, requestedTenantDomain);
+            Identifier identifier;
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
+            JSONObject obj = apiConsumer.getUserRatingInfo(identifier, username);
             RatingDTO ratingDTO = new RatingDTO();
             if (obj != null && !obj.isEmpty()) {
                 ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
-                ratingDTO.setApiId(apiId);
+                ratingDTO.setApiId(id);
             }
             return Response.ok().entity(ratingDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API, apiId, e, log);
+                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API, id, e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(
-                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API, apiId, e, log);
+                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API, id, e, log);
             } else {
-                RestApiUtil.handleInternalServerError("Error while retrieving user rating for API " + apiId, e, log);
+                RestApiUtil.handleInternalServerError("Error while retrieving user rating for API " + id, e, log);
             }
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
@@ -777,9 +789,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
             //this will fail if user doesn't have access to the API or the API does not exist
-            API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
-            APIIdentifier apiIdentifier = api.getId();
-            apiConsumer.removeAPIRating(apiIdentifier, username);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+
+            Identifier identifier;
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
+            apiConsumer.removeAPIRating(identifier, username);
             return Response.ok().build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {

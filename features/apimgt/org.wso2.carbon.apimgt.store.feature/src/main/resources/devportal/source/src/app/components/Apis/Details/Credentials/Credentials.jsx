@@ -29,6 +29,7 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Application from 'AppData/Application';
+import AuthManager from 'AppData/AuthManager';
 import SubscribeToApi from 'AppComponents/Shared/AppsAndKeys/SubscribeToApi';
 import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 import { ApiContext } from '../ApiContext';
@@ -183,11 +184,18 @@ class Credentials extends React.Component {
             apiType,
         )
             .then((response) => {
-                console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
-                Alert.info(intl.formatMessage({
-                    defaultMessage: 'Subscribed successfully',
-                    id: 'Apis.Details.Credentials.Credentials.subscribed.successfully',
-                }));
+                if (response.body.status === 'ON_HOLD') {
+                    Alert.info(intl.formatMessage({
+                        defaultMessage: 'Your subscription request has been submitted and is now awaiting approval.',
+                        id: 'subscription.pending',
+                    }));
+                } else {
+                    console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
+                    Alert.info(intl.formatMessage({
+                        defaultMessage: 'Subscribed successfully',
+                        id: 'Apis.Details.Credentials.Credentials.subscribed.successfully',
+                    }));
+                }
                 if (updateSubscriptionData) updateSubscriptionData(this.updateData);
             })
             .catch((error) => {
@@ -271,6 +279,7 @@ class Credentials extends React.Component {
             throttlingPolicyList,
             applicationOwner,
         } = this.state;
+        const user = AuthManager.getUser();
         return (
             <Grid container>
                 <Grid item md={12} lg={11}>
@@ -288,7 +297,7 @@ class Credentials extends React.Component {
                                         id='Apis.Details.Credentials.Credentials.'
                                         defaultMessage={`API Credentials are grouped in to applications. An application 
                                         is primarily used to decouple the consumer from the APIs. It allows you to 
-                                        Generate and use a single key for multiple APIs and subscribe multiple times to 
+                                        generate and use a single key for multiple APIs and subscribe multiple times to 
                                         a single API with different SLA levels.`}
                                     />
                                 </Typography>
@@ -297,15 +306,20 @@ class Credentials extends React.Component {
                                     <GenericDisplayDialog
                                         classes={classes}
                                         handleClick={this.goToWizard}
-                                        heading={intl.formatMessage({
+                                        heading={user ? intl.formatMessage({
                                             defaultMessage: 'Generate Credentials',
                                             id: 'Apis.Details.Credentials.Credentials.generate.credentials',
-                                        })}
+                                        }) :
+                                            intl.formatMessage({
+                                                defaultMessage: 'Sign In to Generate Credentials',
+                                                id: 'Apis.Details.Credentials.Credentials.generate.credentials',
+                                            })
+                                        }
                                         caption={intl.formatMessage({
                                             defaultMessage: 'You need to generate credentials to access this API',
                                             id:
-                                                    'Apis.Details.Credentials.Credentials.you.need.to'
-                                                    + '.generate.credentials.to.access.this.api',
+                                                'Apis.Details.Credentials.Credentials.you.need.to'
+                                                + '.generate.credentials.to.access.this.api',
                                         })}
                                         buttonText={intl.formatMessage({
                                             defaultMessage: 'GENERATE',
@@ -322,7 +336,7 @@ class Credentials extends React.Component {
                                                 <Typography variant='h5'>
                                                     <FormattedMessage
                                                         id={'Apis.Details.Credentials.Credentials'
-                                                        + '.api.credentials.generate'}
+                                                            + '.api.credentials.generate'}
                                                         defaultMessage='Generate Credentials'
                                                     />
                                                 </Typography>
@@ -331,7 +345,7 @@ class Credentials extends React.Component {
                                                         <Typography variant='body2'>
                                                             <FormattedMessage
                                                                 id={'Apis.Details.Credentials.Credentials.'
-                                                                + 'api.credentials.with.wizard.message'}
+                                                                    + 'api.credentials.with.wizard.message'}
                                                                 defaultMessage={
                                                                     'Use the Key Generation Wizard. '
                                                                     + 'Create a new application -> '
@@ -340,16 +354,21 @@ class Credentials extends React.Component {
                                                                 }
                                                             />
                                                         </Typography>
-                                                        <Link to={`/apis/${api.id}/credentials/wizard`}>
+                                                        <Link
+                                                            to={`/apis/${api.id}/credentials/wizard`}
+                                                            style={!api.isSubscriptionAvailable ?
+                                                                { pointerEvents: 'none' } : null}
+                                                        >
                                                             <Button
                                                                 variant='contained'
                                                                 color='primary'
                                                                 className={classes.buttonElm}
+                                                                disabled={!api.isSubscriptionAvailable}
                                                             >
                                                                 <FormattedMessage
                                                                     id={'Apis.Details.Credentials.' +
-                                                                'SubscibeButtonPanel.subscribe.wizard'}
-                                                                    defaultMessage='Wizard'
+                                                                        'SubscibeButtonPanel.subscribe.wizard.with.new.app'}
+                                                                    defaultMessage='Subscribe with a new application'
                                                                 />
                                                             </Button>
                                                         </Link>
@@ -359,9 +378,9 @@ class Credentials extends React.Component {
                                                             <Typography variant='body2'>
                                                                 <FormattedMessage
                                                                     id={'Apis.Details.Credentials.Credentials' +
-                                                                    '.api.credentials.with.subscribe.message'}
+                                                                        '.api.credentials.with.subscribe.message'}
                                                                     defaultMessage={'Subscribe to an application' +
-                                                                    ' and generate credentials'}
+                                                                        ' and generate credentials'}
                                                                 />
                                                             </Typography>
                                                             <SubscribeToApi
@@ -378,10 +397,11 @@ class Credentials extends React.Component {
                                                                 color='primary'
                                                                 className={classes.buttonElm}
                                                                 onClick={() => this.handleSubscribe()}
+                                                                disabled={!api.isSubscriptionAvailable}
                                                             >
                                                                 <FormattedMessage
                                                                     id={'Apis.Details.Credentials.'
-                                                                    + 'SubscibeButtonPanel.subscribe.btn'}
+                                                                        + 'SubscibeButtonPanel.subscribe.btn'}
                                                                     defaultMessage='Subscribe'
                                                                 />
                                                             </Button>
@@ -391,23 +411,23 @@ class Credentials extends React.Component {
                                             </ScopeValidation>
                                         </div>
                                         {/*
-                                        ****************************
-                                        Subscription List
-                                        ***************************
-                                        */}
+                                    ****************************
+                                    Subscription List
+                                    ***************************
+                                    */}
                                         {subscribedApplications && subscribedApplications.length > 0 && (
                                             <React.Fragment>
                                                 <Typography variant='h5'>
                                                     <FormattedMessage
                                                         id={'Apis.Details.Credentials.Credentials.' +
-                                                        'api.credentials.subscribed.apps.title'}
+                                                            'api.credentials.subscribed.apps.title'}
                                                         defaultMessage='View Credentials'
                                                     />
                                                 </Typography>
                                                 <Typography variant='body2'>
                                                     <FormattedMessage
                                                         id={'Apis.Details.Credentials.Credentials.' +
-                                                        'api.credentials.subscribed.apps.description'}
+                                                            'api.credentials.subscribed.apps.description'}
                                                         defaultMessage='( Subscribed Applications )'
                                                     />
                                                 </Typography>
@@ -416,21 +436,21 @@ class Credentials extends React.Component {
                                                         <th className={classes.th}>
                                                             <FormattedMessage
                                                                 id={'Apis.Details.Credentials.Credentials.' +
-                                                                'api.credentials.subscribed.apps.name'}
+                                                                    'api.credentials.subscribed.apps.name'}
                                                                 defaultMessage='Application Name'
                                                             />
                                                         </th>
                                                         <th className={classes.th}>
                                                             <FormattedMessage
                                                                 id={'Apis.Details.Credentials.Credentials.api.' +
-                                                                'credentials.subscribed.apps.tier'}
+                                                                    'credentials.subscribed.apps.tier'}
                                                                 defaultMessage='Throttling Tier'
                                                             />
                                                         </th>
                                                         <th className={classes.th}>
                                                             <FormattedMessage
                                                                 id={'Apis.Details.Credentials.Credentials.' +
-                                                                'api.credentials.subscribed.apps.status'}
+                                                                    'api.credentials.subscribed.apps.status'}
                                                                 defaultMessage='Application Status'
                                                             />
                                                         </th>

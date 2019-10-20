@@ -66,7 +66,10 @@ const useStyles = makeStyles(theme => ({
  */
 export default function CORSConfiguration(props) {
     const [apiFromContext] = useAPI();
-    const { configDispatcher, api: { corsConfiguration } } = props;
+    const {
+        configDispatcher,
+        api: { corsConfiguration },
+    } = props;
     const isCorsEnabled = corsConfiguration.corsConfigurationEnabled;
     const isAllowAllOrigins =
         corsConfiguration.accessControlAllowOrigins[0] === '*' &&
@@ -74,244 +77,251 @@ export default function CORSConfiguration(props) {
     const classes = useStyles();
 
     return (
-        <React.Fragment>
-            <ExpansionPanel className={classes.expansionPanel}>
-                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography className={classes.subHeading} variant='h6'>
-                        <FormattedMessage
-                            id='Apis.Details.Configuration.components.CORSConfiguration.cors.configuration'
-                            defaultMessage='CORS Configuration'
-                        />
-                        <Tooltip
-                            title={
-                                <FormattedMessage
-                                    id='Apis.Details.Configuration.components.CORSConfiguration.tooltip'
-                                    defaultMessage='If enabled, the CORS configuration for the API will be enabled.'
-                                />
-                            }
-                            aria-label='Response cache'
-                            placement='right-end'
-                            interactive
-                        >
-                            <HelpOutline className={classes.iconSpace} />
-                        </Tooltip>
-                    </Typography>
-                    <FormControlLabel
-                        className={classes.actionSpace}
-                        control={
-                            <Switch
-                                disabled={isRestricted(['apim:api_create'], apiFromContext)}
-                                checked={corsConfiguration.corsConfigurationEnabled}
-                                onChange={({ target: { checked } }) => configDispatcher({
+        <ExpansionPanel className={classes.expansionPanel}>
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography className={classes.subHeading} variant='h6'>
+                    <FormattedMessage
+                        id='Apis.Details.Configuration.components.CORSConfiguration.cors.configuration'
+                        defaultMessage='CORS Configuration'
+                    />
+                    <Tooltip
+                        title={
+                            <FormattedMessage
+                                id='Apis.Details.Configuration.components.CORSConfiguration.tooltip'
+                                defaultMessage='If enabled, the CORS configuration for the API will be enabled.'
+                            />
+                        }
+                        aria-label='Response cache'
+                        placement='right-end'
+                        interactive
+                    >
+                        <HelpOutline className={classes.iconSpace} />
+                    </Tooltip>
+                </Typography>
+                <FormControlLabel
+                    className={classes.actionSpace}
+                    control={
+                        <Switch
+                            disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                            checked={corsConfiguration.corsConfigurationEnabled}
+                            onChange={({ target: { checked } }) =>
+                                configDispatcher({
                                     action: 'corsConfigurationEnabled',
                                     value: checked,
                                 })
-                                }
-                                color='primary'
-                            />
-                        }
-                    />
-                </ExpansionPanelSummary>
-                <ExpansionPanelDetails className={classes.expansionPanelDetails}>
-                    <Grid container>
-                        <Grid item md={12}>
-                            {isCorsEnabled && (
-                                <Grid container>
-                                    <Grid item md={12}>
-                                        <Typography variant='subtitle1'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Configuration.components.CORSConfiguration.allow.
+                            }
+                            color='primary'
+                        />
+                    }
+                />
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails className={classes.expansionPanelDetails}>
+                <Grid container>
+                    <Grid item md={12}>
+                        {isCorsEnabled && (
+                            <Grid container>
+                                <Grid item md={12}>
+                                    <Typography variant='subtitle1'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Configuration.components.CORSConfiguration.allow.
                                                     origins'
-                                                defaultMessage='Access Control Allow Origins'
+                                            defaultMessage='Access Control Allow Origins'
+                                        />
+                                    </Typography>
+                                </Grid>
+                                <Grid item md={12}>
+                                    <Grid container>
+                                        <Grid item md={12}>
+                                            <FormControlLabel
+                                                style={{ display: 'flex' }}
+                                                control={
+                                                    <Checkbox
+                                                        disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                                                        checked={isAllowAllOrigins}
+                                                        onChange={({ target: { checked, value } }) =>
+                                                            configDispatcher({
+                                                                action: 'accessControlAllowOrigins',
+                                                                event: { checked, value },
+                                                            })
+                                                        }
+                                                        value='*'
+                                                        color='primary'
+                                                    />
+                                                }
+                                                label='Allow All Origins'
                                             />
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item md={12}>
-                                        <Grid container>
+                                        </Grid>
+                                        {!isAllowAllOrigins && (
                                             <Grid item md={12}>
-                                                <FormControlLabel
-                                                    style={{ display: 'flex' }}
-                                                    control={
-                                                        <Checkbox
-                                                            disabled={isRestricted(['apim:api_create'], apiFromContext)}
-                                                            checked={isAllowAllOrigins}
-                                                            onChange={({ target: { checked, value } }) =>
-                                                                configDispatcher({
-                                                                    action: 'accessControlAllowOrigins',
-                                                                    event: { checked, value },
-                                                                })
+                                                <ChipInput
+                                                    style={{ marginBottom: 40, display: 'flex' }}
+                                                    value={corsConfiguration.accessControlAllowOrigins}
+                                                    helperText={
+                                                        <FormattedMessage
+                                                            id={
+                                                                'Apis.Details.Configuration.components' +
+                                                                '.CORSConfigurations.origin.helper'
                                                             }
-                                                            value='*'
-                                                            color='primary'
+                                                            defaultMessage={
+                                                                'Press `enter` after typing the origin name,' +
+                                                                'To add a new origin'
+                                                            }
                                                         />
                                                     }
-                                                    label='Allow All Origins'
+                                                    onAdd={(accessControlAllowOrigin) => {
+                                                        configDispatcher({
+                                                            action: 'accessControlAllowOrigins',
+                                                            event: {
+                                                                value: [
+                                                                    ...corsConfiguration.accessControlAllowOrigins,
+                                                                    accessControlAllowOrigin,
+                                                                ],
+                                                            },
+                                                        });
+                                                    }}
+                                                    onDelete={(accessControlAllowOrigin) => {
+                                                        configDispatcher({
+                                                            action: 'accessControlAllowOrigins',
+                                                            event: {
+                                                                value: corsConfiguration
+                                                                    .accessControlAllowOrigins
+                                                                    .filter(oldOrigin =>
+                                                                        oldOrigin !== accessControlAllowOrigin),
+                                                            },
+                                                        });
+                                                    }}
                                                 />
                                             </Grid>
-                                            {!isAllowAllOrigins && (
-                                                <Grid item md={12}>
-                                                    <ChipInput
-                                                        style={{ marginBottom: 40, display: 'flex' }}
-                                                        value={corsConfiguration.accessControlAllowOrigins}
-                                                        helperText={
-                                                            <FormattedMessage
-                                                                id={
-                                                                    'Apis.Details.Configuration.components'
-                                                                    + '.CORSConfigurations.origin.helper'
-                                                                }
-                                                                defaultMessage={
-                                                                    'Press `enter` after typing the origin name,'
-                                                                    + 'To add a new origin'
-                                                                }
-                                                            />
-                                                        }
-                                                        onAdd={(accessControlAllowOrigin) => {
-                                                            configDispatcher({
-                                                                action: 'accessControlAllowOrigins',
-                                                                event: {
-                                                                    value: [
-                                                                        ...corsConfiguration.accessControlAllowOrigins,
-                                                                        accessControlAllowOrigin,
-                                                                    ],
-                                                                },
-                                                            });
-                                                        }}
-                                                        onDelete={(accessControlAllowOrigin) => {
-                                                            configDispatcher({
-                                                                action: 'accessControlAllowOrigins',
-                                                                event: {
-                                                                    value: corsConfiguration.accessControlAllowOrigins
-                                                                        .filter(oldOrigin => oldOrigin
-                                                                            !== accessControlAllowOrigin),
-                                                                },
-                                                            });
-                                                        }}
-                                                    />
-                                                </Grid>
-                                            )}
-                                        </Grid>
-                                    </Grid>
-                                    <Grid item md={12}>
-                                        <Typography variant='subtitle1'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Configuration.components.CORSConfiguration.allow.
-                                                    headers'
-                                                defaultMessage='Access Control Allow Headers'
-                                            />
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item md={12}>
-                                        <ChipInput
-                                            style={{ marginBottom: 40, display: 'flex' }}
-                                            value={corsConfiguration.accessControlAllowHeaders}
-                                            disabled={isRestricted(['apim:api_create'], apiFromContext)}
-                                            helperText={
-                                                <FormattedMessage
-                                                    id={
-                                                        'Apis.Details.Configuration.components.'
-                                                        + 'CORSConfigurations.header.helper'
-                                                    }
-                                                    defaultMessage={
-                                                        'Press `enter` after typing the header name, '
-                                                        + 'To add a new header'
-                                                    }
-                                                />
-                                            }
-                                            onAdd={(accessControlAllowHeader) => {
-                                                configDispatcher({
-                                                    action: 'accessControlAllowHeaders',
-                                                    value: [
-                                                        ...corsConfiguration.accessControlAllowHeaders,
-                                                        accessControlAllowHeader,
-                                                    ],
-                                                });
-                                            }}
-                                            onDelete={(accessControlAllowHeader) => {
-                                                configDispatcher({
-                                                    action: 'accessControlAllowHeaders',
-                                                    value: corsConfiguration.accessControlAllowHeaders
-                                                        .filter(oldHeader => oldHeader !== accessControlAllowHeader),
-                                                });
-                                            }}
-                                        />
-                                    </Grid>
-                                    <Grid item md={12}>
-                                        <Typography variant='subtitle1'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Configuration.components.CORSConfiguration.allow.
-                                                    methods'
-                                                defaultMessage='Access Control Allow Methods'
-                                            />
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item md={12}>
-                                        <ChipInput
-                                            style={{ marginBottom: 40, display: 'flex' }}
-                                            value={corsConfiguration.accessControlAllowMethods}
-                                            disabled={isRestricted(['apim:api_create'], apiFromContext)}
-                                            helperText={
-                                                <FormattedMessage
-                                                    id={
-                                                        'Apis.Details.Configuration.components'
-                                                        + '.CORSConfigurations.method.helper'
-                                                    }
-                                                    defaultMessage={
-                                                        'Press `enter` after typing the method name,'
-                                                        + ' To add a new method'
-                                                    }
-                                                />
-                                            }
-                                            onAdd={(accessControlAllowMethod) => {
-                                                configDispatcher({
-                                                    action: 'accessControlAllowMethods',
-                                                    value: [
-                                                        ...corsConfiguration.accessControlAllowMethods,
-                                                        accessControlAllowMethod,
-                                                    ],
-                                                });
-                                            }}
-                                            onDelete={(accessControlAllowMethod) => {
-                                                configDispatcher({
-                                                    action: 'accessControlAllowMethods',
-                                                    value: corsConfiguration.accessControlAllowMethods
-                                                        .filter(oldMethod => oldMethod !== accessControlAllowMethod),
-                                                });
-                                            }}
-                                        />
-                                    </Grid>
-                                    <Grid item>
-                                        <FormControlLabel
-                                            control={
-                                                <Checkbox
-                                                    disabled={isRestricted(['apim:api_create'], apiFromContext)}
-                                                    checked={corsConfiguration.accessControlAllowCredentials}
-                                                    onChange={({ target: { checked } }) =>
-                                                        configDispatcher({
-                                                            action: 'accessControlAllowCredentials',
-                                                            value: checked,
-                                                        })
-                                                    }
-                                                    color='primary'
-                                                />
-                                            }
-                                            label={
-                                                <FormattedMessage
-                                                    id={
-                                                        'Apis.Details.Configuration.components'
-                                                        + '.CORSConfiguration.allow.credentials'
-                                                    }
-                                                    defaultMessage='Access Control Allow Credentials'
-                                                />
-                                            }
-                                        />
+                                        )}
                                     </Grid>
                                 </Grid>
-                            )}
-                        </Grid>
+                                <Grid item md={12}>
+                                    <Typography variant='subtitle1'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Configuration.components.CORSConfiguration.allow.
+                                                    headers'
+                                            defaultMessage='Access Control Allow Headers'
+                                        />
+                                    </Typography>
+                                </Grid>
+                                <Grid item md={12}>
+                                    <ChipInput
+                                        style={{ marginBottom: 40, display: 'flex' }}
+                                        value={corsConfiguration.accessControlAllowHeaders}
+                                        disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                                        helperText={
+                                            <FormattedMessage
+                                                id={
+                                                    'Apis.Details.Configuration.components.' +
+                                                    'CORSConfigurations.header.helper'
+                                                }
+                                                defaultMessage={
+                                                    'Press `enter` after typing the header name, ' +
+                                                    'To add a new header'
+                                                }
+                                            />
+                                        }
+                                        onAdd={(accessControlAllowHeader) => {
+                                            configDispatcher({
+                                                action: 'accessControlAllowHeaders',
+                                                value: [
+                                                    ...corsConfiguration.accessControlAllowHeaders,
+                                                    accessControlAllowHeader,
+                                                ],
+                                            });
+                                        }}
+                                        onDelete={(accessControlAllowHeader) => {
+                                            configDispatcher({
+                                                action: 'accessControlAllowHeaders',
+                                                value: corsConfiguration.accessControlAllowHeaders
+                                                    .filter(oldHeader => oldHeader !== accessControlAllowHeader),
+                                            });
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item md={12}>
+                                    <Typography variant='subtitle1'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Configuration.components.CORSConfiguration.allow.
+                                                    methods'
+                                            defaultMessage='Access Control Allow Methods'
+                                        />
+                                    </Typography>
+                                </Grid>
+                                <Grid item md={12}>
+                                    <ChipInput
+                                        style={{ marginBottom: 40, display: 'flex' }}
+                                        value={corsConfiguration.accessControlAllowMethods}
+                                        disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                                        helperText={
+                                            <FormattedMessage
+                                                id={
+                                                    'Apis.Details.Configuration.components' +
+                                                    '.CORSConfigurations.method.helper'
+                                                }
+                                                defaultMessage={
+                                                    'Press `enter` after typing the method name,' +
+                                                    ' To add a new method'
+                                                }
+                                            />
+                                        }
+                                        onAdd={(newValue) => {
+                                            let value = [...corsConfiguration.accessControlAllowMethods,
+                                                newValue.toUpperCase()];
+                                            if (
+                                                corsConfiguration
+                                                    .accessControlAllowMethods
+                                                    .find(method => method === newValue.toUpperCase())
+                                            ) {
+                                                value = [...corsConfiguration.accessControlAllowMethods];
+                                            }
+                                            configDispatcher({
+                                                action: 'accessControlAllowMethods',
+                                                value,
+                                            });
+                                        }}
+                                        onDelete={(accessControlAllowMethod) => {
+                                            configDispatcher({
+                                                action: 'accessControlAllowMethods',
+                                                value: corsConfiguration
+                                                    .accessControlAllowMethods
+                                                    .filter(oldMethod => oldMethod !== accessControlAllowMethod),
+                                            });
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                                                checked={corsConfiguration.accessControlAllowCredentials}
+                                                onChange={({ target: { checked } }) =>
+                                                    configDispatcher({
+                                                        action: 'accessControlAllowCredentials',
+                                                        value: checked,
+                                                    })
+                                                }
+                                                color='primary'
+                                            />
+                                        }
+                                        label={
+                                            <FormattedMessage
+                                                id={
+                                                    'Apis.Details.Configuration.components' +
+                                                    '.CORSConfiguration.allow.credentials'
+                                                }
+                                                defaultMessage='Access Control Allow Credentials'
+                                            />
+                                        }
+                                    />
+                                </Grid>
+                            </Grid>
+                        )}
                     </Grid>
-                </ExpansionPanelDetails>
-            </ExpansionPanel>
-        </React.Fragment>
+                </Grid>
+            </ExpansionPanelDetails>
+        </ExpansionPanel>
     );
 }
 

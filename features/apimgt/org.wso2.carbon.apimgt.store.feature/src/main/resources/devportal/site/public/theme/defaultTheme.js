@@ -1,4 +1,3 @@
-const APP_CONTEXT = '/devportal';
 const Configurations = {
     themes: {
         light: {
@@ -71,6 +70,7 @@ const Configurations = {
                     iconOddColor: '#347eff',
                     iconEvenColor: '#89b4ff',
                     listGridSelectedColor: '#347eff', // Defines color of the selected icon ( grid/ list ) view of the api listing page
+                    tagChipBackground: '#7dd7f5',
                 },
                 listView: {
                     tableHeadBackground: '#fff',
@@ -191,27 +191,29 @@ const Configurations = {
                         ],
                     },
                 },
-                tagWiseMode: false,
-                tagThumbnail: {
-                    width: 150,
-                    defaultTagImage: '/devportal/site/public/images/api/api-default.png',
+                tagWise: {
+                    active: false,
+                    style: 'fixed-left', // If 'page' it will show a different page. Else if 'fixed-left' will show a fixed menu with all the group tags on the left.
+                    thumbnail: { // These params will be applyed only if the style is 'page'
+                        width: 150,
+                        image: '/devportal/site/public/images/api/api-default.png',
+                    },
+                    fixedStyles: { // These params will be applyed only if the style is 'fixed-left'
+                        width: 200,
+                        background: 'rgba(255,255,255,100)',
+                        hasIcon: false,
+                    },
+                    key: '-group',
+                    showAllApis: true,
                 },
-                tagGroupKey: '-group',
+                tagCloud: {
+                    active: true,
+                    colorOptions: { // This is the Options object passed to TagCloud component of https://www.npmjs.com/package/react-tagcloud 
+                        luminosity: 'dark',
+                        hue: 'blue',
+                    },
+                },
             },
         },
-    },
-    app: {
-        context: APP_CONTEXT,
-    },
-    grantTypes: {
-        authorization_code: 'Code',
-        implicit: 'Implicit',
-        refresh_token: 'Refresh Token',
-        password: 'Password',
-        'iwa:ntlm': 'IWA-NTLM',
-        client_credentials: 'Client Credentials',
-        'urn:ietf:params:oauth:grant-type:saml2-bearer': 'SAML2',
-        'urn:ietf:params:oauth:grant-type:jwt-bearer': 'JWT',
-        kerberos: 'Kerberos',
     },
 };

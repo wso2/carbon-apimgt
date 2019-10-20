@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
@@ -26,9 +27,11 @@ import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.text.SimpleDateFormat;
 import java.sql.SQLException;
@@ -74,7 +77,10 @@ public class APIAdminImpl implements APIAdmin {
      * @param labelId Label identifier
      * @throws APIManagementException If failed to delete label
      */
-    public void deleteLabel(String labelId) throws APIManagementException{
+    public void deleteLabel(String user, String labelId) throws APIManagementException {
+        if (isAttachedLabel(user, labelId)) {
+            APIUtil.handleException("Unable to delete the label. It is attached to an API");
+        }
         apiMgtDAO.deleteLabel(labelId);
     }
 
@@ -85,9 +91,6 @@ public class APIAdminImpl implements APIAdmin {
      * @throws APIManagementException if failed to update label
      */
     public Label updateLabel(String tenantDomain, Label label) throws APIManagementException {
-        if (isLableNameExists(tenantDomain, label)) {
-            APIUtil.handleException("Label with name " + label.getName() + " already exists");
-        }
         return apiMgtDAO.updateLabel(label);
     }
 
@@ -101,8 +104,36 @@ public class APIAdminImpl implements APIAdmin {
         List<Label> ExistingLables = apiMgtDAO.getAllLabels(tenantDomain);
         if (!ExistingLables.isEmpty()) {
             for (Label labels : ExistingLables) {
-                if (labels.getName().equals(label.getName())) {
+                if (labels.getName().equalsIgnoreCase(label.getName())) {
                     return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isAttachedLabel(String user, String labelId) throws APIManagementException {
+        APIProviderImpl apiProvider = new APIProviderImpl(user);
+        List<API> apiList = apiProvider.getAllAPIs();
+        List<Label> allLabelsWithID = getAllLabels(MultitenantUtils.getTenantDomain(user));
+        String labelName = null;
+        for (Label label : allLabelsWithID) {
+            if (labelId.equalsIgnoreCase(label.getLabelId())) {
+                labelName = label.getName();
+                break;
+            }
+        }
+        if (labelName != null && StringUtils.isEmpty(labelName)) {
+            UserAwareAPIProvider userAwareAPIProvider = new UserAwareAPIProvider(user);
+            for (API api : apiList) {
+                String uuid = api.getUUID();
+                API lightweightAPIByUUID = userAwareAPIProvider.getLightweightAPIByUUID(uuid, apiProvider.
+                        tenantDomain);
+                List<Label> attachedLabelsWithoutID = lightweightAPIByUUID.getGatewayLabels();
+                for (Label labelWithoutId : attachedLabelsWithoutID) {
+                    if (labelName.equalsIgnoreCase(labelWithoutId.getName())) {
+                        return true;
+                    }
                 }
             }
         }

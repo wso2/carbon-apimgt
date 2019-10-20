@@ -51,6 +51,7 @@ const styles = theme => ({
     root: {
         padding: theme.spacing.unit * 3,
         color: theme.palette.getContrastText(theme.palette.background.paper),
+        margin: -1 * theme.spacing(2),
     },
     iconClass: {
         marginRight: 10,
@@ -100,9 +101,6 @@ const styles = theme => ({
     },
     subsToApp: {
         marginTop: theme.spacing(2),
-    },
-    subscribeButton: {
-        marginLeft: theme.spacing(2),
     },
     expansionRoot: {
         minHeight: 238,
@@ -306,28 +304,42 @@ function Overview(props) {
                                                 }
                                             />
                                         </Typography>
-                                        {user && (
+                                    </Grid>
+                                    {user && (
+                                        <Grid item>
                                             <Link
                                                 to={{
                                                     pathname: '/apis/' + api.id + '/credentials/wizard',
                                                 }}
+                                                style={!api.isSubscriptionAvailable ? { pointerEvents: 'none' } : null}
                                             >
-                                                <Button variant='contained' color='primary' size='large'>
+                                                <Button
+                                                    variant='contained'
+                                                    color='primary'
+                                                    size='large'
+                                                    disabled={!api.isSubscriptionAvailable}
+                                                >
                                                     <FormattedMessage
                                                         id='Apis.Details.Overview.credential.wizard.title'
                                                         defaultMessage='Key Generation Wizard'
                                                     />
                                                 </Button>
                                             </Link>
-                                        )}
-                                        {applicationsAvailable && applicationsAvailable.length > 0 && (
+                                        </Grid>
+                                    )}
+                                    {applicationsAvailable && applicationsAvailable.length > 0 && (
+                                        <Grid item>
                                             <React.Fragment>
-                                                <Link to={'/apis/' + api.id + '/credentials'}>
+                                                <Link
+                                                    to={'/apis/' + api.id + '/credentials'}
+                                                    style={!api.isSubscriptionAvailable ?
+                                                        { pointerEvents: 'none' } : null}
+                                                >
                                                     <Button
                                                         variant='contained'
                                                         color='primary'
                                                         size='large'
-                                                        className={classes.subscribeButton}
+                                                        disabled={!api.isSubscriptionAvailable}
                                                     >
                                                         <FormattedMessage
                                                             id='Apis.Details.Overview.subscribe.to.application.btn'
@@ -335,29 +347,9 @@ function Overview(props) {
                                                         />
                                                     </Button>
                                                 </Link>
-                                                <Typography variant='body2'>
-                                                    {` ${applicationsAvailable.length} `}
-                                                    {applicationsAvailable.length === 1 ? (
-                                                        <FormattedMessage
-                                                            id={
-                                                                'Apis.Details.Overview.subscribe.to.' +
-                                                                'application.content.Application'
-                                                            }
-                                                            defaultMessage='Application'
-                                                        />
-                                                    ) : (
-                                                        <FormattedMessage
-                                                            id={
-                                                                'Apis.Details.Overview.subscribe.to.' +
-                                                                'application.content.Applications'
-                                                            }
-                                                            defaultMessage='Applications'
-                                                        />
-                                                    )}
-                                                </Typography>
                                             </React.Fragment>
-                                        )}
-                                    </Grid>
+                                        </Grid>
+                                    )}
                                     <Grid item xs={12}>
                                         <Typography variant='subtitle2'>
                                             <FormattedMessage
@@ -370,7 +362,7 @@ function Overview(props) {
                                                 {subscribedApplications.length}{' '}
                                                 <FormattedMessage
                                                     id='Apis.Details.Overview.subscriptions'
-                                                    defaultMessage='Subscriptions'
+                                                    defaultMessage='Subscriptions >>'
                                                 />
                                             </Typography>
                                         </Link>
@@ -549,7 +541,7 @@ function Overview(props) {
                         classes={{ root: classNames({ [classes.noDocumentRoot]: totalDocuments === 0 }) }}
                     >
                         <Grid container className={classes.root} spacing={2}>
-                            <OverviewDocuments apiId={api.id} setDocsCount={setDocsCount}/>
+                            <OverviewDocuments apiId={api.id} setDocsCount={setDocsCount} />
                         </Grid>
                     </ExpansionPanelDetails>
                     <Divider />

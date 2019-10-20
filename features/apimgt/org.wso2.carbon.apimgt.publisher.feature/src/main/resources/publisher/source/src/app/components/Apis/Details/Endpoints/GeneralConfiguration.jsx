@@ -65,6 +65,9 @@ const styles = theme => ({
     generalConfigPanel: {
         width: '100%',
     },
+    securityHeading: {
+        fontWeight: 600,
+    },
 });
 
 /**
@@ -254,13 +257,15 @@ function GeneralConfiguration(props) {
                                                 />
                                             }
                                             label={
-                                                <FormattedMessage
-                                                    id={
-                                                        'Apis.Details.Endpoints.EndpointOverview.' +
-                                                        'endpoint.security.enable.switch'
-                                                    }
-                                                    defaultMessage='Endpoint Security'
-                                                />
+                                                <Typography className={classes.securityHeading}>
+                                                    <FormattedMessage
+                                                        id={
+                                                            'Apis.Details.Endpoints.EndpointOverview.' +
+                                                            'endpoint.security.enable.switch'
+                                                        }
+                                                        defaultMessage='Endpoint Security'
+                                                    />
+                                                </Typography>
                                             }
                                             labelPlacement='start'
                                             onChange={handleToggleEndpointSecurity}
