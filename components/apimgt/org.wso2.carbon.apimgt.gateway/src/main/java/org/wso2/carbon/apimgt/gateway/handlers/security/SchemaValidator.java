@@ -102,13 +102,13 @@ public class SchemaValidator extends AbstractHandler {
             JSONObject payloadObject = getMessageContent(messageContext);
             if (!APIConstants.SupportedHTTPVerbs.GET.name().equals(requestMethod) &&
                     payloadObject != null && !APIMgtGatewayConstants.EMPTY_ARRAY.equals(payloadObject)) {
-                    validateRequest(messageContext);
+                validateRequest(messageContext);
             }
         } catch (IOException | XMLStreamException e) {
             logger.error("Error occurred while building the API request", e);
-        }  catch (APIManagementException e) {
-        logger.error("Error occurred while validating the API request", e);
-    }
+        } catch (APIManagementException e) {
+            logger.error("Error occurred while validating the API request", e);
+        }
         return true;
     }
 
