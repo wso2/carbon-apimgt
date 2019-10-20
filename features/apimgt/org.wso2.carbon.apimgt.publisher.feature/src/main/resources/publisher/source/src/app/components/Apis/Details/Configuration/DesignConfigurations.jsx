@@ -221,7 +221,7 @@ export default function DesignConfigurations() {
                         <Paper elevation={0}>
                             <form noValidate autoComplete='off'>
                                 <Box px={8} py={5}>
-                                    <Box py={2}>
+                                    <Box py={1}>
                                         <Grid container spacing={0} >
                                             <Grid item xs={12} md={2}>
                                                 <ThumbnailView

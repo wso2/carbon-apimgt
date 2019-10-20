@@ -39,7 +39,7 @@ export default function Tags(props) {
     const [invalidTags, setInvalidTags] = useState([]);
     const regexPattern = /([~!@#;%^&*+=|\\<>"'/,])/;
     return (
-        <React.Fragment>
+        <React.Fragment style={{ marginTop: 10 }}>
             <ChipInput
                 fullWidth
                 variant='outlined'
@@ -55,7 +55,7 @@ export default function Tags(props) {
                 helperText={isTagValid ? (
                     <FormattedMessage
                         id='Apis.Details.Configuration.components.Tags.helper'
-                        defaultMessage='Press `enter` after typing the tag name,To add a new tag'
+                        defaultMessage='Press `enter` after typing the tag name to add a new tag'
                     />
                 ) : (
                     <FormattedMessage

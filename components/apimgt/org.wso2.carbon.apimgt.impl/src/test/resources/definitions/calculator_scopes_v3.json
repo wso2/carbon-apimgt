@@ -1,0 +1,82 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "CalculatorAPI",
+    "description" : "This is a simple API for Pizza Shack online pizza delivery store.",
+    "contact" : {
+      "name" : "Jane Roe",
+      "email" : "marketing@calculator.com"
+    },
+    "version" : "1.0"
+  },
+  "servers" : [ {
+    "url" : "/"
+  } ],
+  "security" : [ {
+    "default" : [ ]
+  } ],
+  "paths" : {
+    "/add" : {
+      "post" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "security" : [ {
+          "default" : [ "perm" ]
+        } ],
+        "x-auth-type" : "Application & Application User",
+        "x-throttling-tier" : "Unlimited"
+      }
+    },
+    "/multiply" : {
+      "post" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "security" : [ {
+          "default" : [ ]
+        } ],
+        "x-auth-type" : "Application & Application User",
+        "x-throttling-tier" : "Unlimited"
+      }
+    },
+    "/divide" : {
+      "post" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "security" : [ {
+          "default" : [ "no-perm" ]
+        } ],
+        "x-auth-type" : "Application & Application User",
+        "x-throttling-tier" : "Unlimited"
+      }
+    }
+  },
+  "components" : {
+    "securitySchemes" : {
+      "default" : {
+        "type" : "oauth2",
+        "flows" : {
+          "implicit" : {
+            "authorizationUrl" : "https://test.com",
+            "scopes" : {
+              "no-perm" : "no-perm",
+              "perm" : "perm"
+            },
+            "x-scopes-bindings" : {
+              "perm" : "manager",
+              "no-perm" : "employee"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -404,15 +404,15 @@ class Details extends React.Component {
                                     iconText='credentials'
                                     to={pathPrefix + 'credentials'}
                                 />
-                                <LeftMenuItem
-                                    text={
-                                        <FormattedMessage id='Apis.Details.index.comments' defaultMessage='Comments' />
-                                    }
-                                    route='comments'
-                                    iconText='comments'
-                                    to={pathPrefix + 'comments'}
-                                />
                             </React.Fragment>}
+                            <LeftMenuItem
+                                text={
+                                    <FormattedMessage id='Apis.Details.index.comments' defaultMessage='Comments' />
+                                }
+                                route='comments'
+                                iconText='comments'
+                                to={pathPrefix + 'comments'}
+                             />
                             {api.type !== 'WS' && (
                                 <LeftMenuItem
                                     text={

@@ -101,9 +101,6 @@ const styles = theme => ({
     subsToApp: {
         marginTop: theme.spacing(2),
     },
-    subscribeButton: {
-        marginLeft: theme.spacing(2),
-    },
     expansionRoot: {
         minHeight: 238,
     },
@@ -291,7 +288,9 @@ function Overview(props) {
                                                 }
                                             />
                                         </Typography>
-                                        {user && (
+                                    </Grid>
+                                    {user && (
+                                        <Grid item>
                                             <Link
                                                 to={{
                                                     pathname: '/apis/' + api.id + '/credentials/wizard',
@@ -310,8 +309,10 @@ function Overview(props) {
                                                     />
                                                 </Button>
                                             </Link>
-                                        )}
-                                        {applicationsAvailable && applicationsAvailable.length > 0 && (
+                                        </Grid>
+                                    )}
+                                    {applicationsAvailable && applicationsAvailable.length > 0 && (
+                                        <Grid item>
                                             <React.Fragment>
                                                 <Link
                                                     to={'/apis/' + api.id + '/credentials'}
@@ -322,7 +323,6 @@ function Overview(props) {
                                                         variant='contained'
                                                         color='primary'
                                                         size='large'
-                                                        className={classes.subscribeButton}
                                                         disabled={!api.isSubscriptionAvailable}
                                                     >
                                                         <FormattedMessage
@@ -332,8 +332,8 @@ function Overview(props) {
                                                     </Button>
                                                 </Link>
                                             </React.Fragment>
-                                        )}
-                                    </Grid>
+                                        </Grid>
+                                    )}
                                     <Grid item xs={12}>
                                         <Typography variant='subtitle2'>
                                             <FormattedMessage

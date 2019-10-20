@@ -24,7 +24,8 @@ import java.util.Map;
 public class BotDetectionMediator extends APIMgtCommonExecutionPublisher {
     private static final Log log = LogFactory.getLog(BotDetectionMediator.class);
     private static final String BOT_ACCESS_COUNT_CACHE = "BOT_ACCESS_CACHE";
-    private final Cache botAccessCountCache;
+    private static final Cache botAccessCountCache = APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER,
+            BOT_ACCESS_COUNT_CACHE, 60, 60);
     private int throttleLimit = 2;
 
     /**
@@ -32,7 +33,6 @@ public class BotDetectionMediator extends APIMgtCommonExecutionPublisher {
      */
     public BotDetectionMediator() {
         super();
-        botAccessCountCache = APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER, BOT_ACCESS_COUNT_CACHE, 60, 60);
     }
 
     @Override

@@ -11,6 +11,7 @@ import { withRouter } from 'react-router';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
 import { isRestricted } from 'AppData/AuthManager';
 
 import BusinessPlans from './BusinessPlans';
@@ -62,14 +63,26 @@ class Monetization extends Component {
 
     getMonetizationData() {
         const { api } = this.props;
-        api.getSettings().then((settings) => {
-            if (settings.monetizationAttributes != null) {
-                this.setState({ monetizationAttributes: settings.monetizationAttributes });
-            }
-        });
-        api.getMonetization(this.props.api.id).then((status) => {
-            this.setState({ monStatus: status.enabled });
-        });
+        if (api.apiType === 'APIProduct') {
+            const apiProduct = new APIProduct(api.name, api.context, api.policies);
+            apiProduct.getSettings().then((settings) => {
+                if (settings.monetizationAttributes != null) {
+                    this.setState({ monetizationAttributes: settings.monetizationAttributes });
+                }
+            });
+            apiProduct.getMonetization(this.props.api.id).then((status) => {
+                this.setState({ monStatus: status.enabled });
+            });
+        } else {
+            api.getSettings().then((settings) => {
+                if (settings.monetizationAttributes != null) {
+                    this.setState({ monetizationAttributes: settings.monetizationAttributes });
+                }
+            });
+            api.getMonetization(this.props.api.id).then((status) => {
+                this.setState({ monStatus: status.enabled });
+            });
+        }
     }
 
     /**
@@ -77,40 +90,75 @@ class Monetization extends Component {
      */
     handleSubmit() {
         const { api, intl } = this.props;
-        const properties = this.state.property;
-        const enabled = this.state.monStatus;
-        const body = {
-            enabled,
-            properties,
-        };
-        const promisedMonetizationConf = api.configureMonetizationToApi(this.props.api.id, body);
-        promisedMonetizationConf.then((response) => {
-            const status = JSON.parse(response.data);
-            if (status.enabled) {
-                Alert.info(intl.formatMessage({
-                    id: 'Apis.Details.Monetization.Index.monetization.configured.successfully',
-                    defaultMessage: 'Monetization Enabled Successfully',
-                }));
-            } else {
-                Alert.info(intl.formatMessage({
-                    id: 'Apis.Details.Monetization.Index.monetization.disabled.successfully',
-                    defaultMessage: 'Monetization Disabled Successfully',
-                }));
-            }
-            this.setState({ monStatus: !this.state.monStatus });
-        }).catch((error) => {
-            console.error(error);
-            if (error.response) {
-                Alert.error(error.response.body.description);
-            } else {
-                Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.Monetization.Index.something.went.wrong.while.configuring.monetization',
-                    defaultMessage: 'Something went wrong while configuring monetization',
-                }));
-            }
-        });
+        if (api.apiType === 'APIProduct') {
+            const properties = this.state.property;
+            const enabled = this.state.monStatus;
+            const body = {
+                enabled,
+                properties,
+            };
+            const apiProduct = new APIProduct(api.name, api.context, api.policies);
+            const promisedMonetization = apiProduct.configureMonetizationToApiProduct(api.id, body);
+            promisedMonetization.then((response) => {
+                const status = JSON.parse(response.data);
+                if (status.enabled) {
+                    Alert.info(intl.formatMessage({
+                        id: 'Apis.Details.Monetization.Index.monetization.configured.successfully',
+                        defaultMessage: 'Monetization Enabled Successfully',
+                    }));
+                } else {
+                    Alert.info(intl.formatMessage({
+                        id: 'Apis.Details.Monetization.Index.monetization.disabled.successfully',
+                        defaultMessage: 'Monetization Disabled Successfully',
+                    }));
+                }
+                this.setState({ monStatus: !this.state.monStatus });
+            }).catch((error) => {
+                console.error(error);
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Monetization.Index.something.went.wrong.while.configuring.monetization',
+                        defaultMessage: 'Something went wrong while configuring monetization',
+                    }));
+                }
+            });
+        } else {
+            const properties = this.state.property;
+            const enabled = this.state.monStatus;
+            const body = {
+                enabled,
+                properties,
+            };
+            const promisedMonetizationConf = api.configureMonetizationToApi(this.props.api.id, body);
+            promisedMonetizationConf.then((response) => {
+                const status = JSON.parse(response.data);
+                if (status.enabled) {
+                    Alert.info(intl.formatMessage({
+                        id: 'Apis.Details.Monetization.Index.monetization.configured.successfully',
+                        defaultMessage: 'Monetization Enabled Successfully',
+                    }));
+                } else {
+                    Alert.info(intl.formatMessage({
+                        id: 'Apis.Details.Monetization.Index.monetization.disabled.successfully',
+                        defaultMessage: 'Monetization Disabled Successfully',
+                    }));
+                }
+                this.setState({ monStatus: !this.state.monStatus });
+            }).catch((error) => {
+                console.error(error);
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Monetization.Index.something.went.wrong.while.configuring.monetization',
+                        defaultMessage: 'Something went wrong while configuring monetization',
+                    }));
+                }
+            });
+        }
     }
-
     handleChange = (event) => {
         this.setState({ monStatus: event.target.checked });
     };

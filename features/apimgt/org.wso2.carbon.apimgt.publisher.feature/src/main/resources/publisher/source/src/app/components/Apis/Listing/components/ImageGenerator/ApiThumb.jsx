@@ -239,6 +239,7 @@ class APIThumb extends Component {
                                 gutterBottom
                                 variant='h4'
                                 className={classes.thumbHeader}
+                                title={api.name}
                             >
                                 {api.name}
                             </Typography>
