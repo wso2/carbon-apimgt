@@ -192,7 +192,7 @@ const Configurations = {
                     },
                 },
                 tagWise: {
-                    active: true,
+                    active: false,
                     style: 'fixed-left', // If 'page' it will show a different page. Else if 'fixed-left' will show a fixed menu with all the group tags on the left.
                     thumbnail: { // These params will be applyed only if the style is 'page'
                         width: 150,
