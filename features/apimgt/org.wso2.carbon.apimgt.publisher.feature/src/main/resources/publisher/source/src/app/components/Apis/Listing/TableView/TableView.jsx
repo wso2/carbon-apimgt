@@ -25,7 +25,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import queryString from 'query-string';
 import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
-import ImageGenerator from 'AppComponents/Apis/Listing/components/ImageGenerator/ImageGenerator';
+import Icon from '@material-ui/core/Icon';
 import ApiThumb from 'AppComponents/Apis/Listing/components/ImageGenerator/ApiThumb';
 import DocThumb from 'AppComponents/Apis/Listing/components/ImageGenerator/DocThumb';
 import { Progress } from 'AppComponents/Shared';
@@ -34,6 +34,7 @@ import SampleAPI from 'AppComponents/Apis/Listing/SampleAPI/SampleAPI';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Typography from '@material-ui/core/Typography';
 import TopMenu from 'AppComponents/Apis/Listing/components/TopMenu';
+import CustomIcon from 'AppComponents/Shared/CustomIcon';
 
 const styles = theme => ({
     contentInside: {
@@ -42,6 +43,13 @@ const styles = theme => ({
         '& > div[class^="MuiPaper-root-"]': {
             boxShadow: 'none',
             backgroundColor: 'transparent',
+        },
+    },
+    apiNameLink: {
+        display: 'flex',
+        alignItems: 'center',
+        '& span': {
+            marginLeft: theme.spacing(1),
         },
     },
 });
@@ -259,24 +267,6 @@ class TableView extends React.Component {
                 },
             },
             {
-                name: 'image',
-                label: intl.formatMessage({
-                    id: 'Apis.Listing.ApiTableView.image',
-                    defaultMessage: 'Image',
-                }),
-                options: {
-                    customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
-                        if (tableMeta.rowData) {
-                            const artifact = tableViewObj.state.apisAndApiProducts[tableMeta.rowIndex];
-                            return <ImageGenerator api={artifact} width={30} height={30} />;
-                        }
-                        return <span />;
-                    },
-                    sort: false,
-                    filter: false,
-                },
-            },
-            {
                 name: 'name',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.name',
@@ -287,24 +277,38 @@ class TableView extends React.Component {
                         if (tableMeta.rowData) {
                             const { isAPIProduct } = tableViewObj.props; // eslint-disable-line no-shadow
                             const artifact = tableViewObj.state.apisAndApiProducts[tableMeta.rowIndex];
-                            const apiName = tableMeta.rowData[2];
+                            const apiName = tableMeta.rowData[1];
                             const apiId = tableMeta.rowData[0];
                             if (isAPIProduct) {
-                                return <Link to={'/api-products/' + apiId + '/overview'}>{apiName}</Link>;
+                                return (
+                                    <Link to={'/api-products/' + apiId + '/overview'} className={classes.apiNameLink}>
+                                        <CustomIcon width={16} height={16} icon='api-product' strokeColor='#444444' />
+                                        <span>{apiName}</span>
+                                    </Link>
+                                );
                             }
                             if (artifact) {
                                 if (artifact.type === 'DOC') {
                                     return (
-                                        <Link to={'/apis/' + artifact.apiUUID + '/documents/' + apiId + '/details'}>
+                                        <Link
+                                            to={'/apis/' + artifact.apiUUID + '/documents/' + apiId + '/details'}
+                                            className={classes.apiNameLink}
+                                        >
+                                            <Icon>library_books</Icon>
                                             <FormattedMessage
                                                 id='Apis.Listing.TableView.TableView.doc.flag'
                                                 defaultMessage=' [Doc]'
                                             />
-                                            {apiName}
+                                            <span>{apiName}</span>
                                         </Link>
                                     );
                                 }
-                                return <Link to={'/apis/' + apiId + '/overview'}>{apiName}</Link>;
+                                return (
+                                    <Link to={'/apis/' + apiId + '/overview'} className={classes.apiNameLink}>
+                                        <CustomIcon width={16} height={16} icon='api' strokeColor='#444444' />
+                                        <span>{apiName}</span>
+                                    </Link>
+                                );
                             }
                         }
                         return <span />;
@@ -346,10 +350,7 @@ class TableView extends React.Component {
         ];
         const { page, count, rowsPerPage } = this;
         const {
-            apisAndApiProducts,
-            notFound,
-            listType,
-            displayCount,
+            apisAndApiProducts, notFound, listType, displayCount,
         } = this.state;
         const options = {
             filterType: 'dropdown',
@@ -384,20 +385,14 @@ class TableView extends React.Component {
                 const artifact = tableViewObj.state.apisAndApiProducts[dataIndex];
                 if (artifact) {
                     if (artifact.type === 'DOC') {
-                        return (<DocThumb doc={artifact} />);
+                        return <DocThumb doc={artifact} />;
                     } else if (artifact.type === 'APIPRODUCT') {
                         artifact.state = 'PUBLISHED';
-                        return (<ApiThumb
-                            api={artifact}
-                            isAPIProduct
-                            updateData={tableViewObj.updateData}
-                        />);
+                        return <ApiThumb api={artifact} isAPIProduct updateData={tableViewObj.updateData} />;
                     } else {
-                        return (<ApiThumb
-                            api={artifact}
-                            isAPIProduct={isAPIProduct}
-                            updateData={tableViewObj.updateData}
-                        />);
+                        return (
+                            <ApiThumb api={artifact} isAPIProduct={isAPIProduct} updateData={tableViewObj.updateData} />
+                        );
                     }
                 }
                 return <span />;
@@ -433,28 +428,31 @@ class TableView extends React.Component {
                         isAPIProduct={isAPIProduct}
                         listType={listType}
                     />
-                    <div className={classes.contentInside}>{isAPIProduct ? (
-                        <InlineMessage type='info' height={140}>
-                            <div className={classes.contentWrapper}>
-                                <Typography variant='h5' component='h3' className={classes.head}>
-                                    <FormattedMessage
-                                        id='Apis.Listing.SampleAPIProduct.manager'
-                                        defaultMessage='Welcome to WSO2 API Manager'
-                                    />
-                                </Typography>
-                                <Typography component='p' className={classes.content}>
-                                    <FormattedMessage
-                                        id='Apis.Listing.SampleAPIProduct.description'
-                                        defaultMessage={
-                                            'The API resources in an API product can come from' +
+                    <div className={classes.contentInside}>
+                        {isAPIProduct ? (
+                            <InlineMessage type='info' height={140}>
+                                <div className={classes.contentWrapper}>
+                                    <Typography variant='h5' component='h3' className={classes.head}>
+                                        <FormattedMessage
+                                            id='Apis.Listing.SampleAPIProduct.manager'
+                                            defaultMessage='Welcome to WSO2 API Manager'
+                                        />
+                                    </Typography>
+                                    <Typography component='p' className={classes.content}>
+                                        <FormattedMessage
+                                            id='Apis.Listing.SampleAPIProduct.description'
+                                            defaultMessage={
+                                                'The API resources in an API product can come from' +
                                                 ' one or more APIs, so you can mix and match resources from multiple ' +
                                                 ' API resources to create specialized feature sets.'
-                                        }
-                                    />
-                                </Typography>
-                            </div>
-                        </InlineMessage>
-                    ) : <SampleAPI />}
+                                            }
+                                        />
+                                    </Typography>
+                                </div>
+                            </InlineMessage>
+                        ) : (
+                            <SampleAPI />
+                        )}
                     </div>
                 </React.Fragment>
             );
