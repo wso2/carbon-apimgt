@@ -9,6 +9,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import { app } from 'Config';
 
 const styles = theme => ({
     profileMenu: {
@@ -69,7 +70,7 @@ class Avatar extends Component {
      */
     doOIDCLogout = (e) => {
         e.preventDefault();
-        window.location = '/publisher/services/logout';
+        window.location = app.context + '/services/logout';
     };
 
     /**
