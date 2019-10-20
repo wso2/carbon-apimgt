@@ -117,6 +117,9 @@ const styles = (theme) => {
             borderLeft: theme.custom.page.border,
             borderRight: theme.custom.page.border,
         },
+        icons: {
+            marginRight: theme.spacing(),
+        },
     };
 };
 
@@ -303,7 +306,7 @@ class Layout extends React.Component {
                                     onClick={() => setTenantDomain('INVALID')}
                                 >
                                     <Button className={classes.publicStore}>
-                                        <Icon>public</Icon>
+                                        <Icon className={classes.icons}>public</Icon>
                                         <FormattedMessage
                                             id='Base.index.go.to.public.store'
                                             defaultMessage='Go to public Dev Portal'
@@ -322,7 +325,7 @@ class Layout extends React.Component {
                                 <React.Fragment>
                                     <Link to='/settings'>
                                         <Button className={classes.userLink}>
-                                            <Icon>settings</Icon>
+                                            <Icon className={classes.icons}>settings</Icon>
                                             <FormattedMessage
                                                 id='Base.index.settings.caption'
                                                 defaultMessage='Settings'
@@ -338,7 +341,7 @@ class Layout extends React.Component {
                                         onClick={this.handleToggleUserMenu}
                                         className={classes.userLink}
                                     >
-                                        <Icon>person</Icon>
+                                        <Icon className={classes.icons}>person</Icon>
                                         {user.name}
                                     </Button>
                                     <Popper
