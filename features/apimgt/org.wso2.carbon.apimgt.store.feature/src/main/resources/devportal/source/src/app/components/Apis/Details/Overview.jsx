@@ -51,6 +51,7 @@ const styles = theme => ({
     root: {
         padding: theme.spacing.unit * 3,
         color: theme.palette.getContrastText(theme.palette.background.paper),
+        margin: -1 * theme.spacing(2),
     },
     iconClass: {
         marginRight: 10,

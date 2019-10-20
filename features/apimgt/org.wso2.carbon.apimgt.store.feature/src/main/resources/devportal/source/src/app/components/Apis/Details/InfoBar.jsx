@@ -182,17 +182,23 @@ class InfoBar extends React.Component {
             commentList: null,
             showOverview: false,
             checked: false,
+            ratingUpdate: 0,
         };
         this.getSchema = this.getSchema.bind(this);
         this.getProvider = this.getProvider.bind(this);
+        this.setRatingUpdate = this.setRatingUpdate.bind(this);
     }
 
     /**
      *
-     *
-     * @memberof InfoBar
+     * This method is a hack to update the image in the toolbar when a new image is uploaded
+     * @memberof Details
      */
-
+    setRatingUpdate() {
+        this.setState(previousState => ({
+            ratingUpdate: previousState.ratingUpdate + 1,
+        }));
+    }
     /**
      *
      *
@@ -245,7 +251,7 @@ class InfoBar extends React.Component {
 
         const { classes, theme, intl } = this.props;
         const {
-            notFound, showOverview, prodUrlCopied, sandboxUrlCopied, epUrl,
+            notFound, showOverview, prodUrlCopied, sandboxUrlCopied, epUrl, ratingUpdate,
         } = this.state;
         const {
             custom: {
@@ -298,7 +304,13 @@ class InfoBar extends React.Component {
                     </div>
                     <VerticalDivider height={70} />
                     {!api.advertiseInfo.advertised && user && (
-                        <StarRatingBar apiId={api.id} isEditable={false} showSummary />
+                        <StarRatingBar
+                            apiId={api.id}
+                            isEditable={false}
+                            showSummary
+                            ratingUpdate={ratingUpdate}
+                            setRatingUpdate={this.setRatingUpdate}
+                        />
                     )}
                     {api.advertiseInfo.advertised && (
                         <React.Fragment>
@@ -395,7 +407,13 @@ class InfoBar extends React.Component {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <StarRatingBar apiId={api.id} isEditable showSummary={false} />
+                                                    <StarRatingBar
+                                                        apiId={api.id}
+                                                        isEditable
+                                                        showSummary={false}
+                                                        ratingUpdate={ratingUpdate}
+                                                        setRatingUpdate={this.setRatingUpdate}
+                                                    />
                                                 </TableCell>
                                             </TableRow>
                                         )}
@@ -541,6 +559,7 @@ InfoBar.propTypes = {
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,
+    imageUpdate: PropTypes.number.isRequired,
 };
 
 InfoBar.contextType = ApiContext;
