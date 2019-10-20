@@ -206,7 +206,7 @@ export default function DefaultAPIForm(props) {
             }
             case 'policies': {
                 const policyValidity = value && value.length > 0;
-                updateValidity({ ...validity, version: policyValidity });
+                updateValidity({ ...validity, policies: !policyValidity || null });
                 break;
             }
             default: {
@@ -440,6 +440,7 @@ export default function DefaultAPIForm(props) {
                     isAPIProduct={isAPIProduct}
                     onChange={onChange}
                     validate={validate}
+                    isValid={validity.policies}
                 />
             </form>
             <Grid container direction='row' justify='flex-end' alignItems='center'>

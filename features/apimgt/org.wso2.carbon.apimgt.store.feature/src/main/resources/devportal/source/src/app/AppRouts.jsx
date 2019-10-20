@@ -34,8 +34,8 @@ import Details from 'AppComponents/Applications/Details/index';
 function getRedirectingPath(theme) {
     if (theme.custom.landingPage.active) {
         return '/home';
-    } else if (theme.custom.landingPage.active === false && theme.custom.tagWiseMode) {
-        return '/apiGroups';
+    } else if (theme.custom.landingPage.active === false && theme.custom.tagWise.active) {
+        return '/api-groups';
     } else {
         return 'apis';
     }

@@ -244,10 +244,18 @@ class Subscriptions extends React.Component {
                         defaultMessage: 'Error occurred during subscription',
                     }));
                 } else {
-                    Alert.info(intl.formatMessage({
-                        id: 'Applications.Details.Subscriptions.subscription.successful',
-                        defaultMessage: 'Subscription successful',
-                    }));
+                    if (response.body.status === 'ON_HOLD') {
+                        Alert.info(intl.formatMessage({
+                            defaultMessage: 'Your subscription request has been submitted and is now awaiting ' +
+                            'approval.',
+                            id: 'subscription.pending',
+                        }));
+                    } else {
+                        Alert.info(intl.formatMessage({
+                            id: 'Applications.Details.Subscriptions.subscription.successful',
+                            defaultMessage: 'Subscription successful',
+                        }));
+                    }
                     this.updateSubscriptions(applicationId);
                 }
             })
