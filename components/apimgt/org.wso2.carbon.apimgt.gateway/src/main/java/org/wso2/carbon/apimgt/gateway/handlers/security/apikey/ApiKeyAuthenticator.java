@@ -31,15 +31,14 @@ import org.jaxen.JaxenException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.security.*;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
+import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -53,6 +52,11 @@ import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class ApiKeyAuthenticator implements Authenticator {
 
@@ -124,7 +128,8 @@ public class ApiKeyAuthenticator implements Authenticator {
 
             if (decodedHeader.getString(APIConstants.JwtTokenConstants.JWT_KID) == null) {
                 if (log.isDebugEnabled()){
-                    log.debug("Invalid Api Key. Could not find alias in header. Api Key: " + GatewayUtils.getMaskedToken(splitToken));
+                    log.debug("Invalid Api Key. Could not find alias in header. Api Key: " +
+                            GatewayUtils.getMaskedToken(splitToken));
                 }
                 log.error("Invalid Api Key. Could not find alias in header");
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
@@ -147,7 +152,8 @@ public class ApiKeyAuthenticator implements Authenticator {
                         APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF,
                         APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF_ERROR_MESSAGE);
             }
-            String resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion, matchingResource, httpMethod);
+            String resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
+                                                                                    matchingResource, httpMethod);
             VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
             verbInfoDTO.setHttpVerb(httpMethod);
             //Not doing resource level authentication
@@ -158,7 +164,8 @@ public class ApiKeyAuthenticator implements Authenticator {
             verbInfoList.add(verbInfoDTO);
             synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoList);
 
-            String cacheKey = GatewayUtils.getAccessTokenCacheKey(tokenSignature, apiContext, apiVersion, matchingResource, httpMethod);
+            String cacheKey = GatewayUtils.getAccessTokenCacheKey(tokenSignature, apiContext, apiVersion,
+                    matchingResource, httpMethod);
             String tenantDomain = GatewayUtils.getTenantDomain();
             boolean isVerified = false;
 
@@ -172,11 +179,30 @@ public class ApiKeyAuthenticator implements Authenticator {
                     isVerified = true;
                 } else if (getInvalidGatewayApiKeyCache().get(tokenSignature) != null) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Api Key retrieved from the invalid Api Key cache. Api Key: " + GatewayUtils.getMaskedToken(splitToken));
+                        log.debug("Api Key retrieved from the invalid Api Key cache. Api Key: " +
+                                GatewayUtils.getMaskedToken(splitToken));
                     }
-                    log.error("Invalid Api Key.");
+                    log.error("Invalid Api Key." + GatewayUtils.getMaskedToken(splitToken));
                     throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                } else if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
+                                getMaskedToken(splitToken));
+                    }
+                    log.error("Invalid API Key. " + GatewayUtils.getMaskedToken(splitToken));
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                            "Invalid API Key");
+                }
+            } else {
+                if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
+                                getMaskedToken(splitToken));
+                    }
+                    log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                            "Invalid JWT token");
                 }
             }
 
@@ -366,8 +392,8 @@ public class ApiKeyAuthenticator implements Authenticator {
             return false;
         }
         // Check whether the token is expired or not.
-        long issuedTime = payload.getLong(APIConstants.JwtTokenConstants.ISSUED_TIME)*1000;
-        long expiryTime = payload.getLong(APIConstants.JwtTokenConstants.EXPIRY_TIME)*1000;
+        long issuedTime = payload.getLong(APIConstants.JwtTokenConstants.ISSUED_TIME) * 1000;
+        long expiryTime = payload.getLong(APIConstants.JwtTokenConstants.EXPIRY_TIME) * 1000;
         long validityPeriod = expiryTime - issuedTime;
         long timestampSkew = OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds()*1000;
         long currentTime = System.currentTimeMillis();
