@@ -313,16 +313,12 @@ function Endpoints(props) {
             {(api.endpointConfig === null && apiObject.endpointConfig === null) ?
                 <NewEndpointCreate generateEndpointConfig={generateEndpointConfig} /> :
                 <div className={classes.root}>
-                    <Grid container spacing={16} className={classes.titleGrid}>
-                        <Grid item>
-                            <Typography variant='h4' align='left' gutterBottom>
-                                <FormattedMessage
-                                    id='Apis.Details.Endpoints.Endpoints.endpoints.header'
-                                    defaultMessage='Endpoints'
-                                />
-                            </Typography>
-                        </Grid>
-                    </Grid>
+                    <Typography variant='h4' align='left' gutterBottom>
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.Endpoints.endpoints.header'
+                            defaultMessage='Endpoints'
+                        />
+                    </Typography>
                     <div>
                         <Grid container>
                             <Grid item xs={12} className={classes.endpointsContainer}>
