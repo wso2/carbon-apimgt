@@ -183,13 +183,15 @@ class Wizard extends Component {
                         </Box>
                         <Box py={1} mb={1} mx='auto' display='flex' >
                             {stepStatus === this.stepStatuses.BLOCKED && (
-                                <Typography variant='h4'>
-                                    <FormattedMessage
-                                        id={'Apis.Details.Credentials.Wizard.Wizard.approval.request.'
+                                <Box pt={2} px={3} display='flex' >
+                                    <Typography variant='h5'>
+                                        <FormattedMessage
+                                            id={'Apis.Details.Credentials.Wizard.Wizard.approval.request.'
                                                     + 'for.this.step.has'}
-                                        defaultMessage='Approval request for this step has been Sent'
-                                    />
-                                </Typography>
+                                            defaultMessage='A request to register this step has been sent.'
+                                        />
+                                    </Typography>
+                                </Box>
                             )}
                         </Box>
                     </Paper>
