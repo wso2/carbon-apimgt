@@ -3097,9 +3097,9 @@ public class APIProviderImplTest {
         Assert.assertEquals(2, checkListItems.size());
         if (checkListItems.get(0) instanceof CheckListItem) {
             CheckListItem checkListItem = (CheckListItem) checkListItems.get(0);
-            Assert.assertTrue((APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM).equals(checkListItem.getName()) ||
-                    (APIConstants.DEPRECATE_CHECK_LIST_ITEM).equals(checkListItem.getName()));
-            if ((APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM).equals(checkListItem.getName())) {
+            Assert.assertTrue(("Requires re-subscription when publish the API").equals(checkListItem.getName()) ||
+                    ("Deprecate old versions after publish the API").equals(checkListItem.getName()));
+            if (("Requires re-subscription when publish the API").equals(checkListItem.getName())) {
                 Assert.assertEquals("1", checkListItem.getOrder());
             } else {
                 Assert.assertEquals("0", checkListItem.getOrder());
@@ -3109,9 +3109,9 @@ public class APIProviderImplTest {
         }
         if (checkListItems.get(1) instanceof CheckListItem) {
             CheckListItem checkListItem = (CheckListItem) checkListItems.get(1);
-            Assert.assertTrue((APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM).equals(checkListItem.getName()) ||
-                    (APIConstants.DEPRECATE_CHECK_LIST_ITEM).equals(checkListItem.getName()));
-            if ((APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM).equals(checkListItem.getName())) {
+            Assert.assertTrue(("Requires re-subscription when publish the API").equals(checkListItem.getName()) ||
+                    ("Deprecate old versions after publish the API").equals(checkListItem.getName()));
+            if (("Requires re-subscription when publish the API").equals(checkListItem.getName())) {
                 Assert.assertEquals("1", checkListItem.getOrder());
             } else {
                 Assert.assertEquals("0", checkListItem.getOrder());
@@ -4124,7 +4124,7 @@ public class APIProviderImplTest {
 
         Property property1 = new Property();
         property1.setKey("registry.custom_lifecycle.checklist.option.APILifeCycle.1.item");
-        String[] values1 = {"status:Created", "name:Requires re-subscription when publishing the API", "value:false",
+        String[] values1 = {"status:Created", "name:Requires re-subscription when publish the API", "value:false",
                 "order:1"};
         property1.setValues(values1);
 
@@ -4150,7 +4150,7 @@ public class APIProviderImplTest {
 
         Property property6 = new Property();
         property6.setKey("registry.custom_lifecycle.checklist.option.APILifeCycle.0.item");
-        String[] values6 = {"status:Created", "name:Deprecate old versions after publishing the API", "value:false",
+        String[] values6 = {"status:Created", "name:Deprecate old versions after publish the API", "value:false",
                 "order:0"};
         property6.setValues(values6);
 
