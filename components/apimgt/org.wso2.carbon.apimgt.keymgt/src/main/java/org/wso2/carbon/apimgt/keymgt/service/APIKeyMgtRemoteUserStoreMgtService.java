@@ -55,7 +55,6 @@ public class APIKeyMgtRemoteUserStoreMgtService extends AbstractAdmin {
             isAuthenticated = userStoreManager.authenticate(tenantAwareUserName, password);
         } catch (UserStoreException e) {
             APIUtil.handleException("Error occurred while validating credentials of user " + username, e);
-
         } finally {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().endTenantFlow();
         }
