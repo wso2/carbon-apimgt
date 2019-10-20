@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState, useRef } from 'react';
+import React, {useState, useRef, useContext} from 'react';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -31,6 +31,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import CreateEditForm from './CreateEditForm';
 import Api from 'AppData/api';
 import { isRestricted } from 'AppData/AuthManager';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = {
     appBar: {
@@ -68,6 +69,7 @@ function Edit(props) {
     const [open, setOpen] = useState(false);
     const [saveDisabled, setSaveDisabled] = useState(false);
     let createEditForm = useRef(null);
+    const { api } = useContext(APIContext);
 
     const toggleOpen = () => {
         setOpen(!open);
@@ -119,7 +121,7 @@ function Edit(props) {
             });
     };
 
-    const { classes, docId, apiId, api} = props;
+    const { classes, docId, apiId } = props;
     return (
         <div>
             <Button onClick={toggleOpen} disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}>

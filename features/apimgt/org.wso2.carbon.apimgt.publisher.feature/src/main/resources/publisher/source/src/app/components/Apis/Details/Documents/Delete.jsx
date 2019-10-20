@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
@@ -30,10 +30,12 @@ import APIProduct from 'AppData/APIProduct';
 import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
 import { isRestricted } from 'AppData/AuthManager';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 function Delete(props) {
-    const { intl, api } = props;
+    const { intl } = props;
     const [open, setOpen] = useState(false);
+    const { api } = useContext(APIContext);
 
     const runAction = (action) => {
         if (action === 'yes') {
