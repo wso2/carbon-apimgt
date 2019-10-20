@@ -378,7 +378,6 @@ public class APIKeyValidator {
                         if (log.isDebugEnabled()) {
                             log.debug("Resource not found in cache for key: " + resourceCacheKey);
                         }
-                        break;
                     }
                 }
             }
@@ -490,7 +489,9 @@ public class APIKeyValidator {
                                 resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
                                         resourceString, httpMethod);
                                 verb.setRequestKey(resourceCacheKey);
-                                verbInfoList.add(verb);
+                                if (!verbInfoList.contains(verb)) {
+                                    verbInfoList.add(verb);
+                                }
                                 if (isGatewayAPIResourceValidationEnabled) {
                                     //Store verb in cache
                                     //Set cache key in the message c\ontext so that it can be used by the subsequent handlers.

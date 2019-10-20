@@ -19,17 +19,19 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import graphql.language.FieldDefinition;
+import graphql.language.ObjectTypeDefinition;
+import graphql.language.TypeDefinition;
+import graphql.schema.idl.SchemaParser;
+import graphql.schema.idl.TypeDefinitionRegistry;
 import io.swagger.models.Swagger;
 import io.swagger.parser.OpenAPIParser;
-import io.swagger.parser.SwaggerParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.entity.ContentType;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -58,6 +60,48 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 public class GraphQLSchemaDefinition {
 
     protected Log log = LogFactory.getLog(getClass());
+
+    /**
+     * Extract GraphQL Operations from given schema
+     * @param schema graphQL Schema
+     * @return the arrayList of APIOperationsDTOextractGraphQLOperationList
+     *
+     */
+    public List<URITemplate> extractGraphQLOperationList(String schema, String type) {
+        List<URITemplate> operationArray = new ArrayList<>();
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
+        Map<java.lang.String, TypeDefinition> operationList = typeRegistry.types();
+        for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
+            if (entry.getValue().getName().equals(APIConstants.GRAPHQL_QUERY) ||
+                    entry.getValue().getName().equals(APIConstants.GRAPHQL_MUTATION)
+                    || entry.getValue().getName().equals(APIConstants.GRAPHQL_SUBSCRIPTION)) {
+                if (type != null && type.equals(entry.getValue().getName().toUpperCase())) {
+                    addOperations(entry, operationArray);
+                } else if (type != null && type.equals(entry.getValue().getName().toUpperCase())) {
+                    addOperations(entry, operationArray);
+                } else if (type != null &&  type.equals(entry.getValue().getName().toUpperCase())) {
+                    addOperations(entry, operationArray);
+                } else if (type == null) {
+                    addOperations(entry, operationArray);
+                }
+            }
+        }
+        return operationArray;
+    }
+
+
+    /*
+
+     */
+    private void addOperations(Map.Entry<String, TypeDefinition> entry, List<URITemplate> operationArray) {
+        for (FieldDefinition fieldDef : ((ObjectTypeDefinition) entry.getValue()).getFieldDefinitions()) {
+            URITemplate operation = new URITemplate();
+            operation.setHTTPVerb(entry.getKey());
+            operation.setUriTemplate(fieldDef.getName());
+            operationArray.add(operation);
+        }
+    }
 
     /**
      * build schema with scopes and roles

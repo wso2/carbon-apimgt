@@ -183,7 +183,8 @@ class Operations extends React.Component {
     handleUpdateList(newOperation) {
         const { operations } = this.state;
         const updatedList = operations.map(operation =>
-            (operation.target === newOperation.target ? newOperation : operation));
+            ((operation.target === newOperation.target && operation.verb === newOperation.verb)
+                ? newOperation : operation));
         this.setState({ operations: updatedList });
     }
 

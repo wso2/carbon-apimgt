@@ -46,9 +46,11 @@ import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 
 import java.io.IOException;
 import java.util.Base64;
@@ -74,6 +76,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
     private GraphQLSchema schema = null;
     private static Validator validator;
     private String apiUUID;
+    private String schemaDefinition;
 
     public GraphQLAPIHandler() {
 
@@ -93,10 +96,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
     public boolean handleRequest(MessageContext messageContext) {
         try {
             String payload;
-            String operationList = "";
             Parser parser = new Parser();
-
-            ArrayList<String> operationArray = new ArrayList<>();
 
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                     getAxis2MessageContext();
@@ -129,6 +129,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
             if (validatePayloadWithSchema(messageContext, document)) {
                 supportForBasicAndAuthentication(messageContext);
+
                 // Extract the operation type and operations from the payload
                 for (Definition definition : document.getDefinitions()) {
                     if (definition instanceof OperationDefinition) {
@@ -137,31 +138,13 @@ public class GraphQLAPIHandler extends AbstractHandler {
                             String httpVerb = ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                                     getProperty(HTTP_METHOD).toString();
                             messageContext.setProperty(HTTP_VERB, httpVerb);
-                            ((Axis2MessageContext) messageContext).getAxis2MessageContext().
-                                    setProperty(HTTP_METHOD, operation.getOperation().toString());
-                            if (Operation.QUERY.equals(operation.getOperation())) {
-                                for (Selection selection : operation.getSelectionSet().getSelections()) {
-                                    if (selection instanceof Field) {
-                                        Field field = (Field) selection;
-                                        operationArray.add(field.getName());
-                                        if (log.isDebugEnabled()) {
-                                            log.debug("Operation - Query " + field.getName());
-                                        }
-                                    }
-                                }
-                                operationList = String.join(",", operationArray);
-                            } else if (operation.getOperation().equals(Operation.MUTATION)) {
-                                operationList = operation.getName();
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Operation - Mutation " + operation.getName());
-                                }
-                            } else if (operation.getOperation().equals(Operation.SUBSCRIPTION)) {
-                                operationList = operation.getName();
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Operation - Subscription " + operation.getName());
-                                }
-                            }
+                            ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty(HTTP_METHOD,
+                                    operation.getOperation().toString());
+                            String operationList = getOperationList(messageContext, operation);
                             messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, operationList);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Operation list has been successfully added to elected property");
+                            }
                             return true;
                         }
                     } else {
@@ -177,6 +160,107 @@ public class GraphQLAPIHandler extends AbstractHandler {
             handleFailure(messageContext, e.getMessage());
         }
         return false;
+    }
+
+    /**
+     * This method used to extract operation List
+     * @param messageContext messageContext
+     * @param operation operation
+     * @return operationList
+     */
+    private String getOperationList(MessageContext messageContext,OperationDefinition operation) {
+        String operationList = "";
+        GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
+        ArrayList<String> operationArray = new ArrayList<>();
+
+        List<URITemplate> list = graphql.extractGraphQLOperationList(schemaDefinition,
+                operation.getOperation().toString());
+        ArrayList<String> supportedFields = getSupportedFields(list);
+
+        if (Operation.QUERY.equals(operation.getOperation())) {
+            if (log.isDebugEnabled()) {
+                log.debug("Operation - Subscription " + operation.getName());
+            }
+            getNestedLevelOperations(operation, supportedFields, operationArray);
+            operationList = String.join(",", operationArray);
+        } else if (operation.getOperation().equals(Operation.MUTATION)) {
+            // Will support if there can be exist nexted level mutation operations
+            operationList = operation.getName();
+            if (log.isDebugEnabled()) {
+                log.debug("Operation - Mutation " + operation.getName());
+            }
+        } else if (operation.getOperation().equals(Operation.SUBSCRIPTION)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Operation - Subscription " + operation.getName());
+            }
+            getNestedLevelOperations(operation, supportedFields, operationArray);
+            operationList = String.join(",", operationArray);
+        }
+        return operationList;
+    }
+
+    /**
+     * This method support to extracted nested level operations (up to three level)
+     * @param operation operation
+     * @param supportedFields supportedFields
+     * @param operationArray operationArray
+     */
+    private void getNestedLevelOperations(OperationDefinition operation, ArrayList<String> supportedFields,
+                                   ArrayList<String> operationArray) {
+
+        for (Selection selectionFirstLevel : operation.getSelectionSet().getSelections()) {
+            Field firstLevelField = (Field) selectionFirstLevel;
+            if (!operationArray.contains(firstLevelField.getName()) &&
+                    supportedFields.contains(firstLevelField.getName())) {
+                operationArray.add(firstLevelField.getName());
+                if (log.isDebugEnabled()) {
+                    log.debug("Extracted first level " + firstLevelField.getName());
+                }
+            }
+            if (firstLevelField.getSelectionSet() != null) {
+                for (Selection selectionSecondLevel : firstLevelField.getSelectionSet().getSelections()) {
+                    if (selectionSecondLevel instanceof Field && ((Field) selectionSecondLevel)
+                            .getSelectionSet() !=null) {
+                        Field secondLevelField = (Field) selectionSecondLevel;
+                        if (!operationArray.contains(secondLevelField.getName()) &&
+                                supportedFields.contains(secondLevelField.getName())) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Extracted second level " + secondLevelField.getName());
+                            }
+                            operationArray.add(secondLevelField.getName());
+                        }
+                        if (secondLevelField.getSelectionSet() != null) {
+                            for (Selection selectionThirdLevel : secondLevelField.getSelectionSet().getSelections()) {
+                                if (selectionThirdLevel instanceof Field && ((Field)
+                                        selectionThirdLevel).getSelectionSet() !=null) {
+                                    Field thirdLevelField = (Field) selectionThirdLevel;
+                                    if (!operationArray.contains(thirdLevelField.getName()) &&
+                                            supportedFields.contains(thirdLevelField.getName())) {
+                                        if (log.isDebugEnabled()) {
+                                            log.debug("Extracted third level" + thirdLevelField.getName());
+                                        }
+                                        operationArray.add(thirdLevelField.getName());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * This method helps to extract only supported operation names
+     * @param list URITemplates
+     * @return supported Fields
+     */
+    private ArrayList<String> getSupportedFields(List<URITemplate> list) {
+        ArrayList<String> supportedFields = new ArrayList<>();
+        for(URITemplate template: list) {
+            supportedFields.add(template.getUriTemplate());
+        }
+        return supportedFields;
     }
 
     /**
@@ -208,19 +292,36 @@ public class GraphQLAPIHandler extends AbstractHandler {
                     } else if (additionalType.getName().contains(APIConstants.SCOPE_OPERATION_MAPPING)) {
                         String base64DecodedURLScope = new String(Base64.getUrlDecoder().decode(type.getName()));
                         operationScopeMappingList.put(base64DecodedAdditionalType, base64DecodedURLScope);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Added operation " + base64DecodedAdditionalType + "with scope "
+                                    + base64DecodedURLScope);
+                        }
                     } else if (additionalType.getName().contains(APIConstants.OPERATION_THROTTLING_MAPPING)) {
                         String base64DecodedURLThrottlingTier = new String(Base64.getUrlDecoder().decode(type.getName()));
                         operationThrottlingMappingList.put(base64DecodedAdditionalType, base64DecodedURLThrottlingTier);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Added operation " + base64DecodedAdditionalType + "with throttling "
+                                    + base64DecodedURLThrottlingTier);
+                        }
+
                     } else if (additionalType.getName().contains(APIConstants.OPERATION_AUTH_SCHEME_MAPPING)) {
                         boolean isSecurityEnabled = true;
                         if (APIConstants.OPERATION_SECURITY_DISABLED.equalsIgnoreCase(type.getName())) {
                             isSecurityEnabled = false;
                         }
                         operationAuthSchemeMappingList.put(base64DecodedAdditionalType, isSecurityEnabled);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Added operation " + base64DecodedAdditionalType + "with security "
+                                    + isSecurityEnabled);
+                        }
                     }
                 }
                 if (!roleArrayList.isEmpty()) {
                     scopeRoleMappingList.put(base64DecodedAdditionalType, roleArrayList);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Added scope " + base64DecodedAdditionalType + "with role list "
+                                + String.join(",", roleArrayList));
+                    }
                 }
             }
         }
@@ -250,7 +351,8 @@ public class GraphQLAPIHandler extends AbstractHandler {
                         GRAPHQL_IDENTIFIER);
                 if (localEntryObj != null) {
                     SchemaParser schemaParser = new SchemaParser();
-                    TypeDefinitionRegistry registry = schemaParser.parse(localEntryObj.getValue().toString());
+                    schemaDefinition = localEntryObj.getValue().toString();
+                    TypeDefinitionRegistry registry = schemaParser.parse(schemaDefinition);
                     schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
                 }
             }
@@ -258,6 +360,9 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
         validationErrors = validator.validateDocument(schema, document);
         if (validationErrors != null && validationErrors.size() > 0) {
+            if (log.isDebugEnabled()) {
+                log.debug("Validation failed for " + document);
+            }
             for (ValidationError error : validationErrors) {
                 validationErrorMessageList.add(error.getDescription());
             }
