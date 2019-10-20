@@ -26,7 +26,6 @@ import Login from './app/components/Login/Login';
 import Logout from './app/components/Logout';
 import SignUp from './app/components/AnonymousView/SignUp';
 import Progress from './app/components/Shared/Progress';
-import defaultTheme from './theme.json';
 import { SettingsProvider } from './app/components/Shared/SettingsContext';
 import AuthManager from './app/data/AuthManager';
 import BrowserRouter from './app/components/Base/CustomRouter/BrowserRouter';
@@ -59,7 +58,6 @@ class Store extends React.Component {
         this.state = {
             settings: null,
             tenantDomain: null,
-            istenantThemeAvailble: false,
             theme: null,
         };
         this.SetTenantTheme = this.SetTenantTheme.bind(this);
@@ -79,7 +77,7 @@ class Store extends React.Component {
         });
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('tenant') === null || urlParams.get('tenant') === 'carbon.super') {
-            this.setState({ theme: defaultTheme.themes.light });
+            this.setState({ theme: Configurations.themes.light });
         } else {
             this.SetTenantTheme(urlParams.get('tenant'));
         }
@@ -93,7 +91,7 @@ class Store extends React.Component {
     setTenantDomain = (tenantDomain) => {
         this.setState({ tenantDomain });
         if (tenantDomain === 'carbon.super') {
-            this.setState({ theme: defaultTheme.themes.light });
+            this.setState({ theme: Configurations.themes.light });
         } else {
             this.SetTenantTheme(tenantDomain);
         }
@@ -109,10 +107,9 @@ class Store extends React.Component {
             .then(resp => resp.json())
             .then((data) => {
                 this.setState({ theme: data.themes.light });
-                this.setState({ istenantThemeAvailble: true });
             })
             .catch(() => {
-                this.setState({ theme: defaultTheme.themes.light });
+                this.setState({ theme: Configurations.themes.light });
             });
     }
 
@@ -122,13 +119,8 @@ class Store extends React.Component {
      * @memberof Store
      */
     render() {
-        const {
-            settings, tenantDomain, theme, istenantThemeAvailble,
-        } = this.state;
+        const { settings, tenantDomain, theme } = this.state;
         const { app: { context } } = Settings;
-        if (theme && !istenantThemeAvailble) {
-            Object.assign(theme, JSON.parse(JSON.stringify(Configurations.themes.light)));
-        }
         return (
             settings && theme && (
                 <SettingsProvider value={{ settings, tenantDomain, setTenantDomain: this.setTenantDomain }}>
