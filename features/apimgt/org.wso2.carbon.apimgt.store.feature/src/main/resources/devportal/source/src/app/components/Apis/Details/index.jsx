@@ -436,7 +436,7 @@ class Details extends React.Component {
                     {!api.advertiseInfo.advertised && api.type !== 'WS' && (
                         <LeftMenuItem
                             text={
-                                <FormattedMessage id='Apis.Details.index.sdk' defaultMessage='SDK' />
+                                <FormattedMessage id='Apis.Details.index.sdk' defaultMessage='SDKs' />
                             }
                             route='sdk'
                             iconText='sdk'

@@ -62,6 +62,11 @@ const styles = theme => ({
     userNotificationPaper: {
         padding: theme.spacing.unit * 2,
     },
+    titleSub: {
+        marginLeft: theme.spacing(2),
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
+    },
 });
 /**
  *
@@ -343,6 +348,9 @@ class ApiConsole extends React.Component {
 
         return (
             <React.Fragment>
+                <Typography variant='h4' className={classes.titleSub}>
+                    <FormattedMessage id='Apis.Details.ApiConsole.ApiConsole.title' defaultMessage='Try Out' />
+                </Typography>
                 <Paper className={classes.paper}>
                     <Grid container className={classes.grid}>
                         {!user && (
