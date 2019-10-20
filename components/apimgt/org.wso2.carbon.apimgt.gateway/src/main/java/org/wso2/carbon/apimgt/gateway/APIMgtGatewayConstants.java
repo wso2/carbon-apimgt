@@ -46,7 +46,7 @@ public class APIMgtGatewayConstants {
     public static final String REVOKED_ACCESS_TOKEN = "RevokedAccessToken";
     public static final String DEACTIVATED_ACCESS_TOKEN = "DeactivatedAccessToken";
     public static final String SCOPES = "Scopes";
-    public static final String REQUEST_EXECUTION_START_TIME ="request.execution.start.time";
+    public static final String REQUEST_EXECUTION_START_TIME = "request.execution.start.time";
     public static final String SYNAPSE_ENDPOINT_ADDRESS = "ENDPOINT_ADDRESS";
     public static final String DUMMY_ENDPOINT_ADDRESS = "dummy_endpoint_address";
 
@@ -56,7 +56,7 @@ public class APIMgtGatewayConstants {
     public static final String RESOURCE_NOT_FOUND_ERROR_MSG = "No matching resource found for given API Request";
     public static final String REQUEST_TYPE_FAIL_MSG = "Neither request method nor content type is matched with" +
             " the validator.";
-    
+
     public static final String BACKEND_LATENCY = "backend_latency";
     public static final String SECURITY_LATENCY = "security_latency";
     public static final String THROTTLING_LATENCY = "throttling_latency";
@@ -71,7 +71,7 @@ public class APIMgtGatewayConstants {
     public static final String REGEX_PATTERN = "regex";
     public static final String ENABLED_CHECK_BODY = "enabledCheckBody";
     public static final String ENABLED_CHECK_PATHPARAM = "enabledCheckPathParams";
-    public static final String ENABLED_CHECK_HEADERS  = "enabledCheckHeaders";
+    public static final String ENABLED_CHECK_HEADERS = "enabledCheckHeaders";
     public static final String REST_URL_POSTFIX = "REST_URL_POSTFIX";
     public static final String TRANSPORT_HEADERS = "TRANSPORT_HEADERS";
     public static final String SERVICE_PREFIX = "SERVICE_PREFIX";
@@ -91,6 +91,7 @@ public class APIMgtGatewayConstants {
     public static final String THREAT_MSG = "THREAT_MSG";
     public static final String THREAT_DESC = "THREAT_DESC";
     public static final String BAD_REQUEST = "Bad Request";
+    public static final String BAD_RESPONSE = "Bad Response";
     public static final String THREAT_TYPE = "threatType";
     public static final String THREAT_FAULT = "_threat_fault_";
     public static final String XML_VALIDATION = "xmlValidation";
@@ -100,9 +101,9 @@ public class APIMgtGatewayConstants {
 
     /**
      * Web socket header for jwt assertion.
-     * */
+     */
     public static final String WS_JWT_TOKEN_HEADER = "websocket.custom.header.X-JWT-Assertion";
-    
+
     public static final String GATEWAY_TYPE = "SYNAPSE";
     public static final String SYNAPDE_GW_LABEL = "Synapse";
     public static final String CLIENT_USER_AGENT = "clientUserAgent";
@@ -110,7 +111,7 @@ public class APIMgtGatewayConstants {
 
     /**
      * Constants for Open Tracing
-     * */
+     */
     public static final String SERVICE_NAME = "API:Latency";
     public static final String RESPONSE_LATENCY = "API:Response_Latency";
     public static final String BACKEND_LATENCY_SPAN = "API:Backend_Latency";
@@ -158,6 +159,9 @@ public class APIMgtGatewayConstants {
     public static final char JSONPATH_SEPARATE = '.';
     public static final String JSON_RESPONSES = ".responses.";
     public static final String EMPTY_ARRAY = "[]";
+    public static final String INTERNAL_ERROR_CODE = "500";
+    public static final String DEFINITIONS = "definitions";
+
     public static final char HASH = '#';
     public static final String EMPTY = "";
     public static final String BACKWARD_SLASH = "\"";
@@ -172,7 +176,7 @@ public class APIMgtGatewayConstants {
 
     /**
      * Constants for trust store access
-     * */
+     */
     public static final String TRUST_STORE_PASSWORD = "Security.TrustStore.Password";
     public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
     public static final String HTTP_RESPONSE_STATUS_CODE = "HTTP_RESPONSE_STATUS_CODE";
