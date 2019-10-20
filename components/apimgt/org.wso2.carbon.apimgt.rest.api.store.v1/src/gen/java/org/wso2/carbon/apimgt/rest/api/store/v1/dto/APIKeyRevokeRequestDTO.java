@@ -1,9 +1,15 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModelProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import javax.validation.constraints.*;
 
+
+import io.swagger.annotations.*;
 import java.util.Objects;
+
+import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 

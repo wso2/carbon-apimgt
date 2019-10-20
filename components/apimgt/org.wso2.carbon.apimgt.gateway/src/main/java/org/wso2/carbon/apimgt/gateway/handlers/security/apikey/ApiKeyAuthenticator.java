@@ -182,7 +182,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                         log.debug("Api Key retrieved from the invalid Api Key cache. Api Key: " +
                                 GatewayUtils.getMaskedToken(splitToken));
                     }
-                    log.error("Invalid Api Key.");
+                    log.error("Invalid Api Key." + GatewayUtils.getMaskedToken(splitToken));
                     throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 } else if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
@@ -190,9 +190,9 @@ public class ApiKeyAuthenticator implements Authenticator {
                         log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
                                 getMaskedToken(splitToken));
                     }
-                    log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
+                    log.error("Invalid API Key. " + GatewayUtils.getMaskedToken(splitToken));
                     throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                            "Invalid JWT token");
+                            "Invalid API Key");
                 }
             } else {
                 if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {

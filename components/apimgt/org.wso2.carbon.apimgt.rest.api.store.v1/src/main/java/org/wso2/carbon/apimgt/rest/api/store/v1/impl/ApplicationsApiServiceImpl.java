@@ -386,7 +386,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             }
                         } else {
                             if (log.isDebugEnabled()) {
-                                log.debug("Logged in user " + username + " isn't owner of the application "
+                                log.debug("Logged in user " + username + " isn't the owner of the application "
                                                                                                         + applicationId);
                             }
                             RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION,
