@@ -204,7 +204,11 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     @Override
     public void addDocumentation(Identifier id,
                                  Documentation documentation) throws APIManagementException {
-        checkCreatePermission();
+
+        if (!checkCreateOrPublishPermission()) {
+            throw new APIManagementException("User '" + username + "' has neither '" + APIConstants.Permissions.API_CREATE
+                    + "' nor the '" + APIConstants.Permissions.API_PUBLISH + "' permission to add API documentation");
+        }
         //todo : implement access control check for api products too
         if (id instanceof APIIdentifier) {
             checkAccessControlPermission((APIIdentifier) id);
@@ -254,7 +258,11 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     @Override
     public void updateDocumentation(APIIdentifier apiId,
                                     Documentation documentation) throws APIManagementException {
-        checkCreatePermission();
+        if (!checkCreateOrPublishPermission()) {
+            throw new APIManagementException("User '" + username + "' has neither '" +
+                    APIConstants.Permissions.API_CREATE + "' nor the '" + APIConstants.Permissions.API_PUBLISH +
+                    "' permission to update API documentation");
+        }
         checkAccessControlPermission(apiId);
         super.updateDocumentation(apiId, documentation);
     }
@@ -262,7 +270,12 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     @Override
     public void addDocumentationContent(API api, String documentationName,
                                         String text) throws APIManagementException {
-        checkCreatePermission();
+
+        if (!checkCreateOrPublishPermission()) {
+            throw new APIManagementException("User '" + username + "' has neither '" +
+                    APIConstants.Permissions.API_CREATE + "' nor the '" + APIConstants.Permissions.API_PUBLISH +
+                    "' permission to add content for API documentation");
+        }
         if (api != null) {
             checkAccessControlPermission(api.getId());
         }
