@@ -284,21 +284,38 @@ class APISecurityAudit extends Component {
         if (searchTerm !== '') {
             // let indexCount;
             const lastTerms = [];
-            const termObject = searchTerm.split('/');
+            const termObject = searchTerm.split('/').join(',').split('~1').join(',')
+                                .split(',');
+            // const lastTerms = termObject.map((term, index) => {
+            //     // indexCount++;
+            //     return editor.getModel()
+            //     .findNextMatch(term, 1, false, false, null, false);
+            // });
+
+            // const termObject = searchTerm.split('/');
             // const lastTerms = termObject.map((term, index) => {
             //     indexCount++;
             //     return editor.getModel()
             //     .findNextMatch(term, index === 0 ? lastTerms[indexCount - 1] : 1, false, false, null, false);
             // });
+
+
             for (let i = 0; i < termObject.length; i++) {
-                if (i === 0 || lastTerms[lastTerms.length - 1] === null) {
-                    if (lastTerms[lastTerms.length - 2] !== null) {
-                        lastTerms.push(editor.getModel().findNextMatch(termObject[i], { lineNumber: lastTerms[lastTerms.length - 2].range.endLineNumber, column: 1 }, false, false, null, false));
+                // if (i === 0 || lastTerms[lastTerms.length - 1] === null) {
+                //     if (lastTerms[lastTerms.length - 2] !== null) {
+                //         lastTerms.push(editor.getModel().findNextMatch(termObject[i], { lineNumber: lastTerms[lastTerms.length - 2].range.endLineNumber, column: 1 }, false, false, null, false));
+                //     } else {
+                //         lastTerms.push(editor.getModel().findNextMatch(termObject[i], 1, false, false, null, false));
+                //     }
+                // } else {
+                //     lastTerms.push(editor.getModel().findNextMatch(termObject[i], { lineNumber: lastTerms[lastTerms.length - 1].range.endLineNumber, column: 1 }, false, false, null, false));
+                // }
+                if (termObject[i] !== '' && termObject[i] !== '0') {
+                    if (i !== 0 && lastTerms.length !== 0 && lastTerms[lastTerms.length - 1] !== null) {
+                        lastTerms.push(editor.getModel().findNextMatch(termObject[i], { lineNumber: lastTerms[lastTerms.length - 1].range.endLineNumber, column: 1 }));
                     } else {
                         lastTerms.push(editor.getModel().findNextMatch(termObject[i], 1, false, false, null, false));
                     }
-                } else {
-                    lastTerms.push(editor.getModel().findNextMatch(termObject[i], { lineNumber: lastTerms[lastTerms.length - 1].range.endLineNumber, column: 1 }, false, false, null, false));
                 }
             }
             const finalMatchIndex = lastTerms.length - 1;
