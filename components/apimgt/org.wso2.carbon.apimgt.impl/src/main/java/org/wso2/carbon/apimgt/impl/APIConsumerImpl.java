@@ -5448,7 +5448,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
             HttpClient httpClient = APIUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
             JSONObject revokeRequestPayload = new JSONObject();
-            revokeRequestPayload.put("apiKey", apiKey);
+            revokeRequestPayload.put("apikey", apiKey);
             revokeRequestPayload.put("expiryTime", expiryTime);
             revokeRequestPayload.put("tenantId", tenantId);
             StringEntity requestEntity = new StringEntity(revokeRequestPayload.toString());

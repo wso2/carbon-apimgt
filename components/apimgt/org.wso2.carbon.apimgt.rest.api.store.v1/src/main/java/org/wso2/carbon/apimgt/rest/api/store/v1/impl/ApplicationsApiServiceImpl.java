@@ -376,6 +376,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                 }
                                 String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
                                 apiConsumer.revokeAPIKey(apiKey, expiryTime, tenantDomain);
+                                return Response.ok().build();
                             } else {
                                 if (log.isDebugEnabled()) {
                                     log.debug("Application uuid " + applicationId + " isn't matched with the " +
