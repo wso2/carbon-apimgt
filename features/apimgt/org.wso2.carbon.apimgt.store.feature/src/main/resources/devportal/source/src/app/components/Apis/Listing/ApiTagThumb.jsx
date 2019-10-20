@@ -19,6 +19,10 @@
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import Icon from '@material-ui/core/Icon';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -29,7 +33,7 @@ import classNames from 'classnames';
  */
 const styles = theme => ({
     thumbContent: {
-        width: theme.custom.tagThumbnail.width - theme.spacing.unit,
+        width: theme.custom.tagWise.thumbnail.width - theme.spacing.unit,
         backgroundColor: theme.palette.background.paper,
         padding: theme.spacing.unit,
     },
@@ -44,7 +48,7 @@ const styles = theme => ({
         display: 'flex',
     },
     thumbHeader: {
-        width: theme.custom.tagThumbnail.width - theme.spacing.unit,
+        width: theme.custom.tagWise.thumbnail.width - theme.spacing.unit,
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -76,12 +80,12 @@ const styles = theme => ({
         textDecoration: 'none',
     },
     image: {
-        width: theme.custom.tagThumbnail.width,
+        width: theme.custom.tagWise.thumbnail.width,
     },
     imageWrapper: {
         color: theme.palette.text.secondary,
         backgroundColor: theme.palette.background.paper,
-        width: theme.custom.tagThumbnail.width + theme.spacing.unit,
+        width: theme.custom.tagWise.thumbnail.width + theme.spacing.unit,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -100,32 +104,36 @@ const styles = theme => ({
  */
 function ApiTagThumb(props) {
     const {
-        tag, path, classes, theme,
+        tag, path, classes, theme, style,
     } = props;
     const tagLink = path + ':' + tag.value;
-    const { thumbnail, tagThumbnail } = theme.custom;
-    const name = tag.value.split(theme.custom.tagGroupKey)[0];
-    const { contentPictureOverlap } = thumbnail;
-    const { defaultTagImage } = tagThumbnail;
+    const {
+        tagWise: {
+            thumbnail: { image },
+        },
+    } = theme.custom;
+    const name = tag.value.split(theme.custom.tagWise.key)[0];
+    if (style === 'fixed-left') {
+        return (
+            <Link to={tagLink} className={classes.textWrapper}>
+                <ListItem button>
+                    <ListItemIcon>
+                        <Icon>label</Icon>
+                    </ListItemIcon>
+                    <ListItemText primary={name} />
+                </ListItem>
+            </Link>
+        );
+    }
 
     return (
         <div className={classes.thumbWrapper}>
             <Link to={tagLink} className={classes.imageWrapper}>
-                <img src={defaultTagImage} className={classes.image} alt='' />
+                <img src={image} className={classes.image} alt='' />
             </Link>
-            <div
-                className={classNames(classes.thumbContent, {
-                    [classes.imageOverlap]: contentPictureOverlap,
-                })}
-            >
+            <div className={classNames(classes.thumbContent)}>
                 <Link to={tagLink} className={classes.textWrapper}>
-                    <Typography
-                        className={classes.thumbHeader}
-                        variant='h4'
-                        gutterBottom
-                        onClick={this}
-                        title={name}
-                    >
+                    <Typography className={classes.thumbHeader} variant='h4' gutterBottom title={name}>
                         {name}
                     </Typography>
                 </Link>
@@ -146,22 +154,16 @@ ApiTagThumb.propTypes = {
     }).isRequired,
     theme: PropTypes.shape({
         custom: PropTypes.shape({
-            thumbnail: PropTypes.shape({
-                contentPictureOverlap: PropTypes.shape({}).isRequired,
-            }).isRequired,
-            tagThumbnail: PropTypes.shape({
-                defaultTagImage: PropTypes.shape({}).isRequired,
-            }).isRequired,
-            tagGroupKey: PropTypes.string.isRequired,
+            tagWise: PropTypes.shape({}).isRequired,
         }).isRequired,
     }).isRequired,
-    listType: PropTypes.shape({}).isRequired,
     tag: PropTypes.shape({
         value: PropTypes.shape({
             split: PropTypes.func,
         }).isRequired,
     }).isRequired,
     path: PropTypes.shape({}).isRequired,
+    style: PropTypes.string.isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(ApiTagThumb);
