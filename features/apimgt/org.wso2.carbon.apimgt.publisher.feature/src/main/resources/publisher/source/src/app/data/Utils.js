@@ -216,7 +216,7 @@ class Utils {
     }
 
     /**
-     * Recursivly freez and object properties.
+     * Recursively freeze and object properties.
      * Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze
      * @static
      * @param {Object} object Object that needs to be frozen
@@ -224,6 +224,9 @@ class Utils {
      * @memberof Utils
      */
     static deepFreeze(object) {
+        if (Object.isFrozen(object)) {
+            return object;
+        }
         const trickObject = object; // This is to satisfy the es-lint rule
         // Retrieve the property names defined on object
         const propNames = Object.getOwnPropertyNames(object);

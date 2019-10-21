@@ -165,6 +165,9 @@ function APICreateDefault(props) {
                         setPageError(message);
                     }
                     console.error(error);
+                    setIsPublishing(false); // We don't publish if something when wrong
+                }).finally(() => {
+                    setIsCreating(false);
                 });
         }
         return promisedCreatedAPI.finally(() => setIsCreating(false));
@@ -188,7 +191,7 @@ function APICreateDefault(props) {
                         Alert.error(error.response.body.description);
                         setPageError(error.response.body);
                     } else {
-                        const message = 'Something went wrong while publising the API';
+                        const message = 'Something went wrong while publishing the API';
                         Alert.error(message);
                         setPageError(message);
                     }
@@ -240,8 +243,7 @@ function APICreateDefault(props) {
                     <FormattedMessage
                         id='Apis.Create.Default.APICreateDefault.apiProduct.sub.heading'
                         defaultMessage={
-                            'Create an API Product by providing a Name, a Context,' +
-                            ' and Business Plans (optional).'
+                            'Create an API Product by providing a Name, a Context,' + ' and Business Plans (optional).'
                         }
                     />
                 </Typography>
@@ -260,8 +262,7 @@ function APICreateDefault(props) {
                     <FormattedMessage
                         id='Apis.Create.Default.APICreateDefault.webSocket.sub.heading'
                         defaultMessage={
-                            'Create a WebSocket API by providing a Name, a Context,' +
-                            ' and Business Plans (optional).'
+                            'Create a WebSocket API by providing a Name, a Context,' + ' and Business Plans (optional).'
                         }
                     />
                 </Typography>
@@ -275,7 +276,14 @@ function APICreateDefault(props) {
                 {/* Page error banner */}
                 {pageError && (
                     <Grid item xs={11}>
-                        <Banner disableActions dense paperProps={{ elevation: 1 }} type='error' message={pageError} />
+                        <Banner
+                            onClose={() => setPageError(null)}
+                            disableActions
+                            dense
+                            paperProps={{ elevation: 1 }}
+                            type='error'
+                            message={pageError}
+                        />
                     </Grid>
                 )}
                 {/* end of Page error banner */}

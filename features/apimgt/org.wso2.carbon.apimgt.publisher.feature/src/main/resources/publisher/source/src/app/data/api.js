@@ -234,7 +234,7 @@ class API extends Resource {
             return client.apis['Validation'].validateEndpoint(({ endpointUrl: endpointUrl, apiId: apiId }));
         });
     }
-    
+
     save(openAPIVersion = 'v3') {
         const promisedAPIResponse = this.client.then((client) => {
             const properties = client.spec.definitions.API.properties;

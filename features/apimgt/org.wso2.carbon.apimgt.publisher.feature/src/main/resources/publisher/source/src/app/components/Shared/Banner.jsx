@@ -50,9 +50,6 @@ function Banner(props) {
     } = props;
     const classes = useStyles();
     const [isOpen, setIsOpen] = useState(open);
-    useEffect(() => {
-        setIsOpen(open);
-    }, [open]);
     const iconProps = {};
     if (dense) {
         iconProps.fontSize = 'large';
