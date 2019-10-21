@@ -233,18 +233,6 @@ class APISecurityAudit extends Component {
             }
         }
         return dataObject;
-
-        // TODO - This code block has to be removed after completing the revamp of the API Security Audit UI.
-        // const dataObject = issues.map((issue) => {
-        //     // const lengthOfIssue = issue.length;
-        //     const rowObject = [];
-        //     rowObject.push(
-        //         this.criticalityObject[issue.criticality], issue.message,
-        //         (Math.round(issue.score * 100) / 100), issue.pointer, category,
-        //     );
-        //     return rowObject;
-        // });
-        // return dataObject;
     }
 
     /**
@@ -282,46 +270,35 @@ class APISecurityAudit extends Component {
     editorDidMount = (editor, monaco, searchTerm) => {
         const { classes } = this.props;
         if (searchTerm !== '') {
-            // let indexCount;
             const lastTerms = [];
-            const termObject = searchTerm.split('/').join(',').split('~1').join(',')
-                                .split(',');
-            // const lastTerms = termObject.map((term, index) => {
-            //     // indexCount++;
-            //     return editor.getModel()
-            //     .findNextMatch(term, 1, false, false, null, false);
-            // });
-
-            // const termObject = searchTerm.split('/');
-            // const lastTerms = termObject.map((term, index) => {
-            //     indexCount++;
-            //     return editor.getModel()
-            //     .findNextMatch(term, index === 0 ? lastTerms[indexCount - 1] : 1, false, false, null, false);
-            // });
-
-
+            const termObject = searchTerm.split('/');
+            const regexPatterns = [];
             for (let i = 0; i < termObject.length; i++) {
-                // if (i === 0 || lastTerms[lastTerms.length - 1] === null) {
-                //     if (lastTerms[lastTerms.length - 2] !== null) {
-                //         lastTerms.push(editor.getModel().findNextMatch(termObject[i], { lineNumber: lastTerms[lastTerms.length - 2].range.endLineNumber, column: 1 }, false, false, null, false));
-                //     } else {
-                //         lastTerms.push(editor.getModel().findNextMatch(termObject[i], 1, false, false, null, false));
-                //     }
-                // } else {
-                //     lastTerms.push(editor.getModel().findNextMatch(termObject[i], { lineNumber: lastTerms[lastTerms.length - 1].range.endLineNumber, column: 1 }, false, false, null, false));
-                // }
                 if (termObject[i] !== '' && termObject[i] !== '0') {
-                    if (i !== 0 && lastTerms.length !== 0 && lastTerms[lastTerms.length - 1] !== null) {
-                        lastTerms.push(editor.getModel().findNextMatch(termObject[i], { lineNumber: lastTerms[lastTerms.length - 1].range.endLineNumber, column: 1 }));
+                    let appendedString = '"' + termObject[i] + '":';
+                    if (appendedString.includes('~1')) {
+                        appendedString = appendedString.replace(/~1/i, '/');
+                    }
+                    regexPatterns.push(appendedString);
+                }
+            }
+
+            for (let j = 0; j < regexPatterns.length; j++) {
+                if (regexPatterns[j] !== '') {
+                     if (j !== 0 && lastTerms.length !== 0 && lastTerms[lastTerms.length - 1] !== null) {
+                        lastTerms.push(editor.getModel().findNextMatch(
+                            regexPatterns[j],
+                            { lineNumber: lastTerms[lastTerms.length - 1].range.endLineNumber, column: 1 },
+                            true, true, null, false,
+                        ));
                     } else {
-                        lastTerms.push(editor.getModel().findNextMatch(termObject[i], 1, false, false, null, false));
+                        lastTerms.push(editor.getModel().findNextMatch(regexPatterns[j], 1, true, true, null, true));
                     }
                 }
             }
             const finalMatchIndex = lastTerms.length - 1;
             if (lastTerms[finalMatchIndex] != null) {
                 editor.revealLineInCenter(lastTerms[finalMatchIndex].range.startLineNumber);
-                // editor.revealPositionInCenter({ lineNumber: 50, column: 120 });
                 editor.deltaDecorations([], [
                     {
                         range: new monaco.Range(
