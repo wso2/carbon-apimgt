@@ -298,6 +298,7 @@ function APICreateDefault(props) {
                         onChange={handleOnChange}
                         api={apiInputs}
                         isAPIProduct={isAPIProduct}
+                        isWebSocket={isWebSocket}
                     />
                 </Grid>
                 <Grid item md={1} xs={0} />

@@ -100,7 +100,7 @@ function actualContext({ context, version }) {
  */
 export default function DefaultAPIForm(props) {
     const {
-        onChange, onValidate, api, isAPIProduct,
+        onChange, onValidate, api, isAPIProduct, isWebSocket,
     } = props;
     const classes = useStyles();
     const [validity, setValidity] = useState({});
@@ -427,19 +427,21 @@ export default function DefaultAPIForm(props) {
                                         )}
                                         variant='outlined'
                                     />}
-                                    <IconButton
-                                        className={isEndpointValid ? classes.iconButtonValid : classes.iconButton}
-                                        aria-label='TestEndpoint'
-                                        onClick={() => testEndpoint(api.endpoint)}
-                                        disabled={isUpdating}
-                                    >
-                                        {isUpdating ?
-                                            <CircularProgress size={20} /> :
-                                            <Icon>
-                                            check_circle
-                                            </Icon>
-                                        }
-                                    </IconButton>
+                                    {!isWebSocket && (
+                                        <IconButton
+                                            className={isEndpointValid ? classes.iconButtonValid : classes.iconButton}
+                                            aria-label='TestEndpoint'
+                                            onClick={() => testEndpoint(api.endpoint)}
+                                            disabled={isUpdating}
+                                        >
+                                            {isUpdating ?
+                                                <CircularProgress size={20} /> :
+                                                <Icon>
+                                                check_circle
+                                                </Icon>
+                                            }
+                                        </IconButton>
+                                    )}
                                 </InputAdornment>
                             ),
                         }}
@@ -468,10 +470,12 @@ export default function DefaultAPIForm(props) {
 DefaultAPIForm.defaultProps = {
     onValidate: () => {},
     api: {}, // Uncontrolled component
+    isWebSocket: false,
 };
 DefaultAPIForm.propTypes = {
     api: PropTypes.shape({}),
     isAPIProduct: PropTypes.shape({}).isRequired,
+    isWebSocket: PropTypes.shape({}),
     onChange: PropTypes.func.isRequired,
     onValidate: PropTypes.func,
 };

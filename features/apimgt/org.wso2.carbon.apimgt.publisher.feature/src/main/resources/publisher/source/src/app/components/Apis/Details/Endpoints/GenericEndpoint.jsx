@@ -159,20 +159,21 @@ function GenericEndpoint(props) {
                                 )}
                                 variant='outlined'
                             />}
-
-                            <IconButton
-                                className={isEndpointValid ? classes.iconButtonValid : classes.iconButton}
-                                aria-label='TestEndpoint'
-                                onClick={() => testEndpoint(serviceUrl, apiId)}
-                                disabled={(isRestricted(['apim:api_create'], api)) || isUpdating}
-                            >
-                                {isUpdating ?
-                                    <CircularProgress size={20} /> :
-                                    <Icon>
-                                    check_circle
-                                    </Icon>
-                                }
-                            </IconButton>
+                            {!api.isWebSocket() && (
+                                <IconButton
+                                    className={isEndpointValid ? classes.iconButtonValid : classes.iconButton}
+                                    aria-label='TestEndpoint'
+                                    onClick={() => testEndpoint(serviceUrl, apiId)}
+                                    disabled={(isRestricted(['apim:api_create'], api)) || isUpdating}
+                                >
+                                    {isUpdating ?
+                                        <CircularProgress size={20} /> :
+                                        <Icon>
+                                        check_circle
+                                        </Icon>
+                                    }
+                                </IconButton>
+                            )}
                             {type === 'prototyped' ?
                                 <div /> :
                                 <IconButton
