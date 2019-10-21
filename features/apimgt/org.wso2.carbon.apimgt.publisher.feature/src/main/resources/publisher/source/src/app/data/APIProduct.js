@@ -111,6 +111,20 @@ class APIProduct extends Resource {
         return promisePolicies.then(response => response.body);
     }
 
+    getMonetizationInvoice(id, callback = null) {
+        debugger;
+        const promiseInvoice = this.client.then(client => {
+            debugger;
+            return client.apis['API Monetization'].get_subscriptions__subscriptionId__usage(
+                {
+                    subscriptionId: id
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promiseInvoice.then(response => response.body);
+    }
+
     /**
      * Create an API Product with the given parameters in template
      * @param {Object} api_product_data - APIProduct data which need to fill the placeholder values in the @get_template
