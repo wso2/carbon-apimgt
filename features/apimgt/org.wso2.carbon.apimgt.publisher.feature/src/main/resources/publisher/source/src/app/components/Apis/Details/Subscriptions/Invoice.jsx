@@ -132,15 +132,15 @@ function Invoice(props) {
                     />
                 )}
             </Dialog>
-            <Dialog open = {showErrorPopup} onClose = {handleAlertClose} fullWidth = 'true'>
+            <Dialog open={showErrorPopup} onClose={handleAlertClose} fullWidth='true'>
                 <DialogTitle>No Data Available</DialogTitle>
                 <DialogContent>
-                    <DialogContentText id="invoice-dialog-description">
+                    <DialogContentText id='invoice-dialog-description'>
                         Pending invoice data not fund for this subscription.
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleAlertClose} color="primary">
+                    <Button onClick={handleAlertClose} color='primary'>
                         Close
                     </Button>
                 </DialogActions>
