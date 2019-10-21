@@ -70,35 +70,19 @@ function TagCloudListingTags(props) {
         },
     } = theme;
 
-    const [apisTagCloudGroup, setApisTagCloudGroup] = useState(null);
 
     const tagWiseURL = '/apis?offset=0&query=tag';
-
-    /**
-     * @memberof TagCloudListing
-     */
-    useEffect(() => {
-        const api = new API();
-        const promisedTags = api.getAllTags();
-        promisedTags
-            .then((response) => {
-                if (response.body.count !== 0) {
-                    const allTags = response.body.list;
-                    let apisTagCloudGroup = null;
-                    if (allTags !== null) {
-                        apisTagCloudGroup = allTags.filter(item => active === true && item.value.split(key).length > 1);
-                    }
-                    if (apisTagCloudGroup && apisTagCloudGroup.length > 0) {
-                        setApisTagCloudGroup(apisTagCloudGroup);
-                        const tagLink = tagWiseURL + ':' + apisTagCloudGroup[0].value;
-                        if (style === 'fixed-left') history.push(tagLink);
-                    }
-                }
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }, []);
+    const { allTags } = props;
+    let apisTagCloudGroup = null;
+    if (allTags.count !== 0) {
+        if (allTags !== null) {
+            apisTagCloudGroup = allTags.filter(item => active === true && item.value.split(key).length > 1);
+        }
+        if (apisTagCloudGroup && apisTagCloudGroup.length > 0) {
+            // const tagLink = tagWiseURL + ':' + apisTagCloudGroup[0].value;
+            // if (style === 'fixed-left') history.push(tagLink);
+        }
+    }
 
     /**
      *
@@ -163,6 +147,7 @@ function TagCloudListingTags(props) {
 TagCloudListingTags.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
+    allTags: PropTypes.shape({}).isRequired,
 };
 
 export default TagCloudListingTags;

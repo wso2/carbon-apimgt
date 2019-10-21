@@ -25,6 +25,7 @@ import Icon from '@material-ui/core/Icon';
 import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import API from 'AppData/api';
 import ApiBreadcrumbs from './ApiBreadcrumbs';
 import ApiTableView from './ApiTableView';
 import { ApiContext } from '../Details/ApiContext';
@@ -85,8 +86,10 @@ const styles = theme => ({
         minWidth: theme.custom.tagWise.fixedStyles.width,
         width: theme.custom.tagWise.fixedStyles.width,
         background: theme.custom.tagWise.fixedStyles.background,
-        color: theme.palette.getContrastText(theme.custom.tagWise.fixedStyles.background),
-        margin: `${theme.spacing(2)}px ${theme.spacing(2)}px 0 0`,
+        // color: theme.custom.tagWise.fixedStyles.color,
+        boxShadow: 'none',
+        margin: `0 ${theme.spacing(2)}px 0 -${theme.spacing(3)}px`,
+        //height: containerHeight
     },
 });
 
@@ -106,6 +109,7 @@ class CommonListing extends React.Component {
         super(props);
         this.state = {
             listType: props.theme.custom.defaultApiView,
+            allTags: null,
         };
     }
 
@@ -118,7 +122,22 @@ class CommonListing extends React.Component {
     setListType = (value) => {
         this.setState({ listType: value });
     };
-
+    /**
+     *
+     * Get all tags
+     * @memberof CommonListing
+     */
+    componentDidMount() {
+        const restApiClient = new API();
+        const promisedTags = restApiClient.getAllTags();
+        promisedTags
+            .then((response) => {
+                this.setState({ allTags: response.body.list });
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
     /**
      *
      * @inheritdoctheme
@@ -139,7 +158,7 @@ class CommonListing extends React.Component {
                 tagCloud: { active: tagCloudActive },
             },
         } = theme;
-        const { listType } = this.state;
+        const { listType, allTags } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
 
         const searchParam = new URLSearchParams(search);
@@ -154,7 +173,7 @@ class CommonListing extends React.Component {
                     if (splitTagArray.length > 0) {
                         selectedTag = splitTagArray[0];
                     }
-                } else if (splits.length > 1 && splits[0] === 'tag'){
+                } else if (splits.length > 1 && splits[0] === 'tag') {
                     selectedTag = splits[1];
                 }
             }
@@ -200,11 +219,13 @@ class CommonListing extends React.Component {
                         </IconButton>
                     </div>
                 </div>
-                {active && <ApiBreadcrumbs selectedTag={selectedTag} />}
+                {active && allTags && allTags.length > 0 && <ApiBreadcrumbs selectedTag={selectedTag} />}
                 <div className={classes.listContentWrapper}>
                     <Paper className={classes.paper}>
-                        {active && style === 'fixed-left' && <TagCloudListingTags />}
-                        {tagCloudActive && <ApiTagCloud />}
+                        {active && style === 'fixed-left' && allTags && allTags.length > 0 && (
+                            <TagCloudListingTags allTags={allTags} />
+                        )}
+                        {tagCloudActive && allTags && allTags.length > 0 && <ApiTagCloud allTags={allTags} />}
                     </Paper>
                     {listType === 'grid' && (
                         <ApiContext.Provider value={{ apiType }}>
