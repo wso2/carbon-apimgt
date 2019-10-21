@@ -78,6 +78,7 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -3343,6 +3344,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         Set<SchemaValidationError> validationErrors;
         boolean isValid = false;
         SchemaParser schemaParser = new SchemaParser();
+        GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
         GraphQLValidationResponseDTO validationResponse = new GraphQLValidationResponseDTO();
 
         try {
@@ -3364,7 +3366,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 isValid = true;
                 validationResponse.setIsValid(isValid);
                 GraphQLValidationResponseGraphQLInfoDTO graphQLInfo = new GraphQLValidationResponseGraphQLInfoDTO();
-                List<APIOperationsDTO> operationArray = extractGraphQLOperationList(schema);
+                List<URITemplate> operationList = graphql.extractGraphQLOperationList(schema,null);
+                List<APIOperationsDTO> operationArray = APIMappingUtil.fromURITemplateListToOprationList(operationList);
                 graphQLInfo.setOperations(operationArray);
                 GraphQLSchemaDTO schemaObj = new GraphQLSchemaDTO();
                 schemaObj.setSchemaDefinition(schema);
@@ -3385,9 +3388,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Extract GraphQL Operations from given schema
      * @param schema graphQL Schema
-     * @return the arrayList of APIOperationsDTO
+     * @return the arrayList of APIOperationsDTOextractGraphQLOperationList
+     *
      */
-    private List<APIOperationsDTO> extractGraphQLOperationList(String schema) {
+    public List<APIOperationsDTO> extractGraphQLOperationList(String schema) {
         List<APIOperationsDTO> operationArray = new ArrayList<>();
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
