@@ -3350,7 +3350,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String filename = fileDetail.getContentDisposition().getFilename();
 
         try {
-            if (filename.endsWith(".graphql") && filename.endsWith(".txt") && filename.endsWith(".sdl")) {
+            if (filename.endsWith(".graphql") || filename.endsWith(".txt") || filename.endsWith(".sdl")) {
                 schema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
                 if (schema.isEmpty()) {
                     errorMessage = "GraphQL Schema cannot be empty or null to validate it";
