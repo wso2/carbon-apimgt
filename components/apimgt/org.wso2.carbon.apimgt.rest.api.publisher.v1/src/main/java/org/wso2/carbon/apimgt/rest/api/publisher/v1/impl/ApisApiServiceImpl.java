@@ -3347,33 +3347,37 @@ public class ApisApiServiceImpl implements ApisApiService {
         SchemaParser schemaParser = new SchemaParser();
         GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
         GraphQLValidationResponseDTO validationResponse = new GraphQLValidationResponseDTO();
+        String filename = fileDetail.getContentDisposition().getFilename();
 
         try {
-            schema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
+            if (filename.endsWith(".graphql") && filename.endsWith(".txt") && filename.endsWith(".sdl")) {
+                schema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
+                if (schema.isEmpty()) {
+                    errorMessage = "GraphQL Schema cannot be empty or null to validate it";
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+                typeRegistry = schemaParser.parse(schema);
+                GraphQLSchema graphQLSchema = UnExecutableSchemaGenerator.makeUnExecutableSchema(typeRegistry);
+                SchemaValidator schemaValidation = new SchemaValidator();
+                validationErrors = schemaValidation.validateSchema(graphQLSchema);
 
-            if (schema.isEmpty()) {
-                errorMessage = "GraphQL Schema cannot be empty or null to validate it";
-                RestApiUtil.handleBadRequest(errorMessage, log);
+                if (validationErrors.toArray().length > 0) {
+                    errorMessage = "InValid Schema";
+                } else {
+                    isValid = true;
+                    validationResponse.setIsValid(isValid);
+                    GraphQLValidationResponseGraphQLInfoDTO graphQLInfo = new GraphQLValidationResponseGraphQLInfoDTO();
+                    List<URITemplate> operationList = graphql.extractGraphQLOperationList(schema, null);
+                    List<APIOperationsDTO> operationArray = APIMappingUtil.fromURITemplateListToOprationList(operationList);
+                    graphQLInfo.setOperations(operationArray);
+                    GraphQLSchemaDTO schemaObj = new GraphQLSchemaDTO();
+                    schemaObj.setSchemaDefinition(schema);
+                    graphQLInfo.setGraphQLSchema(schemaObj);
+                    validationResponse.setGraphQLInfo(graphQLInfo);
+                }
             }
-
-            typeRegistry = schemaParser.parse(schema);
-            GraphQLSchema graphQLSchema = UnExecutableSchemaGenerator.makeUnExecutableSchema(typeRegistry);
-            SchemaValidator schemaValidation = new SchemaValidator();
-            validationErrors = schemaValidation.validateSchema(graphQLSchema);
-
-            if (validationErrors.toArray().length > 0) {
-                errorMessage = "InValid Schema";
-            } else {
-                isValid = true;
-                validationResponse.setIsValid(isValid);
-                GraphQLValidationResponseGraphQLInfoDTO graphQLInfo = new GraphQLValidationResponseGraphQLInfoDTO();
-                List<URITemplate> operationList = graphql.extractGraphQLOperationList(schema,null);
-                List<APIOperationsDTO> operationArray = APIMappingUtil.fromURITemplateListToOprationList(operationList);
-                graphQLInfo.setOperations(operationArray);
-                GraphQLSchemaDTO schemaObj = new GraphQLSchemaDTO();
-                schemaObj.setSchemaDefinition(schema);
-                graphQLInfo.setGraphQLSchema(schemaObj);
-                validationResponse.setGraphQLInfo(graphQLInfo);
+            else {
+                RestApiUtil.handleBadRequest("Unsupported extension type of file: " + filename, log);
             }
         } catch (SchemaProblem | IOException e) {
             errorMessage = e.getMessage();
