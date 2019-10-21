@@ -25,7 +25,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import Configurations from 'Config';
+import Settings from 'Settings';
 import PropTypes from 'prop-types';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 
@@ -134,7 +134,7 @@ class KeyConfiguration extends React.Component {
         }
         const grantTypeDisplayListMap = this.getGrantTypeDisplayList(
             serverSupportedGrantTypes,
-            Configurations.grantTypes,
+            Settings.grantTypes,
         );
 
         return (
@@ -158,6 +158,7 @@ class KeyConfiguration extends React.Component {
                                                 onChange={e => this.handleChange('grantType', e)}
                                                 value={value}
                                                 disabled={this.isGrantTypeDisabled(key)}
+                                                color='primary'
                                             />
                                         )}
                                         label={intl.formatMessage({

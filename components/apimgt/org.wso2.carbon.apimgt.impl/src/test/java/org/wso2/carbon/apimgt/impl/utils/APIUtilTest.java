@@ -1417,6 +1417,7 @@ public class APIUtilTest {
         Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
         Mockito.when(throttleProperties.isEnabled()).thenReturn(true);
         Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
+        Mockito.when(policy.getPolicyName()).thenReturn("policy");
         Mockito.when(policy.getDefaultQuotaPolicy()).thenReturn(quotaPolicy);
         Mockito.when(quotaPolicy.getLimit()).thenReturn(limit);
         Mockito.when(registry.getTags(artifactPath)).thenReturn(getTagsFromSet(expectedAPI.getTags()));
@@ -1487,6 +1488,7 @@ public class APIUtilTest {
         Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
         Mockito.when(throttleProperties.isEnabled()).thenReturn(true);
         Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
+        Mockito.when(policy.getPolicyName()).thenReturn("policy");
         Mockito.when(policy.getDefaultQuotaPolicy()).thenReturn(quotaPolicy);
         Mockito.when(quotaPolicy.getLimit()).thenReturn(limit);
         Mockito.when(registry.getTags(artifactPath)).thenReturn(getTagsFromSet(expectedAPI.getTags()));

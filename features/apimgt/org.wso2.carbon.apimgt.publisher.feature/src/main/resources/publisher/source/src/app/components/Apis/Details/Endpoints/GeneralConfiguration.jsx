@@ -65,6 +65,9 @@ const styles = theme => ({
     generalConfigPanel: {
         width: '100%',
     },
+    securityHeading: {
+        fontWeight: 600,
+    },
 });
 
 /**
@@ -82,7 +85,6 @@ function GeneralConfiguration(props) {
         handleEndpointSecurityChange,
         endpointType,
         classes,
-        apiType,
     } = props;
     const [isConfigExpanded, setConfigExpand] = useState(false);
     const [endpointCertificates, setEndpointCertificates] = useState([]);
@@ -195,30 +197,28 @@ function GeneralConfiguration(props) {
                     id='panel1bh-header'
                     className={classes.configHeaderContainer}
                 >
-                    {apiType !== 'HTTP' || endpointType.key === 'awslambda' ? (
+                    {endpointType.key === 'awslambda' ?
+                        (<div />) :
+                        (
+                            <Typography
+                                className={classes.secondaryHeading}
+                                hidden={
+                                    endpointType.key === 'default'
+                                    || endpointType.key === 'awslambda'
+                                }
+                            >
+                                <FormattedMessage
+                                    id='Apis.Details.Endpoints.GeneralConfiguration.endpoint.security.sub.heading'
+                                    defaultMessage='Endpoint Security'
+                                /> : {endpointSecurityInfo !== null ? endpointSecurityInfo.type : 'NONE'}
+                            </Typography>
+                        )}
+                    {endpointType.key === 'default' || endpointType.key === 'awslambda' ? (
                         <div />
                     ) : (
                         <Typography
                             className={classes.secondaryHeading}
-                            hidden={
-                                apiType !== 'HTTP' || endpointType.key === 'default' || endpointType.key === 'awslambda'
-                            }
-                        >
-                            <FormattedMessage
-                                id='Apis.Details.Endpoints.GeneralConfiguration.endpoint.security.sub.heading'
-                                defaultMessage='Endpoint Security'
-                            />
-                            : {endpointSecurityInfo !== null ? endpointSecurityInfo.type : 'NONE'}
-                        </Typography>
-                    )}
-                    {apiType !== 'HTTP' || endpointType.key === 'default' || endpointType.key === 'awslambda' ? (
-                        <div />
-                    ) : (
-                        <Typography
-                            className={classes.secondaryHeading}
-                            hidden={
-                                apiType !== 'HTTP' || endpointType.key === 'default' || endpointType.key === 'awslambda'
-                            }
+                            hidden={endpointType.key === 'default' || endpointType.key === 'awslambda'}
                         >
                             {' | '}
                             <FormattedMessage
@@ -231,11 +231,11 @@ function GeneralConfiguration(props) {
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails className={classes.generalConfigContent}>
                     <Grid container direction='row' xs={12}>
-                        {apiType !== 'HTTP' ? (
+                        {endpointType.key === 'awslambda' ? (
                             <div />
                         ) : (
                             <Grid container item xs={6}>
-                                {apiType !== 'HTTP' ? (
+                                {endpointType.key === 'awslambda' ? (
                                     <div />
                                 ) : (
                                     <Grid
@@ -254,13 +254,15 @@ function GeneralConfiguration(props) {
                                                 />
                                             }
                                             label={
-                                                <FormattedMessage
-                                                    id={
-                                                        'Apis.Details.Endpoints.EndpointOverview.' +
-                                                        'endpoint.security.enable.switch'
-                                                    }
-                                                    defaultMessage='Endpoint Security'
-                                                />
+                                                <Typography className={classes.securityHeading}>
+                                                    <FormattedMessage
+                                                        id={
+                                                            'Apis.Details.Endpoints.EndpointOverview.' +
+                                                            'endpoint.security.enable.switch'
+                                                        }
+                                                        defaultMessage='Endpoint Security'
+                                                    />
+                                                </Typography>
                                             }
                                             labelPlacement='start'
                                             onChange={handleToggleEndpointSecurity}
@@ -304,7 +306,6 @@ GeneralConfiguration.propTypes = {
     endpointType: PropTypes.shape({}).isRequired,
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
-    apiType: PropTypes.string.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(GeneralConfiguration));

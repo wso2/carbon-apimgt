@@ -158,7 +158,7 @@ export default function ProvideOpenAPI(props) {
                                 <sup className={classes.mandatoryStar}>*</sup>{' '}
                                 <FormattedMessage
                                     id='Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.type'
-                                    defaultMessage='Input type'
+                                    defaultMessage='Input Type'
                                 />
                             </React.Fragment>
                         </FormLabel>
@@ -167,8 +167,8 @@ export default function ProvideOpenAPI(props) {
                             value={apiInputs.inputType}
                             onChange={event => inputsDispatcher({ action: 'inputType', value: event.target.value })}
                         >
-                            <FormControlLabel value='url' control={<Radio />} label='OpenAPI URL' />
-                            <FormControlLabel value='file' control={<Radio />} label='OpenAPI File' />
+                            <FormControlLabel value='url' control={<Radio color='primary' />} label='OpenAPI URL' />
+                            <FormControlLabel value='file' control={<Radio color='primary' />} label='OpenAPI File' />
                         </RadioGroup>
                     </FormControl>
                 </Grid>

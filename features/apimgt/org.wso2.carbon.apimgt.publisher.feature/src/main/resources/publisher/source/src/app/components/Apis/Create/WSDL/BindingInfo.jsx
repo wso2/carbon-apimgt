@@ -37,14 +37,14 @@ const BindingInfo = (props) => {
                     <FormControlLabel
                         disabled={!wsdlBean.info.bindingInfo.hasSoapBinding}
                         value='soap'
-                        control={<Radio />}
+                        control={<Radio color='primary' />}
                         label='Pass-through SOAP API'
                         className={classes.radioGroup}
                     />
                     <FormControlLabel
                         disabled={!wsdlBean.info.bindingInfo.hasHttpBinding}
                         value='httpBinding'
-                        control={<Radio />}
+                        control={<Radio color='primary' />}
                         label='With HTTP binding operations'
                         className={classes.radioGroup}
                     />

@@ -42,15 +42,15 @@ import Utils from 'AppData/Utils';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
-import { PageNotFound } from 'AppComponents/Base/Errors';
 import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import AppContext from 'AppComponents/Shared/AppContext';
+import LastUpdatedTime from 'AppComponents/Apis/Details/components/LastUpdatedTime';
 import Overview from './NewOverview/Overview';
-import Configuration from './Configuration/Configuration';
+import DesignConfigurations from './Configuration/DesignConfigurations';
 import RuntimeConfiguration from './Configuration/RuntimeConfiguration';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
@@ -135,7 +135,7 @@ class Details extends Component {
     static isValidURL(pathname) {
         for (const [subPathKey, subPath] of Object.entries(Details.subPaths)) {
             // Skip the BASE path , because it will match for any `/apis/:apiUUID/*` values
-            if (subPathKey !== 'BASE') {
+            if ((subPathKey !== 'BASE') && (subPathKey !== 'BASE_PRODUCT')) {
                 const matched = matchPath(pathname, subPath);
                 if (matched) {
                     return matched;
@@ -158,12 +158,13 @@ class Details extends Component {
             apiNotFound: false,
             // updateAPI: this.updateAPI,
             isAPIProduct,
+            imageUpdate: 0,
         };
         this.setAPI = this.setAPI.bind(this);
         this.setAPIProduct = this.setAPIProduct.bind(this);
         this.updateAPI = this.updateAPI.bind(this);
+        this.setImageUpdate = this.setImageUpdate.bind(this);
     }
-
     /**
      * @inheritDoc
      * @memberof Details
@@ -203,7 +204,16 @@ class Details extends Component {
             this.setAPI();
         }
     }
-
+    /**
+     *
+     * This method is a hack to update the image in the toolbar when a new image is uploaded
+     * @memberof Details
+     */
+    setImageUpdate() {
+        this.setState(previousState => ({
+            imageUpdate: previousState.imageUpdate + 1,
+        }));
+    }
     /**
      *
      *
@@ -396,7 +406,9 @@ class Details extends Component {
      * @returns {Component} Render API Details page
      */
     render() {
-        const { api, apiNotFound, isAPIProduct } = this.state;
+        const {
+            api, apiNotFound, isAPIProduct, imageUpdate,
+        } = this.state;
         const {
             classes,
             theme,
@@ -410,7 +422,7 @@ class Details extends Component {
 
         // pageLocation renaming is to prevent es-lint errors saying can't use global name location
         if (!Details.isValidURL(pathname)) {
-            return <PageNotFound location={pageLocation} />;
+            return <ResourceNotFound location={pageLocation} />;
         }
         const uuid = match.params.apiUUID || match.params.api_uuid || match.params.apiProdUUID;
         const pathPrefix = '/' + (isAPIProduct ? 'api-products' : 'apis') + '/' + uuid + '/';
@@ -424,7 +436,7 @@ class Details extends Component {
                 },
                 bodyMessage: {
                     id: 'Apis.Details.index.api.not.found.body',
-                    defaultMessage: "Can't find the API with the id {uuid}",
+                    defaultMessage: "Can't find the API with the given id",
                 },
             });
             const resourceNotFountMessage = {
@@ -449,6 +461,7 @@ class Details extends Component {
                         updateAPI: this.updateAPI,
                         isAPIProduct,
                         setAPI: this.setAPI,
+                        setImageUpdate: this.setImageUpdate,
                     }}
                 >
                     <div className={classes.LeftMenu}>
@@ -563,7 +576,7 @@ class Details extends Component {
                             to={pathPrefix + 'documents'}
                             Icon={<DocumentsIcon />}
                         />
-                        {!isAPIProduct && !api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
+                        { !api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.monetization',
@@ -573,20 +586,21 @@ class Details extends Component {
                                 Icon={<MonetizationIcon />}
                             />
                         )}
-                        {settingsContext.externalStoresEnabled && (
+                        {!isAPIProduct && settingsContext.externalStoresEnabled && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.external-stores',
-                                    defaultMessage: 'external developer portals',
+                                    defaultMessage: 'external dev portals',
                                 })}
-                                to={pathPrefix + 'external-stores'}
+                                to={pathPrefix + 'external-devportals'}
                                 Icon={<StoreIcon />}
                             />
                         )}
                     </div>
                     <div className={classes.content}>
-                        <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} />
+                        <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} imageUpdate={imageUpdate} />
                         <div className={classes.contentInside}>
+                            <LastUpdatedTime lastUpdatedTime={api.lastUpdatedTime} />
                             <Switch>
                                 <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
                                 <Route
@@ -610,7 +624,7 @@ class Details extends Component {
                                 <Route path={Details.subPaths.LIFE_CYCLE} component={() => <LifeCycle api={api} />} />
                                 <Route
                                     path={Details.subPaths.CONFIGURATION}
-                                    component={() => <Configuration api={api} />}
+                                    component={() => <DesignConfigurations api={api} />}
                                 />
                                 <Route
                                     path={Details.subPaths.RUNTIME_CONFIGURATION}
@@ -618,7 +632,7 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.CONFIGURATION_PRODUCT}
-                                    component={() => <Configuration api={api} />}
+                                    component={() => <DesignConfigurations api={api} />}
                                 />
                                 <Route
                                     path={Details.subPaths.RUNTIME_CONFIGURATION_PRODUCT}
@@ -631,10 +645,7 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.OPERATIONS}
-                                    component={() => (<Operations
-                                        api={api}
-                                        updateAPI={this.updateAPI}
-                                    />)}
+                                    component={() => <Operations api={api} updateAPI={this.updateAPI} />}
                                 />
                                 <Route
                                     exact
@@ -687,6 +698,10 @@ class Details extends Component {
                                     path={Details.subPaths.MONETIZATION}
                                     component={() => <Monetization api={api} />}
                                 />
+                                <Route
+                                    path={Details.subPaths.MONETIZATION_PRODUCT}
+                                    component={() => <Monetization api={api} />}
+                                />
                                 <Route path={Details.subPaths.EXTERNAL_STORES} component={ExternalStores} />
                             </Switch>
                         </div>
@@ -733,7 +748,8 @@ Details.subPaths = {
     PROPERTIES_PRODUCT: '/api-products/:apiprod_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
     MONETIZATION: '/apis/:api_uuid/monetization',
-    EXTERNAL_STORES: '/apis/:api_uuid/external-stores',
+    MONETIZATION_PRODUCT: '/api-products/:apiprod_uuid/monetization',
+    EXTERNAL_STORES: '/apis/:api_uuid/external-devportals',
 };
 
 // To make sure that paths will not change by outsiders, Basically an enum

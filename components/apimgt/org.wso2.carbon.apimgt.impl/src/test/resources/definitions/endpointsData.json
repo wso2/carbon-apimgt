@@ -1,0 +1,321 @@
+{
+  "http_production": {
+    "endpoint_type": "http",
+    "failOver": "False",
+    "production_endpoints": {
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis/"
+    }
+  },
+  "http_production_failover": {
+    "production_failovers": [
+      {
+        "endpoint_type": "http",
+        "template_not_supported": false,
+        "url": "https://localhost:9443/publisher/apis"
+      }
+    ],
+    "endpoint_type": "failover",
+    "failOver": "True",
+    "production_endpoints": {
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis"
+    },
+    "sandbox_failovers": []
+  },
+  "http_production_loadbalance": {
+    "endpoint_type": "load_balance",
+    "algoCombo": "org.apache.synapse.endpoints.algorithms.RoundRobin",
+    "sessionManagement": "",
+    "failOver": "False",
+    "sessionTimeOut": "",
+    "production_endpoints": [
+      {
+        "template_not_supported": false,
+        "url": "https://localhost:9443/publisher/apis"
+      },
+      {
+        "url": "https://localhost:9443/publisher/apis"
+      }
+    ],
+    "algoClassName": "org.apache.synapse.endpoints.algorithms.RoundRobin"
+  },
+  "http_sandbox": {
+    "endpoint_type": "http",
+    "failOver": "False",
+    "sandbox_endpoints": {
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis/"
+    }
+  },
+  "http_sandbox_failover": {
+    "sandbox_failovers": [
+      {
+        "endpoint_type": "http",
+        "template_not_supported": false,
+        "url": "https://localhost:9443/publisher/apis"
+      }
+    ],
+    "endpoint_type": "failover",
+    "failOver": "True",
+    "sandbox_endpoints": {
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis"
+    },
+    "production_failovers": []
+  },
+  "http_sandbox_loadbalance": {
+    "endpoint_type": "load_balance",
+    "algoCombo": "org.apache.synapse.endpoints.algorithms.RoundRobin",
+    "sessionManagement": "",
+    "failOver": "False",
+    "sessionTimeOut": "",
+    "sandbox_endpoints": [
+      {
+        "template_not_supported": false,
+        "url": "https://localhost:9443/publisher/apis"
+      },
+      {
+        "url": "https://localhost:9443/publisher/apis"
+      }
+    ],
+    "algoClassName": "org.apache.synapse.endpoints.algorithms.RoundRobin"
+  },
+  "http_hybrid": {
+    "endpoint_type": "http",
+    "sandbox_endpoints": {
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis/"
+    },
+    "failOver": "False",
+    "production_endpoints": {
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis/"
+    }
+  },
+  "http_hybrid_failover": {
+    "production_failovers": [
+      {
+        "endpoint_type": "http",
+        "template_not_supported": false,
+        "url": "https://localhost:9443/publisher/apis/"
+      }
+    ],
+    "endpoint_type": "failover",
+    "sandbox_endpoints": {
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis/"
+    },
+    "failOver": "True",
+    "production_endpoints": {
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis/"
+    },
+    "sandbox_failovers": [
+      {
+        "endpoint_type": "http",
+        "template_not_supported": false,
+        "url": "https://localhost:9443/publisher/apis/"
+      }
+    ]
+  },
+  "http_hybrid_loadbalance": {
+    "endpoint_type": "load_balance",
+    "algoCombo": "org.apache.synapse.endpoints.algorithms.RoundRobin",
+    "sessionManagement": "",
+    "sandbox_endpoints": [
+      {
+        "template_not_supported": false,
+        "url": "https://localhost:9443/publisher/apis/"
+      },
+      {
+        "url": "https://localhost:9443/publisher/apis/"
+      }
+    ],
+    "failOver": "False",
+    "sessionTimeOut": "",
+    "production_endpoints": [
+      {
+        "template_not_supported": false,
+        "url": "https://localhost:9443/publisher/apis/"
+      },
+      {
+        "url": "https://localhost:9443/publisher/apis/"
+      }
+    ],
+    "algoClassName": "org.apache.synapse.endpoints.algorithms.RoundRobin"
+  },
+
+  "soap_production": {
+    "endpoint_type": "address",
+    "failOver": "False",
+    "production_endpoints": {
+      "endpoint_type": "address",
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis/"
+    }
+  },
+  "soap_production_failover": {
+    "production_failovers": [
+      {
+        "endpoint_type": "address",
+        "template_not_supported": false,
+        "url": "https://localhost:9443/publisher/apis/"
+      }
+    ],
+    "endpoint_type": "failover",
+    "failOver": "True",
+    "production_endpoints": {
+      "endpoint_type": "address",
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis/"
+    },
+    "sandbox_failovers": []
+  },
+  "soap_production_loadbalance": {
+    "endpoint_type": "load_balance",
+    "algoCombo": "org.apache.synapse.endpoints.algorithms.RoundRobin",
+    "sessionManagement": "",
+    "failOver": "False",
+    "sessionTimeOut": "",
+    "production_endpoints": [
+      {
+        "endpoint_type": "address",
+        "template_not_supported": false,
+        "url": "https://localhost:9443/publisher/apis/"
+      },
+      {
+        "endpoint_type": "address",
+        "template_not_supported": false,
+        "url": "https://localhost:9443/publisher/apis/"
+      }
+    ],
+    "algoClassName": "org.apache.synapse.endpoints.algorithms.RoundRobin"
+  },
+  "soap_sandbox": {
+    "endpoint_type": "address",
+    "failOver": "False",
+    "sandbox_endpoints": {
+      "endpoint_type": "address",
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis/"
+    }
+  },
+  "soap_sandbox_failover": {
+    "sandbox_failovers": [
+      {
+        "endpoint_type": "address",
+        "template_not_supported": false,
+        "url": "https://localhost:9443/publisher/apis/"
+      }
+    ],
+    "endpoint_type": "failover",
+    "failOver": "True",
+    "sandbox_endpoints": {
+      "endpoint_type": "address",
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis/"
+    },
+    "production_failovers": []
+  },
+  "soap_sandbox_loadbalance": {
+    "endpoint_type": "load_balance",
+    "algoCombo": "org.apache.synapse.endpoints.algorithms.RoundRobin",
+    "sessionManagement": "",
+    "failOver": "False",
+    "sessionTimeOut": "",
+    "sandbox_endpoints": [
+      {
+        "endpoint_type": "address",
+        "template_not_supported": false,
+        "url": "https://localhost:9443/publisher/apis/"
+      },
+      {
+        "endpoint_type": "address",
+        "template_not_supported": false,
+        "url": "https://localhost:9443/publisher/apis/"
+      }
+    ],
+    "algoClassName": "org.apache.synapse.endpoints.algorithms.RoundRobin"
+  },
+  "soap_hybrid": {
+    "endpoint_type": "address",
+    "sandbox_endpoints": {
+      "endpoint_type": "address",
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis/"
+    },
+    "failOver": "False",
+    "production_endpoints": {
+      "endpoint_type": "address",
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis/"
+    }
+  },
+  "soap_hybrid_failover": {
+    "production_failovers": [
+      {
+        "endpoint_type": "address",
+        "template_not_supported": false,
+        "url": "https://localhost:9443/publisher/apis/"
+      }
+    ],
+    "endpoint_type": "failover",
+    "sandbox_endpoints": {
+      "endpoint_type": "address",
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis/"
+    },
+    "failOver": "True",
+    "production_endpoints": {
+      "endpoint_type": "address",
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis/"
+    },
+    "sandbox_failovers": [
+      {
+        "endpoint_type": "address",
+        "template_not_supported": false,
+        "url": "https://localhost:9443/publisher/apis/"
+      }
+    ]
+  },
+  "soap_hybrid_loadbalance": {
+    "endpoint_type": "load_balance",
+    "algoCombo": "org.apache.synapse.endpoints.algorithms.RoundRobin",
+    "sessionManagement": "",
+    "sandbox_endpoints": [{
+      "endpoint_type": "address",
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis"
+    }, {
+      "endpoint_type": "address",
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis"
+    }],
+    "failOver": "False",
+    "sessionTimeOut": "",
+    "production_endpoints": [{
+      "endpoint_type": "address",
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis"
+    }, {
+      "endpoint_type": "address",
+      "template_not_supported": false,
+      "url": "https://localhost:9443/publisher/apis"
+    }],
+    "algoClassName": "org.apache.synapse.endpoints.algorithms.RoundRobin"
+  },
+
+  "default_endpoints" : {
+    "endpoint_type": "default",
+    "sandbox_endpoints": {
+      "url": "default"
+    },
+    "failOver": "False",
+    "production_endpoints": {
+      "url": "default"
+    }
+  }
+
+}

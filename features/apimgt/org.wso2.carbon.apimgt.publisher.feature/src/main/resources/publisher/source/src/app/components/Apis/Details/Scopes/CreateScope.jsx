@@ -25,7 +25,6 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
 import Grid from '@material-ui/core/Grid';
 import ChipInput from 'material-ui-chip-input';
 import APIValidation from 'AppData/APIValidation';
@@ -36,9 +35,10 @@ import Chip from '@material-ui/core/Chip';
 import Icon from '@material-ui/core/Icon';
 import Paper from '@material-ui/core/Paper';
 import { red } from '@material-ui/core/colors/';
-import Divider from '@material-ui/core/Divider';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Alert from 'AppComponents/Shared/Alert';
 import Api from 'AppData/api';
+import { isRestricted } from 'AppData/AuthManager';
 
 const styles = theme => ({
     root: {
@@ -65,12 +65,12 @@ const styles = theme => ({
         paddingLeft: 0,
     },
     FormControl: {
-        padding: `0 0 0 ${theme.spacing.unit}px`,
+        padding: `0 0 0 ${theme.spacing(1)}px`,
         width: '100%',
         marginTop: 0,
     },
     FormControlOdd: {
-        padding: `0 0 0 ${theme.spacing.unit}px`,
+        padding: `0 0 0 ${theme.spacing(1)}px`,
         backgroundColor: theme.palette.background.paper,
         width: '100%',
         marginTop: 0,
@@ -81,17 +81,17 @@ const styles = theme => ({
         fontSize: theme.typography.caption.fontSize,
     },
     buttonSection: {
-        paddingTop: theme.spacing.unit * 3,
+        paddingTop: theme.spacing(3),
     },
     saveButton: {
-        marginRight: theme.spacing.unit * 2,
+        marginRight: theme.spacing(2),
     },
     helpText: {
         color: theme.palette.text.hint,
         marginTop: theme.spacing.unit,
     },
     extraPadding: {
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
     },
     addNewOther: {
         paddingTop: 40,
@@ -101,6 +101,12 @@ const styles = theme => ({
             padding: 0,
             margin: 0,
         },
+    },
+    descriptionForm: {
+        marginTop: theme.spacing(1),
+    },
+    progress: {
+        marginLeft: theme.spacing(1),
     },
 });
 
@@ -130,6 +136,7 @@ class CreateScope extends React.Component {
             valid,
             roleValidity: true,
             invalidRoles: [],
+            scopeAddDisabled: false,
         };
         this.addScope = this.addScope.bind(this);
         this.validateScopeName = this.validateScopeName.bind(this);
@@ -163,27 +170,32 @@ class CreateScope extends React.Component {
         scopes.push(scope);
         const updateProperties = { scopes };
         const promisedApiUpdate = updateAPI(updateProperties);
-        promisedApiUpdate.then(() => {
-            Alert.info(intl.formatMessage({
-                id: 'Apis.Details.Scopes.CreateScope.scope.added.successfully',
-                defaultMessage: 'Scope added successfully',
-            }));
-            const { apiScopes } = this.state;
-            const redirectURL = '/' + urlPrefix + '/' + api.id + '/scopes/';
-            history.push(redirectURL);
-            this.setState({
-                apiScopes,
-                apiScope: {},
-                validRoles: [],
+        this.setState({ scopeAddDisabled: true });
+        promisedApiUpdate
+            .then(() => {
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Details.Scopes.CreateScope.scope.added.successfully',
+                    defaultMessage: 'Scope added successfully',
+                }));
+                const { apiScopes } = this.state;
+                const redirectURL = '/' + urlPrefix + '/' + api.id + '/scopes/';
+                history.push(redirectURL);
+                this.setState({
+                    apiScopes,
+                    apiScope: {},
+                    validRoles: [],
+                });
+            })
+            .catch((error) => {
+                const { response } = error;
+                if (response.body) {
+                    const { description } = response.body;
+                    Alert.error(description);
+                }
+            })
+            .finally(() => {
+                this.setState({ scopeAddDisabled: false });
             });
-        });
-        promisedApiUpdate.catch((error) => {
-            const { response } = error;
-            if (response.body) {
-                const { description } = response.body;
-                Alert.error(description);
-            }
-        });
     }
 
     handleScopeNameInput({ target: { id, value } }) {
@@ -208,9 +220,32 @@ class CreateScope extends React.Component {
             valid[id].invalid = true;
             valid[id].error = 'Scope name already exist';
         }
-        if (!valid[id].invalid && /[!@#$%^&*(),.?":{}[\]|<>\t\n]/i.test(value)) {
+        if (!valid[id].invalid && /[!@#$%^&*(),?"{}[\]|<>\t\n]|(^apim:)/i.test(value)) {
             valid[id].invalid = true;
             valid[id].error = 'Field contains special characters';
+        }
+        if (!valid[id].invalid) {
+            const promise = APIValidation.scope.validate(base64url.encode(value));
+            promise
+                .then(() => {
+                    valid[id].invalid = true;
+                    valid[id].error = 'Scope name is already used by another API';
+                    this.setState({
+                        valid,
+                    });
+                })
+                .catch((error) => {
+                    if (error.status === 404) {
+                        valid[id].invalid = false;
+                        valid[id].error = '';
+                        this.setState({
+                            valid,
+                        });
+                    } else {
+                        Alert.error('Error when validating scope: ' + value);
+                        console.error('Error when validating scope ' + error);
+                    }
+                });
         }
         if (!valid[id].invalid) {
             valid[id].error = '';
@@ -277,9 +312,11 @@ class CreateScope extends React.Component {
      */
     render() {
         const { classes, api } = this.props;
-        const urlPrefix = (api.apiType === 'APIProduct') ? 'api-products' : 'apis';
+        const urlPrefix = api.apiType === 'APIProduct' ? 'api-products' : 'apis';
         const url = `/${urlPrefix}/${api.id}/scopes`;
-        const { roleValidity, validRoles, invalidRoles } = this.state;
+        const {
+            roleValidity, validRoles, invalidRoles, scopeAddDisabled,
+        } = this.state;
 
         return (
             <Grid container spacing={3}>
@@ -338,7 +375,7 @@ class CreateScope extends React.Component {
                                         onChange={this.handleScopeNameInput}
                                     />
                                 </FormControl>
-                                <FormControl margin='normal'>
+                                <FormControl margin='normal' classes={{ root: classes.descriptionForm }}>
                                     <TextField
                                         id='description'
                                         label='Description'
@@ -360,13 +397,11 @@ class CreateScope extends React.Component {
                                     />
                                 </FormControl>
                                 <FormControl margin='normal'>
-                                    <FormLabel component='legend' className={classes.FormControlLabel}>
-                                        <FormattedMessage
-                                            id='Apis.Details.Scopes.CreateScope.roles'
-                                            defaultMessage='Roles'
-                                        />
-                                    </FormLabel>
                                     <ChipInput
+                                        label='Roles'
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
                                         variant='outlined'
                                         value={validRoles.concat(invalidRoles)}
                                         alwaysShowPlaceholder={false}
@@ -410,19 +445,33 @@ class CreateScope extends React.Component {
                                         )}
                                     />
                                 </FormControl>
-                                <Divider />
                                 <div className={classes.addNewOther}>
                                     <Button
                                         variant='contained'
                                         color='primary'
                                         onClick={this.addScope}
-                                        disabled={this.state.valid.name.invalid || invalidRoles.length !== 0}
+                                        disabled={
+                                            isRestricted(['apim:api_create'], api) ||
+                                            this.state.valid.name.invalid ||
+                                            invalidRoles.length !== 0 ||
+                                            scopeAddDisabled
+                                        }
                                         className={classes.saveButton}
                                     >
-                                        <FormattedMessage
-                                            id='Apis.Details.Scopes.CreateScope.save'
-                                            defaultMessage='Save'
-                                        />
+                                        {scopeAddDisabled ? (
+                                            <React.Fragment>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Scopes.CreateScope.saving'
+                                                    defaultMessage='Saving'
+                                                />
+                                                <CircularProgress size={16} classes={{ root: classes.progress }} />
+                                            </React.Fragment>
+                                        ) : (
+                                            <FormattedMessage
+                                                id='Apis.Details.Scopes.CreateScope.save'
+                                                defaultMessage='Save'
+                                            />
+                                        )}
                                     </Button>
                                     <Link to={url}>
                                         <Button variant='contained'>

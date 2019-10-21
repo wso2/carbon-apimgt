@@ -143,7 +143,7 @@ function copyAPIConfig(api) {
  * @param {*} props
  * @returns
  */
-export default function Configuration() {
+export default function DesignConfigurations() {
     /**
      *
      * Reduce the configuration UI related actions in to updated state
@@ -213,7 +213,7 @@ export default function Configuration() {
                         <Typography variant='caption'>
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.Design.sub.heading'
-                                defaultMessage='On this page you can change design/metadata related configurations'
+                                defaultMessage="Configure your API's visibility and define what your API offers."
                             />
                         </Typography>
                     </Grid>
@@ -221,7 +221,7 @@ export default function Configuration() {
                         <Paper elevation={0}>
                             <form noValidate autoComplete='off'>
                                 <Box px={8} py={5}>
-                                    <Box py={2}>
+                                    <Box py={1}>
                                         <Grid container spacing={0} >
                                             <Grid item xs={12} md={2}>
                                                 <ThumbnailView

@@ -21,7 +21,7 @@ const APICreateMenu = (props) => {
     const createTypes = (
         <List>
             <ListItem>
-                <Link to='/apis/create/rest' className={classes.links}>
+                <Link id='itest-id-createdefault' to='/apis/create/rest' className={classes.links}>
                     <ListItemText
                         primary={
                             <FormattedMessage

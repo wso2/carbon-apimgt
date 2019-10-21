@@ -22,7 +22,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 // import MaterialDesignCustomTheme from 'AppComponents/Shared/CustomTheme';
-import { PageNotFound } from 'AppComponents/Base/Errors';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Apis from 'AppComponents/Apis/Apis';
 import Api from 'AppData/api';
 import Base from 'AppComponents/Base';
@@ -109,7 +109,7 @@ export default class Protected extends Component {
                                     <Route path='/apis' component={Apis} />
                                     <Route path='/api-products' component={Apis} />
                                     <Route path='/settings' component={SettingsBase} />
-                                    <Route component={PageNotFound} />
+                                    <Route component={ResourceNotFound} />
                                 </Switch>
                             </Base>
                         </AppErrorBoundary>

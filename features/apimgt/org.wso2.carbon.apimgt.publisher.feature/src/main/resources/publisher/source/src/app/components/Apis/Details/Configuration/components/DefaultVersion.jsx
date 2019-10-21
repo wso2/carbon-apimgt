@@ -49,11 +49,11 @@ export default function DefaultVersion(props) {
                         <FormLabel component='legend'>
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.isdefault.label'
-                                defaultMessage='Is Default'
+                                defaultMessage='Make this the default version'
                             />
                         </FormLabel>
                         <RadioGroup
-                            aria-label='Is Default'
+                            aria-label='Make this the default version'
                             value={api.isDefaultVersion}
                             onChange={({
                                 target: { value },
@@ -96,10 +96,9 @@ export default function DefaultVersion(props) {
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.defaultversion.tooltip'
                                 defaultMessage={
-                                    'If a particular version of an API is default, '
-                                    + 'That API can be invoked without specifying the version'
-                                    + ' parameter in the path, The default version will be wired '
-                                    + 'to that request automatically'
+                                    'Indicates if this is the default version of the API. If an ' +
+                                    'API is invoked without specifying a version, the API Gateway will ' +
+                                    'route the request to the default version of the API.'
                                 }
                             />
                         )}

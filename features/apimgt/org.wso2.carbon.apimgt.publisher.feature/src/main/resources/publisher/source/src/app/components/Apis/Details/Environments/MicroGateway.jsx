@@ -113,6 +113,7 @@ export default function MicroGateway(props) {
                                                 }
                                             }
                                             name={row.name}
+                                            color='primary'
                                         />
                                     </TableCell>
                                     <TableCell component='th' scope='row' align='left'>

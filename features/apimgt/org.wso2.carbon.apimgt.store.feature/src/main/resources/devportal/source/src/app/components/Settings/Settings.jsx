@@ -18,8 +18,8 @@
 
 import React from 'react';
 import { Grid, withStyles } from '@material-ui/core';
-import Alerts from './Alerts/Alerts';
 import PropTypes from 'prop-types';
+import Alerts from './Alerts/Alerts';
 
 
 const styles = theme => ({
@@ -47,7 +47,9 @@ function Settings(props) {
 }
 
 Settings.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        settingsRoot: PropTypes.shape({}).isRequired,
+    }).isRequired,
 };
 
 export default withStyles(styles)(Settings);

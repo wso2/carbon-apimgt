@@ -204,7 +204,11 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     @Override
     public void addDocumentation(Identifier id,
                                  Documentation documentation) throws APIManagementException {
-        checkCreatePermission();
+
+        if (!checkCreateOrPublishPermission()) {
+            throw new APIManagementException("User '" + username + "' has neither '" + APIConstants.Permissions.API_CREATE
+                    + "' nor the '" + APIConstants.Permissions.API_PUBLISH + "' permission to add API documentation");
+        }
         //todo : implement access control check for api products too
         if (id instanceof APIIdentifier) {
             checkAccessControlPermission((APIIdentifier) id);
@@ -254,7 +258,11 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     @Override
     public void updateDocumentation(APIIdentifier apiId,
                                     Documentation documentation) throws APIManagementException {
-        checkCreatePermission();
+        if (!checkCreateOrPublishPermission()) {
+            throw new APIManagementException("User '" + username + "' has neither '" +
+                    APIConstants.Permissions.API_CREATE + "' nor the '" + APIConstants.Permissions.API_PUBLISH +
+                    "' permission to update API documentation");
+        }
         checkAccessControlPermission(apiId);
         super.updateDocumentation(apiId, documentation);
     }
@@ -262,7 +270,12 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     @Override
     public void addDocumentationContent(API api, String documentationName,
                                         String text) throws APIManagementException {
-        checkCreatePermission();
+
+        if (!checkCreateOrPublishPermission()) {
+            throw new APIManagementException("User '" + username + "' has neither '" +
+                    APIConstants.Permissions.API_CREATE + "' nor the '" + APIConstants.Permissions.API_PUBLISH +
+                    "' permission to add content for API documentation");
+        }
         if (api != null) {
             checkAccessControlPermission(api.getId());
         }
@@ -430,10 +443,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String addResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException {
-        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifier(resourcePath);
-        checkAccessControlPermission(apiIdentifier);
-        return super.addResourceFile(resourcePath, resourceFile);
+    public String addResourceFile(Identifier identifier, String resourcePath, ResourceFile resourceFile)
+            throws APIManagementException {
+        checkAccessControlPermission(identifier);
+        return super.addResourceFile(identifier, resourcePath, resourceFile);
     }
 
     @Override
@@ -477,27 +490,24 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public Boolean deleteApiSpecificMediationPolicy(String apiResourcePath, String mediationPolicyId)
-            throws APIManagementException {
-        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifier(apiResourcePath);
-        checkAccessControlPermission(apiIdentifier);
-        return super.deleteApiSpecificMediationPolicy(apiResourcePath, mediationPolicyId);
+    public Boolean deleteApiSpecificMediationPolicy(Identifier identifier, String apiResourcePath,
+            String mediationPolicyId) throws APIManagementException {
+        checkAccessControlPermission(identifier);
+        return super.deleteApiSpecificMediationPolicy(identifier, apiResourcePath, mediationPolicyId);
     }
 
     @Override
-    public Mediation getApiSpecificMediationPolicy(String apiResourcePath, String mediationPolicyId)
-            throws APIManagementException {
-        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifier(apiResourcePath);
-        checkAccessControlPermission(apiIdentifier);
-        return super.getApiSpecificMediationPolicy(apiResourcePath, mediationPolicyId);
+    public Mediation getApiSpecificMediationPolicy(Identifier identifier, String apiResourcePath,
+            String mediationPolicyId) throws APIManagementException {
+        checkAccessControlPermission(identifier);
+        return super.getApiSpecificMediationPolicy(identifier, apiResourcePath, mediationPolicyId);
     }
 
     @Override
-    public Resource getApiSpecificMediationResourceFromUuid(String uuid, String resourcePath)
+    public Resource getApiSpecificMediationResourceFromUuid(Identifier identifier, String uuid, String resourcePath)
             throws APIManagementException {
-        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifier(resourcePath);
-        checkAccessControlPermission(apiIdentifier);
-        return super.getApiSpecificMediationResourceFromUuid(uuid, resourcePath);
+        checkAccessControlPermission(identifier);
+        return super.getApiSpecificMediationResourceFromUuid(identifier, uuid, resourcePath);
     }
 
     @Override

@@ -19,8 +19,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
-import Slide from '@material-ui/core/Slide';
+import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Subscription from 'AppData/Subscription';
 import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
@@ -29,11 +28,13 @@ import Alert from 'AppComponents/Shared/Alert';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import Application from 'AppData/Application';
+import AuthManager from 'AppData/AuthManager';
 import SubscribeToApi from 'AppComponents/Shared/AppsAndKeys/SubscribeToApi';
 import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 import { ApiContext } from '../ApiContext';
-import Wizard from './Wizard/Wizard';
 import SubscriptionTableRow from './SubscriptionTableRow';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 
 /**
  * @inheritdoc
@@ -116,13 +117,6 @@ const styles = theme => ({
 });
 
 /**
- * @param {*} props properties
- * @returns {Component}
- */
-function Transition(props) {
-    return <Slide direction='up' {...props} />;
-}
-/**
  * @class Credentials
  * @extends {React.Component}
  */
@@ -130,10 +124,7 @@ class Credentials extends React.Component {
     static contextType = ApiContext;
 
     state = {
-        value: 0,
         expanded: true,
-        wizardOn: false,
-        openNew: false,
         selectedAppId: false,
         selectedKeyType: false,
         subscriptionRequest: {
@@ -142,6 +133,7 @@ class Credentials extends React.Component {
             throttlingPolicy: '',
         },
         throttlingPolicyList: [],
+        applicationOwner: '',
     };
 
     /**
@@ -153,10 +145,6 @@ class Credentials extends React.Component {
             this.updateData();
         } else {
             updateSubscriptionData(this.updateData);
-        }
-        const { location: { pathname } } = this.props;
-        if (pathname.indexOf('wizard') !== -1) {
-            this.setState({ wizardOn: true, openNew: true });
         }
     }
 
@@ -182,13 +170,6 @@ class Credentials extends React.Component {
     };
 
     /**
-     * @memberof Credentials
-     */
-    startStopWizard = () => {
-        this.setState(state => ({ wizardOn: !state.wizardOn }));
-    };
-
-    /**
      * @param {*} updateSubscriptionData method to update global subscription data
      * @memberof Credentials
      */
@@ -204,11 +185,18 @@ class Credentials extends React.Component {
             apiType,
         )
             .then((response) => {
-                console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
-                Alert.info(intl.formatMessage({
-                    defaultMessage: 'Subscribed successfully',
-                    id: 'Apis.Details.Credentials.Credentials.subscribed.successfully',
-                }));
+                if (response.body.status === 'ON_HOLD') {
+                    Alert.info(intl.formatMessage({
+                        defaultMessage: 'Your subscription request has been submitted and is now awaiting approval.',
+                        id: 'subscription.pending',
+                    }));
+                } else {
+                    console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
+                    Alert.info(intl.formatMessage({
+                        defaultMessage: 'Subscribed successfully',
+                        id: 'Apis.Details.Credentials.Credentials.subscribed.successfully',
+                    }));
+                }
                 if (updateSubscriptionData) updateSubscriptionData(this.updateData);
             })
             .catch((error) => {
@@ -221,13 +209,9 @@ class Credentials extends React.Component {
      * @inheritdoc
      * @memberof Credentials
      */
-    handleClickToggle = (name, updateSubscriptionData) => {
-        this.setState((prevState) => {
-            return { [name]: !prevState[name] };
-        });
-        if (updateSubscriptionData) {
-            updateSubscriptionData();
-        }
+    goToWizard = () => {
+        const { history } = this.props;
+        history.push('credentials/wizard');
     };
 
     /**
@@ -239,6 +223,11 @@ class Credentials extends React.Component {
      */
     loadInfo = (selectedKeyType, selectedAppId) => {
         this.setState({ selectedKeyType, selectedAppId });
+
+        Application.get(selectedAppId)
+            .then((result) => {
+                this.setState({ applicationOwner: result.owner });
+            });
     };
 
     /**
@@ -287,14 +276,206 @@ class Credentials extends React.Component {
         const {
             selectedKeyType,
             selectedAppId,
-            wizardOn,
             subscriptionRequest,
             throttlingPolicyList,
-            openNew,
+            applicationOwner,
         } = this.state;
+        const user = AuthManager.getUser();
+        const renderCredentialInfo = () => {
+            const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
+            if (isPrototypedAPI) {
+                return (
+                    <React.Fragment>
+                        <InlineMessage type='info' className={classes.dialogContainer}>
+                            <Typography component='p'>
+                                <FormattedMessage
+                                    id={'Apis.Details.Credentials.Credentials.you.do.not.need'
+                                        + '.credentials.to.access.prototyped.api'}
+                                    defaultMessage={'You do not need credentials to access Prototyped APIs'}
+                                />
+                            </Typography>
+                        </InlineMessage>
+                    </React.Fragment>
+                )
+            } else if (applicationsAvailable.length === 0 && subscribedApplications.length === 0) {
+                return (
+                    <GenericDisplayDialog
+                        classes={classes}
+                        handleClick={this.goToWizard}
+                        heading={user ? intl.formatMessage({
+                                defaultMessage: 'Generate Credentials',
+                                id: 'Apis.Details.Credentials.Credentials.generate.credentials',
+                            }) :
+                            intl.formatMessage({
+                                defaultMessage: 'Sign In to Generate Credentials',
+                                id: 'Apis.Details.Credentials.Credentials.generate.credentials',
+                            })
+                        }
+                        caption={intl.formatMessage({
+                            defaultMessage: 'You need to generate credentials to access this API',
+                            id:
+                            'Apis.Details.Credentials.Credentials.you.need.to'
+                            + '.generate.credentials.to.access.this.api',
+                        })}
+                        buttonText={intl.formatMessage({
+                            defaultMessage: 'GENERATE',
+                            id: 'Apis.Details.Credentials.Credentials.generate',
+                        })}
+                    />
+                )
+            } else {
+                return (
+                    <React.Fragment>
+                        <div className={classes.generateCredentialWrapper}>
+                            <ScopeValidation
+                                resourcePath={resourcePaths.SUBSCRIPTIONS}
+                                resourceMethod={resourceMethods.POST}
+                            >
+                                <Typography variant='h5'>
+                                    <FormattedMessage
+                                        id={'Apis.Details.Credentials.Credentials'
+                                        + '.api.credentials.generate'}
+                                        defaultMessage='Generate Credentials'
+                                    />
+                                </Typography>
+                                <div className={classes.credentialBoxWrapper}>
+                                    <div className={classes.credentialBox}>
+                                        <Typography variant='body2'>
+                                            <FormattedMessage
+                                                id={'Apis.Details.Credentials.Credentials.'
+                                                + 'api.credentials.with.wizard.message'}
+                                                defaultMessage={
+                                                    'Use the Key Generation Wizard. '
+                                                    + 'Create a new application -> '
+                                                    + 'Subscribe -> Generate keys and '
+                                                    + 'Access Token to invoke this API.'
+                                                }
+                                            />
+                                        </Typography>
+                                        <Link
+                                            to={`/apis/${api.id}/credentials/wizard`}
+                                            style={!api.isSubscriptionAvailable ?
+                                                { pointerEvents: 'none' } : null}
+                                        >
+                                            <Button
+                                                variant='contained'
+                                                color='primary'
+                                                className={classes.buttonElm}
+                                                disabled={!api.isSubscriptionAvailable}
+                                            >
+                                                <FormattedMessage
+                                                    id={'Apis.Details.Credentials.' +
+                                                    'SubscibeButtonPanel.subscribe.wizard.with.new.app'}
+                                                    defaultMessage='Subscribe with a new application'
+                                                />
+                                            </Button>
+                                        </Link>
+                                    </div>
+                                    {applicationsAvailable.length > 0 && (
+                                        <div className={classes.credentialBox}>
+                                            <Typography variant='body2'>
+                                                <FormattedMessage
+                                                    id={'Apis.Details.Credentials.Credentials' +
+                                                    '.api.credentials.with.subscribe.message'}
+                                                    defaultMessage={'Subscribe to an application' +
+                                                    ' and generate credentials'}
+                                                />
+                                            </Typography>
+                                            <SubscribeToApi
+                                                applicationsAvailable={applicationsAvailable}
+                                                subscriptionRequest={subscriptionRequest}
+                                                throttlingPolicyList={throttlingPolicyList}
+                                                updateSubscriptionRequest={
+                                                    this.updateSubscriptionRequest
+                                                }
+                                                renderSmall
+                                            />
+                                            <Button
+                                                variant='contained'
+                                                color='primary'
+                                                className={classes.buttonElm}
+                                                onClick={() => this.handleSubscribe()}
+                                                disabled={!api.isSubscriptionAvailable}
+                                            >
+                                                <FormattedMessage
+                                                    id={'Apis.Details.Credentials.'
+                                                    + 'SubscibeButtonPanel.subscribe.btn'}
+                                                    defaultMessage='Subscribe'
+                                                />
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+                            </ScopeValidation>
+                        </div>
+                        {/*
+                                    ****************************
+                                    Subscription List
+                                    ***************************
+                                    */}
+                        {subscribedApplications && subscribedApplications.length > 0 && (
+                            <React.Fragment>
+                                <Typography variant='h5'>
+                                    <FormattedMessage
+                                        id={'Apis.Details.Credentials.Credentials.' +
+                                        'api.credentials.subscribed.apps.title'}
+                                        defaultMessage='View Credentials'
+                                    />
+                                </Typography>
+                                <Typography variant='body2'>
+                                    <FormattedMessage
+                                        id={'Apis.Details.Credentials.Credentials.' +
+                                        'api.credentials.subscribed.apps.description'}
+                                        defaultMessage='( Subscribed Applications )'
+                                    />
+                                </Typography>
+                                <table className={classes.tableMain}>
+                                    <tr>
+                                        <th className={classes.th}>
+                                            <FormattedMessage
+                                                id={'Apis.Details.Credentials.Credentials.' +
+                                                'api.credentials.subscribed.apps.name'}
+                                                defaultMessage='Application Name'
+                                            />
+                                        </th>
+                                        <th className={classes.th}>
+                                            <FormattedMessage
+                                                id={'Apis.Details.Credentials.Credentials.api.' +
+                                                'credentials.subscribed.apps.tier'}
+                                                defaultMessage='Throttling Tier'
+                                            />
+                                        </th>
+                                        <th className={classes.th}>
+                                            <FormattedMessage
+                                                id={'Apis.Details.Credentials.Credentials.' +
+                                                'api.credentials.subscribed.apps.status'}
+                                                defaultMessage='Application Status'
+                                            />
+                                        </th>
+                                        <th className={classes.th} />
+                                    </tr>
+                                    {subscribedApplications.map((app, index) => (
+                                        <SubscriptionTableRow
+                                            loadInfo={this.loadInfo}
+                                            handleSubscriptionDelete={this.handleSubscriptionDelete}
+                                            selectedAppId={selectedAppId}
+                                            updateSubscriptionData={updateSubscriptionData}
+                                            selectedKeyType={selectedKeyType}
+                                            app={app}
+                                            index={index}
+                                            applicationOwner={applicationOwner}
+                                        />
+                                    ))}
+                                </table>
+                            </React.Fragment>
+                        )}
+                    </React.Fragment>
+                )
+            }
+        };
         return (
             <Grid container>
-                <Grid item md={12} lg={9}>
+                <Grid item md={12} lg={11}>
                     <Grid container spacing={5}>
                         <Grid item md={12}>
                             <Typography onClick={this.handleExpandClick} variant='h4' className={classes.titleSub}>
@@ -309,189 +490,11 @@ class Credentials extends React.Component {
                                         id='Apis.Details.Credentials.Credentials.'
                                         defaultMessage={`API Credentials are grouped in to applications. An application 
                                         is primarily used to decouple the consumer from the APIs. It allows you to 
-                                        Generate and use a single key for multiple APIs and subscribe multiple times to 
+                                        generate and use a single key for multiple APIs and subscribe multiple times to 
                                         a single API with different SLA levels.`}
                                     />
                                 </Typography>
-
-                                {applicationsAvailable.length === 0 && subscribedApplications.length === 0 ? (
-                                    !wizardOn && (
-                                        <GenericDisplayDialog
-                                            classes={classes}
-                                            handleClick={() => this.handleClickToggle('openNew')}
-                                            heading={intl.formatMessage({
-                                                defaultMessage: 'Generate Credentials',
-                                                id: 'Apis.Details.Credentials.Credentials.generate.credentials',
-                                            })}
-                                            caption={intl.formatMessage({
-                                                defaultMessage: 'You need to generate credentials to access this API',
-                                                id:
-                                                    'Apis.Details.Credentials.Credentials.you.need.to'
-                                                    + '.generate.credentials.to.access.this.api',
-                                            })}
-                                            buttonText={intl.formatMessage({
-                                                defaultMessage: 'GENERATE',
-                                                id: 'Apis.Details.Credentials.Credentials.generate',
-                                            })}
-                                        />
-                                    )
-                                ) : (
-                                    <React.Fragment>
-                                        <div className={classes.generateCredentialWrapper}>
-                                            <ScopeValidation
-                                                resourcePath={resourcePaths.SUBSCRIPTIONS}
-                                                resourceMethod={resourceMethods.POST}
-                                            >
-                                                <Typography variant='h5'>
-                                                    <FormattedMessage
-                                                        id={'Apis.Details.Credentials.Credentials'
-                                                        + '.api.credentials.generate'}
-                                                        defaultMessage='Generate Credentials'
-                                                    />
-                                                </Typography>
-                                                <div className={classes.credentialBoxWrapper}>
-                                                    <div className={classes.credentialBox}>
-                                                        <Typography variant='body2'>
-                                                            <FormattedMessage
-                                                                id={'Apis.Details.Credentials.Credentials.'
-                                                                + 'api.credentials.with.wizard.message'}
-                                                                defaultMessage={
-                                                                    'Use the Key Generation Wizard. '
-                                                                    + 'Create a new application -> '
-                                                                    + 'Subscribe -> Generate keys and '
-                                                                    + 'Access Token to invoke this API.'
-                                                                }
-                                                            />
-                                                        </Typography>
-                                                        <Button
-                                                            variant='contained'
-                                                            color='primary'
-                                                            className={classes.buttonElm}
-                                                            onClick={() => this.handleClickToggle('openNew')}
-                                                        >
-                                                            <FormattedMessage
-                                                                id={'Apis.Details.Credentials.' +
-                                                                'SubscibeButtonPanel.subscribe.wizard'}
-                                                                defaultMessage='Wizard'
-                                                            />
-                                                        </Button>
-                                                    </div>
-                                                    {applicationsAvailable.length > 0 && (
-                                                        <div className={classes.credentialBox}>
-                                                            <Typography variant='body2'>
-                                                                <FormattedMessage
-                                                                    id={'Apis.Details.Credentials.Credentials' +
-                                                                    '.api.credentials.with.subscribe.message'}
-                                                                    defaultMessage={'Subscribe to an application' +
-                                                                    ' and generate credentials'}
-                                                                />
-                                                            </Typography>
-                                                            <SubscribeToApi
-                                                                applicationsAvailable={applicationsAvailable}
-                                                                subscriptionRequest={subscriptionRequest}
-                                                                throttlingPolicyList={throttlingPolicyList}
-                                                                updateSubscriptionRequest={
-                                                                    this.updateSubscriptionRequest
-                                                                }
-                                                                renderSmall
-                                                            />
-                                                            <Button
-                                                                variant='contained'
-                                                                color='primary'
-                                                                className={classes.buttonElm}
-                                                                onClick={() => this.handleSubscribe()}
-                                                            >
-                                                                <FormattedMessage
-                                                                    id={'Apis.Details.Credentials.'
-                                                                    + 'SubscibeButtonPanel.subscribe.btn'}
-                                                                    defaultMessage='Subscribe'
-                                                                />
-                                                            </Button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </ScopeValidation>
-                                        </div>
-                                        {/*
-                                        ****************************
-                                        Subscription List
-                                        ***************************
-                                        */}
-                                        {subscribedApplications && subscribedApplications.length > 0 && (
-                                            <React.Fragment>
-                                                <Typography variant='h5'>
-                                                    <FormattedMessage
-                                                        id={'Apis.Details.Credentials.Credentials.' +
-                                                        'api.credentials.subscribed.apps.title'}
-                                                        defaultMessage='View Credentials'
-                                                    />
-                                                </Typography>
-                                                <Typography variant='body2'>
-                                                    <FormattedMessage
-                                                        id={'Apis.Details.Credentials.Credentials.' +
-                                                        'api.credentials.subscribed.apps.description'}
-                                                        defaultMessage='( Subscribed Applications )'
-                                                    />
-                                                </Typography>
-                                                <table className={classes.tableMain}>
-                                                    <tr>
-                                                        <th className={classes.th}>
-                                                            <FormattedMessage
-                                                                id={'Apis.Details.Credentials.Credentials.' +
-                                                                'api.credentials.subscribed.apps.name'}
-                                                                defaultMessage='Application Name'
-                                                            />
-                                                        </th>
-                                                        <th className={classes.th}>
-                                                            <FormattedMessage
-                                                                id={'Apis.Details.Credentials.Credentials.api.' +
-                                                                'credentials.subscribed.apps.tier'}
-                                                                defaultMessage='Throttling Tier'
-                                                            />
-                                                        </th>
-                                                        <th className={classes.th}>
-                                                            <FormattedMessage
-                                                                id={'Apis.Details.Credentials.Credentials.' +
-                                                                'api.credentials.subscribed.apps.status'}
-                                                                defaultMessage='Application Status'
-                                                            />
-                                                        </th>
-                                                        <th className={classes.th} />
-                                                    </tr>
-                                                    {subscribedApplications.map((app, index) => (
-                                                        <SubscriptionTableRow
-                                                            loadInfo={this.loadInfo}
-                                                            handleSubscriptionDelete={this.handleSubscriptionDelete}
-                                                            selectedAppId={selectedAppId}
-                                                            updateSubscriptionData={updateSubscriptionData}
-                                                            selectedKeyType={selectedKeyType}
-                                                            app={app}
-                                                            index={index}
-                                                        />
-                                                    ))}
-                                                </table>
-                                            </React.Fragment>
-                                        )}
-                                    </React.Fragment>
-                                )}
-                                {/*
-                                        ***************************************
-                                        Subscribe with new Mode
-                                        ***************************************
-                                        */}
-                                <Dialog
-                                    fullScreen
-                                    open={openNew}
-                                    onClose={() => this.handleClickToggle('openNew', updateSubscriptionData)}
-                                    TransitionComponent={Transition}
-                                >
-                                    <Wizard
-                                        updateSubscriptionData={updateSubscriptionData}
-                                        apiId={api.id}
-                                        handleClickToggle={this.handleClickToggle}
-                                        throttlingPolicyList={throttlingPolicyList}
-                                    />
-                                </Dialog>
+                                {renderCredentialInfo()}
                             </Paper>
                         </Grid>
                     </Grid>
@@ -522,6 +525,7 @@ Credentials.propTypes = {
             pathname: PropTypes.string.isRequired,
         }).isRequired,
         replace: PropTypes.func.isRequired,
+        push: PropTypes.func.isRequired,
     }).isRequired,
     location: PropTypes.shape({
         state: PropTypes.shape({

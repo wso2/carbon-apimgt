@@ -18,62 +18,17 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
-import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
-import AppBar from '@material-ui/core/AppBar';
-import { Typography } from '@material-ui/core';
+import { Typography, Paper, Box } from '@material-ui/core';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
-import { Redirect } from 'react-router-dom';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import CreateAppStep from './CreateAppStep';
 import SubscribeToAppStep from './SubscribeToAppStep';
 import GenerateKeysStep from './GenerateKeysStep';
 import GenerateAccessTokenStep from './GenerateAccessTokenStep';
 import CopyAccessTokenStep from './CopyAccessTokenStep';
-
-const styles = theme => ({
-    appBar: {
-        background: theme.palette.background.paper,
-        color: theme.palette.getContrastText(theme.palette.background.paper),
-    },
-    toolbar: {
-        marginLeft: theme.spacing.unit * 2,
-    },
-    subscribeTitle: {
-        flex: 1,
-    },
-    plainContent: {
-        paddingTop: 80,
-        paddingLeft: theme.spacing.unit * 2,
-    },
-    button: {
-        marginTop: theme.spacing.unit * 2,
-        marginRight: theme.spacing.unit,
-    },
-    group: {
-        display: 'flex',
-        flexDirection: 'row',
-    },
-    instructions: {
-        marginTop: theme.spacing.unit,
-        marginBottom: theme.spacing.unit,
-        'font-size': theme.spacing.unit * 2,
-    },
-    root: {
-        paddingLeft: theme.spacing.unit,
-    },
-    wizardContent: {
-        paddingLeft: theme.spacing.unit,
-    },
-    wizardButtons: {
-        paddingLeft: theme.spacing.unit * 2,
-    },
-});
 
 const stepComponents = [CreateAppStep, SubscribeToAppStep, GenerateKeysStep,
     GenerateAccessTokenStep, CopyAccessTokenStep];
@@ -166,75 +121,50 @@ class Wizard extends Component {
         });
     }
 
-/**
- * Rest the currentStep to 0 and bring wizard back to first step
- * @memberof Wizard
- */
-handleReset = () => {
-    this.setState({
-        currentStep: 0,
-    });
-};
-
     /**
-     * Set state.redirect to true to redirect to the API console page
+     * Rest the currentStep to 0 and bring wizard back to first step
      * @memberof Wizard
      */
-    handleRedirectTest = () => {
-        this.setState({ redirect: true });
-    }
+    handleReset = () => {
+        this.setState({
+            currentStep: 0,
+        });
+    };
 
     /**
      * @inheritdoc
      */
     render() {
-        const {
-            classes, updateSubscriptionData, apiId, handleClickToggle, throttlingPolicyList,
-        } = this.props;
-        const { currentStep, redirect, stepStatus } = this.state;
+        const { classes } = this.props;
+        const { currentStep, stepStatus } = this.state;
         const CurrentStepComponent = stepComponents[currentStep];
-        if (redirect) {
-            return <Redirect push to={'/apis/' + apiId + '/test'} />;
-        }
         return (
-            <React.Fragment>
-                <AppBar className={classes.appBar}>
-                    <Grid container spacing={0}>
-                        <Grid item xs={6}>
-                            <Toolbar className={classes.toolbar}>
-                                <IconButton
-                                    color='inherit'
-                                    onClick={() => handleClickToggle('openNew', updateSubscriptionData)}
-                                    aria-label='Close'
-                                >
-                                    <Icon>close</Icon>
-                                </IconButton>
-                                <div className={classes.subscribeTitle}>
-                                    <Typography variant='h6'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Credentials.Wizard.Wizard.subscribe.to.new.application'
-                                            defaultMessage='Create Application and Subscribe'
-                                        />
-                                    </Typography>
-                                </div>
-                            </Toolbar>
-                        </Grid>
-                    </Grid>
-                </AppBar>
-                <div className={classes.plainContent}>
-                    <div className={classes.root}>
-                        <Stepper activeStep={currentStep}>
-                            {this.steps.map((label) => {
-                                return (
-                                    <Step key={label}>
-                                        <StepLabel>{label}</StepLabel>
-                                    </Step>
-                                );
-                            })}
-                        </Stepper>
-                    </div>
-                    <div>
-                        <div className={classes.wizardContent}>
+            <Box my={2} mx='auto' display='flex' justifyContent='center'>
+                <Grid item pb={1} xs={12} md={11}>
+                    <Paper elevation={0}>
+                        <Box pt={2} px={3} display='flex' >
+                            <Typography variant='h4'>
+                                <FormattedMessage
+                                    id={'Apis.Details.Credentials.Credentials'
+                             + '.api.credentials.generate'}
+                                    defaultMessage='Key Generation Wizard'
+                                />
+                            </Typography>
+                        </Box>
+                        <Box py={1} mx='auto' display='flex' >
+                            <Grid item xs={12} md={12}>
+                                <Stepper activeStep={currentStep}>
+                                    {this.steps.map((label) => {
+                                        return (
+                                            <Step key={label}>
+                                                <StepLabel>{label}</StepLabel>
+                                            </Step>
+                                        );
+                                    })}
+                                </Stepper>
+                            </Grid>
+                        </Box>
+                        <Box py={1} mx='auto' display='block' >
                             {stepStatus === this.stepStatuses.PROCEED && (
                                 <React.Fragment>
                                     <CurrentStepComponent
@@ -244,30 +174,29 @@ handleReset = () => {
                                         stepStatuses={this.stepStatuses}
                                         classes={classes}
                                         setCreatedApp={this.setCreatedApp}
-                                        throttlingPolicyList={throttlingPolicyList}
-                                        apiId={apiId}
                                         setCreatedKeyType={this.setCreatedKeyType}
                                         setCreatedToken={this.setCreatedToken}
-                                        handleClickToggle={handleClickToggle}
-                                        updateSubscriptionData={updateSubscriptionData}
                                         handleReset={this.handleReset}
-                                        handleRedirectTest={this.handleRedirectTest}
                                     />
                                 </React.Fragment>
                             )}
+                        </Box>
+                        <Box py={1} mb={1} mx='auto' display='flex' >
                             {stepStatus === this.stepStatuses.BLOCKED && (
-                                <Typography variant='h4'>
-                                    <FormattedMessage
-                                        id={'Apis.Details.Credentials.Wizard.Wizard.approval.request.'
-                                             + 'for.this.step.has'}
-                                        defaultMessage='Approval request for this step has been Sent'
-                                    />
-                                </Typography>
+                                <Box pt={2} px={3} display='flex' >
+                                    <Typography variant='h5'>
+                                        <FormattedMessage
+                                            id={'Apis.Details.Credentials.Wizard.Wizard.approval.request.'
+                                                    + 'for.this.step.has'}
+                                            defaultMessage='A request to register this step has been sent.'
+                                        />
+                                    </Typography>
+                                </Box>
                             )}
-                        </div>
-                    </div>
-                </div>
-            </React.Fragment>
+                        </Box>
+                    </Paper>
+                </Grid>
+            </Box>
         );
     }
 }
@@ -282,13 +211,9 @@ Wizard.propTypes = {
         instructions: PropTypes.string,
         button: PropTypes.string,
         wizardContent: PropTypes.string,
-        wizardButtons: PropTypes.string,
     }).isRequired,
-    updateSubscriptionData: PropTypes.func.isRequired,
-    handleClickToggle: PropTypes.func.isRequired,
     intl: PropTypes.func.isRequired,
-    apiId: PropTypes.string.isRequired,
     throttlingPolicyList: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
-export default injectIntl(withStyles(styles)(Wizard));
+export default injectIntl(Wizard);

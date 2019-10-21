@@ -127,7 +127,7 @@ function PrototypeEndpoints(props) {
                             >
                                 <FormControlLabel
                                     value={endpointImplementationTypes[0].key}
-                                    control={<Radio />}
+                                    control={<Radio color='primary' />}
                                     label={<FormattedMessage
                                         id='Apis.Details.Endpoints.Prototype.PrototypeEndpoints.mock'
                                         defaultMessage='Mock'
@@ -135,7 +135,7 @@ function PrototypeEndpoints(props) {
                                 />
                                 <FormControlLabel
                                     value={endpointImplementationTypes[1].key}
-                                    control={<Radio />}
+                                    control={<Radio color='primary' />}
                                     label={<FormattedMessage
                                         id='Apis.Details.Endpoints.Prototype.PrototypeEndpoints.endpoint'
                                         defaultMessage='Endpoint'
@@ -156,6 +156,7 @@ function PrototypeEndpoints(props) {
                                 category='prototyped'
                                 editEndpoint={editPrototypeEndpoint}
                                 setAdvancedConfigOpen={null}
+                                apiId={api.id}
                             />
                         </Paper>
                     }

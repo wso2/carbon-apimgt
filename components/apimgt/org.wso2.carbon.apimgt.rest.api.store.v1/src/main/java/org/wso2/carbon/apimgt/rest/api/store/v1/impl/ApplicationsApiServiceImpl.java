@@ -22,7 +22,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -34,8 +33,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
@@ -46,10 +45,10 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRevokeRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyListDTO;
@@ -58,24 +57,23 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
@@ -213,9 +211,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
-                String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
                 // Remove hidden attributes and set the rest of the attributes from config
-                JSONArray applicationAttributesFromConfig = apiConsumer.getAppAttributesFromConfig(tenantDomain);
+                JSONArray applicationAttributesFromConfig = apiConsumer.getAppAttributesFromConfig(username);
                 Map<String, String> existingApplicationAttributes = application.getApplicationAttributes();
                 Map<String, String> applicationAttributes = new HashMap<>();
                 if (existingApplicationAttributes != null && applicationAttributesFromConfig != null) {
@@ -237,6 +234,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 application.setApplicationAttributes(applicationAttributes);
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                     ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
+                    applicationDTO.setHashEnabled(OAuthServerConfiguration.getInstance().isClientSecretHashEnabled());
                     JSONArray scopes= apiConsumer.getScopesForApplicationSubscription(username, application.getId());
                     applicationDTO.setSubscriptionScopes(scopes);
                     return Response.ok().entity(applicationDTO).build();
@@ -343,6 +341,89 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while generatig API Keys for application " + applicationId, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId, String keyType,
+                                                                      APIKeyRevokeRequestDTO body, String ifMatch,
+                                                                      MessageContext messageContext) {
+        String username = RestApiUtil.getLoggedInUsername();
+        String apiKey = body.getApikey();
+        if (!StringUtils.isEmpty(apiKey) && APIUtil.isValidJWT(apiKey)) {
+            try {
+                String splitToken[] = apiKey.split("\\.");
+                String signatureAlgorithm = APIUtil.getSignatureAlgorithm(splitToken);
+                String certAlias = APIUtil.getSigningAlias(splitToken);
+                Certificate certificate = APIUtil.getCertificateFromTrustStore(certAlias);
+                if(APIUtil.verifyTokenSignature(splitToken, certificate, signatureAlgorithm)) {
+                    APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+                    Application application = apiConsumer.getApplicationByUUID(applicationId);
+                    org.json.JSONObject decodedBody = new org.json.JSONObject(
+                                        new String(Base64.getUrlDecoder().decode(splitToken[1])));
+                    org.json.JSONObject appInfo = decodedBody.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION);
+                    if (appInfo != null && application != null) {
+                        if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+                            String appUuid = appInfo.getString(APIConstants.JwtTokenConstants.APPLICATION_UUID);
+                            if (applicationId.equals(appUuid)) {
+                                long expiryTime = Long.MAX_VALUE;
+                                org.json.JSONObject payload = new org.json.JSONObject(
+                                        new String(Base64.getUrlDecoder().decode(splitToken[1])));
+                                if (payload.has(APIConstants.JwtTokenConstants.EXPIRY_TIME)) {
+                                    expiryTime = APIUtil.getExpiryifJWT(apiKey);
+                                }
+                                String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+                                apiConsumer.revokeAPIKey(apiKey, expiryTime, tenantDomain);
+                                return Response.ok().build();
+                            } else {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Application uuid " + applicationId + " isn't matched with the " +
+                                            "application in the token " + appUuid + " of API Key " +
+                                                                                    APIUtil.getMaskedToken(apiKey));
+                                }
+                                RestApiUtil.handleBadRequest("Validation failed for the given token ", log);
+                            }
+                        } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Logged in user " + username + " isn't the owner of the application "
+                                                                                                        + applicationId);
+                            }
+                            RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION,
+                                                                                                      applicationId, log);
+                        }
+                    } else {
+                        if(log.isDebugEnabled()) {
+                            if (application == null) {
+                                log.debug("Application with given id " + applicationId + " doesn't not exist ");
+                            }
+
+                            if (appInfo == null) {
+                                log.debug("Application information doesn't exist in the token "
+                                                                                    + APIUtil.getMaskedToken(apiKey));
+                            }
+                        }
+                        RestApiUtil.handleBadRequest("Validation failed for the given token ", log);
+                    }
+                } else {
+                    if(log.isDebugEnabled()) {
+                        log.debug("Signature verification of given token " + APIUtil.getMaskedToken(apiKey) +
+                                                                                                            " is failed");
+                    }
+                    RestApiUtil.handleInternalServerError("Validation failed for the given token", log);
+                }
+            } catch (APIManagementException e) {
+                String msg = "Error while revoking API Key of application " + applicationId;
+                if(log.isDebugEnabled()) {
+                    log.debug("Error while revoking API Key of application " +
+                            applicationId+ " and token " + APIUtil.getMaskedToken(apiKey));
+                }
+                log.error(msg, e);
+                RestApiUtil.handleInternalServerError(msg, e, log);
+            }
+        } else {
+            log.debug("Provided API Key " + APIUtil.getMaskedToken(apiKey) + " is not valid");
+            RestApiUtil.handleBadRequest("Provided API Key isn't valid ", log);
         }
         return null;
     }

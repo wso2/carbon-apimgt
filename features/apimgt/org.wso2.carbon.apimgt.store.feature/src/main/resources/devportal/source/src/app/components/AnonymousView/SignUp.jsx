@@ -31,6 +31,7 @@ import Icon from '@material-ui/core/Icon';
 import { Link } from 'react-router-dom';
 import Checkbox from '@material-ui/core/Checkbox';
 import { FormattedMessage, injectIntl, } from 'react-intl';
+import { app } from 'Settings';
 import AuthManager from '../../data/AuthManager';
 import Utils from '../../data/Utils';
 import ConfigManager from '../../data/ConfigManager';
@@ -331,7 +332,7 @@ class SignUp extends React.Component {
                                     <Grid item>
                                         <img
                                             className='brand'
-                                            src='/devportal/site/public/images/logo.svg'
+                                            src={app.context + '/site/public/images/logo.svg'}
                                             alt='wso2-logo'
                                         />
                                     </Grid>
@@ -503,7 +504,7 @@ class SignUp extends React.Component {
                                                         </Typography>
                                                     </FormControl>
                                                     <FormControlLabel
-                                                        control={<Checkbox onChange={this.handlePolicyChange} />}
+                                                        control={<Checkbox onChange={this.handlePolicyChange} color='primary' />}
                                                         label={(
                                                             <p>
                                                                 <strong>

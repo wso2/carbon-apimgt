@@ -493,7 +493,7 @@ public final class APIImportUtil {
         try (FileInputStream inputStream = new FileInputStream(imageFile.getAbsolutePath())) {
             ResourceFile apiImage = new ResourceFile(inputStream, mimeType);
             String thumbPath = APIUtil.getIconPath(apiIdentifier);
-            String thumbnailUrl = apiProvider.addResourceFile(thumbPath, apiImage);
+            String thumbnailUrl = apiProvider.addResourceFile(importedApi.getId(), thumbPath, apiImage);
             importedApi.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl,
                     apiIdentifier.getProviderName()));
             APIUtil.setResourcePermissions(apiIdentifier.getProviderName(), null, null, thumbPath);
@@ -577,7 +577,7 @@ public final class APIImportUtil {
                         String filePathDoc = APIUtil.getDocumentationFilePath(apiIdentifier, filePath);
                         APIUtil.setResourcePermissions(importedApi.getId().getProviderName(),
                                 importedApi.getVisibility(), visibleRoles, filePathDoc);
-                        doc.setFilePath(apiProvider.addResourceFile(filePathDoc, apiDocument));
+                        doc.setFilePath(apiProvider.addResourceFile(importedApi.getId(), filePathDoc, apiDocument));
                     }
                 }
 
@@ -840,8 +840,11 @@ public final class APIImportUtil {
     }
 
     /**
-     * Update API with the certificate. If certificate alias is already exists for tenant, cert will be added and if
-     * the certificate is already exists is in trust store, this method will update the cert in trust store.
+     * Update API with the certificate.
+     * If certificate alias already exists for tenant in database, certificate content will be
+     * updated in trust store. If cert alias does not exits in database for that tenant, add the certificate to
+     * publisher and gateway nodes. In such case if alias already exits in the trust store, update the certificate
+     * content for that alias.
      *
      * @param certificate Certificate JSON element
      * @param apiProvider API Provider

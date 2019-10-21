@@ -25,11 +25,12 @@ import Grid from '@material-ui/core/Grid/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import CONSTS from 'AppData/Constants';
 import classNames from 'classnames';
-import AuthManager from 'AppData/AuthManager';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
 import API from '../../../../data/api';
 import { ApiContext } from '../ApiContext';
+import AuthManager from '../../../../data/AuthManager';
 
 const styles = theme => ({
     root: {
@@ -39,7 +40,7 @@ const styles = theme => ({
         paddingBottom: theme.spacing.unit * 2,
     },
     paper: {
-        margin: theme.spacing(3),
+        marginRight: theme.spacing(3),
         paddingBottom: theme.spacing(3),
         paddingRight: theme.spacing(2),
     },
@@ -64,6 +65,9 @@ const styles = theme => ({
     },
     loadMoreLink: {
         textDecoration: 'underline',
+    },
+    genericMessageWrapper: {
+        margin: theme.spacing(2),
     },
 });
 
@@ -106,40 +110,37 @@ class Comments extends Component {
 
         const restApi = new API();
 
-        const user = AuthManager.getUser();
-        if (user != null) {
-            restApi
-                .getAllComments(apiId)
-                .then((result) => {
-                    let commentList = result.body.list;
-                    if (isOverview) {
-                        setCount(commentList.length);
-                        if (commentList.length > 2) {
-                            commentList = commentList.slice(commentList.length - 3, commentList.length);
-                        }
+        restApi
+            .getAllComments(apiId)
+            .then((result) => {
+                let commentList = result.body.list;
+                if (isOverview) {
+                    setCount(commentList.length);
+                    if (commentList.length > 2) {
+                        commentList = commentList.slice(commentList.length - 3, commentList.length);
                     }
-                    this.setState({ allComments: commentList, totalComments: commentList.length });
-                    if (commentList.length < theme.custom.commentsLimit) {
-                        this.setState({
-                            startCommentsToDisplay: 0,
-                            comments: commentList.slice(0, commentList.length),
-                        });
-                    } else {
-                        this.setState({
-                            startCommentsToDisplay: commentList.length - theme.custom.commentsLimit,
-                            comments: commentList.slice(
-                                commentList.length - theme.custom.commentsLimit,
-                                commentList.length,
-                            ),
-                        });
-                    }
-                })
-                .catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.log(error);
-                    }
-                });
-        }
+                }
+                this.setState({ allComments: commentList, totalComments: commentList.length });
+                if (commentList.length < theme.custom.commentsLimit) {
+                    this.setState({
+                        startCommentsToDisplay: 0,
+                        comments: commentList.slice(0, commentList.length),
+                    });
+                } else {
+                    this.setState({
+                        startCommentsToDisplay: commentList.length - theme.custom.commentsLimit,
+                        comments: commentList.slice(
+                            commentList.length - theme.custom.commentsLimit,
+                            commentList.length,
+                        ),
+                    });
+                }
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+            });
     }
 
     /**
@@ -209,6 +210,38 @@ class Comments extends Component {
     }
 
     /**
+     * Method to compare the tenant domains
+     * @param {*} advertiseInfo advertiseInfo object for the API
+     * @param {*} currentUser current logged in user
+     * @returns {boolean} true or false
+     */
+    isCrossTenant(apiProvider, currentUser) {
+        let tenantDomain = null;
+        let loggedInUserDomain = null;
+        const loggedInUser = currentUser.name;
+
+        if (apiProvider.includes('@')) {
+            const splitDomain = apiProvider.split('@');
+            tenantDomain = splitDomain[splitDomain.length - 1];
+        } else {
+            tenantDomain = 'carbon.super';
+        }
+
+        if (loggedInUser.includes('@')) {
+            const splitLoggedInUser = loggedInUser.split('@');
+            loggedInUserDomain = splitLoggedInUser[splitLoggedInUser.length - 1];
+        } else {
+            loggedInUserDomain = 'carbon.super';
+        }
+
+        if (tenantDomain !== loggedInUserDomain) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Render method of the component
      * @returns {React.Component} Comment html component
      * @memberof Comments
@@ -234,7 +267,8 @@ class Comments extends Component {
                                 </Typography>
                             </div>
                         )}
-                        {!showLatest && (
+                        {!showLatest && AuthManager.getUser() &&
+                        !this.isCrossTenant(api.provider, AuthManager.getUser()) && (
                             <Paper className={classes.paper}>
                                 <CommentAdd
                                     apiId={api.id}
@@ -245,6 +279,24 @@ class Comments extends Component {
                                 />
                             </Paper>
                         )}
+                        {totalComments === 0 && AuthManager.getUser() === null && !isOverview &&
+                            <div className={classes.genericMessageWrapper}>
+                                <InlineMessage type='info' className={classes.dialogContainer}>
+                                    <Typography variant='h5' component='h3'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Comments.no.comments'
+                                            defaultMessage='No Comments Yet'
+                                        />
+                                    </Typography>
+                                    <Typography component='p'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Comments.no.comments.content'
+                                            defaultMessage='No comments available for this API yet'
+                                        />
+                                    </Typography>
+                                </InlineMessage>
+                            </div>
+                        }
                         <Comment
                             comments={comments}
                             apiId={api.id}

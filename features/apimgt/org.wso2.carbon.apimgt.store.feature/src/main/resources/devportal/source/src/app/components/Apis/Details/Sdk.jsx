@@ -26,12 +26,27 @@ import Icon from '@material-ui/core/Icon';
 import Divider from '@material-ui/core/Divider';
 import Grid from '@material-ui/core/Grid';
 import JSFileDownload from 'js-file-download';
-import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import { FormattedMessage, injectIntl, } from 'react-intl';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import AuthManager from 'AppData/AuthManager';
+import { app } from 'Settings';
 import Api from '../../../data/api';
+
+const styles = theme => ({
+    genericMessageWrapper: {
+        margin: theme.spacing(2),
+    },
+    titleSub: {
+        marginLeft: theme.spacing(2),
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
+    },
+});
+
 /**
  *
  *
@@ -147,7 +162,7 @@ class Sdk extends React.Component {
      * Handle sdk image not found issue. Point to a default image
      */
     addDefaultSrc = (ev) => {
-        ev.target.src = '/devportal/site/public/images/sdks/default.svg';
+        ev.target.src = app.context + '/site/public/images/sdks/default.svg';
     };
 
     /**
@@ -157,14 +172,13 @@ class Sdk extends React.Component {
      * @memberof Sdk
      */
     render() {
-        const language_list = this.state.items;
-        const { onlyIcons, intl } = this.props;
+        const languageList = this.state.items;
+        const { onlyIcons, intl, classes } = this.props;
         if (onlyIcons) {
             return (
-                language_list && (
+                languageList && (
                     <React.Fragment>
-                        {language_list.map(
-                            (language, index) => index < 3 && (
+                        {languageList.map((language, index) => index < 3 && (
                                 <Grid item xs={4}>
                                     <a
                                         onClick={event => this.handleClick(event, language)}
@@ -173,7 +187,7 @@ class Sdk extends React.Component {
                                         <img
                                             alt={language}
                                             src={
-                                                '/devportal/site/public/images/sdks/'
+                                                app.context + '/site/public/images/sdks/'
                                                     + new String(language)
                                                     + '.svg'
                                             }
@@ -183,85 +197,98 @@ class Sdk extends React.Component {
                                         />
                                     </a>
                                 </Grid>
-                            ),
-                        )}
+                            ),)}
                     </React.Fragment>
                 )
             );
         }
-        return language_list ? (
-            <Grid container className='tab-grid' spacing={0}>
-                <Grid item xs={12} sm={6} md={9} lg={9} xl={10}>
-                    {this.state.sdkLanguages.length >= this.filter_threshold && (
-                        <Grid item style={{ textAlign: 'left', margin: '14px' }}>
-                            <TextField
-                                id='search'
-                                label={intl.formatMessage({
-                                    defaultMessage: 'Search SDK',
-                                    id: 'Apis.Details.Sdk.search.sdk',
-                                })}
-                                type='text'
-                                margin='normal'
-                                name='searchSdk'
-                                onChange={this.handleChange}
-                            />
-                        </Grid>
-                    )}
-                    <Grid container justify='flex-start' spacing={Number(24)}>
-                        {language_list.map((language, index) => (
-                            <Grid key={index} item>
-                                <div style={{ width: 'auto', textAlign: 'center', margin: '10px' }}>
-                                    <Card>
-                                        <div>{language.toString().toUpperCase()}</div>
-                                        <Divider />
-                                        <CardMedia
-                                            title={language.toString().toUpperCase()}
-                                            src={'/devportal/site/public/images/sdks/' + new String(language) + '.svg'}
-                                        >
-                                            <img
-                                                alt={language}
-                                                onError={this.addDefaultSrc}
-                                                src={
-                                                    `/devportal/site/public/images/sdks/${language}.svg`
-                                                }
-                                                style={{ width: '100px', height: '100px', margin: '30px' }}
-                                            />
-                                        </CardMedia>
-                                        <CardActions>
-                                            <Grid container justify='center'>
-                                                <Button
-                                                    color='secondary'
-                                                    onClick={event => this.handleClick(event, language)}
+        return (
+            <React.Fragment>
+                <Typography variant='h4' className={classes.titleSub}>
+                    <FormattedMessage id='Apis.Details.Sdk.title' defaultMessage='Software Development Kits (SDKs)' />
+                </Typography>
+                {languageList ? (
+                    <Grid container className='tab-grid' spacing={0}>
+                        <Grid item xs={12} sm={6} md={9} lg={9} xl={10}>
+                            {this.state.sdkLanguages.length >= this.filter_threshold && (
+                                <Grid item style={{ textAlign: 'left', margin: '14px' }}>
+                                    <TextField
+                                        id='search'
+                                        label={intl.formatMessage({
+                                            defaultMessage: 'Search SDK',
+                                            id: 'Apis.Details.Sdk.search.sdk',
+                                        })}
+                                        type='text'
+                                        margin='normal'
+                                        name='searchSdk'
+                                        onChange={this.handleChange}
+                                    />
+                                </Grid>
+                            )}
+                            <Grid container justify='flex-start' spacing={Number(24)}>
+                                {languageList.map((language, index) => (
+                                    <Grid key={index} item>
+                                        <div style={{ width: 'auto', textAlign: 'center', margin: '10px' }}>
+                                            <Card>
+                                                <div>{language.toString().toUpperCase()}</div>
+                                                <Divider />
+                                                <CardMedia
+                                                    title={language.toString().toUpperCase()}
+                                                    src={'/devportal/site/public/images/sdks/' + new String(language) +
+                                                    '.svg'}
                                                 >
-                                                    <Icon>arrow_downward</Icon>
-                                                    {'Download'}
-                                                </Button>
-                                            </Grid>
-                                        </CardActions>
-                                    </Card>
-                                </div>
+                                                    <img
+                                                        alt={language}
+                                                        onError={this.addDefaultSrc}
+                                                        src={
+                                                            `/devportal/site/public/images/sdks/${language}.svg`
+                                                        }
+                                                        style={{ width: '100px', height: '100px', margin: '30px' }}
+                                                    />
+                                                </CardMedia>
+                                                <CardActions>
+                                                    <Grid container justify='center'>
+                                                        <Button
+                                                            color='secondary'
+                                                            onClick={event => this.handleClick(event, language)}
+                                                        >
+                                                            <Icon>arrow_downward</Icon>
+                                                            {'Download'}
+                                                        </Button>
+                                                    </Grid>
+                                                </CardActions>
+                                            </Card>
+                                        </div>
+                                    </Grid>
+                                ))}
                             </Grid>
-                        ))}
+                        </Grid>
                     </Grid>
-                </Grid>
-            </Grid>
-        ) : (
-            <Paper>
-                <Grid container style={{ marginLeft: '10%', marginRight: '10%', width: '100%' }} align='center'>
-                    <Grid item xs={12} sm={6} md={9} lg={9} xl={10}>
-                        <Paper>
-                            <Typography>
-                                <Icon>info</Icon>
+                ) : (
+                    <div className={classes.genericMessageWrapper}>
+                        <InlineMessage type='info' className={classes.dialogContainer}>
+                            <Typography variant='h5' component='h3'>
                                 <FormattedMessage
-                                    id='Apis.Details.Sdk.no.lanuages'
-                                    defaultMessage='No languages are configured.'
+                                    id='Apis.Details.Sdk.no.sdks'
+                                    defaultMessage='No SDKs'
                                 />
                             </Typography>
-                        </Paper>
-                    </Grid>
-                </Grid>
-            </Paper>
+                            <Typography component='p'>
+                                <FormattedMessage
+                                    id='Apis.Details.Sdk.no.sdks.content'
+                                    defaultMessage='No SDKs available for this API'
+                                />
+                            </Typography>
+                        </InlineMessage>
+                    </div>
+                )}
+            </React.Fragment>
         );
     }
 }
-export default injectIntl(Sdk);
+
+Sdk.propTypes = {
+    classes: PropTypes.instanceOf(Object).isRequired,
+};
+
+export default injectIntl(withStyles(styles)(Sdk));

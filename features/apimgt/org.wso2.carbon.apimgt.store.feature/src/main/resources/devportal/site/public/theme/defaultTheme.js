@@ -1,4 +1,3 @@
-const APP_CONTEXT = '/devportal';
 const Configurations = {
     themes: {
         light: {
@@ -39,7 +38,7 @@ const Configurations = {
                     border: 'none', // It can be something like 'solid 1px #cccccc' for fixed layouts
                 },
                 appBar: {
-                    logo: '/devportal/site/public/images/logo.svg',
+                    logo: '/site/public/images/logo.svg',
                     logoHeight: 19,
                     logoWidth: 208,
                     background: '#1d344f',
@@ -71,6 +70,7 @@ const Configurations = {
                     iconOddColor: '#347eff',
                     iconEvenColor: '#89b4ff',
                     listGridSelectedColor: '#347eff', // Defines color of the selected icon ( grid/ list ) view of the api listing page
+                    tagChipBackground: '#7dd7f5',
                 },
                 listView: {
                     tableHeadBackground: '#fff',
@@ -85,9 +85,9 @@ const Configurations = {
                 commentsLimit: 5,
                 maxCommentLength: 512,
                 overviewPage: {
-                    commentsBackground: '/devportal/site/public/images/overview/comments.svg',
-                    documentsBackground: '/devportal/site/public/images/overview/documents.svg',
-                    credentialsBackground: '/devportal/site/public/images/overview/credentials.svg',
+                    commentsBackground: '/site/public/images/overview/comments.svg',
+                    documentsBackground: '/site/public/images/overview/documents.svg',
+                    credentialsBackground: '/site/public/images/overview/credentials.svg',
                 },
                 resourceChipColors: {
                     get: '#02a8f4',
@@ -128,26 +128,26 @@ const Configurations = {
                         },
                     },
                 },
-                noApiImage: '/devportal/site/public/images/nodata.svg',
+                noApiImage: '/site/public/images/nodata.svg',
                 landingPage: {
                     active: false,
                     carousel: {
                         active: true,
                         slides: [
                             {
-                                src: '/devportal/site/public/images/landing/01.jpg',
+                                src: '/site/public/images/landing/01.jpg',
                                 title: 'Lorem <span>ipsum</span> dolor sit amet',
                                 content:
                                     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer felis lacus, placerat vel condimentum in, porta a urna. Suspendisse dolor diam, vestibulum at molestie dapibus, semper eget ex. Morbi sit amet euismod tortor.',
                             },
                             {
-                                src: '/devportal/site/public/images/landing/02.jpg',
+                                src: '/site/public/images/landing/02.jpg',
                                 title: 'Curabitur <span>malesuada</span> arcu sapien',
                                 content:
                                     'Curabitur malesuada arcu sapien, suscipit egestas purus efficitur vitae. Etiam vulputate hendrerit venenatis. ',
                             },
                             {
-                                src: '/devportal/site/public/images/landing/03.jpg',
+                                src: '/site/public/images/landing/03.jpg',
                                 title: 'Nam vel ex <span>feugiat</span> nunc laoreet',
                                 content:
                                     'Nam vel ex feugiat nunc laoreet elementum. Duis sed nibh condimentum, posuere risus a, mollis diam. Vivamus ultricies, augue id pulvinar semper, mauris lorem bibendum urna, eget tincidunt quam ex ut diam.',
@@ -177,13 +177,13 @@ const Configurations = {
                         active: true,
                         content: [
                             {
-                                src: '/devportal/site/public/images/landing/parallax1.jpg',
+                                src: '/site/public/images/landing/parallax1.jpg',
                                 title: 'Lorem <span>ipsum</span> dolor sit amet',
                                 content:
                                     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer felis lacus, placerat vel condimentum in, porta a urna. Suspendisse dolor diam, vestibulum at molestie dapibus, semper eget ex. Morbi sit amet euismod tortor.',
                             },
                             {
-                                src: '/devportal/site/public/images/landing/parallax2.jpg',
+                                src: '/site/public/images/landing/parallax2.jpg',
                                 title: 'Nam vel ex <span>feugiat</span> nunc laoreet',
                                 content:
                                     'Nam vel ex feugiat nunc laoreet elementum. Duis sed nibh condimentum, posuere risus a, mollis diam. Vivamus ultricies, augue id pulvinar semper, mauris lorem bibendum urna, eget tincidunt quam ex ut diam.',
@@ -191,27 +191,29 @@ const Configurations = {
                         ],
                     },
                 },
-                tagWiseMode: false,
-                tagThumbnail: {
-                    width: 150,
-                    defaultTagImage: '/devportal/site/public/images/api/api-default.png',
+                tagWise: {
+                    active: false,
+                    style: 'fixed-left', // If 'page' it will show a different page. Else if 'fixed-left' will show a fixed menu with all the group tags on the left.
+                    thumbnail: { // These params will be applyed only if the style is 'page'
+                        width: 150,
+                        image: '/devportal/site/public/images/api/api-default.png',
+                    },
+                    fixedStyles: { // These params will be applyed only if the style is 'fixed-left'
+                        width: 200,
+                        background: 'rgba(255,255,255,100)',
+                        hasIcon: false,
+                    },
+                    key: '-group',
+                    showAllApis: true,
                 },
-                tagGroupKey: '-group',
+                tagCloud: {
+                    active: true,
+                    colorOptions: { // This is the Options object passed to TagCloud component of https://www.npmjs.com/package/react-tagcloud
+                        luminosity: 'dark',
+                        hue: 'blue',
+                    },
+                },
             },
         },
-    },
-    app: {
-        context: APP_CONTEXT,
-    },
-    grantTypes: {
-        authorization_code: 'Code',
-        implicit: 'Implicit',
-        refresh_token: 'Refresh Token',
-        password: 'Password',
-        'iwa:ntlm': 'IWA-NTLM',
-        client_credentials: 'Client Credentials',
-        'urn:ietf:params:oauth:grant-type:saml2-bearer': 'SAML2',
-        'urn:ietf:params:oauth:grant-type:jwt-bearer': 'JWT',
-        kerberos: 'Kerberos',
     },
 };

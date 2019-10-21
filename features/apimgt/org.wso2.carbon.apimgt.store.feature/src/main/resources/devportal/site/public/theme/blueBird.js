@@ -1,4 +1,3 @@
-const APP_CONTEXT = '/devportal';
 const Configurations = {
     themes: {
         light: {
@@ -39,14 +38,15 @@ const Configurations = {
                     border: 'solid 1px #cccccc',
                 },
                 appBar: {
-                    logo: '/devportal/site/public/images/logo.png',
+                    logo: '/devportal/site/public/images/logo-custom.svg',
+                    logoHeight: 40,
                     background: '#207bb0',
                     activeBackground: '#f62921',
                     showSearch: true,
                     drawerWidth: 200,
                 },
                 leftMenu: {
-                    position: 'vertical-left', // Sets the position of the left menu ( 'horizontal', 'vertical-left', 'vertical-right')
+                    position: 'horizontal', // Sets the position of the left menu ( 'horizontal', 'vertical-left', 'vertical-right')
                     style: 'no text', //  other values ('icon top', 'icon left', 'no icon', 'no text')
                     iconSize: 24,
                     leftMenuTextStyle: 'uppercase',
@@ -125,26 +125,26 @@ const Configurations = {
                         },
                     },
                 },
-                noApiImage: '/devportal/site/public/images/nodata.svg',
+                noApiImage: '/site/public/images/nodata.svg',
                 landingPage: {
-                    active: false,
+                    active: true,
                     carousel: {
                         active: true,
                         slides: [
                             {
-                                src: '/devportal/site/public/images/landing/01.jpg',
+                                src: '/site/public/images/landing/01.jpg',
                                 title: 'Lorem <span>ipsum</span> dolor sit amet',
                                 content:
                                     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer felis lacus, placerat vel condimentum in, porta a urna. Suspendisse dolor diam, vestibulum at molestie dapibus, semper eget ex. Morbi sit amet euismod tortor.',
                             },
                             {
-                                src: '/devportal/site/public/images/landing/02.jpg',
+                                src: '/site/public/images/landing/02.jpg',
                                 title: 'Curabitur <span>malesuada</span> arcu sapien',
                                 content:
                                     'Curabitur malesuada arcu sapien, suscipit egestas purus efficitur vitae. Etiam vulputate hendrerit venenatis. ',
                             },
                             {
-                                src: '/devportal/site/public/images/landing/03.jpg',
+                                src: '/site/public/images/landing/03.jpg',
                                 title: 'Nam vel ex <span>feugiat</span> nunc laoreet',
                                 content:
                                     'Nam vel ex feugiat nunc laoreet elementum. Duis sed nibh condimentum, posuere risus a, mollis diam. Vivamus ultricies, augue id pulvinar semper, mauris lorem bibendum urna, eget tincidunt quam ex ut diam.',
@@ -174,13 +174,13 @@ const Configurations = {
                         active: true,
                         content: [
                             {
-                                src: '/devportal/site/public/images/landing/parallax1.jpg',
+                                src: '/site/public/images/landing/parallax1.jpg',
                                 title: 'Lorem <span>ipsum</span> dolor sit amet',
                                 content:
                                     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer felis lacus, placerat vel condimentum in, porta a urna. Suspendisse dolor diam, vestibulum at molestie dapibus, semper eget ex. Morbi sit amet euismod tortor.',
                             },
                             {
-                                src: '/devportal/site/public/images/landing/parallax2.jpg',
+                                src: '/site/public/images/landing/parallax2.jpg',
                                 title: 'Nam vel ex <span>feugiat</span> nunc laoreet',
                                 content:
                                     'Nam vel ex feugiat nunc laoreet elementum. Duis sed nibh condimentum, posuere risus a, mollis diam. Vivamus ultricies, augue id pulvinar semper, mauris lorem bibendum urna, eget tincidunt quam ex ut diam.',
@@ -196,19 +196,5 @@ const Configurations = {
                 tagGroupKey: '-group',
             },
         },
-    },
-    app: {
-        context: APP_CONTEXT,
-    },
-    grantTypes: {
-        authorization_code: 'Code',
-        implicit: 'Implicit',
-        refresh_token: 'Refresh Token',
-        password: 'Password',
-        'iwa:ntlm': 'IWA-NTLM',
-        client_credentials: 'Client Credentials',
-        'urn:ietf:params:oauth:grant-type:saml2-bearer': 'SAML2',
-        'urn:ietf:params:oauth:grant-type:jwt-bearer': 'JWT',
-        kerberos: 'Kerberos',
     },
 };

@@ -27,6 +27,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.rest.api.admin.LabelsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.LabelDTO;
@@ -39,7 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({RestApiUtil.class, LabelMappingUtil.class, ApiMgtDAO.class})
+@PrepareForTest({RestApiUtil.class, LabelMappingUtil.class, ApiMgtDAO.class, APIAdminImpl.class})
 public class LabelApiServiceImplTestCase {
 
     private final String TENANT_DOMAIN = "carbon.super";
@@ -123,9 +124,14 @@ public class LabelApiServiceImplTestCase {
     @Test
     public void testLabelsLabelIdDelete() throws APIManagementException {
         String id = "1111";
+        String userName = "admin";
         PowerMockito.mockStatic(ApiMgtDAO.class);
-        apiMgtDAO =  PowerMockito.mock(ApiMgtDAO.class);
+        apiMgtDAO = PowerMockito.mock(ApiMgtDAO.class);
+        PowerMockito.mockStatic(APIAdminImpl.class);
+        APIAdminImpl apiAdminImpl = PowerMockito.mock(APIAdminImpl.class);
         PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(userName);
+        Mockito.when(apiAdminImpl.isAttachedLabel(userName, id)).thenReturn(false);
         apiMgtDAO.deleteLabel(id);
         Response response = labelsApiService.labelsLabelIdDelete(id, null, null);
         Assert.assertEquals(response.getStatus(), 200);

@@ -39,7 +39,6 @@ import Alert from 'AppComponents/Shared/Alert';
 const styles = theme => ({
     button: {
         marginLeft: theme.spacing.unit * 2,
-        textTransform: theme.custom.leftMenuTextStyle,
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
     contentWrapper: {
@@ -127,9 +126,10 @@ class CreateEditForm extends React.Component {
             disableName: false,
             otherTypeName: null,
             nameNotDuplicate: true,
-            urlValidity: null,
+            invalidUrl: true,
             nameEmpty: false,
             summeryEmpty: false,
+            urlEmpty: false,
         };
     }
 
@@ -142,6 +142,7 @@ class CreateEditForm extends React.Component {
     };
     changeSource = (e) => {
         const { value } = e.target;
+        this.validate();
         this.setState({ sourceType: value });
     };
     setDisable = (item) => {
@@ -236,10 +237,16 @@ class CreateEditForm extends React.Component {
                 });
         }
     }
-    validate(field, value) {
+    validate(field=null, value=null) {
+        let invalidUrl = false;
         if (field === 'url') {
-            const urlValidity = value ? APIValidation.url.validate(value).error : null;
-            this.setState({ urlValidity });
+            invalidUrl = value ? APIValidation.url.validate(value).error : false;
+            this.setState({ invalidUrl });
+            if (value === '') {
+                this.setState({ urlEmpty: true });
+            } else {
+                this.setState({ urlEmpty: false });
+            }
         } else if (field === 'name') {
             if (value) {
                 const promise = APIValidation.apiDocument.validate({ id: this.props.apiId, name: value });
@@ -269,6 +276,20 @@ class CreateEditForm extends React.Component {
             } else {
                 this.setState({ summeryEmpty: false });
             }
+        }
+        const {
+            name, summary, nameNotDuplicate, sourceType, sourceUrl,
+        } = this.state;
+        const { setSaveDisabled } = this.props;
+        if (
+            name !== '' &&
+            summary !== '' &&
+            nameNotDuplicate &&
+            ((!invalidUrl && sourceUrl !== '') || sourceType !== 'URL')
+        ) {
+            setSaveDisabled(false);
+        } else {
+            setSaveDisabled(true);
         }
     }
     componentDidMount() {
@@ -303,6 +324,32 @@ class CreateEditForm extends React.Component {
             );
         }
     }
+    getUrlHelperText() {
+        const { invalidUrl, urlEmpty} = this.state;
+
+        if (invalidUrl) {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Documents.CreateEditForm.source.url.helper.text.error.invalid'
+                    defaultMessage='Enter a valid URL to the source'
+                />
+            );
+        } else if (urlEmpty) {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Documents.CreateEditForm.source.url.helper.text.error.empty'
+                    defaultMessage='Url Field can not be empty'
+                />
+            );
+        } else {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Documents.CreateEditForm.source.url.helper.text'
+                    defaultMessage='Provide the URL to the source'
+                />
+            );
+        }
+    }
     render() {
         const {
             name,
@@ -313,10 +360,11 @@ class CreateEditForm extends React.Component {
             file,
             disableName,
             otherTypeName,
-            urlValidity,
+            invalidUrl,
             nameNotDuplicate,
             nameEmpty,
             summeryEmpty,
+            urlEmpty,
         } = this.state;
         const { classes } = this.props;
         return (
@@ -356,6 +404,9 @@ class CreateEditForm extends React.Component {
                         multiline
                         InputProps={{
                             onBlur: ({ target: { value } }) => {
+                                this.validate('summary', value);
+                            },
+                            onKeyUp: ({ target: { value } }) => {
                                 this.validate('summary', value);
                             },
                         }}
@@ -500,7 +551,7 @@ class CreateEditForm extends React.Component {
                                         'Apis.Details.Documents.CreateEditForm.document.create.type.other.document.' +
                                         'category'
                                     }
-                                    defaultMessage='Other Document Category *'
+                                    defaultMessage='Other Document Type *'
                                 />
                             }
                             helperText={
@@ -509,7 +560,7 @@ class CreateEditForm extends React.Component {
                                         'Apis.Details.Documents.CreateEditForm.document.create.type.other.document.' +
                                         'category.helper.text'
                                     }
-                                    defaultMessage='Provide the document category'
+                                    defaultMessage='Provide the document type'
                                 />
                             }
                             type='text'
@@ -589,6 +640,9 @@ class CreateEditForm extends React.Component {
                                 onBlur: ({ target: { value } }) => {
                                     this.validate('url', value);
                                 },
+                                onKeyUp: ({ target: { value } }) => {
+                                    this.validate('url', value);
+                                },
                             }}
                             margin='normal'
                             label={
@@ -597,19 +651,7 @@ class CreateEditForm extends React.Component {
                                     defaultMessage='URL'
                                 />
                             }
-                            helperText={
-                                urlValidity ? (
-                                    <FormattedMessage
-                                        id='Apis.Details.Documents.CreateEditForm.source.url.helper.text.error'
-                                        defaultMessage='Enter a valid URL to the source'
-                                    />
-                                ) : (
-                                    <FormattedMessage
-                                        id='Apis.Details.Documents.CreateEditForm.source.url.helper.text'
-                                        defaultMessage='Provide the URL to the source'
-                                    />
-                                )
-                            }
+                            helperText={this.getUrlHelperText()}
                             type='text'
                             name='sourceUrl'
                             margin='normal'
@@ -618,7 +660,8 @@ class CreateEditForm extends React.Component {
                             InputLabelProps={{
                                 shrink: true,
                             }}
-                            error={urlValidity}
+                            error={invalidUrl || urlEmpty}
+                            variant='outlined'
                         />
                     </FormControl>
                 )}
@@ -677,6 +720,8 @@ CreateEditForm.propTypes = {
     intl: PropTypes.shape({}).isRequired,
     docId: PropTypes.shape({}),
     apiId: PropTypes.shape({}),
+    saveDisabled: PropTypes.bool.isRequired,
+    setSaveDisabled: PropTypes.func.isRequired,
     apiType: PropTypes.oneOf([Api.CONSTS.API, Api.CONSTS.APIProduct]).isRequired,
 };
 

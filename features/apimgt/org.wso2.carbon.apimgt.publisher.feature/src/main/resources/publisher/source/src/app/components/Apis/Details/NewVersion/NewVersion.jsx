@@ -33,7 +33,6 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
 import FormLabel from '@material-ui/core/FormLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import Alert from 'AppComponents/Shared/Alert';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
@@ -97,7 +96,7 @@ class CreateNewVersion extends React.Component {
         super(props);
         this.state = {
             isDefaultVersion: 'no',
-            valid: { version: { empty: false, alreadyExists: false } },
+            valid: { version: { empty: false, alreadyExists: false, hasSpecialChars: false } },
         };
     }
 
@@ -112,9 +111,17 @@ class CreateNewVersion extends React.Component {
         const { value } = event.target;
         this.setState({
             newVersion: value,
-            valid: { version: { empty: !value, alreadyExists: false } },
+            valid: { version: { empty: !value, alreadyExists: false, hasSpecialChars: this.hasSpecialChars(value) } },
         });
     };
+
+    hasSpecialChars(value) {
+        if (/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/.test(value)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 
     /**
      * Handles the submit action for new version creation
@@ -167,11 +174,13 @@ class CreateNewVersion extends React.Component {
             return <Redirect to={'/apis/' + apiId + '/overview'} />;
         }
 
-        let helperText = 'Provide new version';
+        let helperText = '';
         if (valid.version.empty) {
             helperText = 'This field cannot be empty';
         } else if (valid.version.alreadyExists) {
             helperText = 'An API with version "' + newVersion + '" already exists.';
+        } else if (valid.version.hasSpecialChars) {
+            helperText = 'API Version should not contain special characters';
         }
 
         return (
@@ -191,7 +200,11 @@ class CreateNewVersion extends React.Component {
                                 <TextField
                                     fullWidth
                                     id='newVersion'
-                                    error={valid.version.empty || valid.version.alreadyExists}
+                                    error={
+                                        valid.version.empty ||
+                                        valid.version.alreadyExists ||
+                                        valid.version.hasSpecialChars
+                                    }
                                     label={
                                         <FormattedMessage
                                             id='Apis.Details.NewVersion.NewVersion.new.version'
@@ -199,16 +212,13 @@ class CreateNewVersion extends React.Component {
                                         />
                                     }
                                     helperText={
-                                        <FormattedMessage
-                                            id='Apis.Details.NewVersion.NewVersion.helper.text'
-                                            defaultMessage='{helper}'
-                                            values={{ helper: helperText }}
-                                        />
+                                        helperText
                                     }
                                     type='text'
                                     name='newVersion'
                                     placeholder='Eg: 2.0.0'
                                     value={newVersion}
+                                    variant='outlined'
                                     onChange={this.handleVersionChange()}
                                     margin='normal'
                                     InputLabelProps={{
@@ -228,27 +238,22 @@ class CreateNewVersion extends React.Component {
                                         classes={{
                                             tooltip: classes.htmlTooltip,
                                         }}
-                                        disableHoverListener
                                         title={
                                             <React.Fragment>
                                                 <FormattedMessage
                                                     id='Apis.Details.NewVersion.NewVersion.tooltip'
                                                     defaultMessage={
-                                                        'Marks one API version in a group as ' +
-                                                        'the default so that it can be invoked without ' +
-                                                        'specifying the version number in the URL. ' +
-                                                        'For example, if you mark ' +
-                                                        'http://host:port/youtube/2.0 as the default API, ' +
-                                                        'requests made to http://host:port/youtube/ are ' +
-                                                        'automatically routed to version 2.0. If you mark ' +
-                                                        'an unpublished API as the default, ' +
-                                                        'the previous default published API ' +
-                                                        'will still be used as the default until ' +
-                                                        'the new default API is published.'
+                                                        'Indicates if this is the default version of the API. ' +
+                                                        'If an API is invoked without specifying a version, ' +
+                                                        'the API Gateway will route the request to the default ' +
+                                                        'version of the API.'
                                                     }
                                                 />
                                             </React.Fragment>
                                         }
+                                        interactive
+                                        aria-label='Default Version Selector'
+                                        tabIndex='-1'
                                     >
                                         <Button className={classes.helpButton}>
                                             <HelpOutline className={classes.helpIcon} />
@@ -262,18 +267,9 @@ class CreateNewVersion extends React.Component {
                                     value={isDefaultVersion}
                                     onChange={this.handleDefaultVersionChange()}
                                 >
-                                    <FormControlLabel value='yes' control={<Radio />} label='Yes' />
-                                    <FormControlLabel value='no' control={<Radio />} label='No' />
+                                    <FormControlLabel value='yes' control={<Radio color='primary' />} label='Yes' />
+                                    <FormControlLabel value='no' control={<Radio color='primary' />} label='No' />
                                 </RadioGroup>
-                                <FormHelperText>
-                                    <FormattedMessage
-                                        id='Apis.Details.NewVersion.NewVersion.api.helper'
-                                        defaultMessage={
-                                            'Indicate whether API should be the default version ' +
-                                            'among the group of APIs with the same name'
-                                        }
-                                    />
-                                </FormHelperText>
                             </FormControl>
                         </Paper>
                         <div className={classes.buttonWrapper}>
@@ -281,7 +277,7 @@ class CreateNewVersion extends React.Component {
                                 container
                                 direction='row'
                                 alignItems='flex-start'
-                                spacing={4}
+                                spacing={2}
                                 className={classes.buttonSection}
                             >
                                 <Grid item>
@@ -291,6 +287,11 @@ class CreateNewVersion extends React.Component {
                                             color='primary'
                                             id='createBtn'
                                             onClick={() => this.handleSubmit(api, newVersion, isDefaultVersion)}
+                                            disabled={
+                                                valid.version.empty ||
+                                                valid.version.alreadyExists ||
+                                                valid.version.hasSpecialChars
+                                            }
                                         >
                                             <FormattedMessage
                                                 id='Apis.Details.NewVersion.NewVersion.create'

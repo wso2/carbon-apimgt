@@ -37,6 +37,7 @@ import { FormattedMessage } from 'react-intl';
 import Drawer from '@material-ui/core/Drawer';
 import HeaderSearch from 'AppComponents/Base/Header/Search/HeaderSearch';
 import Settings from 'AppComponents/Shared/SettingsContext';
+import { app } from 'Settings';
 import AuthManager from '../../data/AuthManager';
 import ConfigManager from '../../data/ConfigManager';
 import EnvironmentMenu from './Header/EnvironmentMenu';
@@ -117,6 +118,9 @@ const styles = (theme) => {
             borderLeft: theme.custom.page.border,
             borderRight: theme.custom.page.border,
         },
+        icons: {
+            marginRight: theme.spacing(),
+        },
     };
 };
 
@@ -192,7 +196,7 @@ class Layout extends React.Component {
      */
     doOIDCLogout = (e) => {
         e.preventDefault();
-        window.location = '/devportal/services/logout';
+        window.location = app.context + '/services/logout';
     };
 
     handleClickButton = (key) => {
@@ -256,7 +260,7 @@ class Layout extends React.Component {
                             </Hidden>
                             <Link to='/'>
                                 <img
-                                    src={theme.custom.appBar.logo}
+                                    src={app.context + theme.custom.appBar.logo}
                                     style={{
                                         height: theme.custom.appBar.logoHeight,
                                         width: theme.custom.appBar.logoWidth,
@@ -293,7 +297,7 @@ class Layout extends React.Component {
                             </Hidden>
                             <VerticalDivider height={32} />
                             <HeaderSearch />
-                            {tenantDomain && (
+                            {(tenantDomain && tenantDomain !== 'INVALID') && (
                                 <Link
                                     style={{
                                         textDecoration: 'none',
@@ -303,7 +307,7 @@ class Layout extends React.Component {
                                     onClick={() => setTenantDomain('INVALID')}
                                 >
                                     <Button className={classes.publicStore}>
-                                        <Icon>public</Icon>
+                                        <Icon className={classes.icons}>public</Icon>
                                         <FormattedMessage
                                             id='Base.index.go.to.public.store'
                                             defaultMessage='Go to public Dev Portal'
@@ -322,7 +326,7 @@ class Layout extends React.Component {
                                 <React.Fragment>
                                     <Link to='/settings'>
                                         <Button className={classes.userLink}>
-                                            <Icon>settings</Icon>
+                                            <Icon className={classes.icons}>settings</Icon>
                                             <FormattedMessage
                                                 id='Base.index.settings.caption'
                                                 defaultMessage='Settings'
@@ -338,7 +342,7 @@ class Layout extends React.Component {
                                         onClick={this.handleToggleUserMenu}
                                         className={classes.userLink}
                                     >
-                                        <Icon>person</Icon>
+                                        <Icon className={classes.icons}>person</Icon>
                                         {user.name}
                                     </Button>
                                     <Popper
@@ -388,7 +392,7 @@ class Layout extends React.Component {
                                      <HowToReg /> sign-up
                                      </Button>
                                      </Link> */}
-                                    <a href='/devportal/services/configs'>
+                                    <a href={app.context + '/services/configs'}>
                                         <Button className={classes.userLink}>
                                             <Icon>person</Icon>
                                             <FormattedMessage id='Base.index.sign.in' defaultMessage=' Sign-in' />

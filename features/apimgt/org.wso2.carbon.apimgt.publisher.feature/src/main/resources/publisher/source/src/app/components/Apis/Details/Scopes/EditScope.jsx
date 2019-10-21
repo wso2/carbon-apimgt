@@ -28,12 +28,10 @@ import { withStyles } from '@material-ui/core/styles';
 import Alert from 'AppComponents/Shared/Alert';
 import Paper from '@material-ui/core/Paper';
 import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
 import ChipInput from 'material-ui-chip-input';
 import APIValidation from 'AppData/APIValidation';
 import Chip from '@material-ui/core/Chip';
 import { red } from '@material-ui/core/colors/';
-import Divider from '@material-ui/core/Divider';
 import Icon from '@material-ui/core/Icon';
 import base64url from 'base64url';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -311,13 +309,11 @@ class EditScope extends React.Component {
                                     />
                                 </FormControl>
                                 <FormControl margin='normal'>
-                                    <FormLabel component='legend' className={classes.FormControlLabel}>
-                                        <FormattedMessage
-                                            id='Apis.Details.Scopes.EditScope.roles'
-                                            defaultMessage='Roles'
-                                        />
-                                    </FormLabel>
                                     <ChipInput
+                                        label='Roles'
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
                                         variant='outlined'
                                         value={validRoles.concat(invalidRoles)}
                                         alwaysShowPlaceholder={false}
@@ -361,7 +357,6 @@ class EditScope extends React.Component {
                                         )}
                                     />
                                 </FormControl>
-                                <Divider />
                                 <div className={classes.addNewOther}>
                                     <Button
                                         variant='contained'

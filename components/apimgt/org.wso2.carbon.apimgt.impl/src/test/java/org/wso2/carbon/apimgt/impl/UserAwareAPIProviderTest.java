@@ -28,6 +28,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -265,7 +266,8 @@ public class UserAwareAPIProviderTest {
      */
     @Test
     public void testDeleteApiSpecificMediationPolicy() throws APIManagementException {
-        Assert.assertFalse(userAwareAPIProvider.deleteApiSpecificMediationPolicy("test", "test"));
+        Identifier identifier = Mockito.mock(Identifier.class);
+        Assert.assertFalse(userAwareAPIProvider.deleteApiSpecificMediationPolicy(identifier, "test", "test"));
     }
 
     /**

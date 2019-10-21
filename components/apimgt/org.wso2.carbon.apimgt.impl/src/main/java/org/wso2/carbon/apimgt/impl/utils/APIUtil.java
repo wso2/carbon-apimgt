@@ -119,23 +119,23 @@ import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
+import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
-import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
-import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
-import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
+import org.wso2.carbon.apimgt.impl.token.JWTSignatureAlg;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
-import org.wso2.carbon.apimgt.impl.token.JWTSignatureAlg;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -199,6 +199,18 @@ import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
+import javax.cache.Cache;
+import javax.cache.CacheConfiguration;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -217,16 +229,17 @@ import java.net.SocketException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
+import java.security.InvalidKeyException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
-import java.security.PrivateKey;
-import java.security.Signature;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
 import java.security.SignatureException;
-import java.security.InvalidKeyException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
@@ -249,18 +262,6 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.cache.Cache;
-import javax.cache.CacheConfiguration;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -1271,6 +1272,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY, apiProduct.getSubscriptionAvailability());
             artifact.setAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS, apiProduct.getSubscriptionAvailableTenants());
             artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL, apiProduct.getThumbnailUrl());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT, Integer.toString(apiProduct.getCacheTimeout()));
 
             StringBuilder policyBuilder = new StringBuilder();
             for (Tier tier : apiProduct.getAvailableTiers()) {
@@ -1290,6 +1292,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
                     APIUtil.getCorsConfigurationJsonFromDto(apiProduct.getCorsConfiguration()));
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER, apiProduct.getAuthorizationHeader());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, apiProduct.getApiSecurity());
 
             //Validate if the API has an unsupported context before setting it in the artifact
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -1307,9 +1310,27 @@ public final class APIUtil {
                             apiProduct.getContextTemplate());
                 }
             }
+
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA, Boolean.toString(apiProduct.
+                    isEnabledSchemaValidation()));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING, apiProduct.getResponseCache());
             // This is to support the pluggable version strategy.
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, apiProduct.getContextTemplate());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
+
+            String apiSecurity = artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY);
+            if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
+                    !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
+                artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
+            }
+
+            //set monetization status (i.e - enabled or disabled)
+            artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS, Boolean.toString(apiProduct.getMonetizationStatus()));
+            //set additional monetization data
+            if (apiProduct.getMonetizationProperties() != null) {
+                artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES,
+                        apiProduct.getMonetizationProperties().toJSONString());
+            }
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + apiProduct.getId().getName();
             log.error(msg, e);
@@ -3101,6 +3122,30 @@ public final class APIUtil {
     }
 
     /**
+     * Check whether user is exist
+     *
+     * @param username A username
+     * @throws APIManagementException If an error occurs
+     */
+    public static boolean isUserExist(String username) throws APIManagementException {
+        if (username == null) {
+            throw new APIManagementException("Attempt to execute privileged operation as the anonymous user");
+        }
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
+        try {
+            int tenantId =
+                    ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+            UserStoreManager manager =
+                    ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
+                            .getUserStoreManager();
+            return manager.isExistingUser(tenantAwareUserName);
+        } catch (UserStoreException e) {
+            throw new APIManagementException("UserStoreException while trying the user existence " + username, e);
+        }
+    }
+
+    /**
      * To add the value to a cache.
      *
      * @param cacheName - Name of the Cache
@@ -4143,6 +4188,7 @@ public final class APIUtil {
                 }
             }
 
+            createAnalyticsRole(APIConstants.ANALYTICS_ROLE, tenantId);
             createSelfSignUpRoles(tenantId);
         }
     }
@@ -4440,6 +4486,19 @@ public final class APIUtil {
     }
 
     /**
+     * Create Analytics role with the given name in specified tenant
+     *
+     * @param roleName role name
+     * @param tenantId id of the tenant
+     * @throws APIManagementException
+     */
+    public static void createAnalyticsRole(String roleName, int tenantId) throws APIManagementException {
+        Permission[] analyticsPermissions = new Permission[]{
+                new Permission(APIConstants.Permissions.LOGIN, UserMgtConstants.EXECUTE_ACTION)};
+        createRole(roleName, analyticsPermissions, tenantId);
+    }
+
+    /**
      * Creates a role with a given set of permissions for the specified tenant
      *
      * @param roleName    role name
@@ -4531,8 +4590,8 @@ public final class APIUtil {
         return uriTemplate;
     }
 
-    public static float getAverageRating(APIIdentifier apiId) throws APIManagementException {
-        return ApiMgtDAO.getInstance().getAverageRating(apiId);
+    public static float getAverageRating(Identifier id) throws APIManagementException {
+        return ApiMgtDAO.getInstance().getAverageRating(id);
     }
 
     public static float getAverageRating(int apiId) throws APIManagementException {
@@ -5245,15 +5304,15 @@ public final class APIUtil {
 
             if ("in".equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + RegistryConstants.PATH_SEPARATOR +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
             } else if ("out".equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + RegistryConstants.PATH_SEPARATOR +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
             } else if ("fault".equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + RegistryConstants.PATH_SEPARATOR +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
             }
 
@@ -7657,7 +7716,7 @@ public final class APIUtil {
     }
 
     public static Map<String, Tier> getTiersFromPolicies(String policyLevel, int tenantId) throws APIManagementException {
-        Map<String, Tier> tierMap = new HashMap<String, Tier>();
+        Map<String, Tier> tierMap = new TreeMap<String, Tier>();
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         Policy[] policies;
         if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
@@ -8899,6 +8958,7 @@ public final class APIUtil {
             APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, productName,
                     productVersion);
             apiProduct = new APIProduct(apiProductIdentifier);
+            apiProduct.setRating(Float.toString(getAverageRating(apiProductIdentifier)));
             ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
 
             setResourceProperties(apiProduct, registry, artifactPath);
@@ -8920,12 +8980,14 @@ public final class APIUtil {
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             apiProduct.setEnvironments(extractEnvironmentsForAPI(environments));
             apiProduct.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
+            apiProduct.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
             apiProduct.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
             apiProduct.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             apiProduct.setCreatedTime(registry.get(artifactPath).getCreatedTime());
             apiProduct.setLastUpdated(registry.get(artifactPath).getLastModified());
             apiProduct.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
+            apiProduct.setTenantDomain(tenantDomainName);
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
 
@@ -8936,6 +8998,19 @@ public final class APIUtil {
 
             // We set the context template here
             apiProduct.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
+            apiProduct.setEnableSchemaValidation(Boolean.parseBoolean(artifact.getAttribute(APIConstants.
+                    API_OVERVIEW_ENABLE_JSON_SCHEMA)));
+            apiProduct.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
+
+            int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
+            try {
+                cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
+            } catch (NumberFormatException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error in converting cache time out due to " + e.getMessage());
+                }
+            }
+            apiProduct.setCacheTimeout(cacheTimeout);
 
             List<APIProductResource> resources = ApiMgtDAO.getInstance().
                     getAPIProductResourceMappings(apiProductIdentifier);
@@ -8964,7 +9039,15 @@ public final class APIUtil {
             }
 
             apiProduct.setProductResources(resources);
-
+            //set data and status related to monetization
+            apiProduct.setMonetizationStatus(Boolean.parseBoolean(artifact.getAttribute
+                    (APIConstants.Monetization.API_MONETIZATION_STATUS)));
+            String monetizationInfo = artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
+            if (StringUtils.isNotBlank(monetizationInfo)) {
+                JSONParser parser = new JSONParser();
+                JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
+                apiProduct.setMonetizationProperties(jsonObj);
+            }
         } catch (GovernanceException e) {
             String msg = "Failed to get API Product for artifact ";
             throw new APIManagementException(msg, e);
@@ -8973,6 +9056,9 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         } catch (UserStoreException e) {
             String msg = "Failed to get User Realm of API Product Provider";
+            throw new APIManagementException(msg, e);
+        } catch (ParseException e) {
+            String msg = "Failed to get parse monetization information.";
             throw new APIManagementException(msg, e);
         }
         return apiProduct;
@@ -9270,7 +9356,7 @@ public final class APIUtil {
         String alias = config.getFirstProperty(APIConstants.API_STORE_API_KEY_ALIAS);
         if (alias == null) {
             log.warn("The configurations related to Api Key alias in APIStore " +
-                    "are missing in api-manager.xml.");
+                    "are missing in api-manager.xml. Hence returning the default value.");
             return APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
         }
         return alias;
@@ -9371,6 +9457,93 @@ public final class APIUtil {
             return "XXXXX" + token.substring(token.length() - 10);
         } else {
             return "XXXXX" + token.substring(token.length() / 2);
+        }
+    }
+
+    public static Certificate getCertificateFromTrustStore(String certAlias) throws APIManagementException {
+        Certificate publicCert = null;
+        //Read the client-truststore.jks into a KeyStore
+        try {
+            KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
+            if (trustStore != null) {
+                // Read public certificate from trust store
+                publicCert = trustStore.getCertificate(certAlias);
+            }
+        } catch (KeyStoreException e) {
+            String msg = "Error in retrieving public certificate from the trust store with alias : "
+                    + certAlias;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return publicCert;
+    }
+        /**
+         * Verify the JWT token signature.
+         *
+         * This method only used for API Key revocation which contains some duplicate logic in GatewayUtils class.
+         * @param splitToken The JWT token which is split into [header, payload, signature]
+         * @return whether the signature is verified or or not
+         */
+    public static boolean verifyTokenSignature(String[] splitToken, Certificate certificate,
+                                               String signatureAlgorithm) throws APIManagementException {
+        // Retrieve public key from the certificate
+        PublicKey publicKey = certificate.getPublicKey();
+        try {
+            // Verify token signature
+            Signature signatureInstance = Signature.getInstance(signatureAlgorithm);
+            signatureInstance.initVerify(publicKey);
+            String assertion = splitToken[0] + "." + splitToken[1];
+            signatureInstance.update(assertion.getBytes());
+            byte[] decodedSignature = java.util.Base64.getUrlDecoder().decode(splitToken[2]);
+            return signatureInstance.verify(decodedSignature);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | IllegalArgumentException e) {
+            String msg = "Error while verifying JWT signature with signature algorithm " + signatureAlgorithm;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Retrieve the signature algorithm specified in the token header.
+     *
+     * @param splitToken The JWT token which is split into [header, payload, signature]
+     * @return whether the signature algorithm
+     * @throws APIManagementException in case of signature algorithm extraction failure
+     */
+    public static String getSignatureAlgorithm(String[] splitToken) throws APIManagementException {
+        String signatureAlgorithm;
+        org.json.JSONObject decodedHeader;
+        try {
+            decodedHeader = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().decode(splitToken[0])));
+            signatureAlgorithm = decodedHeader.getString(APIConstants.JwtTokenConstants.SIGNATURE_ALGORITHM);
+            if (APIConstants.SIGNATURE_ALGORITHM_RS256.equals(signatureAlgorithm)) {
+                signatureAlgorithm = APIConstants.SIGNATURE_ALGORITHM_SHA256_WITH_RSA;
+            }
+            return signatureAlgorithm;
+        } catch (JSONException | IllegalArgumentException e) {
+            String msg = "Unable to find signature algorithm in the token";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Retrieve the signature algorithm specified in the token header.
+     *
+     * @param splitToken The JWT token which is split into [header, payload, signature]
+     * @return whether the signature algorithm
+     * @throws APIManagementException in case of signature algorithm extraction failure
+     */
+    public static String getSigningAlias(String[] splitToken) throws APIManagementException {
+        String signCertAlias;
+        org.json.JSONObject decodedHeader;
+        try {
+            decodedHeader = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().decode(splitToken[0])));
+            signCertAlias = decodedHeader.getString(APIConstants.JwtTokenConstants.JWT_KID);
+            return signCertAlias;
+        } catch (JSONException | IllegalArgumentException e) {
+            String msg = "Unable to signing certificate alias in the token";
+            throw new APIManagementException(msg, e);
         }
     }
 }

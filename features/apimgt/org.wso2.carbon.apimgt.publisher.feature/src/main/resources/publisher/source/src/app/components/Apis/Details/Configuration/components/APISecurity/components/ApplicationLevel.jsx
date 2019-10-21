@@ -141,6 +141,7 @@ export default function ApplicationLevel(props) {
                                         })
                                         }
                                         value={DEFAULT_API_SECURITY_OAUTH2}
+                                        color='primary'
                                     />
                                 )}
                                 label='OAuth2'
@@ -156,6 +157,7 @@ export default function ApplicationLevel(props) {
                                         })
                                         }
                                         value={API_SECURITY_BASIC_AUTH}
+                                        color='primary'
                                     />
                                 )}
                                 label='Basic'
@@ -172,6 +174,7 @@ export default function ApplicationLevel(props) {
                                             })
                                         }
                                         value={API_SECURITY_API_KEY}
+                                        color='primary'
                                     />
                                 }
                                 label='Api Key'
@@ -195,7 +198,7 @@ export default function ApplicationLevel(props) {
                                         <Radio
                                             disabled={!haveMultiLevelSecurity ||
                                                 isRestricted(['apim:api_create'], apiFromContext)}
-                                            color='default'
+                                            color='primary'
                                         />
                                     }
                                     label='Mandatory'
@@ -207,7 +210,7 @@ export default function ApplicationLevel(props) {
                                         <Radio
                                             disabled={!haveMultiLevelSecurity ||
                                                 isRestricted(['apim:api_create'], apiFromContext)}
-                                            color='default'
+                                            color='primary'
                                         />
                                     }
                                     label='Optional'
@@ -216,7 +219,8 @@ export default function ApplicationLevel(props) {
                             </RadioGroup>
                             <FormHelperText>
                                 <FormattedMessage
-                                    id='Apis.Details.Configuration.components.APISecurity.http.mandatory'
+                                    id='Apis.Details.Configuration.components.APISecurity.components.ApplicationLevel.
+                                    http.mandatory'
                                     defaultMessage='Choose whether Application level security is mandatory or optional'
                                 />
                             </FormHelperText>

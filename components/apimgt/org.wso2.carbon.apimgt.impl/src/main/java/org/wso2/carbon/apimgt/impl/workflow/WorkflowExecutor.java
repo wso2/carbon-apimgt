@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.workflow;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -75,6 +76,11 @@ public abstract class WorkflowExecutor implements Serializable {
         return new GeneralWorkflowResponse();
     }
 
+    public WorkflowResponse monetizeSubscription(WorkflowDTO workflowDTO, APIProduct apiProduct)
+            throws WorkflowException {
+        return new GeneralWorkflowResponse();
+    }
+
     /**
      * Implements monetization deletion logic in workflow.
      *
@@ -82,6 +88,11 @@ public abstract class WorkflowExecutor implements Serializable {
      * @throws WorkflowException - Thrown when the workflow execution was not fully performed.
      */
     public WorkflowResponse deleteMonetizedSubscription(WorkflowDTO workflowDTO, API api) throws WorkflowException {
+        return new GeneralWorkflowResponse();
+    }
+
+    public WorkflowResponse deleteMonetizedSubscription(WorkflowDTO workflowDTO, APIProduct apiProduct)
+            throws WorkflowException {
         return new GeneralWorkflowResponse();
     }
 

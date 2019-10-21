@@ -26,146 +26,96 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
-import org.wso2.carbon.apimgt.keymgt.token.APIMJWTGenerator;
-import org.wso2.carbon.apimgt.keymgt.token.TokenGenerator;
-import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
+import org.wso2.carbon.apimgt.keymgt.JWTAccessTokenIssuerDTO;
 import org.wso2.carbon.apimgt.keymgt.util.APIMTokenIssuerUtil;
+import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
 import org.wso2.carbon.identity.oauth.dao.OAuthAppDO;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
+import org.wso2.carbon.identity.oauth2.authz.OAuthAuthzReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.OauthTokenIssuerImpl;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.List;
 
 public class APIMTokenIssuer extends OauthTokenIssuerImpl {
 
     private static final Log log = LogFactory.getLog(APIMTokenIssuer.class);
 
-
     @Override
     public String accessToken(OAuthTokenReqMessageContext tokReqMsgCtx) throws OAuthSystemException {
 
         String clientId = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId();
+        Application application;
+        long start_time = 0;
+        if (log.isDebugEnabled()) {
+            start_time = System.nanoTime();
+        }
         try {
-            long start_time = 0;
-            if (log.isDebugEnabled()) {
-                start_time = System.nanoTime();
-            }
-            Application application = APIUtil.getApplicationByClientId(clientId);
-            if (log.isDebugEnabled()) {
-                long end_time = System.nanoTime();
-                long output = end_time - start_time;
-                log.debug("Time taken to load the Application from database in milliseconds : " + output / 1000000);
-            }
-            if (application != null) {
-                String tokenType = application.getTokenType();
-                if (APIConstants.JWT.equals(tokenType)) {
-                    OAuthAppDO oAuthAppDO = OAuth2Util.getAppInformationByClientId(clientId);
-                    String[] audience = oAuthAppDO.getAudiences();
-                    List<String> audienceList = Arrays.asList(audience);
-                    String[] scopes = tokReqMsgCtx.getScope();
-                    StringBuilder scopeString = new StringBuilder();
-                    for (String scope : scopes) {
-                        scopeString.append(scope).append(" ");
-                    }
-
-                    ApplicationDTO applicationDTO = new ApplicationDTO();
-                    applicationDTO.setId(application.getId());
-                    applicationDTO.setName(application.getName());
-                    applicationDTO.setTier(application.getTier());
-                    applicationDTO.setOwner(application.getOwner());
-
-                    JwtTokenInfoDTO jwtTokenInfoDTO = APIUtil.getJwtTokenInfoDTO(application,
-                            tokReqMsgCtx.getAuthorizedUser().toFullQualifiedUsername(),
-                            tokReqMsgCtx.getAuthorizedUser().getTenantDomain());
-                    jwtTokenInfoDTO.setScopes(scopeString.toString().trim());
-                    jwtTokenInfoDTO.setAudience(audienceList);
-                    jwtTokenInfoDTO.setExpirationTime(getSecondsTillExpiry(tokReqMsgCtx.getValidityPeriod()));
-                    jwtTokenInfoDTO.setApplication(applicationDTO);
-                    jwtTokenInfoDTO.setKeyType(application.getKeyType());
-                    jwtTokenInfoDTO.setConsumerKey(clientId);
-
-                    // Generate JWT token to be sent for the backend
-                    APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                            .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                    boolean backendJwtGenerationEnabled = Boolean.parseBoolean(config.getFirstProperty(
-                            APIConstants.ENABLE_JWT_GENERATION));
-                    if (log.isDebugEnabled()) {
-                        log.debug("JWT Generation for backend enabled : " + backendJwtGenerationEnabled);
-                    }
-                    if (backendJwtGenerationEnabled) {
-                        TokenGenerator jwtGenerator = APIKeyMgtDataHolder.getTokenGenerator();
-                        if (jwtGenerator != null) {
-                            TokenValidationContext validationContext = new TokenValidationContext();
-                            APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
-                            apiKeyValidationInfoDTO.setEndUserName(tokReqMsgCtx.getAuthorizedUser().toFullQualifiedUsername());
-                            apiKeyValidationInfoDTO.setSubscriber(application.getOwner());
-                            apiKeyValidationInfoDTO.setApplicationName(application.getName());
-                            apiKeyValidationInfoDTO.setApplicationId(String.valueOf(application.getId()));
-                            apiKeyValidationInfoDTO.setType(application.getKeyType());
-                            apiKeyValidationInfoDTO.setApplicationTier(application.getTier());
-                            validationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
-                            jwtTokenInfoDTO.setBackendJwt(jwtGenerator.generateToken(validationContext));
-                        }
-                    }
-
-                    APIMJWTGenerator apimjwtGenerator = new APIMJWTGenerator();
-                    String accessToken = apimjwtGenerator.generateJWT(jwtTokenInfoDTO);
-                    if (log.isDebugEnabled()) {
-                        long end_time_2 = System.nanoTime();
-                        long output = end_time_2 - start_time;
-                        log.debug("Time taken to generate the JWG in milliseconds : " + output / 1000000);
-                    }
-                    return accessToken;
-                }
-            }
-
+            application = APIUtil.getApplicationByClientId(clientId);
         } catch (APIManagementException e) {
-            log.error("Error occurred while getting JWT Token client ID : " + clientId, e);
-            throw new OAuthSystemException("Error occurred while getting JWT Token client ID : " + clientId, e);
-        } catch (InvalidOAuthClientException e) {
-            log.error("Error occurred while getting JWT Token client ID : " + clientId + " when getting oAuth App " +
-                    "information", e);
-            throw new OAuthSystemException("Error occurred while getting JWT Token client ID : " + clientId, e);
-        } catch (IdentityOAuth2Exception e) {
-            log.error("Error occurred while getting JWT Token client ID : " + clientId + " when getting oAuth App " +
-                    "information", e);
-            throw new OAuthSystemException("Error occurred while getting JWT Token client ID : " + clientId, e);
+            String errorMsg = "Error occurred while retrieving application from Token client ID ";
+            log.error(errorMsg + clientId, e);
+            throw new OAuthSystemException(errorMsg + clientId, e);
         }
-        return super.accessToken(tokReqMsgCtx);
-    }
+        if (log.isDebugEnabled()) {
+            long end_time = System.nanoTime();
+            long output = end_time - start_time;
+            log.debug("Time taken to load the Application from database in milliseconds : " + output / 1000000);
+        }
+        if (application != null) {
+            String tokenType = application.getTokenType();
+            if (APIConstants.JWT.equals(tokenType)) {
+                log.debug("Token type of the application is JWT.");
+                // loading the stored oauth app data
+                OAuthAppDO oAuthAppDO;
+                try {
+                    oAuthAppDO = OAuth2Util.getAppInformationByClientId(clientId);
+                } catch (InvalidOAuthClientException | IdentityOAuth2Exception e) {
+                    String errorMsg = "Error while retrieving oauth app information for clientId: ";
+                    log.error(errorMsg + clientId, e);
+                    throw new OAuthSystemException(errorMsg + clientId, e);
+                }
+                long validityPeriod;
+                try {
+                    validityPeriod = APIMTokenIssuerUtil.getAccessTokenLifeTimeInSeconds(tokReqMsgCtx, oAuthAppDO);
+                } catch (IdentityOAuth2Exception e) {
+                    throw new OAuthSystemException("Error while retrieving token validity period for clientId: " +
+                            clientId, e);
+                }
 
-    private long getSecondsTillExpiry(long validityPeriod) throws APIManagementException {
-        if (validityPeriod == -1) {
-            // the token request does not specify the validity period explicitly
-            KeyManagerConfiguration configuration = KeyManagerHolder.getKeyManagerInstance().getKeyManagerConfiguration();;
-            return Long.parseLong(configuration.getParameter(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD));
-        } else if (validityPeriod == -2) {
-            // a non-expiring token request, set the expiration to a large value
-            return Integer.MAX_VALUE;
-        } else {
-            return validityPeriod;
+                AuthenticatedUser endUser = tokReqMsgCtx.getAuthorizedUser();
+                String authCode = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getAuthorizationCode();
+                String[] scopes = tokReqMsgCtx.getScope();
+
+                JWTAccessTokenIssuerDTO jwtAccessTokenIssuerDTO = new JWTAccessTokenIssuerDTO();
+                jwtAccessTokenIssuerDTO.setUser(endUser);
+                jwtAccessTokenIssuerDTO.setClientId(clientId);
+                jwtAccessTokenIssuerDTO.setScopeList(scopes);
+                jwtAccessTokenIssuerDTO.setValidityPeriod(validityPeriod);
+                jwtAccessTokenIssuerDTO.setAuthCode(authCode);
+                String token = APIMTokenIssuerUtil.generateToken(jwtAccessTokenIssuerDTO, application);
+                if (log.isDebugEnabled()) {
+                    long end_time_2 = System.nanoTime();
+                    long output = end_time_2 - start_time;
+                    log.debug("Time taken to generate the JWT in milliseconds : " + output / 1000000);
+                }
+                return token;
+            }
         }
+        log.debug("Token type of the application is NOT JWT.");
+        // token type is not JWT. Generate UUID token.
+        return super.accessToken(tokReqMsgCtx);
     }
 
     @Override
     public String getAccessTokenHash(String accessToken) throws OAuthSystemException {
+
         if (StringUtils.isNotEmpty(accessToken) && accessToken.contains(APIConstants.DOT)) {
             try {
                 JWT parse = JWTParser.parse(accessToken);
@@ -197,5 +147,86 @@ public class APIMTokenIssuer extends OauthTokenIssuerImpl {
             log.error("Error occurred while getting Token type.", e);
         }
         return false;
+    }
+
+   /* Needs to be uncommented after implicit grant renewal fix
+    @Override
+    public boolean renewAccessTokenPerRequest(OAuthAuthzReqMessageContext oauthAuthzMsgCtx) {
+
+        String clientId = oauthAuthzMsgCtx.getAuthorizationReqDTO().getConsumerKey();
+        Application application;
+        try {
+            application = APIUtil.getApplicationByClientId(clientId);
+            if (null != application) {
+                if (APIConstants.JWT.equals(application.getTokenType())) {
+                    return true;
+                }
+            }
+        } catch (APIManagementException e) {
+            log.error("Error occurred while getting Token type.", e);
+        }
+        return false;
+    }*/
+
+    //This method will be called for implicit grant
+    @Override
+    public String accessToken(OAuthAuthzReqMessageContext oauthAuthzMsgCtx) throws OAuthSystemException {
+
+        String clientId = oauthAuthzMsgCtx.getAuthorizationReqDTO().getConsumerKey();
+        long start_time = 0;
+        if (log.isDebugEnabled()) {
+            start_time = System.nanoTime();
+        }
+        Application application;
+        try {
+            application = APIUtil.getApplicationByClientId(clientId);
+        } catch (APIManagementException e) {
+            String errorMsg = "Error occurred while retrieving application from Token client ID ";
+            log.error(errorMsg + clientId, e);
+            throw new OAuthSystemException(errorMsg + clientId, e);
+        }
+        if (log.isDebugEnabled()) {
+            long end_time = System.nanoTime();
+            long output = end_time - start_time;
+            log.debug("Time taken to load the Application from database in milliseconds : " + output / 1000000);
+        }
+        if (application != null) {
+            String tokenType = application.getTokenType();
+            if (APIConstants.JWT.equals(tokenType)) {
+
+                // loading the stored oauth app data
+                OAuthAppDO oAuthAppDO;
+                try {
+                    oAuthAppDO = OAuth2Util.getAppInformationByClientId(clientId);
+                } catch (InvalidOAuthClientException | IdentityOAuth2Exception e) {
+                    String errorMsg = "Error while retrieving oauth app information for clientId: ";
+                    log.error(errorMsg + clientId, e);
+                    throw new OAuthSystemException(errorMsg + clientId, e);
+                }
+                long validityPeriod = APIMTokenIssuerUtil.getAccessTokenLifeTimeInSeconds(oAuthAppDO);
+
+                String[] scopeList = oauthAuthzMsgCtx.getAuthorizationReqDTO().getScopes();
+                AuthenticatedUser endUser = oauthAuthzMsgCtx.getAuthorizationReqDTO().getUser();
+
+                JWTAccessTokenIssuerDTO jwtAccessTokenIssuerDTO = new JWTAccessTokenIssuerDTO();
+                jwtAccessTokenIssuerDTO.setUser(endUser);
+                jwtAccessTokenIssuerDTO.setClientId(clientId);
+                jwtAccessTokenIssuerDTO.setScopeList(scopeList);
+                jwtAccessTokenIssuerDTO.setValidityPeriod(validityPeriod);
+                jwtAccessTokenIssuerDTO.setAuthCode("");
+
+                String token = APIMTokenIssuerUtil.generateToken(jwtAccessTokenIssuerDTO, application);
+
+                if (log.isDebugEnabled()) {
+                    long end_time_2 = System.nanoTime();
+                    long output = end_time_2 - start_time;
+                    log.debug("Time taken to generate the JWT in milliseconds : " + output / 1000000);
+                }
+                return token;
+            }
+        }
+        log.debug("Token type of the application is NOT JWT.");
+        // token type is not JWT. Generate UUID token.
+        return super.accessToken(oauthAuthzMsgCtx);
     }
 }

@@ -35,6 +35,7 @@ import Api from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import Alert from 'AppComponents/Shared/Alert';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
+import { isRestricted } from 'AppData/AuthManager';
 
 const styles = {
     appBar: {
@@ -135,7 +136,7 @@ function TextEditor(props) {
     const { classes } = props;
     return (
         <div>
-            <Button onClick={toggleOpen}>
+            <Button onClick={toggleOpen} disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}>
                 <Icon>description</Icon>
                 <FormattedMessage id='Apis.Details.Documents.TextEditor.edit.content' defaultMessage='Edit Content' />
             </Button>
@@ -183,6 +184,10 @@ TextEditor.propTypes = {
     apiType: PropTypes.oneOf([Api.CONSTS.API, Api.CONSTS.APIProduct]).isRequired,
     intl: PropTypes.shape({}).isRequired,
     showAtOnce: PropTypes.bool.isRequired,
+    api: PropTypes.shape({
+        id: PropTypes.string,
+        apiType: PropTypes.oneOf([Api.CONSTS.API, Api.CONSTS.APIProduct]),
+    }).isRequired,
 };
 
 export default injectIntl(withRouter(withStyles(styles)(TextEditor)));

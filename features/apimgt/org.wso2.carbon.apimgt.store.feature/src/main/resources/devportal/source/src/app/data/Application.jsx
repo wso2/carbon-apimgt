@@ -185,6 +185,25 @@ export default class Application extends Resource {
     }
 
     /**
+     * Regenerate Consumer Secret for this application instance
+     * @param {String} consumerKey Consumer key of application
+     * @param {string} keyType Key type either `Production` or `SandBox`
+     * @returns {promise} Update the consumerSecret
+     */
+    regenerateSecret(consumerKey, keyType) {
+        const promisedPost = this.client.then((client) => {
+            const payload = { applicationId: this.id, keyType, body: consumerKey };
+            return client.apis['Application Keys']
+                .post_applications__applicationId__keys__keyType__regenerate_secret(payload);
+        });
+        return promisedPost.then((secretResponse) => {
+            const secret = secretResponse.obj;
+            this.keys.set(keyType, secretResponse.obj);
+            return secret;
+        });
+    }
+
+    /**
      * Provide Consumer Key and Secret of Existing OAuth Apps
      *
      * @param keyType           key type, either PRODUCTION or SANDBOX
@@ -218,10 +237,12 @@ export default class Application extends Resource {
         });
     }
 
-    static all() {
+    static all(limit = 3, offset = null, sortOrder = 'asc', sortBy = 'name') {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
         const promisedAll = apiClient.client.then((client) => {
-            return client.apis.Applications.get_applications({}, this._requestMetaData());
+            return client.apis.Applications.get_applications({
+                limit, offset, sortOrder, sortBy,
+            }, this._requestMetaData());
         });
         return promisedAll.then(response => response.obj);
     }

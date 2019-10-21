@@ -426,7 +426,7 @@ function ProductResourcesEdit(props) {
     }
     return (
         <React.Fragment>
-            {allApis.length === 0 && !fromSearch ?
+            {allApis.length === 0 && !fromSearch ? (
                 <Grid container>
                     <Typography className={classes.messageWrapper}>
                         <FormattedMessage
@@ -435,26 +435,27 @@ function ProductResourcesEdit(props) {
                         />
                     </Typography>
                 </Grid>
-                :
+            ) : (
                 <React.Fragment>
-                    {!isStateCreate &&
-                    <Grid container>
-                        <React.Fragment>
-                            <Grid item xs={8} className={classes.leftMost}>
-                                <FormattedMessage
-                                    id='Apis.Details.ProductResources.ProductResourcesWorkspace.find.and.select'
-                                    defaultMessage='Find and select resources for the API Product'
-                                />
-                            </Grid>
-                            <Grid item xs={4} className={classes.rightMost}>
-                                <FormattedMessage
-                                    id='Apis.Details.ProductResources.ProductResourcesWorkspace.selected'
-                                    defaultMessage='Selected resources of API Product'
-                                />
-                                <div />
-                            </Grid>
-                        </React.Fragment>
-                    </Grid>}
+                    {!isStateCreate && (
+                        <Grid container>
+                            <React.Fragment>
+                                <Grid item xs={8} className={classes.leftMost}>
+                                    <FormattedMessage
+                                        id='Apis.Details.ProductResources.ProductResourcesWorkspace.find.and.select'
+                                        defaultMessage='Find and select resources for the API Product'
+                                    />
+                                </Grid>
+                                <Grid item xs={4} className={classes.rightMost}>
+                                    <FormattedMessage
+                                        id='Apis.Details.ProductResources.ProductResourcesWorkspace.selected'
+                                        defaultMessage='Selected resources of API Product'
+                                    />
+                                    <div />
+                                </Grid>
+                            </React.Fragment>
+                        </Grid>
+                    )}
                     <Grid container>
                         {/* ************************************************ */}
                         {/* 1st column API search and select column          */}
@@ -496,7 +497,8 @@ function ProductResourcesEdit(props) {
                                                     dense
                                                     button
                                                     className={
-                                                        selectedApi && apiObj.id === selectedApi.id &&
+                                                        selectedApi &&
+                                                        apiObj.id === selectedApi.id &&
                                                         classes.selectedApi
                                                     }
                                                 >
@@ -577,6 +579,8 @@ function ProductResourcesEdit(props) {
                                                                     tabIndex={-1}
                                                                     disableRipple
                                                                     onChange={() => updateCheckBox(key, innerKey)}
+                                                                    color='primary'
+                                                                    disabled={methodObj.allreadyAdded}
                                                                 />
                                                             </ListItemIcon>
                                                             <ListItemText
@@ -592,10 +596,10 @@ function ProductResourcesEdit(props) {
                                                                 }
                                                                 secondary={
                                                                     methodObj['x-auth-type'] &&
-                                                        methodObj['x-throttling-tier'] &&
-                                                        `${methodObj['x-auth-type']} - ${
-                                                            methodObj['x-throttling-tier']
-                                                        }`
+                                                                    methodObj['x-throttling-tier'] &&
+                                                                    `${methodObj['x-auth-type']} - ${
+                                                                        methodObj['x-throttling-tier']
+                                                                    }`
                                                                 }
                                                                 onClick={() =>
                                                                     updateResourceTree(
@@ -671,49 +675,52 @@ function ProductResourcesEdit(props) {
                                         </div>
                                     )}
                                     {apiResources &&
-                                apiResources.length > 0 &&
-                                Object.keys(apiResources).map((key) => {
-                                    const apiResource = apiResources[key];
-                                    return (
-                                        <div key={apiResource.name}>
-                                            <div className={classes.treeItemMain}>{apiResource.name}</div>
-                                            <div className={classes.treeItemMainWrapper}>
-                                                {Object.keys(apiResource.operations).map((innerKey) => {
-                                                    const operation = apiResource.operations[innerKey];
-                                                    const { target, verb } = operation;
-                                                    return (
-                                                        <div key={verb} className={classes.treeItem}>
-                                                            <MethodView method={verb} className={classes.methodView} />
-                                                            <Typography variant='body2'>{target}</Typography>
-                                                            <hr className={classes.hr} />
-                                                            <Icon
-                                                                onClick={() =>
-                                                                    updateResourceTree(
-                                                                        {
-                                                                            target,
-                                                                            verb,
-                                                                            apiId: apiResource.apiId,
-                                                                            name: apiResource.name,
-                                                                        },
-                                                                        'remove',
-                                                                    )
-                                                                }
-                                                            >
-                                                                delete
-                                                            </Icon>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                        apiResources.length > 0 &&
+                                        Object.keys(apiResources).map((key) => {
+                                            const apiResource = apiResources[key];
+                                            return (
+                                                <div key={apiResource.name}>
+                                                    <div className={classes.treeItemMain}>{apiResource.name}</div>
+                                                    <div className={classes.treeItemMainWrapper}>
+                                                        {Object.keys(apiResource.operations).map((innerKey) => {
+                                                            const operation = apiResource.operations[innerKey];
+                                                            const { target, verb } = operation;
+                                                            return (
+                                                                <div key={verb} className={classes.treeItem}>
+                                                                    <MethodView
+                                                                        method={verb}
+                                                                        className={classes.methodView}
+                                                                    />
+                                                                    <Typography variant='body2'>{target}</Typography>
+                                                                    <hr className={classes.hr} />
+                                                                    <Icon
+                                                                        onClick={() =>
+                                                                            updateResourceTree(
+                                                                                {
+                                                                                    target,
+                                                                                    verb,
+                                                                                    apiId: apiResource.apiId,
+                                                                                    name: apiResource.name,
+                                                                                },
+                                                                                'remove',
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        delete
+                                                                    </Icon>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                 </div>
                             </Paper>
                         </Grid>
                     </Grid>
                 </React.Fragment>
-            }
+            )}
         </React.Fragment>
     );
 }

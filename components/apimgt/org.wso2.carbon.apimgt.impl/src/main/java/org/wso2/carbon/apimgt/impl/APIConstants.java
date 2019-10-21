@@ -18,12 +18,12 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import javax.xml.namespace.QName;
 
 /**
  * This class represents the constants that are used for APIManager implementation
@@ -112,6 +112,7 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_DEFAULT_ROLES_PUBLISHER_ROLE = "PublisherRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_CREATOR_ROLE = "CreatorRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE = "SubscriberRole";
+    public static final String ANALYTICS_ROLE = "Internal/analytics";
 
     public static final String API_TENANT_CONF_IS_UNLIMITED_TIER_PAID = "IsUnlimitedTierPaid";
 
@@ -352,6 +353,8 @@ public final class APIConstants {
     public static final String IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD = "VALIDITY_PERIOD";
     public static final String IDENTITY_OAUTH2_FIELD_USER_DOMAIN = "USER_DOMAIN";
     public static final String DOT = ".";
+    public static final String DEFAULT = "DEFAULT";
+    public static final String API_KEY_TYPE = "API_KEY";
     public static final String EXP = "exp";
     public static final String JWT = "JWT";
     public static final String JWT_DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
@@ -685,7 +688,7 @@ public final class APIConstants {
     public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS = CORS_CONFIGURATION
             + "Access-Control-Allow-Credentials";
 
-    public static final String API_KEY_TYPE = "AM_KEY_TYPE";
+    public static final String API_KEY_AUTH_TYPE = "AM_KEY_TYPE";
     public static final String API_KEY_TYPE_PRODUCTION = "PRODUCTION";
     public static final String API_KEY_TYPE_SANDBOX = "SANDBOX";
 
@@ -1154,6 +1157,7 @@ public final class APIConstants {
     public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
     public static final String SWAGGER_X_WSO2_SECURITY = "x-wso2-security";
     public static final String SWAGGER_X_WSO2_SCOPES = "x-wso2-scopes";
+    public static final String SWAGGER_X_EXAMPLES = "x-examples";
     public static final String SWAGGER_SCOPE_KEY = "key";
     public static final String SWAGGER_NAME = "name";
     public static final String SWAGGER_SCHEMES = "schemes";
@@ -1257,6 +1261,11 @@ public final class APIConstants {
     public static final String ENDPOINT_SANDBOX_ENDPOINTS = "sandbox_endpoints";
     public static final String ENDPOINT_URLS = "urls";
     public static final String ENDPOINT_URL = "url";
+    public static final String ENDPOINT_SECURITY_TYPE = "type";
+    public static final String ENDPOINT_SECURITY_TYPE_BASIC = "basic";
+    public static final String ENDPOINT_SECURITY_TYPE_DIGEST = "digest";
+    public static final String ENDPOINT_SECURITY_USERNAME = "username";
+    public static final String ENDPOINT_SECURITY_CONFIG = "securityConfig";
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
     public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
@@ -1289,8 +1298,8 @@ public final class APIConstants {
     }
 
     public static final String API_LC_ACTION_DEPRECATE = "Deprecate";
-    public static final String DEPRECATE_CHECK_LIST_ITEM = "Deprecate old versions after publish the API";
-    public static final String RESUBSCRIBE_CHECK_LIST_ITEM = "Requires re-subscription when publish the API";
+    public static final String DEPRECATE_CHECK_LIST_ITEM = "Deprecate old versions after publishing the API";
+    public static final String RESUBSCRIBE_CHECK_LIST_ITEM = "Requires re-subscription when publishing the API";
 
     public static final String METRICS_PREFIX = "org.wso2.am";
 
@@ -1399,6 +1408,7 @@ public final class APIConstants {
     public static final String BLOCKING_CONDITIONS_IP = "IP";
 
     public static final String REVOKED_TOKEN_KEY = "revokedToken";
+    public static final String REVOKED_TOKEN_EXPIRY_TIME = "expiryTime";
 
     public static final String SEARCH_AND_TAG = "&";
     public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
@@ -1537,6 +1547,7 @@ public final class APIConstants {
     public static class JwtTokenConstants {
         public static final String APPLICATION = "application";
         public static final String APPLICATION_ID = "id";
+        public static final String APPLICATION_UUID = "uuid";
         public static final String APPLICATION_NAME = "name";
         public static final String APPLICATION_TIER = "tier";
         public static final String APPLICATION_OWNER = "owner";
@@ -1779,4 +1790,14 @@ public final class APIConstants {
     public static final int MAX_LENGTH_VERSION = 30;
     public static final int MAX_LENGTH_PROVIDER = 50;
     public static final int MAX_LENGTH_CONTEXT = 82; //context becomes context + version + two '/'. so max context is 50
+
+    /**
+     * Constants for trust store access
+     *
+     * */
+    public static final String TRUST_STORE_PASSWORD = "Security.TrustStore.Password";
+    public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
+    public static final String UTILITY_WEB_APP_EP = "/throttle/data/v1";
+    public static final String API_KEY_REVOKE_PATH = "/apikey/revoke";
+
 }

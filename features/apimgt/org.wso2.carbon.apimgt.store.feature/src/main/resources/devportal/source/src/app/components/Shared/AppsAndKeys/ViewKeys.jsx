@@ -20,7 +20,6 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
-import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import FormHelperText from '@material-ui/core/FormHelperText';
@@ -35,18 +34,19 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Typography from '@material-ui/core/Typography';
+import TextField from '@material-ui/core/TextField';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Loading from '../../Base/Loading/Loading';
 import Application from '../../../data/Application';
 import Tokens from './Tokens';
 import ViewToken from './ViewToken';
+import ViewSecret from './ViewSecret';
 import ViewCurl from './ViewCurl';
-import TextField from '@material-ui/core/TextField';
 
 const styles = theme => ({
     button: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(3),
         color: theme.palette.getContrastText(theme.palette.background.default),
         display: 'flex',
         alignItems: 'center',
@@ -74,8 +74,8 @@ const styles = theme => ({
         cursor: 'grab',
     },
     tokenSection: {
-        marginTop: theme.spacing.unit * 2,
-        marginBottom: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(0.5),
     },
     margin: {
         marginRight: theme.spacing.unit * 2,
@@ -102,6 +102,7 @@ class ViewKeys extends React.Component {
             open: false,
             showToken: false,
             showCurl: false,
+            showSecretGen: false,
             accessTokenRequest: {
                 timeout: 3600,
                 scopesSelected: [],
@@ -206,6 +207,31 @@ class ViewKeys extends React.Component {
     };
 
     /**
+     * Handle onCLick of regenerate consumer secret
+     * */
+    handleSecretRegenerate = (consumerKey, keyType) => {
+        this.applicationPromise
+            .then(application => application.regenerateSecret(consumerKey, keyType))
+            .then((response) => {
+                console.log('consumer secret regenerated successfully ' + response);
+                this.setState({
+                    open: true,
+                    showSecretGen: true,
+                    secretGenResponse: response,
+                });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+            });
+    };
+
+    /**
      * Handle onClick of get curl
      * */
     handleClickOpenCurl = () => {
@@ -216,7 +242,9 @@ class ViewKeys extends React.Component {
      * Handle on close of dialog for generating access token and get curl
      * */
     handleClose = () => {
-        this.setState({ open: false, showCurl: false, isKeyJWT: false });
+        this.setState({
+            open: false, showCurl: false, isKeyJWT: false, showSecretGen: false,
+        });
     };
 
     /**
@@ -256,11 +284,12 @@ class ViewKeys extends React.Component {
      */
     render() {
         const {
-            notFound, showCS, showToken, showCurl, secretCopied, tokenCopied, keyCopied, open,
-            token, tokenScopes, tokenValidityTime, accessTokenRequest, subscriptionScopes, isKeyJWT, tokenResponse,
+            notFound, showCS, showToken, showCurl, showSecretGen, secretCopied, tokenCopied, keyCopied, open,
+            token, tokenScopes, tokenValidityTime, accessTokenRequest, subscriptionScopes,
+            isKeyJWT, tokenResponse, secretGenResponse,
         } = this.state;
         const {
-            intl, keyType, classes, fullScreen, keys, selectedApp: { tokenType },
+            intl, keyType, classes, fullScreen, keys, selectedApp: { tokenType, hashEnabled }, selectedGrantTypes, isUserOwner,
         } = this.props;
 
         if (notFound) {
@@ -287,6 +316,15 @@ class ViewKeys extends React.Component {
             accessTokenScopes = keys.get(keyType).token.tokenScopes;
             validityPeriod = keys.get(keyType).token.validityTime;
             tokenDetails = keys.get(keyType).token;
+        }
+
+        let dialogHead = 'Undefined';
+        if (showCurl) {
+            dialogHead = 'Get CURL to Generate Access Token';
+        } else if (showSecretGen) {
+            dialogHead = 'Generate Consumer Secret';
+        } else {
+            dialogHead = 'Generate Access Token';
         }
 
         return consumerKey ? (
@@ -352,57 +390,76 @@ class ViewKeys extends React.Component {
                         </Grid>
                         <Grid item xs={6}>
                             <div className={classes.copyWrapper}>
-                                <TextField
-                                    id='consumer-secret'
-                                    label={
-                                        <FormattedMessage
-                                            id='Shared.AppsAndKeys.ViewKeys.consumer.secret'
-                                            defaultMessage='Consumer Secret'
-                                        />
-                                    }
-                                    type={showCS || !consumerSecret ? 'text' : 'password'}
-                                    value={consumerSecret}
-                                    margin='normal'
-                                    fullWidth
-                                    variant='outlined'
-                                    InputProps={{
-                                        readOnly: true,
-                                        endAdornment: (
-                                            <InputAdornment position='end'>
-                                                <IconButton
-                                                    classes=''
-                                                    onClick={() => this.handleShowHidden('showCS')}
-                                                    onMouseDown={this.handleMouseDownGeneric}
-                                                >
-                                                    {showCS ? <Icon>visibility_off</Icon> : <Icon>visibility</Icon>}
-                                                </IconButton>
-                                                <Tooltip
-                                                    title={secretCopied ? 'Copied' : 'Copy to clipboard'}
-                                                    placement='right'
-                                                    className={classes.iconStyle}
-                                                >
-                                                    <CopyToClipboard
-                                                        text={consumerSecret}
-                                                        onCopy={() => this.onCopy('secretCopied')}
+                                {!hashEnabled ? (
+                                    <TextField
+                                        id='consumer-secret'
+                                        label={
+                                            <FormattedMessage
+                                                id='Shared.AppsAndKeys.ViewKeys.consumer.secret'
+                                                defaultMessage='Consumer Secret'
+                                            />
+                                        }
+                                        type={showCS || !consumerSecret ? 'text' : 'password'}
+                                        value={consumerSecret}
+                                        margin='normal'
+                                        fullWidth
+                                        variant='outlined'
+                                        InputProps={{
+                                            readOnly: true,
+                                            endAdornment: (
+                                                <InputAdornment position='end'>
+                                                    <IconButton
+                                                        classes=''
+                                                        onClick={() => this.handleShowHidden('showCS')}
+                                                        onMouseDown={this.handleMouseDownGeneric}
                                                     >
-                                                        <Icon color='secondary'>description</Icon>
-                                                    </CopyToClipboard>
-                                                </Tooltip>
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                />
-                            </div>
-                            <FormControl>
-                                <FormHelperText id='consumer-secret-helper-text'>
-                                    <FormattedMessage
-                                        id='Shared.AppsAndKeys.ViewKeys.consumer.secret.of.application'
-                                        defaultMessage='Consumer Secret of the application'
+                                                        {showCS ? <Icon>visibility_off</Icon> : <Icon>visibility</Icon>}
+                                                    </IconButton>
+                                                    <Tooltip
+                                                        title={secretCopied ? 'Copied' : 'Copy to clipboard'}
+                                                        placement='right'
+                                                        className={classes.iconStyle}
+                                                    >
+                                                        <CopyToClipboard
+                                                            text={consumerSecret}
+                                                            onCopy={() => this.onCopy('secretCopied')}
+                                                        >
+                                                            <Icon color='secondary'>description</Icon>
+                                                        </CopyToClipboard>
+                                                    </Tooltip>
+                                                </InputAdornment>
+                                            ),
+                                        }}
                                     />
-                                </FormHelperText>
-                            </FormControl>
+                                ) : (
+                                    <Button
+                                        variant='contained'
+                                        color='primary'
+                                        className={classes.button}
+                                        onClick={() => this.handleSecretRegenerate(consumerKey, keyType)}
+                                        noFound={notFound}
+                                        disabled={!isUserOwner}
+                                    >
+                                        <FormattedMessage
+                                            defaultMessage='Regenerate Consumer Secret'
+                                            id='Shared.AppsAndKeys.ViewKeys.consumer.secret.button.regenerate'
+                                        />
+                                    </Button>
+                                )
+                                }
+                            </div>
+                            {!hashEnabled && (
+                                <FormControl>
+                                    <FormHelperText id='consumer-secret-helper-text'>
+                                        <FormattedMessage
+                                            id='Shared.AppsAndKeys.ViewKeys.consumer.secret.of.application'
+                                            defaultMessage='Consumer Secret of the application'
+                                        />
+                                    </FormHelperText>
+                                </FormControl>
+                            )}
                         </Grid>
-                        {(accessToken && tokenType !== 'JWT') && (
+                        {(accessToken && tokenType !== 'JWT' && !hashEnabled) && (
                             <Grid item xs={6}>
                                 <InputLabel htmlFor='adornment-amount'>
                                     <FormattedMessage
@@ -448,15 +505,15 @@ class ViewKeys extends React.Component {
                         <Grid item xs={12}>
                             <Dialog
                                 fullScreen={fullScreen}
-                                open={open || isKeyJWT}
+                                open={(open || isKeyJWT) && selectedGrantTypes.includes('client_credentials')}
                                 onClose={this.handleClose}
                                 aria-labelledby='responsive-dialog-title'
                             >
                                 <DialogTitle id='responsive-dialog-title'>
-                                    {showCurl ? 'Get CURL to Generate Access Token' : 'Generate Access Token'}
+                                    {dialogHead}
                                 </DialogTitle>
                                 <DialogContent>
-                                    {!showCurl && !isKeyJWT && (
+                                    {!showCurl && !isKeyJWT && !showSecretGen && (
                                         <DialogContentText>
                                             {!showToken && (
                                                 <Tokens
@@ -473,14 +530,24 @@ class ViewKeys extends React.Component {
                                             <ViewCurl keys={{ consumerKey, consumerSecret }} />
                                         </DialogContentText>
                                     )}
-                                    {(isKeyJWT && tokenDetails) && (
+                                    {showSecretGen && (
+                                        <DialogContentText>
+                                            <ViewSecret secret={{ ...secretGenResponse }} />
+                                        </DialogContentText>
+                                    )}
+                                    {(isKeyJWT && tokenDetails && hashEnabled) && (
+                                        <DialogContentText>
+                                            <ViewToken token={{ ...tokenDetails, isOauth: true }} consumerSecret={consumerSecret} />
+                                        </DialogContentText>
+                                    )}
+                                    {(isKeyJWT && tokenDetails && !hashEnabled) && (
                                         <DialogContentText>
                                             <ViewToken token={{ ...tokenDetails, isOauth: true }} />
                                         </DialogContentText>
                                     )}
                                 </DialogContent>
                                 <DialogActions>
-                                    {!showToken && !showCurl && !isKeyJWT && (
+                                    {!showToken && !showCurl && !isKeyJWT && !showSecretGen && (
                                         <Button onClick={this.generateAccessToken} color='primary'>
                                             <FormattedMessage
                                                 id='Shared.AppsAndKeys.ViewKeys.consumer.generate.btn'
@@ -496,32 +563,44 @@ class ViewKeys extends React.Component {
                                     </Button>
                                 </DialogActions>
                             </Dialog>
-                            <div className={classes.tokenSection}>
-                                <Button
-                                    variant='outlined'
-                                    size='small'
-                                    color='primary'
-                                    className={classes.margin}
-                                    onClick={this.handleClickOpen}
-                                >
+                            {!hashEnabled && (
+                                <div className={classes.tokenSection}>
+                                    <Button
+                                        variant='outlined'
+                                        size='small'
+                                        color='primary'
+                                        className={classes.margin}
+                                        onClick={this.handleClickOpen}
+                                        disabled={!selectedGrantTypes.includes('client_credentials')}
+                                    >
+                                        <FormattedMessage
+                                            id='Shared.AppsAndKeys.ViewKeys.generate.access.token'
+                                            defaultMessage='Generate Access Token'
+                                        />
+                                    </Button>
+                                    <Button
+                                        variant='outlined'
+                                        size='small'
+                                        color='primary'
+                                        className={classes.margin}
+                                        onClick={this.handleClickOpenCurl}
+                                    >
+                                        <FormattedMessage
+                                            id='Shared.AppsAndKeys.ViewKeys.curl.to.generate'
+                                            defaultMessage='CURL to Generate Access Token'
+                                        />
+                                    </Button>
+                                </div>
+                            )}
+                            {!selectedGrantTypes.includes('client_credentials') && !hashEnabled && (
+                                <Typography variant='caption' gutterBottom >
                                     <FormattedMessage
-                                        id='Shared.AppsAndKeys.ViewKeys.generate.access.token'
-                                        defaultMessage='Generate Access Token'
+                                        id='Shared.AppsAndKeys.ViewKeys.client.enable.client.credentials'
+                                        defaultMessage={'Enable Client Credentials grant ' +
+                                            'type to generate test access tokens'}
                                     />
-                                </Button>
-                                <Button
-                                    variant='outlined'
-                                    size='small'
-                                    color='primary'
-                                    className={classes.margin}
-                                    onClick={this.handleClickOpenCurl}
-                                >
-                                    <FormattedMessage
-                                        id='Shared.AppsAndKeys.ViewKeys.curl.to.generate'
-                                        defaultMessage='CURL to Generate Access Token'
-                                    />
-                                </Button>
-                            </div>
+                                </Typography>
+                            )}
                         </Grid>
                     </Grid>
                 </div>
@@ -544,6 +623,7 @@ ViewKeys.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     fullScreen: PropTypes.bool.isRequired,
     isKeyJWT: PropTypes.bool.isRequired,
+    isUserOwner: PropTypes.bool.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(ViewKeys));

@@ -81,8 +81,8 @@ export default function ApiProductCreateWrapper(props) {
                 <FormattedMessage
                     id='Apis.Create.APIProduct.APIProductCreateWrapper.sub.heading'
                     defaultMessage={
-                        'Create an API Product providing Name, Context, Resources' +
-                        ' and optionally business plans'
+                        'Create an API Product by providing a Name, a Context, Resources, ' +
+                        'and Business Plans (optional).'
                     }
                 />
             </Typography>
@@ -283,8 +283,8 @@ export default function ApiProductCreateWrapper(props) {
                                         onClick={createAPIProduct}
                                     >
                                         <FormattedMessage
-                                            id='Apis.Create.APIProduct.APIProductCreateWrapper.save'
-                                            defaultMessage='Save'
+                                            id='Apis.Create.APIProduct.APIProductCreateWrapper.publish'
+                                            defaultMessage='Publish'
                                         />
                                         {isCreating && <CircularProgress size={24} />}
                                     </Button>

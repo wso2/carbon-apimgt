@@ -93,57 +93,6 @@ class API extends Resource {
         return copy;
     }
 
-    /**
-     * Create an API with the given parameters in template and call the callback method given optional.
-     * @param {Object} apiData - API data which need to fill the placeholder values in the @get_template
-     * @param {function} callback - An optional callback method
-     * @returns {Promise} Promise after creating and optionally calling the callback method.
-     */
-    create(apiData, callback = null) {
-        let payload;
-        let promise_create;
-        if (apiData.constructor.name === 'Blob' || apiData.constructor.name === 'File') {
-            payload = {
-                file: apiData,
-                'Content-Type': 'multipart/form-data',
-            };
-            promise_create = this.client.then(client => {
-                return client.apis['APIs'].post_apis_import_definition(
-                    payload,
-                    this._requestMetaData({
-                        'Content-Type': 'multipart/form-data',
-                    }),
-                );
-            });
-        } else if (apiData.type === 'swagger-url') {
-            payload = {
-                url: apiData.url,
-                'Content-Type': 'multipart/form-data',
-            };
-            promise_create = this.client.then(client => {
-                return client.apis['APIs'].post_apis_import_definition(
-                    payload,
-                    this._requestMetaData({
-                        'Content-Type': 'multipart/form-data',
-                    }),
-                );
-            });
-        } else {
-            payload = {
-                body: apiData,
-                openAPIVersion: 'v3',
-            };
-            promise_create = this.client.then(client => {
-                return client.apis['APIs'].post_apis(payload, this._requestMetaData());
-            });
-        }
-        if (callback) {
-            return promise_create.then(callback);
-        } else {
-            return promise_create;
-        }
-    }
-
     importOpenAPIByFile(openAPIData, callback = null) {
         let payload, promisedCreate;
         promisedCreate = this.client.then(client => {
@@ -277,6 +226,15 @@ class API extends Resource {
         }
     }
 
+     /**
+     * Tests the endpoints
+     */
+    testEndpoint(endpointUrl, apiId) {
+        return this.client.then((client) => {
+            return client.apis['Validation'].validateEndpoint(({ endpointUrl: endpointUrl, apiId: apiId }));
+        });
+    }
+    
     save(openAPIVersion = 'v3') {
         const promisedAPIResponse = this.client.then((client) => {
             const properties = client.spec.definitions.API.properties;
@@ -1411,6 +1369,13 @@ class API extends Resource {
     validateUSerRole(role) {
         const promise = this.client.then((client) => {
             return client.apis.Roles.validateUserRole({ roleId: role })
+        });
+        return promise;
+    }
+
+    validateScopeName(name) {
+        const promise = this.client.then((client) => {
+            return client.apis.scope.validateScope({ name: name })
         });
         return promise;
     }

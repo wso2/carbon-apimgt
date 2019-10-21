@@ -54,6 +54,7 @@ public class APIDTO   {
     private List<ScopeInfoDTO> scopes = new ArrayList<>();
     private String avgRating = null;
     private AdvertiseInfoDTO advertiseInfo = null;
+    private Boolean isSubscriptionAvailable = null;
 
   /**
    * UUID of the api 
@@ -538,6 +539,23 @@ public class APIDTO   {
     this.advertiseInfo = advertiseInfo;
   }
 
+  /**
+   **/
+  public APIDTO isSubscriptionAvailable(Boolean isSubscriptionAvailable) {
+    this.isSubscriptionAvailable = isSubscriptionAvailable;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("isSubscriptionAvailable")
+  public Boolean isIsSubscriptionAvailable() {
+    return isSubscriptionAvailable;
+  }
+  public void setIsSubscriptionAvailable(Boolean isSubscriptionAvailable) {
+    this.isSubscriptionAvailable = isSubscriptionAvailable;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -574,12 +592,13 @@ public class APIDTO   {
         Objects.equals(environmentList, API.environmentList) &&
         Objects.equals(scopes, API.scopes) &&
         Objects.equals(avgRating, API.avgRating) &&
-        Objects.equals(advertiseInfo, API.advertiseInfo);
+        Objects.equals(advertiseInfo, API.advertiseInfo) &&
+        Objects.equals(isSubscriptionAvailable, API.isSubscriptionAvailable);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable);
   }
 
   @Override
@@ -614,6 +633,7 @@ public class APIDTO   {
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    avgRating: ").append(toIndentedString(avgRating)).append("\n");
     sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
+    sb.append("    isSubscriptionAvailable: ").append(toIndentedString(isSubscriptionAvailable)).append("\n");
     sb.append("}");
     return sb.toString();
   }

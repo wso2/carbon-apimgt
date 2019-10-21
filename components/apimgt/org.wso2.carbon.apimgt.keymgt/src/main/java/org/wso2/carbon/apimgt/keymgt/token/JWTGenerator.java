@@ -21,12 +21,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.keymgt.MethodStats;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
@@ -37,7 +36,9 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.apache.commons.collections.MapUtils.isNotEmpty;
 
@@ -113,11 +114,31 @@ public class JWTGenerator extends AbstractJWTGenerator {
             throws APIManagementException {
         ClaimsRetriever claimsRetriever = getClaimsRetriever();
         if (claimsRetriever != null) {
+            Map<ClaimMapping, String> customClaimsWithMapping;
+            Map<String, String> customClaims;
             //fix for https://github.com/wso2/product-apim/issues/4112
             String accessToken = validationContext.getAccessToken();
-            AuthorizationGrantCacheKey cacheKey = new AuthorizationGrantCacheKey(accessToken);
+            String authCode = validationContext.getAuthorizationCode();
+            if (accessToken != null) {
+                AuthorizationGrantCacheEntry cacheEntry = AuthorizationGrantCache.getInstance()
+                        .getValueFromCacheByToken(new AuthorizationGrantCacheKey(accessToken));
+                if (cacheEntry == null) {
+                    return new HashMap<>();
+                }
+                customClaimsWithMapping = cacheEntry.getUserAttributes();
+            } else if (authCode != null) {
+                AuthorizationGrantCacheEntry cacheEntry = AuthorizationGrantCache.getInstance()
+                        .getValueFromCacheByCode(new AuthorizationGrantCacheKey(authCode));
+                if (cacheEntry == null) {
+                    return new HashMap<>();
+                }
+                customClaimsWithMapping = cacheEntry.getUserAttributes();
+            } else {
+                customClaimsWithMapping = validationContext.getUser().getUserAttributes();
+            }
 
-            Map<String, String> customClaims = getClaimsFromCache(cacheKey);
+            customClaims = convertClaimMap(customClaimsWithMapping);
+
             if (isNotEmpty(customClaims)) {
                 if (log.isDebugEnabled()) {
                     log.debug("The custom claims are retrieved from AuthorizationGrantCache for user : " +
@@ -163,16 +184,12 @@ public class JWTGenerator extends AbstractJWTGenerator {
         }
         return null;
     }
-    protected Map<String, String> getClaimsFromCache(AuthorizationGrantCacheKey cacheKey) {
 
-        AuthorizationGrantCacheEntry cacheEntry = AuthorizationGrantCache.getInstance().getValueFromCacheByToken(cacheKey);
-        if (cacheEntry == null) {
-            return new HashMap<String, String>();
-        }
-        Map<ClaimMapping, String> userAttributes = cacheEntry.getUserAttributes();
-        Map<String, String> userClaims = new HashMap<String, String>();
+    protected Map<String, String> convertClaimMap(Map<ClaimMapping, String> userAttributes) {
+
+        Map<String, String> userClaims = new HashMap<>();
         for (Map.Entry<ClaimMapping, String> entry : userAttributes.entrySet()) {
-            userClaims.put(entry.getKey().getRemoteClaim().getClaimUri(), entry.getValue());
+            userClaims.put(entry.getKey().getLocalClaim().getClaimUri(), entry.getValue());
         }
         return userClaims;
     }

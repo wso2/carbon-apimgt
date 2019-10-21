@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState, useRef } from 'react';
+import React, {useState, useRef, useContext} from 'react';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -30,6 +30,8 @@ import Paper from '@material-ui/core/Paper';
 import Alert from 'AppComponents/Shared/Alert';
 import CreateEditForm from './CreateEditForm';
 import Api from 'AppData/api';
+import { isRestricted } from 'AppData/AuthManager';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = {
     appBar: {
@@ -65,7 +67,9 @@ function Edit(props) {
 
     const { intl, apiType } = props;
     const [open, setOpen] = useState(false);
+    const [saveDisabled, setSaveDisabled] = useState(false);
     let createEditForm = useRef(null);
+    const { api } = useContext(APIContext);
 
     const toggleOpen = () => {
         setOpen(!open);
@@ -117,10 +121,10 @@ function Edit(props) {
             });
     };
 
-    const { classes, docId, apiId} = props;
+    const { classes, docId, apiId } = props;
     return (
         <div>
-            <Button onClick={toggleOpen}>
+            <Button onClick={toggleOpen} disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}>
                 <Icon>edit</Icon>
                 <FormattedMessage
                     id='Apis.Details.Documents.Edit.documents.text.editor.edit'
@@ -139,7 +143,7 @@ function Edit(props) {
                         />
                         "{props.docName}"
                     </Typography>
-                    <Button className={classes.button} variant='contained' color='primary' onClick={updateDoc}>
+                    <Button className={classes.button} variant='contained' color='primary' onClick={updateDoc} disabled={saveDisabled}>
                         <FormattedMessage
                             id='Apis.Details.Documents.Edit.documents.text.editor.update.content'
                             defaultMessage='Save'
@@ -160,6 +164,8 @@ function Edit(props) {
                         docId={docId}
                         apiId={apiId}
                         apiType={apiType}
+                        saveDisabled={saveDisabled}
+                        setSaveDisabled={setSaveDisabled}
                     />
                 </div>
             </Dialog>
@@ -172,6 +178,10 @@ Edit.propTypes = {
     docId: PropTypes.shape({}).isRequired,
     getDocumentsList: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({
+        id: PropTypes.string,
+        apiType: PropTypes.oneOf([Api.CONSTS.API, Api.CONSTS.APIProduct]),
+    }).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Edit));

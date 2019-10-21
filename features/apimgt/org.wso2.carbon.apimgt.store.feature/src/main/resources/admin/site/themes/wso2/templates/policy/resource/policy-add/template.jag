@@ -386,38 +386,38 @@
                                                 <div class="form-group" style="display:block" id="specific-ip-block-{{../../../executionFlow.id}}">
                                                     <label class="control-label col-sm-3" for="request-count"><%=i18n.localize("IP Address:")%><span class="requiredAstrix">*</span></label>
                                                     <div class="col-sm-9">
-                                                        <input type="text" class="form-control required validInput" id="specific-ip-address-input-{{../../../executionFlow.id}}" name="specific-ip-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="{{../../specificIP}}" onchange="onIPChange(this);">
+                                                        <input type="text" class="form-control required validInput" id="specific-ip-address-input-{{../../../executionFlow.id}}" name="specific-ip-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="{{../../specificIP}}" onkeyup="onIPChange(this);">
                                                     </div>
                                                 </div>
 
                                                 <div class="form-group" style="display:none" id="ip-range-block-{{../../../executionFlow.id}}">
                                                     <label class="control-label col-sm-3" for="request-count"><%=i18n.localize("Start IP Address:")%><span class="requiredAstrix">*</span></label>
                                                     <div class="col-sm-3">
-                                                        <input type="text" class="form-control required validInput" id="ip-range-start-address-input-{{../../../executionFlow.id}}" name="ip-range-start-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="" onchange="onIPChange(this);">
+                                                        <input type="text" class="form-control required validInput" id="ip-range-start-address-input-{{../../../executionFlow.id}}" name="ip-range-start-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="" onkeyup="onIPChange(this);">
                                                     </div>
 
                                                     <label class="control-label col-sm-3" for="request-count"><%=i18n.localize("End IP Address:")%><span class="requiredAstrix">*</span></label>
                                                     <div class="col-sm-3">
-                                                        <input type="text" class="form-control required validInput" id="ip-range-end-address-input-{{../../../executionFlow.id}}" name="ip-range-end-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="" onchange="onEndIPChange(this);">
+                                                        <input type="text" class="form-control required validInput" id="ip-range-end-address-input-{{../../../executionFlow.id}}" name="ip-range-end-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="" onkeyup="onEndIPChange(this);">
                                                     </div>
                                                 </div>
                                             {{else}}
                                                 <div class="form-group" style="display:none" id="specific-ip-block-{{../../../executionFlow.id}}">
                                                     <label class="control-label col-sm-3" for="request-count"><%=i18n.localize("IP Address:")%><span class="requiredAstrix">*</span></label>
                                                     <div class="col-sm-9">
-                                                        <input type="text" class="form-control required validInput" id="specific-ip-address-input-{{../../../executionFlow.id}}" name="specific-ip-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="" onchange="onIPChange(this);">
+                                                        <input type="text" class="form-control required validInput" id="specific-ip-address-input-{{../../../executionFlow.id}}" name="specific-ip-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="" onkeyup="onIPChange(this);">
                                                     </div>
                                                 </div>
 
                                                 <div class="form-group" style="display:block" id="ip-range-block-{{../../../executionFlow.id}}">
                                                     <label class="control-label col-sm-3" for="request-count"><%=i18n.localize("Start IP Address:")%><span class="requiredAstrix">*</span></label>
                                                     <div class="col-sm-3">
-                                                        <input type="text" class="form-control required validInput" id="ip-range-start-address-input-{{../../../executionFlow.id}}" name="ip-range-start-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="{{../../startingIP}}" onchange="onIPChange(this);">
+                                                        <input type="text" class="form-control required validInput" id="ip-range-start-address-input-{{../../../executionFlow.id}}" name="ip-range-start-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="{{../../startingIP}}" onkeyup="onIPChange(this);">
                                                     </div>
 
                                                     <label class="control-label col-sm-3" for="request-count"><%=i18n.localize("End IP Address:")%><span class="requiredAstrix">*</span></label>
                                                     <div class="col-sm-3">
-                                                        <input type="text" class="form-control required validInput" id="ip-range-end-address-input-{{../../../executionFlow.id}}" name="ip-range-end-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="{{../../endingIP}}" onchange="onEndIPChange(this);">
+                                                        <input type="text" class="form-control required validInput" id="ip-range-end-address-input-{{../../../executionFlow.id}}" name="ip-range-end-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="{{../../endingIP}}" onkeyup="onEndIPChange(this);">
                                                     </div>
                                                 </div>
                                             {{/if_eq}}

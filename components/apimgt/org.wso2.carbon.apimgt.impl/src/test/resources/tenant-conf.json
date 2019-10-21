@@ -157,32 +157,24 @@
         "Roles": "admin"
       },
       {
-        "Name": "apim_analytics:creator",
-        "Roles": "admin,Internal/creator"
+        "Name": "apim_analytics:product_manager",
+        "Roles": "Internal/creator,Internal/publisher,Internal/subscriber"
       },
       {
-        "Name": "apim_analytics:publisher_owner",
-        "Roles": "admin,Internal/publisher"
+        "Name": "apim_analytics:api_developer",
+        "Roles": "Internal/creator,Internal/publisher"
       },
       {
-        "Name": "apim_analytics:publisher_editor",
-        "Roles": "admin,Internal/publisher"
+        "Name": "apim_analytics:app_developer",
+        "Roles": "Internal/subscriber"
       },
       {
-        "Name": "apim_analytics:publisher_viewer",
-        "Roles": "admin,Internal/publisher"
+        "Name": "apim_analytics:devops_engineer",
+        "Roles": "Internal/creator,Internal/publisher,Internal/subscriber"
       },
       {
-        "Name": "apim_analytics:subscriber_owner",
-        "Roles": "admin,Internal/subscriber"
-      },
-      {
-        "Name": "apim_analytics:subscriber_editor",
-        "Roles": "admin,Internal/subscriber"
-      },
-      {
-        "Name": "apim_analytics:subscriber_viewer",
-        "Roles": "admin,Internal/subscriber"
+        "Name": "apim_analytics:analytics_viewer",
+        "Roles": "admin,Internal/analytics"
       },
       {
         "Name": "apim_analytics:everyone",
@@ -194,7 +186,11 @@
       },
       {
         "Name": "apim:sub_alert_manage",
-        "Roles": "admin,Internal/creator"
+        "Roles": "admin,Internal/subscriber"
+      },
+      {
+        "Name": "apim:tenantInfo",
+        "Roles": "admin"
       }
     ]
   },

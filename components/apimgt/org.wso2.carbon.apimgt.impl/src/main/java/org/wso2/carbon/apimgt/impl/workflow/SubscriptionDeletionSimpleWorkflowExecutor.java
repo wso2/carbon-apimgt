@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
@@ -64,7 +65,13 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
      */
     @Override
     public WorkflowResponse deleteMonetizedSubscription(WorkflowDTO workflowDTO, API api) throws WorkflowException {
-        // implemetation is not provided in this version
+        // implementation is not provided in this version
+        return execute(workflowDTO);
+    }
+
+    @Override
+    public WorkflowResponse deleteMonetizedSubscription(WorkflowDTO workflowDTO, APIProduct apiProduct) throws WorkflowException {
+        // implementation is not provided in this version
         return execute(workflowDTO);
     }
 
@@ -75,13 +82,8 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
         String errorMsg = null;
 
         try {
-            Identifier identifier;
-            if (subWorkflowDTO.getProductIdentifier() != null) {
-                identifier = subWorkflowDTO.getProductIdentifier();
-            } else {
-               identifier = new APIIdentifier(subWorkflowDTO.getApiProvider(),
-                        subWorkflowDTO.getApiName(), subWorkflowDTO.getApiVersion());
-            }
+            APIIdentifier identifier = new APIIdentifier(subWorkflowDTO.getApiProvider(),
+                    subWorkflowDTO.getApiName(), subWorkflowDTO.getApiVersion());
             apiMgtDAO.removeSubscription(identifier, ((SubscriptionWorkflowDTO) workflowDTO).getApplicationId());
         } catch (APIManagementException e) {
             errorMsg = "Could not complete subscription deletion workflow for api: " + subWorkflowDTO.getApiName();

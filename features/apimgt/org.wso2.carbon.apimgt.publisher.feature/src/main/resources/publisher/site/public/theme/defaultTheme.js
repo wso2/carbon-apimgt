@@ -1,4 +1,8 @@
 const APP_CONTEXT = '/publisher';
+const REVERSE_PROXY = {
+    enabled: false,
+    origin: 'https://localhost:9443',
+};
 const STORE_APP_CONTEXT = '/devportal';
 const Configurations = {
     themes: {
@@ -41,6 +45,8 @@ const Configurations = {
             zIndex: {
                 apiCreateMenu: 1250,
                 operationDeleteUndo: 1600,
+                overviewArrow: 1,
+                goToSearch: 2,
             },
             custom: {
                 starColor: '#f2c73a',
@@ -58,7 +64,7 @@ const Configurations = {
                 leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
                 leftMenuIconSize: 24,
                 leftMenuIconMainSize: 52,
-                leftMenuTextStyle: 'uppercase',
+                leftMenuTextStyle: 'capitalize',
                 resourceChipColors: { // https://github.com/swagger-api/swagger-ui/blob/master/src/style/_variables.scss#L45-L52
                     get: '#61affe',
                     post: '#49cc90',
@@ -107,6 +113,7 @@ const Configurations = {
     },
     app: {
         context: APP_CONTEXT,
+        reverseProxy: REVERSE_PROXY,
         storeContext: STORE_APP_CONTEXT,
     },
 };

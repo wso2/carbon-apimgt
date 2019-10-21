@@ -36,6 +36,7 @@ import APIList from 'AppComponents/Apis/Listing/APICardView';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Subscription from 'AppData/Subscription';
 import Api from 'AppData/api';
+import { app } from 'Settings';
 import SubscriptionTableData from './SubscriptionTableData';
 
 /**
@@ -95,7 +96,11 @@ class Subscriptions extends React.Component {
      * @memberof Subscriptions
      */
     componentDidMount() {
-        const { match: { params: { applicationId } } } = this.props;
+        const {
+            match: {
+                params: { applicationId },
+            },
+        } = this.props;
         this.updateSubscriptions(applicationId);
         this.updateUnsubscribedAPIsList();
     }
@@ -159,8 +164,10 @@ class Subscriptions extends React.Component {
                 Alert.info('Subscription deleted successfully!');
                 const { subscriptions } = this.state;
                 for (const endpointIndex in subscriptions) {
-                    if (Object.prototype.hasOwnProperty.call(subscriptions, endpointIndex)
-                        && subscriptions[endpointIndex].subscriptionId === subscriptionId) {
+                    if (
+                        Object.prototype.hasOwnProperty.call(subscriptions, endpointIndex) &&
+                        subscriptions[endpointIndex].subscriptionId === subscriptionId
+                    ) {
                         subscriptions.splice(endpointIndex, 1);
                         break;
                     }
@@ -176,7 +183,6 @@ class Subscriptions extends React.Component {
             });
     }
 
-
     /**
      *
      * Update list of unsubscribed APIs
@@ -184,14 +190,15 @@ class Subscriptions extends React.Component {
      */
     updateUnsubscribedAPIsList() {
         const apiClient = new Api();
-        const promisedGetApis = apiClient.getAllAPIs();
+        const promisedGetApis = apiClient.getAllAPIs({ query: 'status:published' });
 
         promisedGetApis
             .then((response) => {
                 const { list } = response.obj;
                 const subscribedIds = this.getIdsOfSubscribedEntities();
                 const unsubscribedAPIList = list
-                    .filter(api => !subscribedIds.includes(api.id) && !api.advertiseInfo.advertised)
+                    .filter(api => (!subscribedIds.includes(api.id) && !api.advertiseInfo.advertised)
+                     && api.isSubscriptionAvailable)
                     .map((filteredApi) => {
                         return {
                             Id: filteredApi.id,
@@ -238,10 +245,18 @@ class Subscriptions extends React.Component {
                         defaultMessage: 'Error occurred during subscription',
                     }));
                 } else {
-                    Alert.info(intl.formatMessage({
-                        id: 'Applications.Details.Subscriptions.subscription.successful',
-                        defaultMessage: 'Subscription successful',
-                    }));
+                    if (response.body.status === 'ON_HOLD') {
+                        Alert.info(intl.formatMessage({
+                            defaultMessage: 'Your subscription request has been submitted and is now awaiting ' +
+                            'approval.',
+                            id: 'subscription.pending',
+                        }));
+                    } else {
+                        Alert.info(intl.formatMessage({
+                            id: 'Applications.Details.Subscriptions.subscription.successful',
+                            defaultMessage: 'Subscription successful',
+                        }));
+                    }
                     this.updateSubscriptions(applicationId);
                 }
             })
@@ -265,13 +280,17 @@ class Subscriptions extends React.Component {
         const { isAuthorize } = this.state;
 
         if (!isAuthorize) {
-            window.location = '/devportal/services/configs';
+            window.location = app.context + '/services/configs';
         }
 
         const {
             subscriptions, unsubscribedAPIList, apisNotFound, subscriptionsNotFound,
         } = this.state;
-        const { match: { params: { applicationId } } } = this.props;
+        const {
+            match: {
+                params: { applicationId },
+            },
+        } = this.props;
         const { classes } = this.props;
 
         if (subscriptions) {
@@ -305,62 +324,59 @@ class Subscriptions extends React.Component {
                                 </CardActions>
                                 <Divider />
                                 <CardContent className={classes.cardContent}>
-                                    {
-                                        subscriptionsNotFound
-                                            ? (<ResourceNotFound />)
-                                            : (
-                                                <Table>
-                                                    <TableHead>
-                                                        <TableRow>
-                                                            <TableCell className={classes.firstCell}>
-                                                                <FormattedMessage
-                                                                    id='Applications.Details.Subscriptions.api.name'
-                                                                    defaultMessage='API Name'
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <FormattedMessage
-                                                                    id={`Applications.Details.Subscriptions
+                                    {subscriptionsNotFound ? (
+                                        <ResourceNotFound />
+                                    ) : (
+                                        <Table>
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell className={classes.firstCell}>
+                                                        <FormattedMessage
+                                                            id='Applications.Details.Subscriptions.api.name'
+                                                            defaultMessage='API Name'
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <FormattedMessage
+                                                            id={`Applications.Details.Subscriptions
                                                                     .subscription.tier`}
-                                                                    defaultMessage='Subscription Tier'
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <FormattedMessage
-                                                                    id='Applications.Details.Subscriptions.Status'
-                                                                    defaultMessage='Status'
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <FormattedMessage
-                                                                    id='Applications.Details.Subscriptions.action'
-                                                                    defaultMessage='Action'
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <FormattedMessage
-                                                                    id='Applications.Details.Subscriptions.invoice'
-                                                                    defaultMessage='Invoice'
-                                                                />
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    </TableHead>
-                                                    <TableBody>
-                                                        {subscriptions && subscriptions.map((subscription) => {
-                                                            return (
-                                                                <SubscriptionTableData
-                                                                    key={subscription.subscriptionId}
-                                                                    subscription={subscription}
-                                                                    handleSubscriptionDelete={
-                                                                        this.handleSubscriptionDelete
-                                                                    }
-                                                                />
-                                                            );
-                                                        })}
-                                                    </TableBody>
-                                                </Table>
-                                            )
-                                    }
+                                                            defaultMessage='Subscription Tier'
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <FormattedMessage
+                                                            id='Applications.Details.Subscriptions.Status'
+                                                            defaultMessage='Status'
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <FormattedMessage
+                                                            id='Applications.Details.Subscriptions.action'
+                                                            defaultMessage='Action'
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <FormattedMessage
+                                                            id='Applications.Details.Subscriptions.invoice'
+                                                            defaultMessage='Invoice'
+                                                        />
+                                                    </TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {subscriptions &&
+                                                    subscriptions.map((subscription) => {
+                                                        return (
+                                                            <SubscriptionTableData
+                                                                key={subscription.subscriptionId}
+                                                                subscription={subscription}
+                                                                handleSubscriptionDelete={this.handleSubscriptionDelete}
+                                                            />
+                                                        );
+                                                    })}
+                                            </TableBody>
+                                        </Table>
+                                    )}
                                 </CardContent>
                             </Card>
                         </Grid>

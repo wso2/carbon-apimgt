@@ -123,6 +123,7 @@ public class TokenRevocationNotifierImplTest {
     public void testSendMessageOnRealTime() {
         Properties properties = new Properties();
         properties.setProperty("ttl", DEFAULT_TTL);
+        properties.setProperty("expiryTime", "1571063344");
         log.info("Running the test case to check the sendMessageOnRealTime method.");
         try{
             tokenRevocationNotifierImpl = new TokenRevocationNotifierImpl();

@@ -18,26 +18,34 @@
  */
 
     var log = new Log("Services login DCR request");
-    var site = require("/site/public/theme/defaultTheme.js").Configurations.app;
+    var app = require("/site/public/theme/defaultTheme.js").Configurations.app;
     include("/services/constants.jag");
     include("/services/jagg.jag");
 
-    var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
-    var serverUrl = utils.getServerURL();
+    var serverUrl = '';
+    if (app.reverseProxy.enabled === true) {
+        serverUrl = app.reverseProxy.origin;
+    } else {
+        var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        serverUrl = utils.getServerURL();
+    }
     var settingsAPIUrl = serverUrl + SETTINGS_REST_API_URL_SUFFIX;
     var settingsResponse = get(settingsAPIUrl, {}, "json");
 
     var dcrUrl = MGT_TRANSPORT + HOST + ":" + getServerPort() + DCR_URL_SUFFIX;
     var authorizeEndpoint = serverUrl + AUTHORIZE_ENDPOINT_SUFFIX;
-    var loginCallbackUrl = serverUrl + site.context + LOGIN_CALLBACK_URL_SUFFIX;
-    var logoutCallbackUrl = serverUrl + site.context + LOGOUT_CALLBACK_URL_SUFFIX;
+    var loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
+    var logoutCallbackUrl = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
     var callbackUrl = "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";
     var scopes = settingsResponse.data.scopes.join(" ");
     var referer = request.getHeader("Referer");
     var state = "";
     // get the pathname from query param 'referrer'
     if (referer !== null) {
-        state = referer.replace(/(https?:\/\/.*):(\d*)\/?(publisher)/g, '');
+        var context = app.context.charAt(0) === '/' ? app.context.substring(1) : app.context;
+        var hostnamePattern = "(https?:\/\/.*):?(\\d*)\/?(" + context + ")";
+        var re = new RegExp(hostnamePattern);
+        state = encodeURI(referer.replace(re, ''));
     }
 
     var authorizationHeader = "Basic " + utils.getBase64EncodedAdminCredentials();
@@ -86,8 +94,8 @@
     var cookie = {
         'name': 'CLIENT_ID',
         'value': clientId,
-        'path': site.context + "/",
-        "HttpOnly": false,
+        'path': app.context + "/",
+        "httpOnly": false,
         "secure": true,
         "maxAge": -1
     };
