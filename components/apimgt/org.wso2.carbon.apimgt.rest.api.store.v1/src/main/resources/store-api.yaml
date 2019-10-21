@@ -378,6 +378,7 @@ paths:
           required : true
           description: |
             Programming language of the SDK that is required.
+        - $ref: '#/parameters/requestedTenant'
       tags:
         - SDKs
       responses:
