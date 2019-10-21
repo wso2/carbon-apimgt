@@ -320,7 +320,8 @@ const AlertConfiguration = (props) => {
                             <Typography>
                                 <FormattedMessage
                                     id='Apis.Settings.Alerts.AlertConfiguration.no.config.message'
-                                    defaultMessage={'You do not have any configurations. Click on the {newConfig} button' +
+                                    defaultMessage={'You do not have any configurations.+
+                                    ' Click on the {newConfig} button' +
                                     ' to add a configuration.'}
                                     values={{
                                         newConfig: <b>New Configuration</b>,
