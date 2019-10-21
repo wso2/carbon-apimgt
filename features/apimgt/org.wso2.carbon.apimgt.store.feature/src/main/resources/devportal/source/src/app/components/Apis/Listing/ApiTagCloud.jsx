@@ -20,6 +20,7 @@ import React, { useState, useEffect } from 'react';
 import { useTheme, makeStyles } from '@material-ui/core/styles';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
+import Paper from '@material-ui/core/Paper';
 import { FormattedMessage } from 'react-intl';
 import { TagCloud } from 'react-tagcloud';
 import PropTypes from 'prop-types';
@@ -34,6 +35,13 @@ const useStyles = makeStyles(theme => ({
     filterTitle: {
         fontWeight: 400,
         padding: theme.spacing(1, 2),
+    },
+    paper: {
+        minWidth: theme.custom.tagWise.fixedStyles.width,
+        width: theme.custom.tagWise.fixedStyles.width,
+        background: theme.custom.tagWise.fixedStyles.background,
+        color: theme.palette.getContrastText(theme.custom.tagWise.fixedStyles.background),
+        margin: `${theme.spacing(2)}px ${theme.spacing(2)}px 0 0`,
     },
 }));
 
@@ -94,20 +102,22 @@ function ApiTagCloud(props) {
     return (
         allTags && (
             <React.Fragment>
-                <Divider />
-                <Typography variant='h6' gutterBottom className={classes.filterTitle}>
-                    <FormattedMessage defaultMessage='Tag Cloud' id='Apis.Listing.ApiTagCloud.title' />
-                </Typography>
-                <Divider />
-                <TagCloud
-                    minSize={18}
-                    maxSize={40}
-                    colorOptions={colorOptions}
-                    tags={allTags}
-                    shuffle={false}
-                    className={classes.clickablePointer}
-                    onClick={tag => handleOnClick(tag)}
-                />
+                <Paper className={classes.paper}>
+                    <Divider />
+                    <Typography variant='h6' gutterBottom className={classes.filterTitle}>
+                        <FormattedMessage defaultMessage='Tag Cloud' id='Apis.Listing.ApiTagCloud.title' />
+                    </Typography>
+                    <Divider />
+                    <TagCloud
+                        minSize={18}
+                        maxSize={40}
+                        colorOptions={colorOptions}
+                        tags={allTags}
+                        shuffle={false}
+                        className={classes.clickablePointer}
+                        onClick={tag => handleOnClick(tag)}
+                    />
+                </Paper>
             </React.Fragment>
         )
     );

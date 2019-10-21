@@ -18,7 +18,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
 import { FormattedMessage } from 'react-intl';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
@@ -202,10 +201,10 @@ class CommonListing extends React.Component {
                 </div>
                 {active && <ApiBreadcrumbs selectedTag={selectedTag} />}
                 <div className={classes.listContentWrapper}>
-                    <Paper className={classes.paper}>
+                    <React.Fragment>
                         {active && style === 'fixed-left' && <TagCloudListingTags />}
                         {tagCloudActive && <ApiTagCloud />}
-                    </Paper>
+                    </React.Fragment>
                     {listType === 'grid' && (
                         <ApiContext.Provider value={{ apiType }}>
                             <ApiTableView gridView query={search} />

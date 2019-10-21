@@ -21,6 +21,7 @@ import { useTheme, makeStyles } from '@material-ui/core/styles';
 import { Link, useHistory } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import List from '@material-ui/core/List';
+import Paper from '@material-ui/core/Paper';
 import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -49,6 +50,13 @@ const useStyles = makeStyles(theme => ({
     filterTitle: {
         fontWeight: 400,
         padding: theme.spacing(1, 2),
+    },
+    paper: {
+        minWidth: theme.custom.tagWise.fixedStyles.width,
+        width: theme.custom.tagWise.fixedStyles.width,
+        background: theme.custom.tagWise.fixedStyles.background,
+        color: theme.palette.getContrastText(theme.custom.tagWise.fixedStyles.background),
+        margin: `${theme.spacing(2)}px ${theme.spacing(2)}px 0 0`,
     },
 }));
 
@@ -110,36 +118,38 @@ function TagCloudListingTags(props) {
     return apisTagCloudGroup && apisTagCloudGroup.length > 0 ? (
         style === 'fixed-left' ? (
             <React.Fragment>
-                <Typography variant='h6' gutterBottom className={classes.filterTitle}>
-                    <FormattedMessage defaultMessage='Api Groups' id='Apis.Listing.TagCloudListingTags.title' />
-                </Typography>
-                <Divider />
-                <List component='nav' aria-label='main mailbox folders'>
-                    {Object.keys(apisTagCloudGroup).map((key) => {
-                        return <ApiTagThumb tag={apisTagCloudGroup[key]} path={tagWiseURL} style={style} />;
-                    })}
-                    {showAllApis && (
-                        <React.Fragment>
-                            <Divider />
+                <Paper className={classes.paper}>
+                    <Typography variant='h6' gutterBottom className={classes.filterTitle}>
+                        <FormattedMessage defaultMessage='Api Groups' id='Apis.Listing.TagCloudListingTags.title' />
+                    </Typography>
+                    <Divider />
+                    <List component='nav' aria-label='main mailbox folders'>
+                        {Object.keys(apisTagCloudGroup).map((key) => {
+                            return <ApiTagThumb tag={apisTagCloudGroup[key]} path={tagWiseURL} style={style} />;
+                        })}
+                        {showAllApis && (
+                            <React.Fragment>
+                                <Divider />
 
-                            <Link to='apis/' className={classes.textWrapper}>
-                                <ListItem button>
-                                    <ListItemIcon>
-                                        <Icon>label</Icon>
-                                    </ListItemIcon>
-                                    <ListItemText
-                                        primary={
-                                            <FormattedMessage
-                                                defaultMessage='All Apis'
-                                                id='Apis.Listing.TagCloudListingTags.allApis'
-                                            />
-                                        }
-                                    />
-                                </ListItem>
-                            </Link>
-                        </React.Fragment>
-                    )}
-                </List>
+                                <Link to='apis/' className={classes.textWrapper}>
+                                    <ListItem button>
+                                        <ListItemIcon>
+                                            <Icon>label</Icon>
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            primary={
+                                                <FormattedMessage
+                                                    defaultMessage='All Apis'
+                                                    id='Apis.Listing.TagCloudListingTags.allApis'
+                                                />
+                                            }
+                                        />
+                                    </ListItem>
+                                </Link>
+                            </React.Fragment>
+                        )}
+                    </List>
+                </Paper>
             </React.Fragment>
         ) : (
             <div className={classes.tagWiseThumbWrapper}>
