@@ -83,7 +83,7 @@ public class SchemaValidator extends AbstractHandler {
         }
         contentType = objContentType.toString();
         if (logger.isDebugEnabled()) {
-            logger.debug("Content type of the request message :" + contentType);
+            logger.debug("Content type of the request message : " + contentType);
         }
         try {
             RelayUtils.buildMessage(axis2MC);
@@ -106,8 +106,10 @@ public class SchemaValidator extends AbstractHandler {
             }
         } catch (IOException | XMLStreamException e) {
             logger.error("Error occurred while building the API request", e);
+            return false;
         } catch (APIManagementException e) {
             logger.error("Error occurred while validating the API request", e);
+            return false;
         }
         return true;
     }
@@ -125,7 +127,7 @@ public class SchemaValidator extends AbstractHandler {
                 getAxis2MessageContext();
         try {
             RelayUtils.buildMessage(axis2MC);
-            logger.info("Successfully built the response message");
+            logger.debug("Successfully built the response message");
         } catch (IOException e) {
             logger.error("Error occurred while building the API response", e);
         } catch (XMLStreamException e) {
@@ -139,6 +141,7 @@ public class SchemaValidator extends AbstractHandler {
             validateResponse(messageContext);
         } catch (APIManagementException e) {
             logger.error("Error occurred while validating the API response", e);
+            return false;
         }
         return true;
     }
@@ -152,7 +155,7 @@ public class SchemaValidator extends AbstractHandler {
      */
     private void validateContent(JSONObject payloadObject, String schemaString, MessageContext messageContext) {
         logger.debug("Validating JSON content against the schema");
-        String finalMessage = "";
+        StringBuilder finalMessage = new StringBuilder();
         List<String> errorMessages;
 
         JSONObject jsonSchema = new JSONObject(schemaString);
@@ -165,16 +168,16 @@ public class SchemaValidator extends AbstractHandler {
         } catch (ValidationException e) {
             errorMessages = e.getAllMessages();
             for (String message : errorMessages) {
-                finalMessage += message + ", ";
+                finalMessage.append(message).append(", ");
             }
             if (messageContext.isResponse()) {
-                logger.error("Schema validation failed in the Response :" + e.getMessage(), e);
+                logger.error("Schema validation failed in the Response : " + e.getMessage(), e);
                 GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.INTERNAL_ERROR_CODE,
-                        "Schema validation failed in the Response :" + finalMessage);
+                        "Schema validation failed in the Response : " + finalMessage);
             } else {
-                logger.error("Schema validation failed in the Request :" + e.getMessage(), e);
+                logger.error("Schema validation failed in the Request : " + e.getMessage(), e);
                 GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
-                        "Schema validation failed in the Request :" + finalMessage);
+                        "Schema validation failed in the Request : " + finalMessage);
             }
 
         }
@@ -279,26 +282,27 @@ public class SchemaValidator extends AbstractHandler {
         String requestMethod = axis2MC.getProperty(APIMgtGatewayConstants.HTTP_REQUEST_METHOD).toString();
         String schema;
         String Swagger = swagger;
-        String value = JsonPath.read(Swagger, APIMgtGatewayConstants.JSON_PATH + ".openapi").toString();
+        String value = JsonPath.read(Swagger, APIMgtGatewayConstants.JSON_PATH +
+                APIMgtGatewayConstants.OPEN_API).toString();
         if (value != null && !value.equals(APIMgtGatewayConstants.EMPTY_ARRAY)) {
             //refer schema
             StringBuilder jsonPath = new StringBuilder();
             jsonPath.append(APIMgtGatewayConstants.PATHS)
-                    .append(resourcePath).append("..requestBody.content.application/json.schema");
+                    .append(resourcePath).append(APIMgtGatewayConstants.BODY_CONTENT);
             schema = JsonPath.read(Swagger, jsonPath.toString()).toString();
             if (schema == null | APIMgtGatewayConstants.EMPTY_ARRAY.equals(schema)) {
                 // refer request bodies
                 StringBuilder requestBodyPath = new StringBuilder();
                 requestBodyPath.append(APIMgtGatewayConstants.PATHS).append(resourcePath).
                         append(APIMgtGatewayConstants.JSONPATH_SEPARATE).
-                        append(requestMethod.toLowerCase()).append("..requestBody");
+                        append(requestMethod.toLowerCase()).append(APIMgtGatewayConstants.REQUEST_BODY);
                 schema = JsonPath.read(Swagger, requestBodyPath.toString()).toString();
             }
         } else {
             StringBuilder schemaPath = new StringBuilder();
             schemaPath.append(APIMgtGatewayConstants.PATHS).append(resourcePath).
                     append(APIMgtGatewayConstants.JSONPATH_SEPARATE)
-                    .append(requestMethod.toLowerCase()).append(".parameters..schema");
+                    .append(requestMethod.toLowerCase()).append(APIMgtGatewayConstants.PARAM_SCHEMA);
             schema = JsonPath.read(Swagger, schemaPath.toString()).toString();
         }
         return extractReference(schema);
@@ -333,22 +337,22 @@ public class SchemaValidator extends AbstractHandler {
         resource = JsonPath.read(swagger, responseSchemaPath.toString());
 
         if (resource != null) {
-            responseSchemaPath.append(".content");
+            responseSchemaPath.append(APIMgtGatewayConstants.CONTENT);
             content = JsonPath.read(swagger, responseSchemaPath.toString());
         }
         if (content != null) {
-            responseSchemaPath.append(".application/json.schema.$ref");
+            responseSchemaPath.append(APIMgtGatewayConstants.JSON_CONTENT);
             schemaCon = JsonPath.read(swagger, responseSchemaPath.toString());
         }
         if (schemaCon != null) {
-            if (!schemaCon.toString().equals("[]")) {
+            if (!schemaCon.toString().equals(APIMgtGatewayConstants.EMPTY_ARRAY)) {
                 return extractReference(schemaCon.toString());
             } else {
                 StringBuilder pathBuilder = new StringBuilder();
                 pathBuilder.append(APIMgtGatewayConstants.PATHS).append(electedResource).
                         append(APIMgtGatewayConstants.JSONPATH_SEPARATE).append(reqMethod.toLowerCase()).
                         append(APIMgtGatewayConstants.JSON_RESPONSES).
-                        append(responseStatus).append(".content.application/json.schema");
+                        append(responseStatus).append(APIMgtGatewayConstants.JSON_SCHEMA);
 
                 schema = JsonPath.read(swagger, pathBuilder.toString()).toString();
                 JsonNode jsonNode = mapper.convertValue(schema, JsonNode.class);
@@ -357,12 +361,13 @@ public class SchemaValidator extends AbstractHandler {
                 } else {
                     value = jsonNode.toString();
                 }
-                if (value.contains("items")) {
+                if (value.contains(APIMgtGatewayConstants.ITEMS)) {
                     StringBuilder requestSchemaPath = new StringBuilder();
                     requestSchemaPath.append(APIMgtGatewayConstants.PATHS).append(electedResource).
                             append(APIMgtGatewayConstants.JSONPATH_SEPARATE).append(reqMethod.toLowerCase()).
                             append(APIMgtGatewayConstants.JSON_RESPONSES).append(responseStatus).
-                            append(".content.application/json.schema.items");
+                            append(APIMgtGatewayConstants.JSON_SCHEMA).append(
+                            APIMgtGatewayConstants.JSONPATH_SEPARATE).append(APIMgtGatewayConstants.ITEMS);
                     name = JsonPath.read(swagger, requestSchemaPath.toString()).toString();
                     if (name.contains(APIMgtGatewayConstants.SCHEMA_REFERENCE)) {
                         requestSchemaPath.append(APIMgtGatewayConstants.JSONPATH_SEPARATE).
@@ -377,7 +382,8 @@ public class SchemaValidator extends AbstractHandler {
         StringBuilder resPath = new StringBuilder();
         resPath.append(APIMgtGatewayConstants.PATHS).append(electedResource).append(
                 APIMgtGatewayConstants.JSONPATH_SEPARATE).append(reqMethod.toLowerCase()).
-                append(APIMgtGatewayConstants.JSON_RESPONSES).append(responseStatus).append(".schema");
+                append(APIMgtGatewayConstants.JSON_RESPONSES).append(responseStatus).append
+                (APIMgtGatewayConstants.SCHEMA);
         resource = JsonPath.read(swagger, resPath.toString());
         JsonNode json = mapper.convertValue(resource, JsonNode.class);
         if (json.get(0) != null && !APIMgtGatewayConstants.EMPTY_ARRAY.equals(json.get(0))) {
@@ -406,7 +412,7 @@ public class SchemaValidator extends AbstractHandler {
             StringBuilder responseDefaultPath = new StringBuilder();
             responseDefaultPath.append(APIMgtGatewayConstants.PATHS).append(electedResource).
                     append(APIMgtGatewayConstants.JSONPATH_SEPARATE).append(reqMethod.toLowerCase()).
-                    append(".responses.default");
+                    append(APIMgtGatewayConstants.JSON_RESPONSES).append(APIMgtGatewayConstants.DEFAULT);
             resourceSchema = JsonPath.read(swagger, responseDefaultPath.toString());
             JsonNode jnode = mapper.convertValue(resourceSchema, JsonNode.class);
             if (jnode.get(0) != null && !APIMgtGatewayConstants.EMPTY_ARRAY.equals(jnode)) {
@@ -538,23 +544,26 @@ public class SchemaValidator extends AbstractHandler {
             StringBuilder extractRefPath = new StringBuilder();
             extractRefPath.append(APIMgtGatewayConstants.JSON_PATH).append(
                     APIMgtGatewayConstants.REQUESTBODY_SCHEMA).
-                    append(searchLastIndex).append(".content.application/json.schema");
+                    append(searchLastIndex).append(APIMgtGatewayConstants.JSON_SCHEMA);
             String res = JsonPath.read(swagger, extractRefPath.toString()).toString();
-            if (res.contains("items")) {
+            if (res.contains(APIMgtGatewayConstants.ITEMS)) {
                 StringBuilder requestSchemaPath = new StringBuilder();
                 requestSchemaPath.append(APIMgtGatewayConstants.JSON_PATH).
                         append(APIMgtGatewayConstants.REQUESTBODY_SCHEMA).append(
-                        searchLastIndex).append(".content.application/json.schema.items.$ref");
+                        searchLastIndex).append(APIMgtGatewayConstants.JSON_SCHEMA).
+                        append(APIMgtGatewayConstants.JSONPATH_SEPARATE).append(APIMgtGatewayConstants.ITEMS).
+                        append(APIMgtGatewayConstants.JSONPATH_SEPARATE).append(APIMgtGatewayConstants.SCHEMA_REFERENCE);
                 name = JsonPath.read(swagger, requestSchemaPath.toString()).toString();
                 extractReference(name);
             } else {
                 StringBuilder jsonSchemaRef = new StringBuilder();
                 jsonSchemaRef.append(APIMgtGatewayConstants.JSON_PATH).append(
                         APIMgtGatewayConstants.REQUESTBODY_SCHEMA).append(searchLastIndex).append(
-                        ".content.application/json.schema.$ref");
+                        APIMgtGatewayConstants.CONTENT).append(APIMgtGatewayConstants.JSON_CONTENT);
                 name = JsonPath.read(swagger, jsonSchemaRef.toString()).toString();
-                if (name.contains("components/schemas")) {
-                    Object componentSchema = JsonPath.read(swagger, "$..components.schemas." + searchLastIndex);
+                if (name.contains(APIMgtGatewayConstants.COMPONENT_SCHEMA)) {
+                    Object componentSchema = JsonPath.read(swagger,
+                            APIMgtGatewayConstants.JSONPATH_SCHEMAS + searchLastIndex);
                     mapper = new ObjectMapper();
                     try {
                         JsonNode jsonNode = mapper.convertValue(componentSchema, JsonNode.class);
