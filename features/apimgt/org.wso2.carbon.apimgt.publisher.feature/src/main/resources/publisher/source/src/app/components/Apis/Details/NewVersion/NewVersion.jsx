@@ -22,6 +22,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
+import Container from '@material-ui/core/Container';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -184,137 +185,139 @@ class CreateNewVersion extends React.Component {
         }
 
         return (
-            <div className={classes.root}>
-                <div className={classes.titleWrapper}>
-                    <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        <FormattedMessage
-                            id='Apis.Details.NewVersion.NewVersion.create.new.version'
-                            defaultMessage='Create New Version'
-                        />
-                    </Typography>
-                </div>
-                <Grid container spacing={7}>
-                    <Grid item xs={12}>
-                        <Paper className={classes.root}>
-                            <FormControl margin='normal' className={classes.FormControlOdd}>
-                                <TextField
-                                    fullWidth
-                                    id='newVersion'
-                                    error={
-                                        valid.version.empty ||
-                                        valid.version.alreadyExists ||
-                                        valid.version.hasSpecialChars
-                                    }
-                                    label={
-                                        <FormattedMessage
-                                            id='Apis.Details.NewVersion.NewVersion.new.version'
-                                            defaultMessage='New Version'
-                                        />
-                                    }
-                                    helperText={
-                                        helperText
-                                    }
-                                    type='text'
-                                    name='newVersion'
-                                    placeholder='Eg: 2.0.0'
-                                    value={newVersion}
-                                    variant='outlined'
-                                    onChange={this.handleVersionChange()}
-                                    margin='normal'
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    autoFocus
-                                />
-                            </FormControl>
-                            <FormControl margin='normal' className={classes.FormControl}>
-                                <FormLabel className={classes.FormLabel} component='legend'>
-                                    <FormattedMessage
-                                        id='Apis.Details.NewVersion.NewVersion.default'
-                                        defaultMessage='Make this the default version'
-                                    />
-                                    <Tooltip
-                                        placement='top'
-                                        classes={{
-                                            tooltip: classes.htmlTooltip,
-                                        }}
-                                        title={
-                                            <React.Fragment>
-                                                <FormattedMessage
-                                                    id='Apis.Details.NewVersion.NewVersion.tooltip'
-                                                    defaultMessage={
-                                                        'Indicates if this is the default version of the API. ' +
-                                                        'If an API is invoked without specifying a version, ' +
-                                                        'the API Gateway will route the request to the default ' +
-                                                        'version of the API.'
-                                                    }
-                                                />
-                                            </React.Fragment>
+            <React.Fragment>
+                <Container maxWidth='md'>
+                    <div className={classes.titleWrapper}>
+                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+                            <FormattedMessage
+                                id='Apis.Details.NewVersion.NewVersion.create.new.version'
+                                defaultMessage='Create New Version'
+                            />
+                        </Typography>
+                    </div>
+                    <Grid container spacing={7}>
+                        <Grid item xs={12}>
+                            <Paper className={classes.root} elevation={0}>
+                                <FormControl margin='normal' className={classes.FormControlOdd}>
+                                    <TextField
+                                        fullWidth
+                                        id='newVersion'
+                                        error={
+                                            valid.version.empty ||
+                                            valid.version.alreadyExists ||
+                                            valid.version.hasSpecialChars
                                         }
-                                        interactive
-                                        aria-label='Default Version Selector'
-                                        tabIndex='-1'
-                                    >
-                                        <Button className={classes.helpButton}>
-                                            <HelpOutline className={classes.helpIcon} />
-                                        </Button>
-                                    </Tooltip>
-                                </FormLabel>
-                                <RadioGroup
-                                    name='isDefaultVersion'
-                                    id='isDefaultVersion'
-                                    className={classes.group}
-                                    value={isDefaultVersion}
-                                    onChange={this.handleDefaultVersionChange()}
-                                >
-                                    <FormControlLabel value='yes' control={<Radio color='primary' />} label='Yes' />
-                                    <FormControlLabel value='no' control={<Radio color='primary' />} label='No' />
-                                </RadioGroup>
-                            </FormControl>
-                        </Paper>
-                        <div className={classes.buttonWrapper}>
-                            <Grid
-                                container
-                                direction='row'
-                                alignItems='flex-start'
-                                spacing={2}
-                                className={classes.buttonSection}
-                            >
-                                <Grid item>
-                                    <div>
-                                        <Button
-                                            variant='contained'
-                                            color='primary'
-                                            id='createBtn'
-                                            onClick={() => this.handleSubmit(api, newVersion, isDefaultVersion)}
-                                            disabled={
-                                                valid.version.empty ||
-                                                valid.version.alreadyExists ||
-                                                valid.version.hasSpecialChars
+                                        label={
+                                            <FormattedMessage
+                                                id='Apis.Details.NewVersion.NewVersion.new.version'
+                                                defaultMessage='New Version'
+                                            />
+                                        }
+                                        helperText={
+                                            helperText
+                                        }
+                                        type='text'
+                                        name='newVersion'
+                                        placeholder='Eg: 2.0.0'
+                                        value={newVersion}
+                                        variant='outlined'
+                                        onChange={this.handleVersionChange()}
+                                        margin='normal'
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        autoFocus
+                                    />
+                                </FormControl>
+                                <FormControl margin='normal' className={classes.FormControl}>
+                                    <FormLabel className={classes.FormLabel} component='legend'>
+                                        <FormattedMessage
+                                            id='Apis.Details.NewVersion.NewVersion.default'
+                                            defaultMessage='Make this the default version'
+                                        />
+                                        <Tooltip
+                                            placement='top'
+                                            classes={{
+                                                tooltip: classes.htmlTooltip,
+                                            }}
+                                            title={
+                                                <React.Fragment>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.NewVersion.NewVersion.tooltip'
+                                                        defaultMessage={
+                                                            'Indicates if this is the default version of the API. ' +
+                                                            'If an API is invoked without specifying a version, ' +
+                                                            'the API Gateway will route the request to the default ' +
+                                                            'version of the API.'
+                                                        }
+                                                    />
+                                                </React.Fragment>
                                             }
+                                            interactive
+                                            aria-label='Default Version Selector'
+                                            tabIndex='-1'
                                         >
-                                            <FormattedMessage
-                                                id='Apis.Details.NewVersion.NewVersion.create'
-                                                defaultMessage='Create'
-                                            />
-                                        </Button>
-                                    </div>
-                                </Grid>
-                                <Grid item>
-                                    <Link to={'/apis/' + api.id + '/overview'}>
-                                        <Button id='cancelBtn'>
-                                            <FormattedMessage
-                                                id='Apis.Details.NewVersion.NewVersion.cancel'
-                                                defaultMessage='Cancel'
-                                            />
-                                        </Button>
-                                    </Link>
-                                </Grid>
-                            </Grid>
-                        </div>
+                                            <Button className={classes.helpButton}>
+                                                <HelpOutline className={classes.helpIcon} />
+                                            </Button>
+                                        </Tooltip>
+                                    </FormLabel>
+                                    <RadioGroup
+                                        name='isDefaultVersion'
+                                        id='isDefaultVersion'
+                                        className={classes.group}
+                                        value={isDefaultVersion}
+                                        onChange={this.handleDefaultVersionChange()}
+                                    >
+                                        <FormControlLabel value='yes' control={<Radio color='primary' />} label='Yes' />
+                                        <FormControlLabel value='no' control={<Radio color='primary' />} label='No' />
+                                    </RadioGroup>
+                                </FormControl>
+                                <div className={classes.buttonWrapper}>
+                                    <Grid
+                                        container
+                                        direction='row'
+                                        alignItems='flex-start'
+                                        spacing={1}
+                                        className={classes.buttonSection}
+                                    >
+                                        <Grid item>
+                                            <div>
+                                                <Button
+                                                    variant='contained'
+                                                    color='primary'
+                                                    id='createBtn'
+                                                    onClick={() => this.handleSubmit(api, newVersion, isDefaultVersion)}
+                                                    disabled={
+                                                        valid.version.empty ||
+                                                        valid.version.alreadyExists ||
+                                                        valid.version.hasSpecialChars
+                                                    }
+                                                >
+                                                    <FormattedMessage
+                                                        id='Apis.Details.NewVersion.NewVersion.create'
+                                                        defaultMessage='Create'
+                                                    />
+                                                </Button>
+                                            </div>
+                                        </Grid>
+                                        <Grid item>
+                                            <Link to={'/apis/' + api.id + '/overview'}>
+                                                <Button id='cancelBtn'>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.NewVersion.NewVersion.cancel'
+                                                        defaultMessage='Cancel'
+                                                    />
+                                                </Button>
+                                            </Link>
+                                        </Grid>
+                                    </Grid>
+                                </div>
+                            </Paper>
+                        </Grid>
                     </Grid>
-                </Grid>
-            </div>
+                </Container>
+            </React.Fragment>
         );
     }
 }
