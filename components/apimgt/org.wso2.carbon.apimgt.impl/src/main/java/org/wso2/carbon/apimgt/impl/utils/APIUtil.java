@@ -119,23 +119,23 @@ import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
+import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
-import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
-import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
-import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
+import org.wso2.carbon.apimgt.impl.token.JWTSignatureAlg;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
-import org.wso2.carbon.apimgt.impl.token.JWTSignatureAlg;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -199,6 +199,18 @@ import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
+import javax.cache.Cache;
+import javax.cache.CacheConfiguration;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -217,16 +229,17 @@ import java.net.SocketException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
+import java.security.InvalidKeyException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
-import java.security.PrivateKey;
-import java.security.Signature;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
 import java.security.SignatureException;
-import java.security.InvalidKeyException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
@@ -249,18 +262,6 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.cache.Cache;
-import javax.cache.CacheConfiguration;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -8986,6 +8987,7 @@ public final class APIUtil {
             apiProduct.setLastUpdated(registry.get(artifactPath).getLastModified());
             apiProduct.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
+            apiProduct.setTenantDomain(tenantDomainName);
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
 
@@ -9455,6 +9457,93 @@ public final class APIUtil {
             return "XXXXX" + token.substring(token.length() - 10);
         } else {
             return "XXXXX" + token.substring(token.length() / 2);
+        }
+    }
+
+    public static Certificate getCertificateFromTrustStore(String certAlias) throws APIManagementException {
+        Certificate publicCert = null;
+        //Read the client-truststore.jks into a KeyStore
+        try {
+            KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
+            if (trustStore != null) {
+                // Read public certificate from trust store
+                publicCert = trustStore.getCertificate(certAlias);
+            }
+        } catch (KeyStoreException e) {
+            String msg = "Error in retrieving public certificate from the trust store with alias : "
+                    + certAlias;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return publicCert;
+    }
+        /**
+         * Verify the JWT token signature.
+         *
+         * This method only used for API Key revocation which contains some duplicate logic in GatewayUtils class.
+         * @param splitToken The JWT token which is split into [header, payload, signature]
+         * @return whether the signature is verified or or not
+         */
+    public static boolean verifyTokenSignature(String[] splitToken, Certificate certificate,
+                                               String signatureAlgorithm) throws APIManagementException {
+        // Retrieve public key from the certificate
+        PublicKey publicKey = certificate.getPublicKey();
+        try {
+            // Verify token signature
+            Signature signatureInstance = Signature.getInstance(signatureAlgorithm);
+            signatureInstance.initVerify(publicKey);
+            String assertion = splitToken[0] + "." + splitToken[1];
+            signatureInstance.update(assertion.getBytes());
+            byte[] decodedSignature = java.util.Base64.getUrlDecoder().decode(splitToken[2]);
+            return signatureInstance.verify(decodedSignature);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | IllegalArgumentException e) {
+            String msg = "Error while verifying JWT signature with signature algorithm " + signatureAlgorithm;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Retrieve the signature algorithm specified in the token header.
+     *
+     * @param splitToken The JWT token which is split into [header, payload, signature]
+     * @return whether the signature algorithm
+     * @throws APIManagementException in case of signature algorithm extraction failure
+     */
+    public static String getSignatureAlgorithm(String[] splitToken) throws APIManagementException {
+        String signatureAlgorithm;
+        org.json.JSONObject decodedHeader;
+        try {
+            decodedHeader = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().decode(splitToken[0])));
+            signatureAlgorithm = decodedHeader.getString(APIConstants.JwtTokenConstants.SIGNATURE_ALGORITHM);
+            if (APIConstants.SIGNATURE_ALGORITHM_RS256.equals(signatureAlgorithm)) {
+                signatureAlgorithm = APIConstants.SIGNATURE_ALGORITHM_SHA256_WITH_RSA;
+            }
+            return signatureAlgorithm;
+        } catch (JSONException | IllegalArgumentException e) {
+            String msg = "Unable to find signature algorithm in the token";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Retrieve the signature algorithm specified in the token header.
+     *
+     * @param splitToken The JWT token which is split into [header, payload, signature]
+     * @return whether the signature algorithm
+     * @throws APIManagementException in case of signature algorithm extraction failure
+     */
+    public static String getSigningAlias(String[] splitToken) throws APIManagementException {
+        String signCertAlias;
+        org.json.JSONObject decodedHeader;
+        try {
+            decodedHeader = new org.json.JSONObject(new String(java.util.Base64.getUrlDecoder().decode(splitToken[0])));
+            signCertAlias = decodedHeader.getString(APIConstants.JwtTokenConstants.JWT_KID);
+            return signCertAlias;
+        } catch (JSONException | IllegalArgumentException e) {
+            String msg = "Unable to signing certificate alias in the token";
+            throw new APIManagementException(msg, e);
         }
     }
 }

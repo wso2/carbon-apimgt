@@ -1,6 +1,10 @@
 const Settings = {
     app: {
         context: '/devportal',
+        reverseProxy: {
+            enabled: false,
+            origin: 'https://localhost:9443',
+        },
     },
     grantTypes: {
         authorization_code: 'Code',

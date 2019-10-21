@@ -1281,6 +1281,7 @@ paths:
       security:
         - OAuth2Security:
           - apim:api_publish
+          - apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization: Bearer f8828f52-175a-4cb2-b246-02b1e6054f97\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/0527a55e-8dcf-4ce5-bddf-c77e8418be8a/lifecycle"
       x-wso2-request: |
             GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle

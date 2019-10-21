@@ -158,6 +158,10 @@ const styles = (theme) => {
             color: theme.palette.getContrastText(theme.custom.infoBar.tagChipBackground),
             marginRight: theme.spacing(1),
         },
+        expandWrapper: {
+            cursor:'pointer',
+            display: 'block',
+        },
     };
 };
 
@@ -533,7 +537,7 @@ class InfoBar extends React.Component {
                     </Collapse>
                 )}
                 <div className={classes.infoContentBottom}>
-                    <div className={classes.contentWrapper} onClick={this.toggleOverview}>
+                    <a className={classes.expandWrapper} onClick={this.toggleOverview}>
                         <div className={classes.buttonView}>
                             {showOverview ? (
                                 <Typography className={classes.buttonOverviewText}>
@@ -546,7 +550,7 @@ class InfoBar extends React.Component {
                             )}
                             {showOverview ? <Icon>arrow_drop_up</Icon> : <Icon>arrow_drop_down</Icon>}
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         );

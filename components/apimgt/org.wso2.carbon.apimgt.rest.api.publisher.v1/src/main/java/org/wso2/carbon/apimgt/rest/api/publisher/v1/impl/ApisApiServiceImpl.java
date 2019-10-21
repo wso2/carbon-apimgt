@@ -92,6 +92,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -632,6 +633,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(ExceptionCodes.NO_RESOURCES_FOUND, log);
             }
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
+            apiToUpdate.setUUID(originalAPI.getUUID());
             validateScopes(apiToUpdate);
             apiToUpdate.setThumbnailUrl(originalAPI.getThumbnailUrl());
 
@@ -3510,6 +3512,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         Set<SchemaValidationError> validationErrors;
         boolean isValid = false;
         SchemaParser schemaParser = new SchemaParser();
+        GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
         GraphQLValidationResponseDTO validationResponse = new GraphQLValidationResponseDTO();
 
         try {
@@ -3531,7 +3534,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 isValid = true;
                 validationResponse.setIsValid(isValid);
                 GraphQLValidationResponseGraphQLInfoDTO graphQLInfo = new GraphQLValidationResponseGraphQLInfoDTO();
-                List<APIOperationsDTO> operationArray = extractGraphQLOperationList(schema);
+                List<URITemplate> operationList = graphql.extractGraphQLOperationList(schema,null);
+                List<APIOperationsDTO> operationArray = APIMappingUtil.fromURITemplateListToOprationList(operationList);
                 graphQLInfo.setOperations(operationArray);
                 GraphQLSchemaDTO schemaObj = new GraphQLSchemaDTO();
                 schemaObj.setSchemaDefinition(schema);
@@ -3552,9 +3556,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Extract GraphQL Operations from given schema
      * @param schema graphQL Schema
-     * @return the arrayList of APIOperationsDTO
+     * @return the arrayList of APIOperationsDTOextractGraphQLOperationList
+     *
      */
-    private List<APIOperationsDTO> extractGraphQLOperationList(String schema) {
+    public List<APIOperationsDTO> extractGraphQLOperationList(String schema) {
         List<APIOperationsDTO> operationArray = new ArrayList<>();
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
@@ -3780,17 +3785,20 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException throw if validation failure
      */
     private void validateScopes(API api) throws APIManagementException {
+
         APIIdentifier apiId = api.getId();
+        String username = RestApiUtil.getLoggedInUsername();
+
         for (Scope scope : api.getScopes()) {
             if (!(APIUtil.isWhiteListedScope(scope.getName()))) {
-                String username = RestApiUtil.getLoggedInUsername();
                 String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
                 int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
                 APIProvider apiProvider = RestApiUtil.getProvider(username);
 
                 if (apiProvider.isScopeKeyAssigned(apiId, scope.getName(), tenantId)) {
                     RestApiUtil
-                            .handleBadRequest("Scope " + scope.getName() + " is already assigned by another API", log);
+                            .handleBadRequest("Scope " + scope.getName() + " is already assigned by another API",
+                                    log);
                 }
             }
             //set description as empty if it is not provided
@@ -3799,7 +3807,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             if (scope.getRoles() != null) {
                 for (String aRole : scope.getRoles().split(",")) {
-                    boolean isValidRole = APIUtil.isRoleNameExist(apiId.getProviderName(), aRole);
+                    boolean isValidRole = APIUtil.isRoleNameExist(username, aRole);
                     if (!isValidRole) {
                         String error = "Role '" + aRole + "' does not exist.";
                         RestApiUtil.handleBadRequest(error, log);

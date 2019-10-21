@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
@@ -90,10 +91,15 @@ import org.wso2.carbon.utils.FileUtil;
 
 import javax.cache.Cache;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -223,6 +229,22 @@ public class APIManagerComponent {
                                 null);
             } catch (Exception e) {
                 log.error("Error while activating UserPostSelfRegistration handler component.", e);
+            }
+
+            // Read the trust store
+            ServerConfiguration config = CarbonUtils.getServerConfiguration();
+            String trustStorePassword = config.getFirstProperty(APIConstants.TRUST_STORE_PASSWORD);
+            String trustStoreLocation = config.getFirstProperty(APIConstants.TRUST_STORE_LOCATION);
+            if (trustStoreLocation != null && trustStorePassword != null) {
+                try (FileInputStream trustStoreStream = new FileInputStream(new File(trustStoreLocation))) {
+                    KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                    trustStore.load(trustStoreStream, trustStorePassword.toCharArray());
+                    ServiceReferenceHolder.getInstance().setTrustStore(trustStore);
+                } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
+                    log.error("Error in loading trust store.", e);
+                }
+            } else {
+                log.error("Error in loading trust store. Configurations are not set.");
             }
 
             //Initialize product REST API token caches

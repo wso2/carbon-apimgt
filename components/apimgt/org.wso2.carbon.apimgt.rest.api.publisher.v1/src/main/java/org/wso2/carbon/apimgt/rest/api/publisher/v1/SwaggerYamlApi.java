@@ -18,9 +18,15 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
+import io.swagger.models.Swagger;
+import io.swagger.parser.SwaggerParser;
+import io.swagger.util.Json;
+import io.swagger.util.Yaml;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;
@@ -37,6 +43,8 @@ import javax.ws.rs.core.Response;
 public class SwaggerYamlApi {
 
     private static final Log log = LogFactory.getLog(SwaggerYamlApi.class);
+    private static final String LOCK_PUBLISHER_OPENAPI_DEF = "LOCK_PUBLISHER_OPENAPI_DEF";
+    private String openAPIDef = null;
 
     /**
      * Retrieves swagger definition of Publisher REST API and returns
@@ -54,12 +62,19 @@ public class SwaggerYamlApi {
 
             @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported") })
 
-    public Response swaggerYamlGet() {
+    public Response swaggerYamlGet() throws APIManagementException {
         try {
-            String definition = IOUtils
-                    .toString(this.getClass().getResourceAsStream("/publisher-api.yaml"), "UTF-8");
-            return Response.ok().entity(definition).build();
-        } catch (IOException e) {
+            if (openAPIDef == null) {
+                synchronized (LOCK_PUBLISHER_OPENAPI_DEF) {
+                    if (openAPIDef == null) {
+                        String definition = IOUtils
+                                .toString(this.getClass().getResourceAsStream("/publisher-api.yaml"), "UTF-8");
+                        openAPIDef = new OAS2Parser().removeExamplesFromSwagger(definition);
+                    }
+                }
+            }
+            return Response.ok().entity(openAPIDef).build();
+        } catch (IOException e) { 
             String errorMessage = "Error while retrieving the swagger definition of the Publisher API";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }

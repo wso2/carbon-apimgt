@@ -22,7 +22,12 @@ import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
 import MUIDataTable from 'mui-datatables';
 import API from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
 import { FormattedMessage } from 'react-intl';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogActions from '@material-ui/core/DialogActions';
 
 const columns = ['Name', 'Value'];
 
@@ -47,6 +52,7 @@ function Invoice(props) {
         api,
     } = props;
     const [showPopup, setShowPopup] = useState(false);
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [invoice, setInvoice] = useState(null);
 
     /**
@@ -55,18 +61,40 @@ function Invoice(props) {
     const handlePopup = () => {
         setShowPopup(true);
         setInvoice(null);
-        const promiseInvoice = api.getMonetizationInvoice(subscriptionId);
-        promiseInvoice.then((response) => {
-            const invoiceData = [];
-            Object.keys(response.properties).map((invoiceItem) => {
-                const insideArray = [];
-                insideArray.push(invoiceItem);
-                insideArray.push(response.properties[invoiceItem]);
-                invoiceData.push(insideArray);
-                return true;
+        if (api.apiType === 'APIProduct') {
+            const apiProduct = new APIProduct(api.name, api.context, api.policies);
+            const promiseInvoice = apiProduct.getMonetizationInvoice(subscriptionId);
+            promiseInvoice.then((response) => {
+                const invoiceData = [];
+                Object.keys(response.properties).map((invoiceItem) => {
+                    const insideArray = [];
+                    insideArray.push(invoiceItem);
+                    insideArray.push(response.properties[invoiceItem]);
+                    invoiceData.push(insideArray);
+                    return true;
+                });
+                setInvoice(invoiceData);
+            }).catch((error) => {
+                console.error(error);
+                setShowErrorPopup(true);
             });
-            setInvoice(invoiceData);
-        });
+        } else {
+            const promiseInvoice = api.getMonetizationInvoice(subscriptionId);
+            promiseInvoice.then((response) => {
+                const invoiceData = [];
+                Object.keys(response.properties).map((invoiceItem) => {
+                    const insideArray = [];
+                    insideArray.push(invoiceItem);
+                    insideArray.push(response.properties[invoiceItem]);
+                    invoiceData.push(insideArray);
+                    return true;
+                });
+                setInvoice(invoiceData);
+            }).catch((error) => {
+                console.error(error);
+                setShowErrorPopup(true);
+            });
+        }
     };
 
     /**
@@ -74,6 +102,10 @@ function Invoice(props) {
    */
     const handleClose = () => {
         setShowPopup(false);
+    };
+
+    const handleAlertClose = () => {
+        setShowErrorPopup(false);
     };
 
     return (
@@ -99,6 +131,19 @@ function Invoice(props) {
                         options={options}
                     />
                 )}
+            </Dialog>
+            <Dialog open={showErrorPopup} onClose={handleAlertClose} fullWidth='true'>
+                <DialogTitle>No Data Available</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id='invoice-dialog-description'>
+                        Pending invoice data not fund for this subscription.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleAlertClose} color='primary'>
+                        Close
+                    </Button>
+                </DialogActions>
             </Dialog>
         </React.Fragment>
     );

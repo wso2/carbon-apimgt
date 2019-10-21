@@ -14231,8 +14231,12 @@ public class ApiMgtDAO {
      * @param tenantDomain tenant domain of the jwt subject.
      * @param expiryTime   expiry time of the token.
      */
-    public void addRevokedJWTSignature(String jwtSignature, Long expiryTime, String tenantDomain) throws APIManagementException {
+    public void addRevokedJWTSignature(String jwtSignature, String type ,
+                                       Long expiryTime, int tenantId) throws APIManagementException {
 
+        if (StringUtils.isEmpty(type)) {
+            type = APIConstants.DEFAULT;
+        }
         String addJwtSignature = SQLConstants.RevokedJWTConstants.ADD_JWT_SIGNATURE;
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement
@@ -14241,7 +14245,8 @@ public class ApiMgtDAO {
             ps.setString(1, UUID.randomUUID().toString());
             ps.setString(2, jwtSignature);
             ps.setLong(3, expiryTime);
-            ps.setString(4, tenantDomain);
+            ps.setInt(4, tenantId);
+            ps.setString(5, type);
             ps.execute();
             conn.commit();
         } catch (SQLException e) {
