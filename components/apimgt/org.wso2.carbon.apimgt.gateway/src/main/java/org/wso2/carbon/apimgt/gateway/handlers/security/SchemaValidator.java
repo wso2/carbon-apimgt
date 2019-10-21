@@ -171,13 +171,15 @@ public class SchemaValidator extends AbstractHandler {
                 finalMessage.append(message).append(", ");
             }
             if (messageContext.isResponse()) {
-                logger.error("Schema validation failed in the Response : " + e.getMessage(), e);
+                String message = "Schema validation failed in the Response: ";
+                logger.error(message  + e.getMessage(), e);
                 GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.INTERNAL_ERROR_CODE,
-                        "Schema validation failed in the Response : " + finalMessage);
+                        message + finalMessage);
             } else {
-                logger.error("Schema validation failed in the Request : " + e.getMessage(), e);
+                String errMessage = "Schema validation failed in the Request: ";
+                logger.error(errMessage + e.getMessage(), e);
                 GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
-                        "Schema validation failed in the Request : " + finalMessage);
+                        errMessage + finalMessage);
             }
 
         }
