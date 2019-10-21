@@ -24,7 +24,6 @@ import Utils from './Utils';
 import User from './User';
 import APIClient from './APIClient';
 import APIClientFactory from './APIClientFactory';
-
 /**
  * Class managing authentication
  */
@@ -292,7 +291,7 @@ class AuthManager {
      * @returns {Promise} Axios Promise object with the login request made
      */
     postAuthenticationRequest(headers, data, environment) {
-        const promisedResponse = axios('/publisher/services/auth/basic', {
+        const promisedResponse = axios(Configurations.app.context + '/services/auth/basic', {
             method: 'POST',
             data: qs.stringify(data),
             headers,

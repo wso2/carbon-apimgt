@@ -21,6 +21,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import ReactSafeHtml from 'react-safe-html';
 import classNames from 'classnames';
+import { app } from 'Settings';
 
 const styles = theme => ({
     parallax: {
@@ -63,7 +64,7 @@ function ParallaxScroll(props) {
         <React.Fragment>
             <div
                 className={classes.parallax}
-                style={{ backgroundImage: 'url("' + slide.src + '")' }}
+                style={{ backgroundImage: 'url("' + app.context + slide.src + '")' }}
             >
                 <div className={classNames(classes.slideContentWrapper, 'slideContentWrapper')}>
                     <div className={classNames(classes.slideContentTitle, 'slideContentTitle')}>

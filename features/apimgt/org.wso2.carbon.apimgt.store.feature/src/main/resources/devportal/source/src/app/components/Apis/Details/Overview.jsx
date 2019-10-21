@@ -35,6 +35,7 @@ import API from 'AppData/api';
 import AuthManager from 'AppData/AuthManager';
 import View from 'AppComponents/Apis/Details/Documents/View';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import { app } from 'Settings';
 import { ApiContext } from './ApiContext';
 import Resources from './Resources';
 import Operations from './Operations';
@@ -106,7 +107,7 @@ const styles = theme => ({
         minHeight: 238,
     },
     noCommentRoot: {
-        backgroundImage: `url(${theme.custom.overviewPage.commentsBackground})`,
+        backgroundImage: `url(${app.context + theme.custom.overviewPage.commentsBackground})`,
         height: '100%',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -118,7 +119,7 @@ const styles = theme => ({
         minHeight: 192,
     },
     noDocumentRoot: {
-        backgroundImage: `url(${theme.custom.overviewPage.documentsBackground})`,
+        backgroundImage: `url(${app.context + theme.custom.overviewPage.documentsBackground})`,
         height: '100%',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -126,7 +127,7 @@ const styles = theme => ({
         minHeight: 192,
     },
     noCredentialsRoot: {
-        backgroundImage: `url(${theme.custom.overviewPage.credentialsBackground})`,
+        backgroundImage: `url(${app.context + theme.custom.overviewPage.credentialsBackground})`,
         height: '100%',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',

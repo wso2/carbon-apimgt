@@ -1,4 +1,8 @@
 const APP_CONTEXT = '/publisher';
+const REVERSE_PROXY = {
+    enabled: false,
+    origin: 'https://localhost:9443',
+};
 const STORE_APP_CONTEXT = '/devportal';
 const Configurations = {
     themes: {
@@ -109,6 +113,7 @@ const Configurations = {
     },
     app: {
         context: APP_CONTEXT,
+        reverseProxy: REVERSE_PROXY,
         storeContext: STORE_APP_CONTEXT,
     },
 };
