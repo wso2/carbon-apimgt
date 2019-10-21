@@ -434,8 +434,7 @@ public final class APIUtil {
             Set<Scope> scopes = ApiMgtDAO.getInstance().getAPIScopes(api.getId());
             api.setScopes(scopes);
 
-            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
-                    api.getUrl(), api.getSandboxUrl());
+            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
 
             HashMap<String, String> resourceScopesMap;
             resourceScopesMap = ApiMgtDAO.getInstance().getResourceToScopeMapping(api.getId());
@@ -447,6 +446,8 @@ public final class APIUtil {
                 Scope scope = findScopeByKey(scopes, resourceScopesMap.get(resourceScopeKey));
                 uriTemplate.setScope(scope);
                 uriTemplate.setScopes(scope);
+                uriTemplate.setResourceURI(api.getUrl());
+                uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
 
                 Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
                 for (APIProductIdentifier usedByProduct : usedByProducts) {
@@ -607,8 +608,7 @@ public final class APIUtil {
             HashMap<String, String> resourceScopes;
             resourceScopes = ApiMgtDAO.getInstance().getResourceToScopeMapping(api.getId());
 
-            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
-                    api.getUrl(), api.getSandboxUrl());
+            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
 
             for (URITemplate uriTemplate : uriTemplates) {
                 String uTemplate = uriTemplate.getUriTemplate();
@@ -617,6 +617,8 @@ public final class APIUtil {
                 Scope scope = findScopeByKey(scopes, resourceScopes.get(resourceScopeKey));
                 uriTemplate.setScope(scope);
                 uriTemplate.setScopes(scope);
+                uriTemplate.setResourceURI(api.getUrl());
+                uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
 
                 Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
                 for (APIProductIdentifier usedByProduct : usedByProducts) {
