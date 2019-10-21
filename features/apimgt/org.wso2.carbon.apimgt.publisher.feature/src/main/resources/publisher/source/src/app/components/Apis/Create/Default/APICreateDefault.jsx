@@ -32,6 +32,7 @@ import Banner from 'AppComponents/Shared/Banner';
 import APICreateBase from 'AppComponents/Apis/Create/Components/APICreateBase';
 import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm';
 import APIProduct from 'AppData/APIProduct';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  * Handle API creation from WSDL.
@@ -301,20 +302,22 @@ function APICreateDefault(props) {
                                 Create {isCreating && !isPublishing && <CircularProgress size={24} />}
                             </Button>
                         </Grid>
-                        <Grid item>
-                            <Button
-                                id='itest-id-apicreatedefault-createnpublish'
-                                variant='contained'
-                                color='primary'
-                                disabled={!isPublishable || isAPICreateDisabled}
-                                onClick={createAndPublish}
-                            >
-                                {!isPublishing && 'Create & Publish'}
-                                {isPublishing && <CircularProgress size={24} />}
-                                {isCreating && isPublishing && 'Creating API . . .'}
-                                {!isCreating && isPublishing && 'Publishing API . . .'}
-                            </Button>
-                        </Grid>
+                        {!AuthManager.isNotPublisher() &&
+                            <Grid item>
+                                <Button
+                                    id='itest-id-apicreatedefault-createnpublish'
+                                    variant='contained'
+                                    color='primary'
+                                    disabled={!isPublishable || isAPICreateDisabled}
+                                    onClick={createAndPublish}
+                                >
+                                    {!isPublishing && 'Create & Publish'}
+                                    {isPublishing && <CircularProgress size={24} />}
+                                    {isCreating && isPublishing && 'Creating API . . .'}
+                                    {!isCreating && isPublishing && 'Publishing API . . .'}
+                                </Button>
+                            </Grid>
+                        }
                         <Grid item>
                             <Link to='/apis/'>
                                 <Button variant='text'>
