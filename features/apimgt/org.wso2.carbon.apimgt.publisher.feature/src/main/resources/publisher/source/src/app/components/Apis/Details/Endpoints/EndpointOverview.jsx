@@ -700,7 +700,6 @@ function EndpointOverview(props) {
                                 handleToggleEndpointSecurity={handleToggleEndpointSecurity}
                                 handleEndpointSecurityChange={handleEndpointSecurityChange}
                                 endpointType={endpointType}
-                                apiType={api.type}
                             />
                         </Grid>
                     }
