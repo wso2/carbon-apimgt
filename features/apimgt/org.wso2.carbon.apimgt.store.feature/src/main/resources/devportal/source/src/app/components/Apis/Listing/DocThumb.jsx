@@ -197,7 +197,7 @@ class DocThumb extends React.Component {
                         <div className={classes.thumbLeft}>
                             <Typography variant='subtitle1'>{apiName}</Typography>
                             <Typography variant='caption' gutterBottom align='left'>
-                                <FormattedMessage defaultMessage='Api Name' id='Apis.Listing.DocThumb.apiName' />
+                                <FormattedMessage defaultMessage='API Name' id='Apis.Listing.DocThumb.apiName' />
                             </Typography>
                         </div>
                         <div className={classes.thumbRight}>
@@ -205,7 +205,7 @@ class DocThumb extends React.Component {
                                 {apiVersion}
                             </Typography>
                             <Typography variant='caption' gutterBottom align='right'>
-                                <FormattedMessage defaultMessage='Api Version' id='Apis.Listing.DocThumb.apiVersion' />
+                                <FormattedMessage defaultMessage='API Version' id='Apis.Listing.DocThumb.apiVersion' />
                             </Typography>
                         </div>
                     </div>

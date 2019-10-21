@@ -112,7 +112,7 @@ function Create(props) {
                 } else {
                     Alert.info(`${doc.body.name} ${intl.formatMessage({
                         id: 'Apis.Details.Documents.Create.markdown.editor.success',
-                        defaultMessage: ' added successfully.',
+                        defaultMessage: ' Added successfully.',
                     })}`);
                     setNewDoc(doc);
                 }

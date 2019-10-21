@@ -53,7 +53,7 @@ const ResourceNotFound = (props) => {
                                             <Typography variant='subtitle1'>
                                                 <FormattedMessage
                                                     id='Base.Errors.ResourceNotFound.more.links'
-                                                    defaultMessage='You may check below links'
+                                                    defaultMessage='You may check the links below'
                                                 />
                                             </Typography>
                                         </Box>

@@ -112,7 +112,7 @@ const APIDetailsTopMenu = ({ classes, theme }) => {
                             id='fill.the.mandatory.fields'
                             defaultMessage={
                                 'Fill the mandatory fields (Name, Version, Context)' +
-                                ' and create the API. Configure advanced configurations later.'
+                                ' and create the API. Configure the advanced configurations later.'
                             }
                         />
                     </Typography>

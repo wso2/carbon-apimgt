@@ -30,7 +30,7 @@ export default function NoApi() {
                         <FormattedMessage id='Apis.Listing.NoApi.nodata.title' defaultMessage='No APIs Available' />
                     </Typography>
                     <Typography variant='subtitle1' gutterBottom>
-                        <FormattedMessage id='Apis.Listing.NoApi.nodata.content' defaultMessage='There are no APIs to show you right now.' />
+                        <FormattedMessage id='Apis.Listing.NoApi.nodata.content' defaultMessage='There are no APIs to display right now.' />
                     </Typography>
                 </Grid>
             </Grid>

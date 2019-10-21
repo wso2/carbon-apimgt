@@ -644,7 +644,7 @@ class SubscriptionsTable extends Component {
                     <Tooltip
                         title={intl.formatMessage({
                             id: 'Apis.Details.Subscriptions.SubscriptionsTable.search.tooltip',
-                            defaultMessage: 'Search subscriptions by Subscriber, Application and Tier',
+                            defaultMessage: 'Search subscriptions by Subscriber, Application, and Tier',
                         })}
                         aria-label='Search tooltip'
                     >

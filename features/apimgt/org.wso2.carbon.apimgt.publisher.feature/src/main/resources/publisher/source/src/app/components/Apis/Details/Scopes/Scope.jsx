@@ -197,7 +197,7 @@ class Scope extends React.Component {
                                         inputProps={{
                                             placeholder: intl.formatMessage({
                                                 id: 'Apis.Details.Scopes.Scope.scope.add.a.valid.role',
-                                                defaultMessage: 'add a valid role',
+                                                defaultMessage: 'Add a valid role',
                                             }),
                                         }}
                                     />

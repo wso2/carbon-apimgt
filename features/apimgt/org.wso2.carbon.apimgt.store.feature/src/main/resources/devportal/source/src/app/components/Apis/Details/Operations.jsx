@@ -114,7 +114,7 @@ class Operations extends React.Component {
             return <div>
                 <FormattedMessage
                     id='Apis.Details.Operations.notFound'
-                    defaultMessage='operations Not found'
+                    defaultMessage='Operations not found'
                 />
             </div>;
         }

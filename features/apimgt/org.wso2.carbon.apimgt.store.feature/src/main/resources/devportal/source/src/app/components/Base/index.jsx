@@ -411,7 +411,7 @@ class Layout extends React.Component {
                     <Typography noWrap>
                         <FormattedMessage
                             id='Base.index.copyright.text'
-                            defaultMessage='WSO2 APIM v3.0.0 | © 2019 WSO2 Inc'
+                            defaultMessage='WSO2 API-M v3.0.0 | © 2019 WSO2 Inc'
                         />
                     </Typography>
                 </footer>

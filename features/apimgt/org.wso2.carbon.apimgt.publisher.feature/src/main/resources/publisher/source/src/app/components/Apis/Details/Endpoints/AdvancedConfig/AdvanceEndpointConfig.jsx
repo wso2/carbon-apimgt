@@ -230,7 +230,7 @@ function AdvanceEndpointConfig(props) {
             key: 'REST',
             value: intl.formatMessage({
                 id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.representational.state.transfer',
-                defaultMessage: 'Representational State Transer (REST)',
+                defaultMessage: 'Representational State Transfer (REST)',
             }),
         },
         {

@@ -62,7 +62,7 @@ const suggestions = {
             route: 'runtime-configuration',
         },
         {
-            label: 'Enable/Disable Api Key',
+            label: 'Enable/Disable API Key',
             route: 'runtime-configuration',
         },
         {
