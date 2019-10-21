@@ -224,7 +224,7 @@ const ApplicationCreate = (props) => {
             />
             {allAppAttributes && (
                 Object.entries(allAppAttributes).map(item => (
-                    item[1].hidden === 'false' ? (
+                    item[1].hidden !== 'true' ? (
                         <TextField
                             classes={{
                                 root: classes.mandatoryStarText,
