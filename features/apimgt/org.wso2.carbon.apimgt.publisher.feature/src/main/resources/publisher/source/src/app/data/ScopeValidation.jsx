@@ -25,7 +25,7 @@ const resourcePath = {
     APIS: '/apis',
     API_PRODUCTS: '/api-products',
     SINGLE_API: '/apis/{apiId}',
-    SINGLE_API_PRODUCT: '/api-products/{apiId}',
+    SINGLE_API_PRODUCT: '/api-products/{apiProductId}',
     API_SWAGGER: '/apis/{apiId}/swagger',
     API_WSDL: '/apis/{apiId}/wsdl',
     API_GW_CONFIG: '/apis/{apiId}/gateway-config',
