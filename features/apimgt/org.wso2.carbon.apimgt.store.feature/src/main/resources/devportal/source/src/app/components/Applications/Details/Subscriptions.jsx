@@ -36,6 +36,7 @@ import APIList from 'AppComponents/Apis/Listing/APICardView';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Subscription from 'AppData/Subscription';
 import Api from 'AppData/api';
+import { app } from 'Config';
 import SubscriptionTableData from './SubscriptionTableData';
 
 /**
@@ -271,7 +272,7 @@ class Subscriptions extends React.Component {
         const { isAuthorize } = this.state;
 
         if (!isAuthorize) {
-            window.location = '/devportal/services/configs';
+            window.location = app.context + '/services/configs';
         }
 
         const {

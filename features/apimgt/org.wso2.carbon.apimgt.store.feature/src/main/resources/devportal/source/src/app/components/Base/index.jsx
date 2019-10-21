@@ -37,6 +37,7 @@ import { FormattedMessage } from 'react-intl';
 import Drawer from '@material-ui/core/Drawer';
 import HeaderSearch from 'AppComponents/Base/Header/Search/HeaderSearch';
 import Settings from 'AppComponents/Shared/SettingsContext';
+import { app } from 'Config';
 import AuthManager from '../../data/AuthManager';
 import ConfigManager from '../../data/ConfigManager';
 import EnvironmentMenu from './Header/EnvironmentMenu';
@@ -192,7 +193,7 @@ class Layout extends React.Component {
      */
     doOIDCLogout = (e) => {
         e.preventDefault();
-        window.location = '/devportal/services/logout';
+        window.location = app.context + '/services/logout';
     };
 
     handleClickButton = (key) => {
@@ -388,7 +389,7 @@ class Layout extends React.Component {
                                      <HowToReg /> sign-up
                                      </Button>
                                      </Link> */}
-                                    <a href='/devportal/services/configs'>
+                                    <a href={app.context + '/services/configs'}>
                                         <Button className={classes.userLink}>
                                             <Icon>person</Icon>
                                             <FormattedMessage id='Base.index.sign.in' defaultMessage=' Sign-in' />

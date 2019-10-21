@@ -37,6 +37,7 @@ import Loading from 'AppComponents/Base/Loading/Loading';
 import Application from 'AppData/Application';
 import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
 import Settings from 'AppComponents/Shared/SettingsContext';
+import { app } from 'Config';
 import AppsTableContent from './AppsTableContent';
 import ApplicationTableHead from './ApplicationTableHead';
 import DeleteConfirmation from './DeleteConfirmation';
@@ -186,7 +187,7 @@ class Listing extends Component {
                     // eslint-disable-next-line react/no-unused-state
                     this.setState({ notFound: true });
                 } else if (status === 401) {
-                    window.location = '/devportal/services/configs';
+                    window.location = app.context + '/services/configs';
                 }
             });
     }

@@ -31,6 +31,7 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl, } from 'react-intl';
 import AuthManager from 'AppData/AuthManager';
+import { app } from 'Config';
 import Api from '../../../data/api';
 /**
  *
@@ -147,7 +148,7 @@ class Sdk extends React.Component {
      * Handle sdk image not found issue. Point to a default image
      */
     addDefaultSrc = (ev) => {
-        ev.target.src = '/devportal/site/public/images/sdks/default.svg';
+        ev.target.src = app.context + '/site/public/images/sdks/default.svg';
     };
 
     /**
@@ -173,7 +174,7 @@ class Sdk extends React.Component {
                                         <img
                                             alt={language}
                                             src={
-                                                '/devportal/site/public/images/sdks/'
+                                                app.context + '/site/public/images/sdks/'
                                                     + new String(language)
                                                     + '.svg'
                                             }
@@ -216,13 +217,13 @@ class Sdk extends React.Component {
                                         <Divider />
                                         <CardMedia
                                             title={language.toString().toUpperCase()}
-                                            src={'/devportal/site/public/images/sdks/' + new String(language) + '.svg'}
+                                            src={app.context + '/site/public/images/sdks/' + new String(language) + '.svg'}
                                         >
                                             <img
                                                 alt={language}
                                                 onError={this.addDefaultSrc}
                                                 src={
-                                                    `/devportal/site/public/images/sdks/${language}.svg`
+                                                    app.context + '/site/public/images/sdks/${language}.svg'
                                                 }
                                                 style={{ width: '100px', height: '100px', margin: '30px' }}
                                             />

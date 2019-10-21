@@ -17,6 +17,7 @@
  */
 
 import Os from 'os';
+import { app } from 'Config';
 import AuthManager from '../src/app/data/AuthManager.jsx';
 import Utils from '../src/app/data/Utils';
 import User from '../src/app/data/User';
@@ -75,7 +76,11 @@ class TestUtils {
                 }
                 const { partialToken, validityPeriod } = response.data;
                 document.clearCookies();
-                Utils.setCookie(User.CONST.WSO2_AM_TOKEN_1, partialToken + WSO2_AM_TOKEN_MSF4J, validityPeriod, '/devportal');
+                Utils.setCookie(
+                    User.CONST.WSO2_AM_TOKEN_1,
+                    partialToken + WSO2_AM_TOKEN_MSF4J,
+                    validityPeriod, app.context,
+                );
             },
         );
         return promisedAuth;

@@ -29,9 +29,9 @@
   <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
   <title>WSO2 APIM Developer Portal</title>
 
-  <link rel="shortcut icon" href="/devportal/site/public/images/favicon.ico">
-  <link rel="icon" type="image/x-icon" href="/devportal/site/public/images/_favicon.ico">
-  <link href="/devportal/site/public/css/main.css" type="text/css" rel="stylesheet" />
+  <link rel="shortcut icon" href="<%= defaultTheme.Configurations.app.context %>/site/public/images/favicon.ico">
+  <link rel="icon" type="image/x-icon" href="<%= defaultTheme.Configurations.app.context %>/site/public/images/_favicon.ico">
+  <link href="<%= defaultTheme.Configurations.app.context %>/site/public/css/main.css" type="text/css" rel="stylesheet" />
 </head>
 
 <body>
