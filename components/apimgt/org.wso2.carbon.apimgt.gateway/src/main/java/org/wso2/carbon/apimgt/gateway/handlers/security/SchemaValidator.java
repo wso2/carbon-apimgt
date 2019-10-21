@@ -83,7 +83,7 @@ public class SchemaValidator extends AbstractHandler {
         }
         contentType = objContentType.toString();
         if (logger.isDebugEnabled()) {
-            logger.debug("Content type of the request message : " + contentType);
+            logger.debug("Content type of the request message: " + contentType);
         }
         try {
             RelayUtils.buildMessage(axis2MC);
