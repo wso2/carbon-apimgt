@@ -225,7 +225,7 @@ public class BasicAuthAuthenticator implements Authenticator {
         String password = credentials[1];
 
         // If end user tenant domain does not match the API publisher's tenant domain, return error
-        if(!MultitenantUtils.getTenantDomain(username).equals(synCtx.getProperty(PUBLISHER_TENANT_DOMAIN))) {
+        if (!MultitenantUtils.getTenantDomain(username).equals(synCtx.getProperty(PUBLISHER_TENANT_DOMAIN))) {
             log.error("Basic Authentication failure: tenant domain mismatch for user :" + username);
             return new AuthenticationResponse(false, isMandatory, true,
                     APISecurityConstants.API_AUTH_FORBIDDEN,
