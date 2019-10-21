@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.basicauth;
 
-
 import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -34,7 +33,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.TreeMap;
 
