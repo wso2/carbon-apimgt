@@ -307,8 +307,8 @@ const Alerts = (props) => {
                                 <Typography variant='caption'>
                                     <FormattedMessage
                                         id='Apis.Settings.Alerts.Alerts.subscribe.to.alerts.subheading'
-                                        defaultMessage={'Select the Alert types to subscribe/ unsubscribe and click' +
-                                        ' Save.'}
+                                        defaultMessage={'Select the Alert types to subscribe/unsubscribe and click' +
+                                        ' `Save`.'}
                                     />
                                 </Typography>
                                 <List>
@@ -417,7 +417,7 @@ const Alerts = (props) => {
                     <Typography className={classes.configDialogHeading}>
                         <FormattedMessage
                             id='Apis.Settings.Alerts.Alerts.unsubscribe.confirm.dialog.heading'
-                            defaultMessage='Confirm Unsubscribe from All Alerts'
+                            defaultMessage='Confirm unsubscription from All Alerts'
                         />
                     </Typography>
                 </DialogTitle>

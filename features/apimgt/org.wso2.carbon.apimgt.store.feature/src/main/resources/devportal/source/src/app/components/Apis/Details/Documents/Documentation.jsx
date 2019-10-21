@@ -279,13 +279,13 @@ function FullWidthGrid(props) {
                         <Typography variant='h5' component='h3'>
                             <FormattedMessage
                                 id='Apis.Details.Documents.Documentation.no.docs'
-                                defaultMessage='No Documents Yet'
+                                defaultMessage='No Documents Available'
                             />
                         </Typography>
                         <Typography component='p'>
                             <FormattedMessage
                                 id='Apis.Details.Documents.Documentation.no.docs.content'
-                                defaultMessage='No documents available for this API yet'
+                                defaultMessage='No documents are available for this API yet'
                             />
                         </Typography>
                     </InlineMessage>

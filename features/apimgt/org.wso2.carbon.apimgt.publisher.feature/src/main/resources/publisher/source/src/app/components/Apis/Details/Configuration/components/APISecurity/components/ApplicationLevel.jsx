@@ -177,7 +177,7 @@ export default function ApplicationLevel(props) {
                                         color='primary'
                                     />
                                 }
-                                label='Api Key'
+                                label='API Key'
                             />
                         </FormGroup>
                         <FormControl className={classes.bottomSpace} component='fieldset'>

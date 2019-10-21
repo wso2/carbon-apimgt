@@ -461,7 +461,7 @@ class Subscribe extends Component {
                         <Typography gutterBottom>
                             <FormattedMessage
                                 id='Apis.Details.Subscribe.test.description'
-                                defaultMessage={`Create an Application and subscribe this API to that Application.
+                                defaultMessage={`Create an application and subscribe to this API.
                                                 An application is a logical collection of APIs.
                                                 Applications allow you to use a single access token to invoke a collection
                                                 of APIs and to subscribe to one API multiple times with different SLA levels.
@@ -542,7 +542,7 @@ class Subscribe extends Component {
                                     <FormattedMessage
                                         id='Apis.Details.Subscribe.subscribed.to.all'
                                         defaultMessage='You have subscribed to all the available applications. You need to create a
-                                                                        new application to subscribe again to this API.'
+                                                                        new application to subscribe to this API again.'
                                     />
                                 </Typography>
                                 <Button
@@ -564,14 +564,14 @@ class Subscribe extends Component {
                                 <Typography variant='caption' className={classes.subtitle}>
                                     <FormattedMessage
                                         id='Apis.Details.Subscribe.showing.two.subscribed.applications'
-                                        defaultMessage='subscribed Applications'
+                                        defaultMessage='Subscribed Applications'
                                     />
                                     {this.state.subscribedApplications && this.state.subscribedApplications.length > 2 && (
                                         <span>
                                             -
                                             <FormattedMessage
                                                 id='Apis.Details.Subscribe.showing.two.out.of'
-                                                defaultMessage='showing 2 out of'
+                                                defaultMessage='Showing 2 out of'
                                             />
                                             {this.state.subscribedApplications.length}
 -
@@ -662,7 +662,7 @@ class Subscribe extends Component {
                         <Button onClick={this.handleCloseSubsConfirm} color='primary' autoFocus>
                             <FormattedMessage
                                 id='Apis.Details.Subscribe.stay.on.the.api.details.page'
-                                defaultMessage='Stay on the API detials page.'
+                                defaultMessage='Stay on the API details page.'
                             />
                         </Button>
                     </DialogActions>

@@ -108,7 +108,7 @@ class DocThumb extends Component {
                         <Grid item md={6}>
                             <FormattedMessage
                                 id='Apis.Listing.components.ImageGenerator.DocThumb.apiName'
-                                defaultMessage='Api Name'
+                                defaultMessage='API Name'
                             />:
                             <Typography className={classes.providerText} variant='body1' gutterBottom>
                                 {doc.apiName}
@@ -117,7 +117,7 @@ class DocThumb extends Component {
                         <Grid item md={6}>
                             <FormattedMessage
                                 id='Apis.Listing.components.ImageGenerator.DocThumb.apiVersion'
-                                defaultMessage='Api Version'
+                                defaultMessage='API Version'
                             />:
                             <Typography variant='body1' gutterBottom>
                                 {doc.apiVersion}

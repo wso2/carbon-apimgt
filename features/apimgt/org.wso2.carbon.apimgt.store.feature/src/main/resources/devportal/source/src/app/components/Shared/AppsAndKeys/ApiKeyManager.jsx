@@ -151,7 +151,7 @@ class ApiKeyManager extends React.Component {
                     <Typography variant='h5' className={classes.keyTitle}>
                         {keyType + ' '}
                         <FormattedMessage
-                            defaultMessage='Api Key'
+                            defaultMessage='API Key'
                             id='Shared.AppsAndKeys.TokenManager.ApiKey'
                         />
                     </Typography>
@@ -160,7 +160,7 @@ class ApiKeyManager extends React.Component {
                             <Grid item xs={4}>
                             </Grid>
                             <Grid item xs={2} className={classes.gridWrapper}>
-                                <FormLabel className={classes.formLabel}>Generate Api Key</FormLabel>
+                                <FormLabel className={classes.formLabel}>Generate API Key</FormLabel>
                             </Grid>
                             <Grid item xs={3}>
                                 <Button
@@ -176,7 +176,7 @@ class ApiKeyManager extends React.Component {
                     </FormGroup>
                     <Dialog open={open} onClose={this.handleClose} aria-labelledby="form-dialog-title">
                         <DialogTitle id='responsive-dialog-title' className={classes.dialogTitle}>
-                            {'Generate Api Key'}
+                            {'Generate API Key'}
                         </DialogTitle>
                         <DialogContent className={classes.dialogContent}>
                             <DialogContentText>
