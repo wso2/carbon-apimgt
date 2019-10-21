@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useTheme, makeStyles } from '@material-ui/core/styles';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
@@ -31,8 +31,13 @@ const useStyles = makeStyles(theme => ({
         padding: theme.spacing(1),
     },
     filterTitle: {
-        fontWeight: 400,
-        padding: theme.spacing(1, 2),
+        fontWeight: 200,
+        paddingLeft: theme.spacing(2),
+        background: theme.custom.tagCloud.leftMenu.titleBackground,
+        color: theme.palette.getContrastText(theme.custom.tagCloud.leftMenu.titleBackground),
+        height: theme.custom.infoBar.height,
+        alignItems: 'center',
+        display: 'flex',
     },
 }));
 
@@ -77,14 +82,12 @@ function ApiTagCloud(props) {
     return (
         apisTagWithoutGroups && (
             <React.Fragment>
-                <Divider />
                 <Typography variant='h6' gutterBottom className={classes.filterTitle}>
                     <FormattedMessage defaultMessage='Tag Cloud' id='Apis.Listing.ApiTagCloud.title' />
                 </Typography>
-                <Divider />
                 <TagCloud
-                    minSize={18}
-                    maxSize={40}
+                    minSize={14}
+                    maxSize={25}
                     colorOptions={colorOptions}
                     tags={allTags}
                     shuffle={false}

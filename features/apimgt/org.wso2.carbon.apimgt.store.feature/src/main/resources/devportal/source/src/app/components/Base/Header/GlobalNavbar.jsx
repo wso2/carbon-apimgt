@@ -130,7 +130,7 @@ function GlobalNavBar(props) {
                     </Link>
                 ) }
             <Link
-                to={theme.custom.tagWise.active ? '/api-groups' : '/apis'}
+                to={(theme.custom.tagWise.active && theme.custom.tagWise.style === 'page') ? '/api-groups' : '/apis'}
                 className={classNames({ [classes.selected]: selected === 'apis', [classes.links]: true })}
             >
                 <ListItem button>

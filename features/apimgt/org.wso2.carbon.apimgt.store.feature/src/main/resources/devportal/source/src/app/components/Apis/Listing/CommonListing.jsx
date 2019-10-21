@@ -18,7 +18,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
 import { FormattedMessage } from 'react-intl';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
@@ -69,9 +68,6 @@ const styles = theme => ({
     mainTitleWrapper: {
         flexGrow: 1,
     },
-    content: {
-        flexGrow: 1,
-    },
     listContentWrapper: {
         padding: `0 ${theme.spacing.unit * 3}px`,
         display: 'flex',
@@ -82,15 +78,69 @@ const styles = theme => ({
     iconSelected: {
         color: theme.custom.infoBar.listGridSelectedColor,
     },
-    paper: {
-        minWidth: theme.custom.tagWise.fixedStyles.width,
-        width: theme.custom.tagWise.fixedStyles.width,
-        background: theme.custom.tagWise.fixedStyles.background,
-        // color: theme.custom.tagWise.fixedStyles.color,
-        boxShadow: 'none',
-        margin: `0 ${theme.spacing(2)}px 0 -${theme.spacing(3)}px`,
-        //height: containerHeight
+    content: {
+        flexGrow: 1,
+        display: 'flex',
+        flex: 1,
+        flexDirection: 'column',
+        paddingBottom: theme.spacing.unit * 3,
     },
+    contentWithTags: {
+        marginLeft: theme.custom.tagCloud.leftMenu.width,
+    },
+    contentWithoutTags: {
+        marginLeft: 0,
+    },
+    contentWithTagsHidden: {
+        marginLeft: theme.custom.tagCloud.leftMenu.sliderWidth,
+    },
+    LeftMenu: {
+        backgroundColor: theme.custom.tagCloud.leftMenu.background,
+        color: theme.custom.tagCloud.leftMenu.color,
+        textAlign: 'left',
+        fontFamily: theme.typography.fontFamily,
+        position: 'absolute',
+        bottom: 0,
+        paddingLeft: 0,
+        width: theme.custom.tagCloud.leftMenu.width,
+        top: 0,
+        left: 0,
+        overflowY: 'auto',
+    },
+    LeftMenuForSlider: {
+        backgroundColor: theme.custom.tagCloud.leftMenu.background,
+        color: theme.custom.tagCloud.leftMenu.color,
+        textAlign: 'left',
+        fontFamily: theme.typography.fontFamily,
+        position: 'absolute',
+        bottom: 0,
+        paddingLeft: 0,
+        width: theme.custom.tagCloud.leftMenu.sliderWidth,
+        top: 0,
+        left: 0,
+        overflowY: 'auto',
+        display: 'flex',
+    },
+    sliderButton: {
+        fontWeight: 200,
+        background: theme.custom.tagCloud.leftMenu.sliderBackground,
+        color: theme.palette.getContrastText(theme.custom.tagCloud.leftMenu.sliderBackground),
+        height: theme.custom.infoBar.height,
+        alignItems: 'center',
+        display: 'flex',
+        position: 'absolute',
+        right: 0,
+        cursor: 'pointer',
+    },
+    rotatedText: {
+        transform: 'rotate(90deg)',
+        transformOrigin: 'left bottom 0',
+        position: 'absolute',
+        whiteSpace: 'nowrap',
+        top: theme.custom.infoBar.height,
+        marginLeft: 4,
+        cursor: 'pointer',
+    }
 });
 
 /**
@@ -110,6 +160,7 @@ class CommonListing extends React.Component {
         this.state = {
             listType: props.theme.custom.defaultApiView,
             allTags: null,
+            showLeftMenu: false,
         };
     }
 
@@ -138,6 +189,9 @@ class CommonListing extends React.Component {
                 console.log(error);
             });
     }
+    toggleLeftMenu = () => {
+        this.setState(prevState => ({ showLeftMenu: !prevState.showLeftMenu }));
+    };
     /**
      *
      * @inheritdoctheme
@@ -158,9 +212,8 @@ class CommonListing extends React.Component {
                 tagCloud: { active: tagCloudActive },
             },
         } = theme;
-        const { listType, allTags } = this.state;
-        const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
-
+        const { listType, allTags, showLeftMenu } = this.state;
+        const strokeColorMain = theme.custom.tagCloud.leftMenu.background;
         const searchParam = new URLSearchParams(search);
         const searchQuery = searchParam.get('query');
         let selectedTag = null;
@@ -178,67 +231,97 @@ class CommonListing extends React.Component {
                 }
             }
         }
+        const tagPaneVisible = allTags && allTags.length > 0 && (tagCloudActive || active);
         return (
-            <main className={classes.content}>
-                <div className={classes.appBar}>
-                    <div className={classes.mainIconWrapper}>
-                        <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
+            <React.Fragment>
+                {tagPaneVisible && showLeftMenu && (
+                    <div className={classes.LeftMenu}>
+                        <div className={classes.sliderButton} onClick={this.toggleLeftMenu}>
+                            <Icon>keyboard_arrow_left</Icon>
+                        </div>
+                        {active && <TagCloudListingTags allTags={allTags} />}
+                        {tagCloudActive && <ApiTagCloud allTags={allTags} />}
                     </div>
-                    <div className={classes.mainTitleWrapper}>
-                        <Typography variant='h4' className={classes.mainTitle}>
-                            <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.main' />
-                        </Typography>
-                        {apis && (
-                            <Typography variant='caption' gutterBottom align='left'>
-                                <FormattedMessage defaultMessage='Displaying' id='Apis.Listing.Listing.displaying' />
-                                {apis.count}
-                                <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.count' />
+                )}
+                {tagPaneVisible && !showLeftMenu && (
+                    <div className={classes.LeftMenuForSlider}>
+                        <div className={classes.sliderButton} onClick={this.toggleLeftMenu}>
+                            <Icon>keyboard_arrow_right</Icon>
+                        </div>
+                        <div className={classes.rotatedText} onClick={this.toggleLeftMenu}>
+                                <FormattedMessage
+                                    defaultMessage='Tag Cloud'
+                                    id='Apis.Listing.Listing.ApiTagCloud.title'
+                                />
+                            </div>
+                    </div>
+                )}
+
+                <main
+                    className={classNames(
+                        classes.content,
+                        { [classes.contentWithoutTags]: !tagPaneVisible || !showLeftMenu },
+                        { [classes.contentWithTagsHidden]: tagPaneVisible && !showLeftMenu },
+                        { [classes.contentWithTags]: tagPaneVisible && showLeftMenu },
+                    )}
+                >
+                    <div className={classes.appBar}>
+                        <div className={classes.mainIconWrapper}>
+                            <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
+                        </div>
+                        <div className={classes.mainTitleWrapper}>
+                            <Typography variant='h4' className={classes.mainTitle}>
+                                <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.main' />
                             </Typography>
+                            {apis && (
+                                <Typography variant='caption' gutterBottom align='left'>
+                                    <FormattedMessage
+                                        defaultMessage='Displaying'
+                                        id='Apis.Listing.Listing.displaying'
+                                    />
+                                    {apis.count}
+                                    <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.count' />
+                                </Typography>
+                            )}
+                        </div>
+                        <div className={classes.buttonRight}>
+                            <IconButton className={classes.button} onClick={() => this.setListType('list')}>
+                                <Icon
+                                    className={classNames(
+                                        { [classes.iconSelected]: listType === 'list' },
+                                        { [classes.iconDefault]: listType === 'grid' },
+                                    )}
+                                >
+                                    list
+                                </Icon>
+                            </IconButton>
+                            <IconButton className={classes.button} onClick={() => this.setListType('grid')}>
+                                <Icon
+                                    className={classNames(
+                                        { [classes.iconSelected]: listType === 'grid' },
+                                        { [classes.iconDefault]: listType === 'list' },
+                                    )}
+                                >
+                                    grid_on
+                                </Icon>
+                            </IconButton>
+                        </div>
+                    </div>
+                    {active && allTags && allTags.length > 0 && <ApiBreadcrumbs selectedTag={selectedTag} />}
+                    <div className={classes.listContentWrapper}>
+                        {listType === 'grid' && (
+                            <ApiContext.Provider value={{ apiType }}>
+                                <ApiTableView gridView query={search} />
+                            </ApiContext.Provider>
+                        )}
+                        {listType === 'list' && (
+                            <ApiContext.Provider value={{ apiType }}>
+                                <ApiTableView gridView={false} query={search} />
+                            </ApiContext.Provider>
                         )}
                     </div>
-                    <div className={classes.buttonRight}>
-                        <IconButton className={classes.button} onClick={() => this.setListType('list')}>
-                            <Icon
-                                className={classNames(
-                                    { [classes.iconSelected]: listType === 'list' },
-                                    { [classes.iconDefault]: listType === 'grid' },
-                                )}
-                            >
-                                list
-                            </Icon>
-                        </IconButton>
-                        <IconButton className={classes.button} onClick={() => this.setListType('grid')}>
-                            <Icon
-                                className={classNames(
-                                    { [classes.iconSelected]: listType === 'grid' },
-                                    { [classes.iconDefault]: listType === 'list' },
-                                )}
-                            >
-                                grid_on
-                            </Icon>
-                        </IconButton>
-                    </div>
-                </div>
-                {active && allTags && allTags.length > 0 && <ApiBreadcrumbs selectedTag={selectedTag} />}
-                <div className={classes.listContentWrapper}>
-                    <Paper className={classes.paper}>
-                        {active && style === 'fixed-left' && allTags && allTags.length > 0 && (
-                            <TagCloudListingTags allTags={allTags} />
-                        )}
-                        {tagCloudActive && allTags && allTags.length > 0 && <ApiTagCloud allTags={allTags} />}
-                    </Paper>
-                    {listType === 'grid' && (
-                        <ApiContext.Provider value={{ apiType }}>
-                            <ApiTableView gridView query={search} />
-                        </ApiContext.Provider>
-                    )}
-                    {listType === 'list' && (
-                        <ApiContext.Provider value={{ apiType }}>
-                            <ApiTableView gridView={false} query={search} />
-                        </ApiContext.Provider>
-                    )}
-                </div>
-            </main>
+                </main>
+            </React.Fragment>
         );
     }
 }
