@@ -806,7 +806,7 @@ public final class APIImportUtil {
 
         String jsonContent = null;
         String pathToYamlFile = pathToArchive + APIImportExportConstants.YAML_ENDPOINTS_CERTIFICATE_FILE;
-        String pathToJsonFile = pathToArchive + APIImportExportConstants.YAML_ENDPOINTS_CERTIFICATE_FILE;
+        String pathToJsonFile = pathToArchive + APIImportExportConstants.JSON_ENDPOINTS_CERTIFICATE_FILE;
 
         try {
             // try loading file as YAML
