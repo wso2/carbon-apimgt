@@ -96,7 +96,7 @@ export default function APIProductOperations() {
                             variant='outlined'
                             onClick={() => setApiThrottlingPolicy(api.apiThrottlingPolicy)}
                         >
-                            Rest
+                            Reset
                         </Button>
                     </Box>
                 </Box>
