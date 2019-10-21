@@ -63,8 +63,8 @@ public class AlertTypesPublisher1Test {
                 + " ApimAlertStakeholderInfo.isSubscriber = isSubscriber, ApimAlertStakeholderInfo.isPublisher = isPublisher, "
                 + "ApimAlertStakeholderInfo.isAdmin = isAdmin on ApimAlertStakeholderInfo.userId == userId and "
                 + "ApimAlertStakeholderInfo.isAdmin == isAdmin";
-        BDDMockito.given(APIUtil.executeQueryOnStreamProcessor("APIM_ALERT_STAKEHOLDER", query1)).willReturn(obj);
-        BDDMockito.given(APIUtil.executeQueryOnStreamProcessor("APIM_ALERT_STAKEHOLDER", query2)).willReturn(obj);
+        BDDMockito.given(APIUtil.executeQueryOnStreamProcessor("APIM_STAKEHOLDER_ALERT", query1)).willReturn(obj);
+        BDDMockito.given(APIUtil.executeQueryOnStreamProcessor("APIM_STAKEHOLDER_ALERT", query2)).willReturn(obj);
         AlertTypesPublisher alertTypesPublisher = new AlertTypesPublisherWrapper(apiMgtDAO);
         alertTypesPublisher.publisher = apiMgtUsageDataPublisher;
         alertTypesPublisher.enabled = true;
