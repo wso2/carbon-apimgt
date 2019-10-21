@@ -71,6 +71,7 @@ function Invoice(props) {
                 setInvoice(invoiceData);
             }
         }).catch((error) => {
+            console.error(error);
             setShowErrorPopup(true);
         });
     }
