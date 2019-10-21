@@ -140,12 +140,12 @@
     if (state !== null) {
         state = decodeURIComponent(state);
         if ( state !== '/') {
-            response.sendRedirect(app.context + state);
+            response.sendRedirect("/publisher" + state);
         } else {
-            response.sendRedirect(app.context + "/apis");
+            response.sendRedirect("/publisher" + "/apis");
         }
     } else {
-        response.sendRedirect(app.context + "/apis");
+        response.sendRedirect("/publisher/apis");
     }
 
 %>
