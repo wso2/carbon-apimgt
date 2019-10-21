@@ -145,7 +145,7 @@ function Endpoints(props) {
             }
         }
     };
-    const [apiObject, apiDispatcher] = useReducer(apiReducer, cloneDeep(api.toJSON()));
+    const [apiObject, apiDispatcher] = useReducer(apiReducer, api.toJSON());
 
 
     /**

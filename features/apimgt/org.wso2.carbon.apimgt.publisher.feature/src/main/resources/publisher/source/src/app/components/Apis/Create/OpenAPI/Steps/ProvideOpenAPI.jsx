@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Radio from '@material-ui/core/Radio';
 import Grid from '@material-ui/core/Grid';
@@ -55,6 +55,7 @@ export default function ProvideOpenAPI(props) {
     // If valid value is `null`,that means valid, else an error object will be there
     const [isValid, setValidity] = useState({});
     const [isValidating, setIsValidating] = useState(false);
+
     /**
      *
      *
@@ -98,7 +99,8 @@ export default function ProvideOpenAPI(props) {
      * Do the validation state aggregation and call the onValidate method with aggregated value
      * @param {Object} state Validation state object returned from Joi `.validate()` method
      */
-    function validateURL(state) {
+    function validateURL(value) {
+        const state = APIValidation.url.required().validate(value).error;
         // State `null` means URL is valid, We do backend validation only in valid URLs
         if (state === null) {
             setIsValidating(true);
@@ -122,6 +124,16 @@ export default function ProvideOpenAPI(props) {
             onValidate(false);
         }
     }
+    useEffect(() => {
+        const { inputType, inputValue } = apiInputs;
+        if (inputValue) {
+            if (inputType === ProvideOpenAPI.INPUT_TYPES.FILE) {
+                onDrop([inputValue]);
+            } else if (inputType === ProvideOpenAPI.INPUT_TYPES.URL) {
+                validateURL(inputValue);
+            }
+        }
+    }, []);
 
     // TODO: Use validation + input to separate component that can be share with wsdl,swagger,graphql URL inputs ~tmkb
     const isInvalidURL = Boolean(isValid.url);
@@ -167,8 +179,16 @@ export default function ProvideOpenAPI(props) {
                             value={apiInputs.inputType}
                             onChange={event => inputsDispatcher({ action: 'inputType', value: event.target.value })}
                         >
-                            <FormControlLabel value='url' control={<Radio color='primary' />} label='OpenAPI URL' />
-                            <FormControlLabel value='file' control={<Radio color='primary' />} label='OpenAPI File' />
+                            <FormControlLabel
+                                value={ProvideOpenAPI.INPUT_TYPES.URL}
+                                control={<Radio color='primary' />}
+                                label='OpenAPI URL'
+                            />
+                            <FormControlLabel
+                                value={ProvideOpenAPI.INPUT_TYPES.FILE}
+                                control={<Radio color='primary' />}
+                                label='OpenAPI File'
+                            />
                         </RadioGroup>
                     </FormControl>
                 </Grid>
@@ -203,7 +223,7 @@ export default function ProvideOpenAPI(props) {
                             }}
                             InputProps={{
                                 onBlur: ({ target: { value } }) => {
-                                    validateURL(APIValidation.url.required().validate(value).error);
+                                    validateURL(value);
                                 },
                                 endAdornment: urlStateEndAdornment,
                             }}
@@ -222,6 +242,10 @@ export default function ProvideOpenAPI(props) {
 
 ProvideOpenAPI.defaultProps = {
     onValidate: () => {},
+};
+ProvideOpenAPI.INPUT_TYPES = {
+    URL: 'url',
+    FILE: 'file',
 };
 ProvideOpenAPI.propTypes = {
     apiInputs: PropTypes.shape({
