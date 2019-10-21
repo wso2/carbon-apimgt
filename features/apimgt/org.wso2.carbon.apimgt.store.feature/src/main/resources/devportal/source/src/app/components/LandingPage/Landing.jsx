@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
+import { app } from 'Settings';
 import Carousel from './Carousel';
 import ApisWithTag from './ApisWithTag';
 import ParallaxScroll from './ParallaxScroll';
@@ -24,7 +25,7 @@ const styles = theme => ({
 function Landing(props) {
     const { classes, theme } = props;
     const content = theme.custom.listByTag;
-    const carouselActive = theme.custom.landingPage.carousel.active;
+    const carouselActive = app.context + theme.custom.landingPage.carousel.active;
     const listByTagActive = theme.custom.landingPage.listByTag.active;
     const parallaxActive = theme.custom.landingPage.parallax.active;
     const listByTagContent = theme.custom.landingPage.listByTag.content;

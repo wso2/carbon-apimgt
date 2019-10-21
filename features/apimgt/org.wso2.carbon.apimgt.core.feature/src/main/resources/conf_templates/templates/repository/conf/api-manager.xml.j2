@@ -436,7 +436,7 @@
         <isStoreForumEnabled>{{apim.devportal.enable_forum}}</isStoreForumEnabled>
 
         <!--This parameter specifies whether Provisioning Out-of-Band OAuth Clients is enabled-->
-        <MapExistingAuthApps>{{apim.devportal.enable_map_auth}}</MapExistingAuthApps>
+        <MapExistingAuthApps>{{apim.devportal.enable_key_provisioning}}</MapExistingAuthApps>
 
         <!--This parameter specifies the alias value of the Api Key which will be used for Api Key Authentication-->
         <ApiKeyAlias>{{apim.devportal.api_key_alias}}</ApiKeyAlias>
@@ -911,6 +911,74 @@
             {% endfor %}
         </ApplicationAttributes>
     </ApplicationConfiguration>
+    {% endif %}
+
+    {% if apim.ai_security is defined %}
+    <AISecurityHandler>
+        {% if apim.ai_security.operation_mode is defined %}
+        <OperationMode>{{apim.ai_security.operation_mode}}</OperationMode>
+        {% endif %}
+        {% if apim.ai_security.apply_for_all is defined %}
+        <ApplyForAllAPIs>{{apim.ai_security.apply_for_all}}</ApplyForAllAPIs>
+        {% endif %}
+        {% if apim.ai_security.cash_expiry_time is defined %}
+        <CacheExpiryTime>{{apim.ai_security.cash_expiry_time}}</CacheExpiryTime>
+        {% endif %}
+        <APISecurityEnforcer>
+            <EndPoint>{{apim.ai_security.sideband_request_endpoint}}</EndPoint>
+            <ASEToken>{{apim.ai_security.ase_token}}</ASEToken>
+            {% if apim.ai_security.model_creation_endpoint is defined %}
+            <ModelCreationEndpoint>
+                <EndPoint>{{apim.ai_security.model_creation_endpoint}}</EndPoint>
+                <AccessKey>{{apim.ai_security.access_key}}</AccessKey>
+                <SecretKey>{{apim.ai_security.secret_key}}</SecretKey>
+            </ModelCreationEndpoint>
+            {% endif %}
+        </APISecurityEnforcer>
+        {% if apim.ai_security.data_publisher is defined %}
+        <DataPublisher>
+            {% if apim.ai_security.data_publisher.max_per_route is defined %}
+            <MaxPerRoute>{{apim.ai_security.data_publisher.max_per_route}}</MaxPerRoute>
+            {% endif %}
+            {% if apim.ai_security.data_publisher.max_open_connections is defined %}
+            <MaxOpenConnections>{{apim.ai_security.data_publisher.max_open_connections}}</MaxOpenConnections>
+            {% endif %}
+            {% if apim.ai_security.data_publisher.connection_timeout is defined %}
+            <ConnectionTimeout>{{apim.ai_security.data_publisher.connection_timeout}}</ConnectionTimeout>
+            {% endif %}
+        </DataPublisher>
+        {% endif %}
+        {% if apim.ai_security.threadpool_executor is defined %}
+        <ThreadPoolExecutor>
+            {% if apim.ai_security.threadpool_executor.core_pool_size is defined %}
+            <CorePoolSize>{{apim.ai_security.threadpool_executor.core_pool_size}}</CorePoolSize>
+            {% endif %}
+            {% if apim.ai_security.threadpool_executor.max_pool_size is defined %}
+            <MaximumPoolSize>{{apim.ai_security.threadpool_executor.max_pool_size}}</MaximumPoolSize>
+            {% endif %}
+            {% if apim.ai_security.threadpool_executor.keep_alive_time is defined %}
+            <KeepAliveTime>{{apim.ai_security.threadpool_executor.keep_alive_time}}</KeepAliveTime>
+            {% endif %}
+        </ThreadPoolExecutor>
+        {% endif %}
+        {% if apim.ai_security.stack_object_pool is defined %}
+        <StackObjectPool>
+            {% if apim.ai_security.stack_object_pool.max_idle is defined %}
+            <MaxIdle>{{apim.ai_security.stack_object_pool.max_idle}}</MaxIdle>
+            {% endif %}
+            {% if apim.ai_security.stack_object_pool.init_idle_capacity is defined %}
+            <InitIdleCapacity>{{apim.ai_security.stack_object_pool.init_idle_capacity}}</InitIdleCapacity>
+            {% endif %}
+        </StackObjectPool>
+        {% endif %}
+        {% if apim.ai_security.limit_transport_headers is defined %}
+        <LimitTransportHeaders>
+            {% for attribute in apim.ai_security.limit_transport_headers %}
+            <Header>{{attribute}}</Header>
+            {% endfor %}
+        </LimitTransportHeaders>
+        {% endif %}
+    </AISecurityHandler>
     {% endif %}
 
 </APIManager>

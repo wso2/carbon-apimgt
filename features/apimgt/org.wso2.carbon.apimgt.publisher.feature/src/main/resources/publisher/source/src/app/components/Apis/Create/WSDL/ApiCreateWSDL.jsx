@@ -109,7 +109,7 @@ export default function ApiCreateWSDL(props) {
     function createAPI() {
         setCreating(true);
         const {
-            name, version, context, endpoint, policies,
+            name, version, context, endpoint, policies, type,
         } = apiInputs;
         const additionalProperties = {
             name,
@@ -119,11 +119,13 @@ export default function ApiCreateWSDL(props) {
         };
         if (endpoint) {
             additionalProperties.endpointConfig = {
-                endpoint_type: 'http',
+                endpoint_type: type === 'SOAPTOREST' ? 'address' : 'http',
                 sandbox_endpoints: {
+                    type: type === 'SOAPTOREST' ? 'address' : undefined,
                     url: endpoint,
                 },
                 production_endpoints: {
+                    type: type === 'SOAPTOREST' ? 'address' : undefined,
                     url: endpoint,
                 },
             };
@@ -174,7 +176,7 @@ export default function ApiCreateWSDL(props) {
             }
         >
             <Box>
-                <Stepper alternativeLabel activeStep={0}>
+                <Stepper alternativeLabel activeStep={wizardStep}>
                     <Step>
                         <StepLabel>Provide WSDL</StepLabel>
                     </Step>

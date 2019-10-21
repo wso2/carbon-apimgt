@@ -35,6 +35,7 @@ import Dropzone from 'react-dropzone';
 import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import APIValidation from 'AppData/APIValidation';
 import SelectEndpoint from 'AppComponents/Apis/Details/Endpoints/GeneralConfiguration/SelectEndpoint';
 import SelectPolicies from '../../../Create/Components/SelectPolicies';
 
@@ -109,12 +110,13 @@ export default function UploadCertificate(props) {
     const [isSaving, setSaving] = useState(false);
     const [certificate, setCertificate] = useState({ name: '', content: {} });
     const [isEndpointEmpty, setIsEndpointEmpty] = useState(false);
-    const [isAliasEmpty, setIsAliasEmpty] = useState(false);
+    const [aliasValidity, setAliasValidity] = useState();
     const classes = useStyles();
     const [isRejected, setIsRejected] = useState(false);
 
     const closeCertificateUpload = () => {
         setUploadCertificateOpen(false);
+        setAliasValidity();
         setCertificate({ name: '', content: '' });
         setAlias('');
         setEndpoint('');
@@ -173,12 +175,30 @@ export default function UploadCertificate(props) {
         }
     };
 
-    const handleAliasOnChange = (value) => {
-        setAlias(value);
-        if (value) {
-            setIsAliasEmpty(false);
+    const handleAliasOnBlur = () => {
+        const aliasValidation = APIValidation.alias.required().validate(alias).error;
+        if (aliasValidation) {
+            setAliasValidity({ isValid: false, message: aliasValidation.details[0].message });
         } else {
-            setIsAliasEmpty(true);
+            setAliasValidity({ isValid: true, message: '' });
+        }
+    };
+
+    const getHelperText = () => {
+        if (aliasValidity && !aliasValidity.isValid) {
+            return (aliasValidity.message);
+        } else if (aliasList && aliasList.includes(alias)) {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias.exist.error'
+                    defaultMessage='Alias already exists'
+                />);
+        } else {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias.default.message'
+                    defaultMessage='Alias for the Certificate'
+                />);
         }
     };
 
@@ -208,7 +228,6 @@ export default function UploadCertificate(props) {
                             <SelectEndpoint
                                 endpoints={endpoints}
                                 onChange={handleEndpointOnChange}
-                                onBlur={handleEndpointOnChange}
                                 endpoint={endpoint}
                                 isEndpointEmpty={isEndpointEmpty}
                                 required
@@ -225,22 +244,14 @@ export default function UploadCertificate(props) {
                             }
                             value={alias}
                             placeholder='My Alias'
-                            onChange={event => handleAliasOnChange(event.target.value)}
-                            onBlur={event => handleAliasOnChange(event.target.value)}
+                            onChange={event => setAlias(event.target.value)}
+                            onBlur={() => handleAliasOnBlur()}
                             margin='normal'
                             variant='outlined'
-                            error={isAliasEmpty || (aliasList && aliasList.includes(alias))}
-                            helperText={isAliasEmpty ? <FormattedMessage
-                                id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias.error'
-                                defaultMessage='Alias should not be empty'
-                            /> : iff(aliasList && aliasList.includes(alias), <FormattedMessage
-                                id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint.error'
-                                defaultMessage='Alias already exists'
-                            />, <FormattedMessage
-                                id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias.helpertext'
-                                defaultMessage='Alias for the certificate'
-                            />)
+                            error={
+                                (aliasValidity && !aliasValidity.isValid) || (aliasList && aliasList.includes(alias))
                             }
+                            helperText={getHelperText()}
                             fullWidth
                             inputProps={{ maxLength: 45 }}
                         />
@@ -256,7 +267,7 @@ export default function UploadCertificate(props) {
                                     'application/x-pkcs12,' +
                                     'application/x-pkcs7-certificates,' +
                                     'application/x-pkcs7-certreqresp,' +
-                                    '.p8, .p10, .csr, .cer, .crl, .p7c, .crt, .der, .p12, .pfx, .p7b, .spc, .p7r'
+                                    '.p8, .p10, .cer, .cert, .p7c, .crt, .der, .p12, .pfx, .p7b, .spc, .p7r'
                             }
                             className={classes.dropzone}
                             activeClassName={classes.acceptDrop}
@@ -309,7 +320,9 @@ export default function UploadCertificate(props) {
                                             <div className={classes.uploadedFile}>
                                                 <InsertDriveFileIcon color='primary' fontSize='large' />
                                                 <Box fontSize='h6.fontSize' fontWeight='fontWeightLight'>
-                                                    {certificate.name}
+                                                    <Typography>
+                                                        {certificate.name}
+                                                    </Typography>
                                                 </Box>
                                             </div>,
                                         )}
@@ -333,7 +346,7 @@ export default function UploadCertificate(props) {
                     color='primary'
                     autoFocus
                     disabled={
-                        alias === '' ||
+                        alias === '' || (aliasValidity && !aliasValidity.isValid) ||
                             (!isMutualSSLEnabled && endpoint === '') ||
                             certificate.name === '' ||
                             (isMutualSSLEnabled && policy === '') ||

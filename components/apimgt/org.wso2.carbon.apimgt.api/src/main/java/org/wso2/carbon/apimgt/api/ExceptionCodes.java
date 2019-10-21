@@ -73,6 +73,9 @@ public enum ExceptionCodes implements ErrorHandler {
     NO_READ_PERMISSIONS(900340, "No permissions to read API.", 403, "No permissions to read API."),
     API_PRODUCT_DUPLICATE_RESOURCE(900341, "Cannot create API Product with duplicate resource",
             400, "Cannot create API Product with duplicate resource: %s , verb: %s combination"),
+    API_PRODUCT_RESOURCE_ENDPOINT_UNDEFINED(900342,
+            "Cannot create API Product, due to resources with undefined endpoints in their parent APIs",
+            409, "Cannot create API Product %s, due to resources with undefined endpoints in their parent APIs %s"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
@@ -183,6 +186,7 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_OAS2_FOUND(900761, "Invalid OpenAPI V2 definition found", 400, "Invalid OpenAPI V2 definition found"),
     INVALID_OAS3_FOUND(900762, "Invalid OpenAPI V3 definition found", 400, "Invalid OpenAPI V3 definition found"),
     NO_RESOURCES_FOUND(900763, "No resources found", 404, "API must have at least one resource defined"),
+    ERROR_REMOVING_EXAMPLES(900764, "Internal Error While Processing Swagger Definition", 500, "Couldn't remove one or more examples from the swagger definition"),
 
 
     // REST API related codes

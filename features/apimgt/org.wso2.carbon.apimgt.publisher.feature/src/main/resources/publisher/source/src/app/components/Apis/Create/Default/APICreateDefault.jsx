@@ -144,6 +144,7 @@ function APICreateDefault(props) {
                         Alert.error(message);
                         setPageError(message);
                     }
+                    console.error(error);
                 });
         } else {
             const newAPI = new API(apiData);

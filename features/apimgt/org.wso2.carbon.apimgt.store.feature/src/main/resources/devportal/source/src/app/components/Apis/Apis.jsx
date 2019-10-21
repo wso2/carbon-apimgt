@@ -35,7 +35,7 @@ function Apis() {
         <Switch>
             <Route
                 exact
-                path='/apiGroups'
+                path='/api-groups'
                 render={props => (
                     <TagCloudListing {...props} apiType={CONSTS.API_TYPE} />)}
             />

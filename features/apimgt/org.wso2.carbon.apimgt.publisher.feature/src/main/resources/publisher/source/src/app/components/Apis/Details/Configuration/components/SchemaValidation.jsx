@@ -179,7 +179,7 @@ class SchemaValidation extends React.Component {
                                     id='Apis.Details.Configuration.components.SchemaValidation.description'
                                     defaultMessage={
                                         'Enabling JSON schema validation will cause to build the' +
-                                        ' payload in every requests and responses. This will have an impact ' +
+                                        ' payload in every request and response. This will have an impact ' +
                                         'on the round trip time of an API request!'
                                     }
                                 />

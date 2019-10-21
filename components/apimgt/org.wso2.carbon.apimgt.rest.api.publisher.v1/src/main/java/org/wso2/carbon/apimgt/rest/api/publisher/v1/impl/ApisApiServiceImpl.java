@@ -691,7 +691,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
                 SwaggerData swaggerData = new SwaggerData(apiToUpdate);
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
-                apiProvider.saveSwagger20Definition(apiToUpdate.getId(), newDefinition);
+                apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition);
             }
 
             apiProvider.manageAPI(apiToUpdate);
@@ -762,11 +762,11 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Finds resources that have been removed in the updated API URITemplates,
      * that are currently reused by API Products.
      *
-     * @param updateUriTemplates Updated URITemplates
+     * @param updatedUriTemplates Updated URITemplates
      * @param existingAPI Existing API
      * @return List of removed resources that are reused among API Products
      */
-    private List<APIResource> getRemovedProductResources(Set<URITemplate> updateUriTemplates, API existingAPI) {
+    private List<APIResource> getRemovedProductResources(Set<URITemplate> updatedUriTemplates, API existingAPI) {
         Set<URITemplate> existingUriTemplates = existingAPI.getUriTemplates();
         List<APIResource> removedReusedResources = new ArrayList<>();
 
@@ -778,7 +778,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String existingPath = existingUriTemplate.getUriTemplate();
                 boolean isReusedResourceRemoved = true;
 
-                for (URITemplate updatedUriTemplate : updateUriTemplates) {
+                for (URITemplate updatedUriTemplate : updatedUriTemplates) {
                     String updatedVerb = updatedUriTemplate.getHTTPVerb();
                     String updatedPath = updatedUriTemplate.getUriTemplate();
 
@@ -2189,7 +2189,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             HashMap monetizationDataMap = new Gson().fromJson(api.getMonetizationProperties().toString(), HashMap.class);
             boolean isMonetizationStateChangeSuccessful = false;
             if (MapUtils.isEmpty(monetizationDataMap)) {
-                String errorMessage = "Monetization is not configured. Monetization data is empty for API ID " + apiId;
+                String errorMessage = "Monetization is not configured. Monetization data is empty for "
+                        + apiIdentifier.getApiName();
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
             try {
@@ -3692,17 +3693,20 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException throw if validation failure
      */
     private void validateScopes(API api) throws APIManagementException {
+
         APIIdentifier apiId = api.getId();
+        String username = RestApiUtil.getLoggedInUsername();
+
         for (Scope scope : api.getScopes()) {
             if (!(APIUtil.isWhiteListedScope(scope.getName()))) {
-                String username = RestApiUtil.getLoggedInUsername();
                 String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
                 int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
                 APIProvider apiProvider = RestApiUtil.getProvider(username);
 
                 if (apiProvider.isScopeKeyAssigned(apiId, scope.getName(), tenantId)) {
                     RestApiUtil
-                            .handleBadRequest("Scope " + scope.getName() + " is already assigned by another API", log);
+                            .handleBadRequest("Scope " + scope.getName() + " is already assigned by another API",
+                                    log);
                 }
             }
             //set description as empty if it is not provided
@@ -3711,7 +3715,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             if (scope.getRoles() != null) {
                 for (String aRole : scope.getRoles().split(",")) {
-                    boolean isValidRole = APIUtil.isRoleNameExist(apiId.getProviderName(), aRole);
+                    boolean isValidRole = APIUtil.isRoleNameExist(username, aRole);
                     if (!isValidRole) {
                         String error = "Role '" + aRole + "' does not exist.";
                         RestApiUtil.handleBadRequest(error, log);

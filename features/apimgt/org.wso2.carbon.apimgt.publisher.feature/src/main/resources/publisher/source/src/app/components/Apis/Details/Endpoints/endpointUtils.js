@@ -90,7 +90,7 @@ function getEndpointTemplateByType(endpointType, isAddressEndpoint, currentEndpo
         }
         tmpEndpointConfig.failOver = 'False';
     } else {
-        tmpEndpointConfig.endpoint_type = isAddressEndpoint === true ? 'address' : endpointType;
+        tmpEndpointConfig.endpoint_type = isAddressEndpoint === true ? 'address' : 'http';
         tmpEndpointConfig.production_endpoints = Array.isArray(currentEndpointConfig.production_endpoints) ?
             currentEndpointConfig.production_endpoints[0] : currentEndpointConfig.production_endpoints;
         tmpEndpointConfig.sandbox_endpoints =

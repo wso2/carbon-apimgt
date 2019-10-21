@@ -42,6 +42,7 @@ function EndpointSecurity(props) {
         username: '',
         password: '',
     });
+    const [securityValidity, setSecurityValidity] = useState();
 
     const authTypes = [
         {
@@ -69,6 +70,14 @@ function EndpointSecurity(props) {
         setEndpointSecurityInfo(tmpSecurity);
     }, [props]);
 
+    const validateAndUpdateSecurityInfo = (field) => {
+        if (!endpointSecurityInfo[field]) {
+            setSecurityValidity({ ...securityValidity, [field]: false });
+        } else {
+            setSecurityValidity({ ...securityValidity, [field]: true });
+        }
+        onChangeEndpointAuth(endpointSecurityInfo[field], field);
+    };
     return (
         <Grid container direction='column' spacing={2}>
             <Grid item xs={6}>
@@ -96,6 +105,15 @@ function EndpointSecurity(props) {
                     disabled={isRestricted(['apim:api_create'], api)}
                     required
                     fullWidth
+                    error={securityValidity && securityValidity.username === false}
+                    helperText={securityValidity && securityValidity.username === false ?
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.no.username.error'
+                            defaultMessage='Username should not be empty'
+                        /> : <FormattedMessage
+                            id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.username.message'
+                            defaultMessage='Enter Username'
+                        />}
                     variant='outlined'
                     id='auth-userName'
                     label={(
@@ -107,7 +125,7 @@ function EndpointSecurity(props) {
                     onChange={
                         event => setEndpointSecurityInfo({ ...endpointSecurityInfo, username: event.target.value })}
                     value={endpointSecurityInfo.username}
-                    onBlur={(event) => { onChangeEndpointAuth(event, 'username'); }}
+                    onBlur={() => validateAndUpdateSecurityInfo('username')}
                 />
             </Grid>
             <Grid item xs={6}>
@@ -115,6 +133,15 @@ function EndpointSecurity(props) {
                     disabled={isRestricted(['apim:api_create'], api)}
                     required
                     fullWidth
+                    error={securityValidity && securityValidity.password === false}
+                    helperText={securityValidity && securityValidity.password === false ?
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.no.password.error'
+                            defaultMessage='Password should not be empty'
+                        /> : <FormattedMessage
+                            id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.password.message'
+                            defaultMessage='Enter Password'
+                        />}
                     variant='outlined'
                     type='password'
                     id='auth-password'
@@ -127,7 +154,7 @@ function EndpointSecurity(props) {
                     value={endpointSecurityInfo.password}
                     onChange={
                         event => setEndpointSecurityInfo({ ...endpointSecurityInfo, password: event.target.value })}
-                    onBlur={(event) => { onChangeEndpointAuth(event, 'password'); }}
+                    onBlur={() => validateAndUpdateSecurityInfo('password')}
                 />
             </Grid>
         </Grid>

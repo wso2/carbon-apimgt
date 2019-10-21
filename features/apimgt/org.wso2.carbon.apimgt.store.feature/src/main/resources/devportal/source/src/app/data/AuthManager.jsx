@@ -19,7 +19,7 @@
 
 import axios from 'axios';
 import qs from 'qs';
-import Configurations from 'Config';
+import Settings from 'Settings';
 import Utils from './Utils';
 import User from './User';
 import APIClient from './APIClient';
@@ -109,7 +109,10 @@ class AuthManager {
         if (!partialToken) {
             return new Promise((resolve, reject) => reject(new Error('No partial token found')));
         }
-        const promisedResponse = fetch('/devportal/services/auth/introspect', { credentials: 'same-origin' });
+        const promisedResponse = fetch(
+            Settings.app.context + '/services/auth/introspect',
+            { credentials: 'same-origin' },
+        );
         return promisedResponse
             .then(response => response.json())
             .then((data) => {
@@ -226,7 +229,7 @@ class AuthManager {
                 const validityPeriod = response.data.validityPeriod; // In seconds
                 const WSO2_AM_TOKEN_1 = response.data.partialToken;
                 const user = new User(Utils.getEnvironment().label, response.data.authUser, response.data.idToken);
-                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Configurations.app.context);
+                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Settings.app.context);
                 user.scopes = response.data.scopes.split(' ');
                 AuthManager.setUser(user);
             })
@@ -251,7 +254,7 @@ class AuthManager {
         };
         const promisedLogout = axios.post(url, null, { headers });
         return promisedLogout.then((response) => {
-            Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Configurations.app.context);
+            Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Settings.app.context);
             localStorage.removeItem(User.CONST.LOCALSTORAGE_USER);
             new APIClientFactory().destroyAPIClient(Utils.getEnvironment().label); // Single client should be re initialize after log out
         });
@@ -269,7 +272,7 @@ class AuthManager {
             scopes: AuthManager.CONST.USER_SCOPES,
         };
         const referrer = document.referrer.indexOf('https') !== -1 ? document.referrer : null;
-        const url = Configurations.app.context + environment.refreshTokenPath;
+        const url = Settings.app.context + environment.refreshTokenPath;
         const headers = {
             Accept: 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -309,7 +312,7 @@ class AuthManager {
                 const validityPeriod = response.data.validityPeriod;
                 const WSO2_AM_TOKEN_1 = response.data.partialToken;
                 const user = new User(Utils.getEnvironment().label, response.data.authUser, response.data.idToken);
-                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Configurations.app.context);
+                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Settings.app.context);
                 user.scopes = response.data.scopes;
                 AuthManager.setUser(user);
             })

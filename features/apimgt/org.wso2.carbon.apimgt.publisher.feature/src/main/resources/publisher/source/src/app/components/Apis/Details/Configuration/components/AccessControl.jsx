@@ -132,7 +132,7 @@ export default function AccessControl(props) {
 
     return (
         <React.Fragment>
-            <Box style={{ position: 'relative' }} >
+            <Box style={{ position: 'relative', marginBottom: -12 }} >
                 <TextField
                     fullWidth
                     id='accessControl-selector'
@@ -140,7 +140,7 @@ export default function AccessControl(props) {
                     label={
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.AccessControl.head.topic'
-                            defaultMessage='Access control'
+                            defaultMessage='Publisher Access Control'
                         />
                     }
                     value={api.accessControl}
@@ -154,7 +154,7 @@ export default function AccessControl(props) {
                     helperText={
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.AccessControl.form.helper.text'
-                            defaultMessage='By default there is no access restrictions'
+                            defaultMessage='By default there are no access restrictions'
                         />
                     }
                     margin='normal'
@@ -207,7 +207,7 @@ export default function AccessControl(props) {
                             </p>
                         </React.Fragment>
                     )}
-                    aria-label='Access control'
+                    aria-label='Publisher Access Control'
                     placement='right-end'
                     interactive
                     className={classes.tooltip}
@@ -216,7 +216,7 @@ export default function AccessControl(props) {
                 </Tooltip>
             </Box>
             {!isNone && (
-                <Box py={2}>
+                <Box py={1} style={{ marginTop: 10 }}>
                     <ChipInput
                         fullWidth
                         variant='outlined'

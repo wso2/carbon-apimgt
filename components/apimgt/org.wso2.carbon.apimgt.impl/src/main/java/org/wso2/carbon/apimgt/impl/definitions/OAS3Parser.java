@@ -82,7 +82,7 @@ import java.util.Set;
  */
 public class OAS3Parser extends APIDefinition {
     private static final Log log = LogFactory.getLog(OAS3Parser.class);
-    private static final String OPENAPI_SECURITY_SCHEMA_KEY = "default";
+    static final String OPENAPI_SECURITY_SCHEMA_KEY = "default";
 
     /**
      * This method returns URI templates according to the given swagger file
@@ -465,9 +465,35 @@ public class OAS3Parser extends APIDefinition {
     @Override
     public String getOASDefinitionForPublisher(API api, String oasDefinition) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(oasDefinition);
+        if (openAPI.getComponents() == null) {
+            openAPI.setComponents(new Components());
+        }
+        Map<String, SecurityScheme> securitySchemes = openAPI.getComponents().getSecuritySchemes();
+        if (securitySchemes == null) {
+            securitySchemes = new HashMap<>();
+            openAPI.getComponents().setSecuritySchemes(securitySchemes);
+        }
+        SecurityScheme securityScheme = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY);
+        if (securityScheme == null) {
+            securityScheme = new SecurityScheme();
+            securityScheme.setType(SecurityScheme.Type.OAUTH2);
+            securitySchemes.put(OPENAPI_SECURITY_SCHEMA_KEY, securityScheme);
+            List<SecurityRequirement> security = new ArrayList<SecurityRequirement>();
+            SecurityRequirement secReq = new SecurityRequirement();
+            secReq.addList(OPENAPI_SECURITY_SCHEMA_KEY, new ArrayList<String>());
+            security.add(secReq);
+            openAPI.setSecurity(security);
+        }
+        if (securityScheme.getFlows() == null) {
+            securityScheme.setFlows(new OAuthFlows());
+        }
         // setting scopes id if it is null
         // https://github.com/swagger-api/swagger-parser/issues/1202
-        OAuthFlow oAuthFlow = openAPI.getComponents().getSecuritySchemes().get("default").getFlows().getImplicit();
+        OAuthFlow oAuthFlow = securityScheme.getFlows().getImplicit();
+        if (oAuthFlow == null) {
+            oAuthFlow = new OAuthFlow();
+            securityScheme.getFlows().setImplicit(oAuthFlow);
+        }
         if (oAuthFlow.getScopes() == null) {
             oAuthFlow.setScopes(new Scopes());
         }
@@ -888,9 +914,8 @@ public class OAS3Parser extends APIDefinition {
      *
      * @param oasDefinition OAS definition
      * @return OpenAPI
-     * @throws APIManagementException
      */
-    private OpenAPI getOpenAPI(String oasDefinition) throws APIManagementException {
+    OpenAPI getOpenAPI(String oasDefinition) {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(oasDefinition, null, null);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {

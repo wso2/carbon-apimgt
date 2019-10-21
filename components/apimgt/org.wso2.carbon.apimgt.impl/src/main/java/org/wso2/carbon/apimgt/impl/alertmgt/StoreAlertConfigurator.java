@@ -54,7 +54,6 @@ public class StoreAlertConfigurator extends AlertConfigurator {
         if (log.isDebugEnabled()) {
             log.debug("Persisting subscribing alert types in database.");
         }
-        apiMgtDAO.addAlertTypesConfigInfo(userName, emails, alertTypesMap.get("ids"), AlertMgtConstants.STORE_AGENT);
 
         String query =
                 "select '" + userName + "' as userId, '" + alertTypesMap.get("names") + "' as alertTypes, '" + emails
@@ -68,7 +67,9 @@ public class StoreAlertConfigurator extends AlertConfigurator {
                         + "ApimAlertStakeholderInfo.isAdmin = isAdmin on "
                         + "ApimAlertStakeholderInfo.userId == userId and "
                         + "ApimAlertStakeholderInfo.isSubscriber == isSubscriber";
+
         APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_ALERT_STAKEHOLDER_APP, query);
+        apiMgtDAO.addAlertTypesConfigInfo(userName, emails, alertTypesMap.get("ids"), AlertMgtConstants.STORE_AGENT);
     }
 
     @Override

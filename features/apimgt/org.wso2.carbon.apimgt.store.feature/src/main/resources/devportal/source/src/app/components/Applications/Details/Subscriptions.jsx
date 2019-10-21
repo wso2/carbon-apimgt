@@ -36,6 +36,7 @@ import APIList from 'AppComponents/Apis/Listing/APICardView';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Subscription from 'AppData/Subscription';
 import Api from 'AppData/api';
+import { app } from 'Settings';
 import SubscriptionTableData from './SubscriptionTableData';
 
 /**
@@ -244,10 +245,18 @@ class Subscriptions extends React.Component {
                         defaultMessage: 'Error occurred during subscription',
                     }));
                 } else {
-                    Alert.info(intl.formatMessage({
-                        id: 'Applications.Details.Subscriptions.subscription.successful',
-                        defaultMessage: 'Subscription successful',
-                    }));
+                    if (response.body.status === 'ON_HOLD') {
+                        Alert.info(intl.formatMessage({
+                            defaultMessage: 'Your subscription request has been submitted and is now awaiting ' +
+                            'approval.',
+                            id: 'subscription.pending',
+                        }));
+                    } else {
+                        Alert.info(intl.formatMessage({
+                            id: 'Applications.Details.Subscriptions.subscription.successful',
+                            defaultMessage: 'Subscription successful',
+                        }));
+                    }
                     this.updateSubscriptions(applicationId);
                 }
             })
@@ -271,7 +280,7 @@ class Subscriptions extends React.Component {
         const { isAuthorize } = this.state;
 
         if (!isAuthorize) {
-            window.location = '/devportal/services/configs';
+            window.location = app.context + '/services/configs';
         }
 
         const {

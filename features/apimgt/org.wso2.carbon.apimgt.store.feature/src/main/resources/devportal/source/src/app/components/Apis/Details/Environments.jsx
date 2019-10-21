@@ -74,32 +74,35 @@ const styles = theme => ({
             boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
         },
     },
+    iconStyle: {
+        cursor: 'grab',
+    },
 });
 
+/**
+ *  @inheritdoc
+ */
 class Environments extends React.Component {
     constructor(props) {
         super(props);
         this.apiClient = new API();
         this.state = {
-            prodUrlCopied: false,
-            epUrl: '',
+            urlCopied: false,
         };
         this.downloadWSDL = this.downloadWSDL.bind(this);
+        this.onCopy = this.onCopy.bind(this);
     }
 
-    onCopy = name => () => {
+    onCopy = (name) => {
         this.setState({
             [name]: true,
         });
         const that = this;
-        const elementName = name;
         const caller = function () {
-            that.setState({
-                [elementName]: false,
-            });
+            that.setState({ urlCopied: false });
         };
-        setTimeout(caller, 4000);
-    };
+        setTimeout(caller, 2000);
+    }
 
     /**
      * Downloads the WSDL of the api for the provided environment
@@ -147,10 +150,14 @@ class Environments extends React.Component {
             });
     }
 
+    /**
+     *  @inheritdoc
+     */
     render() {
         const { api } = this.context;
-        const { classes } = this.props;
-        const { prodUrlCopied, epUrl } = this.state;
+        const { classes, intl } = this.props;
+        const { urlCopied } = this.state;
+
 
         return (
             <Grid container spacing={2} item xs={12}>
@@ -186,13 +193,13 @@ class Environments extends React.Component {
                                             || endpoint.URLs.https !== null
                                             || endpoint.URLs.ws !== null
                                             || endpoint.URLs.wss !== null) && (
-                                                <Typography className={classes.heading}>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.InfoBar.gateway.urls'
-                                                        defaultMessage='Gateway URLs'
-                                                    />
-                                                </Typography>
-                                            )}
+                                            <Typography className={classes.heading}>
+                                                <FormattedMessage
+                                                    id='Apis.Details.InfoBar.gateway.urls'
+                                                    defaultMessage='Gateway URLs'
+                                                />
+                                            </Typography>
+                                        )}
                                         {endpoint.URLs.http !== null && (
                                             <Grid item xs={12}>
                                                 <TextField
@@ -212,12 +219,23 @@ class Environments extends React.Component {
                                                     }}
                                                 />
                                                 <Tooltip
-                                                    title={prodUrlCopied ? 'Copied' : 'Copy to clipboard'}
+                                                    title={
+                                                        urlCopied
+                                                            ? intl.formatMessage({
+                                                                defaultMessage: 'Copied',
+                                                                id: 'Apis.Details.Environments.copied',
+                                                            })
+                                                            : intl.formatMessage({
+                                                                defaultMessage: 'Copy to clipboard',
+                                                                id: 'Apis.Details.Environments.copy.to.clipboard',
+                                                            })
+                                                    }
                                                     placement='right'
+                                                    className={classes.iconStyle}
                                                 >
                                                     <CopyToClipboard
-                                                        text={epUrl}
-                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                        text={endpoint.URLs.http}
+                                                        onCopy={() => this.onCopy('urlCopied')}
                                                     >
                                                         <Icon color='secondary'>insert_drive_file</Icon>
                                                     </CopyToClipboard>
@@ -243,12 +261,23 @@ class Environments extends React.Component {
                                                     }}
                                                 />
                                                 <Tooltip
-                                                    title={prodUrlCopied ? 'Copied' : 'Copy to clipboard'}
+                                                    title={
+                                                        urlCopied
+                                                            ? intl.formatMessage({
+                                                                defaultMessage: 'Copied',
+                                                                id: 'Apis.Details.Environments.copied',
+                                                            })
+                                                            : intl.formatMessage({
+                                                                defaultMessage: 'Copy to clipboard',
+                                                                id: 'Apis.Details.Environments.copy.to.clipboard',
+                                                            })
+                                                    }
                                                     placement='right'
+                                                    className={classes.iconStyle}
                                                 >
                                                     <CopyToClipboard
-                                                        text={epUrl}
-                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                        text={endpoint.URLs.https}
+                                                        onCopy={() => this.onCopy('urlCopied')}
                                                     >
                                                         <Icon color='secondary'>insert_drive_file</Icon>
                                                     </CopyToClipboard>
@@ -274,12 +303,23 @@ class Environments extends React.Component {
                                                     }}
                                                 />
                                                 <Tooltip
-                                                    title={prodUrlCopied ? 'Copied' : 'Copy to clipboard'}
+                                                    title={
+                                                        urlCopied
+                                                            ? intl.formatMessage({
+                                                                defaultMessage: 'Copied',
+                                                                id: 'Apis.Details.Environments.copied',
+                                                            })
+                                                            : intl.formatMessage({
+                                                                defaultMessage: 'Copy to clipboard',
+                                                                id: 'Apis.Details.Environments.copy.to.clipboard',
+                                                            })
+                                                    }
                                                     placement='right'
+                                                    className={classes.iconStyle}
                                                 >
                                                     <CopyToClipboard
-                                                        text={epUrl}
-                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                        text={endpoint.URLs.ws}
+                                                        onCopy={() => this.onCopy('urlCopied')}
                                                     >
                                                         <Icon color='secondary'>insert_drive_file</Icon>
                                                     </CopyToClipboard>
@@ -305,12 +345,23 @@ class Environments extends React.Component {
                                                     }}
                                                 />
                                                 <Tooltip
-                                                    title={prodUrlCopied ? 'Copied' : 'Copy to clipboard'}
+                                                    title={
+                                                        urlCopied
+                                                            ? intl.formatMessage({
+                                                                defaultMessage: 'Copied',
+                                                                id: 'Apis.Details.Environments.copied',
+                                                            })
+                                                            : intl.formatMessage({
+                                                                defaultMessage: 'Copy to clipboard',
+                                                                id: 'Apis.Details.Environments.copy.to.clipboard',
+                                                            })
+                                                    }
                                                     placement='right'
+                                                    className={classes.iconStyle}
                                                 >
                                                     <CopyToClipboard
-                                                        text={epUrl}
-                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                        text={endpoint.URLs.wss}
+                                                        onCopy={() => this.onCopy('urlCopied')}
                                                     >
                                                         <Icon color='secondary'>insert_drive_file</Icon>
                                                     </CopyToClipboard>
@@ -318,16 +369,16 @@ class Environments extends React.Component {
                                             </Grid>
                                         )}
                                         {endpoint.defaultVersionURLs !== null &&
-                                            (endpoint.defaultVersionURLs.http !== null
-                                            || endpoint.defaultVersionURLs.https !== null
-                                            || endpoint.defaultVersionURLs.ws !== null
-                                            || endpoint.defaultVersionURLs.wss !== null) && (
+                                            (endpoint.defaultVersionURLs.http !== null ||
+                                                endpoint.defaultVersionURLs.https !== null ||
+                                                endpoint.defaultVersionURLs.ws !== null ||
+                                                endpoint.defaultVersionURLs.wss !== null) && (
                                             <Typography className={classes.heading}>
-                                                <FormattedMessage
+                                                    <FormattedMessage
                                                     id='Apis.Details.InfoBar.default.gateway.urls'
                                                     defaultMessage='Default Gateway URLs'
                                                 />
-                                            </Typography>
+                                                </Typography>
                                         )}
                                         {endpoint.defaultVersionURLs !== null &&
                                             endpoint.defaultVersionURLs.http !== null && (
@@ -349,14 +400,25 @@ class Environments extends React.Component {
                                                     }}
                                                 />
                                                 <Tooltip
-                                                    title={prodUrlCopied ? 'Copied' : 'Copy to clipboard'}
+                                                    title={
+                                                        urlCopied
+                                                            ? intl.formatMessage({
+                                                                defaultMessage: 'Copied',
+                                                                id: 'Apis.Details.Environments.copied',
+                                                            })
+                                                            : intl.formatMessage({
+                                                                defaultMessage: 'Copy to clipboard',
+                                                                id: 'Apis.Details.Environments.copy.to.clipboard',
+                                                            })
+                                                    }
                                                     placement='right'
+                                                    className={classes.iconStyle}
                                                 >
                                                     <CopyToClipboard
-                                                        text={epUrl}
-                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                        text={endpoint.defaultVersionURLs.http}
+                                                        onCopy={() => this.onCopy('urlCopied')}
                                                     >
-                                                        <Icon color='secondary'>insert_drive_file</Icon>
+                                                        <Icon color='secondary'>file_copy</Icon>
                                                     </CopyToClipboard>
                                                 </Tooltip>
                                             </Grid>
@@ -381,14 +443,25 @@ class Environments extends React.Component {
                                                     }}
                                                 />
                                                 <Tooltip
-                                                    title={prodUrlCopied ? 'Copied' : 'Copy to clipboard'}
+                                                    title={
+                                                        urlCopied
+                                                            ? intl.formatMessage({
+                                                                defaultMessage: 'Copied',
+                                                                id: 'Apis.Details.Environments.copied',
+                                                            })
+                                                            : intl.formatMessage({
+                                                                defaultMessage: 'Copy to clipboard',
+                                                                id: 'Apis.Details.Environments.copy.to.clipboard',
+                                                            })
+                                                    }
                                                     placement='right'
+                                                    className={classes.iconStyle}
                                                 >
                                                     <CopyToClipboard
-                                                        text={epUrl}
-                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                        text={endpoint.defaultVersionURLs.https}
+                                                        onCopy={() => this.onCopy('urlCopied')}
                                                     >
-                                                        <Icon color='secondary'>insert_drive_file</Icon>
+                                                        <Icon color='secondary'>file_copy</Icon>
                                                     </CopyToClipboard>
                                                 </Tooltip>
                                             </Grid>
@@ -413,14 +486,25 @@ class Environments extends React.Component {
                                                     }}
                                                 />
                                                 <Tooltip
-                                                    title={prodUrlCopied ? 'Copied' : 'Copy to clipboard'}
+                                                    title={
+                                                        urlCopied
+                                                            ? intl.formatMessage({
+                                                                defaultMessage: 'Copied',
+                                                                id: 'Apis.Details.Environments.copied',
+                                                            })
+                                                            : intl.formatMessage({
+                                                                defaultMessage: 'Copy to clipboard',
+                                                                id: 'Apis.Details.Environments.copy.to.clipboard',
+                                                            })
+                                                    }
                                                     placement='right'
+                                                    className={classes.iconStyle}
                                                 >
                                                     <CopyToClipboard
-                                                        text={epUrl}
-                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                        text={endpoint.defaultVersionURLs.ws}
+                                                        onCopy={() => this.onCopy('urlCopied')}
                                                     >
-                                                        <Icon color='secondary'>insert_drive_file</Icon>
+                                                        <Icon color='secondary'>file_copy</Icon>
                                                     </CopyToClipboard>
                                                 </Tooltip>
                                             </Grid>
@@ -445,14 +529,25 @@ class Environments extends React.Component {
                                                     }}
                                                 />
                                                 <Tooltip
-                                                    title={prodUrlCopied ? 'Copied' : 'Copy to clipboard'}
+                                                    title={
+                                                        urlCopied
+                                                            ? intl.formatMessage({
+                                                                defaultMessage: 'Copied',
+                                                                id: 'Apis.Details.Environments.copied',
+                                                            })
+                                                            : intl.formatMessage({
+                                                                defaultMessage: 'Copy to clipboard',
+                                                                id: 'Apis.Details.Environments.copy.to.clipboard',
+                                                            })
+                                                    }
                                                     placement='right'
+                                                    className={classes.iconStyle}
                                                 >
                                                     <CopyToClipboard
-                                                        text={epUrl}
-                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                        text={endpoint.defaultVersionURLs.wss}
+                                                        onCopy={() => this.onCopy('urlCopied')}
                                                     >
-                                                        <Icon color='secondary'>insert_drive_file</Icon>
+                                                        <Icon color='secondary'>file_copy</Icon>
                                                     </CopyToClipboard>
                                                 </Tooltip>
                                             </Grid>
@@ -460,9 +555,7 @@ class Environments extends React.Component {
                                         {api.type === 'SOAP' && (
                                             <Button
                                                 size='small'
-                                                onClick={
-                                                    () => this.downloadWSDL(api.id, endpoint.environmentName)
-                                                }
+                                                onClick={() => this.downloadWSDL(api.id, endpoint.environmentName)}
                                             >
                                                 <CloudDownloadRounded className={classes.buttonIcon} />
                                                 <FormattedMessage
@@ -474,9 +567,7 @@ class Environments extends React.Component {
                                         {(api.type === 'HTTP' || api.type === 'SOAPTOREST') && (
                                             <Button
                                                 size='small'
-                                                onClick={
-                                                    () => this.downloadSwagger(api.id, endpoint.environmentName)
-                                                }
+                                                onClick={() => this.downloadSwagger(api.id, endpoint.environmentName)}
                                             >
                                                 <CloudDownloadRounded className={classes.buttonIcon} />
                                                 <FormattedMessage

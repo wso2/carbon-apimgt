@@ -1,7 +1,7 @@
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { PageNotFound } from 'AppComponents/Base/Errors/';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 // import PermissionFormWrapper from '../Permissions/Permission';
 
 /**
@@ -26,7 +26,7 @@ const APIDetailsRoutes = ({ api, apiDetailPages }) => {
                     render={routeProps => <PageComponent api={api} {...routeProps} />}
                 />
             ))}
-            <Route component={PageNotFound} />
+            <Route component={ResourceNotFound} />
         </Switch>
     );
 };

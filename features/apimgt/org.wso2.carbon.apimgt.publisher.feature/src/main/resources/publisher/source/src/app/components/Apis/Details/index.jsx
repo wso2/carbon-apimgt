@@ -50,7 +50,7 @@ import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import AppContext from 'AppComponents/Shared/AppContext';
 import LastUpdatedTime from 'AppComponents/Apis/Details/components/LastUpdatedTime';
 import Overview from './NewOverview/Overview';
-import Configuration from './Configuration/Configuration';
+import DesignConfigurations from './Configuration/DesignConfigurations';
 import RuntimeConfiguration from './Configuration/RuntimeConfiguration';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
@@ -576,7 +576,7 @@ class Details extends Component {
                             to={pathPrefix + 'documents'}
                             Icon={<DocumentsIcon />}
                         />
-                        {!isAPIProduct && !api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
+                        { !api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.monetization',
@@ -624,7 +624,7 @@ class Details extends Component {
                                 <Route path={Details.subPaths.LIFE_CYCLE} component={() => <LifeCycle api={api} />} />
                                 <Route
                                     path={Details.subPaths.CONFIGURATION}
-                                    component={() => <Configuration api={api} />}
+                                    component={() => <DesignConfigurations api={api} />}
                                 />
                                 <Route
                                     path={Details.subPaths.RUNTIME_CONFIGURATION}
@@ -632,7 +632,7 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.CONFIGURATION_PRODUCT}
-                                    component={() => <Configuration api={api} />}
+                                    component={() => <DesignConfigurations api={api} />}
                                 />
                                 <Route
                                     path={Details.subPaths.RUNTIME_CONFIGURATION_PRODUCT}
@@ -698,6 +698,10 @@ class Details extends Component {
                                     path={Details.subPaths.MONETIZATION}
                                     component={() => <Monetization api={api} />}
                                 />
+                                <Route
+                                    path={Details.subPaths.MONETIZATION_PRODUCT}
+                                    component={() => <Monetization api={api} />}
+                                />
                                 <Route path={Details.subPaths.EXTERNAL_STORES} component={ExternalStores} />
                             </Switch>
                         </div>
@@ -744,6 +748,7 @@ Details.subPaths = {
     PROPERTIES_PRODUCT: '/api-products/:apiprod_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
     MONETIZATION: '/apis/:api_uuid/monetization',
+    MONETIZATION_PRODUCT: '/api-products/:apiprod_uuid/monetization',
     EXTERNAL_STORES: '/apis/:api_uuid/external-devportals',
 };
 

@@ -30,6 +30,8 @@ import API from 'AppData/api';
 import { CircularProgress } from '@material-ui/core';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import Alert from 'AppComponents/Shared/Alert';
+import Banner from 'AppComponents/Shared/Banner';
+
 import LifeCycleImage from './LifeCycleImage';
 import CheckboxLabels from './CheckboxLabels';
 import LifecyclePending from './LifecyclePending';
@@ -77,6 +79,7 @@ class LifeCycleUpdate extends Component {
         this.state = {
             newState: null,
             isUpdating: null,
+            pageError: null,
         };
     }
 
@@ -117,10 +120,19 @@ class LifeCycleUpdate extends Component {
                 }
                 /* TODO: add i18n ~tmkb */
             })
-            .catch((errorResponse) => {
-                console.log(errorResponse);
-                Alert.error(JSON.stringify(errorResponse.message));
-            }).finally(() => {
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                    this.setState({ pageError: error.response.body });
+                } else {
+                    // TODO add i18n ~tmkb
+                    const message = 'Something went wrong while updating the lifecycle';
+                    Alert.error(message);
+                    this.setState({ pageError: error.response.body });
+                }
+                console.error(error);
+            })
+            .finally(() => {
                 this.setState({ isUpdating: null });
             });
     }
@@ -140,7 +152,6 @@ class LifeCycleUpdate extends Component {
         this.updateLCStateOfAPI(apiUUID, action);
     }
 
-
     /**
      * @inheritdoc
      * @memberof LifeCycleUpdate
@@ -150,7 +161,7 @@ class LifeCycleUpdate extends Component {
             api, lcState, classes, theme, handleChangeCheckList, checkList,
         } = this.props;
         const lifecycleStates = [...lcState.availableTransitions];
-        const { newState } = this.state;
+        const { newState, pageError } = this.state;
         const isWorkflowPending = api.workflowStatus && api.workflowStatus === this.WORKFLOW_STATUS.CREATED;
         const lcMap = new Map();
         lcMap.set('Published', 'Publish');
@@ -172,7 +183,8 @@ class LifeCycleUpdate extends Component {
                 if (item.event === 'Publish') {
                     return {
                         ...item,
-                        disabled: api.endpointConfig == null ||
+                        disabled:
+                            api.endpointConfig == null ||
                             api.policies.length === 0 ||
                             api.endpointConfig.implementation_status === 'prototyped',
                     };
@@ -197,7 +209,8 @@ class LifeCycleUpdate extends Component {
                                 <Grid item xs={8}>
                                     <LifeCycleImage lifeCycleStatus={newState || api.lifeCycleStatus} />
                                 </Grid>
-                                {(api.lifeCycleStatus === 'CREATED' || api.lifeCycleStatus === 'PUBLISHED' ||
+                                {(api.lifeCycleStatus === 'CREATED' || (api.lifeCycleStatus === 'PUBLISHED'
+                                && api.type !== 'GRAPHQL') ||
                                 api.lifeCycleStatus === 'PROTOTYPED') && (
                                     <Grid item xs={3}>
                                         <CheckboxLabels api={api} />
@@ -228,7 +241,7 @@ class LifeCycleUpdate extends Component {
                     )}
                     <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
                         <div className={classes.buttonsWrapper}>
-                            {!isWorkflowPending && (
+                            {!isWorkflowPending &&
                                 lifecycleButtons.map((transitionState) => {
                                     return (
                                         <Button
@@ -240,17 +253,32 @@ class LifeCycleUpdate extends Component {
                                             onClick={this.updateLifeCycleState}
                                         >
                                             {transitionState.event}
-                                            {this.state.isUpdating === transitionState.event &&
-                                            <CircularProgress size={18} /> }
+                                            {this.state.isUpdating === transitionState.event && (
+                                                <CircularProgress size={18} />
+                                            )}
                                         </Button>
                                     );
-                                }))
+                                })
                             /* Skip when transitions available for current state ,
                             this occurs in states where have allowed re-publishing in prototype and published sates */
                             }
                         </div>
                     </ScopeValidation>
                 </Grid>
+                {/* Page error banner */}
+                {pageError && (
+                    <Grid item xs={11}>
+                        <Banner
+                            onClose={() => this.setState({ pageError: null })}
+                            disableActions
+                            dense
+                            paperProps={{ elevation: 1 }}
+                            type='error'
+                            message={pageError}
+                        />
+                    </Grid>
+                )}
+                {/* end of Page error banner */}
             </Grid>
         );
     }

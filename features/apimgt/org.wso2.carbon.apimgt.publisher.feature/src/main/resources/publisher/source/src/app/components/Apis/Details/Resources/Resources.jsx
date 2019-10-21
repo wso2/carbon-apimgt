@@ -35,7 +35,7 @@ import SpecErrors from './components/SpecErrors';
 import AddOperation from './components/AddOperation';
 import GoToDefinitionLink from './components/GoToDefinitionLink';
 import APIRateLimiting from './components/APIRateLimiting';
-import { extractPathParameters, isSelectAll } from './operationUtils';
+import { extractPathParameters, isSelectAll, mapAPIOperations } from './operationUtils';
 import OperationsSelector from './components/OperationsSelector';
 import SaveOperations from './components/SaveOperations';
 
@@ -91,6 +91,18 @@ export default function Resources(props) {
                 break;
             case 'authType':
                 updatedOperation['x-auth-type'] = value ? 'Any' : 'None';
+                break;
+            case 'parameter':
+                if (!updatedOperation.parameters) {
+                    updatedOperation.parameters = [value];
+                } else {
+                    updatedOperation.parameters.push(value);
+                }
+                break;
+            case 'deleteParameter':
+                updatedOperation.parameters = updatedOperation.parameters.filter((parameter) => {
+                    return parameter.in !== value.in && parameter.name !== value.name;
+                });
                 break;
             case 'throttlingPolicy':
                 updatedOperation['x-throttling-tier'] = value;
@@ -165,17 +177,20 @@ export default function Resources(props) {
         });
     }
     const onMarkAsDelete = useCallback(onOperationSelectM, [setSelectedOperation]);
+
+    // can't depends on API id because we need to consider the changes in operations in api object
     // memoized (https://reactjs.org/docs/hooks-reference.html#usememo) to improve pref,
     // localized to inject local apiThrottlingPolicy data
-    const localApi = useMemo(() => ({
-        id: api.id,
-        apiThrottlingPolicy,
-        scopes: api.scopes,
-        endpointConfig: api.endpointConfig,
-    }), [
-        api,
-        apiThrottlingPolicy,
-    ]);
+    const localApi = useMemo(
+        () => ({
+            id: api.id,
+            apiThrottlingPolicy,
+            scopes: api.scopes,
+            operations: api.isAPIProduct() ? {} : mapAPIOperations(api.operations),
+            endpointConfig: api.endpointConfig,
+        }),
+        [api, apiThrottlingPolicy],
+    );
     /**
      *
      *
@@ -224,7 +239,7 @@ export default function Resources(props) {
         switch (type) {
             case 'save':
                 if (isSelectAll(markedOperations, copyOfOperations)) {
-                    const message = "Can't delete all the operations, Please keep at least one operation.";
+                    const message = 'At least one operation is required for the API';
                     Alert.warning(message);
                     return Promise.reject(new Error(message));
                 }
@@ -271,6 +286,7 @@ export default function Resources(props) {
                     Alert.error(error.response.body.description);
                     setPageError(error.response.body);
                 }
+                console.error(error);
             });
 
         // Fetch API level throttling policies only when the page get mounted for the first time `componentDidMount`
@@ -347,7 +363,8 @@ export default function Resources(props) {
                                                     markAsDelete={Boolean(markedOperations[target]
                                                         && markedOperations[target][verb])}
                                                     onMarkAsDelete={onMarkAsDelete}
-                                                    disableUpdate={disableUpdate}
+                                                    disableUpdate={disableUpdate
+                                                        || isRestricted(['apim:api_create'], api)}
                                                     disableMultiSelect={disableMultiSelect}
                                                     {...operationProps}
                                                 />

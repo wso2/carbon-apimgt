@@ -3,6 +3,7 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
+import { app } from 'Settings';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -24,7 +25,7 @@ export default function NoApi() {
         <div className={classes.root}>
             <Grid container spacing={3}>
                 <Grid item xs={12} className={classes.messageWrapper}>
-                    <img src={theme.custom.noApiImage} className={classes.messageWrapper} />
+                    <img src={app.context + theme.custom.noApiImage} className={classes.messageWrapper} />
                     <Typography variant='h5' gutterBottom>
                         <FormattedMessage id='Apis.Listing.NoApi.nodata.title' defaultMessage='No APIs Available' />
                     </Typography>

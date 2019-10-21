@@ -283,8 +283,8 @@ export default function ApiProductCreateWrapper(props) {
                                         onClick={createAPIProduct}
                                     >
                                         <FormattedMessage
-                                            id='Apis.Create.APIProduct.APIProductCreateWrapper.save'
-                                            defaultMessage='Save'
+                                            id='Apis.Create.APIProduct.APIProductCreateWrapper.publish'
+                                            defaultMessage='Publish'
                                         />
                                         {isCreating && <CircularProgress size={24} />}
                                     </Button>

@@ -18,6 +18,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import { Link } from 'react-router-dom';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
@@ -52,6 +53,7 @@ const styles = theme => ({
     thumbHeader: {
         width: '90%',
         whiteSpace: 'nowrap',
+        color: theme.palette.text.secondary,
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         cursor: 'pointer',
@@ -203,7 +205,13 @@ class APIThumb extends Component {
     render() {
         const { classes, api, isAPIProduct } = this.props;
         const { isHover, loading } = this.state;
-
+        let overviewPath = '';
+        if (api.apiType) {
+            overviewPath =
+            isAPIProduct ? `/api-products/${api.id}/overview` : `/apis/${api.id}/overview`;
+        } else {
+            overviewPath = `/apis/${api.apiUUID}/documents/${api.id}/details`;
+        }
         if (isAPIProduct) {
             api.apiType = API.CONSTS.APIProduct;
         } else {
@@ -226,13 +234,16 @@ class APIThumb extends Component {
                 <CardMedia src='None' component={ThumbnailView} height={140} title='Thumbnail' api={api} />
                 <CardContent className={classes.apiDetails}>
                     <div className={classes.textWrapper}>
-                        <Typography
-                            gutterBottom
-                            variant='h4'
-                            className={classes.thumbHeader}
-                        >
-                            {api.name}
-                        </Typography>
+                        <Link to={overviewPath}>
+                            <Typography
+                                gutterBottom
+                                variant='h4'
+                                className={classes.thumbHeader}
+                                title={api.name}
+                            >
+                                {api.name}
+                            </Typography>
+                        </Link>
                     </div>
                     <div className={classes.row}>
                         <Typography variant='caption' gutterBottom align='left' className={classes.thumbBy}>

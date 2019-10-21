@@ -24,7 +24,6 @@ import Utils from './Utils';
 import User from './User';
 import APIClient from './APIClient';
 import APIClientFactory from './APIClientFactory';
-
 /**
  * Class managing authentication
  */
@@ -32,35 +31,6 @@ class AuthManager {
     constructor() {
         this.isLogged = false;
         this.username = null;
-    }
-
-    /**
-     * Refresh the access token and set new access token to the intercepted request
-     * @param {Request} request
-     * @param {Object} environment
-     */
-    static refreshTokenOnExpire(request, environment = Utils.getCurrentEnvironment()) {
-        const refreshPeriod = 60;
-        const user = AuthManager.getUser(environment.label);
-        const timeToExpire = Utils.timeDifference(user.getExpiryTime());
-        if (timeToExpire >= refreshPeriod) {
-            return request;
-        }
-        if (user.getExpiryTime() < 0) {
-            return request;
-        }
-        const loginPromise = AuthManager.refresh(environment);
-        loginPromise.then((response) => {
-            const loggedInUser = AuthManager.loginUserMapper(response, environment.label);
-            AuthManager.setUser(loggedInUser, environment.label);
-        });
-        loginPromise.catch((error) => {
-            const errorData = JSON.parse(error.responseText);
-            const message = 'Error while refreshing token You will be redirect to the login page ...';
-            console.error(errorData);
-            console.error(message);
-        });
-        return loginPromise;
     }
 
     /**
@@ -221,38 +191,6 @@ class AuthManager {
     }
 
     /**
-     * @deprecated Was used when Basic login facility provided from SPA app
-     * By given username and password Authenticate the user, Since this REST API has no swagger definition,
-     * Can't use swaggerjs to generate client.Hence using Axios to make AJAX calls
-     * @param {String} username - Username of the user
-     * @param {String} password - Plain text password
-     * @param {Object} environment - environment object
-     * @returns {AxiosPromise} - Promise object with the login request made
-     */
-    authenticateUser(username, password, environment) {
-        const headers = {
-            Accept: 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded',
-        };
-        const data = {
-            username,
-            password,
-            application: 'publisher',
-            remember_me: true, // By default always remember user session
-        };
-        // Set the environment that user tried to authenticate
-        const previousEnvironment = Utils.getCurrentEnvironment();
-        Utils.setEnvironment(environment);
-
-        const promisedResponse = this.postAuthenticationRequest(headers, data, environment);
-        promisedResponse.catch(() => {
-            Utils.setEnvironment(previousEnvironment);
-        });
-
-        return promisedResponse;
-    }
-
-    /**
      * Return an user object given the login request response object
      * @param {Object} response - Response object received from either Axios or Fetch libraries
      * @param {String} environmentName - Name of the environment
@@ -319,18 +257,6 @@ class AuthManager {
         return this.logout(currentEnvironmentName);
     }
 
-    setupAutoRefresh(environmentName) {
-        const user = AuthManager.getUser(environmentName);
-        const bufferTime = 1000 * 10; // Give 10 sec buffer time before token expire,
-        // considering the network delays and ect.
-        const triggerIn = Utils.timeDifference(user.getExpiryTime() - bufferTime);
-        if (user) {
-            setTimeout(AuthManager.refreshTokenOnExpire, triggerIn * 1000);
-        } else {
-            throw new Error('No user exist for current session! Needs to login before setting up refresh');
-        }
-    }
-
     /**
      * Call Token API with refresh token grant type
      * @param {Object} environment - Name of the environment
@@ -365,7 +291,7 @@ class AuthManager {
      * @returns {Promise} Axios Promise object with the login request made
      */
     postAuthenticationRequest(headers, data, environment) {
-        const promisedResponse = axios('/publisher/services/auth/basic', {
+        const promisedResponse = axios(Configurations.app.context + '/services/auth/basic', {
             method: 'POST',
             data: qs.stringify(data),
             headers,

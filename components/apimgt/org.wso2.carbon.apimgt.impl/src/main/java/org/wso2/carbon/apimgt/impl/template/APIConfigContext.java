@@ -119,6 +119,11 @@ public class APIConfigContext extends ConfigContext {
         } else {
             context.put("apiIsOauthProtected", Boolean.FALSE);
         }
+        if (apiProduct.isEnabledSchemaValidation()) {
+            context.put("enableSchemaValidation", Boolean.TRUE);
+        } else {
+            context.put("enableSchemaValidation", Boolean.FALSE);
+        }
     }
 
     public String getAPIName(API api) {

@@ -89,7 +89,7 @@ const LoadableSwitch = withRouter(Loadable.Map({
 
         return (
             <Switch>
-                <Redirect exact from='/apis/:apiUuid' to={redirectURL} />
+                <Redirect exact from={`/apis/${apiUuid}`} to={redirectURL} />
                 <Route path='/apis/:apiUuid/overview' render={() => <Overview {...props} />} />
                 <Route path='/apis/:apiUuid/documents' component={Documentation} />
                 <Route
@@ -337,6 +337,7 @@ class Details extends React.Component {
         const {
             classes, theme, intl, match,
         } = this.props;
+        const user = AuthManager.getUser();
         const { apiUuid } = match.params;
         const { api, notFound } = this.state;
         const {
@@ -380,17 +381,67 @@ class Details extends React.Component {
                             )}
                         </Link>
                     )}
-                    <LeftMenuItem text='overview' route='overview' to={pathPrefix + 'overview'} />
+                    <LeftMenuItem
+                        text={
+                            <FormattedMessage id='Apis.Details.index.overview' defaultMessage='Overview' />
+                        }
+                        route='overview'
+                        iconText='overview'
+                        to={pathPrefix + 'overview'}
+                    />
                     {!api.advertiseInfo.advertised && (
                         <React.Fragment>
-                            <LeftMenuItem text='credentials' route='credentials' to={pathPrefix + 'credentials'} />
-                            <LeftMenuItem text='comments' route='comments' to={pathPrefix + 'comments'} />
-                            {api.type !== 'WS' && <LeftMenuItem text='test' route='test' to={pathPrefix + 'test'} />}
+                            { user &&
+                            <React.Fragment>
+                                <LeftMenuItem
+                                    text={
+                                        <FormattedMessage
+                                            id='Apis.Details.index.credentials'
+                                            defaultMessage='Credentials'
+                                        />
+                                    }
+                                    route='credentials'
+                                    iconText='credentials'
+                                    to={pathPrefix + 'credentials'}
+                                />
+                            </React.Fragment>}
+                            <LeftMenuItem
+                                text={
+                                    <FormattedMessage id='Apis.Details.index.comments' defaultMessage='Comments' />
+                                }
+                                route='comments'
+                                iconText='comments'
+                                to={pathPrefix + 'comments'}
+                             />
+                            {api.type !== 'WS' && (
+                                <LeftMenuItem
+                                    text={
+                                        <FormattedMessage id='Apis.Details.index.try.out' defaultMessage='Try out' />
+                                    }
+                                    route='test'
+                                    iconText='test'
+                                    to={pathPrefix + 'test'}
+                                />
+                            )}
                         </React.Fragment>
                     )}
-                    <LeftMenuItem text='Documentation' route='documents' to={pathPrefix + 'documents'} />
+                    <LeftMenuItem
+                        text={
+                            <FormattedMessage id='Apis.Details.index.documentation' defaultMessage='Documentation' />
+                        }
+                        route='documents'
+                        iconText='docs'
+                        to={pathPrefix + 'documents'}
+                    />
                     {!api.advertiseInfo.advertised && api.type !== 'WS' && (
-                        <LeftMenuItem text='SDK' route='sdk' to={pathPrefix + 'sdk'} />
+                        <LeftMenuItem
+                            text={
+                                <FormattedMessage id='Apis.Details.index.sdk' defaultMessage='SDKs' />
+                            }
+                            route='sdk'
+                            iconText='sdk'
+                            to={pathPrefix + 'sdk'}
+                        />
                     )}
                 </div>
                 <div className={classes.content}>

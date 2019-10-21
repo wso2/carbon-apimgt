@@ -226,6 +226,15 @@ class API extends Resource {
         }
     }
 
+     /**
+     * Tests the endpoints
+     */
+    testEndpoint(endpointUrl, apiId) {
+        return this.client.then((client) => {
+            return client.apis['Validation'].validateEndpoint(({ endpointUrl: endpointUrl, apiId: apiId }));
+        });
+    }
+    
     save(openAPIVersion = 'v3') {
         const promisedAPIResponse = this.client.then((client) => {
             const properties = client.spec.definitions.API.properties;
