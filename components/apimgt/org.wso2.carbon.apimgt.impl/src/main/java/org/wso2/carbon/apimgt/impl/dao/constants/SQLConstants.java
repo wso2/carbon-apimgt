@@ -2038,20 +2038,33 @@ public class SQLConstants {
 
     public static final String GET_URL_TEMPLATES_OF_API_SQL =
             " SELECT " +
+            "  AUM.URL_MAPPING_ID," +
             "   AUM.URL_PATTERN," +
             "   AUM.HTTP_METHOD," +
             "   AUM.AUTH_SCHEME," +
             "   AUM.THROTTLING_TIER, " +
-            "   AUM.MEDIATION_SCRIPT, " +
-            "   API.API_TYPE " +
+            "   AUM.MEDIATION_SCRIPT " +
             " FROM " +
             "   AM_API_URL_MAPPING AUM " +
             " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
-            " LEFT JOIN AM_API_PRODUCT_MAPPING APM ON AUM.URL_MAPPING_ID = APM.URL_MAPPING_ID" +
             " WHERE " +
             "  API.API_PROVIDER = ? AND " +
             "  API.API_NAME = ? AND " +
             "  API.API_VERSION = ? ";
+
+    public static final String GET_API_PRODUCT_URI_TEMPLATE_ASSOCIATION_SQL =
+            " SELECT " +
+            "  API.API_PROVIDER," +
+            "  API.API_NAME," +
+            "  API.API_VERSION," +
+            "  APM.URL_MAPPING_ID  " +
+            "  FROM " +
+            "  AM_API API " +
+            "  INNER JOIN AM_API_PRODUCT_MAPPING APM ON API.API_ID = APM.API_ID " +
+            "  WHERE APM.URL_MAPPING_ID IN " +
+                    "(SELECT AUM.URL_MAPPING_ID " +
+                    "FROM AM_API_URL_MAPPING AUM, AM_API API WHERE API.API_PROVIDER = ? AND " +
+                    "API.API_NAME = ? AND API.API_VERSION = ?)";
 
     public static final String GET_AUTHORIZED_DOMAINS_PREFIX =
             "SELECT AKDM.AUTHZ_DOMAIN FROM AM_APP_KEY_DOMAIN_MAPPING AKDM, ";
@@ -3041,13 +3054,6 @@ public class SQLConstants {
     public static final String GET_PRODUCT_ID =
             "SELECT API_ID FROM AM_API WHERE API_NAME = ? AND API_PROVIDER = ? AND "
             + "API_VERSION = ? AND API_TYPE='" + APIConstants.API_PRODUCT +"'";
-
-    public static final String GET_PRODUCT_RESOURCE_MAPPINGS_FOR_API =
-            "SELECT "
-            + "API_NAME, API_PROVIDER , API_VERSION, HTTP_METHOD, URL_PATTERN "
-            + "FROM AM_API_URL_MAPPING, AM_API_PRODUCT_MAPPING, AM_API "
-            + "WHERE AM_API_URL_MAPPING.URL_MAPPING_ID = AM_API_PRODUCT_MAPPING.URL_MAPPING_ID AND "
-            + "AM_API_PRODUCT_MAPPING.API_ID = AM_API.API_ID AND AM_API.API_ID = ?";
 
     public static final String GET_URL_TEMPLATES_FOR_API = 
             "SELECT URL_PATTERN , URL_MAPPING_ID, HTTP_METHOD FROM AM_API API , AM_API_URL_MAPPING URL "
