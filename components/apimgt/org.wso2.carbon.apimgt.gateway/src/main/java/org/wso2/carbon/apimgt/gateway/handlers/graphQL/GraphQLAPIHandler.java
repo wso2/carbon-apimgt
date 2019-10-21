@@ -179,7 +179,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
         if (Operation.QUERY.equals(operation.getOperation())) {
             if (log.isDebugEnabled()) {
-                log.debug("Operation - Subscription " + operation.getName());
+                log.debug("Operation - Query " + operation.getName());
             }
             getNestedLevelOperations(operation.getSelectionSet().getSelections(),supportedFields, operationArray);
             operationList = String.join(",", operationArray);
