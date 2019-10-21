@@ -115,6 +115,9 @@ const styles = theme => ({
     thumbBy: {
         'padding-left': '5px',
     },
+    thumbRightBy: {
+        'margin-right': '5px',
+    },
 });
 
 /**
@@ -285,7 +288,12 @@ class APIThumb extends Component {
                         color='default'
                     />
                     {(api.type === 'GRAPHQL' || api.transportType === 'GRAPHQL') && (
-                        <Chip label={api.transportType === undefined ? api.type : api.transportType} color='primary' />
+                        <Chip
+                            className={classes.thumbRightBy}
+                            label={api.transportType === undefined ?
+                                api.type : api.transportType}
+                            color='primary'
+                        />
                     )}
                     <DeleteApiButton onClick={this.handleApiDelete} api={api} />
                     {loading && <CircularProgress className={classes.deleteProgress} />}
