@@ -17,7 +17,7 @@
  */
 
 import Os from 'os';
-import { app } from 'Config';
+import { app } from 'Settings';
 import AuthManager from '../src/app/data/AuthManager.jsx';
 import Utils from '../src/app/data/Utils';
 import User from '../src/app/data/User';

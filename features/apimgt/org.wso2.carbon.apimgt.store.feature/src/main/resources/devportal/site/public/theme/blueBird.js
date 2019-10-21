@@ -1,8 +1,3 @@
-const APP_CONTEXT = '/devportal';
-const REVERSE_PROXY = {
-    enabled: true,
-    origin: 'https://localhost:9443',
-};
 const Configurations = {
     themes: {
         light: {
@@ -34,7 +29,7 @@ const Configurations = {
             },
             custom: {
                 contentAreaWidth: 1240,
-                backgroundImage: APP_CONTEXT + '/site/public/images/back-light.png',
+                backgroundImage: '/devportal/site/public/images/back-light.png',
                 defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
                 page: {
                     style: 'fluid', // Set the page style ( Other values available 'fixed', 'fluid')
@@ -43,7 +38,7 @@ const Configurations = {
                     border: 'solid 1px #cccccc',
                 },
                 appBar: {
-                    logo: APP_CONTEXT + '/site/public/images/logo-custom.svg',
+                    logo: '/devportal/site/public/images/logo-custom.svg',
                     logoHeight: 40,
                     background: '#207bb0',
                     activeBackground: '#f62921',
@@ -88,8 +83,8 @@ const Configurations = {
                 commentsLimit: 5,
                 maxCommentLength: 512,
                 overviewPage: {
-                    commentsBackground: APP_CONTEXT + '/site/public/images/overview/comments.svg',
-                    documentsBackground: APP_CONTEXT + '/site/public/images/overview/documents.svg',
+                    commentsBackground: '/devportal/site/public/images/overview/comments.svg',
+                    documentsBackground: '/devportal/site/public/images/overview/documents.svg',
                 },
                 resourceChipColors: {
                     get: '#02a8f4',
@@ -130,26 +125,26 @@ const Configurations = {
                         },
                     },
                 },
-                noApiImage: '/devportal/site/public/images/nodata.svg',
+                noApiImage: '/site/public/images/nodata.svg',
                 landingPage: {
                     active: true,
                     carousel: {
                         active: true,
                         slides: [
                             {
-                                src: '/devportal/site/public/images/landing/01.jpg',
+                                src: '/site/public/images/landing/01.jpg',
                                 title: 'Lorem <span>ipsum</span> dolor sit amet',
                                 content:
                                     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer felis lacus, placerat vel condimentum in, porta a urna. Suspendisse dolor diam, vestibulum at molestie dapibus, semper eget ex. Morbi sit amet euismod tortor.',
                             },
                             {
-                                src: '/devportal/site/public/images/landing/02.jpg',
+                                src: '/site/public/images/landing/02.jpg',
                                 title: 'Curabitur <span>malesuada</span> arcu sapien',
                                 content:
                                     'Curabitur malesuada arcu sapien, suscipit egestas purus efficitur vitae. Etiam vulputate hendrerit venenatis. ',
                             },
                             {
-                                src: '/devportal/site/public/images/landing/03.jpg',
+                                src: '/site/public/images/landing/03.jpg',
                                 title: 'Nam vel ex <span>feugiat</span> nunc laoreet',
                                 content:
                                     'Nam vel ex feugiat nunc laoreet elementum. Duis sed nibh condimentum, posuere risus a, mollis diam. Vivamus ultricies, augue id pulvinar semper, mauris lorem bibendum urna, eget tincidunt quam ex ut diam.',
@@ -179,13 +174,13 @@ const Configurations = {
                         active: true,
                         content: [
                             {
-                                src: '/devportal/site/public/images/landing/parallax1.jpg',
+                                src: '/site/public/images/landing/parallax1.jpg',
                                 title: 'Lorem <span>ipsum</span> dolor sit amet',
                                 content:
                                     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer felis lacus, placerat vel condimentum in, porta a urna. Suspendisse dolor diam, vestibulum at molestie dapibus, semper eget ex. Morbi sit amet euismod tortor.',
                             },
                             {
-                                src: '/devportal/site/public/images/landing/parallax2.jpg',
+                                src: '/site/public/images/landing/parallax2.jpg',
                                 title: 'Nam vel ex <span>feugiat</span> nunc laoreet',
                                 content:
                                     'Nam vel ex feugiat nunc laoreet elementum. Duis sed nibh condimentum, posuere risus a, mollis diam. Vivamus ultricies, augue id pulvinar semper, mauris lorem bibendum urna, eget tincidunt quam ex ut diam.',

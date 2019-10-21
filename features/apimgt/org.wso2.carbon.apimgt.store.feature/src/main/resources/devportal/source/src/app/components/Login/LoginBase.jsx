@@ -18,7 +18,7 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { app } from 'Config';
+import { app } from 'Settings';
 import Footer from '../Footer/Footer';
 
 const LoginBase = (props) => {

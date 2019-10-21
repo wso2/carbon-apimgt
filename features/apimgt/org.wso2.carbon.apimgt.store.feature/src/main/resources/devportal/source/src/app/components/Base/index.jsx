@@ -37,7 +37,7 @@ import { FormattedMessage } from 'react-intl';
 import Drawer from '@material-ui/core/Drawer';
 import HeaderSearch from 'AppComponents/Base/Header/Search/HeaderSearch';
 import Settings from 'AppComponents/Shared/SettingsContext';
-import { app } from 'Config';
+import { app } from 'Settings';
 import AuthManager from '../../data/AuthManager';
 import ConfigManager from '../../data/ConfigManager';
 import EnvironmentMenu from './Header/EnvironmentMenu';
@@ -260,7 +260,7 @@ class Layout extends React.Component {
                             </Hidden>
                             <Link to='/'>
                                 <img
-                                    src={theme.custom.appBar.logo}
+                                    src={app.context + theme.custom.appBar.logo}
                                     style={{
                                         height: theme.custom.appBar.logoHeight,
                                         width: theme.custom.appBar.logoWidth,

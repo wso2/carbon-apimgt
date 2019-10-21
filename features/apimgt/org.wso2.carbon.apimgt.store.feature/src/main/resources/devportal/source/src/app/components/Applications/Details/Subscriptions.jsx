@@ -36,7 +36,7 @@ import APIList from 'AppComponents/Apis/Listing/APICardView';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Subscription from 'AppData/Subscription';
 import Api from 'AppData/api';
-import { app } from 'Config';
+import { app } from 'Settings';
 import SubscriptionTableData from './SubscriptionTableData';
 
 /**

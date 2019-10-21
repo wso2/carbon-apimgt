@@ -33,7 +33,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import AuthManager from 'AppData/AuthManager';
-import { app } from 'Config';
+import { app } from 'Settings';
 import Api from '../../../data/api';
 
 const styles = theme => ({

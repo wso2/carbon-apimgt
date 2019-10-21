@@ -17,7 +17,7 @@
  */
 
 import axios from 'axios';
-import { app } from 'Config';
+import { app } from 'Settings';
 
 class ConfigManager {
 

@@ -31,7 +31,7 @@ import Icon from '@material-ui/core/Icon';
 import { Link } from 'react-router-dom';
 import Checkbox from '@material-ui/core/Checkbox';
 import { FormattedMessage, injectIntl, } from 'react-intl';
-import { app } from 'Config';
+import { app } from 'Settings';
 import AuthManager from '../../data/AuthManager';
 import Utils from '../../data/Utils';
 import ConfigManager from '../../data/ConfigManager';
