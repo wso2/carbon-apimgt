@@ -34,11 +34,12 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.TreeMap;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(OpenAPIUtils.class)
+@PrepareForTest({OpenAPIUtils.class, MultitenantUtils.class})
 public class BasicAuthAuthenticatorTest {
     private MessageContext messageContext;
     private org.apache.axis2.context.MessageContext axis2MsgCntxt;
@@ -86,6 +87,8 @@ public class BasicAuthAuthenticatorTest {
                     return false;
                 });
         basicAuthAuthenticator.setBasicAuthCredentialValidator(basicAuthCredentialValidator);
+        Mockito.when(messageContext.getProperty(BasicAuthAuthenticator.PUBLISHER_TENANT_DOMAIN)).
+                thenReturn("carbon.super");
     }
 
     @Test
