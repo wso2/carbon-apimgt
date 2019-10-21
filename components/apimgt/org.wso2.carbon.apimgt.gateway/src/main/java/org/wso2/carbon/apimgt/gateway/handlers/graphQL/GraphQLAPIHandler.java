@@ -181,10 +181,10 @@ public class GraphQLAPIHandler extends AbstractHandler {
             if (log.isDebugEnabled()) {
                 log.debug("Operation - Subscription " + operation.getName());
             }
-            getNestedLevelOperations(operation, supportedFields, operationArray);
+            getNestedLevels(operation.getSelectionSet().getSelections(),supportedFields, operationArray);
             operationList = String.join(",", operationArray);
         } else if (operation.getOperation().equals(Operation.MUTATION)) {
-            // Will support if there can be exist nexted level mutation operations
+            // Will support nexted level mutation according to requirements.
             operationList = operation.getName();
             if (log.isDebugEnabled()) {
                 log.debug("Operation - Mutation " + operation.getName());
@@ -193,59 +193,31 @@ public class GraphQLAPIHandler extends AbstractHandler {
             if (log.isDebugEnabled()) {
                 log.debug("Operation - Subscription " + operation.getName());
             }
-            getNestedLevelOperations(operation, supportedFields, operationArray);
+            getNestedLevels(operation.getSelectionSet().getSelections(), supportedFields, operationArray);
             operationList = String.join(",", operationArray);
         }
         return operationList;
     }
 
     /**
-     * This method support to extracted nested level operations (up to three level)
-     * @param operation operation
+     * This method support to extracted nested level operations
+     * @param selectionList selection List
      * @param supportedFields supportedFields
      * @param operationArray operationArray
      */
-    private void getNestedLevelOperations(OperationDefinition operation, ArrayList<String> supportedFields,
-                                   ArrayList<String> operationArray) {
-
-        for (Selection selectionFirstLevel : operation.getSelectionSet().getSelections()) {
-            Field firstLevelField = (Field) selectionFirstLevel;
-            if (!operationArray.contains(firstLevelField.getName()) &&
-                    supportedFields.contains(firstLevelField.getName())) {
-                operationArray.add(firstLevelField.getName());
+    public void getNestedLevels(List<Selection> selectionList, ArrayList<String> supportedFields,
+                                ArrayList<String> operationArray) {
+        for (Selection selection : selectionList) {
+            Field levelField = (Field) selection;
+            if (!operationArray.contains(levelField.getName()) &&
+                    supportedFields.contains(levelField.getName())) {
+                operationArray.add(levelField.getName());
                 if (log.isDebugEnabled()) {
-                    log.debug("Extracted first level " + firstLevelField.getName());
+                    log.debug("Extracted operation: " + levelField.getName());
                 }
             }
-            if (firstLevelField.getSelectionSet() != null) {
-                for (Selection selectionSecondLevel : firstLevelField.getSelectionSet().getSelections()) {
-                    if (selectionSecondLevel instanceof Field && ((Field) selectionSecondLevel)
-                            .getSelectionSet() !=null) {
-                        Field secondLevelField = (Field) selectionSecondLevel;
-                        if (!operationArray.contains(secondLevelField.getName()) &&
-                                supportedFields.contains(secondLevelField.getName())) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Extracted second level " + secondLevelField.getName());
-                            }
-                            operationArray.add(secondLevelField.getName());
-                        }
-                        if (secondLevelField.getSelectionSet() != null) {
-                            for (Selection selectionThirdLevel : secondLevelField.getSelectionSet().getSelections()) {
-                                if (selectionThirdLevel instanceof Field && ((Field)
-                                        selectionThirdLevel).getSelectionSet() !=null) {
-                                    Field thirdLevelField = (Field) selectionThirdLevel;
-                                    if (!operationArray.contains(thirdLevelField.getName()) &&
-                                            supportedFields.contains(thirdLevelField.getName())) {
-                                        if (log.isDebugEnabled()) {
-                                            log.debug("Extracted third level" + thirdLevelField.getName());
-                                        }
-                                        operationArray.add(thirdLevelField.getName());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            if (levelField.getSelectionSet() != null) {
+                getNestedLevels(levelField.getSelectionSet().getSelections(), supportedFields, operationArray);
             }
         }
     }
