@@ -19,13 +19,17 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentSearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APISearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -33,6 +37,18 @@ import java.util.Map;
 
 public class SearchResultMappingUtil {
 
+    /**
+     * Converts a API or Product into a DTO
+     *
+     * @param api api or Product
+     * @return APISearchResultDTO
+     */
+    public static APISearchResultDTO fromAPIToAPIResultDTO(Object api) {
+        if (api instanceof APIProduct) {
+            return fromAPIToAPIResultDTO((APIProduct) api);
+        }
+        return fromAPIToAPIResultDTO((API) api);
+    }
     /**
      * Get API result representation for content search
      * @param api API
@@ -44,17 +60,56 @@ public class SearchResultMappingUtil {
         APIIdentifier apiId = api.getId();
         apiResultDTO.setName(apiId.getApiName());
         apiResultDTO.setVersion(apiId.getVersion());
-        apiResultDTO.setProvider(apiId.getProviderName());
+        apiResultDTO.setProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         String context = api.getContextTemplate();
         if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
         }
         apiResultDTO.setContext(context);
+        apiResultDTO.setAvgRating(String.valueOf(api.getRating()));
+        APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
+        apiBusinessInformationDTO.setBusinessOwner(api.getBusinessOwner());
+        apiBusinessInformationDTO.setBusinessOwnerEmail(api.getBusinessOwnerEmail());
+        apiBusinessInformationDTO.setTechnicalOwner(api.getTechnicalOwner());
+        apiBusinessInformationDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
+        apiResultDTO.setBusinessInformation(apiBusinessInformationDTO);
         apiResultDTO.setType(SearchResultDTO.TypeEnum.API);
         apiResultDTO.setTransportType(api.getType());
         apiResultDTO.setDescription(api.getDescription());
         apiResultDTO.setStatus(api.getStatus());
         apiResultDTO.setThumbnailUri(api.getThumbnailUrl());
+        return apiResultDTO;
+    }
+
+    /**
+     * Get API result representation for content search
+     * @param apiProduct API product
+     * @return APISearchResultDTO
+     */
+    public static APISearchResultDTO fromAPIToAPIResultDTO(APIProduct apiProduct) {
+        APISearchResultDTO apiResultDTO = new APISearchResultDTO();
+        apiResultDTO.setId(apiProduct.getUuid());
+        APIProductIdentifier apiId = apiProduct.getId();
+        apiResultDTO.setName(apiId.getName());
+        apiResultDTO.setVersion(apiId.getVersion());
+        apiResultDTO.setProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+        String context = apiProduct.getContextTemplate();
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }
+        apiResultDTO.setContext(context);
+        apiResultDTO.setAvgRating(String.valueOf(apiProduct.getRating()));
+        APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
+        apiBusinessInformationDTO.setBusinessOwner(apiProduct.getBusinessOwner());
+        apiBusinessInformationDTO.setBusinessOwnerEmail(apiProduct.getBusinessOwnerEmail());
+        apiBusinessInformationDTO.setTechnicalOwner(apiProduct.getTechnicalOwner());
+        apiBusinessInformationDTO.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
+        apiResultDTO.setBusinessInformation(apiBusinessInformationDTO);
+        apiResultDTO.setType(SearchResultDTO.TypeEnum.API);
+        apiResultDTO.setTransportType(apiProduct.getType());
+        apiResultDTO.setDescription(apiProduct.getDescription());
+        apiResultDTO.setStatus(apiProduct.getState());
+        apiResultDTO.setThumbnailUri(apiProduct.getThumbnailUrl());
         return apiResultDTO;
     }
 

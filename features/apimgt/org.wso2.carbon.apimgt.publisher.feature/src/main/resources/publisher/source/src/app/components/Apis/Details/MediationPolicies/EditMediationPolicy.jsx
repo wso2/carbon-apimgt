@@ -185,7 +185,14 @@ function EditMediationPolicy(props) {
             })
             .catch((errorResponse) => {
                 console.log(errorResponse);
-                Alert.error(JSON.stringify(errorResponse));
+                if (errorResponse.response.body.description !== null) {
+                    Alert.error(errorResponse.response.body.description);
+                } else {
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.MediationPolicies.Edit.AddMediationPolicy.error',
+                        defaultMessage: 'Error when adding mediation policy',
+                    }));
+                }
             });
     };
     /**

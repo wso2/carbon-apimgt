@@ -19,7 +19,7 @@
 
     var log = new Log("Logout Request Function");
     include("/services/constants.jag");
-    var app = require("/site/public/theme/defaultTheme.js").Configurations.app;
+    var app = require("/site/public/theme/settings.js").Settings.app;
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
     var idTokenP1 = request.getCookie("AM_ID_TOKEN_DEFAULT_P1").value;
@@ -30,7 +30,7 @@
         serverUrl = app.reverseProxy.origin;
     } else {
         serverUrl = utils.getServerURL();
-    } 
+    }
     var postLogoutRedirectURI = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
     var url = serverUrl + '/oidc/logout?id_token_hint=' + idToken + '&post_logout_redirect_uri=' + postLogoutRedirectURI;
 

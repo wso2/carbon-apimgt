@@ -13,8 +13,8 @@ var getAlert = function(){
                     };
 
                 }
-        var appName = "apim_bot_detection_alert_configuration_0";
-        var query = "from AM_BOT_DATA SELECT REQUEST_TIME, MESSAGE_ID, HTTP_METHOD, HEADERS, MESSAGE_BODY, CLIENT_IP ;";
+        var appName = "APIM_ALERT_BOT_DETECTION_EMAIL";
+        var query = "from AM_BOT_DATA SELECT request_time, message_id, http_method, headers, message_body, client_ip;";
 
         var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
         var objArr = [];

@@ -219,7 +219,8 @@ export default function ApplicationLevel(props) {
                             </RadioGroup>
                             <FormHelperText>
                                 <FormattedMessage
-                                    id='Apis.Details.Configuration.components.APISecurity.http.mandatory'
+                                    id='Apis.Details.Configuration.components.APISecurity.components.ApplicationLevel.
+                                    http.mandatory'
                                     defaultMessage='Choose whether Application level security is mandatory or optional'
                                 />
                             </FormHelperText>

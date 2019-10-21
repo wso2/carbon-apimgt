@@ -42,6 +42,7 @@ import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.util.Yaml;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -436,6 +437,29 @@ public class OAS2Parser extends APIDefinition {
     }
 
     /**
+     * Remove x-wso2-examples from all the paths from the swagger.
+     *
+     * @param swaggerString Swagger as String
+     */
+    public String removeExamplesFromSwagger(String swaggerString) throws APIManagementException {
+        try {
+            SwaggerParser swaggerParser = new SwaggerParser();
+            Swagger swagger = swaggerParser.parse(swaggerString);
+            swagger.getPaths().values().forEach(path -> {
+                path.getOperations().forEach(operation -> {
+                    if (operation.getVendorExtensions().keySet().contains(APIConstants.SWAGGER_X_EXAMPLES)) {
+                        operation.getVendorExtensions().remove(APIConstants.SWAGGER_X_EXAMPLES);
+                    }
+                });
+            });
+            return Yaml.pretty().writeValueAsString(swagger);
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error while removing examples from OpenAPI definition", e,
+                    ExceptionCodes.ERROR_REMOVING_EXAMPLES);
+        }
+    }
+
+    /**
      * Update OAS definition for store
      *
      * @param api            API
@@ -810,7 +834,7 @@ public class OAS2Parser extends APIDefinition {
      * @return Swagger
      * @throws APIManagementException
      */
-    private Swagger getSwagger(String oasDefinition) throws APIManagementException {
+    Swagger getSwagger(String oasDefinition) {
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(oasDefinition);
         if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {

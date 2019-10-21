@@ -20,6 +20,7 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.appBar),
         fontSize: theme.typography.fontSize,
         textTransform: 'uppercase',
+        fontWeight: 'bold',
     },
     accountIcon: {
         marginRight: 10,

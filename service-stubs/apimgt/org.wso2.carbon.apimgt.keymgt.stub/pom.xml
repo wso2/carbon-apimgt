@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-stubs</artifactId>
-        <version>6.5.280-SNAPSHOT</version>
+        <version>6.5.316-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -63,6 +63,10 @@
                                 </java>
                                 <java classname="org.apache.axis2.wsdl.WSDL2Java" fork="true">
                                     <arg line="-uri src/main/resources/APIKeyValidationService.wsdl -u -uw -o target/generated-code -p org.wso2.carbon.apimgt.keymgt.stub.validator -ns2p http://service.keymgt.apimgt.carbon.wso2.org=org.wso2.carbon.apimgt.keymgt.stub.validator,http://keymgt.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.carbon,http://org.apache.axis2/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.axis2,http://dto.keymgt.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.dto" />
+                                    <classpath refid="wsdl2java.classpath" />
+                                </java>
+                                <java classname="org.apache.axis2.wsdl.WSDL2Java" fork="true">
+                                    <arg line="-uri src/main/resources/APIKeyMgtRemoteUserStoreMgtService.wsdl -u -uw -o target/generated-code -p org.wso2.carbon.apimgt.keymgt.stub.usermanager -ns2p http://service.keymgt.apimgt.carbon.wso2.org=org.wso2.carbon.apimgt.keymgt.stub.usermanager,http://keymgt.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.carbon,http://org.apache.axis2/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.axis2,http://dto.keymgt.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.dto" />
                                     <classpath refid="wsdl2java.classpath" />
                                 </java>
                             </tasks>

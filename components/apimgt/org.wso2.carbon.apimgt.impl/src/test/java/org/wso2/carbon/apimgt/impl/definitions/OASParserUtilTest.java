@@ -24,14 +24,21 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class OASParserUtilTest {
 
@@ -429,5 +436,52 @@ public class OASParserUtilTest {
         Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC,
                 securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE).asText());
         Assert.assertEquals(endUserName, securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME).asText());
+    }
+
+    @Test
+    public void testSyncOpenAPIResourcePaths() throws Exception {
+        String calculatorSwaggerString = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "calculator_scopes_v3.json"),
+                "UTF-8");
+
+        String calcSmallSwaggerString = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "calc_small_v3.json"),
+                "UTF-8");
+
+        final String verb = "POST";
+        final String existingPathString = "/add";
+        final String nonExistingPathString = "/divide";
+
+        API api = Mockito.mock(API.class);
+        Mockito.when(api.getSwaggerDefinition()).thenReturn(calculatorSwaggerString);
+
+        APIProductResource apiProductResource = Mockito.mock(APIProductResource.class);
+        URITemplate uriTemplate = Mockito.mock(URITemplate.class);
+        Mockito.when(apiProductResource.getUriTemplate()).thenReturn(uriTemplate);
+        Mockito.when(uriTemplate.getHTTPVerb()).thenReturn(verb);
+        Mockito.when(uriTemplate.getUriTemplate()).thenReturn(existingPathString);
+
+        Map<API, List<APIProductResource>> apiToProductResourceMapping = new HashMap<>();
+        List<APIProductResource> resources = new ArrayList<>();
+        resources.add(apiProductResource);
+        apiToProductResourceMapping.put(api, resources);
+
+        String updatedCalcSmallSwaggerString = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping,
+                calcSmallSwaggerString);
+
+        JSONObject calculatorSwagger = new JSONObject(calculatorSwaggerString);
+        JSONObject updatedCalcSmallSwagger = new JSONObject(updatedCalcSmallSwaggerString);
+
+        JSONObject calculatorPaths = (JSONObject) calculatorSwagger.get(APIConstants.SWAGGER_PATHS);
+        JSONObject smallCalcPaths = (JSONObject) updatedCalcSmallSwagger.get(APIConstants.SWAGGER_PATHS);
+
+        JSONObject calculatorPath = (JSONObject) calculatorPaths.get(existingPathString);
+        JSONObject smallCalculatorPath = (JSONObject) smallCalcPaths.get(existingPathString);
+
+        // Check if both paths match
+        Assert.assertEquals(calculatorPath.toString(), smallCalculatorPath.toString());
+
+        // Ensure that an originally non existing path was not added
+        Assert.assertFalse(smallCalcPaths.has(nonExistingPathString));
     }
 }

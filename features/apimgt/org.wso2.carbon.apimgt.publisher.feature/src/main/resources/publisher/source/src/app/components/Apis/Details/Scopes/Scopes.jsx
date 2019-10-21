@@ -254,19 +254,6 @@ class Scopes extends React.Component {
                                 defaultMessage='Scopes'
                             />
                         </Typography>
-                        <Link to={!isRestricted(['apim:api_create'], api) && url}>
-                            <Button
-                                size='small'
-                                className={classes.button}
-                                disabled={isRestricted(['apim:api_create'], api)}
-                            >
-                                <AddCircle className={classes.buttonIcon} />
-                                <FormattedMessage
-                                    id='Apis.Details.Scopes.Scopes.heading.scope.add_new'
-                                    defaultMessage='Add New Scope'
-                                />
-                            </Button>
-                        </Link>
                     </div>
                     <InlineMessage type='info' height={140}>
                         <div className={classes.contentWrapper}>

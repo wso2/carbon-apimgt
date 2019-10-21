@@ -201,6 +201,7 @@ class Details extends Component {
                                 label: application.name,
                                 tokenType: application.tokenType,
                                 owner: application.owner,
+                                hashEnabled: application.hashEnabled,
                             }}
                         />
                     </div>

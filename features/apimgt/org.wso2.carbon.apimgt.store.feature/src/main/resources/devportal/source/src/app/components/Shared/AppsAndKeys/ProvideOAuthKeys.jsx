@@ -71,6 +71,7 @@ function ProvideOAuthKeys(props) {
                         margin='normal'
                         fullWidth
                         disabled={!isUserOwner}
+                        variant='outlined'
                     />
                     <FormControl>
                         <FormHelperText id='consumer-key-helper-text'>
@@ -95,6 +96,7 @@ function ProvideOAuthKeys(props) {
                         margin='normal'
                         fullWidth
                         disabled={!isUserOwner}
+                        variant='outlined'
                     />
                     <FormControl>
                         <FormHelperText id='consumer-secret-helper-text'>

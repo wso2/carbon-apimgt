@@ -16,43 +16,25 @@
  * under the License.
  */
 import React from 'react';
-import PropTypes from 'prop-types';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
-import IconButton from '@material-ui/core/IconButton';
-import Icon from '@material-ui/core/Icon';
-import { withStyles } from '@material-ui/core/styles';
-import API from 'AppData/api';
-import CONSTS from 'AppData/Constants';
-import ApiTagCloud from 'AppComponents/Apis/Listing/ApiTagCloud';
+import TagCloudListingTags from './TagCloudListingTags';
 import CustomIcon from '../../Shared/CustomIcon';
 
-const styles = theme => ({
-    rightIcon: {
-        marginLeft: theme.spacing.unit,
-    },
-    button: {
-        margin: theme.spacing.unit,
-        marginBottom: 0,
-    },
-    buttonRight: {
-        alignSelf: 'flex-end',
-        display: 'flex',
-    },
-    ListingWrapper: {
-        paddingTop: 10,
-        paddingLeft: 35,
-        maxWidth: theme.custom.contentAreaWidth,
-    },
-    root: {
+const useStyles = makeStyles(theme => ({
+    appBar: {
         height: 70,
-        background: theme.palette.background.paper,
+        background: theme.custom.infoBar.background,
+        color: theme.palette.getContrastText(theme.custom.infoBar.background),
         borderBottom: 'solid 1px ' + theme.palette.grey.A200,
         display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     mainIconWrapper: {
         paddingTop: 13,
-        paddingLeft: 35,
+        paddingLeft: 20,
         paddingRight: 20,
     },
     mainTitle: {
@@ -67,155 +49,35 @@ const styles = theme => ({
     listContentWrapper: {
         padding: `0 ${theme.spacing.unit * 3}px`,
     },
-});
+    iconDefault: {
+        color: theme.palette.getContrastText(theme.custom.infoBar.background),
+    },
+}));
 
-/**
- * Shared listing page
- *
- * @class TagCloudListing
- * @extends {Component}
- */
-class TagCloudListing extends React.Component {
-    /**
-     * Constructor
-     *
-     * @param {*} props Properties
-     */
-    constructor(props) {
-        super(props);
-        this.state = {
-            listType: props.theme.custom.defaultApiView,
-            allTags: null,
-        };
-    }
+export default function TagCloudListing() {
+    const classes = useStyles();
+    const theme = useTheme();
 
-    /**
-     * @memberof TagCloudListing
-     */
-    componentDidMount() {
-        const api = new API();
-        const promisedTags = api.getAllTags();
-        promisedTags
-            .then((response) => {
-                if (response.body.count !== 0) {
-                    this.setState({ allTags: response.body.list });
-                }
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }
+    const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
 
-
-    /**
-     *
-     * Switch the view between grid and list view
-     * @param {String} value view type
-     * @memberof TagCloudListing
-     */
-    setListType = (value) => {
-        this.setState({ listType: value });
-    };
-
-    /**
-     *
-     * @inheritdoctheme
-     * @returns {React.Component} @inheritdoc
-     * @memberof TagCloudListing
-     */
-    render() {
-        const {
-            theme, classes,
-        } = this.props;
-        const { listType, allTags } = this.state;
-        const apiType = CONSTS.API_TYPE;
-        let apisTagCloudGroup;
-
-        if (allTags !== null) {
-            apisTagCloudGroup = allTags.filter(item => (theme.custom.tagWiseMode === true
-                && item.value.split(theme.custom.tagGroupKey).length > 1));
-        }
-        const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
-
-        return (
-            <main className={classes.content}>
-                <div className={classes.root}>
-                    <div className={classes.mainIconWrapper}>
-                        <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
-                    </div>
-                    <div className={classes.mainTitleWrapper}>
-                        <Typography variant='h4' className={classes.mainTitle}>
-                            <FormattedMessage
-                                defaultMessage='API Groups'
-                                id='Apis.Listing.TagCloudListing.apigroups.main'
-                            />
-                        </Typography>
-                        {apisTagCloudGroup && apisTagCloudGroup.tags && (
-                            <Typography variant='caption' gutterBottom align='left'>
-                                <FormattedMessage
-                                    defaultMessage='Displaying'
-                                    id='Apis.Listing.TagCloudListing.displaying'
-                                />
-                                {apisTagCloudGroup.tags.count}
-                                <FormattedMessage
-                                    defaultMessage='API Groups'
-                                    id='Apis.Listing.TagCloudListing.apigroups.count'
-                                />
-                            </Typography>
-                        )}
-                    </div>
-                    <div className={classes.buttonRight}>
-                        <IconButton className={classes.button} onClick={() => this.setListType('list')}>
-                            <Icon color={listType === 'list' ? 'primary' : 'default'}>list</Icon>
-                        </IconButton>
-                        <IconButton className={classes.button} onClick={() => this.setListType('grid')}>
-                            <Icon color={listType === 'grid' ? 'primary' : 'default'}>grid_on</Icon>
-                        </IconButton>
-                    </div>
+    return (
+        <main className={classes.content}>
+            <div className={classes.appBar}>
+                <div className={classes.mainIconWrapper}>
+                    <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
                 </div>
-                {(apisTagCloudGroup && apisTagCloudGroup.length > 0)
-                    ? <ApiTagCloud data={apisTagCloudGroup} listType={listType} apiType={apiType} />
-                    : (
-                        <div className={classes.mainTitle}>
-                            <Typography variant='subtitle1' gutterBottom align='center'>
-                                <FormattedMessage
-                                    defaultMessage='Tags Connot be Found'
-                                    id='Apis.Listing.TagCloudListing.tagsNotFound'
-                                />
-                            </Typography>
-                        </div>
-                    )
-                }
-            </main>
-        );
-    }
+                <div className={classes.mainTitleWrapper}>
+                    <Typography variant='h4' className={classes.mainTitle}>
+                        <FormattedMessage
+                            defaultMessage='API Groups'
+                            id='Apis.Listing.TagCloudListing.apigroups.main'
+                        />
+                    </Typography>
+                </div>
+            </div>
+            <div className={classes.listContentWrapper}>
+                <TagCloudListingTags />
+            </div>
+        </main>
+    );
 }
-
-TagCloudListing.propTypes = {
-    classes: PropTypes.shape({
-        listContentWrapper: PropTypes.shape({}).isRequired,
-        defaultApiView: PropTypes.shape({}).isRequired,
-        mainTitle: PropTypes.shape({}).isRequired,
-        buttonRight: PropTypes.shape({}).isRequired,
-        button: PropTypes.shape({}).isRequired,
-        mainTitleWrapper: PropTypes.shape({}).isRequired,
-        mainIconWrapper: PropTypes.shape({}).isRequired,
-        content: PropTypes.shape({}).isRequired,
-        root: PropTypes.shape({}).isRequired,
-    }).isRequired,
-    theme: PropTypes.shape({
-        palette: PropTypes.shape({
-            getContrastText: PropTypes.func.isRequired,
-            background: PropTypes.shape({
-                paper: PropTypes.shape({}).isRequired,
-            }).isRequired,
-        }).isRequired,
-        custom: PropTypes.shape({
-            tagWiseMode: PropTypes.bool.isRequired,
-            tagGroupKey: PropTypes.string.isRequired,
-            defaultApiView: PropTypes.string.isRequired,
-        }),
-    }).isRequired,
-};
-
-export default withStyles(styles, { withTheme: true })(TagCloudListing);

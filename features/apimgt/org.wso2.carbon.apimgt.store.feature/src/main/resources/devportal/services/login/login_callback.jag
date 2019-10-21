@@ -19,14 +19,14 @@
 
     include("/services/constants.jag");
     include("/services/jagg.jag");
-    var app = require("/site/public/theme/defaultTheme.js").Configurations.app;
+    var app = require("/site/public/theme/settings.js").Settings.app;
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var serverUrl = "";
         if (app.reverseProxy.enabled === true) {
         serverUrl = app.reverseProxy.origin;
     } else {
         serverUrl = utils.getServerURL();
-    } 
+    }
     var tokenRequestData = {
         "grant_type": "authorization_code",
         "code": request.getParameter("code","UTF-8"),

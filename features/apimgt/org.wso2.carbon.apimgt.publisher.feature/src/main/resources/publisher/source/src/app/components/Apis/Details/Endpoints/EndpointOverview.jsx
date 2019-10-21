@@ -171,10 +171,10 @@ function EndpointOverview(props) {
             }
             if (Array.isArray(availableEndpoints)) {
                 return availableEndpoints[0].endpoint_type !== undefined ?
-                    endpointTypes[1] : endpointTypes[0];
+                    endpointTypes[2] : endpointTypes[0];
             }
             return availableEndpoints.endpoint_type !== undefined ?
-                endpointTypes[1] : endpointTypes[0];
+                endpointTypes[2] : endpointTypes[0];
         }
     };
 
@@ -334,6 +334,13 @@ function EndpointOverview(props) {
         endpointsDispatcher({ action: category, value: modifiedEndpoint });
     };
 
+    const handleEndpointCategorySelect = (event) => {
+        endpointsDispatcher({
+            action: 'endpoint_type',
+            value: { category: event.target.value, endpointType: endpointType.key },
+        });
+    };
+
     /**
      * Handles the endpoint type select event.
      * @param {any} event The select event.
@@ -431,13 +438,13 @@ function EndpointOverview(props) {
 
     /**
      * Method to handle the endpoint security changes.
-     * @param {any} event The html event
+     * @param {string} value The value
      * @param {string} field The security propety that is being modified.
      * */
-    const handleEndpointSecurityChange = (event, field) => {
+    const handleEndpointSecurityChange = (value, field) => {
         endpointsDispatcher({
             action: 'endpointSecurity',
-            value: { ...endpointSecurityInfo, [field]: event.target.value },
+            value: { ...endpointSecurityInfo, [field]: value },
         });
     };
 
@@ -502,6 +509,7 @@ function EndpointOverview(props) {
                         category='production_endpoints'
                         editEndpoint={editEndpoint}
                         setAdvancedConfigOpen={toggleAdvanceConfig}
+                        apiId={api.id}
                     />
                 </Paper>
                 :
@@ -633,6 +641,7 @@ function EndpointOverview(props) {
                                                 category='production_endpoints'
                                                 editEndpoint={editEndpoint}
                                                 setAdvancedConfigOpen={toggleAdvanceConfig}
+                                                apiId={api.id}
                                             />
                                         </Collapse>
                                     </React.Fragment>}
@@ -668,6 +677,7 @@ function EndpointOverview(props) {
                                                 category='sandbox_endpoints'
                                                 editEndpoint={editEndpoint}
                                                 setAdvancedConfigOpen={toggleAdvanceConfig}
+                                                apiId={api.id}
                                             />
                                         </Collapse>
                                     </React.Fragment>
@@ -690,7 +700,6 @@ function EndpointOverview(props) {
                                 handleToggleEndpointSecurity={handleToggleEndpointSecurity}
                                 handleEndpointSecurityChange={handleEndpointSecurityChange}
                                 endpointType={endpointType}
-                                apiType={api.type}
                             />
                         </Grid>
                     }
@@ -708,6 +717,7 @@ function EndpointOverview(props) {
                                     />
                                 </Typography>
                                 <LoadbalanceFailoverConfig
+                                    handleEndpointCategorySelect={handleEndpointCategorySelect}
                                     toggleAdvanceConfig={toggleAdvanceConfig}
                                     endpointsDispatcher={endpointsDispatcher}
                                     epConfig={(cloneDeep(epConfig))}

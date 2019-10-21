@@ -18,7 +18,7 @@
  */
 
     var log = new Log("Services login DCR request");
-    var app = require("/site/public/theme/defaultTheme.js").Configurations.app;
+    var app = require("/site/public/theme/settings.js").Settings.app;
     include("/services/constants.jag");
 
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -29,7 +29,7 @@
         serverUrl = app.reverseProxy.origin;
     } else {
         serverUrl = utils.getServerURL();
-    } 
+    }
     application.put("serverPort", serverPort);
 
     var settingsAPIUrl = serverUrl + SETTINGS_REST_API_URL_SUFFIX;
