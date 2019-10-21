@@ -106,7 +106,7 @@ function Invoice(props) {
 
     const handleAlertClose = () => {
         setShowErrorPopup(false);
-    }
+    };
 
     return (
         <React.Fragment>
