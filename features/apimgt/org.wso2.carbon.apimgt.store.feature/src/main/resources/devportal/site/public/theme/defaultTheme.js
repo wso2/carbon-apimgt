@@ -196,12 +196,7 @@ const Configurations = {
                     style: 'fixed-left', // If 'page' it will show a different page. Else if 'fixed-left' will show a fixed menu with all the group tags on the left.
                     thumbnail: { // These params will be applyed only if the style is 'page'
                         width: 150,
-                        image: '/devportal/site/public/images/api/api-default.png',
-                    },
-                    fixedStyles: { // These params will be applyed only if the style is 'fixed-left'
-                        width: 200,
-                        background: 'rgba(255,255,255,100)',
-                        hasIcon: false,
+                        image: '/site/public/images/api/api-default.png',
                     },
                     key: '-group',
                     showAllApis: true,
@@ -209,8 +204,18 @@ const Configurations = {
                 tagCloud: {
                     active: true,
                     colorOptions: { // This is the Options object passed to TagCloud component of https://www.npmjs.com/package/react-tagcloud
-                        luminosity: 'dark',
+                        luminosity: 'light',
                         hue: 'blue',
+                    },
+                    leftMenu: { // These params will be applyed only if the style is 'fixed-left'
+                        width: 200,
+                        height: 'calc(100vh - 222px)',
+                        background: '#1a1f2f',
+                        color: '#c7e9ff',
+                        titleBackground: '#335c8b',
+                        sliderBackground: '#335c8b',
+                        sliderWidth: 25,
+                        hasIcon: false,
                     },
                 },
             },

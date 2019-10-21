@@ -26,6 +26,7 @@ import Icon from '@material-ui/core/Icon';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { app } from 'Settings';
 
 /**
  * @inheritdoc
@@ -76,8 +77,10 @@ const styles = theme => ({
         fill: 'red',
     },
     textWrapper: {
-        color: theme.palette.text.secondary,
-        textDecoration: 'none',
+        color: theme.custom.tagCloud.leftMenu.color,
+        '& .material-icons': {
+            color: theme.custom.tagCloud.leftMenu.color,
+        },
     },
     image: {
         width: theme.custom.tagWise.thumbnail.width,
@@ -129,7 +132,7 @@ function ApiTagThumb(props) {
     return (
         <div className={classes.thumbWrapper}>
             <Link to={tagLink} className={classes.imageWrapper}>
-                <img src={image} className={classes.image} alt='' />
+                <img src={app.context + image} className={classes.image} alt='' />
             </Link>
             <div className={classNames(classes.thumbContent)}>
                 <Link to={tagLink} className={classes.textWrapper}>
