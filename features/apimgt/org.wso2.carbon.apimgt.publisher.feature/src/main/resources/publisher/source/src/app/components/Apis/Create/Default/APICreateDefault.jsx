@@ -166,7 +166,8 @@ function APICreateDefault(props) {
                     }
                     console.error(error);
                     setIsPublishing(false); // We don't publish if something when wrong
-                }).finally(() => {
+                })
+                .finally(() => {
                     setIsCreating(false);
                 });
         }
@@ -243,7 +244,8 @@ function APICreateDefault(props) {
                     <FormattedMessage
                         id='Apis.Create.Default.APICreateDefault.apiProduct.sub.heading'
                         defaultMessage={
-                            'Create an API Product by providing a Name, a Context,' + ' and Business Plans (optional).'
+                            'Create an API Product by providing a Name, a Context,'
+                            + ' and Business Plans (optional).'
                         }
                     />
                 </Typography>
@@ -262,7 +264,8 @@ function APICreateDefault(props) {
                     <FormattedMessage
                         id='Apis.Create.Default.APICreateDefault.webSocket.sub.heading'
                         defaultMessage={
-                            'Create a WebSocket API by providing a Name, a Context,' + ' and Business Plans (optional).'
+                            'Create a WebSocket API by providing a Name, a Context,'
+                            + ' and Business Plans (optional).'
                         }
                     />
                 </Typography>
@@ -310,7 +313,7 @@ function APICreateDefault(props) {
                                 Create {isCreating && !isPublishing && <CircularProgress size={24} />}
                             </Button>
                         </Grid>
-                        {!AuthManager.isNotPublisher() &&
+                        {!AuthManager.isNotPublisher() && (
                             <Grid item>
                                 <Button
                                     id='itest-id-apicreatedefault-createnpublish'
@@ -325,7 +328,7 @@ function APICreateDefault(props) {
                                     {!isCreating && isPublishing && 'Publishing API . . .'}
                                 </Button>
                             </Grid>
-                        }
+                        )}
                         <Grid item>
                             <Link to='/apis/'>
                                 <Button variant='text'>
