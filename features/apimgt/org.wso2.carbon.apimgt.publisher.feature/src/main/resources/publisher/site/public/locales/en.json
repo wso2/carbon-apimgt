@@ -57,7 +57,7 @@
   "Apis.Details.APIDefinition.APIDefinition.btn.close": "Close",
   "Apis.Details.APIDefinition.APIDefinition.btn.no": "CANCEL",
   "Apis.Details.APIDefinition.APIDefinition.btn.yes": "SAVE",
-  "Apis.Details.APIDefinition.APIDefinition.convert.to": "Convert to",
+  "Apis.Details.APIDefinition.APIDefinition.convert.to": "Convert to ",
   "Apis.Details.APIDefinition.APIDefinition.documents.swagger.editor.update.content": "Update Content",
   "Apis.Details.APIDefinition.APIDefinition.download.definition": "Download Definition",
   "Apis.Details.APIDefinition.APIDefinition.edit": "Edit",
