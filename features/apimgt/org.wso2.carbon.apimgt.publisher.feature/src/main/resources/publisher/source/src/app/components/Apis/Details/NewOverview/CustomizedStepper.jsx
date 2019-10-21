@@ -252,7 +252,7 @@ export default function CustomizedSteppers() {
                                     variant='contained'
                                     color='primary'
                                     onClick={() => updateLCStateOfAPI(api.id, 'Deploy as a Prototype')}
-                                    disabled={api.workflowStatus === 'CREATED'}
+                                    disabled={api.workflowStatus === 'CREATED' || !AuthManager.isNotCreator()}
                                 >
                           Deploy as a prototype
                                     {isUpdating && <CircularProgress size={20} />}
