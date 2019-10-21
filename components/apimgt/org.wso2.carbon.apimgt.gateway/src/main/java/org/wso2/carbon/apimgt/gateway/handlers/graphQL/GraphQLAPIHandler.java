@@ -181,7 +181,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
             if (log.isDebugEnabled()) {
                 log.debug("Operation - Subscription " + operation.getName());
             }
-            getNestedLevels(operation.getSelectionSet().getSelections(),supportedFields, operationArray);
+            getNestedLevelOperations(operation.getSelectionSet().getSelections(),supportedFields, operationArray);
             operationList = String.join(",", operationArray);
         } else if (operation.getOperation().equals(Operation.MUTATION)) {
             // Will support nexted level mutation according to requirements.
@@ -193,7 +193,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
             if (log.isDebugEnabled()) {
                 log.debug("Operation - Subscription " + operation.getName());
             }
-            getNestedLevels(operation.getSelectionSet().getSelections(), supportedFields, operationArray);
+            getNestedLevelOperations(operation.getSelectionSet().getSelections(), supportedFields, operationArray);
             operationList = String.join(",", operationArray);
         }
         return operationList;
@@ -205,7 +205,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
      * @param supportedFields supportedFields
      * @param operationArray operationArray
      */
-    public void getNestedLevels(List<Selection> selectionList, ArrayList<String> supportedFields,
+    public void getNestedLevelOperations(List<Selection> selectionList, ArrayList<String> supportedFields,
                                 ArrayList<String> operationArray) {
         for (Selection selection : selectionList) {
             Field levelField = (Field) selection;
@@ -217,7 +217,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 }
             }
             if (levelField.getSelectionSet() != null) {
-                getNestedLevels(levelField.getSelectionSet().getSelections(), supportedFields, operationArray);
+                getNestedLevelOperations(levelField.getSelectionSet().getSelections(), supportedFields, operationArray);
             }
         }
     }
