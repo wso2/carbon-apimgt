@@ -132,7 +132,7 @@ export default function DefaultAPIForm(props) {
             Boolean(api.name) &&
             (isAPIProduct || Boolean(api.version)) &&
             Boolean(api.context) &&
-            (!isAPIProduct || (Boolean(api.policies) && api.policies.length > 0));
+            (!isAPIProduct || newState.policy === null);
         onValidate(isFormValid, validity);
         setValidity(newState);
     };

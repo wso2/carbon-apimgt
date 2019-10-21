@@ -45,7 +45,7 @@ export default function SelectPolicies(props) {
                 label={
                     <React.Fragment>
                         <FormattedMessage
-                            id='Apis.Create.Components.SelectPolicies.busimess.plans'
+                            id='Apis.Create.Components.SelectPolicies.business.plans'
                             defaultMessage='Business plan(s)'
                         />
                         {isAPIProduct && (<sup className={classes.mandatoryStar}>*</sup>)}
