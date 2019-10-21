@@ -5055,7 +5055,8 @@ definitions:
       mapExistingAuthApps:
         type: boolean
         default: false
-
+      apiGatewayEndpoint:
+        type: string
 #-----------------------------------------------------
 # The Application Attribute resource
 #-----------------------------------------------------
