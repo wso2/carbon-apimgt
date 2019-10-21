@@ -26,7 +26,6 @@ import Icon from '@material-ui/core/Icon';
 import Divider from '@material-ui/core/Divider';
 import Grid from '@material-ui/core/Grid';
 import JSFileDownload from 'js-file-download';
-import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
@@ -39,6 +38,11 @@ import Api from '../../../data/api';
 const styles = theme => ({
     genericMessageWrapper: {
         margin: theme.spacing(2),
+    },
+    titleSub: {
+        marginLeft: theme.spacing(2),
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
     },
 });
 
@@ -167,13 +171,13 @@ class Sdk extends React.Component {
      * @memberof Sdk
      */
     render() {
-        const language_list = this.state.items;
+        const languageList = this.state.items;
         const { onlyIcons, intl, classes } = this.props;
         if (onlyIcons) {
             return (
-                language_list && (
+                languageList && (
                     <React.Fragment>
-                        {language_list.map((language, index) => index < 3 && (
+                        {languageList.map((language, index) => index < 3 && (
                                 <Grid item xs={4}>
                                     <a
                                         onClick={event => this.handleClick(event, language)}
@@ -197,79 +201,87 @@ class Sdk extends React.Component {
                 )
             );
         }
-        return language_list ? (
-            <Grid container className='tab-grid' spacing={0}>
-                <Grid item xs={12} sm={6} md={9} lg={9} xl={10}>
-                    {this.state.sdkLanguages.length >= this.filter_threshold && (
-                        <Grid item style={{ textAlign: 'left', margin: '14px' }}>
-                            <TextField
-                                id='search'
-                                label={intl.formatMessage({
-                                    defaultMessage: 'Search SDK',
-                                    id: 'Apis.Details.Sdk.search.sdk',
-                                })}
-                                type='text'
-                                margin='normal'
-                                name='searchSdk'
-                                onChange={this.handleChange}
-                            />
-                        </Grid>
-                    )}
-                    <Grid container justify='flex-start' spacing={Number(24)}>
-                        {language_list.map((language, index) => (
-                            <Grid key={index} item>
-                                <div style={{ width: 'auto', textAlign: 'center', margin: '10px' }}>
-                                    <Card>
-                                        <div>{language.toString().toUpperCase()}</div>
-                                        <Divider />
-                                        <CardMedia
-                                            title={language.toString().toUpperCase()}
-                                            src={'/devportal/site/public/images/sdks/' + new String(language) + '.svg'}
-                                        >
-                                            <img
-                                                alt={language}
-                                                onError={this.addDefaultSrc}
-                                                src={
-                                                    `/devportal/site/public/images/sdks/${language}.svg`
-                                                }
-                                                style={{ width: '100px', height: '100px', margin: '30px' }}
-                                            />
-                                        </CardMedia>
-                                        <CardActions>
-                                            <Grid container justify='center'>
-                                                <Button
-                                                    color='secondary'
-                                                    onClick={event => this.handleClick(event, language)}
+        return (
+            <React.Fragment>
+                <Typography variant='h4' className={classes.titleSub}>
+                    <FormattedMessage id='Apis.Details.Sdk.title' defaultMessage='Software Development Kits (SDKs)' />
+                </Typography>
+                {languageList ? (
+                    <Grid container className='tab-grid' spacing={0}>
+                        <Grid item xs={12} sm={6} md={9} lg={9} xl={10}>
+                            {this.state.sdkLanguages.length >= this.filter_threshold && (
+                                <Grid item style={{ textAlign: 'left', margin: '14px' }}>
+                                    <TextField
+                                        id='search'
+                                        label={intl.formatMessage({
+                                            defaultMessage: 'Search SDK',
+                                            id: 'Apis.Details.Sdk.search.sdk',
+                                        })}
+                                        type='text'
+                                        margin='normal'
+                                        name='searchSdk'
+                                        onChange={this.handleChange}
+                                    />
+                                </Grid>
+                            )}
+                            <Grid container justify='flex-start' spacing={Number(24)}>
+                                {languageList.map((language, index) => (
+                                    <Grid key={index} item>
+                                        <div style={{ width: 'auto', textAlign: 'center', margin: '10px' }}>
+                                            <Card>
+                                                <div>{language.toString().toUpperCase()}</div>
+                                                <Divider />
+                                                <CardMedia
+                                                    title={language.toString().toUpperCase()}
+                                                    src={'/devportal/site/public/images/sdks/' + new String(language) +
+                                                    '.svg'}
                                                 >
-                                                    <Icon>arrow_downward</Icon>
-                                                    {'Download'}
-                                                </Button>
-                                            </Grid>
-                                        </CardActions>
-                                    </Card>
-                                </div>
+                                                    <img
+                                                        alt={language}
+                                                        onError={this.addDefaultSrc}
+                                                        src={
+                                                            `/devportal/site/public/images/sdks/${language}.svg`
+                                                        }
+                                                        style={{ width: '100px', height: '100px', margin: '30px' }}
+                                                    />
+                                                </CardMedia>
+                                                <CardActions>
+                                                    <Grid container justify='center'>
+                                                        <Button
+                                                            color='secondary'
+                                                            onClick={event => this.handleClick(event, language)}
+                                                        >
+                                                            <Icon>arrow_downward</Icon>
+                                                            {'Download'}
+                                                        </Button>
+                                                    </Grid>
+                                                </CardActions>
+                                            </Card>
+                                        </div>
+                                    </Grid>
+                                ))}
                             </Grid>
-                        ))}
+                        </Grid>
                     </Grid>
-                </Grid>
-            </Grid>
-        ) : (
-            <div className={classes.genericMessageWrapper}>
-                <InlineMessage type='info' className={classes.dialogContainer}>
-                    <Typography variant='h5' component='h3'>
-                        <FormattedMessage
-                            id='Apis.Details.Sdk.no.sdks'
-                            defaultMessage='No SDKs'
-                        />
-                    </Typography>
-                    <Typography component='p'>
-                        <FormattedMessage
-                            id='Apis.Details.Sdk.no.sdks.content'
-                            defaultMessage='No SDKs available for this API'
-                        />
-                    </Typography>
-                </InlineMessage>
-            </div>
+                ) : (
+                    <div className={classes.genericMessageWrapper}>
+                        <InlineMessage type='info' className={classes.dialogContainer}>
+                            <Typography variant='h5' component='h3'>
+                                <FormattedMessage
+                                    id='Apis.Details.Sdk.no.sdks'
+                                    defaultMessage='No SDKs'
+                                />
+                            </Typography>
+                            <Typography component='p'>
+                                <FormattedMessage
+                                    id='Apis.Details.Sdk.no.sdks.content'
+                                    defaultMessage='No SDKs available for this API'
+                                />
+                            </Typography>
+                        </InlineMessage>
+                    </div>
+                )}
+            </React.Fragment>
         );
     }
 }

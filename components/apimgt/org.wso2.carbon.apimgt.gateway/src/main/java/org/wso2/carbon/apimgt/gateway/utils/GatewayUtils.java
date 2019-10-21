@@ -31,7 +31,6 @@ import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.Pipe;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -44,6 +43,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimeDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -53,17 +53,16 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.security.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.security.cert.Certificate;
-import java.util.Map;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -578,37 +577,43 @@ public class GatewayUtils {
      * @throws APISecurityException in case of signature verification failure
      */
     public static boolean verifyTokenSignature(String[] splitToken, String alias) throws APISecurityException {
+
+        String signatureAlgorithm = null;
         // Retrieve signature algorithm from token header
-        String signatureAlgorithm = getSignatureAlgorithm(splitToken);
+        try {
+            signatureAlgorithm = APIUtil.getSignatureAlgorithm(splitToken);
+        } catch (APIManagementException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Token decryption failure when retrieving signature algorithm. Token: " +
+                        getMaskedToken(splitToken), e);
+            }
+            log.error("Invalid Api Key. Failed to decode the Api Key header.");
+            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, e);
+        }
+
+        if (StringUtils.isBlank(signatureAlgorithm)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Signature algorithm not found in the token. Token: " + getMaskedToken(splitToken));
+            }
+            log.error("Invalid JWT token. Signature algorithm not found in the token.");
+            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+        }
 
         Certificate publicCert = null;
         //Read the client-truststore.jks into a KeyStore
         try {
-            KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
-            if (trustStore != null) {
-                // Read public certificate from trust store
-                publicCert = trustStore.getCertificate(alias);
-            }
-        } catch (KeyStoreException e) {
-            log.error("Error in retrieving public certificate from the trust store with alias : "
-                    + alias, e);
+            publicCert = APIUtil.getCertificateFromTrustStore(alias);
+        } catch (APIManagementException e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
         }
 
         if (publicCert != null) {
-            // Retrieve public key from the certificate
-            PublicKey publicKey = publicCert.getPublicKey();
-
             try {
-                // Verify token signature
-                Signature signatureInstance = Signature.getInstance(signatureAlgorithm);
-                signatureInstance.initVerify(publicKey);
-                String assertion = splitToken[0] + "." + splitToken[1];
-                signatureInstance.update(assertion.getBytes());
-                byte[] decodedSignature = java.util.Base64.getUrlDecoder().decode(splitToken[2]);
-                return signatureInstance.verify(decodedSignature);
-            } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | IllegalArgumentException e) {
+                return APIUtil.verifyTokenSignature(splitToken, publicCert, signatureAlgorithm);
+            } catch (APIManagementException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Error while verifying JWT signature. Token: " + getMaskedToken(splitToken), e);
                 }
@@ -621,42 +626,6 @@ public class GatewayUtils {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
-    }
-
-    /**
-     * Retrieve the signature algorithm specified in the token header.
-     *
-     * @param splitToken The JWT token which is split into [header, payload, signature]
-     * @return whether the signature algorithm
-     * @throws APISecurityException in case of signature algorithm extraction failure
-     */
-    public static String getSignatureAlgorithm(String[] splitToken) throws APISecurityException {
-        String signatureAlgorithm;
-        JSONObject header;
-        try {
-            header = new JSONObject(new String(java.util.Base64.getUrlDecoder().decode(splitToken[0])));
-        } catch (JSONException | IllegalArgumentException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Token decryption failure when retrieving header. Token: " +
-                        getMaskedToken(splitToken), e);
-            }
-            log.error("Invalid Api Key. Failed to decode the Api Key header.");
-            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, e);
-        }
-        signatureAlgorithm = header.getString(APIConstants.JwtTokenConstants.SIGNATURE_ALGORITHM);
-        if (org.apache.commons.lang.StringUtils.isBlank(signatureAlgorithm)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Signature algorithm not found in the token. Token: " + getMaskedToken(splitToken));
-            }
-            log.error("Invalid JWT token. Signature algorithm not found in the token.");
-            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-        }
-        if (APIConstants.SIGNATURE_ALGORITHM_RS256.equals(signatureAlgorithm)) {
-            signatureAlgorithm = APIConstants.SIGNATURE_ALGORITHM_SHA256_WITH_RSA;
-        }
-        return signatureAlgorithm;
     }
 
     public static String getMaskedToken(String[] splitToken) {

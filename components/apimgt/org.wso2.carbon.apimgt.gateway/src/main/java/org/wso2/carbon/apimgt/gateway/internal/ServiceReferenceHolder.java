@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
-import java.security.KeyStore;
 
 
 public class ServiceReferenceHolder {
@@ -41,7 +40,6 @@ public class ServiceReferenceHolder {
     private TracingService tracingService;
     private ServerConfigurationService serverConfigurationService;
     private RealmService realmService;
-    private KeyStore trustStore;
 
     public ThrottleDataHolder getThrottleDataHolder() {
         return throttleDataHolder;
@@ -89,14 +87,6 @@ public class ServiceReferenceHolder {
 
     public void setThrottleProperties(ThrottleProperties throttleProperties) {
         this.throttleProperties = throttleProperties;
-    }
-
-    public KeyStore getTrustStore() {
-        return trustStore;
-    }
-
-    public void setTrustStore(KeyStore trustStore) {
-        this.trustStore = trustStore;
     }
 
     public void setAxis2ConfigurationContext(ConfigurationContext axis2ConfigurationContext) {
