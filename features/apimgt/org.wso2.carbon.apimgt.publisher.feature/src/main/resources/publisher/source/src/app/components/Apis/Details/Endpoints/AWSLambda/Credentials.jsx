@@ -22,7 +22,6 @@ const useStyles = makeStyles(theme => ({
 export default function Credentials(props) {
     const { epConfig, setEpConfig, endpointsDispatcher } = props;
     const classes = useStyles();
-    const [isChanged, setIsChanged] = useState(false);
     return (
         <Grid item>
             <TextField
@@ -48,13 +47,12 @@ export default function Credentials(props) {
                 margin='normal'
                 variant='outlined'
                 className={classes.textField}
-                value={isChanged ? epConfig.amznSecretKey : ''}
+                value={epConfig.amznSecretKey}
                 onChange={(event) => {
                     const newEpConfig = { ...epConfig };
                     newEpConfig.amznSecretKey = event.target.value;
                     setEpConfig(newEpConfig);
                     endpointsDispatcher({ action: 'set_awsCredentials', value: newEpConfig });
-                    setIsChanged(true);
                 }}
             />
         </Grid>

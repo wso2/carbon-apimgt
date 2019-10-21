@@ -15,6 +15,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.json.XML;
 import java.nio.ByteBuffer;
@@ -37,18 +38,27 @@ public class AWSLambdaClassMediator extends AbstractMediator {
      * @return true
      */
     public boolean mediate(MessageContext messageContext) {
+        // convert XML payload to JSON payload
+        JSONObject soapBody = XML.toJSONObject(messageContext.getEnvelope().getBody().toString()).getJSONObject("soapenv:Body");
+
+        String jsonPayload = "{}";
+        if (soapBody.has("jsonObject")) {
+            jsonPayload = soapBody.getJSONObject("jsonObject").toString();
+        }
+
+        // get response from Lambda
+        ByteBuffer response = invokeLambda(jsonPayload);
+
+        // byte buffer to string conversion
+        String strResponse = new String(response.array(), Charset.forName("UTF-8"));
+
+        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         try {
-            // convert XML payload to JSON payload
-            String JSONPayload = XML.toJSONObject(messageContext.getEnvelope().getBody().toString()).getJSONObject("soapenv:Body").getJSONObject("jsonObject").toString();
-
-            // get response from Lambda
-            ByteBuffer response = invokeLambda(JSONPayload);
-
-            // byte buffer to string conversion
-            String strResponse = new String(response.array(), Charset.forName("UTF-8"));
-
             // set response to messageContext
-            JsonUtil.getNewJsonPayload(((Axis2MessageContext) messageContext).getAxis2MessageContext(), strResponse, true, true);
+            JsonUtil.getNewJsonPayload(axis2MessageContext, strResponse, true, true);
+            axis2MessageContext.removeProperty("NO_ENTITY_BODY");
+            axis2MessageContext.setProperty("messageType", "application/json");
+            axis2MessageContext.setProperty("ContentType", "application/json");
         } catch (AxisFault axisFault) {
             axisFault.printStackTrace();
         }
@@ -76,8 +86,7 @@ public class AWSLambdaClassMediator extends AbstractMediator {
                     .withFunctionName(resourceName)
                     .withPayload(payload)
                     .withInvocationType(InvocationType.RequestResponse);
-            InvokeResult invokeResult = null;
-            invokeResult = awsLambda.invoke(invokeRequest);
+            InvokeResult invokeResult = awsLambda.invoke(invokeRequest);
             response = invokeResult.getPayload();
         } catch (Exception e) {
             e.printStackTrace();
@@ -126,4 +135,5 @@ public class AWSLambdaClassMediator extends AbstractMediator {
     public void setResourceName(String resourceName) {
         this.resourceName = resourceName;
     }
+
 }

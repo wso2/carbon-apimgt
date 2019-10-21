@@ -298,10 +298,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 LinkedHashMap endpointConfig = (LinkedHashMap) body.getEndpointConfig();
                 if (endpointConfig.containsKey("amznSecretKey")) {
                     String secretKey = (String) endpointConfig.get("amznSecretKey");
-                    CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-                    String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
-                    endpointConfig.put("amznSecretKey", encryptedSecretKey);
-                    body.setEndpointConfig(endpointConfig);
+                    if (!secretKey.equals("")) {
+                        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                        String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                        endpointConfig.put("amznSecretKey", encryptedSecretKey);
+                        body.setEndpointConfig(endpointConfig);
+                    }
                 }
             }
 
@@ -602,13 +604,17 @@ public class ApisApiServiceImpl implements ApisApiService {
             boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
 
             // AWS Lambda: secret key encryption
-            LinkedHashMap endpointConfig = (LinkedHashMap) body.getEndpointConfig();
-            if (endpointConfig.containsKey("amznSecretKey")) {
-                String secretKey = (String) endpointConfig.get("amznSecretKey");
-                CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-                String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
-                endpointConfig.put("amznSecretKey", encryptedSecretKey);
-                body.setEndpointConfig(endpointConfig);
+            if (body.getEndpointConfig() != null) {
+                LinkedHashMap endpointConfig = (LinkedHashMap) body.getEndpointConfig();
+                if (endpointConfig.containsKey("amznSecretKey")) {
+                    String secretKey = (String) endpointConfig.get("amznSecretKey");
+                    if (!secretKey.equals("")) {
+                        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                        String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                        endpointConfig.put("amznSecretKey", encryptedSecretKey);
+                        body.setEndpointConfig(endpointConfig);
+                    }
+                }
             }
 
             if (!hasClassLevelScope) {
@@ -717,7 +723,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdAmznResourceNamesGet(String apiId, MessageContext messageContext) throws APIManagementException {
         try {
-            JSONObject endpointConfig = (JSONObject) getAPIByID(apiId).getEndpointConfig();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            String endpointConfigString = api.getEndpointConfig();
+            JSONParser jsonParser = new JSONParser();
+            JSONObject endpointConfig = (JSONObject) jsonParser.parse(endpointConfigString);
             if (endpointConfig != null) {
                 if (endpointConfig.containsKey("amznAccessKey") && endpointConfig.containsKey("amznSecretKey")) {
                     String accessKey = (String) endpointConfig.get("amznAccessKey");

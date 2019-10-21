@@ -640,6 +640,10 @@ public class APIMappingUtil {
             try {
                 JSONParser parser = new JSONParser();
                 JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfig);
+                // AWS Lambda: set empty secret key before passing
+                if (endpointConfigJson.get("endpoint_type").equals("awslambda")) {
+                    endpointConfigJson.put("amznSecretKey", "");
+                }
                 dto.setEndpointConfig(endpointConfigJson);
             } catch (ParseException e) {
                 //logs the error and continues as this is not a blocker
