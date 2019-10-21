@@ -267,7 +267,7 @@ export default function UploadCertificate(props) {
                                     'application/x-pkcs12,' +
                                     'application/x-pkcs7-certificates,' +
                                     'application/x-pkcs7-certreqresp,' +
-                                    '.p8, .p10, .csr, .cer, .crl, .p7c, .crt, .der, .p12, .pfx, .p7b, .spc, .p7r'
+                                    '.p8, .p10, .cer, .cert, .p7c, .crt, .der, .p12, .pfx, .p7b, .spc, .p7r'
                             }
                             className={classes.dropzone}
                             activeClassName={classes.acceptDrop}

@@ -24,10 +24,11 @@ public class ApplicationDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    int id;
-    String name;
-    String tier;
-    String owner;
+    private int id;
+    private String name;
+    private String tier;
+    private String owner;
+    private String uuid;
 
     public String getOwner() {
         return owner;
@@ -59,5 +60,13 @@ public class ApplicationDTO implements Serializable {
 
     public void setTier(String tier) {
         this.tier = tier;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }

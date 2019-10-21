@@ -41,7 +41,7 @@ public class PublisherAlertsAPIUtils {
     public static boolean validateConfigParameters(String configId) {
         String decodedConfigurationId = new String(Base64.getDecoder().decode(configId.getBytes()));
         String[] parameters = decodedConfigurationId.split("#");
-        if (parameters.length != 2) {
+        if (parameters.length < 2) {
             RestApiUtil.handleBadRequest(
                     "The configuration id validation failed. Should be {apiName}#{apiVersion}#{tenantDomain}",
                     log);

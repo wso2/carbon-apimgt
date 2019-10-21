@@ -509,6 +509,7 @@ function EndpointOverview(props) {
                         category='production_endpoints'
                         editEndpoint={editEndpoint}
                         setAdvancedConfigOpen={toggleAdvanceConfig}
+                        apiId={api.id}
                     />
                 </Paper>
                 :
@@ -640,6 +641,7 @@ function EndpointOverview(props) {
                                                 category='production_endpoints'
                                                 editEndpoint={editEndpoint}
                                                 setAdvancedConfigOpen={toggleAdvanceConfig}
+                                                apiId={api.id}
                                             />
                                         </Collapse>
                                     </React.Fragment>}
@@ -675,6 +677,7 @@ function EndpointOverview(props) {
                                                 category='sandbox_endpoints'
                                                 editEndpoint={editEndpoint}
                                                 setAdvancedConfigOpen={toggleAdvanceConfig}
+                                                apiId={api.id}
                                             />
                                         </Collapse>
                                     </React.Fragment>
@@ -697,7 +700,6 @@ function EndpointOverview(props) {
                                 handleToggleEndpointSecurity={handleToggleEndpointSecurity}
                                 handleEndpointSecurityChange={handleEndpointSecurityChange}
                                 endpointType={endpointType}
-                                apiType={api.type}
                             />
                         </Grid>
                     }

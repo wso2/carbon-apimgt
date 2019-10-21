@@ -115,6 +115,16 @@ public class JWTValidator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
+        } else {
+            if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
+                            getMaskedToken(splitToken));
+                }
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Invalid JWT token");
+            }
         }
 
         if (!isVerified) {
@@ -243,6 +253,16 @@ public class JWTValidator {
             }
             // Check revoked map.
             else if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
+                            getMaskedToken(splitToken));
+                }
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Invalid JWT token");
+            }
+        } else {
+            if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
                             getMaskedToken(splitToken));
