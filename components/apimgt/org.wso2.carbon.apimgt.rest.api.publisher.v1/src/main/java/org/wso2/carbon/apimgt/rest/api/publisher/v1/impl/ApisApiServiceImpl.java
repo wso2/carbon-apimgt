@@ -639,6 +639,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(ExceptionCodes.NO_RESOURCES_FOUND, log);
             }
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
+            apiToUpdate.setUUID(originalAPI.getUUID());
             validateScopes(apiToUpdate);
             apiToUpdate.setThumbnailUrl(originalAPI.getThumbnailUrl());
 
