@@ -79,7 +79,7 @@ function Delete(props) {
             .then(() => {
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Details.Resources.Resources.api.scope.deleted.successfully',
-                    defaultMessage: 'API Scope Deleted successfully!',
+                    defaultMessage: 'API Scope deleted successfully!',
                 }));
                 setOpenLocal(!open);
             })

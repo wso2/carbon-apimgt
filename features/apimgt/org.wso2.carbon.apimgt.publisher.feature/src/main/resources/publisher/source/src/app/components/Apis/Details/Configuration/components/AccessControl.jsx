@@ -117,14 +117,14 @@ export default function AccessControl(props) {
             return (
                 <FormattedMessage
                     id='Apis.Details.Scopes.Roles.User.Invalid'
-                    defaultMessage='Role must be associated with API creator'
+                    defaultMessage='Role must be associated with the API creator'
                 />
             );
         } else {
             return (
                 <FormattedMessage
                     id='Apis.Details.Scopes.CreateScope.roles.help'
-                    defaultMessage='Enter valid role and press enter'
+                    defaultMessage='Enter valid role and press `Enter`'
                 />
             );
         }
@@ -154,7 +154,7 @@ export default function AccessControl(props) {
                     helperText={
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.AccessControl.form.helper.text'
-                            defaultMessage='By default there are no access restrictions'
+                            defaultMessage='There are no access restrictions by default.'
                         />
                     }
                     margin='normal'
@@ -201,7 +201,7 @@ export default function AccessControl(props) {
                                 <FormattedMessage
                                     id='Apis.Details.Configuration.components.AccessControl.tooltip.restrict.
                                     desc'
-                                    defaultMessage={'The API can be viewable and modifiable by only specific' +
+                                    defaultMessage={'The API can be viewed and modified only by specific' +
                                     ' publishers and creators with the roles that you specify'}
                                 />
                             </p>

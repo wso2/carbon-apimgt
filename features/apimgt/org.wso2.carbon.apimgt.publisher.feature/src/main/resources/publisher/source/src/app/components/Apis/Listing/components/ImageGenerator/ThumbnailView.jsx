@@ -633,7 +633,7 @@ class ThumbnailView extends Component {
                                     <Typography component='p' variant='body1' className={classes.body}>
                                         <FormattedMessage
                                             id='Apis.Listing.components.ImageGenerator.ThumbnailView.select.an.icon'
-                                            defaultMessage='Select an icon from the Material Icons for you api.'
+                                            defaultMessage='Select an icon from the Material Icons for your API.'
                                         />
                                     </Typography>
                                     <div style={{ background: '#efefef', maxHeight: 180, overflow: 'scroll' }}>

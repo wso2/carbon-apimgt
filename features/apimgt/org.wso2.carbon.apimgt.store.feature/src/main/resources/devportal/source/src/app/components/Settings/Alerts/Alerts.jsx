@@ -287,7 +287,7 @@ const Alerts = (props) => {
             console.error(err);
             Alert.error(intl.formatMessage({
                 id: 'Settings.Alerts.Alerts.unsubscribe.error.msg',
-                defaultMessage: 'Error occurred while Unsubscribing.',
+                defaultMessage: 'Error occurred while unsubscribing.',
             }));
         }).finally(() => setInProgress({ unSubscribing: false }));
     };

@@ -263,7 +263,7 @@ class ProvideGraphQL extends Component {
                         {valid.graphQLFile.empty && (
                             <FormattedMessage
                                 id='Apis.GraphQL.Steps.ProvideGraphQL.error.empty'
-                                defaultMessage='This field can not be empty.'
+                                defaultMessage='This field cannot be empty.'
                             />
                         )}
                     </FormHelperText>

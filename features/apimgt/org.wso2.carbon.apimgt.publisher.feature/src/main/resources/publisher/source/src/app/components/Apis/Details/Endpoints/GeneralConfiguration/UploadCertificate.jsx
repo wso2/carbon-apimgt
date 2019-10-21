@@ -290,7 +290,7 @@ export default function UploadCertificate(props) {
                                                                 '.UploadCertificate.click.or.drop.to.upload.file'
                                                         }
                                                         defaultMessage={
-                                                            'Click or drag the certificate ' +
+                                                            'Click or drag the certificate' +
                                                                 ' file to upload.'
                                                         }
                                                     />

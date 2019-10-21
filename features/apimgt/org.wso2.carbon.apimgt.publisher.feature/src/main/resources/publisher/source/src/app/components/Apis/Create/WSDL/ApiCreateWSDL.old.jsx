@@ -371,13 +371,13 @@ class APICreateWSDL extends React.Component {
                                 {uploadMethod === 'file' && (
                                     <FormattedMessage
                                         id='design.a.new.rest.api.using.wsdl.help.file'
-                                        defaultMessage='Provide an api definition file'
+                                        defaultMessage='Provide an API definition file'
                                     />
                                 )}
                                 {uploadMethod === 'url' && (
                                     <FormattedMessage
                                         id='design.a.new.rest.api.using.wsdl.help.url'
-                                        defaultMessage='Provide a url for the api deninition'
+                                        defaultMessage='Provide a URL for the API definition'
                                     />
                                 )}
                             </Typography>

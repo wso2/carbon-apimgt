@@ -312,7 +312,7 @@ class CreateEditForm extends React.Component {
             return (
                 <FormattedMessage
                     id='Apis.Details.Documents.CreateEditForm.empty.document.name.helper.text'
-                    defaultMessage='Document name can not be empty'
+                    defaultMessage='Document name cannot be empty'
                 />
             );
         } else {
@@ -338,7 +338,7 @@ class CreateEditForm extends React.Component {
             return (
                 <FormattedMessage
                     id='Apis.Details.Documents.CreateEditForm.source.url.helper.text.error.empty'
-                    defaultMessage='Url Field can not be empty'
+                    defaultMessage='URL Field can not be empty'
                 />
             );
         } else {

@@ -110,7 +110,7 @@ class Resources extends React.Component {
                 <div>
                     <FormattedMessage
                         id='Apis.Details.NewOverview.Resources.resource.not.found'
-                        defaultMessage='resource not found...'
+                        defaultMessage='Resource not found...'
                     />
                 </div>);
         }
@@ -119,7 +119,7 @@ class Resources extends React.Component {
                 <div>
                     <FormattedMessage
                         id='Apis.Details.NewOverview.Resources.loading'
-                        defaultMessage='loading...'
+                        defaultMessage='Loading...'
                     />
                 </div>);
         }

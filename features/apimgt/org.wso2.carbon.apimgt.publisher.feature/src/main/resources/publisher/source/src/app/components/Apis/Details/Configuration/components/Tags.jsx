@@ -55,7 +55,7 @@ export default function Tags(props) {
                 helperText={isTagValid ? (
                     <FormattedMessage
                         id='Apis.Details.Configuration.components.Tags.helper'
-                        defaultMessage='Press `enter` after typing the tag name to add a new tag'
+                        defaultMessage='Press `Enter` after typing the tag name, to add a new tag'
                     />
                 ) : (
                     <FormattedMessage

@@ -361,7 +361,7 @@ class CreateScope extends React.Component {
                                             ) : (
                                                 <FormattedMessage
                                                     id='Apis.Details.Scopes.CreateScope.short.description.name'
-                                                    defaultMessage='Enter Scope Name ( Ex: creator )'
+                                                    defaultMessage='Enter Scope Name ( E.g.,: creator )'
                                                 />
                                             )
                                         }
@@ -425,7 +425,7 @@ class CreateScope extends React.Component {
                                             ) : (
                                                 <FormattedMessage
                                                     id='Apis.Details.Scopes.CreateScope.roles.help'
-                                                    defaultMessage='Enter a valid role and press enter.'
+                                                    defaultMessage='Enter a valid role and press `Enter`.'
                                                 />
                                             )
                                         }

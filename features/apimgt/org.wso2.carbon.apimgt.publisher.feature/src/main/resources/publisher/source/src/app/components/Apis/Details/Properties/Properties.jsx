@@ -341,8 +341,8 @@ function Properties(props) {
                                 <FormattedMessage
                                     id='Apis.Details.Properties.Properties.add.new.property.message.content'
                                     defaultMessage={
-                                        'If you want to add specific custom properties to your ' +
-                                        'API you can add them here.'
+                                        'To add specific custom properties to your ' +
+                                        ' API, add them here.'
                                     }
                                 />
                             </Typography>
@@ -468,8 +468,8 @@ function Properties(props) {
                                                             id='Apis.Details.Properties.Properties.help'
                                                             defaultMessage={
                                                                 'Property name should be unique, should not contain ' +
-                                                                'spaces and cannot be any ' +
-                                                                'of the following as they are reserved keywords : ' +
+                                                                'spaces, and cannot be any ' +
+                                                                'of the following reserved keywords : ' +
                                                                 'provider, version, context, status, description, ' +
                                                                 'subcontext, doc, lcState, name, tags.'
                                                             }

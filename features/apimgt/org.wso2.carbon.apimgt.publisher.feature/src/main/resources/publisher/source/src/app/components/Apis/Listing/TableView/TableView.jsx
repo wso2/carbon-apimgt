@@ -443,7 +443,7 @@ class TableView extends React.Component {
                                             id='Apis.Listing.SampleAPIProduct.description'
                                             defaultMessage={
                                                 'The API resources in an API product can come from' +
-                                                ' one or more APIs, so you can mix and match resources from multiple ' +
+                                                ' one or more APIs, so you can mix and match resources from multiple' +
                                                 ' API resources to create specialized feature sets.'
                                             }
                                         />

@@ -127,7 +127,7 @@ class APIInputForm extends Component {
 
                         helperText={
                             valid.name.empty ? (
-                                <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
+                                <FormattedMessage id='error.empty' defaultMessage='This field cannot be empty.' />
                             ) : (
                                 nameHelperMsg
                             )
@@ -159,7 +159,7 @@ class APIInputForm extends Component {
                             placeholder='E.g: 1.0.0'
                             helperText={
                                 valid.version.empty ? (
-                                    <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
+                                    <FormattedMessage id='error.empty' defaultMessage='This field cannot be empty.' />
                                 ) : (
                                     ''
                                 )
@@ -189,7 +189,7 @@ class APIInputForm extends Component {
                             valid.context.empty ? (
                                 <FormattedMessage
                                     id='error.empty'
-                                    defaultMessage='This field can not be empty.'
+                                    defaultMessage='This field cannot be empty.'
                                 />
                             ) : (
                                 contextHelperMsg
@@ -213,7 +213,7 @@ class APIInputForm extends Component {
                             placeholder='E.g: http://appserver/resource'
                             helperText={
                                 valid.context.empty ? (
-                                    <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
+                                    <FormattedMessage id='error.empty' defaultMessage='This field cannot be empty.' />
                                 ) : (
                                     <FormattedMessage
                                         id='api.create.endpoint.help'

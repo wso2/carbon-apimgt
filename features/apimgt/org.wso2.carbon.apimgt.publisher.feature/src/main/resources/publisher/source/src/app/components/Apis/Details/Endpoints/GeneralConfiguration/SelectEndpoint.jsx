@@ -41,7 +41,7 @@ export default function SelectEndpoint(props) {
                 defaultMessage='Endpoint should not be empty'
             />, <FormattedMessage
                 id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint.helpertext'
-                defaultMessage='Endpoint for the Certificate'
+                defaultMessage='Endpoint for the certificate'
             />)
             }
             required

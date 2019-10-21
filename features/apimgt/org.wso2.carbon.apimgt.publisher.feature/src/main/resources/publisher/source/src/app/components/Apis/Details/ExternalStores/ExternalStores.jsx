@@ -72,11 +72,11 @@ export default function ExternalStores() {
         const resourceNotFoundMessageText = defineMessages({
             titleMessage: {
                 id: 'Apis.Details.ExternalStores.ExternalStores.external.stores.not.found.title',
-                defaultMessage: 'External Developert Portals Not Found for API : {apiUUID}',
+                defaultMessage: 'External Developert Portals not found for API : {apiUUID}',
             },
             bodyMessage: {
                 id: 'Apis.Details.ExternalStores.ExternalStores.external.stores.not.found.body',
-                defaultMessage: 'No External Developer Portals configured for current tenant',
+                defaultMessage: 'No External Developer Portals configured for the current tenant',
             },
         });
         const resourceNotFountMessage = {
@@ -124,7 +124,7 @@ export default function ExternalStores() {
                 const successfulStores = response.body.list.map(store => store.id);
                 Alert.success(intl.formatMessage({
                     id: 'Apis.Details.ExternalStores.ExternalStores.successfully.published.to.external.stores',
-                    defaultMessage: 'Successfully Published to external developer portals: {successfulStores}',
+                    defaultMessage: 'Successfully published to external developer portals: {successfulStores}',
                 }, { successfulStores }));
             })
             .catch((error) => {
