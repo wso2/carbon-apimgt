@@ -39,7 +39,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.util.TreeMap;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({OpenAPIUtils.class, MultitenantUtils.class})
+@PrepareForTest(OpenAPIUtils.class)
 public class BasicAuthAuthenticatorTest {
     private MessageContext messageContext;
     private org.apache.axis2.context.MessageContext axis2MsgCntxt;
