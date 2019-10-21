@@ -54,24 +54,7 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.Label;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.ResourcePath;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -166,6 +149,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 public class ApisApiServiceImpl implements ApisApiService {
 
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
+    private static final String API_PRODUCT_TYPE = "APIPRODUCT";
 
     class APIResource {
         String verb;
@@ -887,7 +871,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                     .deleteClientCertificate(RestApiUtil.getLoggedInUsername(), clientCertificateDTO.getApiIdentifier(),
                             alias);
             if (responseCode == ResponseCode.SUCCESS.getResponseCode()) {
-                apiProvider.updateAPI(api);
+                //Handle api product case.
+                if (API_PRODUCT_TYPE.equals(api.getType())) {
+                    APIIdentifier apiIdentifier = api.getId();
+                    APIProductIdentifier apiProductIdentifier =
+                            new APIProductIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(),
+                                    apiIdentifier.getVersion());
+                    APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
+                    apiProvider.updateAPIProduct(apiProduct);
+                } else {
+                    apiProvider.updateAPI(api);
+                }
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("The client certificate which belongs to tenant : %s represented by the "
                             + "alias : %s is deleted successfully", tenantDomain, alias));
@@ -968,7 +962,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                             tenantId);
 
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode) {
-                apiProvider.updateAPI(api);
+                //Handle api product case.
+                if (API_PRODUCT_TYPE.equals(api.getType())) {
+                    APIIdentifier apiIdentifier = api.getId();
+                    APIProductIdentifier apiProductIdentifier =
+                            new APIProductIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(),
+                                    apiIdentifier.getVersion());
+                    APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
+                    apiProvider.updateAPIProduct(apiProduct);
+                } else {
+                    apiProvider.updateAPI(api);
+                }
                 ClientCertMetadataDTO clientCertMetadataDTO = new ClientCertMetadataDTO();
                 clientCertMetadataDTO.setAlias(alias);
                 clientCertMetadataDTO.setApiId(api.getUUID());
@@ -1072,7 +1076,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                 log.debug(String.format("Add certificate operation response code : %d", responseCode));
             }
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode) {
-                apiProvider.updateAPI(api);
+                //Handle api product case.
+                if (API_PRODUCT_TYPE.equals(api.getType())) {
+                    APIIdentifier apiIdentifier = api.getId();
+                    APIProductIdentifier apiProductIdentifier =
+                            new APIProductIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(),
+                                    apiIdentifier.getVersion());
+                    APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
+                    apiProvider.updateAPIProduct(apiProduct);
+                } else {
+                    apiProvider.updateAPI(api);
+                }
                 ClientCertMetadataDTO certificateDTO = new ClientCertMetadataDTO();
                 certificateDTO.setAlias(alias);
                 certificateDTO.setApiId(apiId);
