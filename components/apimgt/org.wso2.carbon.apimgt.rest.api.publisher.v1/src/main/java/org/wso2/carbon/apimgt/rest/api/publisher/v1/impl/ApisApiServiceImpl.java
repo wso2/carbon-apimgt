@@ -3613,17 +3613,20 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException throw if validation failure
      */
     private void validateScopes(API api) throws APIManagementException {
+
         APIIdentifier apiId = api.getId();
+        String username = RestApiUtil.getLoggedInUsername();
+
         for (Scope scope : api.getScopes()) {
             if (!(APIUtil.isWhiteListedScope(scope.getName()))) {
-                String username = RestApiUtil.getLoggedInUsername();
                 String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
                 int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
                 APIProvider apiProvider = RestApiUtil.getProvider(username);
 
                 if (apiProvider.isScopeKeyAssigned(apiId, scope.getName(), tenantId)) {
                     RestApiUtil
-                            .handleBadRequest("Scope " + scope.getName() + " is already assigned by another API", log);
+                            .handleBadRequest("Scope " + scope.getName() + " is already assigned by another API",
+                                    log);
                 }
             }
             //set description as empty if it is not provided
@@ -3632,7 +3635,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             if (scope.getRoles() != null) {
                 for (String aRole : scope.getRoles().split(",")) {
-                    boolean isValidRole = APIUtil.isRoleNameExist(apiId.getProviderName(), aRole);
+                    boolean isValidRole = APIUtil.isRoleNameExist(username, aRole);
                     if (!isValidRole) {
                         String error = "Role '" + aRole + "' does not exist.";
                         RestApiUtil.handleBadRequest(error, log);
