@@ -440,7 +440,7 @@ class ApiConsole extends React.Component {
                                                         <em>
                                                             <FormattedMessage
                                                                 id='micro.gateways'
-                                                                defaultMessage='Micro Gateways'
+                                                                defaultMessage='Microgateways'
                                                             />
                                                         </em>
                                                     </MenuItem>

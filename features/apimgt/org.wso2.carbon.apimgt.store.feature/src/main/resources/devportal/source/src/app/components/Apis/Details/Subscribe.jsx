@@ -461,7 +461,7 @@ class Subscribe extends Component {
                         <Typography gutterBottom>
                             <FormattedMessage
                                 id='Apis.Details.Subscribe.test.description'
-                                defaultMessage={`Create an Application and subscribe this API to that Application.
+                                defaultMessage={`Create an application and subscribe to this API.
                                                 An application is a logical collection of APIs.
                                                 Applications allow you to use a single access token to invoke a collection
                                                 of APIs and to subscribe to one API multiple times with different SLA levels.
