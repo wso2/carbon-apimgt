@@ -349,7 +349,7 @@ class ProvideWSDL extends Component {
                                         <FormattedMessage
                                             id='create.new.wsdl.help'
                                             defaultMessage={
-                                                'Give a WSDL url such as' +
+                                                'Give a WSDL URL such as' +
                                                 ' https://graphical.weather.gov/xml/SOAP_server/ndfdXMLserver.php?wsdl'
                                             }
                                         />
