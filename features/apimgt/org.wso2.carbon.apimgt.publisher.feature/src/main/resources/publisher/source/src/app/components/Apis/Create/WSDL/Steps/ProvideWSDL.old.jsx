@@ -325,7 +325,7 @@ class ProvideWSDL extends Component {
                         </Dropzone>
                         <FormHelperText className={classes.errorMessage}>
                             {valid.wsdlFile.empty && (
-                                <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
+                                <FormattedMessage id='error.empty' defaultMessage='This field cannot be empty.' />
                             )}
                             {valid.wsdlFile.invalidFile && (
                                 <FormattedMessage id='error.invalid.wsdl.file' defaultMessage='Invalid WSDL File' />
@@ -375,7 +375,7 @@ class ProvideWSDL extends Component {
 
                             <FormHelperText className={classes.errorMessage}>
                                 {valid.wsdlUrl.empty && (
-                                    <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
+                                    <FormattedMessage id='error.empty' defaultMessage='This field cannot be empty.' />
                                 )}
                                 {valid.wsdlUrl.invalidUrl && 'Invalid WSDL Url'}
                             </FormHelperText>
