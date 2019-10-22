@@ -56,7 +56,7 @@ const styles = theme => ({
         height: 35,
     },
     selectedWrapper: {
-        background: theme.palette.grey.A100,
+        background: theme.palette.grey[100],
         borderLeft: 'solid 2px ' + theme.palette.primary.main,
     },
 });
