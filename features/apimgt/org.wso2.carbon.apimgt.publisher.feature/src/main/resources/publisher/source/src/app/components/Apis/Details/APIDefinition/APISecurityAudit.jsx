@@ -321,11 +321,14 @@ class APISecurityAudit extends Component {
     /**
      * Method to round off the score of a section of the report
      * @param {*} score Score of section
-     * @param {*} maxScore Maximum score of the section
      * @returns {*} roundScore Rounded off score
      */
     roundScore(score) {
-        return Math.round(score * 100) / 100;
+        if (score !== 0) {
+            return Math.round(score * 100) / 100;
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -426,16 +429,6 @@ class APISecurityAudit extends Component {
         const indexNumber = rowData[3];
         const path = reportObject.index[indexNumber];
         searchTerm = path;
-
-        // TODO - Remove the following code block after completing the pointer feature
-        // if (path.includes('get') ||
-        //     path.includes('put') ||
-        //     path.includes('post') ||
-        //     path.includes('delete')) {
-        //     searchTerm = path;
-        // } else {
-        //     searchTerm = 'none';
-        // }
 
         return (
                 <TableRow className={classes.tableRow}>
@@ -602,10 +595,12 @@ class APISecurityAudit extends Component {
                                                         defaultMessage='{securitySummary}'
                                                         values={{
                                                             securitySummary: (
-                                                                <strong>
-                                                                    Security -
-                                                                    ({this.roundScore(reportObject.security.score)} / 30)
-                                                                </strong>
+                                                            <strong>
+                                                                Security -
+                                                                ({
+                                                                    this.roundScore(reportObject.security.score)
+                                                                } / 30)
+                                                            </strong>
                                                             ),
                                                         }}
                                                     />
@@ -660,7 +655,7 @@ class APISecurityAudit extends Component {
                                 </div>
                             </Paper>
                         </div>
-                        {reportObject.validation !== null &&
+                        {{}.hasOwnProperty.call(reportObject, 'validation') &&
                             <div className={classes.paperDiv}>
                                 <Paper elevation={1} className={classes.rootPaper}>
                                     <div>
@@ -670,11 +665,18 @@ class APISecurityAudit extends Component {
                                                 defaultMessage='OpenAPI Format Requirements'
                                             />
                                         </Typography>
+
+                                        <Typography variant='body1'>
+                                            <FormattedMessage
+                                                id='Apis.Details.APIDefinition.AuditApi.OASNoIssuesFound'
+                                                defaultMessage='No issues found'
+                                            />
+                                        </Typography>
                                     </div>
                                 </Paper>
                             </div>
                         }
-                        {reportObject.security !== null &&
+                        {{}.hasOwnProperty.call(reportObject, 'security') &&
                             <div className={classes.paperDiv}>
                                 <Paper elevation={1} className={classes.rootPaper}>
                                     <div>
@@ -771,7 +773,7 @@ class APISecurityAudit extends Component {
                                 </Paper>
                             </div>
                         }
-                        {reportObject.data !== null &&
+                        {{}.hasOwnProperty.call(reportObject, 'data') &&
                             <div className={classes.paperDiv}>
                                 <Paper elevation={1} className={classes.rootPaper}>
                                     <div>
