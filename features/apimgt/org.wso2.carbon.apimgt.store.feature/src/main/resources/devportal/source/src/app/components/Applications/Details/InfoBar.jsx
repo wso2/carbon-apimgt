@@ -174,6 +174,13 @@ const styles = theme => ({
     button: {
         textDecoration: 'none',
     },
+    appName: {
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
+        overflow: 'auto',
+        maxWidth: 600,
+        lineHeight: 1.3,
+    },
 });
 /**
  *
@@ -276,7 +283,7 @@ class InfoBar extends React.Component {
                     </Link>
                     <VerticalDivider height={70} />
                     <div style={{ marginLeft: theme.spacing.unit }}>
-                        <Typography variant='h4'>{application.name}</Typography>
+                        <Typography className={classes.appName} variant='h4'>{application.name}</Typography>
                         <Typography variant='caption' gutterBottom align='left'>
                             { application.subscriptionCount }
                             {' '}
