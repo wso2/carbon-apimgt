@@ -417,7 +417,7 @@ const Alerts = (props) => {
                     <Typography className={classes.configDialogHeading}>
                         <FormattedMessage
                             id='Apis.Settings.Alerts.Alerts.unsubscribe.confirm.dialog.heading'
-                            defaultMessage='Confirm Unsubscribe from All Alerts'
+                            defaultMessage='Confirm unsubscription from All Alerts'
                         />
                     </Typography>
                 </DialogTitle>

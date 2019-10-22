@@ -564,14 +564,14 @@ class Subscribe extends Component {
                                 <Typography variant='caption' className={classes.subtitle}>
                                     <FormattedMessage
                                         id='Apis.Details.Subscribe.showing.two.subscribed.applications'
-                                        defaultMessage='subscribed Applications'
+                                        defaultMessage='Subscribed Applications'
                                     />
                                     {this.state.subscribedApplications && this.state.subscribedApplications.length > 2 && (
                                         <span>
                                             -
                                             <FormattedMessage
                                                 id='Apis.Details.Subscribe.showing.two.out.of'
-                                                defaultMessage='showing 2 out of'
+                                                defaultMessage='Showing 2 out of'
                                             />
                                             {this.state.subscribedApplications.length}
 -
@@ -662,7 +662,7 @@ class Subscribe extends Component {
                         <Button onClick={this.handleCloseSubsConfirm} color='primary' autoFocus>
                             <FormattedMessage
                                 id='Apis.Details.Subscribe.stay.on.the.api.details.page'
-                                defaultMessage='Stay on the API detials page.'
+                                defaultMessage='Stay on the API details page.'
                             />
                         </Button>
                     </DialogActions>
