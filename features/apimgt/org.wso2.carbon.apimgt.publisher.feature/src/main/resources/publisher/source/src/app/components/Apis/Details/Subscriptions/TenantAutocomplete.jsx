@@ -140,7 +140,7 @@ function getSuggestions(value, suggestions, { showEmpty = false } = {}) {
         ? []
         : suggestions.filter((suggestion) => {
             const keep =
-          count < 5 && suggestion.slice(0, inputLength).toLowerCase() === inputValue;
+          count < 15 && suggestion.slice(0, inputLength).toLowerCase() === inputValue;
             if (keep) {
                 count += 1;
             }
@@ -202,7 +202,7 @@ function DownshiftMultiple(props) {
                     onBlur, onChange, onFocus, ...inputProps
                 } = getInputProps({
                     onKeyDown: handleKeyDown,
-                    placeholder: 'Select multiple tenants',
+                    placeholder: 'Type and select tenants from the suggested list',
                 });
 
                 return (
