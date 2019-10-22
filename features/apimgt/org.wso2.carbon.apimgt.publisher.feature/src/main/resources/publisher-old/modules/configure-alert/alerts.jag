@@ -15,7 +15,7 @@ var getPublisherAlertConfigs  = function (type) {
         var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
         var domainName = MultitenantUtils.getTenantDomain(username);
 
-        var appName = "APIM_ALERT_CONFIGURATION"; 
+        var appName = "APIM_CONFIGURATION_ALERT";
         var query =  "from ApiCreatorAlertConfiguration on apiCreator=='" 
                     + username + "' and apiCreatorTenantDomain=='" + domainName + "' and "
                     + typeColName +"!=0 select apiName,apiVersion,apiCreator,apiCreatorTenantDomain, " + typeColName + "; ";
@@ -63,7 +63,7 @@ var addOrUpdatePublisherAlertConfigs  = function (apiName, apiVersion, type, val
         var username = jagg.getUser().username;
         var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
         var domainName = MultitenantUtils.getTenantDomain(username);
-        var appName = "APIM_ALERT_CONFIGURATION"; 
+        var appName = "APIM_CONFIGURATION_ALERT";
    
         if (typeColName == 'thresholdBackendTime') {
             thresholdBackendTime = value;
@@ -107,7 +107,7 @@ var deletePublisherAlertConfigs = function (apiName, apiVersion, type) {
         var username = jagg.getUser().username;
         var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
         var domainName = MultitenantUtils.getTenantDomain(username);
-        var appName = "APIM_ALERT_CONFIGURATION"; 
+        var appName = "APIM_CONFIGURATION_ALERT";
 
         var query = "select '"+apiName+"' as apiName, '"+apiVersion+"' as apiVersion, '"
             + username + "' as apiCreator, '" + domainName + "' as apiCreatorTenantDomain,"

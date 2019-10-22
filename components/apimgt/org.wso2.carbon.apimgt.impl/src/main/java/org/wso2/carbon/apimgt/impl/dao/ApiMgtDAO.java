@@ -78,7 +78,6 @@ import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
@@ -131,7 +130,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -7396,9 +7394,9 @@ public class ApiMgtDAO {
         return urlMappings;
     }
 
-    public Set<URITemplate> getURITemplatesOfAPI(APIIdentifier identifier, String productionURL, String sandboxURL)
+    public Set<URITemplate> getURITemplatesOfAPI(APIIdentifier identifier)
             throws APIManagementException {
-        Map<String, URITemplate> uriTemplates = new HashMap<>();
+        Map<Integer, URITemplate> uriTemplates = new HashMap<>();
 
         try (Connection conn = APIMgtDBUtil.getConnection();
             PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_SQL)) {
@@ -7410,44 +7408,29 @@ public class ApiMgtDAO {
                     String urlPattern = rs.getString("URL_PATTERN");
                     String verb = rs.getString("HTTP_METHOD");
 
-                    String key = urlPattern + verb;
+                    URITemplate uriTemplate = new URITemplate();
+                    uriTemplate.setUriTemplate(urlPattern);
+                    uriTemplate.setHTTPVerb(verb);
+                    uriTemplate.setHttpVerbs(verb);
+                    String authType = rs.getString("AUTH_SCHEME");
+                    String throttlingTier = rs.getString("THROTTLING_TIER");
+                    uriTemplate.setAuthType(authType);
+                    uriTemplate.setAuthTypes(authType);
+                    uriTemplate.setThrottlingTier(throttlingTier);
+                    uriTemplate.setThrottlingTiers(throttlingTier);
 
-                    URITemplate uriTemplate = uriTemplates.get(key);
-
-                    if (uriTemplate != null) {
-                        Optional<APIProductIdentifier> productId = getProductIdIfExists(rs);
-                        if (productId.isPresent()) {
-                            uriTemplate.addUsedByProduct(productId.get());
-                        }
-                    } else {
-                        uriTemplate = new URITemplate();
-                        uriTemplate.setUriTemplate(urlPattern);
-                        uriTemplate.setHTTPVerb(verb);
-                        uriTemplate.setHttpVerbs(verb);
-                        String authType = rs.getString("AUTH_SCHEME");
-                        String throttlingTier = rs.getString("THROTTLING_TIER");
-                        uriTemplate.setAuthType(authType);
-                        uriTemplate.setAuthTypes(authType);
-                        uriTemplate.setThrottlingTier(throttlingTier);
-                        uriTemplate.setThrottlingTiers(throttlingTier);
-                        uriTemplate.setResourceURI(productionURL);
-                        uriTemplate.setResourceSandboxURI(sandboxURL);
-                        InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
-                        if (mediationScriptBlob != null) {
-                            String script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
-                            uriTemplate.setMediationScript(script);
-                            uriTemplate.setMediationScripts(verb, script);
-                        }
-
-                        Optional<APIProductIdentifier> productId = getProductIdIfExists(rs);
-                        if (productId.isPresent()) {
-                            uriTemplate.addUsedByProduct(productId.get());
-                        }
-
-                        uriTemplates.put(key, uriTemplate);
+                    InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
+                    if (mediationScriptBlob != null) {
+                        String script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+                        uriTemplate.setMediationScript(script);
+                        uriTemplate.setMediationScripts(verb, script);
                     }
+
+                    uriTemplates.put(rs.getInt("URL_MAPPING_ID"), uriTemplate);
                 }
             }
+
+            setAssociatedAPIProducts(identifier, uriTemplates);
         } catch (SQLException e) {
             handleException("Failed to get URI Templates of API" + identifier, e);
         }
@@ -7455,20 +7438,29 @@ public class ApiMgtDAO {
         return new HashSet<>(uriTemplates.values());
     }
 
-    private Optional<APIProductIdentifier> getProductIdIfExists(ResultSet rs) throws SQLException {
-        String type = rs.getString("API_TYPE");
+    private void setAssociatedAPIProducts(APIIdentifier identifier, Map<Integer, URITemplate> uriTemplates)
+            throws SQLException {
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_API_PRODUCT_URI_TEMPLATE_ASSOCIATION_SQL)) {
+            ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            ps.setString(2, identifier.getName());
+            ps.setString(3, identifier.getVersion());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String productName = rs.getString("API_NAME");
+                    String productVersion = rs.getString("API_VERSION");
+                    String productProvider = rs.getString("API_PROVIDER");
+                    int uriTemplateId  = rs.getInt("URL_MAPPING_ID");
 
-        if (rs.wasNull() || StringUtils.isEmpty(type)) {
-            return Optional.empty();
+                    URITemplate uriTemplate = uriTemplates.get(uriTemplateId);
+                    if (uriTemplate != null) {
+                        APIProductIdentifier productIdentifier = new APIProductIdentifier
+                                (productProvider, productName, productVersion);
+                        uriTemplate.addUsedByProduct(productIdentifier);
+                    }
+                }
+            }
         }
-
-        String productName = rs.getString("API_NAME");
-        String productVersion = rs.getString("API_VERSION");
-        String productProvider = rs.getString("API_PROVIDER");
-        APIProductIdentifier productIdentifier = new APIProductIdentifier
-                (productProvider, productName, productVersion);
-
-        return Optional.of(productIdentifier);
     }
 
     // This should be only used only when Token Partitioning is enabled.
@@ -13936,35 +13928,23 @@ public class ApiMgtDAO {
     }
 
     public List<APIProductResource> getProductMappingsForAPI(API api) throws APIManagementException {
-        Connection connection = null;
-
-        String query = SQLConstants.GET_PRODUCT_RESOURCE_MAPPINGS_FOR_API;
-        List<APIProductResource> productMappings = new ArrayList<APIProductResource>();
+        List<APIProductResource> productMappings = new ArrayList<>();
         APIIdentifier apiIdentifier = api.getId();
-        int apiId = getAPIID(apiIdentifier, connection);
 
-        try (Connection conn = APIMgtDBUtil.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(query)){
-                ps.setInt(1, apiId);
-                try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        APIProductResource productMapping = new APIProductResource();
-                        productMapping.setApiIdentifier(apiIdentifier);
-                        APIProductIdentifier productIdentifier = new APIProductIdentifier(
-                                rs.getString("API_PROVIDER"), rs.getString("API_NAME"),
-                                rs.getString("API_VERSION"));
-                        productMapping.setProductIdentifier(productIdentifier);
-                        URITemplate uriTemplate = new URITemplate();
-                        uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
-                        uriTemplate.setResourceURI(rs.getString("URL_PATTERN"));
-                        productMapping.setUriTemplate(uriTemplate);
-                        productMappings.add(productMapping);
-                    }
-                }
+        Set<URITemplate> uriTemplatesOfAPI = getURITemplatesOfAPI(apiIdentifier);
+
+        for (URITemplate uriTemplate : uriTemplatesOfAPI) {
+            Set<APIProductIdentifier> apiProductIdentifiers = uriTemplate.retrieveUsedByProducts();
+
+            for (APIProductIdentifier apiProductIdentifier : apiProductIdentifiers) {
+                APIProductResource productMapping = new APIProductResource();
+                productMapping.setProductIdentifier(apiProductIdentifier);
+                productMapping.setUriTemplate(uriTemplate);
+
+                productMappings.add(productMapping);
             }
-        } catch (SQLException e) {
-            handleException("Error while adding product mappings fro api " + api.getId(), e);
         }
+
         return productMappings;
     }
 

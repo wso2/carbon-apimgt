@@ -109,7 +109,10 @@ class AuthManager {
         if (!partialToken) {
             return new Promise((resolve, reject) => reject(new Error('No partial token found')));
         }
-        const promisedResponse = fetch('/devportal/services/auth/introspect', { credentials: 'same-origin' });
+        const promisedResponse = fetch(
+            Settings.app.context + '/services/auth/introspect',
+            { credentials: 'same-origin' },
+        );
         return promisedResponse
             .then(response => response.json())
             .then((data) => {
@@ -136,19 +139,6 @@ class AuthManager {
                     throw new Error(CONSTS.errorCodes.INVALID_TOKEN);
                 }
                 return user;
-            });
-    }
-
-    /**
-     * retrieve Settings from settings rest api and store in the local storage
-     *  @returns {Object}: settings response object
-     */
-    static setSettings() {
-        const promisedResponse = fetch('/api/am/store/v1.0/settings', {});
-        return promisedResponse
-            .then(response => response.json())
-            .then((data) => {
-                return data;
             });
     }
 

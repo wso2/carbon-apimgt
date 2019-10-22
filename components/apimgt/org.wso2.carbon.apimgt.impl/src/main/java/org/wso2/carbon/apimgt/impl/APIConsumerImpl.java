@@ -2869,13 +2869,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                 if (api != null) {
                     isMonetizationEnabled = api.getMonetizationStatus();
-                }
-
-                //check whether monetization is enabled for API and tier plan is commercial
-                if (isMonetizationEnabled == true && tier.getTierPlan().equals(APIConstants.COMMERCIAL_TIER_PLAN)) {
-                    workflowResponse = addSubscriptionWFExecutor.monetizeSubscription(workflowDTO, api);
+                    //check whether monetization is enabled for API and tier plan is commercial
+                    if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
+                        workflowResponse = addSubscriptionWFExecutor.monetizeSubscription(workflowDTO, api);
+                    } else {
+                        workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
+                    }
                 } else {
-                    workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
+                    isMonetizationEnabled = product.getMonetizationStatus();
+                    //check whether monetization is enabled for API and tier plan is commercial
+                    if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
+                        workflowResponse = addSubscriptionWFExecutor.monetizeSubscription(workflowDTO, product);
+                    } else {
+                        workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
+                    }
                 }
             } catch (WorkflowException e) {
                 //If the workflow execution fails, roll back transaction by removing the subscription entry.
@@ -3062,7 +3069,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             Tier tier = null;
             if (api != null) {
-
                 Set<Tier> policies = api.getAvailableTiers();
                 Iterator<Tier> iterator = policies.iterator();
                 boolean isPolicyAllowed = false;
@@ -3072,15 +3078,32 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         tier = policy;
                     }
                 }
+            } else if (product != null) {
+                Set<Tier> policies = product.getAvailableTiers();
+                Iterator<Tier> iterator = policies.iterator();
+                boolean isPolicyAllowed = false;
+                while (iterator.hasNext()) {
+                    Tier policy = iterator.next();
+                    if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
+                        tier = policy;
+                    }
+                }
             }
-            //TODO add monetization for API product
-            //check whether monetization is enabled for API and tier plan is commercial
-            if (api != null && api.getMonetizationStatus() == true && tier.getTierPlan().equals(APIConstants.COMMERCIAL_TIER_PLAN)) {
-                removeSubscriptionWFExecutor.deleteMonetizedSubscription(workflowDTO, api);
-            } else {
-                removeSubscriptionWFExecutor.execute(workflowDTO);
+            if (api != null) {
+                //check whether monetization is enabled for API and tier plan is commercial
+                if (api.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
+                    removeSubscriptionWFExecutor.deleteMonetizedSubscription(workflowDTO, api);
+                } else {
+                    removeSubscriptionWFExecutor.execute(workflowDTO);
+                }
+            } else if (product != null) {
+                //check whether monetization is enabled for API product and tier plan is commercial
+                if (product.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
+                    removeSubscriptionWFExecutor.deleteMonetizedSubscription(workflowDTO, product);
+                } else {
+                    removeSubscriptionWFExecutor.execute(workflowDTO);
+                }
             }
-
             JSONObject subsLogObject = new JSONObject();
             subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
             subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
@@ -3223,8 +3246,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                             "cannot contain leading or trailing white spaces");
         }
 
-        JSONArray applicationAttributesFromConfig =
-                getAppAttributesFromConfig(MultitenantUtils.getTenantDomain(userId));
+        JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(userId);
         Map<String, String> applicationAttributes = application.getApplicationAttributes();
         if (applicationAttributes == null) {
             /*
@@ -3418,9 +3440,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
         Subscriber subscriber = application.getSubscriber();
-        String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
 
-        JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(tenantDomain);
+        JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(subscriber.getName());
         Map<String, String> applicationAttributes = application.getApplicationAttributes();
         Map<String, String> existingApplicationAttributes = existingApp.getApplicationAttributes();
         if (applicationAttributes == null) {

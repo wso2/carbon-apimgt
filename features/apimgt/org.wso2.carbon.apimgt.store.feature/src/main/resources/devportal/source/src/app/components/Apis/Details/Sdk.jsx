@@ -33,6 +33,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import AuthManager from 'AppData/AuthManager';
+import { app } from 'Settings';
 import Api from '../../../data/api';
 
 const styles = theme => ({
@@ -161,7 +162,7 @@ class Sdk extends React.Component {
      * Handle sdk image not found issue. Point to a default image
      */
     addDefaultSrc = (ev) => {
-        ev.target.src = '/devportal/site/public/images/sdks/default.svg';
+        ev.target.src = app.context + '/site/public/images/sdks/default.svg';
     };
 
     /**
@@ -186,7 +187,7 @@ class Sdk extends React.Component {
                                         <img
                                             alt={language}
                                             src={
-                                                '/devportal/site/public/images/sdks/'
+                                                app.context + '/site/public/images/sdks/'
                                                     + new String(language)
                                                     + '.svg'
                                             }

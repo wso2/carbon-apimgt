@@ -131,7 +131,7 @@ class DeleteApiButton extends React.Component {
                 history.push(redirectURL);
             }).catch((error) => {
                 if (error.status === 409) {
-                    Alert.error(error.response.body.description);
+                    Alert.error('Cannot remove ' + api.name + ' API as active subscriptions exist');
                 } else {
                     Alert.error('Something went wrong while deleting the API!');
                 }
@@ -150,10 +150,17 @@ class DeleteApiButton extends React.Component {
         const type = api.apiType === API.CONSTS.APIProduct ? 'API Product ' : 'API ';
         const version = api.apiType === API.CONSTS.APIProduct ? null : '-' + api.version;
         const deleteHandler = onClick || this.handleApiDelete;
+
+        let path = resourcePath.SINGLE_API;
+
+        if (api.apiType === API.CONSTS.APIProduct) {
+            path = resourcePath.SINGLE_API_PRODUCT;
+        }
+
         return (
             <React.Fragment>
                 {/* allowing delete based on scopes */}
-                <ScopeValidation resourceMethod={resourceMethod.DELETE} resourcePath={resourcePath.SINGLE_API}>
+                <ScopeValidation resourceMethod={resourceMethod.DELETE} resourcePath={path}>
                     <div className={classes.deleteWrapper}>
                         <VerticalDivider height={70} />
                         <a

@@ -119,7 +119,7 @@
   "Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.alias.error": "Something went wrong while adding the API certificate",
   "Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.delete.error": "Error while deleting certificate",
   "Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.delete.success": "Certificate Deleted Successfully",
-  "Apis.Details.Configuration.components.APISecurity.allOptional": "Please select at least one API security level mandatory!",
+  "Apis.Details.Configuration.components.APISecurity.allOptional": "Please select at least one API security level as 'Mandatory'!",
   "Apis.Details.Configuration.components.APISecurity.components.ApplicationLevel.\n                                    http.mandatory": "Choose whether Application level security is mandatory or optional",
   "Apis.Details.Configuration.components.APISecurity.emptySchemas": "Please select at least one API security method!",
   "Apis.Details.Configuration.components.APISecurity.http.mandatory": "Choose whether Transport level security is mandatory or\n                                        optional",

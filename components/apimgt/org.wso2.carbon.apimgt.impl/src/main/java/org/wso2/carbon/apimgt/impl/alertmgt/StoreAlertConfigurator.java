@@ -68,7 +68,7 @@ public class StoreAlertConfigurator extends AlertConfigurator {
                         + "ApimAlertStakeholderInfo.userId == userId and "
                         + "ApimAlertStakeholderInfo.isSubscriber == isSubscriber";
 
-        APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_ALERT_STAKEHOLDER_APP, query);
+        APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_STAKEHOLDER_ALERT_APP, query);
         apiMgtDAO.addAlertTypesConfigInfo(userName, emails, alertTypesMap.get("ids"), AlertMgtConstants.STORE_AGENT);
     }
 
@@ -78,7 +78,7 @@ public class StoreAlertConfigurator extends AlertConfigurator {
         apiMgtDAO.unSubscribeAlerts(userName, AlertMgtConstants.STORE_AGENT);
         String query = "delete ApimAlertStakeholderInfo on ApimAlertStakeholderInfo.userId == '" + userName + "' and "
                 + "ApimAlertStakeholderInfo.isSubscriber == true";
-        APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_ALERT_STAKEHOLDER_APP, query);
+        APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_STAKEHOLDER_ALERT_APP, query);
 
     }
 

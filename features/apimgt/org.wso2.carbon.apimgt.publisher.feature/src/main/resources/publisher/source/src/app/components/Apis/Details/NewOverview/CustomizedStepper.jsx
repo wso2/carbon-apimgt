@@ -37,6 +37,7 @@ import ApiContext, { useAPI } from 'AppComponents/Apis/Details/components/ApiCon
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import Alert from 'AppComponents/Shared/Alert';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import AuthManager from 'AppData/AuthManager';
 
 
 const useStyles = makeStyles(theme => ({
@@ -251,7 +252,7 @@ export default function CustomizedSteppers() {
                                     variant='contained'
                                     color='primary'
                                     onClick={() => updateLCStateOfAPI(api.id, 'Deploy as a Prototype')}
-                                    disabled={api.workflowStatus === 'CREATED'}
+                                    disabled={api.workflowStatus === 'CREATED' || AuthManager.isNotPublisher()}
                                 >
                           Deploy as a prototype
                                     {isUpdating && <CircularProgress size={20} />}
@@ -263,7 +264,7 @@ export default function CustomizedSteppers() {
                                     color='primary'
                                     onClick={() => updateLCStateOfAPI(api.id, 'Publish')}
                                     disabled={(!isEndpointAvailable || !isTierAvailable) ||
-                             api.workflowStatus === 'CREATED'}
+                                        AuthManager.isNotPublisher() || api.workflowStatus === 'CREATED'}
                                 >
                          Publish
                                     {isUpdating && <CircularProgress size={20} />}

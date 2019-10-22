@@ -378,6 +378,7 @@ paths:
           required : true
           description: |
             Programming language of the SDK that is required.
+        - $ref: '#/parameters/requestedTenant'
       tags:
         - SDKs
       responses:
@@ -5055,7 +5056,8 @@ definitions:
       mapExistingAuthApps:
         type: boolean
         default: false
-
+      apiGatewayEndpoint:
+        type: string
 #-----------------------------------------------------
 # The Application Attribute resource
 #-----------------------------------------------------

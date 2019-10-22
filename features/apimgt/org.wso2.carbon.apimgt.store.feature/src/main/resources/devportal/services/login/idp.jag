@@ -18,28 +18,33 @@
  */
 
     var log = new Log("Services login DCR request");
-    var site = require("/site/public/theme/settings.js").Settings.app;
+    var app = require("/site/public/theme/settings.js").Settings.app;
     include("/services/constants.jag");
 
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var serverPort = utils.getManagementTransportPort(MGT_TRANSPORT.split(":")[0]);
     var serverUrl = utils.getServerURL();
+    if (app.reverseProxy.enabled === true) {
+        serverUrl = app.reverseProxy.origin;
+    } else {
+        serverUrl = utils.getServerURL();
+    }
     application.put("serverPort", serverPort);
 
-    var settingsAPIUrl = serverUrl + SETTINGS_REST_API_URL_SUFFIX;
+    var settingsAPIUrl = utils.getServerURL() + SETTINGS_REST_API_URL_SUFFIX;
     var settingsResponse = get(settingsAPIUrl, {}, "json");
 
-    var dcrUrl = MGT_TRANSPORT + HOST + ":" + serverPort + DCR_URL_SUFFIX;
-    var authorizeEndpoint = serverUrl + AUTHORIZE_ENDPOINT_SUFFIX;
-    var loginCallbackUrl = serverUrl + site.context + LOGIN_CALLBACK_URL_SUFFIX;
-    var logoutCallbackUrl = serverUrl + site.context + LOGOUT_CALLBACK_URL_SUFFIX;
+    var dcrUrl = utils.getServerURL() + DCR_URL_SUFFIX;
+    var authorizeEndpoint = utils.getServerURL() + AUTHORIZE_ENDPOINT_SUFFIX;
+    var loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
+    var logoutCallbackUrl = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
     var callbackUrl = "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";
     var scopes = settingsResponse.data.scopes.join(" ");
     var referer = request.getHeader("Referer");
     var state = "";
     // get the pathname excluding the 'devportal/publisher' segment
     if (referer !== null) {
-        var context = site.context.charAt(0) === '/' ? site.context.substring(1) : site.context;
+        var context = app.context.charAt(0) === '/' ? app.context.substring(1) : app.context;
         var hostnamePattern = "(https?:\/\/.*):?(\\d*)\/?(" + context + ")";
         var re = new RegExp(hostnamePattern);
         state = encodeURI(referer.replace(re, ''));
@@ -90,7 +95,7 @@
     }
     var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl;
     log.debug("Redirecting to = " + authorizeEndpoint + authRequestParams);
-    var cookie = {'name': 'CLIENT_ID', 'value': clientId, 'path': site.context + "/", "HttpOnly": false, "secure": true, "maxAge": -1};
+    var cookie = {'name': 'CLIENT_ID', 'value': clientId, 'path': app.context + "/", "HttpOnly": false, "secure": true, "maxAge": -1};
 
     response.addCookie(cookie);
 
