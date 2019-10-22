@@ -18,6 +18,7 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useDropzone } from 'react-dropzone';
+import { useTheme } from '@material-ui/core/styles';
 
 /**
  *
@@ -26,7 +27,7 @@ import { useDropzone } from 'react-dropzone';
  * @param {boolean} [si=false]
  * @returns {String} Human readable string format
  */
-function humanFileSize(bytesParam, si = false) {
+export function humanFileSize(bytesParam, si = false) {
     let bytes = bytesParam; // To prevent `no-param-reassign` eslint rule violation
     const thresh = si ? 1000 : 1024;
     if (Math.abs(bytes) < thresh) {
@@ -48,7 +49,7 @@ const baseStyle = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    padding: '20px',
+    padding: '100px 20px',
     borderWidth: 2,
     borderRadius: 2,
     borderColor: '#eeeeee',
@@ -78,23 +79,14 @@ const rejectStyle = {
  * @returns
  */
 export default function DropZoneLocal(props) {
-    let { files } = props;
     const {
-        message, onDrop, error, showFilesList, children,
+        message, onDrop, error, children, accept,
     } = props;
-    files = files instanceof File ? [files] : files;
     const dropZoneObject = useDropzone({ onDrop });
     const {
         getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject,
     } = dropZoneObject;
-    let { acceptedFiles } = dropZoneObject;
-    acceptedFiles = files || acceptedFiles;
-    const filesList = acceptedFiles.map(file => (
-        <li key={file.path}>
-            {file.path} - {humanFileSize(file.size)}
-        </li>
-    ));
-    baseStyle.borderColor = error ? rejectStyle.borderColor : '#eeeeee';
+
     const style = useMemo(
         () => ({
             ...baseStyle,
@@ -104,17 +96,20 @@ export default function DropZoneLocal(props) {
         }),
         [isDragActive, isDragReject, error],
     );
+    const theme = useTheme();
+
+    const containerStyles = {
+        fontFamily: theme.typography.fontFamily,
+        textAlign: 'center',
+    };
+
     return (
-        <section className='container'>
-            <div {...getRootProps({ style })}>
-                <input {...getInputProps()} />
-                {children || <p>{message}</p>}
-            </div>
-            {showFilesList && (
-                <aside>
-                    <h4>Files</h4>
-                    <ul>{filesList}</ul>
-                </aside>
+        <section className='container' style={containerStyles}>
+            {(
+                <div {...getRootProps({ style })}>
+                    <input {...getInputProps()} multiple={false} accept={accept} />
+                    {children || <p>{message}</p>}
+                </div>
             )}
         </section>
     );
@@ -123,15 +118,15 @@ DropZoneLocal.defaultProps = {
     message: "Drag 'n' drop some files here, or click to select files",
     onDrop: () => {},
     showFilesList: true,
-    files: null,
     children: null,
     error: false,
+    accept: '*',
 };
 DropZoneLocal.propTypes = {
     message: PropTypes.string,
     onDrop: PropTypes.func,
+    accept: PropTypes.string,
     showFilesList: PropTypes.bool,
-    files: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.object), PropTypes.instanceOf(File)]),
     children: PropTypes.oneOfType([PropTypes.element, PropTypes.array]),
     error: PropTypes.oneOfType([PropTypes.bool, PropTypes.shape({})]),
 };
