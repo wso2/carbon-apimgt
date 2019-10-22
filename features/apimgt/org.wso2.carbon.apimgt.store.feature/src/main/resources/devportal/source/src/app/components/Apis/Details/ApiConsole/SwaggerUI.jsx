@@ -24,7 +24,11 @@ const SwaggerUI = (props) => {
         docExpansion: 'list',
         defaultModelsExpandDepth: 0,
         requestInterceptor: (req) => {
+            const { url } = req;
             req.headers[authorizationHeader] = 'Bearer ' + accessTokenProvider();
+            if (url.charAt(req.url.length - 1) === '*') {
+                req.url = url.substring(url.length - 1, 0);
+            }
             return req;
         },
 
