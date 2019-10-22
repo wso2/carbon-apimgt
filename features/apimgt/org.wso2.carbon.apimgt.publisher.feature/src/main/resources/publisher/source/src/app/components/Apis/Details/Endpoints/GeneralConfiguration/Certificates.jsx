@@ -252,7 +252,7 @@ function Certificates(props) {
                     <Typography>
                         <FormattedMessage
                             id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.confirm.certificate.delete'
-                            defaultMessage='Do you want to delete the Certificate'
+                            defaultMessage='Do you want to delete the Certificate?'
                         />{' '}
                         {' "' + certificateToDelete.alias + '"?'}
                     </Typography>

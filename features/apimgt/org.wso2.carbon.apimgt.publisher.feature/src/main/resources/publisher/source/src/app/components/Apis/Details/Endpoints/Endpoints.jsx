@@ -389,7 +389,7 @@ function Endpoints(props) {
                                         <Typography variant='body2' color='primary'>
                                             <FormattedMessage
                                                 id='Apis.Details.Endpoints.Endpoints.update.not.allowed'
-                                                defaultMessage={'*You are not authorized to update Endpoints of' +
+                                                defaultMessage={'*You are not authorized to update endpoints of' +
                                                 ' the API due to insufficient permissions'}
                                             />
                                         </Typography>
