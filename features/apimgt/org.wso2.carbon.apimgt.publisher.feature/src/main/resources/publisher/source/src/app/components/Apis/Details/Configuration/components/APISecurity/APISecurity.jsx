@@ -92,7 +92,7 @@ export default function APISecurity(props) {
                 <Typography className={classes.bottomSpace}>
                     <FormattedMessage
                         id='Apis.Details.Configuration.components.APISecurity.allOptional'
-                        defaultMessage='Please select at least one API security level as mandatory!'
+                        defaultMessage="Please select at least one API security level as 'Mandatory'!"
                     />
                 </Typography>
             );
