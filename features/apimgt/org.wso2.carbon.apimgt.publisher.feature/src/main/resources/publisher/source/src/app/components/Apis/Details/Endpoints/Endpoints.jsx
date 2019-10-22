@@ -138,7 +138,16 @@ function Endpoints(props) {
             }
             case 'select_endpoint_type': {
                 const { endpointImplementationType, endpointConfig } = value;
-                return { ...initState, endpointConfig, endpointImplementationType };
+                let { endpointSecurity } = initState;
+                if (endpointSecurity && (endpointSecurity.username === '')) {
+                    endpointSecurity = null;
+                }
+                return {
+                    ...initState,
+                    endpointConfig,
+                    endpointImplementationType,
+                    endpointSecurity: null,
+                };
             }
             default: {
                 return initState;

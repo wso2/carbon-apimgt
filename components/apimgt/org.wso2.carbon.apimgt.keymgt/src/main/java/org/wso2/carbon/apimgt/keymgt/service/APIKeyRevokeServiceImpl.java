@@ -47,7 +47,7 @@ public class APIKeyRevokeServiceImpl implements APIKeyRevokeService {
                                                                     throws APIManagementException {
         if (APIUtil.isValidJWT(token)) {
             String splitToken[] = token.split("\\.");
-            dao.addRevokedJWTSignature(splitToken[2], APIConstants.API_KEY_TYPE, expiryTime, tenantId);
+            dao.addRevokedJWTSignature(splitToken[2], APIConstants.API_KEY_AUTH_TYPE, expiryTime, tenantId);
             revocationRequestPublisher.publishRevocationEvents(token, expiryTime, null);
         }
     }

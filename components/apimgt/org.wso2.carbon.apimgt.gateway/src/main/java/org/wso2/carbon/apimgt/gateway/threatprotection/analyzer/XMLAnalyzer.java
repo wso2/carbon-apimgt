@@ -59,7 +59,6 @@ public class XMLAnalyzer implements APIMThreatAnalyzer {
         Integer maxElementCount = config.getMaxElementCount();
         Integer maxAttributeCount = config.getMaxAttributeCount();
         Integer maxAttributeLength = config.getMaxAttributeLength();
-        Integer entityExpansionLimit = config.getEntityExpansionLimit();
         Integer maxChildrenPerElement = config.getMaxChildrenPerElement();
         factory.setProperty(XMLInputFactory.SUPPORT_DTD, dtdEnabled);
         factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, externalEntitiesEnabled);
@@ -67,7 +66,6 @@ public class XMLAnalyzer implements APIMThreatAnalyzer {
         factory.setProperty(ThreatProtectorConstants.P_MAX_ATTRIBUTES_PER_ELEMENT, maxAttributeCount);
         factory.setProperty(ThreatProtectorConstants.P_MAX_ELEMENT_DEPTH, maxDepth);
         factory.setProperty(ThreatProtectorConstants.P_MAX_CHILDREN_PER_ELEMENT, maxChildrenPerElement);
-        factory.setProperty(ThreatProtectorConstants.P_MAX_ENTITY_COUNT, entityExpansionLimit);
         factory.setProperty(ThreatProtectorConstants.P_MAX_ELEMENT_COUNT, maxElementCount);
     }
 

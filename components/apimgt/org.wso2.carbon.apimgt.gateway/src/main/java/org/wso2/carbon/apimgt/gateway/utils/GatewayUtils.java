@@ -315,7 +315,11 @@ public class GatewayUtils {
                                        String errorCode, String desc) {
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_FOUND, true);
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_CODE, errorCode);
-        messageContext.setProperty(APIMgtGatewayConstants.THREAT_MSG, APIMgtGatewayConstants.BAD_REQUEST);
+        if (messageContext.isResponse()) {
+            messageContext.setProperty(APIMgtGatewayConstants.THREAT_MSG, APIMgtGatewayConstants.BAD_RESPONSE);
+        } else {
+            messageContext.setProperty(APIMgtGatewayConstants.THREAT_MSG, APIMgtGatewayConstants.BAD_REQUEST);
+        }
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_DESC, desc);
         Mediator sequence = messageContext.getSequence(APIMgtGatewayConstants.THREAT_FAULT);
         // Invoke the custom error handler specified by the user

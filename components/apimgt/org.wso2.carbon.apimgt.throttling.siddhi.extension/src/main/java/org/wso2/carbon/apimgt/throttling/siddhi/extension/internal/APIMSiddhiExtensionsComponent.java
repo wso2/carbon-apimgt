@@ -24,6 +24,7 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.utils.CarbonUtils;
 
 @Component(
         name = "org.wso2.carbon.apimgt.throttling.siddhi.extension.component",
@@ -45,7 +46,7 @@ public class APIMSiddhiExtensionsComponent {
     }
 
     private static int getPortOffset() {
-        ServerConfiguration carbonConfig = ServerConfiguration.getInstance();
+        ServerConfiguration carbonConfig = CarbonUtils.getServerConfiguration();
         String portOffset = System.getProperty(PORT_OFFSET_SYSTEM_VAR,
                 carbonConfig.getFirstProperty(PORT_OFFSET_CONFIG));
         try {
