@@ -185,7 +185,7 @@ class APIThumb extends Component {
                 })
                 .catch((error) => {
                     if (error.status === 409) {
-                        Alert.error(<div>Cannot remove <b>{name}</b> API as active subscriptions exist </div>);
+                        Alert.error(error.response.body.description);
                         this.setState({ loading: false });
                     } else {
                         Alert.error('Something went wrong while deleting the API!');
