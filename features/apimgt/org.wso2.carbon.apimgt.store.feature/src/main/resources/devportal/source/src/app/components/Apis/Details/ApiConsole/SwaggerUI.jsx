@@ -28,7 +28,7 @@ const SwaggerUI = (props) => {
             const patternToCheck = api.context + '/*';
             req.headers[authorizationHeader] = 'Bearer ' + accessTokenProvider();
             if (url.endsWith(patternToCheck)) {
-                req.url = url.substring(url.length - 1, 0);
+                req.url = url.substring(0, url.length - 2);
             }
             return req;
         },
