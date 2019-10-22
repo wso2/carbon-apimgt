@@ -319,6 +319,19 @@
 
     <!-- Uncomment this section only if you are going to have an instance other than KeyValidator as your KeyManager.
          Unless a ThirdParty KeyManager is used, you don't need to configure this section. -->
+
+    {% if apim.key_manager.key_manager_client_impl is defined %}
+    <APIKeyManager>
+        <KeyManagerClientImpl>{{apim.key_manager.key_manager_client_impl}}</KeyManagerClientImpl>
+        <Configuration>
+            <ServerURL>{{apim.key_manager.configuration.server_url }}</ServerURL>
+            <Username>{{apim.key_manager.configuration.username }}</Username>
+            <Password>{{apim.key_manager.configuration.password}}</Password>
+            <TokenURL>{{apim.key_manager.configuration.token_url}}</TokenURL>
+            <RevokeURL>{{apim.key_manager.configuration.revoke_url}}</RevokeURL>
+        </Configuration>
+    </APIKeyManager>
+    {% else %}
     <!--APIKeyManager>
         <KeyManagerClientImpl>org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl</KeyManagerClientImpl>
         <Configuration>
@@ -329,6 +342,7 @@
             <RevokeURL>https://${carbon.local.ip}:${https.nio.port}/revoke</RevokeURL>
         </Configuration>
     </APIKeyManager-->
+    {% endif %}
 
     <OAuthConfigurations>
         <!-- Remove OAuth headers from outgoing message. -->
