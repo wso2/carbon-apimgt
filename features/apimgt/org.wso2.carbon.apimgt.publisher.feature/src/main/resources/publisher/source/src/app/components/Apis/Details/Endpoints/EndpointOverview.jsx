@@ -24,13 +24,12 @@ import {
     Radio,
     FormControlLabel,
     Collapse,
-    RadioGroup, Checkbox, Dialog, DialogTitle, DialogContent,
+    RadioGroup, Checkbox, Dialog, DialogTitle, DialogContent, IconButton,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
 import LaunchIcon from '@material-ui/icons/Launch';
-import { Link } from 'react-router-dom';
 
 import cloneDeep from 'lodash.clonedeep';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
@@ -125,6 +124,7 @@ function EndpointOverview(props) {
         endpointsDispatcher,
         swaggerDef,
         updateSwagger,
+        saveAndRedirect,
     } = props;
     const { endpointConfig, endpointSecurity } = api;
     const [endpointType, setEndpointType] = useState(endpointTypes[0]);
@@ -582,13 +582,15 @@ function EndpointOverview(props) {
                                                     defaultMessage={'Please upload a mediation sequence file to ' +
                                                     'Message Mediation Policies, which sets the endpoints.'}
                                                 />
-                                                <Link to={'/apis/' + api.id + '/runtime-configuration'}>
+                                                <IconButton
+                                                    onClick={saveAndRedirect}
+                                                >
                                                     <LaunchIcon
                                                         style={{ marginLeft: '2px' }}
                                                         fontSize='small'
                                                         color='primary'
                                                     />
-                                                </Link>
+                                                </IconButton>
                                             </Typography>
                                         </div>
                                     </InlineMessage> :
@@ -762,6 +764,7 @@ EndpointOverview.propTypes = {
     endpointsDispatcher: PropTypes.func.isRequired,
     swaggerDef: PropTypes.shape({}).isRequired,
     updateSwagger: PropTypes.func.isRequired,
+    saveAndRedirect: PropTypes.func.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(EndpointOverview));

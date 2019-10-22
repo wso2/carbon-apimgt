@@ -19,6 +19,7 @@
 
     var log = new Log("Services login DCR request");
     var app = require("/site/public/theme/defaultTheme.js").Configurations.app;
+    var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     include("/services/constants.jag");
     include("/services/jagg.jag");
 
@@ -26,14 +27,13 @@
     if (app.reverseProxy.enabled === true) {
         serverUrl = app.reverseProxy.origin;
     } else {
-        var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
         serverUrl = utils.getServerURL();
     }
-    var settingsAPIUrl = serverUrl + SETTINGS_REST_API_URL_SUFFIX;
+    var settingsAPIUrl = utils.getServerURL() + SETTINGS_REST_API_URL_SUFFIX;
     var settingsResponse = get(settingsAPIUrl, {}, "json");
 
-    var dcrUrl = MGT_TRANSPORT + HOST + ":" + getServerPort() + DCR_URL_SUFFIX;
-    var authorizeEndpoint = serverUrl + AUTHORIZE_ENDPOINT_SUFFIX;
+    var dcrUrl = utils.getServerURL() + DCR_URL_SUFFIX;
+    var authorizeEndpoint = utils.getServerURL() + AUTHORIZE_ENDPOINT_SUFFIX;
     var loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
     var logoutCallbackUrl = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
     var callbackUrl = "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";

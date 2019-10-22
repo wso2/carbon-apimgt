@@ -363,7 +363,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             return "*";
         } else if (allowedOrigins.contains(origin)) {
             return origin;
-        } else {
+        } else if (origin != null) {
             for (String allowedOrigin : allowedOrigins) {
                 if (allowedOrigin.contains("*")) {
                     Pattern pattern = Pattern.compile(allowedOrigin.replace("*", ".*"));
@@ -373,8 +373,8 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                     }
                 }
             }
-            return null;
         }
+        return null;
     }
 
     public void setAllowedOrigins(String allowedOrigins) {

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -50,9 +50,6 @@ function Banner(props) {
     } = props;
     const classes = useStyles();
     const [isOpen, setIsOpen] = useState(open);
-    useEffect(() => {
-        setIsOpen(open);
-    }, [open]);
     const iconProps = {};
     if (dense) {
         iconProps.fontSize = 'large';

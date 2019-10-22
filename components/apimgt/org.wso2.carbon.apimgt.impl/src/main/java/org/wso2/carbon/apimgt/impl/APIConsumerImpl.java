@@ -3246,8 +3246,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                             "cannot contain leading or trailing white spaces");
         }
 
-        JSONArray applicationAttributesFromConfig =
-                getAppAttributesFromConfig(MultitenantUtils.getTenantDomain(userId));
+        JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(userId);
         Map<String, String> applicationAttributes = application.getApplicationAttributes();
         if (applicationAttributes == null) {
             /*
@@ -3441,9 +3440,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
         Subscriber subscriber = application.getSubscriber();
-        String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
 
-        JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(tenantDomain);
+        JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(subscriber.getName());
         Map<String, String> applicationAttributes = application.getApplicationAttributes();
         Map<String, String> existingApplicationAttributes = existingApp.getApplicationAttributes();
         if (applicationAttributes == null) {

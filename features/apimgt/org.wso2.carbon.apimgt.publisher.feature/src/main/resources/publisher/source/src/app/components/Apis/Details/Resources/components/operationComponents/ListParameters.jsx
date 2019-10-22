@@ -15,23 +15,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
 
 import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
@@ -94,39 +77,85 @@ export default function ListParameters(props) {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {operation.parameters.map(parameter => (
-                        <TableRow key={parameter.name}>
-                            <TableCell>{parameter.name}</TableCell>
-                            <TableCell align='right'>{capitalizeFirstLetter(parameter.in)}</TableCell>
-                            <TableCell align='right'>{parameter.type}</TableCell>
-                            <TableCell align='right'>{parameter.required ? 'Yes' : 'No'}</TableCell>
-                            {!disableUpdate && (
-                                <TableCell align='right'>
-                                    {!hideParameterEdit && (
-                                        <Tooltip title='Edit'>
-                                            <IconButton onClick={() => setEditingParameter(parameter)} fontSize='small'>
-                                                <EditIcon fontSize='small' />
+                    {operation.parameters &&
+                        operation.parameters.map(parameter => (
+                            <TableRow key={parameter.name}>
+                                <TableCell>{parameter.name}</TableCell>
+                                <TableCell align='right'>{capitalizeFirstLetter(parameter.in)}</TableCell>
+                                <TableCell align='right'>{parameter.type}</TableCell>
+                                <TableCell align='right'>{parameter.required ? 'Yes' : 'No'}</TableCell>
+                                {!disableUpdate && (
+                                    <TableCell align='right'>
+                                        {!hideParameterEdit && (
+                                            <Tooltip title='Edit'>
+                                                <IconButton
+                                                    onClick={() => setEditingParameter(parameter)}
+                                                    fontSize='small'
+                                                >
+                                                    <EditIcon fontSize='small' />
+                                                </IconButton>
+                                            </Tooltip>
+                                        )}
+                                        <Tooltip title='Delete'>
+                                            <IconButton
+                                                disabled={disableUpdate}
+                                                onClick={() =>
+                                                    operationsDispatcher({
+                                                        action: 'deleteParameter',
+                                                        data: { target, verb, value: parameter },
+                                                    })
+                                                }
+                                                fontSize='small'
+                                            >
+                                                <DeleteIcon fontSize='small' />
                                             </IconButton>
                                         </Tooltip>
-                                    )}
-                                    <Tooltip title='Delete'>
-                                        <IconButton
-                                            disabled={disableUpdate}
-                                            onClick={() =>
-                                                operationsDispatcher({
-                                                    action: 'deleteParameter',
-                                                    data: { target, verb, value: parameter },
-                                                })
-                                            }
-                                            fontSize='small'
-                                        >
-                                            <DeleteIcon fontSize='small' />
-                                        </IconButton>
-                                    </Tooltip>
-                                </TableCell>
-                            )}
-                        </TableRow>
-                    ))}
+                                    </TableCell>
+                                )}
+                            </TableRow>
+                        ))}
+                    {operation.requestBody &&
+                        Object.entries(operation.requestBody.content).map(([contentType, content]) => (
+                            <TableRow key={contentType}>
+                                <TableCell>{contentType}</TableCell>
+                                <TableCell align='right'>Body</TableCell>
+                                <TableCell align='right'>{content.schema.type}</TableCell>
+                                <TableCell align='right'>{content.required ? 'Yes' : 'No'}</TableCell>
+                                {!disableUpdate && (
+                                    <TableCell align='right'>
+                                        {!hideParameterEdit && (
+                                            <Tooltip title='Edit'>
+                                                <IconButton onClick={() => {}} fontSize='small'>
+                                                    <EditIcon fontSize='small' />
+                                                </IconButton>
+                                            </Tooltip>
+                                        )}
+                                        <Tooltip title='Delete'>
+                                            <IconButton
+                                                disabled={disableUpdate}
+                                                onClick={() => {
+                                                    operationsDispatcher({
+                                                        action: 'requestBody',
+                                                        data: {
+                                                            target,
+                                                            verb,
+                                                            value: {
+                                                                description: '',
+                                                                required: false,
+                                                                content: {},
+                                                            },
+                                                        },
+                                                    });
+                                                }}
+                                                fontSize='small'
+                                            >
+                                                <DeleteIcon fontSize='small' />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </TableCell>
+                                )}
+                            </TableRow>
+                        ))}
                 </TableBody>
             </Table>
         </Fragment>

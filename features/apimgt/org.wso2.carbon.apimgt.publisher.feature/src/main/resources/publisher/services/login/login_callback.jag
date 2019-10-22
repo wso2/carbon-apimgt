@@ -20,12 +20,12 @@
     include("/services/constants.jag");
     include("/services/jagg.jag");
     var app = require("/site/public/theme/defaultTheme.js").Configurations.app;
+    var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
     var serverUrl = '';
     if (app.reverseProxy.enabled === true) {
         serverUrl = app.reverseProxy.origin;
     } else {
-        var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
         serverUrl = utils.getServerURL();
     }
     var tokenRequestData = {
@@ -44,7 +44,7 @@
     var String = Packages.java.lang.String;
     var Integer = Packages.java.lang.Integer;
     var base64encoded = Base64.encode(new String(clientId + ":" + clientSecret).getBytes());
-    var tokenEndpoint = MGT_TRANSPORT + HOST + ":" + getServerPort() + TOKEN_URL_SUFFIX;
+    var tokenEndpoint = utils.getServerURL() + TOKEN_URL_SUFFIX;
     var result = post(tokenEndpoint, tokenRequestData, {"Authorization": "Basic " + base64encoded});
 
     response.contentType = "application/json";
@@ -140,12 +140,12 @@
     if (state !== null) {
         state = decodeURIComponent(state);
         if ( state !== '/') {
-            response.sendRedirect(app.context + state);
+            response.sendRedirect("/publisher" + state);
         } else {
-            response.sendRedirect(app.context + "/apis");
+            response.sendRedirect("/publisher/apis");
         }
     } else {
-        response.sendRedirect(app.context + "/apis");
+        response.sendRedirect("/publisher/apis");
     }
 
 %>

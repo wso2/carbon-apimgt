@@ -68,9 +68,8 @@ public class SettingsApiServiceImpl implements SettingsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             List<ApplicationAttributeDTO> applicationAttributeDTOList = new ArrayList<>();
-            JSONArray attributeArray = apiConsumer.getAppAttributesFromConfig(tenantDomain);
+            JSONArray attributeArray = apiConsumer.getAppAttributesFromConfig(username);
             for (int i = 0; i < attributeArray.size(); i++) {
                 JSONObject obj = (JSONObject) attributeArray.get(i);
                 ApplicationAttributeDTO applicationAttributeDTO = ApplicationMappingUtil

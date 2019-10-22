@@ -7227,6 +7227,7 @@ definitions:
           - PRIVATE
           - RESTRICTED
         example: PUBLIC
+        default: PUBLIC
       visibleRoles:
         type: array
         description: The user roles that are able to access the API
@@ -7247,6 +7248,7 @@ definitions:
         enum:
           - NONE
           - RESTRICTED
+        default: NONE
       accessControlRoles:
         type: array
         description: The user roles that are able to view/modify as API Product publisher or creator.
@@ -7305,6 +7307,7 @@ definitions:
           - all_tenants
           - specific_tenants
         example: current_tenant
+        default: all_tenants
       subscriptionAvailableTenants:
         type: array
         items:

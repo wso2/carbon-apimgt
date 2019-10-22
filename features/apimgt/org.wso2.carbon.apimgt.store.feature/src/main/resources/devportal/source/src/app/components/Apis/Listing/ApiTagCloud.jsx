@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useTheme, makeStyles } from '@material-ui/core/styles';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
@@ -24,7 +24,6 @@ import { FormattedMessage } from 'react-intl';
 import { TagCloud } from 'react-tagcloud';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import API from 'AppData/api';
 
 const useStyles = makeStyles(theme => ({
     clickablePointer: {
@@ -32,8 +31,13 @@ const useStyles = makeStyles(theme => ({
         padding: theme.spacing(1),
     },
     filterTitle: {
-        fontWeight: 400,
-        padding: theme.spacing(1, 2),
+        fontWeight: 200,
+        paddingLeft: theme.spacing(2),
+        background: theme.custom.tagCloud.leftMenu.titleBackground,
+        color: theme.palette.getContrastText(theme.custom.tagCloud.leftMenu.titleBackground),
+        height: theme.custom.infoBar.height,
+        alignItems: 'center',
+        display: 'flex',
     },
 }));
 
@@ -53,33 +57,17 @@ function ApiTagCloud(props) {
         },
     } = theme;
     const history = useHistory();
-    const [allTags, setAllTags] = useState(null);
 
-    /**
-     * @memberof ApiTagCloud
-     */
-    useEffect(() => {
-        const api = new API();
-        const promisedTags = api.getAllTags();
-
-        promisedTags
-            .then((response) => {
-                if (response.body.count !== 0) {
-                    // Remve the tags with a sufix '-group' to ignore the
-                    if (active) {
-                        const apisTagWithoutGroups = response.body.list.filter(item => item.value.search(key) === -1);
-                        setAllTags(apisTagWithoutGroups);
-                    } else {
-                        setAllTags(response.body.list);
-                    }
-                }
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-            });
-    }, []);
+    const { allTags } = props;
+    let apisTagWithoutGroups = null;
+    if (allTags.count !== 0) {
+        // Remve the tags with a sufix '-group' to ignore the
+        if (active) {
+            apisTagWithoutGroups = allTags.filter(item => item.value.search(key) === -1);
+        } else {
+            apisTagWithoutGroups = allTags;
+        }
+    }
 
     /**
      *
@@ -92,16 +80,14 @@ function ApiTagCloud(props) {
     };
 
     return (
-        allTags && (
+        apisTagWithoutGroups && (
             <React.Fragment>
-                <Divider />
                 <Typography variant='h6' gutterBottom className={classes.filterTitle}>
                     <FormattedMessage defaultMessage='Tag Cloud' id='Apis.Listing.ApiTagCloud.title' />
                 </Typography>
-                <Divider />
                 <TagCloud
-                    minSize={18}
-                    maxSize={40}
+                    minSize={14}
+                    maxSize={25}
                     colorOptions={colorOptions}
                     tags={allTags}
                     shuffle={false}
@@ -118,6 +104,7 @@ ApiTagCloud.propTypes = {
     tag: PropTypes.shape({}).isRequired,
     listType: PropTypes.string.isRequired,
     apiType: PropTypes.string.isRequired,
+    allTags: PropTypes.shape({}).isRequired,
 };
 
 export default ApiTagCloud;

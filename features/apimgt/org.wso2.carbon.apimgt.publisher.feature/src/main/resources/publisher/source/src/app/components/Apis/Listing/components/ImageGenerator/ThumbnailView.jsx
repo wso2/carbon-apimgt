@@ -46,6 +46,8 @@ import APIProduct from 'AppData/APIProduct';
 import MaterialIcons from 'MaterialIcons';
 import Alert from 'AppComponents/Shared/Alert';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import Configurations from 'Config';
+
 import ImageGenerator from './ImageGenerator';
 import Background from './Background';
 
@@ -558,7 +560,8 @@ class ThumbnailView extends Component {
                                             src={
                                                 file && file.length > 0
                                                     ? windowURL.createObjectURL(file[0])
-                                                    : '/publisher/site/public/images/api/api-default.png'
+                                                    : Configurations.app.context +
+                                                      '/site/public/images/api/api-default.png'
                                             }
                                             alt='Thumbnail Preview'
                                         />

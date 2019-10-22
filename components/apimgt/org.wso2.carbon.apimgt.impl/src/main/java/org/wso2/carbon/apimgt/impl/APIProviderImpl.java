@@ -7431,7 +7431,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         for (APIProductResource productResource : productResources) {
             URITemplate uriTemplate = productResource.getUriTemplate();
-            String productResourceKey = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getResourceURI();
+            String productResourceKey = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
 
             //set new uri template ID to the product resource
             int updatedURITemplateId = apiResources.get(productResourceKey).getId();
