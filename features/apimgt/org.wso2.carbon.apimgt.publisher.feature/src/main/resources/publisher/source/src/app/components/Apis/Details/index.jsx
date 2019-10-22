@@ -436,7 +436,7 @@ class Details extends Component {
                 },
                 bodyMessage: {
                     id: 'Apis.Details.index.api.not.found.body',
-                    defaultMessage: "Cannot find the API with the given id",
+                    defaultMessage: 'Cannot find the API with the given id',
                 },
             });
             const resourceNotFountMessage = {
