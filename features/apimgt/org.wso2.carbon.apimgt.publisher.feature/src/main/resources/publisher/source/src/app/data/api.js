@@ -196,6 +196,15 @@ class API extends Resource {
         return Promise.all(promisedPolicies).then(policies => policies.map(response => response.body));
     }
 
+    getResourcePolicies() {
+        return this.client.then(client => {
+            return client.apis['API Resource Policies'].get_apis__apiId__resource_policies({
+                apiId: this.id,
+                sequenceType: 'in',
+            });
+        });
+    }
+
     setInlineProductionEndpoint(serviceURL) {
         this.endpointConfig.production_endpoints.url = serviceURL;
         return this.endpointConfig;
@@ -226,17 +235,17 @@ class API extends Resource {
         }
     }
 
-     /**
+    /**
      * Tests the endpoints
      */
     testEndpoint(endpointUrl, apiId) {
-        return this.client.then((client) => {
-            return client.apis['Validation'].validateEndpoint(({ endpointUrl: endpointUrl, apiId: apiId }));
+        return this.client.then(client => {
+            return client.apis['Validation'].validateEndpoint({ endpointUrl: endpointUrl, apiId: apiId });
         });
     }
 
     save(openAPIVersion = 'v3') {
-        const promisedAPIResponse = this.client.then((client) => {
+        const promisedAPIResponse = this.client.then(client => {
             const properties = client.spec.definitions.API.properties;
             const data = {};
             Object.keys(this).forEach(apiAttribute => {
@@ -363,13 +372,15 @@ class API extends Resource {
      * @return {promise}
      * */
     validateAPIParameter(query) {
-        return this.client.then((client) => {
-            return client.apis.Validation.validateAPI({ query: query }).then((resp) => {
-                return resp.ok;
-            }).catch((err) => {
-                console.log(err);
-                return false;
-            });
+        return this.client.then(client => {
+            return client.apis.Validation.validateAPI({ query: query })
+                .then(resp => {
+                    return resp.ok;
+                })
+                .catch(err => {
+                    console.log(err);
+                    return false;
+                });
         });
     }
 
@@ -380,13 +391,16 @@ class API extends Resource {
      * @return {promise}
      * */
     validateDocumentExists(id, name) {
-        return this.client.then((client) => {
-            return client.apis['API Documents'].validateDocument({ apiId: id, name: name }).then((resp) => {
-                return resp.ok;
-            }).catch((err) => {
-                console.log(err);
-                return false;
-            });
+        return this.client.then(client => {
+            return client.apis['API Documents']
+                .validateDocument({ apiId: id, name: name })
+                .then(resp => {
+                    return resp.ok;
+                })
+                .catch(err => {
+                    console.log(err);
+                    return false;
+                });
         });
     }
 
@@ -432,7 +446,6 @@ class API extends Resource {
         });
         return promise_get;
     }
-
 
     /**
      * Get the graphQL schema of an API
@@ -534,7 +547,7 @@ class API extends Resource {
         const promiseInvoice = this.client.then(client => {
             return client.apis['API Monetization'].get_subscriptions__subscriptionId__usage(
                 {
-                    subscriptionId: id
+                    subscriptionId: id,
                 },
                 this._requestMetaData(),
             );
@@ -659,19 +672,19 @@ class API extends Resource {
         promise_updated = this.client.then(client => {
             const apiData = this.getDataFromSpecFields(client);
 
-        payload = {
-            apiId: apiId,
-            url: openAPIUrl
-        };
+            payload = {
+                apiId: apiId,
+                url: openAPIUrl,
+            };
 
-        const promisedResponse = client.apis['APIs'].put_apis__apiId__swagger(
-            payload,
-            this._requestMetaData({
-                'Content-Type': 'multipart/form-data',
-            }),
-        );
-        return promisedResponse.then(response => new API(response.body));
-      });
+            const promisedResponse = client.apis['APIs'].put_apis__apiId__swagger(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
+            );
+            return promisedResponse.then(response => new API(response.body));
+        });
         return promise_updated;
     }
 
@@ -687,19 +700,19 @@ class API extends Resource {
         promise_updated = this.client.then(client => {
             const apiData = this.getDataFromSpecFields(client);
 
-        payload = {
-            apiId: apiId,
-            file: openAPIFile
-        };
+            payload = {
+                apiId: apiId,
+                file: openAPIFile,
+            };
 
-        const promisedResponse = client.apis['APIs'].put_apis__apiId__swagger(
-            payload,
-            this._requestMetaData({
-                'Content-Type': 'multipart/form-data',
-            }),
-        );
-        return promisedResponse.then(response => new API(response.body));
-    });
+            const promisedResponse = client.apis['APIs'].put_apis__apiId__swagger(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
+            );
+            return promisedResponse.then(response => new API(response.body));
+        });
         return promise_updated;
     }
 
@@ -921,10 +934,11 @@ class API extends Resource {
      * @returns {Promise} With given callback attached to the success chain else API invoke promise.
      */
     subscriptions(apiId, offset = null, limit = null, query = null, callback = null) {
-        const promise_subscription = this.client.then((client) => {
+        const promise_subscription = this.client.then(client => {
             return client.apis['Subscriptions'].get_subscriptions(
                 { apiId, limit, offset, query },
-                this._requestMetaData());
+                this._requestMetaData(),
+            );
         });
         if (callback) {
             return promise_subscription.then(callback);
@@ -1360,22 +1374,22 @@ class API extends Resource {
     }
 
     validateSystemRole(role) {
-        const promise = this.client.then((client) => {
-            return client.apis.Roles.validateSystemRole({ roleId: role })
+        const promise = this.client.then(client => {
+            return client.apis.Roles.validateSystemRole({ roleId: role });
         });
         return promise;
     }
 
     validateUSerRole(role) {
-        const promise = this.client.then((client) => {
-            return client.apis.Roles.validateUserRole({ roleId: role })
+        const promise = this.client.then(client => {
+            return client.apis.Roles.validateUserRole({ roleId: role });
         });
         return promise;
     }
 
     validateScopeName(name) {
-        const promise = this.client.then((client) => {
-            return client.apis.scope.validateScope({ name: name })
+        const promise = this.client.then(client => {
+            return client.apis.scope.validateScope({ name: name });
         });
         return promise;
     }
@@ -1523,7 +1537,7 @@ class API extends Resource {
      * @param state state of the tenant
      */
     getTenantsByState(state) {
-        return this.client.then((client) => {
+        return this.client.then(client => {
             return client.apis['Tenants'].getTenantsByState({ state });
         });
     }
@@ -1532,7 +1546,7 @@ class API extends Resource {
      * Get list of microgateway labels
      */
     microgatewayLabelsGet() {
-        return this.client.then((client) => {
+        return this.client.then(client => {
             return client.apis['Label Collection'].get_labels();
         });
     }
@@ -1551,7 +1565,7 @@ class API extends Resource {
             Object.entries(params.query).forEach(([key, value], index) => {
                 query = `${key}:${value}`;
                 if (Object.entries(params.query).length !== index + 1) {
-                    query += ','
+                    query += ',';
                 }
             });
             params.query = query;
@@ -1764,7 +1778,7 @@ class API extends Resource {
         );
     }
 
-     /**
+    /**
      * Get all certificates for a particular API.
      *
      * @param apiId api id of the api to which the certificate is added
@@ -1852,9 +1866,10 @@ class API extends Resource {
      */
     static getMediationPolicies(apiId) {
         const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
-        return restApiClient.then((client) => {
-            return client.apis["API Mediation Policies"].apisApiIdMediationPoliciesGet({
-                    apiId: apiId
+        return restApiClient.then(client => {
+            return client.apis['API Mediation Policies'].apisApiIdMediationPoliciesGet(
+                {
+                    apiId: apiId,
                 },
                 this._requestMetaData(),
             );
@@ -1869,16 +1884,17 @@ class API extends Resource {
      */
     static addMediationPolicy(policyFile, apiId, type) {
         const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
-        return restApiClient.then((client) => {
-            return client.apis["API Mediation Policies"].apisApiIdMediationPoliciesPost({
-                apiId: apiId,
-                type: type.toLowerCase(),
-                mediationPolicyFile: policyFile
-            },
-            this._requestMetaData({
-                'Content-Type': 'multipart/form-data'
-            }),
-            )
+        return restApiClient.then(client => {
+            return client.apis['API Mediation Policies'].apisApiIdMediationPoliciesPost(
+                {
+                    apiId: apiId,
+                    type: type.toLowerCase(),
+                    mediationPolicyFile: policyFile,
+                },
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
+            );
         });
     }
 
@@ -1891,10 +1907,11 @@ class API extends Resource {
      */
     static getMediationPolicy(seqId, apiId) {
         const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
-        return restApiClient.then((client) => {
-            return client.apis["API Mediation Policy"].apisApiIdMediationPoliciesMediationPolicyIdGet({
+        return restApiClient.then(client => {
+            return client.apis['API Mediation Policy'].apisApiIdMediationPoliciesMediationPolicyIdGet(
+                {
                     mediationPolicyId: seqId,
-                    apiId: apiId
+                    apiId: apiId,
                 },
                 this._requestMetaData(),
             );
@@ -1910,10 +1927,11 @@ class API extends Resource {
      */
     static deleteMediationPolicy(seqId, apiId) {
         const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
-        return restApiClient.then((client) => {
-            return client.apis["API Mediation Policy"].apisApiIdMediationPoliciesMediationPolicyIdDelete({
+        return restApiClient.then(client => {
+            return client.apis['API Mediation Policy'].apisApiIdMediationPoliciesMediationPolicyIdDelete(
+                {
                     mediationPolicyId: seqId,
-                    apiId: apiId
+                    apiId: apiId,
                 },
                 this._requestMetaData(),
             );
@@ -1929,14 +1947,15 @@ class API extends Resource {
      */
     static updateMediationPolicyContent(seqId, apiId) {
         const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
-        return restApiClient.then((client) => {
-            return client.apis["API Mediation Policy"].apisApiIdMediationPoliciesMediationPolicyIdContentPut({
+        return restApiClient.then(client => {
+            return client.apis['API Mediation Policy'].apisApiIdMediationPoliciesMediationPolicyIdContentPut(
+                {
                     mediationPolicyId: seqId,
                     apiId: apiId,
                     type: 'in',
                 },
                 this._requestMetaData({
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data',
                 }),
             );
         });
@@ -1951,13 +1970,14 @@ class API extends Resource {
      */
     static getMediationPolicyContent(mediationPolicyId, apiId) {
         const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
-        return restApiClient.then((client) => {
-            return client.apis["API Mediation Policy"].apisApiIdMediationPoliciesMediationPolicyIdContentGet({
-                mediationPolicyId: mediationPolicyId,
-                apiId: apiId,
+        return restApiClient.then(client => {
+            return client.apis['API Mediation Policy'].apisApiIdMediationPoliciesMediationPolicyIdContentGet(
+                {
+                    mediationPolicyId: mediationPolicyId,
+                    apiId: apiId,
                 },
                 this._requestMetaData({
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data',
                 }),
             );
         });
@@ -1970,10 +1990,8 @@ class API extends Resource {
      */
     static getGlobalMediationPolicies() {
         const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
-        return restApiClient.then((client) => {
-            return client.apis["Global Mediation Policies"].getAllGlobalMediationPolicies({},
-                this._requestMetaData(),
-            );
+        return restApiClient.then(client => {
+            return client.apis['Global Mediation Policies'].getAllGlobalMediationPolicies({}, this._requestMetaData());
         });
     }
 
@@ -1986,10 +2004,11 @@ class API extends Resource {
      */
     static getGlobalMediationPolicyContent(mediationPolicyId) {
         const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
-        return restApiClient.then((client) => {
-            return client.apis["Global Mediation Policy"].getGlobalMediationPolicyContent({
-                mediationPolicyId: mediationPolicyId,
-            },
+        return restApiClient.then(client => {
+            return client.apis['Global Mediation Policy'].getGlobalMediationPolicyContent(
+                {
+                    mediationPolicyId: mediationPolicyId,
+                },
                 this._requestMetaData(),
             );
         });
@@ -2003,9 +2022,7 @@ class API extends Resource {
     static getAllExternalStores() {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return apiClient.then(client => {
-            return client.apis['External Stores'].getAllExternalStores(
-                this._requestMetaData(),
-            );
+            return client.apis['External Stores'].getAllExternalStores(this._requestMetaData());
         });
     }
 
@@ -2037,9 +2054,9 @@ class API extends Resource {
             return client.apis['External Stores'].publishAPIToExternalStores(
                 {
                     apiId: apiId,
-                    externalStoreIds: externalStoreIds
-                }
-                , this._requestMetaData,
+                    externalStoreIds: externalStoreIds,
+                },
+                this._requestMetaData,
             );
         });
     }
@@ -2076,7 +2093,7 @@ class API extends Resource {
     static subscribeAlerts(alerts) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return apiClient.then(client => {
-            return client.apis['Alert Subscriptions'].subscribeToAlerts({body: alerts}, this._requestMetaData());
+            return client.apis['Alert Subscriptions'].subscribeToAlerts({ body: alerts }, this._requestMetaData());
         });
     }
 
@@ -2103,9 +2120,10 @@ class API extends Resource {
         return apiClient.then(client => {
             return client.apis['Alert Configuration'].getAllAlertConfigs(
                 {
-                    alertType: alertType
+                    alertType: alertType,
                 },
-                this._requestMetaData());
+                this._requestMetaData(),
+            );
         });
     }
 
@@ -2126,7 +2144,8 @@ class API extends Resource {
                     body: alertConfig,
                     configurationId: configId,
                 },
-                this._requestMetaData());
+                this._requestMetaData(),
+            );
         });
     }
 
@@ -2143,9 +2162,10 @@ class API extends Resource {
             return client.apis['Alert Configuration'].deleteAlertConfig(
                 {
                     alertType: alertType,
-                    configurationId: configId
+                    configurationId: configId,
                 },
-                this._requestMetaData());
+                this._requestMetaData(),
+            );
         });
     }
 }

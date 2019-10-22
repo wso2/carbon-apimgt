@@ -171,29 +171,33 @@ class LifeCycleUpdate extends Component {
         lcMap.set('Created', 'Create');
         lcMap.set('Retired', 'Retire');
         const isPrototype = api.endpointConfig && api.endpointConfig.implementation_status === 'prototyped';
-        const lifecycleButtons = lifecycleStates
-            .filter(item => item.event !== lcMap.get(lcState.state))
-            .map((item) => {
-                if (item.event === 'Deploy as a Prototype') {
-                    return {
-                        ...item,
-                        disabled: !isPrototype || api.endpointConfig == null,
-                    };
-                }
-                if (item.event === 'Publish') {
-                    return {
-                        ...item,
-                        disabled:
-                            api.endpointConfig == null ||
-                            api.policies.length === 0 ||
-                            api.endpointConfig.implementation_status === 'prototyped',
-                    };
+        const lifecycleButtons = lifecycleStates.map((item) => {
+            const state = { ...item, displayName: item.event };
+            if (state.event === 'Deploy as a Prototype') {
+                return {
+                    ...state,
+                    disabled: !isPrototype || api.endpointConfig == null,
+                };
+            }
+            if (state.event === 'Publish') {
+                let { displayName } = state;
+                if (lcState.state === 'Published') {
+                    displayName = 'Re Deploy';
                 }
                 return {
-                    ...item,
-                    disabled: false,
+                    ...state,
+                    displayName,
+                    disabled:
+                        api.endpointConfig == null ||
+                        api.policies.length === 0 ||
+                        api.endpointConfig.implementation_status === 'prototyped',
                 };
-            });
+            }
+            return {
+                ...state,
+                disabled: false,
+            };
+        });
         return (
             <Grid container>
                 {isWorkflowPending ? (
@@ -209,9 +213,9 @@ class LifeCycleUpdate extends Component {
                                 <Grid item xs={8}>
                                     <LifeCycleImage lifeCycleStatus={newState || api.lifeCycleStatus} />
                                 </Grid>
-                                {(api.lifeCycleStatus === 'CREATED' || (api.lifeCycleStatus === 'PUBLISHED'
-                                && api.type !== 'GRAPHQL') ||
-                                api.lifeCycleStatus === 'PROTOTYPED') && (
+                                {(api.lifeCycleStatus === 'CREATED' ||
+                                    (api.lifeCycleStatus === 'PUBLISHED' && api.type !== 'GRAPHQL') ||
+                                    api.lifeCycleStatus === 'PROTOTYPED') && (
                                     <Grid item xs={3}>
                                         <CheckboxLabels api={api} />
                                     </Grid>
@@ -252,7 +256,7 @@ class LifeCycleUpdate extends Component {
                                             data-value={transitionState.event}
                                             onClick={this.updateLifeCycleState}
                                         >
-                                            {transitionState.event}
+                                            {transitionState.displayName}
                                             {this.state.isUpdating === transitionState.event && (
                                                 <CircularProgress size={18} />
                                             )}

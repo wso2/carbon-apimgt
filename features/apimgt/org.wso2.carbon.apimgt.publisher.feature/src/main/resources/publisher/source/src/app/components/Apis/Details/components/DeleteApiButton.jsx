@@ -131,7 +131,7 @@ class DeleteApiButton extends React.Component {
                 history.push(redirectURL);
             }).catch((error) => {
                 if (error.status === 409) {
-                    Alert.error('Cannot remove ' + api.name + ' API as active subscriptions exist');
+                    Alert.error(error.response.body.description);
                 } else {
                     Alert.error('Something went wrong while deleting the API!');
                 }
