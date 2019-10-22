@@ -29,6 +29,9 @@ const SwaggerUI = (props) => {
             req.headers[authorizationHeader] = 'Bearer ' + accessTokenProvider();
             if (url.endsWith(patternToCheck)) {
                 req.url = url.substring(0, url.length - 2);
+            } else if (url.includes('/*?')) {
+                const splitTokens = url.split('/*?');
+                req.url = splitTokens.length > 1 ? splitTokens[0] + '?' + splitTokens[1] : splitTokens[0];
             }
             return req;
         },
