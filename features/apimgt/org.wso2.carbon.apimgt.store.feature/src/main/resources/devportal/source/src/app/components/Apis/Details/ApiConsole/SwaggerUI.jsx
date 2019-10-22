@@ -16,7 +16,7 @@ const disableAuthorizeAndInfoPlugin = function () {
  * @extends {Component}
  */
 const SwaggerUI = (props) => {
-    const { spec, accessTokenProvider, authorizationHeader } = props;
+    const { spec, accessTokenProvider, authorizationHeader, api } = props;
 
     const componentProps = {
         spec,
@@ -24,7 +24,12 @@ const SwaggerUI = (props) => {
         docExpansion: 'list',
         defaultModelsExpandDepth: 0,
         requestInterceptor: (req) => {
+            const { url } = req;
+            const patternToCheck = api.context + '/*';
             req.headers[authorizationHeader] = 'Bearer ' + accessTokenProvider();
+            if (url.endsWith(patternToCheck)) {
+                req.url = url.substring(url.length - 1, 0);
+            }
             return req;
         },
 
