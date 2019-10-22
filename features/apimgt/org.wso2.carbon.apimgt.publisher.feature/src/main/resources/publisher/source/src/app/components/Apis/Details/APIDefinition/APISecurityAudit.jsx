@@ -253,7 +253,7 @@ class APISecurityAudit extends Component {
                 url = baseUrl + 'security/';
                 break;
             case 'Data Validation':
-                url = baseUrl + 'security/datavalidation/';
+                url = baseUrl + 'datavalidation/datavalidation/';
                 break;
             default:
                 url = baseUrl;
@@ -595,94 +595,66 @@ class APISecurityAudit extends Component {
                                                 </Typography>
                                             </React.Fragment>
                                             <hr />
-                                            {/* <Typography variant='body1'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.APIDefinition.AuditApi.OpenApiSummary'
-                                                    defaultMessage='{openApiSummary}'
-                                                    values={{
-                                                        openApiSummary: (
-                                                            <strong>OpenAPI Format Requirements -
-                                                                    ({(
-                                                                Math.round(reportObject.validation.grade * 100) / 100)
-                                                            } / 25)
-                                                            </strong>
-                                                        ),
-                                                    }}
-                                                /> */}
-
-                                            {/* </Typography>
-                                            <VisibilitySensor>
-                                                {({ isVisible }) => {
-                                                    const gradeProgressScore = isVisible ?
-                                                        (((Math.round(reportObject.validation.grade * 100) / 100) / 25
-                                                        ) * 100) : 0;
-                                                    return (
-                                                        <Line
-                                                            percent={gradeProgressScore}
-                                                            strokeColor='#3d98c7'
-                                                        />
-                                                    );
-                                                }
-                                                }
-                                            </VisibilitySensor> */}
-                                            <Typography variant='body1'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.APIDefinition.AuditApi.SecuritySummary'
-                                                    defaultMessage='{securitySummary}'
-                                                    values={{
-                                                        securitySummary: (
-                                                            <strong>
-                                                                Security -
-                                                                 ({this.roundScore(reportObject.security.score)} / 30)
-                                                            </strong>
-                                                        ),
-                                                    }}
-                                                />
-
-                                            </Typography>
-                                            <VisibilitySensor>
-                                                {({ isVisible }) => {
-                                                    const progressScore = isVisible ?
-                                                        ((this.roundScore(reportObject.security.score) / 30
-                                                        ) * 100) : 0;
-                                                    return (
-                                                        <Line
-                                                            percent={progressScore}
-                                                            strokeColor='#3d98c7'
-                                                        />
-                                                    );
-                                                }
-                                                }
-                                            </VisibilitySensor>
-                                            <Typography variant='body1'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.APIDefinition.AuditApi.DataValidationSummary'
-                                                    defaultMessage='{dataValidationSummary}'
-                                                    values={{
-                                                        dataValidationSummary: (
-                                                            <strong>
-                                                                Data Validation -
-                                                                 ({this.roundScore(reportObject.data.score)} / 70)
-                                                            </strong>
-                                                        ),
-                                                    }}
-                                                />
-
-                                            </Typography>
-                                            <VisibilitySensor>
-                                                {({ isVisible }) => {
-                                                    const progressScore = isVisible ?
-                                                        ((this.roundScore(reportObject.data.score) / 70
-                                                        ) * 100) : 0;
-                                                    return (
-                                                        <Line
-                                                            percent={progressScore}
-                                                            strokeColor='#3d98c7'
-                                                        />
-                                                    );
-                                                }
-                                                }
-                                            </VisibilitySensor>
+                                            {reportObject.security.issues !== null &&
+                                                <Typography variant='body1'>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.APIDefinition.AuditApi.SecuritySummary'
+                                                        defaultMessage='{securitySummary}'
+                                                        values={{
+                                                            securitySummary: (
+                                                                <strong>
+                                                                    Security -
+                                                                    ({this.roundScore(reportObject.security.score)} / 30)
+                                                                </strong>
+                                                            ),
+                                                        }}
+                                                    />
+                                                    <VisibilitySensor>
+                                                        {({ isVisible }) => {
+                                                            const progressScore = isVisible ?
+                                                                ((this.roundScore(reportObject.security.score) / 30
+                                                                ) * 100) : 0;
+                                                            return (
+                                                                <Line
+                                                                    percent={progressScore}
+                                                                    strokeColor='#3d98c7'
+                                                                />
+                                                            );
+                                                        }
+                                                        }
+                                                    </VisibilitySensor>
+                                                </Typography>
+                                            }
+                                            {reportObject.data.issues !== null &&
+                                                <Typography variant='body1'>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.APIDefinition.AuditApi.DataValidationSummary'
+                                                        defaultMessage='{dataValidationSummary}'
+                                                        values={{
+                                                            dataValidationSummary: (
+                                                                <strong>
+                                                                    Data Validation -
+                                                                    ({this.roundScore(reportObject.data.score)} / 70)
+                                                                </strong>
+                                                            ),
+                                                        }}
+                                                    />
+                                                    <VisibilitySensor>
+                                                        {({ isVisible }) => {
+                                                            const progressScore = isVisible ?
+                                                                ((this.roundScore(reportObject.data.score) / 70
+                                                                ) * 100) : 0;
+                                                            return (
+                                                                <Line
+                                                                    percent={progressScore}
+                                                                    strokeColor='#3d98c7'
+                                                                />
+                                                            );
+                                                        }
+                                                        }
+                                                    </VisibilitySensor>
+                                                </Typography>
+                                            }
                                         </div>
                                     </div>
                                 </div>
@@ -777,7 +749,7 @@ class APISecurityAudit extends Component {
                                                 </Tooltip>
                                             </Typography>
                                         </React.Fragment>
-                                        {(reportObject.data.issueCounter !== 0) &&
+                                        {(reportObject.security.issueCounter !== 0) &&
                                             <div>
                                                 <hr />
                                                 <Typography variant='body1'>
@@ -896,263 +868,6 @@ class APISecurityAudit extends Component {
                                 </Paper>
                             </div>
                         }
-                        {/* <Paper elevation={1} className={classes.rootPaper}>
-                            <div>
-                                <Typography variant='h5' className={classes.sectionHeadingTypography}>
-                                    <FormattedMessage
-                                        id='Apis.Details.APIDefinition.AuditApi.OpenApiFormatRequirements'
-                                        defaultMessage='OpenAPI Format Requirements'
-                                    />
-                                </Typography>
-                                <Typography variant='body1'>
-                                    <FormattedMessage
-                                        id='Apis.Details.APIDefinition.AuditApi.OpenApiNumOfIssues'
-                                        defaultMessage='{openApiNumOfIssuesText} {openApiNumOfIssues}'
-                                        values={{
-                                            openApiNumOfIssuesText: (
-                                                <strong>Number of Issues:</strong>
-                                            ),
-                                            openApiNumOfIssues: reportObject.validation.issueCounter,
-                                        }}
-                                    />
-                                </Typography>
-                                <Typography variant='body1'>
-                                    <FormattedMessage
-                                        id='Apis.Details.APIDefinition.AuditApi.OpenApiScore'
-                                        defaultMessage='{openApiScoreText} {openApiScore}  / 25'
-                                        values={{
-                                            openApiScoreText: (
-                                                <strong>Score:</strong>
-                                            ),
-                                            openApiScore: (
-                                                (Math.round(reportObject.validation.grade * 100) / 100)
-                                            ),
-                                        }}
-                                    />
-
-                                </Typography>
-                                <React.Fragment>
-                                    <Typography variant='body1'>
-                                        <FormattedMessage
-                                            id='Apis.Details.APIDefinition.AuditApi.OpenApiCriticality'
-                                            defaultMessage='{openApiCriticalityText} {openApiCriticality}'
-                                            values={{
-                                                openApiCriticalityText: (
-                                                    <strong>Criticality:</strong>
-                                                ),
-                                                openApiCriticality: reportObject.validation.criticality,
-                                            }}
-                                        />
-                                        <Tooltip
-                                            placement='right'
-                                            classes={{
-                                                tooltip: classes.htmlTooltip,
-                                            }}
-                                            title={
-                                                <React.Fragment>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.APIDefinition.AuditApi.tooltip'
-                                                        defaultMessage={
-                                                            'Criticality ranges from 1 to 5, with 1 being' +
-                                                                    ' low vulnerability and 5 being high vulnerability'
-                                                        }
-                                                    />
-                                                </React.Fragment>
-                                            }
-                                        >
-                                            <Button className={classes.helpButton}>
-                                                <HelpOutline className={classes.helpIcon} />
-                                            </Button>
-                                        </Tooltip>
-                                    </Typography>
-                                </React.Fragment> */}
-                                {/* {(reportObject.validation.issueCounter !== 0) &&
-                                    <div>
-                                        <hr />
-                                        <Typography variant='body1'>
-                                            <MuiThemeProvider theme={this.getMuiTheme()}>
-                                                <MUIDataTable
-                                                    title='Issues'
-                                                    data={this.getRowData(
-                                                        reportObject.validation.issues,
-                                                        'OpenAPI Format Requirements',
-                                                    )}
-                                                    columns={columns}
-                                                    options={options}
-                                                />
-                                            </MuiThemeProvider>
-                                        </Typography>
-                                    </div>
-                                } */}
-                            {/* </div>
-                        </Paper>
-
-                        <Paper elevation={1} className={classes.rootPaper}>
-                            <div>
-                                <Typography variant='h5' className={classes.sectionHeadingTypography}>
-                                    <FormattedMessage
-                                        id='Apis.Details.APIDefinition.AuditApi.Security'
-                                        defaultMessage='Security'
-                                    />
-                                </Typography>
-                                <Typography variant='body1'>
-                                    <FormattedMessage
-                                        id='Apis.Details.APIDefinition.AuditApi.SecurityNumOfIssues'
-                                        defaultMessage='{securityNumOfIssuesText} {securityNumOfIssues}'
-                                        values={{
-                                            securityNumOfIssuesText: (
-                                                <strong>Number of Issues:</strong>
-                                            ),
-                                            securityNumOfIssues: reportObject.security.issueCounter,
-                                        }}
-                                    />
-                                </Typography>
-                                <Typography variant='body1'>
-                                    <FormattedMessage
-                                        id='Apis.Details.APIDefinition.AuditApi.SecurityScore'
-                                        defaultMessage='{securityScoreText} {securityScore}  / 25'
-                                        values={{
-                                            securityScoreText: <strong>Score:</strong>,
-                                            securityScore: (Math.round(reportObject.security.grade * 100) / 100),
-                                        }}
-                                    />
-                                </Typography>
-                                <React.Fragment>
-                                    <Typography variant='body1'>
-                                        <FormattedMessage
-                                            id='APis.Dtails.APIDefinition.AuditApi.SecurityCriticality'
-                                            defaultMessage='{securityCriticalityText} {securityCriticality}'
-                                            values={{
-                                                securityCriticalityText: (
-                                                    <strong>Criticality:</strong>
-                                                ),
-                                                securityCriticality: reportObject.security.criticality,
-                                            }}
-                                        />
-                                        <Tooltip
-                                            placement='right'
-                                            classes={{
-                                                tooltip: classes.htmlTooltip,
-                                            }}
-                                            title={
-                                                <React.Fragment>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.APIDefinition.AuditApi.tooltip'
-                                                        defaultMessage={
-                                                            'Criticality ranges from 1 to 5, with 1 being' +
-                                                                    ' low vulnerability and 5 being high vulnerability'
-                                                        }
-                                                    />
-                                                </React.Fragment>
-                                            }
-                                        >
-                                            <Button className={classes.helpButton}>
-                                                <HelpOutline className={classes.helpIcon} />
-                                            </Button>
-                                        </Tooltip>
-                                    </Typography>
-                                </React.Fragment> */}
-                                {/* {(reportObject.security.issueCounter !== 0) &&
-                                    <div>
-                                        <hr />
-                                        <Typography variant='body1'>
-                                            <MuiThemeProvider theme={this.getMuiTheme()}>
-                                                <MUIDataTable
-                                                    title='Issues'
-                                                    data={this.getRowData(reportObject.security.issues, 'Security')}
-                                                    columns={columns}
-                                                    options={options}
-                                                />
-                                            </MuiThemeProvider>
-                                        </Typography>
-                                    </div>
-                                } */}
-                            {/* </div>
-                        </Paper>
-                        <Paper elevation={1} className={classes.rootPaper}>
-                            <div>
-                                <Typography variant='h5' className={classes.sectionHeadingTypography}>
-                                    <FormattedMessage
-                                        id='Apis.Details.APIDefinition.AuditApi.DataValidation'
-                                        defaultMessage='Data Validation'
-                                    />
-                                </Typography>
-                                <Typography variant='body1'>
-                                    <FormattedMessage
-                                        id='Apis.Details.APIDefinition.AuditApi.DataValidationIssueCounter'
-                                        defaultMessage='{dataValidationIssueCounterText} {dataValidationIssueCounter}'
-                                        values={{
-                                            dataValidationIssueCounterText: (
-                                                <strong>Number of Issues:</strong>
-                                            ),
-                                            dataValidationIssueCounter: reportObject.data.issueCounter,
-                                        }}
-                                    />
-                                </Typography>
-                                <Typography variant='body1'>
-                                    <FormattedMessage
-                                        id='Apis.Details.APIDefinition.AuditApi.DataValidationScore'
-                                        defaultMessage='{dataValidationScoreText} {dataValidationScore} / 50'
-                                        values={{
-                                            dataValidationScoreText: (
-                                                <strong>Score:</strong>
-                                            ),
-                                            dataValidationScore: (Math.round(reportObject.data.grade * 100) / 100),
-                                        }}
-                                    />
-                                </Typography>
-                                <React.Fragment>
-                                    <Typography variant='body1'>
-                                        <FormattedMessage
-                                            id='Apis.Details.APIDefinition.AuditApi.DataValidationCriticality'
-                                            defaultMessage='{dataValidationCriticalityText} {dataValidationCriticality}'
-                                            values={{
-                                                dataValidationCriticalityText: (
-                                                    <strong>Criticality:</strong>
-                                                ),
-                                                dataValidationCriticality: reportObject.data.criticality,
-                                            }}
-                                        />
-                                        <Tooltip
-                                            placement='right'
-                                            classes={{
-                                                tooltip: classes.htmlTooltip,
-                                            }}
-                                            title={
-                                                <React.Fragment>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.APIDefinition.AuditApi.tooltip'
-                                                        defaultMessage={
-                                                            'Criticality ranges from 1 to 5, with 1 being' +
-                                                                    ' low vulnerability and 5 being high vulnerability'
-                                                        }
-                                                    />
-                                                </React.Fragment>
-                                            }
-                                        >
-                                            <Button className={classes.helpButton}>
-                                                <HelpOutline className={classes.helpIcon} />
-                                            </Button>
-                                        </Tooltip>
-                                    </Typography>
-                                </React.Fragment> */}
-                                {/* {(reportObject.data.issueCounter !== 0) &&
-                                    <div>
-                                        <hr />
-                                        <Typography variant='body1'>
-                                            <MuiThemeProvider theme={this.getMuiTheme()}>
-                                                <MUIDataTable
-                                                    title='Issues'
-                                                    data={this.getRowData(reportObject.data.issues, 'Data Validation')}
-                                                    columns={columns}
-                                                    options={options}
-                                                />
-                                            </MuiThemeProvider>
-                                        </Typography>
-                                    </div>
-                                } */}
-                            {/* </div>
-                        </Paper> */}
                     </div>
                 )}
             </div>
