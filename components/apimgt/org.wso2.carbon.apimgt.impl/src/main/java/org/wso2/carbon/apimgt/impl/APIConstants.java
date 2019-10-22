@@ -354,7 +354,7 @@ public final class APIConstants {
     public static final String IDENTITY_OAUTH2_FIELD_USER_DOMAIN = "USER_DOMAIN";
     public static final String DOT = ".";
     public static final String DEFAULT = "DEFAULT";
-    public static final String API_KEY_TYPE = "API_KEY";
+    public static final String API_KEY_AUTH_TYPE = "API_KEY";
     public static final String EXP = "exp";
     public static final String JWT = "JWT";
     public static final String JWT_DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
@@ -688,7 +688,7 @@ public final class APIConstants {
     public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS = CORS_CONFIGURATION
             + "Access-Control-Allow-Credentials";
 
-    public static final String API_KEY_AUTH_TYPE = "AM_KEY_TYPE";
+    public static final String API_KEY_TYPE = "AM_KEY_TYPE";
     public static final String API_KEY_TYPE_PRODUCTION = "PRODUCTION";
     public static final String API_KEY_TYPE_SANDBOX = "SANDBOX";
 
