@@ -47,7 +47,6 @@ public class ThreatProtectorConstants {
     public static final String P_MAX_CHILDREN_PER_ELEMENT = "com.ctc.wstx.maxChildrenPerElement";
     public static final String P_MAX_ELEMENT_COUNT = "com.ctc.wstx.maxElementCount";
     public static final String P_MAX_ELEMENT_DEPTH = "com.ctc.wstx.maxElementDepth";
-    public static final String P_MAX_ENTITY_COUNT = "com.ctc.wstx.maxEntityCount";
     public static final String REQUEST_BUFFER_SIZE = "RequestMessageBufferSize";
     public static final String XML = "XML";
     public static final String ORIGINAL = "Original";

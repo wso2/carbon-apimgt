@@ -100,7 +100,7 @@ public enum VisibilityEnum {
     }
 }
 
-    private VisibilityEnum visibility = null;
+    private VisibilityEnum visibility = VisibilityEnum.PUBLIC;
     private List<String> visibleRoles = new ArrayList<>();
     private List<String> visibleTenants = new ArrayList<>();
 
@@ -136,7 +136,7 @@ public enum AccessControlEnum {
     }
 }
 
-    private AccessControlEnum accessControl = null;
+    private AccessControlEnum accessControl = AccessControlEnum.NONE;
     private List<String> accessControlRoles = new ArrayList<>();
     private List<String> gatewayEnvironments = new ArrayList<>();
     private String apiType = null;
@@ -179,7 +179,7 @@ public enum SubscriptionAvailabilityEnum {
     }
 }
 
-    private SubscriptionAvailabilityEnum subscriptionAvailability = null;
+    private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.ALL_TENANTS;
     @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> subscriptionAvailableTenants = new ArrayList<>();
     private Map<String, String> additionalProperties = new HashMap<>();

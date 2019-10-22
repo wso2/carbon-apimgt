@@ -323,7 +323,7 @@ class APIDefinition extends React.Component {
         if (notFound) {
             return <ResourceNotFound message={resourceNotFountMessage} />;
         }
-        if (!swagger && !graphQL) {
+        if (!swagger && !graphQL && api === 'undefined') {
             return <Progress />;
         }
 
@@ -344,7 +344,7 @@ class APIDefinition extends React.Component {
                                 />
                             )}
                         </Typography>
-                        {!graphQL && (
+                        {!(graphQL || api.type === 'APIProduct') && (
                             <Button
                                 size='small'
                                 className={classes.button}
@@ -358,7 +358,9 @@ class APIDefinition extends React.Component {
                                 />
                             </Button>
                         )}
-                        <ImportDefinition setSchemaDefinition={this.setSchemaDefinition} />
+                        {api.type !== 'APIProduct' && <ImportDefinition
+                            setSchemaDefinition={this.setSchemaDefinition}
+                        />}
                         <a className={classes.downloadLink} href={downloadLink} download={fileName}>
                             <Button size='small' className={classes.button}>
                                 <CloudDownloadRounded className={classes.buttonIcon} />

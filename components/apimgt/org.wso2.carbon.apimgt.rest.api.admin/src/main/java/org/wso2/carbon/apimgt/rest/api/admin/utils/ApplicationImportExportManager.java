@@ -153,6 +153,7 @@ public class ApplicationImportExportManager {
                     if (isTierAvailable(tier, api) && api.getStatus() != null &&
                             APIConstants.PUBLISHED.equals(api.getStatus())) {
                         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+                        apiTypeWrapper.setTier(tier.getName());
                         // add subscription if update flag is not specified
                         // it will throw an error if subscriber already exists
                         if (!update) {

@@ -15,10 +15,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
+import API from 'AppData/api';
 import TagCloudListingTags from './TagCloudListingTags';
 import CustomIcon from '../../Shared/CustomIcon';
 
@@ -57,7 +58,18 @@ const useStyles = makeStyles(theme => ({
 export default function TagCloudListing() {
     const classes = useStyles();
     const theme = useTheme();
-
+    const [allTags, setAllTags] = useState(null);
+    useEffect(() => {
+        const restApiClient = new API();
+        const promisedTags = restApiClient.getAllTags();
+        promisedTags
+            .then((response) => {
+                setAllTags(response.body.list);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }, []);
     const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
 
     return (
@@ -76,7 +88,7 @@ export default function TagCloudListing() {
                 </div>
             </div>
             <div className={classes.listContentWrapper}>
-                <TagCloudListingTags />
+                {allTags && <TagCloudListingTags allTags={allTags} />}
             </div>
         </main>
     );

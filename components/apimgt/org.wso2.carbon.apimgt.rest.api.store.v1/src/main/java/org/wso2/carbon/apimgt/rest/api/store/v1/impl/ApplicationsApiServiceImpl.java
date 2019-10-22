@@ -211,9 +211,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
-                String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
                 // Remove hidden attributes and set the rest of the attributes from config
-                JSONArray applicationAttributesFromConfig = apiConsumer.getAppAttributesFromConfig(tenantDomain);
+                JSONArray applicationAttributesFromConfig = apiConsumer.getAppAttributesFromConfig(username);
                 Map<String, String> existingApplicationAttributes = application.getApplicationAttributes();
                 Map<String, String> applicationAttributes = new HashMap<>();
                 if (existingApplicationAttributes != null && applicationAttributesFromConfig != null) {

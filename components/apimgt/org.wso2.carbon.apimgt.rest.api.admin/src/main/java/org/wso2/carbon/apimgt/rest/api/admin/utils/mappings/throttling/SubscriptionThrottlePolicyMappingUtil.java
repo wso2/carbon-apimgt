@@ -134,7 +134,8 @@ public class SubscriptionThrottlePolicyMappingUtil {
             }
             subscriptionPolicy.setCustomAttributes(customAttrJsonArray.toJSONString().getBytes());
         }
-        if (StringUtils.isNotBlank(dto.getMonetization().getMonetizationPlan().name())) {
+        if (dto.getMonetization() != null &&
+                StringUtils.isNotBlank(dto.getMonetization().getMonetizationPlan().name())) {
             String tierMonetizationPlan = dto.getMonetization().getMonetizationPlan().toString();
             subscriptionPolicy.setMonetizationPlan(tierMonetizationPlan);
             if (dto.getMonetization().getProperties() != null) {

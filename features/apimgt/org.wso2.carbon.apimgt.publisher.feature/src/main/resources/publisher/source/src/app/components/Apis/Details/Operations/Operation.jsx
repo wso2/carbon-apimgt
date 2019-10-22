@@ -156,7 +156,8 @@ class Operation extends React.Component {
             ...operation,
             scopes: [...operation.scopes],
         };
-        newoperation.scopes = [e.target.value];
+        const scope = (e.target.value === 'none' ? '' : e.target.value);
+        newoperation.scopes = [scope];
         this.props.handleUpdateList(newoperation);
     }
     /**
@@ -195,6 +196,8 @@ class Operation extends React.Component {
         const {
             operation, theme, classes, apiPolicies, scopes, isOperationRateLimiting,
         } = this.props;
+        const noneScope = { name: 'none', description: '', bindings: null };
+        const dropdownScopes = [...scopes, noneScope];
         const { isSecurity } = this.state;
         let chipColor = theme.custom.operationChipColor ?
             theme.custom.operationChipColor[operation.verb.toLowerCase()]
@@ -244,14 +247,14 @@ class Operation extends React.Component {
                 <TableCell>
                     <Select
                         className={classes.dropDown}
-                        value={operation.scopes}
+                        value={operation.scopes.length === 0 ? ['none'] : operation.scopes}
                         onChange={this.handleScopeChange}
                         inputProps={{
                             name: 'scopes',
                             id: 'age-simple',
                         }}
                     >
-                        {scopes.map(tempScope => (
+                        {dropdownScopes.map(tempScope => (
                             <MenuItem
                                 key={tempScope.name}
                                 value={tempScope.name}

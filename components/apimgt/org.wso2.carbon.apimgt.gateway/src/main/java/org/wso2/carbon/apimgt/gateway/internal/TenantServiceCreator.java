@@ -52,6 +52,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private static final Log log = LogFactory.getLog(TenantServiceCreator.class);
     private String resourceMisMatchSequenceName = "_resource_mismatch_handler_";
     private String authFailureHandlerSequenceName = "_auth_failure_handler_";
+    private String graphqlAuthFailureHandlerSequenceName = "_graphql_failure_handler_";
     private String sandboxKeyErrorSequenceName = "_sandbox_key_error_";
     private String productionKeyErrorSequenceName = "_production_key_error_";
     private String throttleOutSequenceName = "_throttle_out_handler_";
@@ -101,8 +102,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                     configurationContext);
             manger.init();
 
-            File synapseConfigDir = new File(synapseConfigsDir,
-                    manger.getTracker().getCurrentConfigurationName());
+            File synapseConfigDir = new File(synapseConfigsDir, manger.getTracker().getCurrentConfigurationName());
             StringBuilder filepath = new StringBuilder();
             filepath.append(synapseConfigsDir).append('/').append(manger.getTracker().getCurrentConfigurationName()).append('/').
                     append(MultiXMLConfigurationBuilder.SEQUENCES_DIR).append('/').append(authFailureHandlerSequenceName).
@@ -111,6 +111,14 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
             //Here we will check authfailurehandler sequence exist in synapse artifact. If it is not available we will create
             //sequence synapse configurations by using resource artifacts
             if (!authFailureHandlerSequenceNameFile.exists()) {
+                createTenantSynapseConfigHierarchy(synapseConfigDir, tenantDomain);
+            }
+
+            String graphqlFilepath = String.valueOf(synapseConfigsDir) + '/' +
+                    manger.getTracker().getCurrentConfigurationName() + '/' + MultiXMLConfigurationBuilder.SEQUENCES_DIR
+                    + '/' + graphqlAuthFailureHandlerSequenceName + ".xml";
+            File graphqlFailureHandlerSequenceNameFile = new File(graphqlFilepath);
+            if (!graphqlFailureHandlerSequenceNameFile.exists()) {
                 createTenantSynapseConfigHierarchy(synapseConfigDir, tenantDomain);
             }
 
@@ -202,6 +210,9 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                 FileUtils.copyFile(new File(synapseConfigRootPath + authFailureHandlerSequenceName + ".xml"),
                                    new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
                                             + File.separator + authFailureHandlerSequenceName + ".xml"));
+                FileUtils.copyFile(new File(synapseConfigRootPath + graphqlAuthFailureHandlerSequenceName + ".xml"),
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                + File.separator + graphqlAuthFailureHandlerSequenceName + ".xml"));
                 FileUtils.copyFile(new File(synapseConfigRootPath + resourceMisMatchSequenceName + ".xml"),
                                    new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
                                             + File.separator + resourceMisMatchSequenceName + ".xml"));

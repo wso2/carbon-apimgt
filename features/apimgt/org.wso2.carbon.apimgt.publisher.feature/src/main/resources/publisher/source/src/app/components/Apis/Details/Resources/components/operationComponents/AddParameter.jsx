@@ -38,7 +38,7 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
-const SUPPORTED_LOCATIONS = ['query', 'header', 'cookie']; // 'Path'
+const SUPPORTED_LOCATIONS = ['query', 'header', 'cookie', 'body']; // 'Path'
 
 /**
  *
@@ -55,7 +55,7 @@ function AddParameter(props) {
     const inputLabel = useRef(null);
     const [labelWidth, setLabelWidth] = useState(0);
     // For more info about Data Models (Schemas) refer https://swagger.io/docs/specification/data-models/
-    const initParameter = { in: '', name: '', schema: { type: 'integer' } };
+    const initParameter = { in: '', name: '', schema: { type: 'string' } };
 
     /**
      *
@@ -72,8 +72,6 @@ function AddParameter(props) {
                 return { ...state, [type]: value };
             case 'clear':
                 return initParameter;
-            case 'error':
-                return { ...state, error: value };
             default:
                 return state;
         }
@@ -96,7 +94,22 @@ function AddParameter(props) {
      *
      */
     function addNewParameter() {
-        operationsDispatcher({ action: 'parameter', data: { target, verb, value: newParameter } });
+        if (newParameter.in === 'body') {
+            operationsDispatcher({
+                action: 'requestBody',
+                data: {
+                    target,
+                    verb,
+                    value: {
+                        description: '',
+                        required: false,
+                        content: { [newParameter.name]: { schema: { type: 'object' } } },
+                    },
+                },
+            });
+        } else {
+            operationsDispatcher({ action: 'parameter', data: { target, verb, value: newParameter } });
+        }
         clearInputs();
     }
     return (
@@ -123,11 +136,16 @@ function AddParameter(props) {
                             },
                         }}
                     >
-                        {SUPPORTED_LOCATIONS.map(location => (
-                            <MenuItem value={location} dense>
-                                {capitalizeFirstLetter(location)}
-                            </MenuItem>
-                        ))}
+                        {SUPPORTED_LOCATIONS.map((location) => {
+                            if (location === 'body' && !['post', 'put', 'patch'].includes(verb)) {
+                                return null;
+                            }
+                            return (
+                                <MenuItem value={location} dense>
+                                    {capitalizeFirstLetter(location)}
+                                </MenuItem>
+                            );
+                        })}
                     </Select>
                     <FormHelperText id='my-helper-text'>Select the parameter location</FormHelperText>
                 </FormControl>
@@ -135,12 +153,11 @@ function AddParameter(props) {
             <Grid item md={4}>
                 <TextField
                     id='parameter-name'
-                    label='Name'
-                    error={Boolean(newParameter.error)}
+                    label={newParameter.in === 'body' ? 'Content Type' : 'Name'}
                     name='name'
                     value={newParameter.name}
                     onChange={({ target: { name, value } }) => newParameterDispatcher({ type: name, value })}
-                    helperText={newParameter.error || 'Enter parameter name'}
+                    helperText={newParameter.in === 'body' ? 'Enter content type' : 'Enter parameter name'}
                     fullWidth
                     margin='dense'
                     variant='outlined'
