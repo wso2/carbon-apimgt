@@ -19,6 +19,7 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import Settings from 'AppComponents/Shared/SettingsContext';
+import { FormattedMessage } from 'react-intl';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -73,7 +74,7 @@ const tenantListing = (props) => {
         <div className={classes.root}>
             <Grid container md={4} justify='left' spacing={0} className={classes.wrapper}>
                 <Typography variant='h4'>
-                    Tenant Developer Portals
+                    <FormattedMessage id='TenantListing.title' defaultMessage='Tenant Developer Portals' />
                 </Typography>
                 <div className={classes.list}>
                     {orderedList.map(({ domain }) => {
