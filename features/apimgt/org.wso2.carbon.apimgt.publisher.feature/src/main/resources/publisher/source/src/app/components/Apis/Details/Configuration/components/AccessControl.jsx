@@ -117,7 +117,7 @@ export default function AccessControl(props) {
             return (
                 <FormattedMessage
                     id='Apis.Details.Scopes.Roles.User.Invalid'
-                    defaultMessage='Role must be associated with API creator'
+                    defaultMessage='Role must be associated with the API creator'
                 />
             );
         } else {

@@ -167,7 +167,7 @@ class BusinessPlans extends Component {
                                 <Typography>
                                     <FormattedMessage
                                         id='Apis.Details.Monetization.BusinessPlans.unchecked.policies'
-                                        defaultMessage='Unchecked polices are not monetized, click save to monetize'
+                                        defaultMessage='Unchecked polices are not monetized, click `Save` to monetize'
                                     />
                                 </Typography>
                             </Grid>
