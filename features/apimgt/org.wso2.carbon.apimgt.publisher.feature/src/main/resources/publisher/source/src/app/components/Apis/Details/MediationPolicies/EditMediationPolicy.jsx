@@ -190,7 +190,7 @@ function EditMediationPolicy(props) {
                 } else {
                     Alert.error(intl.formatMessage({
                         id: 'Apis.Details.MediationPolicies.Edit.AddMediationPolicy.error',
-                        defaultMessage: 'Error when adding mediation policy',
+                        defaultMessage: 'Error while adding mediation policy',
                     }));
                 }
             });

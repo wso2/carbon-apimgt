@@ -172,7 +172,7 @@ export default function MaxBackendTps(props) {
                                 <FormHelperText>
                                     <FormattedMessage
                                         id='Apis.Details.Configuration.components.MaxBackendTps.formattedMessage'
-                                        defaultMessage='Maximum backend transactions per seconds in integers'
+                                        defaultMessage='Maximum backend transactions per second in integers'
                                     />
                                 </FormHelperText>
                             </Grid>

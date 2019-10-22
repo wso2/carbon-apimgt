@@ -108,7 +108,7 @@ function NewEndpointCreate(props) {
             description: intl.formatMessage({
                 id: 'Apis.Details.Endpoints.NewEndpointCreate.create.prototype.endpoint.description',
                 defaultMessage: 'Use the inbuilt JavaScript engine to prototype the API or provide an endpoint' +
-                    ' to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs',
+                    ' to a prototype API. The inbuilt JavaScript engine does support prototype SOAP APIs',
             }),
             options: [
                 {

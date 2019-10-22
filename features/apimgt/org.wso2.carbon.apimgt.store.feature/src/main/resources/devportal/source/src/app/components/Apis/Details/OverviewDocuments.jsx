@@ -119,7 +119,7 @@ function OverviewDocuments(props) {
                     <Typography variant='body2'>
                         <FormattedMessage
                             id='Apis.Details.Overview.documents.no.content'
-                            defaultMessage='No Documents Yet'
+                            defaultMessage='No Documents Available'
                         />
                     </Typography>
                 </div>
