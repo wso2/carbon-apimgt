@@ -174,15 +174,20 @@ class LifeCycleUpdate extends Component {
         const lifecycleButtons = lifecycleStates.map((item) => {
             const state = { ...item, displayName: item.event };
             if (state.event === 'Deploy as a Prototype') {
+                let { displayName } = state;
+                if (lcState.state === 'Prototyped') {
+                    displayName = 'Redeploy';
+                }
                 return {
                     ...state,
+                    displayName,
                     disabled: !isPrototype || api.endpointConfig == null,
                 };
             }
             if (state.event === 'Publish') {
                 let { displayName } = state;
                 if (lcState.state === 'Published') {
-                    displayName = 'Re Deploy';
+                    displayName = 'Redeploy';
                 }
                 return {
                     ...state,

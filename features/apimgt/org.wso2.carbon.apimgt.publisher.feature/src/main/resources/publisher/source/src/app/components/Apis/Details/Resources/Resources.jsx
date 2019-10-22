@@ -297,12 +297,6 @@ export default function Resources(props) {
             setOperationRateLimits(response.body.list);
         });
         // TODO: need to handle the error cases through catch ~tmkb
-        // if (api.isSOAPToREST()) {
-        //     api.getResourcePolicies().then((res) => {
-        //         const { a } = res;
-        //         console.log(a);
-        //     });
-        // }
     }, [api.id]);
 
     // Note: Make sure not to use any hooks after/within this condition , because it returns conditionally
