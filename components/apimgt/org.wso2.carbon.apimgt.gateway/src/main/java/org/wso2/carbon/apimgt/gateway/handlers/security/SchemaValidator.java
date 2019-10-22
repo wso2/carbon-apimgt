@@ -78,27 +78,27 @@ public class SchemaValidator extends AbstractHandler {
                 messageContext).getAxis2MessageContext();
         String contentType;
         Object objContentType = axis2MC.getProperty(APIMgtGatewayConstants.REST_CONTENT_TYPE);
-        if (objContentType == null) {
+        swagger = messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_STRING).toString();
+        if (swagger == null) {
             return true;
         }
-        contentType = objContentType.toString();
-        if (logger.isDebugEnabled()) {
-            logger.debug("Content type of the request message: " + contentType);
-        }
         try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            rootNode = objectMapper.readTree(swagger.getBytes());
+            requestMethod = messageContext.getProperty(APIMgtGatewayConstants.
+                    ELECTED_REQUEST_METHOD).toString();
+            if (objContentType == null) {
+                return true;
+            }
+            contentType = objContentType.toString();
+            if (logger.isDebugEnabled()) {
+                logger.debug("Content type of the request message: " + contentType);
+            }
             RelayUtils.buildMessage(axis2MC);
             logger.debug("Successfully built the request message");
             if (!APIMgtGatewayConstants.APPLICATION_JSON.equals(contentType)) {
                 return true;
             }
-            swagger = messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_STRING).toString();
-            if (swagger == null) {
-                return true;
-            }
-            ObjectMapper objectMapper = new ObjectMapper();
-            rootNode = objectMapper.readTree(swagger.getBytes());
-            requestMethod = messageContext.getProperty(APIMgtGatewayConstants.
-                    ELECTED_REQUEST_METHOD).toString();
             JSONObject payloadObject = getMessageContent(messageContext);
             if (!APIConstants.SupportedHTTPVerbs.GET.name().equals(requestMethod) &&
                     payloadObject != null && !APIMgtGatewayConstants.EMPTY_ARRAY.equals(payloadObject)) {
@@ -123,6 +123,7 @@ public class SchemaValidator extends AbstractHandler {
     @Override
     public boolean handleResponse(MessageContext messageContext) {
         logger.debug("Validating the API response  Body content..");
+        String contentType;
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
         try {
@@ -130,11 +131,17 @@ public class SchemaValidator extends AbstractHandler {
             logger.debug("Successfully built the response message");
         } catch (IOException e) {
             logger.error("Error occurred while building the API response", e);
+            return false;
         } catch (XMLStreamException e) {
             logger.error("Error occurred while validating the API response", e);
+            return false;
         }
         Object objectResponse = axis2MC.getProperty(APIMgtGatewayConstants.REST_CONTENT_TYPE);
         if (objectResponse == null) {
+            return true;
+        }
+        contentType = objectResponse.toString();
+        if (!APIMgtGatewayConstants.APPLICATION_JSON.equals(contentType)) {
             return true;
         }
         try {
@@ -172,7 +179,7 @@ public class SchemaValidator extends AbstractHandler {
             }
             if (messageContext.isResponse()) {
                 String message = "Schema validation failed in the Response: ";
-                logger.error(message  + e.getMessage(), e);
+                logger.error(message + e.getMessage(), e);
                 GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.INTERNAL_ERROR_CODE,
                         message + finalMessage);
             } else {
