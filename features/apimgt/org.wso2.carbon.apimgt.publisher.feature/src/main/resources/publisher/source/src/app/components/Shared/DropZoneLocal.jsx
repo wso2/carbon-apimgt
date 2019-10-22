@@ -80,7 +80,7 @@ const rejectStyle = {
  */
 export default function DropZoneLocal(props) {
     const {
-        message, onDrop, error, children,
+        message, onDrop, error, children, accept,
     } = props;
     const dropZoneObject = useDropzone({ onDrop });
     const {
@@ -107,7 +107,7 @@ export default function DropZoneLocal(props) {
         <section className='container' style={containerStyles}>
             {(
                 <div {...getRootProps({ style })}>
-                    <input {...getInputProps()} />
+                    <input {...getInputProps()} multiple={false} accept={accept} />
                     {children || <p>{message}</p>}
                 </div>
             )}
@@ -120,10 +120,12 @@ DropZoneLocal.defaultProps = {
     showFilesList: true,
     children: null,
     error: false,
+    accept: '*',
 };
 DropZoneLocal.propTypes = {
     message: PropTypes.string,
     onDrop: PropTypes.func,
+    accept: PropTypes.string,
     showFilesList: PropTypes.bool,
     children: PropTypes.oneOfType([PropTypes.element, PropTypes.array]),
     error: PropTypes.oneOfType([PropTypes.bool, PropTypes.shape({})]),

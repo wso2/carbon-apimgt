@@ -211,7 +211,7 @@ export default function ProvideWSDL(props) {
 
     /**
      * Render file upload UI.
-     * 
+     *
      */
     function renderFileUpload() {
         if (apiInputs.inputValue) {
@@ -219,7 +219,12 @@ export default function ProvideWSDL(props) {
         }
         // TODO: Pass message saying accepting only one file ~tmkb
         return (
-            <DropZoneLocal error={isError && isError.file} onDrop={onDrop} files={apiInputs.inputValue}>
+            <DropZoneLocal
+                error={isError && isError.file}
+                onDrop={onDrop}
+                files={apiInputs.inputValue}
+                accept={isArchiveInput ? '.bz,.bz2,.gz,.rar,.tar,.zip,.7z' : '.wsdl'}
+            >
                 {isValidating ? (<CircularProgress />)
                     : (
                         <React.Fragment>
@@ -291,6 +296,7 @@ export default function ProvideWSDL(props) {
                                     inputsDispatcher({ action: 'type', value: event.target.value });
                                     inputsDispatcher({ action: 'isFormValid', value: false });
                                     inputsDispatcher({ action: 'inputValue', value: null });
+                                    inputsDispatcher({ action: 'inputType', value: 'url' });
                                 }
                             }
                         >
@@ -342,7 +348,7 @@ export default function ProvideWSDL(props) {
                                 />}
                             />
                             <FormControlLabel
-                                value='file'
+                                value={isGenerateRESTAPI ? 'file' : 'archive'}
                                 control={<Radio color='primary' />}
                                 label={fileControlLabel}
                             />
@@ -379,7 +385,6 @@ export default function ProvideWSDL(props) {
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
-                                
                                 InputProps={{
                                     onBlur: ({ target: { value } }) => {
                                         validateUrl(APIValidation.url.required().validate(value).error);

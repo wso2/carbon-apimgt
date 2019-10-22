@@ -154,7 +154,12 @@ export default function ProvideGraphQL(props) {
                             </ListItem>
                         </List>
                     ) : (
-                        <DropZoneLocal error={isValid.file} onDrop={onDrop} files={apiInputs.inputValue}>
+                        <DropZoneLocal
+                            error={isValid.file}
+                            onDrop={onDrop}
+                            files={apiInputs.inputValue}
+                            accept='.graphql'
+                        >
                             {isValidating ? (<CircularProgress />)
                                 : ([
                                     <FormattedMessage
