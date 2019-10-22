@@ -75,7 +75,7 @@ const styles = theme => ({
     },
 });
 function LeftMenuItem(props) {
-    const [selected, setSelected] = useState(false);
+    const [selected, setSelected] = useState('overview');
 
     const {
         classes, theme, Icon, to, history, text, route,
