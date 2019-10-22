@@ -158,7 +158,7 @@ export default function ProvideGraphQL(props) {
                             error={isValid.file}
                             onDrop={onDrop}
                             files={apiInputs.inputValue}
-                            accept='.graphql'
+                            accept='.graphql,text/plain'
                         >
                             {isValidating ? (<CircularProgress />)
                                 : ([
