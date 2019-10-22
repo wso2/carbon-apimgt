@@ -2587,9 +2587,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 for (SubscribedAPI subscribedApi : originalSubscribedAPIs) {
                     Tier tier = tiers.get(subscribedApi.getTier().getName());
                     subscribedApi.getTier().setDisplayName(tier != null ? tier.getDisplayName() : subscribedApi.getTier().getName());
-                    if (tier.getMonetizationAttributes() != null) {
-                        subscribedApi.getTier().setMonetizationAttributes(tier.getMonetizationAttributes());
-                    }
                     subscribedAPIs.add(subscribedApi);
                 }
             }
