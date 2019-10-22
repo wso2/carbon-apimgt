@@ -143,7 +143,7 @@ export default function ImportDefinition(props) {
                 console.log(err);
                 Alert.error(intl.formatMessage({
                     id: 'Apis.Details.APIDefinition.APIDefinition.error.updating.graphQL.schema',
-                    defaultMessage: 'Error while updating graphQL schema',
+                    defaultMessage: 'Error while updating GraphQL schema',
                 }));
             });
     }
