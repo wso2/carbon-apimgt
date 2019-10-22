@@ -30,10 +30,21 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import CheckIcon from '@material-ui/icons/Check';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
+import Button from '@material-ui/core/Button';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import Avatar from '@material-ui/core/Avatar';
+import IconButton from '@material-ui/core/IconButton';
+import InsertDriveFile from '@material-ui/icons/InsertDriveFile';
+import DeleteIcon from '@material-ui/icons/Delete';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListItemText from '@material-ui/core/ListItemText';
 
+import Banner from 'AppComponents/Shared/Banner';
 import APIValidation from 'AppData/APIValidation';
 import API from 'AppData/api';
-import DropZoneLocal from 'AppComponents/Shared/DropZoneLocal';
+import DropZoneLocal, { humanFileSize } from 'AppComponents/Shared/DropZoneLocal';
 
 const useStyles = makeStyles(theme => ({
     mandatoryStar: {
@@ -172,20 +183,72 @@ export default function ProvideOpenAPI(props) {
                         </RadioGroup>
                     </FormControl>
                 </Grid>
-                <Grid item xs={10} md={7}>
+                {isValid.file &&
+                    (
+                        <Grid item md={11}>
+                            <Banner
+                                onClose={() => setValidity({ file: null })}
+                                disableActions
+                                dense
+                                paperProps={{ elevation: 1 }}
+                                type='error'
+                                message={isValid.file.message}
+                            />
+                        </Grid>
+                    )
+                }
+                <Grid item xs={10} md={11}>
                     {isFileInput ? (
                         <React.Fragment>
-                            <DropZoneLocal error={isValid.file} onDrop={onDrop} files={apiInputs.inputValue}>
-                                {isValidating && <CircularProgress />}
-                                {isValid.file ? (
-                                    isValid.file.message
-                                ) : (
-                                    <FormattedMessage
-                                        id='Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.file.dropzone'
-                                        defaultMessage='Select an OpenAPI definition file'
-                                    />
-                                )}
-                            </DropZoneLocal>
+                            {apiInputs.inputValue ? (
+                                <List>
+                                    <ListItem key={apiInputs.inputValue.path}>
+                                        <ListItemAvatar>
+                                            <Avatar>
+                                                <InsertDriveFile />
+                                            </Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText
+                                            primary={`${apiInputs.inputValue.path} - 
+                                    ${humanFileSize(apiInputs.inputValue.size)}`}
+                                        />
+                                        <ListItemSecondaryAction>
+                                            <IconButton
+                                                edge='end'
+                                                aria-label='delete'
+                                                onClick={() => {
+                                                    inputsDispatcher({ action: 'inputValue', value: null });
+                                                    inputsDispatcher({ action: 'isFormValid', value: false });
+                                                }}
+                                            >
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </ListItemSecondaryAction>
+                                    </ListItem>
+                                </List>
+                            ) : (
+                                <DropZoneLocal error={isValid.file} onDrop={onDrop} files={apiInputs.inputValue}>
+                                    {isValidating ? (<CircularProgress />)
+                                        : ([
+                                            <FormattedMessage
+                                                id='Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.file.dropzone'
+                                                defaultMessage='Drag & Drop files here {break} or {break} Browse files'
+                                                values={{ break: <br /> }}
+                                            />,
+                                            <Button
+                                                color='primary'
+                                                variant='contained'
+                                            >
+                                                <FormattedMessage
+                                                    id='Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.file.upload'
+                                                    defaultMessage='Browse File to Upload'
+                                                />
+                                            </Button>,
+                                        ]
+                                        )
+                                    }
+                                </DropZoneLocal>
+                            )}
                         </React.Fragment>
                     ) : (
                         <TextField
