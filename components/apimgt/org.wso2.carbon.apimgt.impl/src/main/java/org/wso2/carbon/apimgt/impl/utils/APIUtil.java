@@ -488,6 +488,7 @@ public final class APIUtil {
         for (URITemplate uriTemplate : api.getUriTemplates()) {
             Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
             for (APIProductIdentifier usedByProduct : usedByProducts) {
+                //TODO : removed registry call until find a proper fix
                 String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);
                 usedByProduct.setUUID(apiProductPath);
             }
