@@ -489,15 +489,7 @@ public final class APIUtil {
             Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
             for (APIProductIdentifier usedByProduct : usedByProducts) {
                 String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);
-                Resource productResource = null;
-                try {
-                    productResource = registry.get(apiProductPath);
-                } catch (RegistryException e) {
-                    String msg = "Failed to get LastAccess time or Rating";
-                    throw new APIManagementException(msg, e);
-                }
-                String artifactId = productResource.getUUID();
-                usedByProduct.setUUID(artifactId);
+                usedByProduct.setUUID(apiProductPath);
             }
         }
     }
