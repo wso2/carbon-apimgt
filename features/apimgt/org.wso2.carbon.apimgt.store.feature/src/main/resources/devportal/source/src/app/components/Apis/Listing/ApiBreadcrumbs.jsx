@@ -18,7 +18,7 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Link from '@material-ui/core/Link';
@@ -35,9 +35,9 @@ const useStyles = makeStyles(theme => ({
         alignItems: 'center',
     },
     linkNotActive: {
-      display: 'flex',
-      alignItems: 'center',
-      cursor: 'default',
+        display: 'flex',
+        alignItems: 'center',
+        cursor: 'default',
     },
     icon: {
         marginRight: theme.spacing(0.5),
@@ -54,21 +54,22 @@ const useStyles = makeStyles(theme => ({
 
 export default function ApiBreadcrumbs(props) {
     const classes = useStyles();
+    const theme = useTheme();
     const { selectedTag } = props;
     return (
         <Paper elevation={0} className={classes.root}>
             <Breadcrumbs aria-label='breadcrumb'>
-                <RouterLink to='api-groups' className={classes.apiGroup}>
+                <RouterLink
+                    to={theme.custom.tagWise.active && theme.custom.tagWise.style === 'page' ? '/api-groups' : '/apis'}
+                    className={classes.apiGroup}
+                >
                     <Link color='inherit' className={classes.link}>
                         <Icon className={classes.icon}>dynamic_feed</Icon>
                         <FormattedMessage defaultMessage='API Groups' id='Apis.Listing.ApiBreadcrumbs.apigroups.main' />
                     </Link>
                 </RouterLink>
 
-                <Link
-                    color='inherit'
-                    className={classes.linkNotActive}
-                >
+                <Link color='inherit' className={classes.linkNotActive}>
                     <CustomIcon width={16} height={16} icon='api' />
                     <span className={classes.selectedTagText}>{selectedTag}</span>
                 </Link>

@@ -29,7 +29,7 @@ import JSFileDownload from 'js-file-download';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles, withTheme } from '@material-ui/core/styles';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import AuthManager from 'AppData/AuthManager';
@@ -173,12 +173,24 @@ class Sdk extends React.Component {
      */
     render() {
         const languageList = this.state.items;
-        const { onlyIcons, intl, classes } = this.props;
+        const {
+            onlyIcons, intl, classes, theme,
+        } = this.props;
+        const {
+            custom: {
+                apiDetailPages: { onlyShowSdks },
+            },
+        } = theme;
+        const filteredLanguageList =
+        languageList && languageList.length > 0 && onlyShowSdks && onlyShowSdks.length > 0
+                ? languageList.filter(lang => onlyShowSdks.includes(lang.toLowerCase()))
+                : languageList;
         if (onlyIcons) {
             return (
-                languageList && (
+                filteredLanguageList && (
                     <React.Fragment>
-                        {languageList.map((language, index) => index < 3 && (
+                        {filteredLanguageList.map((language, index) =>
+                            index < 3 && (
                                 <Grid item xs={4}>
                                     <a
                                         onClick={event => this.handleClick(event, language)}
@@ -187,17 +199,20 @@ class Sdk extends React.Component {
                                         <img
                                             alt={language}
                                             src={
-                                                app.context + '/site/public/images/sdks/'
-                                                    + new String(language)
-                                                    + '.svg'
+                                                app.context +
+                                                    '/site/public/images/sdks/' +
+                                                    new String(language) +
+                                                    '.svg'
                                             }
                                             style={{
-                                                width: 80, height: 80, margin: 10,
+                                                width: 80,
+                                                height: 80,
+                                                margin: 10,
                                             }}
                                         />
                                     </a>
                                 </Grid>
-                            ),)}
+                            ))}
                     </React.Fragment>
                 )
             );
@@ -207,7 +222,7 @@ class Sdk extends React.Component {
                 <Typography variant='h4' className={classes.titleSub}>
                     <FormattedMessage id='Apis.Details.Sdk.title' defaultMessage='Software Development Kits (SDKs)' />
                 </Typography>
-                {languageList ? (
+                {filteredLanguageList ? (
                     <Grid container className='tab-grid' spacing={0}>
                         <Grid item xs={12} sm={6} md={9} lg={9} xl={10}>
                             {this.state.sdkLanguages.length >= this.filter_threshold && (
@@ -226,7 +241,7 @@ class Sdk extends React.Component {
                                 </Grid>
                             )}
                             <Grid container justify='flex-start' spacing={Number(24)}>
-                                {languageList.map((language, index) => (
+                                {filteredLanguageList.map((language, index) => (
                                     <Grid key={index} item>
                                         <div style={{ width: 'auto', textAlign: 'center', margin: '10px' }}>
                                             <Card>
@@ -234,15 +249,16 @@ class Sdk extends React.Component {
                                                 <Divider />
                                                 <CardMedia
                                                     title={language.toString().toUpperCase()}
-                                                    src={'/devportal/site/public/images/sdks/' + new String(language) +
-                                                    '.svg'}
+                                                    src={
+                                                        '/devportal/site/public/images/sdks/' +
+                                                        new String(language) +
+                                                        '.svg'
+                                                    }
                                                 >
                                                     <img
                                                         alt={language}
                                                         onError={this.addDefaultSrc}
-                                                        src={
-                                                            `/devportal/site/public/images/sdks/${language}.svg`
-                                                        }
+                                                        src={`/devportal/site/public/images/sdks/${language}.svg`}
                                                         style={{ width: '100px', height: '100px', margin: '30px' }}
                                                     />
                                                 </CardMedia>
@@ -268,10 +284,7 @@ class Sdk extends React.Component {
                     <div className={classes.genericMessageWrapper}>
                         <InlineMessage type='info' className={classes.dialogContainer}>
                             <Typography variant='h5' component='h3'>
-                                <FormattedMessage
-                                    id='Apis.Details.Sdk.no.sdks'
-                                    defaultMessage='No SDKs'
-                                />
+                                <FormattedMessage id='Apis.Details.Sdk.no.sdks' defaultMessage='No SDKs' />
                             </Typography>
                             <Typography component='p'>
                                 <FormattedMessage
@@ -291,4 +304,4 @@ Sdk.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
 };
 
-export default injectIntl(withStyles(styles)(Sdk));
+export default injectIntl(withStyles(styles, { withTheme: true })(Sdk));

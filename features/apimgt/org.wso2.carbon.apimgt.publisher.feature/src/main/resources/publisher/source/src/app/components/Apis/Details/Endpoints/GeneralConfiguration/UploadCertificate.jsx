@@ -110,6 +110,7 @@ export default function UploadCertificate(props) {
     const [isSaving, setSaving] = useState(false);
     const [certificate, setCertificate] = useState({ name: '', content: {} });
     const [isEndpointEmpty, setIsEndpointEmpty] = useState(false);
+    const [isPoliciesEmpty, setPoliciesEmpty] = useState(false);
     const [aliasValidity, setAliasValidity] = useState();
     const classes = useStyles();
     const [isRejected, setIsRejected] = useState(false);
@@ -132,6 +133,14 @@ export default function UploadCertificate(props) {
         const { value } = event.target;
         setPolicy(value);
     }
+
+    /**
+     * Method to validate the policies.
+     * @param {string} value selected policy.
+     * */
+    const onValidate = (value) => {
+        setPoliciesEmpty(value === '');
+    };
 
     /**
      * Method to upload the certificate content by calling the rest api.
@@ -223,6 +232,7 @@ export default function UploadCertificate(props) {
                                 helperText='Select a throttling policy for the certificate'
                                 onChange={handleOnChange}
                                 required
+                                validate={onValidate}
                             />
                         ) :
                             <SelectEndpoint
@@ -349,7 +359,7 @@ export default function UploadCertificate(props) {
                         alias === '' || (aliasValidity && !aliasValidity.isValid) ||
                             (!isMutualSSLEnabled && endpoint === '') ||
                             certificate.name === '' ||
-                            (isMutualSSLEnabled && policy === '') ||
+                            (isMutualSSLEnabled && isPoliciesEmpty) ||
                             isSaving || (aliasList && aliasList.includes(alias)) || isRejected
                     }
                 >

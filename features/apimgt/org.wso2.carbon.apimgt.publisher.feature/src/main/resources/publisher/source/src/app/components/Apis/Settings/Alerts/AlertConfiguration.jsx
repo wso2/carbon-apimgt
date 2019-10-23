@@ -93,9 +93,12 @@ const AlertConfiguration = (props) => {
     useEffect(() => {
         const alertConfigPromise = api.getAlertConfigurations(alertType);
         const apisPromise = api.all();
-        Promise.all([alertConfigPromise, apisPromise])
+        const apiProductsPromise = api.allProducts();
+        Promise.all([alertConfigPromise, apisPromise, apiProductsPromise])
             .then((response) => {
-                const apisList = response[1].body.list;
+                let apisList = response[1].body.list;
+                const productsList = response[2].body.list;
+                apisList = apisList.concat(productsList);
                 const apiNamesSet = new Set();
                 apisList.forEach((tmpApi) => {
                     apiNamesSet.add(tmpApi.name);
@@ -265,8 +268,11 @@ const AlertConfiguration = (props) => {
                             >
                                 {apiVersions && apiVersions.map((selected) => {
                                     return (
-                                        <MenuItem key={selected.version} value={selected.version}>
-                                            {selected.version}
+                                        <MenuItem
+                                            key={selected.version ? selected.version : '1.0.0'}
+                                            value={selected.version ? selected.version : '1.0.0'}
+                                        >
+                                            {selected.version ? selected.version : '1.0.0'}
                                         </MenuItem>
                                     );
                                 })}

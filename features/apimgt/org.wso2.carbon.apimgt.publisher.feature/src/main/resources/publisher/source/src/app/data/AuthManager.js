@@ -16,14 +16,12 @@
  * under the License.
  */
 
-import axios from 'axios';
 import qs from 'qs';
 import CONSTS from 'AppData/Constants';
 import Configurations from 'Config';
 import Utils from './Utils';
 import User from './User';
 import APIClient from './APIClient';
-import APIClientFactory from './APIClientFactory';
 /**
  * Class managing authentication
  */
@@ -106,7 +104,7 @@ class AuthManager {
                         user.scopes = scopes;
                         AuthManager.setUser(user, currentEnv.label);
                     } else {
-                        console.warn('The user with ' + partialToken + ' doesn\'t enough have permission!');
+                        console.warn('The user with ' + partialToken + " doesn't enough have permission!");
                         throw new Error(CONSTS.errorCodes.INSUFFICIENT_PREVILEGES);
                     }
                 } else {
@@ -142,7 +140,6 @@ class AuthManager {
         User.destroyInMemoryUser(environmentName);
     }
 
-
     /**
      *
      * Get scope for resources
@@ -177,7 +174,9 @@ class AuthManager {
                 return false;
             } else if (
                 // if the user has creator role, but not the publisher role
-                api.lifeCycleStatus === 'CREATED' || api.lifeCycleStatus === 'PROTOTYPED') {
+                api.lifeCycleStatus === 'CREATED' ||
+                api.lifeCycleStatus === 'PROTOTYPED'
+            ) {
                 return false;
             } else {
                 return true;
@@ -207,60 +206,9 @@ class AuthManager {
     }
 
     /**
-     * Revoke the issued OAuth access token for currently logged in user and clear both cookie and local-storage data.
-     * @param {String} environmentName - Name of the environment to be logged out. Default current environment.
-     * @returns {AxiosPromise}
-     */
-    logout(environmentName = Utils.getCurrentEnvironment().label) {
-        const authHeader = 'Bearer ' + AuthManager.getUser(environmentName).getPartialToken();
-        // TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store, etc.)
-        const url = Utils.getAppLogoutURL();
-        const headers = {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: authHeader,
-        };
-        const promisedLogout = axios.post(url, null, {
-            headers,
-        });
-        promisedLogout
-            .then(() => {
-                Utils.deleteCookie(User.CONST.WSO2_AM_TOKEN_1, Configurations.app.context, environmentName);
-                AuthManager.dismissUser(environmentName);
-                new APIClientFactory().destroyAPIClient(environmentName);
-                // Single client should be re initialize after log out
-                console.log(`Successfully logout from environment: ${environmentName}`);
-            })
-            .catch((error) => {
-                console.error(`Failed to logout from environment: ${environmentName}`, error);
-            });
-
-        return promisedLogout;
-    }
-
-    /**
-     * Logout current user from all specified environments
-     * @param {array} environments - Array of environments
-     * @returns {Promise} Promised Logout object of current environment
-     */
-    logoutFromEnvironments(environments) {
-        const currentEnvironmentName = Utils.getCurrentEnvironment().label;
-        const currentUser = AuthManager.getUser(currentEnvironmentName).name;
-
-        environments.forEach((environment) => {
-            const user = AuthManager.getUser(environment.label);
-            if (user && currentUser === user.name && currentEnvironmentName !== environment.label) {
-                this.logout(environment.label);
-            }
-        });
-
-        return this.logout(currentEnvironmentName);
-    }
-
-    /**
      * Call Token API with refresh token grant type
      * @param {Object} environment - Name of the environment
-     * @return {AxiosPromise}
+     * @return {Promise}
      */
     static refresh(environment) {
         const params = {
@@ -281,45 +229,13 @@ class AuthManager {
             headers,
         });
     }
-
-    /**
-     * @deprecated Was used when Basic login facility provided from SPA app
-     * Send the POST request to the using Axios
-     * @param {Object} headers - Header object
-     * @param {Object} data - Data object with credentials
-     * @param {Object} environment - environment object
-     * @returns {Promise} Axios Promise object with the login request made
-     */
-    postAuthenticationRequest(headers, data, environment) {
-        const promisedResponse = axios(Configurations.app.context + '/services/auth/basic', {
-            method: 'POST',
-            data: qs.stringify(data),
-            headers,
-            withCredentials: true,
-        });
-
-        promisedResponse
-            .then((response) => {
-                const user = AuthManager.loginUserMapper(response, environment.label);
-                AuthManager.setUser(user, environment.label);
-                this.setupAutoRefresh(environment.label);
-                // remove the swaggerjs api client which could contain old access token if
-                // user login back without page reload
-                new APIClientFactory().destroyAPIClient(environment.label);
-                console.log(`Authentication Success in '${environment.label}' environment.`);
-            })
-            .catch((error) => {
-                console.error(`Authentication Error in '${environment.label}' environment :\n`, error);
-            });
-
-        return promisedResponse;
-    }
 }
 
 // TODO: derive this from swagger definitions ~tmkb
 AuthManager.CONST = {
-    USER_SCOPES: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
-        + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
+    USER_SCOPES:
+        'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage ' +
+        'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
 };
 const { isRestricted } = AuthManager;
 

@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Radio from '@material-ui/core/Radio';
 import Grid from '@material-ui/core/Grid';
@@ -30,10 +30,21 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import CheckIcon from '@material-ui/icons/Check';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
+import Button from '@material-ui/core/Button';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import Avatar from '@material-ui/core/Avatar';
+import IconButton from '@material-ui/core/IconButton';
+import InsertDriveFile from '@material-ui/icons/InsertDriveFile';
+import DeleteIcon from '@material-ui/icons/Delete';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListItemText from '@material-ui/core/ListItemText';
 
+import Banner from 'AppComponents/Shared/Banner';
 import APIValidation from 'AppData/APIValidation';
 import API from 'AppData/api';
-import DropZoneLocal from 'AppComponents/Shared/DropZoneLocal';
+import DropZoneLocal, { humanFileSize } from 'AppComponents/Shared/DropZoneLocal';
 
 const useStyles = makeStyles(theme => ({
     mandatoryStar: {
@@ -55,6 +66,7 @@ export default function ProvideOpenAPI(props) {
     // If valid value is `null`,that means valid, else an error object will be there
     const [isValid, setValidity] = useState({});
     const [isValidating, setIsValidating] = useState(false);
+
     /**
      *
      *
@@ -98,7 +110,8 @@ export default function ProvideOpenAPI(props) {
      * Do the validation state aggregation and call the onValidate method with aggregated value
      * @param {Object} state Validation state object returned from Joi `.validate()` method
      */
-    function validateURL(state) {
+    function validateURL(value) {
+        const state = APIValidation.url.required().validate(value).error;
         // State `null` means URL is valid, We do backend validation only in valid URLs
         if (state === null) {
             setIsValidating(true);
@@ -122,6 +135,16 @@ export default function ProvideOpenAPI(props) {
             onValidate(false);
         }
     }
+    useEffect(() => {
+        const { inputType, inputValue } = apiInputs;
+        if (inputValue) {
+            if (inputType === ProvideOpenAPI.INPUT_TYPES.FILE) {
+                onDrop([inputValue]);
+            } else if (inputType === ProvideOpenAPI.INPUT_TYPES.URL) {
+                validateURL(inputValue);
+            }
+        }
+    }, []);
 
     // TODO: Use validation + input to separate component that can be share with wsdl,swagger,graphql URL inputs ~tmkb
     const isInvalidURL = Boolean(isValid.url);
@@ -167,25 +190,90 @@ export default function ProvideOpenAPI(props) {
                             value={apiInputs.inputType}
                             onChange={event => inputsDispatcher({ action: 'inputType', value: event.target.value })}
                         >
-                            <FormControlLabel value='url' control={<Radio color='primary' />} label='OpenAPI URL' />
-                            <FormControlLabel value='file' control={<Radio color='primary' />} label='OpenAPI File' />
+                            <FormControlLabel
+                                value={ProvideOpenAPI.INPUT_TYPES.URL}
+                                control={<Radio color='primary' />}
+                                label='OpenAPI URL'
+                            />
+                            <FormControlLabel
+                                value={ProvideOpenAPI.INPUT_TYPES.FILE}
+                                control={<Radio color='primary' />}
+                                label='OpenAPI File'
+                            />
                         </RadioGroup>
                     </FormControl>
                 </Grid>
-                <Grid item xs={10} md={7}>
+                {isValid.file &&
+                    (
+                        <Grid item md={11}>
+                            <Banner
+                                onClose={() => setValidity({ file: null })}
+                                disableActions
+                                dense
+                                paperProps={{ elevation: 1 }}
+                                type='error'
+                                message={isValid.file.message}
+                            />
+                        </Grid>
+                    )
+                }
+                <Grid item xs={10} md={11}>
                     {isFileInput ? (
                         <React.Fragment>
-                            <DropZoneLocal error={isValid.file} onDrop={onDrop} files={apiInputs.inputValue}>
-                                {isValidating && <CircularProgress />}
-                                {isValid.file ? (
-                                    isValid.file.message
-                                ) : (
-                                    <FormattedMessage
-                                        id='Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.file.dropzone'
-                                        defaultMessage='Select an OpenAPI definition file'
-                                    />
-                                )}
-                            </DropZoneLocal>
+                            {apiInputs.inputValue ? (
+                                <List>
+                                    <ListItem key={apiInputs.inputValue.path}>
+                                        <ListItemAvatar>
+                                            <Avatar>
+                                                <InsertDriveFile />
+                                            </Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText
+                                            primary={`${apiInputs.inputValue.path} - 
+                                    ${humanFileSize(apiInputs.inputValue.size)}`}
+                                        />
+                                        <ListItemSecondaryAction>
+                                            <IconButton
+                                                edge='end'
+                                                aria-label='delete'
+                                                onClick={() => {
+                                                    inputsDispatcher({ action: 'inputValue', value: null });
+                                                    inputsDispatcher({ action: 'isFormValid', value: false });
+                                                }}
+                                            >
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </ListItemSecondaryAction>
+                                    </ListItem>
+                                </List>
+                            ) : (
+                                <DropZoneLocal
+                                    error={isValid.file}
+                                    onDrop={onDrop}
+                                    files={apiInputs.inputValue}
+                                    accept='.json, application/json'
+                                >
+                                    {isValidating ? (<CircularProgress />)
+                                        : ([
+                                            <FormattedMessage
+                                                id='Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.file.dropzone'
+                                                defaultMessage='Drag & Drop files here {break} or {break} Browse files'
+                                                values={{ break: <br /> }}
+                                            />,
+                                            <Button
+                                                color='primary'
+                                                variant='contained'
+                                            >
+                                                <FormattedMessage
+                                                    id='Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.file.upload'
+                                                    defaultMessage='Browse File to Upload'
+                                                />
+                                            </Button>,
+                                        ]
+                                        )
+                                    }
+                                </DropZoneLocal>
+                            )}
                         </React.Fragment>
                     ) : (
                         <TextField
@@ -203,7 +291,7 @@ export default function ProvideOpenAPI(props) {
                             }}
                             InputProps={{
                                 onBlur: ({ target: { value } }) => {
-                                    validateURL(APIValidation.url.required().validate(value).error);
+                                    validateURL(value);
                                 },
                                 endAdornment: urlStateEndAdornment,
                             }}
@@ -222,6 +310,10 @@ export default function ProvideOpenAPI(props) {
 
 ProvideOpenAPI.defaultProps = {
     onValidate: () => {},
+};
+ProvideOpenAPI.INPUT_TYPES = {
+    URL: 'url',
+    FILE: 'file',
 };
 ProvideOpenAPI.propTypes = {
     apiInputs: PropTypes.shape({

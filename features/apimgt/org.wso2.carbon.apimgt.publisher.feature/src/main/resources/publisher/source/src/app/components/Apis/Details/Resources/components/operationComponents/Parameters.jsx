@@ -36,7 +36,10 @@ export default function Parameters(props) {
     const {
         operation, spec, target, verb, operationsDispatcher, disableUpdate,
     } = props;
-    const haveParameters = operation.parameters && operation.parameters.length !== 0;
+    if (!spec.openapi) {
+        return null; // TODO: add support to swagger 2 parameter support ~tmkb
+    }
+    const haveParameters = (operation.parameters && operation.parameters.length !== 0) || operation.requestBody;
     return (
         <Fragment>
             <Grid item md={12}>

@@ -183,8 +183,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Requested SDK Language is not supported. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not found. Requested API does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error. Error while generating SDK. ", response = ErrorDTO.class) })
-    public Response apisApiIdSdksLanguageGet(@ApiParam(value = "ID of the specific API for which the SDK is required. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Programming language of the SDK that is required. ",required=true) @PathParam("language") String language) throws APIManagementException{
-        return delegate.apisApiIdSdksLanguageGet(apiId, language, securityContext);
+    public Response apisApiIdSdksLanguageGet(@ApiParam(value = "ID of the specific API for which the SDK is required. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Programming language of the SDK that is required. ",required=true) @PathParam("language") String language, @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+        return delegate.apisApiIdSdksLanguageGet(apiId, language, xWSO2Tenant, securityContext);
     }
 
     @GET

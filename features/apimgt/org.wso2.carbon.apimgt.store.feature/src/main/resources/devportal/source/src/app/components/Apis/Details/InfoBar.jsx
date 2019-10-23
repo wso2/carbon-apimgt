@@ -21,7 +21,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import Collapse from '@material-ui/core/Collapse';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -34,7 +34,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import VerticalDivider from '../../Shared/VerticalDivider';
-import ImageGenerator from '../Listing/ImageGenerator';
+import ApiThumb from '../Listing/ApiThumb';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import AuthManager from '../../../data/AuthManager';
 import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
@@ -159,7 +159,7 @@ const styles = (theme) => {
             marginRight: theme.spacing(1),
         },
         expandWrapper: {
-            cursor:'pointer',
+            cursor: 'pointer',
             display: 'block',
         },
     };
@@ -184,13 +184,31 @@ class InfoBar extends React.Component {
             tabValue: 'Social Sites',
             comment: '',
             commentList: null,
-            showOverview: false,
+            showOverview: true,
             checked: false,
             ratingUpdate: 0,
         };
         this.getSchema = this.getSchema.bind(this);
         this.getProvider = this.getProvider.bind(this);
         this.setRatingUpdate = this.setRatingUpdate.bind(this);
+    }
+    ditectCurrentMenu = (location) => {
+        const routeToCheck = 'overview';
+        const { pathname } = location;
+        const test1 = new RegExp('/' + routeToCheck + '$', 'g');
+        const test2 = new RegExp('/' + routeToCheck + '/', 'g');
+        if (pathname.match(test1) || pathname.match(test2)) {
+            this.setState({ showOverview: true });
+        } else {
+            this.setState({ showOverview: false });
+        }
+    };
+    componentDidMount() {
+        const { history } = this.props;
+        this.ditectCurrentMenu(history.location);
+        history.listen((location) => {
+            this.ditectCurrentMenu(location);
+        });
     }
 
     /**
@@ -260,8 +278,9 @@ class InfoBar extends React.Component {
         const {
             custom: {
                 leftMenu: { position },
-                infoBar: { showThumbnail, sliderPosition, sliderBackground },
+                infoBar: { showThumbnail },
                 tagWise: { key, active },
+                social: { showRating },
             },
         } = theme;
 
@@ -284,7 +303,7 @@ class InfoBar extends React.Component {
         }
 
         return (
-            <div className={classes.infoBarMain}>
+            <div className={classes.infoBarMain} id='infoBar'>
                 <div className={classes.root}>
                     <Link to='/apis' className={classes.backLink}>
                         <Icon className={classes.backIcon}>keyboard_arrow_left</Icon>
@@ -297,7 +316,7 @@ class InfoBar extends React.Component {
                     {showThumbnail && (
                         <React.Fragment>
                             <VerticalDivider height={70} />
-                            <ImageGenerator api={api} width='70' height='50' />
+                            <ApiThumb api={api} customWidth={70} customHeight={50} showInfo={false} />
                         </React.Fragment>
                     )}
                     <div style={{ marginLeft: theme.spacing.unit }}>
@@ -307,7 +326,7 @@ class InfoBar extends React.Component {
                         </Typography>
                     </div>
                     <VerticalDivider height={70} />
-                    {!api.advertiseInfo.advertised && user && (
+                    {!api.advertiseInfo.advertised && user && showRating && (
                         <StarRatingBar
                             apiId={api.id}
                             isEditable={false}
@@ -397,7 +416,7 @@ class InfoBar extends React.Component {
                                                     </TableCell>
                                                     <TableCell>21 May 2018</TableCell>
                                                 </TableRow> */}
-                                        {user && !api.advertiseInfo.advertised && (
+                                        {user && !api.advertiseInfo.advertised && showRating && (
                                             <TableRow>
                                                 <TableCell component='th' scope='row'>
                                                     <div className={classes.iconAligner}>
@@ -568,4 +587,4 @@ InfoBar.propTypes = {
 
 InfoBar.contextType = ApiContext;
 
-export default injectIntl(withStyles(styles, { withTheme: true })(InfoBar));
+export default injectIntl(withRouter(withStyles(styles, { withTheme: true })(InfoBar)));

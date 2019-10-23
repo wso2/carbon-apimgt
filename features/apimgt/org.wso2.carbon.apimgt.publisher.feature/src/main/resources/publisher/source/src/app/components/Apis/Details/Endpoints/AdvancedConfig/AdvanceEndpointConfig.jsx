@@ -112,7 +112,7 @@ function AdvanceEndpointConfig(props) {
             key: '101001',
             value: '101001 : ' + intl.formatMessage({
                 id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.receiver.io.error.receiving',
-                defaultMessage: 'Receiver IO error receiving',
+                defaultMessage: 'Receiver IO error Receiving',
             }),
         },
         {
@@ -230,7 +230,7 @@ function AdvanceEndpointConfig(props) {
             key: 'REST',
             value: intl.formatMessage({
                 id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.representational.state.transfer',
-                defaultMessage: 'Representational State Transer (REST)',
+                defaultMessage: 'Representational State Transfer (REST)',
             }),
         },
         {

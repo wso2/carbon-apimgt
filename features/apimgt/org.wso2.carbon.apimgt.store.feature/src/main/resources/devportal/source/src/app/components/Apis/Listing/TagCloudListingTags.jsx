@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { useTheme, makeStyles } from '@material-ui/core/styles';
 import { Link, useHistory } from 'react-router-dom';
@@ -27,7 +27,6 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Icon from '@material-ui/core/Icon';
 import { FormattedMessage } from 'react-intl';
-import API from 'AppData/api';
 import ApiTagThumb from './ApiTagThumb';
 
 const useStyles = makeStyles(theme => ({
@@ -41,14 +40,22 @@ const useStyles = makeStyles(theme => ({
         padding: `0 ${theme.spacing.unit * 3}px`,
     },
     textWrapper: {
-        color: theme.palette.getContrastText(theme.custom.tagWise.fixedStyles.background),
+        color: theme.custom.tagCloud.leftMenu.color,
+        '& .material-icons': {
+            color: theme.custom.tagCloud.leftMenu.color,
+        },
     },
     tagWiseThumbWrapper: {
         display: 'flex',
     },
     filterTitle: {
-        fontWeight: 400,
-        padding: theme.spacing(1, 2),
+        fontWeight: 200,
+        paddingLeft: theme.spacing(2),
+        background: theme.custom.tagCloud.leftMenu.titleBackground,
+        color: theme.palette.getContrastText(theme.custom.tagCloud.leftMenu.titleBackground),
+        height: theme.custom.infoBar.height,
+        alignItems: 'center',
+        display: 'flex',
     },
 }));
 
@@ -70,35 +77,20 @@ function TagCloudListingTags(props) {
         },
     } = theme;
 
-    const [apisTagCloudGroup, setApisTagCloudGroup] = useState(null);
 
     const tagWiseURL = '/apis?offset=0&query=tag';
+    const { allTags } = props;
+    let apisTagCloudGroup = null;
 
-    /**
-     * @memberof TagCloudListing
-     */
-    useEffect(() => {
-        const api = new API();
-        const promisedTags = api.getAllTags();
-        promisedTags
-            .then((response) => {
-                if (response.body.count !== 0) {
-                    const allTags = response.body.list;
-                    let apisTagCloudGroup = null;
-                    if (allTags !== null) {
-                        apisTagCloudGroup = allTags.filter(item => active === true && item.value.split(key).length > 1);
-                    }
-                    if (apisTagCloudGroup && apisTagCloudGroup.length > 0) {
-                        setApisTagCloudGroup(apisTagCloudGroup);
-                        const tagLink = tagWiseURL + ':' + apisTagCloudGroup[0].value;
-                        if (style === 'fixed-left') history.push(tagLink);
-                    }
-                }
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }, []);
+    if (allTags.count !== 0) {
+        if (allTags !== null) {
+            apisTagCloudGroup = allTags.filter(item => active === true && item.value.split(key).length > 1);
+        }
+        if (apisTagCloudGroup && apisTagCloudGroup.length > 0) {
+            // const tagLink = tagWiseURL + ':' + apisTagCloudGroup[0].value;
+            // if (style === 'fixed-left') history.push(tagLink);
+        }
+    }
 
     /**
      *
@@ -113,7 +105,6 @@ function TagCloudListingTags(props) {
                 <Typography variant='h6' gutterBottom className={classes.filterTitle}>
                     <FormattedMessage defaultMessage='Api Groups' id='Apis.Listing.TagCloudListingTags.title' />
                 </Typography>
-                <Divider />
                 <List component='nav' aria-label='main mailbox folders'>
                     {Object.keys(apisTagCloudGroup).map((key) => {
                         return <ApiTagThumb tag={apisTagCloudGroup[key]} path={tagWiseURL} style={style} />;
@@ -152,7 +143,7 @@ function TagCloudListingTags(props) {
         <div className={classes.mainTitle}>
             <Typography variant='subtitle1' gutterBottom align='center'>
                 <FormattedMessage
-                    defaultMessage='Tags Connot be Found'
+                    defaultMessage='Tags cannot be found'
                     id='Apis.Listing.TagCloudListingTags.tagsNotFound'
                 />
             </Typography>
@@ -163,6 +154,7 @@ function TagCloudListingTags(props) {
 TagCloudListingTags.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
+    allTags: PropTypes.shape({}).isRequired,
 };
 
 export default TagCloudListingTags;

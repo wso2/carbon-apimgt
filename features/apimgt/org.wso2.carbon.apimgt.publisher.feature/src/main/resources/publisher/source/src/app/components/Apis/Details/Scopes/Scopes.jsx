@@ -321,7 +321,7 @@ class Scopes extends React.Component {
                                 <FormattedMessage
                                     id='Apis.Details.Scopes.Scopes.update.not.allowed'
                                     defaultMessage={
-                                        '*You are not authorized to update Scopes of'
+                                        '*You are not authorized to update scopes of'
                                         + ' the API due to insufficient permissions'
                                     }
                                 />

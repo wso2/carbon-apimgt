@@ -21,7 +21,7 @@ import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import NewEndpointCreate from 'AppComponents/Apis/Details/Endpoints/NewEndpointCreate';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import cloneDeep from 'lodash.clonedeep';
@@ -67,7 +67,7 @@ const defaultSwagger = { paths: {} };
  * @returns {any} HTML representation.
  */
 function Endpoints(props) {
-    const { classes, intl } = props;
+    const { classes, intl, history } = props;
     const { api, updateAPI } = useContext(APIContext);
     const [swagger, setSwagger] = useState(defaultSwagger);
     const [endpointValidity, setAPIEndpointsValid] = useState({ isValid: true, message: '' });
@@ -141,22 +141,31 @@ function Endpoints(props) {
             }
             case 'select_endpoint_type': {
                 const { endpointImplementationType, endpointConfig } = value;
-                return { ...initState, endpointConfig, endpointImplementationType };
+                let { endpointSecurity } = initState;
+                if (endpointSecurity && (endpointSecurity.username === '')) {
+                    endpointSecurity = null;
+                }
+                return {
+                    ...initState,
+                    endpointConfig,
+                    endpointImplementationType,
+                    endpointSecurity: null,
+                };
             }
             default: {
                 return initState;
             }
         }
     };
-    const [apiObject, apiDispatcher] = useReducer(apiReducer, cloneDeep(api.toJSON()));
+    const [apiObject, apiDispatcher] = useReducer(apiReducer, api.toJSON());
 
 
     /**
      * Method to update the api.
      *
-     * @param {function} updateFunc The api update function.
+     * @param {boolean} isRedirect Used for dynamic endpoints to redirect to the runtime config page.
      */
-    const saveAPI = () => {
+    const saveAPI = (isRedirect) => {
         const { endpointConfig, endpointImplementationType, endpointSecurity } = apiObject;
         setUpdating(true);
         if (endpointImplementationType === 'INLINE') {
@@ -166,10 +175,16 @@ function Endpoints(props) {
                 updateAPI({ endpointConfig, endpointImplementationType, endpointSecurity });
             }).finally(() => {
                 setUpdating(false);
+                if (isRedirect) {
+                    history.push('/apis/' + api.id + '/runtime-configuration');
+                }
             });
         } else {
             updateAPI(apiObject).finally(() => {
                 setUpdating(false);
+                if (isRedirect) {
+                    history.push('/apis/' + api.id + '/runtime-configuration');
+                }
             });
         }
     };
@@ -295,6 +310,9 @@ function Endpoints(props) {
         setAPIEndpointsValid(validate(apiObject.endpointImplementationType));
     }, [apiObject]);
 
+    const saveAndRedirect = () => {
+        saveAPI(true);
+    };
     /**
      * Method to update the swagger object.
      *
@@ -335,6 +353,7 @@ function Endpoints(props) {
                                     api={apiObject}
                                     onChangeAPI={apiDispatcher}
                                     endpointsDispatcher={apiDispatcher}
+                                    saveAndRedirect={saveAndRedirect}
                                 />
                             </Grid>
                         </Grid>
@@ -386,7 +405,7 @@ function Endpoints(props) {
                                         <Typography variant='body2' color='primary'>
                                             <FormattedMessage
                                                 id='Apis.Details.Endpoints.Endpoints.update.not.allowed'
-                                                defaultMessage={'*You are not authorized to update Endpoints of' +
+                                                defaultMessage={'*You are not authorized to update endpoints of' +
                                                 ' the API due to insufficient permissions'}
                                             />
                                         </Typography>
@@ -411,6 +430,7 @@ Endpoints.propTypes = {
     }).isRequired,
     api: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
+    history: PropTypes.shape({}).isRequired,
 };
 
-export default injectIntl(withStyles(styles)(Endpoints));
+export default withRouter(injectIntl(withStyles(styles)(Endpoints)));

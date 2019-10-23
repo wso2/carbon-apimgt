@@ -86,7 +86,7 @@ export default function ResponseCaching(props) {
                                 <FormattedMessage
                                     id='Apis.Details.Configuration.components.ResponseCaching.tooltip'
                                     defaultMessage={
-                                        'If enabled, API response will be cached at the gateway level'
+                                        'If enabled, the API response will be cached at the gateway level'
                                         + ' to improve the response time and minimize the backend load'
                                     }
                                 />

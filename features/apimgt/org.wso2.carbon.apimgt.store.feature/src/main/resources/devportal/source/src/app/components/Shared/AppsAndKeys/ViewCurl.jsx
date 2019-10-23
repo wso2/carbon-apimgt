@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core';
@@ -23,7 +23,7 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import FileCopy from '@material-ui/icons/FileCopy';
 import Tooltip from '@material-ui/core/Tooltip';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
+import Settings from 'AppComponents/Shared/SettingsContext';
 
 const useStyles = makeStyles(theme => ({
     code: {
@@ -45,6 +45,10 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
+/**
+ *
+ * @param {*} props
+ */
 function ViewCurl(props) {
     const classes = useStyles();
 
@@ -53,12 +57,9 @@ function ViewCurl(props) {
         intl,
     } = props;
     const bas64Encoded = window.btoa(consumerKey + ':' + consumerSecret);
-    const {
-        api: { endpointURLs },
-    } = useContext(ApiContext);
+    const { settings: { apiGatewayEndpoint } } = useContext(Settings);
     const [showReal, setShowReal] = useState(false);
     const [tokenCopied, setTokenCopied] = useState(false);
-
     const onCopy = () => {
         setTokenCopied(true);
         const caller = function () {
@@ -71,10 +72,8 @@ function ViewCurl(props) {
         setShowReal(!showReal);
     };
 
-    // Calculate EP URL
-    const a = document.createElement('a');
-    a.href = endpointURLs[0].URLs.https;
-    const tokenURL = 'https://' + a.host + '/token';
+    const gatewayUrl = apiGatewayEndpoint ? apiGatewayEndpoint.split(',')[0] : 'https://localhost:8243';
+    const tokenURL = `${gatewayUrl}/token`;
 
     return (
         <React.Fragment>
@@ -91,15 +90,15 @@ function ViewCurl(props) {
                     <div>
                         <span className={classes.command}>curl -k -X POST </span> {tokenURL}
                         <span className={classes.command}> -d </span>{' '}
-                        "grant_type=password&username=Username&password=Password"
+                        {'"grant_type=password&username=Username&password=Password"'}
                     </div>
                     <div>
                         <span className={classes.command}> -H </span>
-                        "Authorization: Basic
+                        {'"Authorization: Basic'}
                         <a onClick={applyReal} className={classes.encodeVisible}>
                             {showReal ? ' ' + bas64Encoded : ' Base64(consumer-key:consumer-secret)'}
                         </a>
-                        "
+                        {'"'}
                     </div>
                 </div>
                 <div>
@@ -118,7 +117,9 @@ function ViewCurl(props) {
                         placement='right'
                     >
                         <CopyToClipboard
-                            text={`curl -k -X POST ${tokenURL} -d "grant_type=password&username=Username&password=Password" -H "Authorization: Basic ${bas64Encoded}"`}
+                            text={`curl -k -X POST ${tokenURL} -d ` +
+                            '"grant_type=password&username=Username&password=Password" -H ' +
+                            `"Authorization: Basic ${bas64Encoded}"`}
                             onCopy={onCopy}
                         >
                             <FileCopy color='secondary' />
@@ -129,8 +130,8 @@ function ViewCurl(props) {
             <Typography>
                 <FormattedMessage
                     id='Shared.AppsAndKeys.ViewCurl.help.in.a.similar'
-                    defaultMessage='In a similar manner, you can generate an access token using the Client Credentials grant type with
-                        the following cURL command.'
+                    defaultMessage={`In a similar manner, you can generate an access token using the
+                    Client Credentials grant type with the following cURL command.`}
                 />
             </Typography>
             <div className={classes.contentWrapper}>
@@ -138,21 +139,23 @@ function ViewCurl(props) {
                     <div>
                         <span className={classes.command}>curl -k -X POST </span> {tokenURL}
                         <span className={classes.command}> -d </span>{' '}
-                        "grant_type=client_credentials&username=Username&password=Password"
+                        {'"grant_type=client_credentials&username=Username&password=Password"'}
                     </div>
                     <div>
                         <span className={classes.command}> -H </span>
-                        "Authorization: Basic
+                        {'"Authorization: Basic'}
                         <a onClick={applyReal} className={classes.encodeVisible}>
                             {showReal ? ' ' + bas64Encoded : ' Base64(consumer-key:consumer-secret)'}
                         </a>
-                        "
+                        {'"'}
                     </div>
                 </div>
                 <div>
                     <Tooltip title={tokenCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
                         <CopyToClipboard
-                            text={`curl -k -X POST ${tokenURL} -d "grant_type=client_credentials&username=Username&password=Password" -H "Authorization: Basic ${bas64Encoded}"`}
+                            text={`curl -k -X POST ${tokenURL} -d ` +
+                            '"grant_type=client_credentials&username=Username&password=Password" -H' +
+                            `"Authorization: Basic ${bas64Encoded}"`}
                             onCopy={onCopy}
                         >
                             <FileCopy color='secondary' />
@@ -165,7 +168,7 @@ function ViewCurl(props) {
 }
 
 ViewCurl.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
     keys: PropTypes.shape({}).isRequired,
     apis: PropTypes.shape({}).isRequired,
 };

@@ -84,7 +84,7 @@ public class AlertTypesPublisher {
             alertTypeDTO.setPublisher(false);
             alertTypeDTO.setAdmin(true);
         }
-        String appName = "APIM_ALERT_STAKEHOLDER";
+        String appName = "APIM_STAKEHOLDER_ALERT";
         String query = "select '" + alertTypeDTO.getUserName() + "' as userId, '" + alertTypeDTO.getAlertTypes()
                 + "' as alertTypes, '" + alertTypeDTO.getEmails() + "' as emails, " + alertTypeDTO.isSubscriber()
                 + " as isSubscriber, " + alertTypeDTO.isPublisher() + " as isPublisher, " + alertTypeDTO.isAdmin()
@@ -172,7 +172,7 @@ public class AlertTypesPublisher {
             alertTypeDTO.setPublisher(false);
             alertTypeDTO.setAdmin(true);
         }
-        String appName = "APIM_ALERT_STAKEHOLDER";
+        String appName = "APIM_STAKEHOLDER_ALERT";
         String query =
                 "delete ApimAlertStakeholderInfo  on ApimAlertStakeholderInfo.userId == '" + alertTypeDTO.getUserName()
                         + "' and " + conditionClause;

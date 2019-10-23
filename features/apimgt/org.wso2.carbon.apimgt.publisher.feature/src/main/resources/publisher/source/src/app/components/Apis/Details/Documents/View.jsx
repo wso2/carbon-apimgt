@@ -240,7 +240,7 @@ function View(props) {
                                         <Typography variant='body1'>
                                             <FormattedMessage
                                                 id='Apis.Details.Documents.View.meta.catogery'
-                                                defaultMessage='Catogoriezed as'
+                                                defaultMessage='Categorized as'
                                             />
                                         </Typography>
                                     </TableCell>

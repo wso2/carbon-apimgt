@@ -656,7 +656,7 @@ public final class APIImportUtil {
                 + importedApi.getId().getApiName() + RegistryConstants.PATH_SEPARATOR
                 + importedApi.getId().getVersion() + RegistryConstants.PATH_SEPARATOR;
 
-        String inSequenceFileName = importedApi.getInSequence();
+        String inSequenceFileName = importedApi.getInSequence() + APIConstants.XML_EXTENSION;
         String inSequenceFileLocation = pathToArchive + APIImportExportConstants.IN_SEQUENCE_LOCATION
                 + APIImportExportConstants.CUSTOM_TYPE + File.separator + inSequenceFileName;
 
@@ -667,7 +667,7 @@ public final class APIImportUtil {
             addSequenceToRegistry(true, registry, inSequenceFileLocation, regResourcePath + inSequencePath);
         }
 
-        String outSequenceFileName = importedApi.getOutSequence();
+        String outSequenceFileName = importedApi.getOutSequence() + APIConstants.XML_EXTENSION;
         String outSequenceFileLocation = pathToArchive + APIImportExportConstants.OUT_SEQUENCE_LOCATION
                 + APIImportExportConstants.CUSTOM_TYPE + File.separator + outSequenceFileName;
 
@@ -678,7 +678,7 @@ public final class APIImportUtil {
             addSequenceToRegistry(true, registry, outSequenceFileLocation, regResourcePath + outSequencePath);
         }
 
-        String faultSequenceFileName = importedApi.getFaultSequence();
+        String faultSequenceFileName = importedApi.getFaultSequence() + APIConstants.XML_EXTENSION;
         String faultSequenceFileLocation = pathToArchive + APIImportExportConstants.FAULT_SEQUENCE_LOCATION
                 + APIImportExportConstants.CUSTOM_TYPE + File.separator + faultSequenceFileName;
 
@@ -806,7 +806,7 @@ public final class APIImportUtil {
 
         String jsonContent = null;
         String pathToYamlFile = pathToArchive + APIImportExportConstants.YAML_ENDPOINTS_CERTIFICATE_FILE;
-        String pathToJsonFile = pathToArchive + APIImportExportConstants.YAML_ENDPOINTS_CERTIFICATE_FILE;
+        String pathToJsonFile = pathToArchive + APIImportExportConstants.JSON_ENDPOINTS_CERTIFICATE_FILE;
 
         try {
             // try loading file as YAML

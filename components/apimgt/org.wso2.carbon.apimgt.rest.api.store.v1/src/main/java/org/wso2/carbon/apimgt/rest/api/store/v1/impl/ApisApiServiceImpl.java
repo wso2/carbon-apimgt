@@ -519,13 +519,14 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return : The sdk as a zip archive.
      */
     @Override
-    public Response apisApiIdSdksLanguageGet(String apiId, String language, MessageContext messageContext) {
+    public Response apisApiIdSdksLanguageGet(String apiId, String language, String xWSO2Tenant,
+            MessageContext messageContext) {
 
         if (StringUtils.isEmpty(apiId) || StringUtils.isEmpty(language)) {
             String message = "Error generating the SDK. API id or language should not be empty";
             RestApiUtil.handleBadRequest(message, log);
         }
-        String tenant = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenant = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIDTO api = getAPIByAPIId(apiId, tenant);
         APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
         Map<String, String> sdkArtifacts;

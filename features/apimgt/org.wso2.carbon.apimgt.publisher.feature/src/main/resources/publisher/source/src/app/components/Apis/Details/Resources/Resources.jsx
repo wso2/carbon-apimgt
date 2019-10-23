@@ -99,6 +99,9 @@ export default function Resources(props) {
                     updatedOperation.parameters.push(value);
                 }
                 break;
+            case 'requestBody':
+                updatedOperation[action] = value;
+                break;
             case 'deleteParameter':
                 updatedOperation.parameters = updatedOperation.parameters.filter((parameter) => {
                     return parameter.in !== value.in && parameter.name !== value.name;
@@ -220,7 +223,11 @@ export default function Resources(props) {
             .then(updateAPI)
             .catch((error) => {
                 console.error(error);
-                Alert.error('Error while updating the definition');
+                if (error.response) {
+                    setPageError(error.response.body);
+                } else {
+                    Alert.error('Error while updating the definition');
+                }
             });
     }
 
@@ -296,10 +303,6 @@ export default function Resources(props) {
         // TODO: need to handle the error cases through catch ~tmkb
     }, [api.id]);
 
-    if (pageError) {
-        return <Banner type='error' message={pageError} />;
-    }
-
     // Note: Make sure not to use any hooks after/within this condition , because it returns conditionally
     // If you do so, You will probably get `Rendered more hooks than during the previous render.` exception
     if (isEmpty(openAPISpec)) {
@@ -313,6 +316,11 @@ export default function Resources(props) {
     }
     return (
         <Grid container direction='row' justify='flex-start' spacing={2} alignItems='stretch'>
+            {pageError && (
+                <Grid item md={12}>
+                    <Banner onClose={() => setPageError(null)} disableActions type='error' message={pageError} />
+                </Grid>
+            )}
             {!disableRateLimiting && (
                 <Grid item md={12}>
                     <APIRateLimiting
@@ -363,8 +371,9 @@ export default function Resources(props) {
                                                     markAsDelete={Boolean(markedOperations[target]
                                                         && markedOperations[target][verb])}
                                                     onMarkAsDelete={onMarkAsDelete}
-                                                    disableUpdate={disableUpdate
-                                                        || isRestricted(['apim:api_create'], api)}
+                                                    disableUpdate={
+                                                        disableUpdate || isRestricted(['apim:api_create'], api)
+                                                    }
                                                     disableMultiSelect={disableMultiSelect}
                                                     {...operationProps}
                                                 />
