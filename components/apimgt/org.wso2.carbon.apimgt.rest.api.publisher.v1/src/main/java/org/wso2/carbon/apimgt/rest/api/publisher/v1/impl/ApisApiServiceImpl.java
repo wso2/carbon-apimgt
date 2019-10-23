@@ -343,7 +343,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (!errorMessage.isEmpty()) {
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
-	    }
+        }
         if (body.getContext() == null) {
             RestApiUtil.handleBadRequest("Parameter: \"context\" cannot be null", log);
         } else if (body.getContext().endsWith("/")) {
