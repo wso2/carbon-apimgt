@@ -70,8 +70,8 @@ export default function ListParameters(props) {
                 <TableHead>
                     <TableRow>
                         <TableCell>Name</TableCell>
-                        <TableCell align='right'>Location</TableCell>
-                        <TableCell align='right'>Type</TableCell>
+                        <TableCell align='right'>Parameter Type</TableCell>
+                        <TableCell align='right'>Data Type</TableCell>
                         <TableCell align='right'>Required</TableCell>
                         {!disableUpdate && <TableCell align='right'>Actions</TableCell>}
                     </TableRow>
