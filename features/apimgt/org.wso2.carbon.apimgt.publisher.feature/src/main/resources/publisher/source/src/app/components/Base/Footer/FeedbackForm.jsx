@@ -37,6 +37,7 @@ import MoodIcon from '@material-ui/icons/Mood';
 import MoodBadIcon from '@material-ui/icons/MoodBad';
 import FaceIcon from '@material-ui/icons/Face';
 import Alert from 'AppComponents/Shared/Alert';
+import Configurations from 'Config';
 
 /**
  *
@@ -88,7 +89,7 @@ export default function FeedbackForm() {
         const check = Date.now();
         const { score = -1, message = '' } = feedback;
         const data = { check, score, message };
-        const response = fetch('https://dev1.knnect.com/apis/feedbacks', {
+        const response = fetch(Configurations.feedback.serviceURL, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',

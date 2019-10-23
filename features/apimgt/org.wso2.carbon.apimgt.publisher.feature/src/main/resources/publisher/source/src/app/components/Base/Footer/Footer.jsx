@@ -23,6 +23,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import Grid from '@material-ui/core/Grid';
 import FeedbackForm from './FeedbackForm';
+import Configurations from 'Config';
 
 const useStyles = makeStyles(theme => ({
     footer: {
@@ -54,9 +55,11 @@ function Footer() {
                         />
                     </Typography>
                 </Grid>
-                <Grid item>
-                    <FeedbackForm />
-                </Grid>
+                {Configurations.app.feedback.enable && (
+                    <Grid item>
+                        <FeedbackForm />
+                    </Grid>
+                )}
             </Grid>
         </footer>
     );

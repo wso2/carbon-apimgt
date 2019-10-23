@@ -115,6 +115,10 @@ const Configurations = {
         context: APP_CONTEXT,
         reverseProxy: REVERSE_PROXY,
         storeContext: STORE_APP_CONTEXT,
+        feedback: {
+            enable: false,
+            serviceURL: '',
+        },
     },
 };
 if (typeof module !== 'undefined') {
