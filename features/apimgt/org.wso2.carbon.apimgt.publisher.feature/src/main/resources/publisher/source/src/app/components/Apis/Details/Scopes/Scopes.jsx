@@ -40,7 +40,6 @@ const styles = theme => ({
     root: {
         paddingTop: 0,
         paddingLeft: 0,
-        maxWidth: theme.custom.contentAreaWidth,
     },
     buttonProgress: {
         position: 'relative',
