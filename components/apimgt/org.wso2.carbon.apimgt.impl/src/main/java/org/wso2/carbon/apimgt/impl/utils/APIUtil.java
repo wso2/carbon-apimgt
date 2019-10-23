@@ -448,14 +448,6 @@ public final class APIUtil {
                 uriTemplate.setScopes(scope);
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
-
-                Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
-                for (APIProductIdentifier usedByProduct : usedByProducts) {
-                    String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);
-                    Resource productResource = registry.get(apiProductPath);
-                    String artifactId = productResource.getUUID();
-                    usedByProduct.setUUID(artifactId);
-                }
             }
             api.setUriTemplates(uriTemplates);
             api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
@@ -484,6 +476,25 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return api;
+    }
+
+
+    public static void updateAPIProductDependencies(API api, Registry registry) throws APIManagementException {
+        for (URITemplate uriTemplate : api.getUriTemplates()) {
+            Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
+            for (APIProductIdentifier usedByProduct : usedByProducts) {
+                String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);
+                Resource productResource = null;
+                try {
+                    productResource = registry.get(apiProductPath);
+                } catch (RegistryException e) {
+                    String msg = "Failed to get LastAccess time or Rating";
+                    throw new APIManagementException(msg, e);
+                }
+                String artifactId = productResource.getUUID();
+                usedByProduct.setUUID(artifactId);
+            }
+        }
     }
 
     /**
