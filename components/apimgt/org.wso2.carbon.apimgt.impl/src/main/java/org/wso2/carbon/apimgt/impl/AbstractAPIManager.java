@@ -114,7 +114,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1238,15 +1237,7 @@ public abstract class AbstractAPIManager implements APIManager {
             Resource thumb = registry.newResource();
             thumb.setContentStream(resourceFile.getContent());
             thumb.setMediaType(resourceFile.getContentType());
-            StringWriter stringWriter = new StringWriter();
-            IOUtils.copy(thumb.getContentStream(), stringWriter);
-            String sequenceText = stringWriter.toString();
-            OMElement omElement = AXIOMUtil.stringToOM(sequenceText);
-            if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(omElement.getLocalName())) {
-                registry.put(resourcePath, thumb);
-            } else {
-                throw new APIManagementException("Sequence is malformed");
-            }
+            registry.put(resourcePath, thumb);
             if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(tenantDomain)) {
                 return RegistryConstants.PATH_SEPARATOR + "registry"
                         + RegistryConstants.PATH_SEPARATOR + "resource"
@@ -1262,10 +1253,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "Error while adding the resource to the registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } catch (XMLStreamException | IOException e) {
-            String msg = "Error while parsing the sequence";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
