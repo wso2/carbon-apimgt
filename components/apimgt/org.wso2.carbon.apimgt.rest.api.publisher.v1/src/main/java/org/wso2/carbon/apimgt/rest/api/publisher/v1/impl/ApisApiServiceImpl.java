@@ -340,6 +340,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
         }
+        if (body.getVisibleRoles() != null) {
+            String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getVisibleRoles());
+
+            if (!errorMessage.isEmpty()) {
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        }
         if (body.getContext() == null) {
             RestApiUtil.handleBadRequest("Parameter: \"context\" cannot be null", log);
         } else if (body.getContext().endsWith("/")) {
@@ -611,6 +618,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             if (body.getAccessControlRoles() != null) {
                 String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getAccessControlRoles());
+                if (!errorMessage.isEmpty()) {
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+            }
+            if (body.getVisibleRoles() != null) {
+                String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getVisibleRoles());
+
                 if (!errorMessage.isEmpty()) {
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
