@@ -223,7 +223,7 @@ export default function ProvideWSDL(props) {
                 error={isError && isError.file}
                 onDrop={onDrop}
                 files={apiInputs.inputValue}
-                accept={isArchiveInput ? '.bz,.bz2,.gz,.rar,.tar,.zip,.7z' : '.wsdl'}
+                accept={isArchiveInput ? '.bz,.bz2,.gz,.rar,.tar,.zip,.7z,.wsdl' : '.wsdl'}
             >
                 {isValidating ? (<CircularProgress />)
                     : (
@@ -349,6 +349,7 @@ export default function ProvideWSDL(props) {
                             />
                             <FormControlLabel
                                 value={isGenerateRESTAPI ? 'file' : 'archive'}
+                                disabled={isGenerateRESTAPI}
                                 control={<Radio color='primary' />}
                                 label={fileControlLabel}
                             />
