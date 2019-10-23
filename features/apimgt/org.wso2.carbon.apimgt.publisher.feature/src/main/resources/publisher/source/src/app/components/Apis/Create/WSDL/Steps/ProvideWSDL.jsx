@@ -349,6 +349,7 @@ export default function ProvideWSDL(props) {
                             />
                             <FormControlLabel
                                 value={isGenerateRESTAPI ? 'file' : 'archive'}
+                                disabled={isGenerateRESTAPI}
                                 control={<Radio color='primary' />}
                                 label={fileControlLabel}
                             />
