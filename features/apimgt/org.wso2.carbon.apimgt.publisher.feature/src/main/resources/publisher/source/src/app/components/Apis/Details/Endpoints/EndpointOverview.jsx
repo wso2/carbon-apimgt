@@ -780,18 +780,18 @@ function EndpointOverview(props) {
                     <Typography>
                         <FormattedMessage
                             id='Apis.Details.Endpoints.EndpointOverview.endpoint.type.change.confirmation.message'
-                            defaultMessage='Your current endpoint configuration will be lost. Continue?'
+                            defaultMessage='Your current endpoint configuration will be lost.'
                         />
                     </Typography>
                 </DialogContent>
                 <DialogActions>
                     <Button
                         onClick={() => { setTypeChangeConfirmation({ openDialog: false }); }}
-                        color='secondary'
+                        color='primary'
                     >
                         <FormattedMessage
                             id='Apis.Details.Endpoints.EndpointOverview.change.type.cancel'
-                            defaultMessage='NO'
+                            defaultMessage='Cancel'
                         />
                     </Button>
                     <Button
@@ -799,8 +799,8 @@ function EndpointOverview(props) {
                         color='primary'
                     >
                         <FormattedMessage
-                            id='Apis.Details.Endpoints..EndpointOverview.change.type.ok'
-                            defaultMessage='Yes'
+                            id='Apis.Details.Endpoints..EndpointOverview.change.type.proceed'
+                            defaultMessage='Proceed'
                         />
                     </Button>
                 </DialogActions>
