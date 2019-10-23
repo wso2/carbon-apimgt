@@ -779,7 +779,7 @@ function EndpointOverview(props) {
                 <DialogContent>
                     <Typography>
                         <FormattedMessage
-                            id='Apis.Details.Endpoints.EndpointOverview.endpoint.type.change.confirmation'
+                            id='Apis.Details.Endpoints.EndpointOverview.endpoint.type.change.confirmation.message'
                             defaultMessage='Your current endpoint configuration will be lost. Continue?'
                         />
                     </Typography>
