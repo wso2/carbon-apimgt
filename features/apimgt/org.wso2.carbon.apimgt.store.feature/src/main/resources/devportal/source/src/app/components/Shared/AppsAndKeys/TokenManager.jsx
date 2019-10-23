@@ -380,7 +380,7 @@ class TokenManager extends React.Component {
                         <FormattedMessage
                             id='Shared.AppsAndKeys.TokenManager.cleanup.text'
                             defaultMessage='Error! You have partially-created keys.
-                            Please click the Clean Up button and try again.'
+                            Please click `Clean Up` button and try again.'
                         />
                     </Typography>
                     <Button

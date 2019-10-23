@@ -196,12 +196,7 @@ const Configurations = {
                     style: 'fixed-left', // If 'page' it will show a different page. Else if 'fixed-left' will show a fixed menu with all the group tags on the left.
                     thumbnail: { // These params will be applyed only if the style is 'page'
                         width: 150,
-                        image: '/devportal/site/public/images/api/api-default.png',
-                    },
-                    fixedStyles: { // These params will be applyed only if the style is 'fixed-left'
-                        width: 200,
-                        background: 'rgba(255,255,255,100)',
-                        hasIcon: false,
+                        image: '/site/public/images/api/api-default.png',
                     },
                     key: '-group',
                     showAllApis: true,
@@ -209,9 +204,48 @@ const Configurations = {
                 tagCloud: {
                     active: true,
                     colorOptions: { // This is the Options object passed to TagCloud component of https://www.npmjs.com/package/react-tagcloud
-                        luminosity: 'dark',
+                        luminosity: 'light',
                         hue: 'blue',
                     },
+                    leftMenu: { // These params will be applyed only if the style is 'fixed-left'
+                        width: 200,
+                        height: 'calc(100vh - 222px)',
+                        background: '#1a1f2f',
+                        color: '#c7e9ff',
+                        titleBackground: '#335c8b',
+                        sliderBackground: '#335c8b',
+                        sliderWidth: 25,
+                        hasIcon: false,
+                    },
+                },
+                social: {
+                    showRating: true,
+                },
+                apiDetailPages: {
+                    showCredentials: true,
+                    showComments: true,
+                    showTryout: true,
+                    showDocuments: true,
+                    showSdks: true,
+                    onlyShowSdks: [], // You can put an array of strings to enable only a given set of sdks. Leave empty to show all. ex: ['java','javascript'] 
+                },
+                banner: {
+                    active: false, // make it true to display a banner image
+                    style: 'text', // 'can take 'image' or 'text'. If text it will display the 'banner.text' value else it will display the 'banner.image' value.
+                    image: '/site/public/images/landing/01.jpg',
+                    text: 'This is a very important announcement',
+                    color: '#ffffff',
+                    background: '#e08a00',
+                    padding: 20,
+                    margin: 0,
+                    fontSize: 18,
+                    textAlign: 'center',
+                },
+                footer: {
+                    active: true,
+                    text: '', // Leave empty to show the default WSO2 Text. Provide custom text to display your own thing.
+                    background: '#bdbdbd',
+                    color: '#222222',
                 },
             },
         },

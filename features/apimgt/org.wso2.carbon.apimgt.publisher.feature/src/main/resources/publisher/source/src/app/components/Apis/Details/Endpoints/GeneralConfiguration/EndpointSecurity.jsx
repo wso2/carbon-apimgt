@@ -16,11 +16,7 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
-import {
-    Grid,
-    TextField,
-    MenuItem,
-} from '@material-ui/core';
+import { Grid, TextField, MenuItem } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
@@ -32,11 +28,7 @@ import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
  */
 function EndpointSecurity(props) {
     const { api } = useContext(APIContext);
-    const {
-        intl,
-        securityInfo,
-        onChangeEndpointAuth,
-    } = props;
+    const { intl, securityInfo, onChangeEndpointAuth } = props;
     const [endpointSecurityInfo, setEndpointSecurityInfo] = useState({
         type: 'BASIC',
         username: '',
@@ -58,7 +50,8 @@ function EndpointSecurity(props) {
                 id: 'Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.digest.auth',
                 defaultMessage: 'Digest Auth',
             }),
-        }];
+        },
+    ];
     useEffect(() => {
         const tmpSecurity = {};
         if (securityInfo !== null) {
@@ -79,7 +72,7 @@ function EndpointSecurity(props) {
         onChangeEndpointAuth(endpointSecurityInfo[field], field);
     };
     return (
-        <Grid container direction='column' spacing={2}>
+        <Grid container direction='row' spacing={2}>
             <Grid item xs={6}>
                 <TextField
                     disabled={isRestricted(['apim:api_create'], api)}
@@ -87,73 +80,88 @@ function EndpointSecurity(props) {
                     select
                     value={endpointSecurityInfo.type}
                     variant='outlined'
-                    onChange={(event) => { onChangeEndpointAuth(event, 'type'); }}
+                    onChange={(event) => {
+                        onChangeEndpointAuth(event.target.value, 'type');
+                    }}
                     inputProps={{
                         name: 'key',
                         id: 'auth-type-select',
                     }}
                 >
                     {authTypes.map(type => (
-                        <MenuItem value={type.key}>
-                            {type.value}
-                        </MenuItem>
+                        <MenuItem value={type.key}>{type.value}</MenuItem>
                     ))}
                 </TextField>
             </Grid>
+            <Grid item xs={6} />
+
             <Grid item xs={6}>
                 <TextField
                     disabled={isRestricted(['apim:api_create'], api)}
                     required
                     fullWidth
                     error={securityValidity && securityValidity.username === false}
-                    helperText={securityValidity && securityValidity.username === false ?
-                        <FormattedMessage
-                            id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.no.username.error'
-                            defaultMessage='Username should not be empty'
-                        /> : <FormattedMessage
-                            id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.username.message'
-                            defaultMessage='Enter Username'
-                        />}
+                    helperText={
+                        securityValidity && securityValidity.username === false ? (
+                            <FormattedMessage
+                                id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.no.username.error'
+                                defaultMessage='Username should not be empty'
+                            />
+                        ) : (
+                            <FormattedMessage
+                                id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.username.message'
+                                defaultMessage='Enter Username'
+                            />
+                        )
+                    }
                     variant='outlined'
                     id='auth-userName'
-                    label={(
+                    label={
                         <FormattedMessage
                             id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.user.name.input'
                             defaultMessage='Username'
                         />
-                    )}
-                    onChange={
-                        event => setEndpointSecurityInfo({ ...endpointSecurityInfo, username: event.target.value })}
+                    }
+                    onChange={event =>
+                        setEndpointSecurityInfo({ ...endpointSecurityInfo, username: event.target.value })
+                    }
                     value={endpointSecurityInfo.username}
                     onBlur={() => validateAndUpdateSecurityInfo('username')}
                 />
             </Grid>
+
             <Grid item xs={6}>
                 <TextField
                     disabled={isRestricted(['apim:api_create'], api)}
                     required
                     fullWidth
                     error={securityValidity && securityValidity.password === false}
-                    helperText={securityValidity && securityValidity.password === false ?
-                        <FormattedMessage
-                            id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.no.password.error'
-                            defaultMessage='Password should not be empty'
-                        /> : <FormattedMessage
-                            id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.password.message'
-                            defaultMessage='Enter Password'
-                        />}
+                    helperText={
+                        securityValidity && securityValidity.password === false ? (
+                            <FormattedMessage
+                                id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.no.password.error'
+                                defaultMessage='Password should not be empty'
+                            />
+                        ) : (
+                            <FormattedMessage
+                                id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.password.message'
+                                defaultMessage='Enter Password'
+                            />
+                        )
+                    }
                     variant='outlined'
                     type='password'
                     id='auth-password'
-                    label={(
+                    label={
                         <FormattedMessage
                             id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.password.input'
                             defaultMessage='Password'
                         />
-                    )}
+                    }
                     value={endpointSecurityInfo.password}
-                    onChange={
-                        event => setEndpointSecurityInfo({ ...endpointSecurityInfo, password: event.target.value })}
+                    onChange={event =>
+                        setEndpointSecurityInfo({ ...endpointSecurityInfo, password: event.target.value })
+                    }
                     onBlur={() => validateAndUpdateSecurityInfo('password')}
                 />
             </Grid>
@@ -167,4 +175,4 @@ EndpointSecurity.propTypes = {
     onChangeEndpointAuth: PropTypes.func.isRequired,
 };
 
-export default injectIntl((EndpointSecurity));
+export default injectIntl(EndpointSecurity);

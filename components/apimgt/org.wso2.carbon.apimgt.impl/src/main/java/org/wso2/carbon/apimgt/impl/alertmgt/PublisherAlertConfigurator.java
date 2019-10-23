@@ -60,7 +60,7 @@ public class PublisherAlertConfigurator extends AlertConfigurator {
                         + "ApimAlertStakeholderInfo.isAdmin = isAdmin on "
                         + "ApimAlertStakeholderInfo.userId == userId and "
                         + "ApimAlertStakeholderInfo.isPublisher == isPublisher";
-        APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_ALERT_STAKEHOLDER_APP, query);
+        APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_STAKEHOLDER_ALERT_APP, query);
         apiMgtDAO.addAlertTypesConfigInfo(userName, emails, alertTypesMap.get("ids"),
                 AlertMgtConstants.PUBLISHER_AGENT);
     }
@@ -70,7 +70,7 @@ public class PublisherAlertConfigurator extends AlertConfigurator {
         apiMgtDAO.unSubscribeAlerts(userName, AlertMgtConstants.PUBLISHER_AGENT);
         String query = "delete ApimAlertStakeholderInfo on ApimAlertStakeholderInfo.userId == '" + userName + "' and "
                 + "ApimAlertStakeholderInfo.isPublisher == true";
-        APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_ALERT_STAKEHOLDER_APP, query);
+        APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_STAKEHOLDER_ALERT_APP, query);
     }
 
     @Override

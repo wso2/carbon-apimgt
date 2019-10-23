@@ -337,7 +337,7 @@ class EditScope extends React.Component {
                                             ) : (
                                                 <FormattedMessage
                                                     id='Apis.Details.Scopes.EditScopes.roles.help'
-                                                    defaultMessage='Enter a valid role and press enter.'
+                                                    defaultMessage='Enter a valid role and press `Enter`.'
                                                 />
                                             )
                                         }

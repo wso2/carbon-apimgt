@@ -27,7 +27,7 @@ import Logout from './app/components/Logout';
 import SignUp from './app/components/AnonymousView/SignUp';
 import Progress from './app/components/Shared/Progress';
 import { SettingsProvider } from './app/components/Shared/SettingsContext';
-import AuthManager from './app/data/AuthManager';
+import API from './app/data/api';
 import BrowserRouter from './app/components/Base/CustomRouter/BrowserRouter';
 
 const LoadableProtectedApp = Loadable({
@@ -67,14 +67,17 @@ class Store extends React.Component {
      *  Mounting the components
      */
     componentDidMount() {
-        AuthManager.setSettings().then((response) => {
-            this.setState({ settings: response });
-        }).catch((error) => {
-            console.error(
-                'Error while receiving settings : ',
-                error,
-            );
-        });
+        const api = new API();
+        const promisedSettings = api.getSettings();
+        promisedSettings
+            .then((response) => {
+                this.setState({ settings: response.body });
+            }).catch((error) => {
+                console.error(
+                    'Error while receiving settings : ',
+                    error,
+                );
+            });
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('tenant') === null || urlParams.get('tenant') === 'carbon.super') {
             this.setState({ theme: Configurations.themes.light });

@@ -24,13 +24,12 @@ import {
     Radio,
     FormControlLabel,
     Collapse,
-    RadioGroup, Checkbox, Dialog, DialogTitle, DialogContent,
+    RadioGroup, Checkbox, Dialog, DialogTitle, DialogContent, IconButton, Button, DialogActions,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
 import LaunchIcon from '@material-ui/icons/Launch';
-import { Link } from 'react-router-dom';
 
 import cloneDeep from 'lodash.clonedeep';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
@@ -125,6 +124,7 @@ function EndpointOverview(props) {
         endpointsDispatcher,
         swaggerDef,
         updateSwagger,
+        saveAndRedirect,
     } = props;
     const { endpointConfig, endpointSecurity } = api;
     const [endpointType, setEndpointType] = useState(endpointTypes[0]);
@@ -140,6 +140,7 @@ function EndpointOverview(props) {
         config: undefined,
     });
     const [endpointCategory, setEndpointCategory] = useState({ sandbox: false, prod: false });
+    const [typeChangeConfirmation, setTypeChangeConfirmation] = useState({ openDialog: false });
 
     /**
      * Method to get the type of the endpoint. (HTTP/REST or HTTP/SOAP)
@@ -342,11 +343,13 @@ function EndpointOverview(props) {
     };
 
     /**
-     * Handles the endpoint type select event.
-     * @param {any} event The select event.
+     * Handles the endpoint type change functionality.
+     *
+     * @param {string} value The selected endpoint type.
      * */
-    const handleEndpointTypeSelect = (event) => {
-        const selectedKey = event.target.value;
+    const changeEndpointType = (value) => {
+        setTypeChangeConfirmation({ openDialog: false });
+        const selectedKey = typeChangeConfirmation.type || value;
         if (selectedKey === 'INLINE') {
             const tmpConfig = createEndpointConfig('prototyped');
             endpointsDispatcher({
@@ -374,6 +377,20 @@ function EndpointOverview(props) {
                     endpointConfig: { ...generatedEndpointConfig },
                 },
             });
+        }
+    };
+
+    /**
+     * Handles the endpoint type select event. If endpoint config has existing values, show confirmation dialog.
+     * @param {any} event The select event.
+     * */
+    const handleEndpointTypeSelect = (event) => {
+        // Check whether the endpoint Config has values.
+        if (epConfig.production_endpoints || epConfig.sandbox_endpoints) {
+            // Show confirmation dialog
+            setTypeChangeConfirmation({ type: event.target.value, openDialog: true });
+        } else {
+            changeEndpointType(event.target.value);
         }
     };
 
@@ -582,13 +599,15 @@ function EndpointOverview(props) {
                                                     defaultMessage={'Please upload a mediation sequence file to ' +
                                                     'Message Mediation Policies, which sets the endpoints.'}
                                                 />
-                                                <Link to={'/apis/' + api.id + '/runtime-configuration'}>
+                                                <IconButton
+                                                    onClick={saveAndRedirect}
+                                                >
                                                     <LaunchIcon
                                                         style={{ marginLeft: '2px' }}
                                                         fontSize='small'
                                                         color='primary'
                                                     />
-                                                </Link>
+                                                </IconButton>
                                             </Typography>
                                         </div>
                                     </InlineMessage> :
@@ -748,6 +767,44 @@ function EndpointOverview(props) {
                     />
                 </DialogContent>
             </Dialog>
+            <Dialog open={typeChangeConfirmation.openDialog}>
+                <DialogTitle>
+                    <Typography className={classes.configDialogHeader}>
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.EndpointOverview.endpoint.type.change.confirmation'
+                            defaultMessage='Change Endpoint Type'
+                        />
+                    </Typography>
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.EndpointOverview.endpoint.type.change.confirmation.message'
+                            defaultMessage='Your current endpoint configuration will be lost.'
+                        />
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() => { setTypeChangeConfirmation({ openDialog: false }); }}
+                        color='primary'
+                    >
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.EndpointOverview.change.type.cancel'
+                            defaultMessage='Cancel'
+                        />
+                    </Button>
+                    <Button
+                        onClick={() => { changeEndpointType(typeChangeConfirmation.type); }}
+                        color='primary'
+                    >
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints..EndpointOverview.change.type.proceed'
+                            defaultMessage='Proceed'
+                        />
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }
@@ -762,6 +819,7 @@ EndpointOverview.propTypes = {
     endpointsDispatcher: PropTypes.func.isRequired,
     swaggerDef: PropTypes.shape({}).isRequired,
     updateSwagger: PropTypes.func.isRequired,
+    saveAndRedirect: PropTypes.func.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(EndpointOverview));

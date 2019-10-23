@@ -115,6 +115,9 @@ const styles = theme => ({
     thumbBy: {
         'padding-left': '5px',
     },
+    thumbRightBy: {
+        'margin-right': '5px',
+    },
 });
 
 /**
@@ -149,42 +152,46 @@ class APIThumb extends Component {
         const { updateData, isAPIProduct } = this.props;
         if (isAPIProduct) {
             const promisedDelete = API.deleteProduct(id);
-            promisedDelete.then((response) => {
-                if (response.status !== 200) {
-                    Alert.info('Something went wrong while deleting the API Product!');
-                    return;
-                }
-                updateData(id);
-                Alert.info(`API Product ${name} deleted Successfully`);
-                this.setState({ loading: false });
-            }).catch((error) => {
-                if (error.status === 409) {
-                    Alert.error(error.response.body.description);
+            promisedDelete
+                .then((response) => {
+                    if (response.status !== 200) {
+                        Alert.info('Something went wrong while deleting the API Product!');
+                        return;
+                    }
+                    updateData(id);
+                    Alert.info(`API Product ${name} deleted Successfully`);
                     this.setState({ loading: false });
-                } else {
-                    Alert.error('Something went wrong while deleting the API Product!');
-                    this.setState({ loading: false });
-                }
-            });
+                })
+                .catch((error) => {
+                    if (error.status === 409) {
+                        Alert.error(error.response.body.description);
+                        this.setState({ loading: false });
+                    } else {
+                        Alert.error('Something went wrong while deleting the API Product!');
+                        this.setState({ loading: false });
+                    }
+                });
         } else {
             const promisedDelete = API.delete(id);
-            promisedDelete.then((response) => {
-                if (response.status !== 200) {
-                    Alert.info('Something went wrong while deleting the API!');
-                    return;
-                }
-                updateData(id);
-                Alert.info(`API ${name} deleted Successfully`);
-                this.setState({ loading: false });
-            }).catch((error) => {
-                if (error.status === 409) {
-                    Alert.error(error.response.body.description);
+            promisedDelete
+                .then((response) => {
+                    if (response.status !== 200) {
+                        Alert.info('Something went wrong while deleting the API!');
+                        return;
+                    }
+                    updateData(id);
+                    Alert.info(`API ${name} deleted Successfully`);
                     this.setState({ loading: false });
-                } else {
-                    Alert.error('Something went wrong while deleting the API!');
-                    this.setState({ loading: false });
-                }
-            });
+                })
+                .catch((error) => {
+                    if (error.status === 409) {
+                        Alert.error(error.response.body.description);
+                        this.setState({ loading: false });
+                    } else {
+                        Alert.error('Something went wrong while deleting the API!');
+                        this.setState({ loading: false });
+                    }
+                });
         }
     }
 
@@ -207,8 +214,7 @@ class APIThumb extends Component {
         const { isHover, loading } = this.state;
         let overviewPath = '';
         if (api.apiType) {
-            overviewPath =
-            isAPIProduct ? `/api-products/${api.id}/overview` : `/apis/${api.id}/overview`;
+            overviewPath = isAPIProduct ? `/api-products/${api.id}/overview` : `/apis/${api.id}/overview`;
         } else {
             overviewPath = `/apis/${api.apiUUID}/documents/${api.id}/details`;
         }
@@ -235,12 +241,7 @@ class APIThumb extends Component {
                 <CardContent className={classes.apiDetails}>
                     <div className={classes.textWrapper}>
                         <Link to={overviewPath}>
-                            <Typography
-                                gutterBottom
-                                variant='h4'
-                                className={classes.thumbHeader}
-                                title={api.name}
-                            >
+                            <Typography gutterBottom variant='h4' className={classes.thumbHeader} title={api.name}>
                                 {api.name}
                             </Typography>
                         </Link>
@@ -261,14 +262,10 @@ class APIThumb extends Component {
 
                                 <div className={classes.thumbLeft}>
                                     <Typography variant='caption' gutterBottom align='left'>
-                                        <FormattedMessage
-                                            defaultMessage='Version'
-                                            id='Apis.Listing.ApiThumb.version'
-                                        />
+                                        <FormattedMessage defaultMessage='Version' id='Apis.Listing.ApiThumb.version' />
                                     </Typography>
                                 </div>
                             </div>
-
                         )}
                         <div className={classes.row}>
                             <div className={classes.thumbRight}>
@@ -287,11 +284,16 @@ class APIThumb extends Component {
                 </CardContent>
                 <CardActions className={classes.apiActions}>
                     <Chip
-                        label={(api.apiType === API.CONSTS.APIProduct) ? api.state : api.lifeCycleStatus}
+                        label={api.apiType === API.CONSTS.APIProduct ? api.state : api.lifeCycleStatus}
                         color='default'
                     />
                     {(api.type === 'GRAPHQL' || api.transportType === 'GRAPHQL') && (
-                        <Chip label={api.transportType === undefined ? api.type : api.transportType} color='primary' />
+                        <Chip
+                            className={classes.thumbRightBy}
+                            label={api.transportType === undefined ?
+                                api.type : api.transportType}
+                            color='primary'
+                        />
                     )}
                     <DeleteApiButton onClick={this.handleApiDelete} api={api} />
                     {loading && <CircularProgress className={classes.deleteProgress} />}

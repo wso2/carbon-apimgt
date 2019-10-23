@@ -30,7 +30,7 @@ const APINotFound = (props) => {
                 <p>
                     <FormattedMessage
                         id='Base.Errors.APINotfound.no.api'
-                        defaultMessage="Can't find an API associate with the given API ID"
+                        defaultMessage="Cannot find an API associated with the given API ID"
                     />
                     <span style={{ color: 'green' }}>
                         {props.match.params.api_uuid}

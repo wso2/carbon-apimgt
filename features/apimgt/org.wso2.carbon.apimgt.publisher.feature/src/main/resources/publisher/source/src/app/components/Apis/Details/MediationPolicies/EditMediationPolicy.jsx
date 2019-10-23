@@ -190,7 +190,7 @@ function EditMediationPolicy(props) {
                 } else {
                     Alert.error(intl.formatMessage({
                         id: 'Apis.Details.MediationPolicies.Edit.AddMediationPolicy.error',
-                        defaultMessage: 'Error when adding mediation policy',
+                        defaultMessage: 'Error while adding mediation policy',
                     }));
                 }
             });
@@ -377,7 +377,7 @@ function EditMediationPolicy(props) {
                             >
                                 {({ getRootProps, getInputProps }) => (
                                     <div {...getRootProps({ style: dropzoneStyles })}>
-                                        <input {...getInputProps()} />
+                                        <input {...getInputProps()} accept='application/xml,text/xml' />
                                         <div className={classes.dropZoneWrapper}>
                                             <Icon className={classes.dropIcon}>cloud_upload</Icon>
                                             <Typography>

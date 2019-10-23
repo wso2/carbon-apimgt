@@ -101,19 +101,19 @@ function InFlow(props) {
                 {type === 'IN' && (
                     <FormattedMessage
                         id='Apis.Details.MediationPolicies.MediationPolicies.flow.in.content'
-                        defaultMessage='Mediation policy that is engaged in Request Flow'
+                        defaultMessage='Mediation policy engaged in the Request Flow'
                     />
                 )}
                 {type === 'OUT' && (
                     <FormattedMessage
                         id='Apis.Details.MediationPolicies.MediationPolicies.flow.out.content'
-                        defaultMessage='Mediation policy that is engaged in Out Flow'
+                        defaultMessage='Mediation policy engaged in the Out Flow'
                     />
                 )}
                 {type === 'FAULT' && (
                     <FormattedMessage
                         id='Apis.Details.MediationPolicies.MediationPolicies.flow.fault.content'
-                        defaultMessage='Mediation policy that is engaged in Fault Flow'
+                        defaultMessage='Mediation policy engaged in the Fault Flow'
                     />
                 )}
             </Typography>

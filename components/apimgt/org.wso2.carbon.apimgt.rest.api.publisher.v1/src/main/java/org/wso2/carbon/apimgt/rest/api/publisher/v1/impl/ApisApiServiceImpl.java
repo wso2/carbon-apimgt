@@ -30,6 +30,7 @@ import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
+import org.apache.axiom.om.OMElement;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -54,24 +55,7 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.Label;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.ResourcePath;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -92,6 +76,8 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -166,6 +152,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 public class ApisApiServiceImpl implements ApisApiService {
 
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
+    private static final String API_PRODUCT_TYPE = "APIPRODUCT";
 
     class APIResource {
         String verb;
@@ -349,6 +336,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (body.getAdditionalProperties() != null) {
             String errorMessage = RestApiPublisherUtils
                     .validateAdditionalProperties(body.getAdditionalProperties());
+            if (!errorMessage.isEmpty()) {
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        }
+        if (body.getVisibleRoles() != null) {
+            String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getVisibleRoles());
+
             if (!errorMessage.isEmpty()) {
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
@@ -628,6 +622,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
             }
+            if (body.getVisibleRoles() != null) {
+                String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getVisibleRoles());
+
+                if (!errorMessage.isEmpty()) {
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+            }
             if (body.getAdditionalProperties() != null) {
                 String errorMessage = RestApiPublisherUtils.validateAdditionalProperties(body.getAdditionalProperties());
                 if (!errorMessage.isEmpty()) {
@@ -887,7 +888,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                     .deleteClientCertificate(RestApiUtil.getLoggedInUsername(), clientCertificateDTO.getApiIdentifier(),
                             alias);
             if (responseCode == ResponseCode.SUCCESS.getResponseCode()) {
-                apiProvider.updateAPI(api);
+                //Handle api product case.
+                if (API_PRODUCT_TYPE.equals(api.getType())) {
+                    APIIdentifier apiIdentifier = api.getId();
+                    APIProductIdentifier apiProductIdentifier =
+                            new APIProductIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(),
+                                    apiIdentifier.getVersion());
+                    APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
+                    apiProvider.updateAPIProduct(apiProduct);
+                } else {
+                    apiProvider.updateAPI(api);
+                }
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("The client certificate which belongs to tenant : %s represented by the "
                             + "alias : %s is deleted successfully", tenantDomain, alias));
@@ -968,7 +979,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                             tenantId);
 
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode) {
-                apiProvider.updateAPI(api);
+                //Handle api product case.
+                if (API_PRODUCT_TYPE.equals(api.getType())) {
+                    APIIdentifier apiIdentifier = api.getId();
+                    APIProductIdentifier apiProductIdentifier =
+                            new APIProductIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(),
+                                    apiIdentifier.getVersion());
+                    APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
+                    apiProvider.updateAPIProduct(apiProduct);
+                } else {
+                    apiProvider.updateAPI(api);
+                }
                 ClientCertMetadataDTO clientCertMetadataDTO = new ClientCertMetadataDTO();
                 clientCertMetadataDTO.setAlias(alias);
                 clientCertMetadataDTO.setApiId(api.getUUID());
@@ -1072,7 +1093,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                 log.debug(String.format("Add certificate operation response code : %d", responseCode));
             }
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode) {
-                apiProvider.updateAPI(api);
+                //Handle api product case.
+                if (API_PRODUCT_TYPE.equals(api.getType())) {
+                    APIIdentifier apiIdentifier = api.getId();
+                    APIProductIdentifier apiProductIdentifier =
+                            new APIProductIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(),
+                                    apiIdentifier.getVersion());
+                    APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
+                    apiProvider.updateAPIProduct(apiProduct);
+                } else {
+                    apiProvider.updateAPI(api);
+                }
                 ClientCertMetadataDTO certificateDTO = new ClientCertMetadataDTO();
                 certificateDTO.setAlias(alias);
                 certificateDTO.setApiId(apiId);
@@ -1990,9 +2021,20 @@ public class ApisApiServiceImpl implements ApisApiService {
                     fileContentType = fileDetail.getContentType().toString();
                 }
 
-                ResourceFile contentFile = new ResourceFile(fileInputStream, fileContentType);
-                //Adding api specific mediation policy
-                mediationPolicyUrl = apiProvider.addResourceFile(apiIdentifier, mediationResourcePath, contentFile);
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                IOUtils.copy(fileInputStream, outputStream);
+                byte[] sequenceBytes = outputStream.toByteArray();
+                InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
+                OMElement seqElement = APIUtil.buildOMElement(new ByteArrayInputStream(sequenceBytes));
+                String localName = seqElement.getLocalName();
+
+                if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
+                    ResourceFile contentFile = new ResourceFile(inSequenceStream, fileContentType);
+                    //Adding api specific mediation policy
+                    mediationPolicyUrl = apiProvider.addResourceFile(apiIdentifier, mediationResourcePath, contentFile);
+                } else {
+                    throw new APIManagementException("Sequence is malformed");
+                }
             } else if (inlineContent != null) {
                 //todo
             }
@@ -2026,6 +2068,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             String errorMessage = "Error while getting location header for created " +
                     "mediation policy " + fileName;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (Exception e) {
+            RestApiUtil.handleInternalServerError("An Error has occurred while adding mediation policy", e, log);
         } finally {
             IOUtils.closeQuietly(fileInputStream);
         }
@@ -3347,33 +3391,37 @@ public class ApisApiServiceImpl implements ApisApiService {
         SchemaParser schemaParser = new SchemaParser();
         GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
         GraphQLValidationResponseDTO validationResponse = new GraphQLValidationResponseDTO();
+        String filename = fileDetail.getContentDisposition().getFilename();
 
         try {
-            schema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
+            if (filename.endsWith(".graphql") || filename.endsWith(".txt") || filename.endsWith(".sdl")) {
+                schema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
+                if (schema.isEmpty()) {
+                    errorMessage = "GraphQL Schema cannot be empty or null to validate it";
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+                typeRegistry = schemaParser.parse(schema);
+                GraphQLSchema graphQLSchema = UnExecutableSchemaGenerator.makeUnExecutableSchema(typeRegistry);
+                SchemaValidator schemaValidation = new SchemaValidator();
+                validationErrors = schemaValidation.validateSchema(graphQLSchema);
 
-            if (schema.isEmpty()) {
-                errorMessage = "GraphQL Schema cannot be empty or null to validate it";
-                RestApiUtil.handleBadRequest(errorMessage, log);
+                if (validationErrors.toArray().length > 0) {
+                    errorMessage = "InValid Schema";
+                } else {
+                    isValid = true;
+                    validationResponse.setIsValid(isValid);
+                    GraphQLValidationResponseGraphQLInfoDTO graphQLInfo = new GraphQLValidationResponseGraphQLInfoDTO();
+                    List<URITemplate> operationList = graphql.extractGraphQLOperationList(schema, null);
+                    List<APIOperationsDTO> operationArray = APIMappingUtil.fromURITemplateListToOprationList(operationList);
+                    graphQLInfo.setOperations(operationArray);
+                    GraphQLSchemaDTO schemaObj = new GraphQLSchemaDTO();
+                    schemaObj.setSchemaDefinition(schema);
+                    graphQLInfo.setGraphQLSchema(schemaObj);
+                    validationResponse.setGraphQLInfo(graphQLInfo);
+                }
             }
-
-            typeRegistry = schemaParser.parse(schema);
-            GraphQLSchema graphQLSchema = UnExecutableSchemaGenerator.makeUnExecutableSchema(typeRegistry);
-            SchemaValidator schemaValidation = new SchemaValidator();
-            validationErrors = schemaValidation.validateSchema(graphQLSchema);
-
-            if (validationErrors.toArray().length > 0) {
-                errorMessage = "InValid Schema";
-            } else {
-                isValid = true;
-                validationResponse.setIsValid(isValid);
-                GraphQLValidationResponseGraphQLInfoDTO graphQLInfo = new GraphQLValidationResponseGraphQLInfoDTO();
-                List<URITemplate> operationList = graphql.extractGraphQLOperationList(schema,null);
-                List<APIOperationsDTO> operationArray = APIMappingUtil.fromURITemplateListToOprationList(operationList);
-                graphQLInfo.setOperations(operationArray);
-                GraphQLSchemaDTO schemaObj = new GraphQLSchemaDTO();
-                schemaObj.setSchemaDefinition(schema);
-                graphQLInfo.setGraphQLSchema(schemaObj);
-                validationResponse.setGraphQLInfo(graphQLInfo);
+            else {
+                RestApiUtil.handleBadRequest("Unsupported extension type of file: " + filename, log);
             }
         } catch (SchemaProblem | IOException e) {
             errorMessage = e.getMessage();

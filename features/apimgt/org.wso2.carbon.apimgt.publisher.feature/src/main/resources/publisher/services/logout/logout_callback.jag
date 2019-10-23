@@ -89,6 +89,6 @@
     response.addCookie(cookie);
 
     log.debug("redirecting to logout");
-    response.sendRedirect(site.context + "/logout");
+    response.sendRedirect("/publisher/logout");
 
 %>

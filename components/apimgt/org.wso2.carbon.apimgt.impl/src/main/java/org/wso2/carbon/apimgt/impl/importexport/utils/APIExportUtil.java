@@ -39,6 +39,8 @@ import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
@@ -544,6 +546,18 @@ public class APIExportUtil {
                     String schemaContent = apiProvider.getGraphqlSchema(apiToReturn.getId());
                     CommonUtil.writeFile(archivePath + APIImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION,
                             schemaContent);
+                    //Set the id of the scopes in API object to 0, as scope creation fails with a non existing id
+                    Set<URITemplate> uriTemplates = apiToReturn.getUriTemplates();
+                    for (URITemplate uriTemplate : uriTemplates) {
+                        if (uriTemplate.getScope() != null) {
+                            uriTemplate.getScope().setId(0);
+                        }
+                    }
+                    if (apiToReturn.getScopes() != null) {
+                        for (Scope scope : apiToReturn.getScopes()) {
+                            scope.setId(0);
+                        }
+                    }
                 } else {
                     //Swagger.json contains complete details about scopes. Therefore scope details and uri templates
                     //are removed from api.json.
@@ -674,7 +688,7 @@ public class APIExportUtil {
         }
     }
 
-     /**
+    /**
      * Get endpoint url list from endpoint config.
      *
      * @param endpointConfig JSON converted endpoint config

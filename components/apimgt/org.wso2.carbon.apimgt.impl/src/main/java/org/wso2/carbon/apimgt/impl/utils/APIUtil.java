@@ -199,18 +199,6 @@ import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
-import javax.cache.Cache;
-import javax.cache.CacheConfiguration;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -262,6 +250,18 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.cache.Cache;
+import javax.cache.CacheConfiguration;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -434,8 +434,7 @@ public final class APIUtil {
             Set<Scope> scopes = ApiMgtDAO.getInstance().getAPIScopes(api.getId());
             api.setScopes(scopes);
 
-            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
-                    api.getUrl(), api.getSandboxUrl());
+            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
 
             HashMap<String, String> resourceScopesMap;
             resourceScopesMap = ApiMgtDAO.getInstance().getResourceToScopeMapping(api.getId());
@@ -447,14 +446,8 @@ public final class APIUtil {
                 Scope scope = findScopeByKey(scopes, resourceScopesMap.get(resourceScopeKey));
                 uriTemplate.setScope(scope);
                 uriTemplate.setScopes(scope);
-
-                Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
-                for (APIProductIdentifier usedByProduct : usedByProducts) {
-                    String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);
-                    Resource productResource = registry.get(apiProductPath);
-                    String artifactId = productResource.getUUID();
-                    usedByProduct.setUUID(artifactId);
-                }
+                uriTemplate.setResourceURI(api.getUrl());
+                uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
             }
             api.setUriTemplates(uriTemplates);
             api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
@@ -483,6 +476,23 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return api;
+    }
+
+    /**
+     * This method used to retrieve the api resource dependencies
+     * @param api api object
+     * @param registry registry
+     * @throws APIManagementException
+     */
+    public static void updateAPIProductDependencies(API api, Registry registry) throws APIManagementException {
+        for (URITemplate uriTemplate : api.getUriTemplates()) {
+            Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
+            for (APIProductIdentifier usedByProduct : usedByProducts) {
+                //TODO : removed registry call until find a proper fix
+                String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);
+                usedByProduct.setUUID(apiProductPath);
+            }
+        }
     }
 
     /**
@@ -607,8 +617,7 @@ public final class APIUtil {
             HashMap<String, String> resourceScopes;
             resourceScopes = ApiMgtDAO.getInstance().getResourceToScopeMapping(api.getId());
 
-            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
-                    api.getUrl(), api.getSandboxUrl());
+            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
 
             for (URITemplate uriTemplate : uriTemplates) {
                 String uTemplate = uriTemplate.getUriTemplate();
@@ -617,14 +626,8 @@ public final class APIUtil {
                 Scope scope = findScopeByKey(scopes, resourceScopes.get(resourceScopeKey));
                 uriTemplate.setScope(scope);
                 uriTemplate.setScopes(scope);
-
-                Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
-                for (APIProductIdentifier usedByProduct : usedByProducts) {
-                    String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);
-                    Resource productResource = registry.get(apiProductPath);
-                    String artifactId = productResource.getUUID();
-                    usedByProduct.setUUID(artifactId);
-                }
+                uriTemplate.setResourceURI(api.getUrl());
+                uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
             }
 
             if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
@@ -8018,7 +8021,7 @@ public final class APIUtil {
     }
 
     public static int getPortOffset() {
-        ServerConfiguration carbonConfig = ServerConfiguration.getInstance();
+        ServerConfiguration carbonConfig = CarbonUtils.getServerConfiguration();
         String portOffset = System.getProperty(APIConstants.PORT_OFFSET_SYSTEM_VAR,
                 carbonConfig.getFirstProperty(APIConstants.PORT_OFFSET_CONFIG));
         try {

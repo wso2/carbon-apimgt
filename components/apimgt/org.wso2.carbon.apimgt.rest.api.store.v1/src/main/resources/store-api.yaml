@@ -378,6 +378,7 @@ paths:
           required : true
           description: |
             Programming language of the SDK that is required.
+        - $ref: '#/parameters/requestedTenant'
       tags:
         - SDKs
       responses:
@@ -4661,6 +4662,10 @@ definitions:
         type: string
         description: Client secret for generating access token. This is given together with the client Id.
         example: ""
+      additionalProperties:
+        type: string
+        description: Additional properties needed.
+        example: ""
 
 #-----------------------------------------------------
 # The Application Key Mapping Request schema
@@ -5055,7 +5060,8 @@ definitions:
       mapExistingAuthApps:
         type: boolean
         default: false
-
+      apiGatewayEndpoint:
+        type: string
 #-----------------------------------------------------
 # The Application Attribute resource
 #-----------------------------------------------------

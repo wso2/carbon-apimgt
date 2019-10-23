@@ -153,6 +153,7 @@ public class ApplicationImportExportManager {
                     if (isTierAvailable(tier, api) && api.getStatus() != null &&
                             APIConstants.PUBLISHED.equals(api.getStatus())) {
                         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+                        apiTypeWrapper.setTier(tier.getName());
                         // add subscription if update flag is not specified
                         // it will throw an error if subscriber already exists
                         if (!update) {
@@ -226,7 +227,7 @@ public class ApplicationImportExportManager {
         String jsonParams = jsonParamObj.toString();
         String tokenScopes = apiKey.getTokenScope();
         apiConsumer.requestApprovalForApplicationRegistration(
-                application.getSubscriber().getName(), application.getName(), apiKey.getType(), apiKey.getCallbackUrl(),
+                username, application.getName(), apiKey.getType(), apiKey.getCallbackUrl(),
                 accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()), tokenScopes, application.getGroupId(),
                 jsonParams);
     }
