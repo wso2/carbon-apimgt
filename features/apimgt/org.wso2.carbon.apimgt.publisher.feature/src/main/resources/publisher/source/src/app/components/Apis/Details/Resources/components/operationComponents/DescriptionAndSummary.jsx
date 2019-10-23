@@ -36,7 +36,7 @@ export default function DescriptionAndSummary(props) {
     } = props;
     return (
         <Fragment>
-            <Grid item md={12}>
+            <Grid item xs={12} md={12}>
                 <Typography variant='subtitle1'>
                     Summary {'&'} Description
                     <Divider variant='middle' />
