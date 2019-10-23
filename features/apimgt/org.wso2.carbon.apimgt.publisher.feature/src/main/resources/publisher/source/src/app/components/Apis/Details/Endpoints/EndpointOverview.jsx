@@ -24,7 +24,7 @@ import {
     Radio,
     FormControlLabel,
     Collapse,
-    RadioGroup, Checkbox, Dialog, DialogTitle, DialogContent, IconButton,
+    RadioGroup, Checkbox, Dialog, DialogTitle, DialogContent, IconButton, Button, DialogActions,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
@@ -140,6 +140,7 @@ function EndpointOverview(props) {
         config: undefined,
     });
     const [endpointCategory, setEndpointCategory] = useState({ sandbox: false, prod: false });
+    const [typeChangeConfirmation, setTypeChangeConfirmation] = useState({ openDialog: false });
 
     /**
      * Method to get the type of the endpoint. (HTTP/REST or HTTP/SOAP)
@@ -342,11 +343,13 @@ function EndpointOverview(props) {
     };
 
     /**
-     * Handles the endpoint type select event.
-     * @param {any} event The select event.
+     * Handles the endpoint type change functionality.
+     *
+     * @param {string} value The selected endpoint type.
      * */
-    const handleEndpointTypeSelect = (event) => {
-        const selectedKey = event.target.value;
+    const changeEndpointType = (value) => {
+        setTypeChangeConfirmation({ openDialog: false });
+        const selectedKey = typeChangeConfirmation.type || value;
         if (selectedKey === 'INLINE') {
             const tmpConfig = createEndpointConfig('prototyped');
             endpointsDispatcher({
@@ -374,6 +377,20 @@ function EndpointOverview(props) {
                     endpointConfig: { ...generatedEndpointConfig },
                 },
             });
+        }
+    };
+
+    /**
+     * Handles the endpoint type select event. If endpoint config has existing values, show confirmation dialog.
+     * @param {any} event The select event.
+     * */
+    const handleEndpointTypeSelect = (event) => {
+        // Check whether the endpoint Config has values.
+        if (epConfig.production_endpoints || epConfig.sandbox_endpoints) {
+            // Show confirmation dialog
+            setTypeChangeConfirmation({ type: event.target.value, openDialog: true });
+        } else {
+            changeEndpointType(event.target.value);
         }
     };
 
@@ -749,6 +766,44 @@ function EndpointOverview(props) {
                         onCancel={closeAdvanceConfig}
                     />
                 </DialogContent>
+            </Dialog>
+            <Dialog open={typeChangeConfirmation.openDialog}>
+                <DialogTitle>
+                    <Typography className={classes.configDialogHeader}>
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.EndpointOverview.endpoint.type.change.confirmation'
+                            defaultMessage='Change Endpoint Type'
+                        />
+                    </Typography>
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.EndpointOverview.endpoint.type.change.confirmation'
+                            defaultMessage='Your current endpoint configuration will be lost. Continue?'
+                        />
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() => { setTypeChangeConfirmation({ openDialog: false }); }}
+                        color='secondary'
+                    >
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.EndpointOverview.change.type.cancel'
+                            defaultMessage='NO'
+                        />
+                    </Button>
+                    <Button
+                        onClick={() => { changeEndpointType(typeChangeConfirmation.type); }}
+                        color='primary'
+                    >
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints..EndpointOverview.change.type.ok'
+                            defaultMessage='Yes'
+                        />
+                    </Button>
+                </DialogActions>
             </Dialog>
         </div>
     );
