@@ -1208,10 +1208,13 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getOpenAPIDefinition(Identifier apiId) throws APIManagementException {
         String apiTenantDomain = getTenantDomain(apiId);
         String swaggerDoc = null;
+        boolean tenantFlowStarted = false;
         try {
             Registry registryType;
             //Tenant store anonymous mode if current tenant and the required tenant is not matching
             if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
+                startTenantFlow(apiTenantDomain);
+                tenantFlowStarted = true;
                 int tenantId = getTenantManager().getTenantId(
                         apiTenantDomain);
                 registryType = getRegistryService().getGovernanceUserRegistry(
@@ -1228,6 +1231,10 @@ public abstract class AbstractAPIManager implements APIManager {
             String msg = "Failed to get swagger documentation of API : " + apiId;
             log.error(msg, e);
             throw new APIManagementException(msg, e);
+        } finally {
+            if (tenantFlowStarted) {
+                endTenantFlow();
+            }
         }
         return swaggerDoc;
     }
