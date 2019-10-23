@@ -656,6 +656,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 SwaggerData swaggerData = new SwaggerData(apiToUpdate);
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
                 apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition);
+                apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
             }
 
             apiProvider.manageAPI(apiToUpdate);
