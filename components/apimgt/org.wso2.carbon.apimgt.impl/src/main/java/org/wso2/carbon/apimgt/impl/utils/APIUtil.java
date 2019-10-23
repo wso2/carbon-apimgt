@@ -478,7 +478,12 @@ public final class APIUtil {
         return api;
     }
 
-
+    /**
+     * This method used to retrieve the api resource dependencies
+     * @param api api object
+     * @param registry registry
+     * @throws APIManagementException
+     */
     public static void updateAPIProductDependencies(API api, Registry registry) throws APIManagementException {
         for (URITemplate uriTemplate : api.getUriTemplates()) {
             Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
