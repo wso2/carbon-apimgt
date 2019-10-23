@@ -6564,8 +6564,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         } else {
                             if (APIConstants.PUBLISHED.equals(status)) {
                                 API api = APIUtil.getAPI(artifact, registry);
-                                APIUtil.updateAPIProductDependencies(api, registry);
                                 if (api != null) {
+                                    APIUtil.updateAPIProductDependencies(api, registry);
                                     apiList.add(api);
                                     apiNames.append(api.getId().getApiName());
                                 }

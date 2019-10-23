@@ -434,6 +434,7 @@ public abstract class AbstractAPIManager implements APIManager {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
 
             API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
+            APIUtil.updateAPIProductDependencies(api, registry);
 
             //check for API visibility
             if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) { //global api
@@ -467,7 +468,9 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     protected API getApiForPublishing(Registry registry, GovernanceArtifact apiArtifact) throws APIManagementException {
-        return APIUtil.getAPIForPublishing(apiArtifact, registry);
+        API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
+        APIUtil.updateAPIProductDependencies(api, registry);
+        return api;
     }
 
     protected void loadTenantRegistry(int apiTenantId) throws RegistryException {

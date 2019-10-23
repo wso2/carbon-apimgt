@@ -635,14 +635,6 @@ public final class APIUtil {
                 uriTemplate.setScopes(scope);
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
-
-                Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
-                for (APIProductIdentifier usedByProduct : usedByProducts) {
-                    String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);
-                    Resource productResource = registry.get(apiProductPath);
-                    String artifactId = productResource.getUUID();
-                    usedByProduct.setUUID(artifactId);
-                }
             }
 
             if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
