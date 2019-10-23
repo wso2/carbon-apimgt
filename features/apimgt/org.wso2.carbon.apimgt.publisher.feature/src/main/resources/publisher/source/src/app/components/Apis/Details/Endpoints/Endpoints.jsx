@@ -206,6 +206,12 @@ function Endpoints(props) {
                     }),
                 };
             }
+            if (endpointConfig.amznAccessKey !== '' && endpointConfig.amznSecretKey.charAt(0) === '~') {
+                return {
+                    isValid: false,
+                    message: '',
+                };
+            }
         } else if (endpointType === 'load_balance') {
             /**
              * Checklist:

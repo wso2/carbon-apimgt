@@ -239,15 +239,18 @@ function Operation(props) {
                                 verb={verb}
                             />
                         )}
-                        {api.endpointConfig.endpoint_type === 'awslambda' ?
-                            <AmznResourceName
-                                api={api}
-                                operation={operation}
-                                operationsDispatcher={operationsDispatcher}
-                                target={target}
-                                verb={verb}
-                            /> :
-                            <div />
+                        {
+                            api.endpointConfig &&
+                            api.endpointConfig.endpoint_type &&
+                            api.endpointConfig.endpoint_type === 'awslambda' ?
+                                <AmznResourceName
+                                    api={api}
+                                    operation={operation}
+                                    operationsDispatcher={operationsDispatcher}
+                                    target={target}
+                                    verb={verb}
+                                /> :
+                                <div />
                         }
                     </Grid>
                 </ExpansionPanelDetails>

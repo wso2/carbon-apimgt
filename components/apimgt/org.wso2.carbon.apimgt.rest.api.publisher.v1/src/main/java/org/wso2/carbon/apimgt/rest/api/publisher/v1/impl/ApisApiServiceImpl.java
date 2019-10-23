@@ -608,10 +608,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 LinkedHashMap endpointConfig = (LinkedHashMap) body.getEndpointConfig();
                 if (endpointConfig.containsKey("amznSecretKey")) {
                     String secretKey = (String) endpointConfig.get("amznSecretKey");
-                    if (!secretKey.equals("")) {
+                    if (secretKey.charAt(0) != '~') {
                         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
                         String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
                         endpointConfig.put("amznSecretKey", encryptedSecretKey);
+                        body.setEndpointConfig(endpointConfig);
+                    } else {
+                        endpointConfig.put("amznSecretKey", secretKey.substring(1));
                         body.setEndpointConfig(endpointConfig);
                     }
                 }

@@ -202,7 +202,7 @@ function EndpointOverview(props) {
                 { key: 'default', value: 'Dynamic Endpoints' },
                 { key: 'prototyped', value: 'Prototyped' },
                 { key: 'INLINE', value: 'Mocked' },
-                { key: 'awslambda', value: 'AWS Lambda'},
+                { key: 'awslambda', value: 'AWS Lambda' },
             ];
         }
         return supportedEndpointTypes;
@@ -586,20 +586,12 @@ function EndpointOverview(props) {
                             <InlineEndpoints paths={swaggerDef.paths} updatePaths={updatePaths} /> :
                             <Paper className={classes.endpointContainer}>
                                 {endpointType.key === 'awslambda' ?
-                                    <div>
-                                        <Typography>
-                                            <FormattedMessage
-                                                id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
-                                                '.endpoint.credentials'}
-                                                defaultMessage='AWS Credentials'
-                                            />
-                                        </Typography>
-                                        <Credentials
-                                            epConfig={epConfig}
-                                            setEpConfig={setEpConfig}
-                                            endpointsDispatcher={endpointsDispatcher}
-                                        />
-                                    </div>
+                                    <Credentials
+                                        apiId={api.id}
+                                        epConfig={epConfig}
+                                        setEpConfig={setEpConfig}
+                                        endpointsDispatcher={endpointsDispatcher}
+                                    />
                                     :
                                     <div>
                                         {endpointType.key === 'default' ?
