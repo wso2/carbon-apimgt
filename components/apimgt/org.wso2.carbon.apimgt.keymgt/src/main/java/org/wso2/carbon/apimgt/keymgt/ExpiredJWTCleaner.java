@@ -37,11 +37,15 @@ public class ExpiredJWTCleaner implements Runnable {
     public void run() {
 
         long currentTime = System.currentTimeMillis();
-        synchronized (this) {
+        if (currentTime - lastUpdatedTime < DURATION) { // double checked locking to avoid unnecessary locking
+            return;
+        }
+        synchronized (ExpiredJWTCleaner.class) {
             // Only run the cleanup if the last cleanup was was performed more than 1 hour ago
-            if (currentTime - lastUpdatedTime > DURATION) {
-                cleanExpiredTokens();
+            if (currentTime - lastUpdatedTime < DURATION) {
+                return;
             }
+            cleanExpiredTokens();
         }
     }
 
