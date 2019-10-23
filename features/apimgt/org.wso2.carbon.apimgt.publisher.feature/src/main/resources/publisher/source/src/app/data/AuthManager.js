@@ -133,12 +133,19 @@ class AuthManager {
     }
 
     /**
-     *
-     * @param {String} environmentName - Name of the environment the user to be removed
+     * Clear all user records from the browser (opposite of `getUser`).
+     * partial token, Local storage user object etc
+     * consequent `getUser` user will fallback to `getUserFromToken`.
+     * @memberof User
+     * @returns {void}
      */
-    static dismissUser(environmentName) {
-        localStorage.removeItem(`${User.CONST.LOCAL_STORAGE_USER}_${environmentName}`);
-        User.destroyInMemoryUser(environmentName);
+    static discardUser() {
+        // Since we don't have multi environments currentEnv will always get `default`
+        const currentEnv = Utils.getCurrentEnvironment().label;
+        localStorage.removeItem(User.CONST.USER_EXPIRY_TIME);
+        localStorage.removeItem(`${User.CONST.LOCAL_STORAGE_USER}_${currentEnv}`);
+        Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1, currentEnv);
+        Utils.getCookie(User.CONST.WSO2_AM_REFRESH_TOKEN_1, currentEnv);
     }
 
     /**

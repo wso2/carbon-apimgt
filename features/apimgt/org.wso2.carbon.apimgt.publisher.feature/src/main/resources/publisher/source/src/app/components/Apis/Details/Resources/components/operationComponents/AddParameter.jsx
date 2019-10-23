@@ -113,8 +113,8 @@ function AddParameter(props) {
         clearInputs();
     }
     return (
-        <Grid container direction='row' spacing={0} justify='center' alignItems='center'>
-            <Grid item md={2}>
+        <Grid container direction='row' spacing={1} justify='center' alignItems='center'>
+            <Grid item xs={4} md={3}>
                 <FormControl margin='dense' variant='outlined' className={classes.formControl}>
                     <InputLabel ref={inputLabel} htmlFor='param-in'>
                         Parameter Type
@@ -150,7 +150,7 @@ function AddParameter(props) {
                     <FormHelperText id='my-helper-text'>Select the parameter type</FormHelperText>
                 </FormControl>
             </Grid>
-            <Grid item md={4}>
+            <Grid item xs={4} md={4}>
                 <TextField
                     id='parameter-name'
                     label={newParameter.in === 'body' ? 'Content Type' : 'Name'}
@@ -170,7 +170,7 @@ function AddParameter(props) {
                     }}
                 />
             </Grid>
-            <Grid item md={6}>
+            <Grid item xs={4} md={5}>
                 <Tooltip
                     title={
                         <FormattedMessage
