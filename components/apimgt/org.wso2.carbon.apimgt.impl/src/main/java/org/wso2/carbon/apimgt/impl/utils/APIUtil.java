@@ -9329,7 +9329,7 @@ public final class APIUtil {
             subscribedApiDTO.setName(api.getApiName());
             subscribedApiDTO.setContext(api.getContext());
             subscribedApiDTO.setVersion(api.getVersion());
-            subscribedApiDTO.setPublisher(api.getProviderId());
+            subscribedApiDTO.setPublisher(APIUtil.replaceEmailDomainBack(api.getProviderId()));
             subscribedApiDTO.setSubscriptionTier(api.getSubscriptionTier());
             subscribedApiDTO.setSubscriberTenantDomain(tenantDomain);
             subscribedApiDTOList.add(subscribedApiDTO);
