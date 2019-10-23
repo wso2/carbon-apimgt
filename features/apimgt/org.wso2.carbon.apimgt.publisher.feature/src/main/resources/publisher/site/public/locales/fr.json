@@ -142,6 +142,7 @@
   "Apis.Details.Configuration.components.CORSConfigurations.header.helper": "",
   "Apis.Details.Configuration.components.CORSConfigurations.method.helper": "",
   "Apis.Details.Configuration.components.CORSConfigurations.origin.helper": "",
+  "Apis.Details.Configuration.components.Endpoints.dynamic": "",
   "Apis.Details.Configuration.components.Endpoints.endpoints": "",
   "Apis.Details.Configuration.components.Endpoints.production": "",
   "Apis.Details.Configuration.components.Endpoints.production.not.set": "",
