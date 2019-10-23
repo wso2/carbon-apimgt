@@ -18,6 +18,7 @@
 
 import qs from 'qs';
 import CONSTS from 'AppData/Constants';
+import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import Configurations from 'Config';
 import Utils from './Utils';
 import User from './User';
@@ -162,7 +163,11 @@ class AuthManager {
     }
 
     static isNotPublisher() {
-        return !AuthManager.getUser().scopes.includes('apim:api_publish');
+        if (AuthManager.getUser() === null) {
+            return doRedirectToLogin();
+        } else {
+            return !AuthManager.getUser().scopes.includes('apim:api_publish');
+        }
     }
 
     static isRestricted(scopesAllowedToEdit, api) {
