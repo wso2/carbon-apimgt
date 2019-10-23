@@ -396,10 +396,9 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
             if (StringUtils.isEmpty(wwwHeader)) {
                 String errorDesc = "Digest authentication is not supported by the backend";
                 log.error(HttpHeaders.WWW_AUTHENTICATE + " header is not found. " + errorDesc);
-                Utils.setFaultPayload(messageContext, getFaultPayload("Unauthenticated at backend level",
-                        errorDesc));
+                Utils.setFaultPayload(messageContext, getFaultPayload("Unauthenticated at backend level", errorDesc));
                 Utils.sendFault(messageContext, HttpStatus.SC_UNAUTHORIZED);
-               return false;
+                return false;
             }
 
             //This step can throw a NullPointerException if a WWW-Authenticate header is not received.
@@ -516,6 +515,12 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
         // ignore
     }
 
+    /**
+     * Generates fault payload
+     * @param errorMessage
+     * @param errorDesc
+     * @return
+     */
     protected OMElement getFaultPayload(String errorMessage, String errorDesc) {
         OMFactory fac = OMAbstractFactory.getOMFactory();
         OMNamespace ns = fac
