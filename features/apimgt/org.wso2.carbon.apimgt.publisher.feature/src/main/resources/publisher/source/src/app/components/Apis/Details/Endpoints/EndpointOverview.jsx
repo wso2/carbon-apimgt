@@ -618,8 +618,8 @@ function EndpointOverview(props) {
                                                         <FormattedMessage
                                                             id={'Apis.Details.Endpoints.EndpointOverview.upload' +
                                                             '.mediation.message'}
-                                                            defaultMessage={'Please upload a mediation sequence file to ' +
-                                                            'Message Mediation Policies, which sets the endpoints.'}
+                                                            defaultMessage={'Please upload a mediation sequence file ' +
+                                                            'to Message Mediation Policies, which sets the endpoints.'}
                                                         />
                                                         <IconButton
                                                             onClick={saveAndRedirect}
@@ -637,8 +637,8 @@ function EndpointOverview(props) {
                                                 {endpointType.key === 'prototyped' ?
                                                     <Typography>
                                                         <FormattedMessage
-                                                            id={'Apis.Details.Endpoints.EndpointOverview.prototype.endpoint' +
-                                                            '.label'}
+                                                            id={'Apis.Details.Endpoints.EndpointOverview.prototype' +
+                                                            '.endpoint.label'}
                                                             defaultMessage='Prototype Endpoint'
                                                         />
                                                     </Typography> :
@@ -667,12 +667,12 @@ function EndpointOverview(props) {
                                                         autoFocus
                                                         name={endpointType.key === 'prototyped' ?
                                                             <FormattedMessage
-                                                                id={'Apis.Details.Endpoints.EndpointOverview.prototype' +
-                                                                '.endpoint.header'}
+                                                                id={'Apis.Details.Endpoints.EndpointOverview' +
+                                                                '.prototype.endpoint.header'}
                                                                 defaultMessage='Prototype Endpoint'
                                                             /> : <FormattedMessage
-                                                                id={'Apis.Details.Endpoints.EndpointOverview.production' +
-                                                                '.endpoint.header'}
+                                                                id={'Apis.Details.Endpoints.EndpointOverview' +
+                                                                '.production.endpoint.header'}
                                                                 defaultMessage='Production Endpoint'
                                                             />}
                                                         className={classes.defaultEndpointWrapper}
@@ -702,12 +702,17 @@ function EndpointOverview(props) {
                                                     }
                                                     label={
                                                         <FormattedMessage
-                                                            id='Apis.Details.Endpoints.EndpointOverview.sandbox.endpoint'
+                                                            id={'Apis.Details.Endpoints.EndpointOverview.sandbox' +
+                                                            '.endpoint'}
                                                             defaultMessage='Sandbox Endpoint'
                                                         />
                                                     }
                                                 />
-                                                <Collapse in={endpointCategory.sandbox && endpointType.key !== 'default'}>
+                                                <Collapse in={
+                                                    endpointCategory.sandbox &&
+                                                    endpointType.key !== 'default'
+                                                }
+                                                >
                                                     <GenericEndpoint
                                                         autoFocus
                                                         name='Sandbox Endpoint'
