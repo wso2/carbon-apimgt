@@ -69,12 +69,13 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
         // check the existence in the database
         String groupId = RestApiUtil.getLoggedInUserGroupId();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String syncKey = username + LOCK_POSTFIX;
         try {
             //takes a consumer object using the user set in thread local carbon context
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             Subscriber subscriber = apiConsumer.getSubscriber(username);
             if (subscriber == null) {
-                synchronized (username + LOCK_POSTFIX) {
+                synchronized (syncKey.intern()) {
                     subscriber = apiConsumer.getSubscriber(username);
                     if (subscriber == null) {
                         try {
