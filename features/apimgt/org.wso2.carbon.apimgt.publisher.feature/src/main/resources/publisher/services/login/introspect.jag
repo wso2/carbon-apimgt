@@ -21,9 +21,16 @@
 
     var log = new Log("Jaggery service for token introspection");
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    
+    var serverUrl = utils.getServerURL();
+    var serverUrlWithContext = serverUrl + app.context;
+    if (app.reverseProxy.enabled === true) {
+        serverUrl = app.reverseProxy.origin;
+        serverUrlWithContext = serverUrl + app.reverseProxy.context;
+    }
 
-    var userInfoEndpoint = MGT_TRANSPORT + HOST + ":" + getServerPort() + "/oauth2/userinfo";
-    var introspectEndpoint = MGT_TRANSPORT + HOST + ":" + getServerPort() + "/oauth2/introspect";
+    var userInfoEndpoint = serverUrl + "/oauth2/userinfo";
+    var introspectEndpoint = serverUrl + "/oauth2/introspect";
     var tokenP1 = request.getCookie("WSO2_AM_TOKEN_1_Default")? request.getCookie("WSO2_AM_TOKEN_1_Default").value : null;
     var tokenP2 = request.getCookie("AM_ACC_TOKEN_DEFAULT_P2")? request.getCookie("AM_ACC_TOKEN_DEFAULT_P2").value : null;
     var token = tokenP1 + tokenP2;

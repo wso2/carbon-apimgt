@@ -22,16 +22,17 @@
     var app = require("/site/public/theme/defaultTheme.js").Configurations.app;
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-    var serverUrl = '';
+    var serverUrl = utils.getServerURL();
+    var serverUrlWithContext = serverUrl + app.context;
     if (app.reverseProxy.enabled === true) {
         serverUrl = app.reverseProxy.origin;
-    } else {
-        serverUrl = utils.getServerURL();
+        serverUrlWithContext = serverUrl + app.reverseProxy.context;
     }
+
     var tokenRequestData = {
         "grant_type": "authorization_code",
         "code": request.getParameter("code", "UTF-8"),
-        "redirect_uri": serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX
+        "redirect_uri": serverUrlWithContext + LOGIN_CALLBACK_URL_SUFFIX
     };
 
     var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
@@ -44,7 +45,7 @@
     var String = Packages.java.lang.String;
     var Integer = Packages.java.lang.Integer;
     var base64encoded = Base64.encode(new String(clientId + ":" + clientSecret).getBytes());
-    var tokenEndpoint = utils.getServerURL() + TOKEN_URL_SUFFIX;
+    var tokenEndpoint = serverUrl + TOKEN_URL_SUFFIX;
     var result = post(tokenEndpoint, tokenRequestData, {"Authorization": "Basic " + base64encoded});
 
     response.contentType = "application/json";

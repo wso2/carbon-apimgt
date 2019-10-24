@@ -2,6 +2,7 @@ const APP_CONTEXT = '/publisher';
 const REVERSE_PROXY = {
     enabled: false,
     origin: 'https://localhost:9443',
+    context: APP_CONTEXT,
 };
 const STORE_APP_CONTEXT = '/devportal';
 const Configurations = {

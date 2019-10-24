@@ -22,22 +22,24 @@
     include("/services/constants.jag");
 
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    
     var serverPort = utils.getManagementTransportPort(MGT_TRANSPORT.split(":")[0]);
-    var serverUrl = utils.getServerURL();
-    if (app.reverseProxy.enabled === true) {
-        serverUrl = app.reverseProxy.origin;
-    } else {
-        serverUrl = utils.getServerURL();
-    }
     application.put("serverPort", serverPort);
 
-    var settingsAPIUrl = utils.getServerURL() + SETTINGS_REST_API_URL_SUFFIX;
+    var serverUrl = utils.getServerURL();
+    var serverUrlWithContext = serverUrl + app.context;
+    if (app.reverseProxy.enabled === true) {
+        serverUrl = app.reverseProxy.origin;
+        serverUrlWithContext = serverUrl + app.reverseProxy.context;
+    }
+
+    var settingsAPIUrl = serverUrl + SETTINGS_REST_API_URL_SUFFIX;
     var settingsResponse = get(settingsAPIUrl, {}, "json");
 
-    var dcrUrl = utils.getServerURL() + DCR_URL_SUFFIX;
-    var authorizeEndpoint = utils.getServerURL() + AUTHORIZE_ENDPOINT_SUFFIX;
-    var loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
-    var logoutCallbackUrl = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
+    var dcrUrl = serverUrl + DCR_URL_SUFFIX;
+    var authorizeEndpoint = serverUrl + AUTHORIZE_ENDPOINT_SUFFIX;
+    var loginCallbackUrl = serverUrlWithContext + LOGIN_CALLBACK_URL_SUFFIX;
+    var logoutCallbackUrl = serverUrlWithContext + LOGOUT_CALLBACK_URL_SUFFIX;
     var callbackUrl = "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";
     var scopes = settingsResponse.data.scopes.join(" ");
     var referer = request.getHeader("Referer");

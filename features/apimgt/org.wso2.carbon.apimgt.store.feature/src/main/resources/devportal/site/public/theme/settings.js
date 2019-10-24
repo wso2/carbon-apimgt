@@ -4,6 +4,7 @@ const Settings = {
         reverseProxy: {
             enabled: false,
             origin: 'https://localhost:9443',
+            context: '/devportal',
         },
     },
     grantTypes: {
