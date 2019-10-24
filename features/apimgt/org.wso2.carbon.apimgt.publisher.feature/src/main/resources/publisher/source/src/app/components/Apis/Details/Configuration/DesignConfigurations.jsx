@@ -168,7 +168,7 @@ export default function DesignConfigurations() {
                 return nextState;
             case 'accessControl':
                 nextState[action] = value;
-                if(value === 'NONE') {
+                if (value === 'NONE') {
                     nextState.accessControlRoles = [];
                 }
                 return nextState;
