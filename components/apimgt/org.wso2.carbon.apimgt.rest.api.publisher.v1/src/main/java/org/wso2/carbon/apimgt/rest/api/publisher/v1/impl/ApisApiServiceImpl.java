@@ -568,6 +568,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIIdentifier apiIdentifier = originalAPI.getId();
             boolean isWSAPI = originalAPI.getType() != null
                             && APIConstants.APITransportType.WS.toString().equals(originalAPI.getType());
+            boolean isGraphql = originalAPI.getType() != null
+                    && APIConstants.APITransportType.GRAPHQL.toString().equals(originalAPI.getType());
 
             org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] apiDtoClassAnnotatedScopes =
                     APIDTO.class.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
@@ -656,9 +658,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 SwaggerData swaggerData = new SwaggerData(apiToUpdate);
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
                 apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition);
-                apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
+                if (!isGraphql) {
+                    apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
+                }
             }
-
             apiProvider.manageAPI(apiToUpdate);
 
             API updatedApi = apiProvider.getAPI(apiIdentifier);
