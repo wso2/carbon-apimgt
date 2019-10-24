@@ -74,7 +74,7 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             Subscriber subscriber = apiConsumer.getSubscriber(username);
             if (subscriber == null) {
-                synchronized (username + LOCK_POSTFIX) {
+                synchronized ((username + LOCK_POSTFIX).intern()) {
                     subscriber = apiConsumer.getSubscriber(username);
                     if (subscriber == null) {
                         try {

@@ -52,7 +52,7 @@ const styles = theme => ({
     root: {
         padding: theme.spacing.unit * 3,
         color: theme.palette.getContrastText(theme.palette.background.paper),
-        margin: -1 * theme.spacing(0,2),
+        margin: -1 * theme.spacing(0, 2),
     },
     iconClass: {
         marginRight: 10,
@@ -175,6 +175,13 @@ ExpansionPanelSummary.muiName = 'ExpansionPanelSummary';
  */
 function Overview(props) {
     const { classes, theme } = props;
+    const {
+        custom: {
+            apiDetailPages: {
+                showCredentials, showComments, showTryout, showDocuments, showSdks,
+            },
+        },
+    } = theme;
     const { api, applicationsAvailable, subscribedApplications } = useContext(ApiContext);
     const [totalComments, setCount] = useState(0);
     const [totalDocuments, setDocsCount] = useState(0);
@@ -233,7 +240,7 @@ function Overview(props) {
     const user = AuthManager.getUser();
     return (
         <Grid container className={classes.root} spacing={2}>
-            {!api.advertiseInfo.advertised && (
+            {!api.advertiseInfo.advertised && showCredentials && (
                 <Grid item xs={12} lg={6}>
                     <ExpansionPanel defaultExpanded>
                         <ExpansionPanelSummary>
@@ -284,8 +291,8 @@ function Overview(props) {
                                             <FormattedMessage
                                                 id='Apis.Details.Overview.credential.wizard.info'
                                                 defaultMessage={
-                                                    'Use the Key Generation Wizard. Create a new application '
-                                                    + '-> Subscribe -> ' +
+                                                    'Use the Key Generation Wizard. Create a new application ' +
+                                                    '-> Subscribe -> ' +
                                                     ' Generate keys and Access Token to invoke this API.'
                                                 }
                                             />
@@ -318,8 +325,9 @@ function Overview(props) {
                                             <React.Fragment>
                                                 <Link
                                                     to={'/apis/' + api.id + '/credentials'}
-                                                    style={!api.isSubscriptionAvailable ?
-                                                        { pointerEvents: 'none' } : null}
+                                                    style={
+                                                        !api.isSubscriptionAvailable ? { pointerEvents: 'none' } : null
+                                                    }
                                                 >
                                                     <Button
                                                         variant='contained'
@@ -359,7 +367,7 @@ function Overview(props) {
                     </ExpansionPanel>
                 </Grid>
             )}
-            {api.type !== 'WS' && (
+            {api.type !== 'WS' && showTryout && (
                 <Grid item xs={12} lg={6}>
                     <ExpansionPanel defaultExpanded>
                         <ExpansionPanelSummary>
@@ -397,68 +405,70 @@ function Overview(props) {
             )}
             {!api.advertiseInfo.advertised && (
                 <React.Fragment>
-                    <Grid item xs={12} lg={6}>
-                        <ExpansionPanel defaultExpanded>
-                            <ExpansionPanelSummary>
-                                <CustomIcon
-                                    strokeColor={titleIconColor}
-                                    className={classes.iconClass}
-                                    width={titleIconSize}
-                                    height={titleIconSize}
-                                    icon='comments'
-                                />
-                                <Typography className={classes.heading} variant='h6'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Overview.comments.title'
-                                        defaultMessage='Comments'
+                    {showComments && (
+                        <Grid item xs={12} lg={6}>
+                            <ExpansionPanel defaultExpanded>
+                                <ExpansionPanelSummary>
+                                    <CustomIcon
+                                        strokeColor={titleIconColor}
+                                        className={classes.iconClass}
+                                        width={titleIconSize}
+                                        height={titleIconSize}
+                                        icon='comments'
                                     />
-                                </Typography>
-                                <Typography className={classes.subheading}>
-                                    {' ' + (totalComments > 3 ? 3 : totalComments) + ' of ' + totalComments}
-                                </Typography>
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails
-                                classes={{
-                                    root: classNames(
-                                        { [classes.noCommentRoot]: totalComments === 0 },
-                                        { [classes.commentRoot]: totalComments !== 0 },
-                                    ),
-                                }}
-                            >
-                                <Grid container className={classes.root} spacing={2}>
-                                    {api &&
-                                        <Grid item xs={12}>
-                                            <Comments apiId={api.id} showLatest isOverview setCount={setCount} />
-                                        </Grid>
-                                    }
-                                    {totalComments === 0 &&
-                                        <Grid item xs={12}>
-                                            <div className={classes.emptyBox}>
-                                                <Typography variant='body2'>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Overview.comments.no.content'
-                                                        defaultMessage='No Comments Yet'
-                                                    />
-                                                </Typography>
-                                            </div>
-                                        </Grid>
-                                    }
-                                </Grid>
-                            </ExpansionPanelDetails>
-                            <Divider />
-                            <ExpansionPanelActions className={classes.actionPanel}>
-                                <Link to={'/apis/' + api.id + '/comments'} className={classes.button}>
-                                    <Button size='small' color='primary'>
+                                    <Typography className={classes.heading} variant='h6'>
                                         <FormattedMessage
-                                            id='Apis.Details.Overview.comments.show.more'
-                                            defaultMessage='Show More >>'
+                                            id='Apis.Details.Overview.comments.title'
+                                            defaultMessage='Comments'
                                         />
-                                    </Button>
-                                </Link>
-                            </ExpansionPanelActions>
-                        </ExpansionPanel>
-                    </Grid>
-                    {api.type !== 'WS' && (
+                                    </Typography>
+                                    <Typography className={classes.subheading}>
+                                        {' ' + (totalComments > 3 ? 3 : totalComments) + ' of ' + totalComments}
+                                    </Typography>
+                                </ExpansionPanelSummary>
+                                <ExpansionPanelDetails
+                                    classes={{
+                                        root: classNames(
+                                            { [classes.noCommentRoot]: totalComments === 0 },
+                                            { [classes.commentRoot]: totalComments !== 0 },
+                                        ),
+                                    }}
+                                >
+                                    <Grid container className={classes.root} spacing={2}>
+                                        {api && (
+                                            <Grid item xs={12}>
+                                                <Comments apiId={api.id} showLatest isOverview setCount={setCount} />
+                                            </Grid>
+                                        )}
+                                        {totalComments === 0 && (
+                                            <Grid item xs={12}>
+                                                <div className={classes.emptyBox}>
+                                                    <Typography variant='body2'>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Overview.comments.no.content'
+                                                            defaultMessage='No Comments Yet'
+                                                        />
+                                                    </Typography>
+                                                </div>
+                                            </Grid>
+                                        )}
+                                    </Grid>
+                                </ExpansionPanelDetails>
+                                <Divider />
+                                <ExpansionPanelActions className={classes.actionPanel}>
+                                    <Link to={'/apis/' + api.id + '/comments'} className={classes.button}>
+                                        <Button size='small' color='primary'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Overview.comments.show.more'
+                                                defaultMessage='Show More >>'
+                                            />
+                                        </Button>
+                                    </Link>
+                                </ExpansionPanelActions>
+                            </ExpansionPanel>
+                        </Grid>
+                    )}
+                    {api.type !== 'WS' && showSdks && (
                         <Grid item xs={6}>
                             <ExpansionPanel defaultExpanded>
                                 <ExpansionPanelSummary>
@@ -508,41 +518,46 @@ function Overview(props) {
                     )}
                 </React.Fragment>
             )}
-            <Grid item xs={12} lg={6}>
-                <ExpansionPanel defaultExpanded>
-                    <ExpansionPanelSummary>
-                        <CustomIcon
-                            strokeColor={titleIconColor}
-                            className={classes.iconClass}
-                            width={titleIconSize}
-                            height={titleIconSize}
-                            icon='docs'
-                        />
+            {showDocuments && (
+                <Grid item xs={12} lg={6}>
+                    <ExpansionPanel defaultExpanded>
+                        <ExpansionPanelSummary>
+                            <CustomIcon
+                                strokeColor={titleIconColor}
+                                className={classes.iconClass}
+                                width={titleIconSize}
+                                height={titleIconSize}
+                                icon='docs'
+                            />
 
-                        <Typography className={classes.heading} variant='h6'>
-                            <FormattedMessage id='Apis.Details.Overview.documents.title' defaultMessage='Documents' />
-                        </Typography>
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails
-                        classes={{ root: classNames({ [classes.noDocumentRoot]: totalDocuments === 0 }) }}
-                    >
-                        <Grid container className={classes.root} spacing={2}>
-                            <OverviewDocuments apiId={api.id} setDocsCount={setDocsCount} />
-                        </Grid>
-                    </ExpansionPanelDetails>
-                    <Divider />
-                    <ExpansionPanelActions className={classes.actionPanel}>
-                        <Link to={'/apis/' + api.id + '/documents'} className={classes.button}>
-                            <Button size='small' color='primary'>
+                            <Typography className={classes.heading} variant='h6'>
                                 <FormattedMessage
-                                    id='Apis.Details.Overview.comments.show.more'
-                                    defaultMessage='Show More >>'
+                                    id='Apis.Details.Overview.documents.title'
+                                    defaultMessage='Documents'
                                 />
-                            </Button>
-                        </Link>
-                    </ExpansionPanelActions>
-                </ExpansionPanel>
-            </Grid>
+                            </Typography>
+                        </ExpansionPanelSummary>
+                        <ExpansionPanelDetails
+                            classes={{ root: classNames({ [classes.noDocumentRoot]: totalDocuments === 0 }) }}
+                        >
+                            <Grid container className={classes.root} spacing={2}>
+                                <OverviewDocuments apiId={api.id} setDocsCount={setDocsCount} />
+                            </Grid>
+                        </ExpansionPanelDetails>
+                        <Divider />
+                        <ExpansionPanelActions className={classes.actionPanel}>
+                            <Link to={'/apis/' + api.id + '/documents'} className={classes.button}>
+                                <Button size='small' color='primary'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Overview.comments.show.more'
+                                        defaultMessage='Show More >>'
+                                    />
+                                </Button>
+                            </Link>
+                        </ExpansionPanelActions>
+                    </ExpansionPanel>
+                </Grid>
+            )}
         </Grid>
     );
 }

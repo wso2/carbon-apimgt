@@ -4662,6 +4662,10 @@ definitions:
         type: string
         description: Client secret for generating access token. This is given together with the client Id.
         example: ""
+      additionalProperties:
+        type: string
+        description: Additional properties needed.
+        example: ""
 
 #-----------------------------------------------------
 # The Application Key Mapping Request schema

@@ -112,7 +112,7 @@ const APIProductDetailsTopMenu = ({ classes, theme }) => {
                             id='fill.the.mandatory.fields.product'
                             defaultMessage={
                                 'Fill the mandatory fields (Name, Context)' +
-                                ' and create the API Product. Configure advanced configurations later.'
+                                ' and create the API Product. Configure advanced the configurations later.'
                             }
                         />
                     </Typography>

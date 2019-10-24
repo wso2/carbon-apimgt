@@ -51,7 +51,7 @@ export default function OperationGovernance(props) {
 
     return (
         <Fragment>
-            <Grid item md={12}>
+            <Grid item xs={12} md={12}>
                 <Typography gutterBottom variant='subtitle1'>
                     Operation Governance
                     <Typography style={{ marginLeft: '10px' }} gutterBottom variant='caption'>
@@ -60,8 +60,8 @@ export default function OperationGovernance(props) {
                     <Divider variant='middle' />
                 </Typography>
             </Grid>
-            <Grid item md={1} />
-            <Grid item md={11}>
+            <Grid item xs={1} />
+            <Grid item xs={11}>
                 <FormControl disabled={disableUpdate} component='fieldset'>
                     <FormControlLabel
                         control={

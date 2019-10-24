@@ -85,7 +85,8 @@ const styles = (theme) => {
             height: 50,
         },
         footer: {
-            backgroundColor: theme.palette.grey.A100,
+            background: theme.custom.footer.background,
+            color: theme.custom.footer.color,
             paddingLeft: theme.spacing.unit * 3,
             height: 50,
             alignItems: 'center',
@@ -120,6 +121,16 @@ const styles = (theme) => {
         },
         icons: {
             marginRight: theme.spacing(),
+        },
+        banner: {
+            color: theme.custom.banner.color,
+            background: theme.custom.banner.background,
+            padding: theme.custom.banner.padding,
+            margin: theme.custom.banner.margin,
+            fontSize: theme.custom.banner.fontSize,
+            display: 'flex',
+            distributeContent: theme.custom.banner.textAlign,
+            justifyContent: theme.custom.banner.textAlign,
         },
     };
 };
@@ -235,6 +246,16 @@ class Layout extends React.Component {
      */
     render() {
         const { classes, theme } = this.props;
+        const {
+            custom: {
+                banner: {
+                    style, text, image, active,
+                },
+                footer: {
+                    active: footerActive, text: footerText,
+                }
+            },
+        } = theme;
         const { openNavBar } = this.state;
         const { tenantDomain, setTenantDomain } = this.context;
         const user = AuthManager.getUser();
@@ -249,173 +270,182 @@ class Layout extends React.Component {
             },
         };
         return (
-            <div className={classes.reactRoot}>
-                <div className={classes.wrapper}>
-                    <AppBar position='fixed' className={classes.appBar}>
-                        <Toolbar className={classes.toolbar}>
-                            <Hidden mdUp>
-                                <IconButton onClick={this.toggleGlobalNavBar} color='inherit'>
-                                    <Icon className={classes.menuIcon}>menu</Icon>
-                                </IconButton>
-                            </Hidden>
-                            <Link to='/'>
-                                <img
-                                    src={app.context + theme.custom.appBar.logo}
-                                    style={{
-                                        height: theme.custom.appBar.logoHeight,
-                                        width: theme.custom.appBar.logoWidth,
-                                    }}
-                                />
-                            </Link>
-                            <Hidden smDown>
-                                <VerticalDivider height={32} />
-                                <div className={classes.listInline}>
-                                    <GlobalNavBar smallView />
-                                </div>
-                            </Hidden>
-                            <Hidden mdUp>
-                                <Drawer
-                                    className={classes.drawerStyles}
-                                    PaperProps={paperStyles}
-                                    SlideProps={commonStyle}
-                                    ModalProps={commonStyle}
-                                    BackdropProps={commonStyle}
-                                    open={openNavBar}
-                                    onClose={this.toggleGlobalNavBar}
-                                >
-                                    <div
-                                        tabIndex={0}
-                                        role='button'
-                                        onClick={this.toggleGlobalNavBar}
-                                        onKeyDown={this.toggleGlobalNavBar}
-                                    >
-                                        <div className={classes.list}>
-                                            <GlobalNavBar smallView={false} />
-                                        </div>
-                                    </div>
-                                </Drawer>
-                            </Hidden>
-                            <VerticalDivider height={32} />
-                            <HeaderSearch />
-                            {(tenantDomain && tenantDomain !== 'INVALID') && (
-                                <Link
-                                    style={{
-                                        textDecoration: 'none',
-                                        color: '#ffffff',
-                                    }}
-                                    to='/'
-                                    onClick={() => setTenantDomain('INVALID')}
-                                >
-                                    <Button className={classes.publicStore}>
-                                        <Icon className={classes.icons}>public</Icon>
-                                        <FormattedMessage
-                                            id='Base.index.go.to.public.store'
-                                            defaultMessage='Go to public Dev Portal'
-                                        />
-                                    </Button>
+            <React.Fragment>
+                {active && <div className={classes.banner}>{style === 'text' ? text : <img src={`${app.context}/${image}`} />}</div>}
+                <div className={classes.reactRoot} id='pageRoot'>
+                    <div className={classes.wrapper}>
+                        <AppBar position='fixed' className={classes.appBar} id='appBar'>
+                            <Toolbar className={classes.toolbar} id='toolBar'>
+                                <Hidden mdUp>
+                                    <IconButton onClick={this.toggleGlobalNavBar} color='inherit'>
+                                        <Icon className={classes.menuIcon}>menu</Icon>
+                                    </IconButton>
+                                </Hidden>
+                                <Link to='/' id='logoLink'>
+                                    <img
+                                        src={app.context + theme.custom.appBar.logo}
+                                        style={{
+                                            height: theme.custom.appBar.logoHeight,
+                                            width: theme.custom.appBar.logoWidth,
+                                        }}
+                                    />
                                 </Link>
-                            )}
-                            <VerticalDivider height={72} />
-                            {/* Environment menu */}
-                            <EnvironmentMenu
-                                environments={this.state.environments}
-                                environmentLabel={Utils.getEnvironment().label}
-                                handleEnvironmentChange={this.handleEnvironmentChange}
-                            />
-                            {user ? (
-                                <React.Fragment>
-                                    <Link to='/settings'>
-                                        <Button className={classes.userLink}>
-                                            <Icon className={classes.icons}>settings</Icon>
-                                            <FormattedMessage
-                                                id='Base.index.settings.caption'
-                                                defaultMessage='Settings'
-                                            />
+                                <Hidden smDown>
+                                    <VerticalDivider height={32} />
+                                    <div className={classes.listInline}>
+                                        <GlobalNavBar smallView />
+                                    </div>
+                                </Hidden>
+                                <Hidden mdUp>
+                                    <Drawer
+                                        className={classes.drawerStyles}
+                                        PaperProps={paperStyles}
+                                        SlideProps={commonStyle}
+                                        ModalProps={commonStyle}
+                                        BackdropProps={commonStyle}
+                                        open={openNavBar}
+                                        onClose={this.toggleGlobalNavBar}
+                                    >
+                                        <div
+                                            tabIndex={0}
+                                            role='button'
+                                            onClick={this.toggleGlobalNavBar}
+                                            onKeyDown={this.toggleGlobalNavBar}
+                                        >
+                                            <div className={classes.list}>
+                                                <GlobalNavBar smallView={false} />
+                                            </div>
+                                        </div>
+                                    </Drawer>
+                                </Hidden>
+                                <VerticalDivider height={32} />
+                                <HeaderSearch id='headerSearch' />
+                                {tenantDomain && tenantDomain !== 'INVALID' && (
+                                    <Link
+                                        style={{
+                                            textDecoration: 'none',
+                                            color: '#ffffff',
+                                        }}
+                                        to='/'
+                                        onClick={() => setTenantDomain('INVALID')}
+                                        id='gotoPubulicDevPortal'
+                                    >
+                                        <Button className={classes.publicStore}>
+                                            <Icon className={classes.icons}>public</Icon>
+                                            <Hidden mdDown>
+                                                <FormattedMessage
+                                                    id='Base.index.go.to.public.store'
+                                                    defaultMessage='Go to public Dev Portal'
+                                                />
+                                            </Hidden>
                                         </Button>
                                     </Link>
-                                    <Button
-                                        buttonRef={(node) => {
-                                            this.anchorEl = node;
-                                        }}
-                                        aria-owns={open ? 'menu-list-grow' : null}
-                                        aria-haspopup='true'
-                                        onClick={this.handleToggleUserMenu}
-                                        className={classes.userLink}
-                                    >
-                                        <Icon className={classes.icons}>person</Icon>
-                                        {user.name}
-                                    </Button>
-                                    <Popper
-                                        open={this.state.openUserMenu}
-                                        anchorEl={this.anchorEl}
-                                        transition
-                                        disablePortal
-                                        anchorOrigin={{
-                                            vertical: 'bottom',
-                                            horizontal: 'center',
-                                        }}
-                                        transformOrigin={{
-                                            vertical: 'top',
-                                            horizontal: 'center',
-                                        }}
-                                    >
-                                        {({ TransitionProps, placement }) => (
-                                            <Grow
-                                                {...TransitionProps}
-                                                id='menu-list-grow'
-                                                style={{
-                                                    transformOrigin:
-                                                        placement === 'bottom' ? 'center top' : 'center bottom',
-                                                }}
-                                            >
-                                                <Paper>
-                                                    <ClickAwayListener onClickAway={this.handleCloseUserMenu}>
-                                                        <MenuList>
-                                                            <MenuItem onClick={this.doOIDCLogout}>
-                                                                <FormattedMessage
-                                                                    id='Base.index.logout'
-                                                                    defaultMessage='Logout'
-                                                                />
-                                                            </MenuItem>
-                                                        </MenuList>
-                                                    </ClickAwayListener>
-                                                </Paper>
-                                            </Grow>
-                                        )}
-                                    </Popper>
-                                </React.Fragment>
-                            ) : (
-                                <React.Fragment>
-                                    {/* TODO: uncomment when the feature is working */}
-                                    {/* <Link to={'/sign-up'}>
+                                )}
+                                <VerticalDivider height={72} />
+                                {/* Environment menu */}
+                                <EnvironmentMenu
+                                    environments={this.state.environments}
+                                    environmentLabel={Utils.getEnvironment().label}
+                                    handleEnvironmentChange={this.handleEnvironmentChange}
+                                    id='environmentMenu'
+                                />
+                                {user ? (
+                                    <React.Fragment>
+                                        <Link to='/settings' id='settingsLink'>
+                                            <Button className={classes.userLink}>
+                                                <Icon className={classes.icons}>settings</Icon>
+                                                <Hidden mdDown>
+                                                    <FormattedMessage
+                                                        id='Base.index.settings.caption'
+                                                        defaultMessage='Settings'
+                                                    />
+                                                </Hidden>
+                                            </Button>
+                                        </Link>
+                                        <Button
+                                            buttonRef={(node) => {
+                                                this.anchorEl = node;
+                                            }}
+                                            aria-owns={open ? 'menu-list-grow' : null}
+                                            aria-haspopup='true'
+                                            onClick={this.handleToggleUserMenu}
+                                            className={classes.userLink}
+                                            id='userToggleButton'
+                                        >
+                                            <Icon className={classes.icons}>person</Icon>
+                                            {user.name}
+                                        </Button>
+                                        <Popper
+                                            id='userPopup'
+                                            open={this.state.openUserMenu}
+                                            anchorEl={this.anchorEl}
+                                            transition
+                                            disablePortal
+                                            anchorOrigin={{
+                                                vertical: 'bottom',
+                                                horizontal: 'center',
+                                            }}
+                                            transformOrigin={{
+                                                vertical: 'top',
+                                                horizontal: 'center',
+                                            }}
+                                        >
+                                            {({ TransitionProps, placement }) => (
+                                                <Grow
+                                                    {...TransitionProps}
+                                                    id='menu-list-grow'
+                                                    style={{
+                                                        transformOrigin:
+                                                            placement === 'bottom' ? 'center top' : 'center bottom',
+                                                    }}
+                                                >
+                                                    <Paper>
+                                                        <ClickAwayListener onClickAway={this.handleCloseUserMenu}>
+                                                            <MenuList>
+                                                                <MenuItem onClick={this.doOIDCLogout}>
+                                                                    <FormattedMessage
+                                                                        id='Base.index.logout'
+                                                                        defaultMessage='Logout'
+                                                                    />
+                                                                </MenuItem>
+                                                            </MenuList>
+                                                        </ClickAwayListener>
+                                                    </Paper>
+                                                </Grow>
+                                            )}
+                                        </Popper>
+                                    </React.Fragment>
+                                ) : (
+                                    <React.Fragment>
+                                        {/* TODO: uncomment when the feature is working */}
+                                        {/* <Link to={'/sign-up'}>
                                      <Button className={classes.userLink}>
                                      <HowToReg /> sign-up
                                      </Button>
                                      </Link> */}
-                                    <a href={app.context + '/services/configs'}>
-                                        <Button className={classes.userLink}>
-                                            <Icon>person</Icon>
-                                            <FormattedMessage id='Base.index.sign.in' defaultMessage=' Sign-in' />
-                                        </Button>
-                                    </a>
-                                </React.Fragment>
-                            )}
-                        </Toolbar>
-                    </AppBar>
-
-                    <div className={classes.contentWrapper}>{this.props.children}</div>
-
-                    <div className={classes.push} />
+                                        <a href={app.context + '/services/configs'}>
+                                            <Button className={classes.userLink}>
+                                                <Icon>person</Icon>
+                                                <FormattedMessage id='Base.index.sign.in' defaultMessage=' Sign-in' />
+                                            </Button>
+                                        </a>
+                                    </React.Fragment>
+                                )}
+                            </Toolbar>
+                        </AppBar>
+                        <div className={classes.contentWrapper}>{this.props.children}</div>
+                        {footerActive &&<div className={classes.push} />}
+                    </div>
+                    {footerActive && <footer className={classes.footer} id='footer'>
+                        <Typography noWrap>
+                            {footerText && footerText !== '' ? <span>{footerText}</span> :<FormattedMessage
+                                id='Base.index.copyright.text'
+                                defaultMessage='WSO2 API-M v3.0.0 | © 2019 WSO2 Inc'
+                            />}
+                        </Typography>
+                    </footer>}
                 </div>
-                <footer className={classes.footer}>
-                    <Typography noWrap>
-                        <FormattedMessage
-                            id='Base.index.copyright.text'
-                            defaultMessage='WSO2 APIM v3.0.0 | © 2019 WSO2 Inc'
-                        />
-                    </Typography>
-                </footer>
-            </div>
+            </React.Fragment>
         );
     }
 }

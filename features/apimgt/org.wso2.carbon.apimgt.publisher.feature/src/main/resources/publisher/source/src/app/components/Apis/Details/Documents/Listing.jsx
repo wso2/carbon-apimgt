@@ -429,7 +429,7 @@ class Listing extends React.Component {
                         </ScopeValidation>
                     )}
                 </div>
-                <div className={classes.contentWrapper}>
+                <div>
                     {showAddDocs && (
                         <Create
                             toggleAddDocs={this.toggleAddDocs}

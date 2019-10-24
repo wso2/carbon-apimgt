@@ -8880,7 +8880,7 @@ public class ApiMgtDAO {
                         if (roles != null) {
                             roleList = Lists.newArrayList(Splitter.on(",").trimResults().split(roles));
                         } else {
-                            roleList = Collections.EMPTY_LIST;
+                            roleList = Arrays.asList("");
                         }
 
                         for (String role : roleList) {

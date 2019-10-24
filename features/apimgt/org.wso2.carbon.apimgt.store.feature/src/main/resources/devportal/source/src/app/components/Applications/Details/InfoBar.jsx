@@ -24,6 +24,7 @@ import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import Collapse from '@material-ui/core/Collapse';
 import Icon from '@material-ui/core/Icon';
+import Hidden from '@material-ui/core/Hidden';
 import { FormattedMessage } from 'react-intl';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
@@ -34,32 +35,35 @@ import API from 'AppData/api';
  * @param {*} theme theme details
  * @returns {Object}
  */
-const styles = theme => ({
-    root: {
-        height: 70,
-        background: theme.palette.background.paper,
-        borderBottom: 'solid 1px ' + theme.palette.grey.A200,
-        display: 'flex',
-        alignItems: 'center',
-    },
-    backIcon: {
-        color: theme.palette.primary.main,
-        fontSize: 56,
-        cursor: 'pointer',
-    },
-    backText: {
-        color: theme.palette.primary.main,
-        cursor: 'pointer',
-        fontFamily: theme.typography.fontFamily,
-    },
-    apiIcon: {
-        height: 45,
-        marginTop: 10,
-        marginRight: 10,
-    },
+const styles = (theme) => {
+    const mainBack = theme.custom.infoBar.background || '#ffffff';
+    const infoBarHeight = theme.custom.infoBar.height || 70;
+    const backIconDisplay = theme.custom.infoBar.showBackIcon ? 'flex' : 'none';
+    const starColor = theme.custom.infoBar.starColor || theme.palette.getContrastText(mainBack);
+
+    return {
+        root: {
+            height: infoBarHeight,
+            background: mainBack,
+            color: theme.palette.getContrastText(mainBack),
+            borderBottom: 'solid 1px ' + theme.palette.grey.A200,
+            display: 'flex',
+            alignItems: 'center',
+            paddingLeft: theme.spacing.unit * 2,
+        },
+        backIcon: {
+            color: theme.palette.primary.main,
+            fontSize: 56,
+            cursor: 'pointer',
+        },
+        backText: {
+            color: theme.palette.primary.main,
+            cursor: 'pointer',
+            fontFamily: theme.typography.fontFamily,
+        },
     starRate: {
-        fontSize: 70,
-        color: theme.custom.starColor,
+        fontSize: 40,
+        color: starColor,
     },
     starRateMy: {
         fontSize: 70,
@@ -75,13 +79,17 @@ const styles = theme => ({
         paddingBottom: theme.spacing.unit * 2,
     },
     infoContent: {
-        background: theme.palette.background.paper,
+        color: theme.palette.getContrastText(mainBack),
+        background: mainBack,
         padding: theme.spacing.unit * 3,
+        '& td, & th': {
+            color: theme.palette.getContrastText(mainBack),
+        },
     },
     infoContentBottom: {
-        background: theme.palette.grey['200'],
+        background: theme.custom.infoBar.sliderBackground,
+        color: theme.palette.getContrastText(theme.custom.infoBar.sliderBackground),
         borderBottom: 'solid 1px ' + theme.palette.grey.A200,
-        color: theme.palette.grey['600'],
     },
     infoItem: {
         marginRight: theme.spacing.unit * 4,
@@ -99,8 +107,18 @@ const styles = theme => ({
         padding: '5px 12px',
         width: 350,
         transition: theme.transitions.create(['border-color', 'box-shadow']),
-        fontFamily: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial',
-            'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"'].join(','),
+        fontFamily: [
+            '-apple-system',
+            'BlinkMacSystemFont',
+            '"Segoe UI"',
+            'Roboto',
+            '"Helvetica Neue"',
+            'Arial',
+            'sans-serif',
+            '"Apple Color Emoji"',
+            '"Segoe UI Emoji"',
+            '"Segoe UI Symbol"',
+        ].join(','),
         '&:focus': {
             borderColor: '#80bdff',
             boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
@@ -174,7 +192,36 @@ const styles = theme => ({
     button: {
         textDecoration: 'none',
     },
-});
+    appNameXSmall: {
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
+        overflowX: 'auto',
+        maxWidth: 200,
+        lineHeight: 1.3,
+    },
+    appNameSmall: {
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
+        overflowX: 'auto',
+        maxWidth: 310,
+        lineHeight: 1.3,
+    },
+    appNameMid: {
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
+        overflowX: 'auto',
+        maxWidth: 640,
+        lineHeight: 1.3,
+    },
+    appNameBig: {
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
+        overflowX: 'auto',
+        maxWidth: 980,
+        lineHeight: 1.3,
+    },
+};
+};
 /**
  *
  *
@@ -183,8 +230,8 @@ const styles = theme => ({
  */
 class InfoBar extends React.Component {
     /**
-    * @param {Object} props props passed from above
-    */
+     * @param {Object} props props passed from above
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -247,6 +294,11 @@ class InfoBar extends React.Component {
         const {
             application, tierDescription, showOverview, notFound,
         } = this.state;
+        const {
+            custom: {
+                leftMenu: { position },
+            },
+        } = theme;
 
         if (notFound) {
             return <ResourceNotFound message={resourceNotFountMessage} />;
@@ -262,25 +314,36 @@ class InfoBar extends React.Component {
                     <Link to='/applications' className={classes.backLink}>
                         <Icon className={classes.backIcon}>keyboard_arrow_left</Icon>
                         <div className={classes.backText}>
-                            <FormattedMessage
-                                id='Applications.Details.InfoBar.new.back.to'
-                                defaultMessage='BACK TO'
-                            />
-                            {' '}
+                            <FormattedMessage id='Applications.Details.InfoBar.new.back.to' defaultMessage='BACK TO' />{' '}
                             <br />
-                            <FormattedMessage
-                                id='Applications.Details.InfoBar.listing'
-                                defaultMessage='LISTING'
-                            />
+                            <FormattedMessage id='Applications.Details.InfoBar.listing' defaultMessage='LISTING' />
                         </div>
                     </Link>
                     <VerticalDivider height={70} />
                     <div style={{ marginLeft: theme.spacing.unit }}>
-                        <Typography variant='h4'>{application.name}</Typography>
-                        <Typography variant='caption' gutterBottom align='left'>
-                            { application.subscriptionCount }
-                            {' '}
+                        <Hidden smUp>
+                            <Typography className={classes.appNameXSmall} variant='h4'>
+                                {application.name}
+                            </Typography>
+                        </Hidden>
 
+                        <Hidden xsDown mdUp>
+                            <Typography className={classes.appNameSmall} variant='h4'>
+                                {application.name}
+                            </Typography>
+                        </Hidden>
+                        <Hidden smDown lgUp>
+                            <Typography className={classes.appNameMid} variant='h4'>
+                                {application.name}
+                            </Typography>
+                        </Hidden>
+                        <Hidden mdDown xlUp>
+                            <Typography className={classes.appNameBig} variant='h4'>
+                                {application.name}
+                            </Typography>
+                        </Hidden>
+                        <Typography variant='caption' gutterBottom align='left'>
+                            {application.subscriptionCount}{' '}
                             <FormattedMessage
                                 id='Applications.Details.InfoBar.subscriptions'
                                 defaultMessage='Subscriptions'
@@ -288,7 +351,7 @@ class InfoBar extends React.Component {
                         </Typography>
                     </div>
                 </div>
-
+                {position === 'horizontal' && <div style={{ height: 60 }} />}
                 {showOverview && (
                     <Collapse in={showOverview} timeout='auto' unmountOnExit>
                         <div className={classes.infoContent}>
@@ -296,14 +359,8 @@ class InfoBar extends React.Component {
                                 <div className={classes.topBar}>
                                     <div className={classes.infoItem}>
                                         <Typography variant='subtitle1' gutterBottom>
-                                            {application.throttlingPolicy}
-                                            {' '}
-                                            <Typography variant='caption'>
-                                                (
-                                                {tierDescription}
-                                                {' '}
-                                                )
-                                            </Typography>
+                                            {application.throttlingPolicy}{' '}
+                                            <Typography variant='caption'>({tierDescription} )</Typography>
                                         </Typography>
                                         <Typography variant='caption' gutterBottom align='left'>
                                             <FormattedMessage
@@ -312,28 +369,19 @@ class InfoBar extends React.Component {
                                             />
                                         </Typography>
                                     </div>
-                                    {Object.entries(application.attributes).map(([key, value]) => (
-                                        value !== '' ? (
+                                    {Object.entries(application.attributes).map(([key, value]) =>
+                                        (value !== '' ? (
                                             <div className={classes.infoItem} key={key}>
                                                 <Typography variant='subtitle1' gutterBottom>
-                                                    { key }
+                                                    {key}
                                                     {' : '}
-                                                    <Typography variant='caption'>
-                                                        { value }
-                                                    </Typography>
+                                                    <Typography variant='caption'>{value}</Typography>
                                                 </Typography>
                                             </div>
-                                        ) : (null)
-                                    ))}
+                                        ) : null))}
                                     <div className={classes.infoItem}>
-                                        <Link
-                                            to={`/applications/${applicationId}/edit/`}
-                                            className={classes.button}
-                                        >
-                                            <Button
-                                                variant='contained'
-                                                color='default'
-                                            >
+                                        <Link to={`/applications/${applicationId}/edit/`} className={classes.button}>
+                                            <Button variant='contained' color='default'>
                                                 <FormattedMessage
                                                     id='Applications.Details.InfoBar.edit'
                                                     defaultMessage='Edit'
@@ -354,25 +402,15 @@ class InfoBar extends React.Component {
                         onKeyDown={this.toggleOverview}
                     >
                         <div className={classes.buttonView}>
-                            {showOverview
-                                ? (
-                                    <Typography className={classes.buttonOverviewText}>
-
-                                        <FormattedMessage
-                                            id='Applications.Details.InfoBar.less'
-                                            defaultMessage='LESS'
-                                        />
-                                    </Typography>
-                                )
-                                : (
-                                    <Typography className={classes.buttonOverviewText}>
-
-                                        <FormattedMessage
-                                            id='Applications.Details.InfoBar.more'
-                                            defaultMessage='MORE'
-                                        />
-                                    </Typography>
-                                )}
+                            {showOverview ? (
+                                <Typography className={classes.buttonOverviewText}>
+                                    <FormattedMessage id='Applications.Details.InfoBar.less' defaultMessage='LESS' />
+                                </Typography>
+                            ) : (
+                                <Typography className={classes.buttonOverviewText}>
+                                    <FormattedMessage id='Applications.Details.InfoBar.more' defaultMessage='MORE' />
+                                </Typography>
+                            )}
                             {showOverview ? <Icon>arrow_drop_up_circle</Icon> : <Icon>arrow_drop_down_circle</Icon>}
                         </div>
                     </div>

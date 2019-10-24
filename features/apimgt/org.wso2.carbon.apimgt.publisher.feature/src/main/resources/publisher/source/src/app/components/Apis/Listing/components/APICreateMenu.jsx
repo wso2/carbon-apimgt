@@ -70,7 +70,7 @@ const APICreateMenu = (props) => {
                         secondary={
                             <FormattedMessage
                                 id='Apis.Listing.components.APICreateMenu.secondary.soap'
-                                defaultMessage='Use an existing SOAP or Import the WSDL'
+                                defaultMessage='Use an existing SOAP or import the WSDL'
                             />
                         }
                     />

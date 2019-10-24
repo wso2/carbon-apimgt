@@ -133,14 +133,14 @@ const styles = theme => ({
         cursor: 'pointer',
     },
     rotatedText: {
-        transform: 'rotate(90deg)',
+        transform: 'rotate(270deg)',
         transformOrigin: 'left bottom 0',
         position: 'absolute',
         whiteSpace: 'nowrap',
-        top: theme.custom.infoBar.height,
-        marginLeft: 4,
+        top: theme.custom.infoBar.height * 2,
+        marginLeft: 23,
         cursor: 'pointer',
-    }
+    },
 });
 
 /**
@@ -213,7 +213,7 @@ class CommonListing extends React.Component {
             },
         } = theme;
         const { listType, allTags, showLeftMenu } = this.state;
-        const strokeColorMain = theme.custom.tagCloud.leftMenu.background;
+        const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
         const searchParam = new URLSearchParams(search);
         const searchQuery = searchParam.get('query');
         let selectedTag = null;
@@ -249,11 +249,8 @@ class CommonListing extends React.Component {
                             <Icon>keyboard_arrow_right</Icon>
                         </div>
                         <div className={classes.rotatedText} onClick={this.toggleLeftMenu}>
-                                <FormattedMessage
-                                    defaultMessage='Tag Cloud'
-                                    id='Apis.Listing.Listing.ApiTagCloud.title'
-                                />
-                            </div>
+                            <FormattedMessage defaultMessage='Tag Cloud' id='Apis.Listing.Listing.ApiTagCloud.title' />
+                        </div>
                     </div>
                 )}
 
@@ -264,17 +261,18 @@ class CommonListing extends React.Component {
                         { [classes.contentWithTagsHidden]: tagPaneVisible && !showLeftMenu },
                         { [classes.contentWithTags]: tagPaneVisible && showLeftMenu },
                     )}
+                    id='commonListing'
                 >
-                    <div className={classes.appBar}>
+                    <div className={classes.appBar} id='commonListingAppBar'>
                         <div className={classes.mainIconWrapper}>
                             <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
                         </div>
-                        <div className={classes.mainTitleWrapper}>
+                        <div className={classes.mainTitleWrapper} id='mainTitleWrapper'>
                             <Typography variant='h4' className={classes.mainTitle}>
                                 <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.main' />
                             </Typography>
                             {apis && (
-                                <Typography variant='caption' gutterBottom align='left'>
+                                <Typography variant='caption' gutterBottom align='left' id='apiCountDisplay'>
                                     <FormattedMessage
                                         defaultMessage='Displaying'
                                         id='Apis.Listing.Listing.displaying'
@@ -284,7 +282,7 @@ class CommonListing extends React.Component {
                                 </Typography>
                             )}
                         </div>
-                        <div className={classes.buttonRight}>
+                        <div className={classes.buttonRight} id='listGridWrapper'>
                             <IconButton className={classes.button} onClick={() => this.setListType('list')}>
                                 <Icon
                                     className={classNames(

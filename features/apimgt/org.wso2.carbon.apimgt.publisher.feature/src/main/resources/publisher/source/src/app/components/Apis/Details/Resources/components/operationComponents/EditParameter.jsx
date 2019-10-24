@@ -119,7 +119,7 @@ export default function EditParameter(props) {
                             value={capitalizeFirstLetter(parameter.in)}
                             disabled
                             fullWidth
-                            label='Location'
+                            label='Parameter Type'
                             margin='dense'
                             variant='outlined'
                         />
@@ -177,9 +177,9 @@ export default function EditParameter(props) {
                                     },
                                 }}
                             >
-                                {['number', 'integer'].map(location => (
-                                    <MenuItem value={location} dense>
-                                        {capitalizeFirstLetter(location)}
+                                {['number', 'integer'].map(dataType => (
+                                    <MenuItem value={dataType} dense>
+                                        {capitalizeFirstLetter(dataType)}
                                     </MenuItem>
                                 ))}
                             </Select>
@@ -206,9 +206,9 @@ export default function EditParameter(props) {
                                     },
                                 }}
                             >
-                                {['float', 'double', 'int32', 'int64'].map(location => (
-                                    <MenuItem value={location} dense>
-                                        {capitalizeFirstLetter(location)}
+                                {['float', 'double', 'int32', 'int64'].map(dataType => (
+                                    <MenuItem value={dataType} dense>
+                                        {capitalizeFirstLetter(dataType)}
                                     </MenuItem>
                                 ))}
                             </Select>

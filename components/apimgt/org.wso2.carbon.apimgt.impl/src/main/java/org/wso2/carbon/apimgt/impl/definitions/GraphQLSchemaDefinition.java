@@ -80,10 +80,6 @@ public class GraphQLSchemaDefinition {
                     addOperations(entry, operationArray);
                 } else if (type.equals(entry.getValue().getName().toUpperCase())) {
                     addOperations(entry, operationArray);
-                } else if (type.equals(entry.getValue().getName().toUpperCase())) {
-                    addOperations(entry, operationArray);
-                } else if (type.equals(entry.getValue().getName().toUpperCase())) {
-                    addOperations(entry, operationArray);
                 }
             }
         }

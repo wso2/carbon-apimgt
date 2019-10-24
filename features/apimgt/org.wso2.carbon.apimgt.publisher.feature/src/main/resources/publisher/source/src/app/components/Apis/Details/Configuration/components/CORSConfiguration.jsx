@@ -163,8 +163,8 @@ export default function CORSConfiguration(props) {
                                                                 '.CORSConfigurations.origin.helper'
                                                             }
                                                             defaultMessage={
-                                                                'Press `enter` after typing the origin name,' +
-                                                                'To add a new origin'
+                                                                'Press `Enter` after typing the origin name,' +
+                                                                'to add a new origin'
                                                             }
                                                         />
                                                     }
@@ -216,8 +216,8 @@ export default function CORSConfiguration(props) {
                                                     'CORSConfigurations.header.helper'
                                                 }
                                                 defaultMessage={
-                                                    'Press `enter` after typing the header name, ' +
-                                                    'To add a new header'
+                                                    'Press `Enter` after typing the header name, ' +
+                                                    'to add a new header'
                                                 }
                                             />
                                         }
@@ -260,8 +260,8 @@ export default function CORSConfiguration(props) {
                                                     '.CORSConfigurations.method.helper'
                                                 }
                                                 defaultMessage={
-                                                    'Press `enter` after typing the method name,' +
-                                                    ' To add a new method'
+                                                    'Press `Enter` after typing the method name,' +
+                                                    ' to add a new method'
                                                 }
                                             />
                                         }
