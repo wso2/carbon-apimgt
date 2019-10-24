@@ -169,7 +169,7 @@ export default function DefaultAPIForm(props) {
                 if (contextValidity === null) {
                     let apiContext = value.includes('/') ? value + '/' + api.version : '/' + value + '/' + api.version;
                     if (isAPIProduct) {
-                        apiContext = value.includes('/') ? value : '/' + value;
+                        apiContext = value.includes('/') ? value + '/1.0.0' : '/' + value + '/1.0.0';
                     }
                     APIValidation.apiParameter.validate(field + ':' + apiContext).then((result) => {
                         if (result.body.list.length > 0) {
