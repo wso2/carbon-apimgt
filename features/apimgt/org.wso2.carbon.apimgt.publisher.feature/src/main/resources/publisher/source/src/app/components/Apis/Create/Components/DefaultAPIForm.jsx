@@ -192,7 +192,8 @@ export default function DefaultAPIForm(props) {
                     const apiVersion = api.context.includes('/') ? api.context + '/' + value : '/'
                     + api.context + '/' + value;
                     APIValidation.apiParameter.validate('context:' + apiVersion).then((result) => {
-                        if (result.body.list.length > 0) {
+                        if (result.body.list.length > 0 &&
+                            value.toLowerCase() === result.body.list[0].version.toLowerCase()) {
                             updateValidity({
                                 ...validity,
                                 version: { message: apiVersion + ' context with version already exists' },
