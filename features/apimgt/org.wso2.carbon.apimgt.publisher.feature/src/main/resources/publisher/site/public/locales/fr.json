@@ -381,7 +381,7 @@
   "Apis.Details.Endpoints.NewEndpointCreate.create.soap.endpoint": "",
   "Apis.Details.Endpoints.NewEndpointCreate.create.soap.endpoint.description": "",
   "Apis.Details.Endpoints.NewEndpointCreate.default.prototype.endpoints": "",
-  "Apis.Details.Endpoints.NewEndpointCreate.mock.endpoints": "",
+  "Apis.Details.Endpoints.NewEndpointCreate.prototype.implementation": "",
   "Apis.Details.Endpoints.Prototype.InlineEndpoints.script": "",
   "Apis.Details.Endpoints.Prototype.PrototypeEndpoints.endpoint": "",
   "Apis.Details.Endpoints.Prototype.PrototypeEndpoints.endpoint.implementation.method": "",
