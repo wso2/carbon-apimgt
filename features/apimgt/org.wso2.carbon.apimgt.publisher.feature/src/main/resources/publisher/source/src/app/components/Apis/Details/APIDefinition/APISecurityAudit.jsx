@@ -793,9 +793,13 @@ class APISecurityAudit extends Component {
                                                 </Typography>
                                             }
                                             {{}.hasOwnProperty.call(reportObject, 'validationErrors') &&
-                                                <InlineMessage type='info' height={140}>
+                                                <InlineMessage type='warning' height={140}>
                                                     <div className={classes.contentWrapper}>
-                                                        <Typography variant='h5' component='h3' className={classes.head}>
+                                                        <Typography
+                                                            variant='h5'
+                                                            component='h3'
+                                                            className={classes.head}
+                                                        >
                                                             <FormattedMessage
                                                                 id='Apis.Details.APIDefinition.AuditApi.FailedToValidate.Heading'
                                                                 defaultMessage='Failed to Validate OpenAPI File'
@@ -827,20 +831,6 @@ class APISecurityAudit extends Component {
                                         </Typography>
                                         {{}.hasOwnProperty.call(reportObject, 'semanticErrors') &&
                                             <React.Fragment>
-                                                {/* <Typography variant='body1'>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.APIDefinition.AuditApi.OASSemanticErrorIssueCount'
-                                                        defaultMessage='{semanticErrorIssueCountText} {semanticErrorIssueCount}'
-                                                        values={{
-                                                            semanticErrorIssueCountText: (
-                                                                <strong>Number of Semantic Issues: </strong>
-                                                            ),
-                                                            semanticErrorIssueCount: (
-                                                                reportObject.semanticErrors.issues
-                                                            ),
-                                                        }}
-                                                    />
-                                                </Typography> */}
                                                 <div>
                                                     <Typography variant='body1'>
                                                         <MuiThemeProvider theme={this.getMuiTheme()}>
@@ -861,20 +851,6 @@ class APISecurityAudit extends Component {
                                         }
                                         {{}.hasOwnProperty.call(reportObject, 'validationErrors') &&
                                             <React.Fragment>
-                                                {/* <Typography variant='body1'>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.APIDefinition.AuditApi.OASStructuralErrorIssueCount'
-                                                        defaultMessage='{structuralErrorIssueCountText} {structuralErrorIssueCount}'
-                                                        values={{
-                                                            structuralErrorIssueCountText: (
-                                                                <strong>Number of Structural Issues: </strong>
-                                                            ),
-                                                            structuralErrorIssueCount: (
-                                                                reportObject.validationErrors.issues
-                                                            ),
-                                                        }}
-                                                    />
-                                                </Typography> */}
                                                 <div>
                                                     <Typography variant='body1'>
                                                         <MuiThemeProvider theme={this.getErrorMuiTheme()}>
