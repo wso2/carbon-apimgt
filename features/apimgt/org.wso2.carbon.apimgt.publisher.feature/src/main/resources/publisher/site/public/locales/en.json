@@ -381,7 +381,7 @@
   "Apis.Details.Endpoints.NewEndpointCreate.create.soap.endpoint": "HTTP/ SOAP Endpoint",
   "Apis.Details.Endpoints.NewEndpointCreate.create.soap.endpoint.description": "The direct URI of the web service.",
   "Apis.Details.Endpoints.NewEndpointCreate.default.prototype.endpoints": "Prototype Endpoint",
-  "Apis.Details.Endpoints.NewEndpointCreate.mock.endpoints": "Mock Endpoint",
+  "Apis.Details.Endpoints.NewEndpointCreate.prototype.implementation": "Prototype Implementation",
   "Apis.Details.Endpoints.Prototype.InlineEndpoints.script": "Script",
   "Apis.Details.Endpoints.Prototype.PrototypeEndpoints.endpoint": "Endpoint",
   "Apis.Details.Endpoints.Prototype.PrototypeEndpoints.endpoint.implementation.method": "Endpoint Implementation Method",

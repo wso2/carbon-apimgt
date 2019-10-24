@@ -18,6 +18,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Grid } from '@material-ui/core';
 import GenericResource from 'AppComponents/Apis/Details/Endpoints/Prototype/GenericResource';
 
 const xMediationScriptProperty = 'x-mediation-script';
@@ -49,21 +50,23 @@ function InlineEndpoints(props) {
         updatePaths(tmpPaths);
     };
     return (
-        <React.Fragment >
-            {Object.keys(paths).map((path) => {
-                return (
-                    Object.keys(paths[path]).map((method) => {
-                        const mediationScript = paths[path][method][xMediationScriptProperty];
-                        const script = mediationScript === undefined ? defaultScript : mediationScript;
-                        return (<GenericResource
-                            resourcePath={path}
-                            resourceMethod={method}
-                            onChange={onScriptChange}
-                            scriptContent={script}
-                        />);
-                    })
-                );
-            })}
+        <React.Fragment>
+            <Grid container spacing={1} direction='column'>
+                {Object.keys(paths).map((path) => {
+                    return (
+                        Object.keys(paths[path]).map((method) => {
+                            const mediationScript = paths[path][method][xMediationScriptProperty];
+                            const script = mediationScript === undefined ? defaultScript : mediationScript;
+                            return (<GenericResource
+                                resourcePath={path}
+                                resourceMethod={method}
+                                onChange={onScriptChange}
+                                scriptContent={script}
+                            />);
+                        })
+                    );
+                })}
+            </Grid>
         </React.Fragment>);
 }
 

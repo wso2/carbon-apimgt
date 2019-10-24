@@ -82,7 +82,7 @@ export default function ListParameters(props) {
                             <TableRow key={parameter.name}>
                                 <TableCell>{parameter.name}</TableCell>
                                 <TableCell align='right'>{capitalizeFirstLetter(parameter.in)}</TableCell>
-                                <TableCell align='right'>{parameter.type}</TableCell>
+                                <TableCell align='right'>{capitalizeFirstLetter(parameter.schema.type)}</TableCell>
                                 <TableCell align='right'>{parameter.required ? 'Yes' : 'No'}</TableCell>
                                 {!disableUpdate && (
                                     <TableCell align='right'>

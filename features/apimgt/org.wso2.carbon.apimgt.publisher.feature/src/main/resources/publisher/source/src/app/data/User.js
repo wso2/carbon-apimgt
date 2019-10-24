@@ -78,14 +78,6 @@ export default class User {
     }
 
     /**
-     * Remove the user from static in-memory user map
-     * @param {String} environmentName - Name of the environment the user to be removed
-     */
-    static destroyInMemoryUser(environmentName) {
-        User._userMap.delete(environmentName);
-    }
-
-    /**
      * Get the JS accessible access token fragment from cookie storage.
      * @returns {String|null}
      */
@@ -123,11 +115,13 @@ export default class User {
 
     /**
      * Set user expiry time, User validity expires with the expiry of user's access token
-     * @param expireTime {Integer} Number of seconds till the expire time from the current time
+     * Negative value will imply removal of existing expiry time
+     * @param {Integer} expireTime of seconds till the expire time from the current time
+     * @returns {Integer} expire time
      */
     setExpiryTime(expireTime) {
         if (expireTime < 0) {
-            localStorage.setItem(User.CONST.USER_EXPIRY_TIME, expireTime);
+            localStorage.removeItem(User.CONST.USER_EXPIRY_TIME);
             return expireTime;
         }
         const currentTime = Date.now();

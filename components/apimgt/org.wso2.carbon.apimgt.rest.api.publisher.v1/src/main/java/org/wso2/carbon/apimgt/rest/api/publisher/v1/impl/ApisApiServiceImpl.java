@@ -340,13 +340,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
         }
-        if (body.getVisibleRoles() != null) {
-            String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getVisibleRoles());
-
-            if (!errorMessage.isEmpty()) {
-                RestApiUtil.handleBadRequest(errorMessage, log);
-            }
-        }
         if (body.getContext() == null) {
             RestApiUtil.handleBadRequest("Parameter: \"context\" cannot be null", log);
         } else if (body.getContext().endsWith("/")) {
@@ -568,6 +561,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIIdentifier apiIdentifier = originalAPI.getId();
             boolean isWSAPI = originalAPI.getType() != null
                             && APIConstants.APITransportType.WS.toString().equals(originalAPI.getType());
+            boolean isGraphql = originalAPI.getType() != null
+                    && APIConstants.APITransportType.GRAPHQL.toString().equals(originalAPI.getType());
 
             org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] apiDtoClassAnnotatedScopes =
                     APIDTO.class.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
@@ -622,13 +617,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
             }
-            if (body.getVisibleRoles() != null) {
-                String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getVisibleRoles());
-
-                if (!errorMessage.isEmpty()) {
-                    RestApiUtil.handleBadRequest(errorMessage, log);
-                }
-            }
             if (body.getAdditionalProperties() != null) {
                 String errorMessage = RestApiPublisherUtils.validateAdditionalProperties(body.getAdditionalProperties());
                 if (!errorMessage.isEmpty()) {
@@ -656,8 +644,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 SwaggerData swaggerData = new SwaggerData(apiToUpdate);
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
                 apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition);
+                if (!isGraphql) {
+                    apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
+                }
             }
-
             apiProvider.manageAPI(apiToUpdate);
 
             API updatedApi = apiProvider.getAPI(apiIdentifier);

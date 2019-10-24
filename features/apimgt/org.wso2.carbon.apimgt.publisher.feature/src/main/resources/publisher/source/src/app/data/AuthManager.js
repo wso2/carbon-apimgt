@@ -20,6 +20,7 @@ import qs from 'qs';
 import CONSTS from 'AppData/Constants';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import Configurations from 'Config';
+import API from 'AppData/api.js';
 import Utils from './Utils';
 import User from './User';
 import APIClient from './APIClient';
@@ -133,12 +134,19 @@ class AuthManager {
     }
 
     /**
-     *
-     * @param {String} environmentName - Name of the environment the user to be removed
+     * Clear all user records from the browser (opposite of `getUser`).
+     * partial token, Local storage user object etc
+     * consequent `getUser` user will fallback to `getUserFromToken`.
+     * @memberof User
+     * @returns {void}
      */
-    static dismissUser(environmentName) {
-        localStorage.removeItem(`${User.CONST.LOCAL_STORAGE_USER}_${environmentName}`);
-        User.destroyInMemoryUser(environmentName);
+    static discardUser() {
+        // Since we don't have multi environments currentEnv will always get `default`
+        const currentEnv = Utils.getCurrentEnvironment().label;
+        localStorage.removeItem(User.CONST.USER_EXPIRY_TIME);
+        localStorage.removeItem(`${User.CONST.LOCAL_STORAGE_USER}_${currentEnv}`);
+        Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1, currentEnv);
+        Utils.getCookie(User.CONST.WSO2_AM_REFRESH_TOKEN_1, currentEnv);
     }
 
     /**
@@ -171,6 +179,15 @@ class AuthManager {
     }
 
     static isRestricted(scopesAllowedToEdit, api) {
+        // determines whether the apiType is API PRODUCT and user has publisher role, then allow access.
+        if (api.apiType === API.CONSTS.APIProduct) {
+            if (AuthManager.getUser().scopes.includes('apim:api_publish')) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
         // determines whether the user is a publisher or creator (based on what is passed from the element)
         // if (scopesAllowedToEdit.filter(element => AuthManager.getUser().scopes.includes(element)).length > 0) {
         if (scopesAllowedToEdit.find(element => AuthManager.getUser().scopes.includes(element))) {
