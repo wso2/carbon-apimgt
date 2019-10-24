@@ -1,3 +1,4 @@
+// TODO - Remove the disable commands for eslint when not needed
 /* eslint-disable indent */
 /* eslint-disable react/jsx-indent */
 /*
@@ -33,6 +34,7 @@ import { withStyles, createMuiTheme, MuiThemeProvider } from '@material-ui/core/
 import { Line } from 'rc-progress';
 import Progress from 'AppComponents/Shared/Progress';
 import { withRouter } from 'react-router';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 
 import MUIDataTable from 'mui-datatables';
 
@@ -72,6 +74,10 @@ const styles = theme => ({
     tableRow: {
         'background-color': '#d3d3d3',
     },
+    referenceErrorTypography: {
+        width: '70%',
+        marginTop: '15%',
+    },
     referenceTypography: {
         width: '70%',
     },
@@ -107,6 +113,19 @@ const styles = theme => ({
         flexGrow: 1,
         marginLeft: 200,
         marginTop: 10,
+    },
+    columnOne: {
+        display: 'block',
+        width: '50%',
+        float: 'left',
+    },
+    columnTwo: {
+        width: '40%',
+        float: 'right',
+    },
+    head: {
+        fontWeight: 200,
+        marginBottom: 20,
     },
 });
 
@@ -200,33 +219,73 @@ class APISecurityAudit extends Component {
         },
     });
 
+    getErrorMuiTheme = () => createMuiTheme({
+        typography: {
+            useNextVariants: true,
+        },
+        overrides: {
+            MUIDataTableBodyCell: {
+                root: {
+                    width: '100%',
+                },
+            },
+            MUIDataTableSelectCell: {
+                root: {
+                    display: 'none',
+                },
+            },
+            MUIDataTableToolbarSelect: {
+                title: {
+                    display: 'none',
+                },
+            },
+        },
+    });
+
     /**
      * Get Row data for MUI Table
      * @param {*} issues Issues array
      * @param {String} category The category of the issue
-     * @return {*} dataObject array
+     * @param {*} rowType The type of row - normal or error
+     * @return {*} dataObject The dataObject array
      */
-    getRowData(issues, category) {
+    getRowData(issues, category, rowType) {
         const dataObject = [];
         for (const item in issues) {
             if ({}.hasOwnProperty.call(issues, item)) {
                 for (let i = 0; i < issues[item].issues.length; i++) {
                     const rowObject = [];
-                    if (issues[item].issues[i].specificDescription) {
-                        rowObject.push(
-                            this.criticalityObject[issues[item].criticality],
-                            issues[item].issues[i].specificDescription,
-                            this.roundScore(issues[item].issues[i].score), issues[item].issues[i].pointer,
-                            issues[item].issues[i].tooManyImpacted,
-                            issues[item].issues[i].pointersAffected, category, issues[item].tooManyError,
-                        );
-                    } else {
-                        rowObject.push(
-                            this.criticalityObject[issues[item].criticality],
-                            issues[item].description, this.roundScore(issues[item].issues[i].score),
-                            issues[item].issues[i].pointer, issues[item].issues[i].tooManyImpacted,
-                            issues[item].issues[i].pointersAffected, category, issues[item].tooManyError,
-                        );
+                    if (rowType === 'error') {
+                        if (issues[item].issues[i].specificDescription) {
+                            rowObject.push(
+                                issues[item].issues[i].specificDescription, issues[item].issues[i].pointer,
+                                category, rowType,
+                            );
+                        } else {
+                            rowObject.push(
+                                issues[item].description, issues[item].issues[i].pointer,
+                                category, rowType,
+                            );
+                        }
+                    } else if (rowType === 'normal') {
+                        if (issues[item].issues[i].specificDescription) {
+                            rowObject.push(
+                                this.criticalityObject[issues[item].criticality],
+                                issues[item].issues[i].specificDescription,
+                                this.roundScore(issues[item].issues[i].score), issues[item].issues[i].pointer,
+                                issues[item].issues[i].tooManyImpacted,
+                                issues[item].issues[i].pointersAffected, category, issues[item].tooManyError,
+                                rowType,
+                            );
+                        } else {
+                            rowObject.push(
+                                this.criticalityObject[issues[item].criticality],
+                                issues[item].description, this.roundScore(issues[item].issues[i].score),
+                                issues[item].issues[i].pointer, issues[item].issues[i].tooManyImpacted,
+                                issues[item].issues[i].pointersAffected, category, issues[item].tooManyError,
+                                rowType,
+                            );
+                        }
                     }
                     dataObject.push(rowObject);
                 }
@@ -345,7 +404,6 @@ class APISecurityAudit extends Component {
         if (loading) {
             return <Progress />;
         }
-
         const columns = [
             {
                 name: 'Severity',
@@ -408,6 +466,48 @@ class APISecurityAudit extends Component {
                     sort: false,
                 },
             },
+            {
+                name: 'isError',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                    sort: false,
+                },
+            },
+        ];
+
+        const errorColumns = [
+            {
+                name: 'Description',
+                options: {
+                    filter: true,
+                    sort: true,
+                },
+            },
+            {
+                name: 'Pointer',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                    sort: false,
+                },
+            },
+            {
+                name: 'Issue Category',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                    sort: false,
+                },
+            },
+            {
+                name: 'isError',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                    sort: false,
+                },
+            },
         ];
 
         const editorOptions = {
@@ -424,47 +524,83 @@ class APISecurityAudit extends Component {
             selectableRows: false,
             expandableRows: true,
             expandableRowsOnClick: true,
-        renderExpandableRow: (rowData) => {
-        let searchTerm = null;
-        const indexNumber = rowData[3];
-        const path = reportObject.index[indexNumber];
-        searchTerm = path;
+            renderExpandableRow: (rowData) => {
+                let searchTerm = null;
+                if (rowData[3] === 'error') {
+                    searchTerm = reportObject.index[rowData[1]];
 
-        return (
-                <TableRow className={classes.tableRow}>
-                    <TableCell colSpan='2'>
-                        <MonacoEditor
-                            width='85%'
-                            height='250px'
-                            theme='vs-dark'
-                            value={apiDefinition}
-                            options={editorOptions}
-                            editorDidMount={(editor, monaco) => this.editorDidMount(editor, monaco, searchTerm)}
-                        />
-                    </TableCell>
-                    <TableCell>
-                        <Typography variant='body1' className={classes.referenceTypography}>
-                            <FormattedMessage
-                                id='Apis.Details.APIDefinition.AuditApi.ReferenceSection'
-                                description='Link to visit for detail on how to remedy issue'
-                                defaultMessage='Visit this {link} to view a detailed description, possible
-                                exploits and remediation for this issue.'
-                                values={{
-                                    link: (
-                                        <strong>
-                                            <a
-                                                href={this.getMoreDetailUrl(rowData[6])}
-                                                target='_blank'
-                                                rel='noopener noreferrer'
-                                            >link
-                                            </a>
-                                        </strong>),
-                                }}
-                            />
-                        </Typography>
-                    </TableCell>
-                </TableRow>
-                );
+                    return (
+                        <TableRow className={classes.tableRow}>
+                            <TableCell className={classes.columnOne}>
+                                <MonacoEditor
+                                    height='250px'
+                                    theme='vs-dark'
+                                    value={apiDefinition}
+                                    options={editorOptions}
+                                    editorDidMount={(editor, monaco) => this.editorDidMount(editor, monaco, searchTerm)}
+                                />
+                            </TableCell>
+                            <TableCell className={classes.columnTwo}>
+                                <Typography variant='body1' className={classes.referenceErrorTypography}>
+                                    <FormattedMessage
+                                        id='Apis.Details.APIDefinition.AuditApi.ReferenceSection'
+                                        description='Link to visit for detail on how to remedy issue'
+                                        defaultMessage='Visit this {link} to view a detailed description, possible
+                                        exploits and remediation for this issue.'
+                                        values={{
+                                            link: (
+                                                <strong>
+                                                    <a
+                                                        href={this.getMoreDetailUrl(rowData[2])}
+                                                        target='_blank'
+                                                        rel='noopener noreferrer'
+                                                    >link
+                                                    </a>
+                                                </strong>),
+                                        }}
+                                    />
+                                </Typography>
+                            </TableCell>
+                        </TableRow>
+                    );
+                } else {
+                    searchTerm = reportObject.index[rowData[3]];
+                    return (
+                        <TableRow className={classes.tableRow}>
+                            <TableCell colSpan='2'>
+                                <MonacoEditor
+                                    width='85%'
+                                    height='250px'
+                                    theme='vs-dark'
+                                    value={apiDefinition}
+                                    options={editorOptions}
+                                    editorDidMount={(editor, monaco) => this.editorDidMount(editor, monaco, searchTerm)}
+                                />
+                            </TableCell>
+                            <TableCell>
+                                <Typography variant='body1' className={classes.referenceTypography}>
+                                    <FormattedMessage
+                                        id='Apis.Details.APIDefinition.AuditApi.ReferenceSection'
+                                        description='Link to visit for detail on how to remedy issue'
+                                        defaultMessage='Visit this {link} to view a detailed description, possible
+                                        exploits and remediation for this issue.'
+                                        values={{
+                                            link: (
+                                                <strong>
+                                                    <a
+                                                        href={this.getMoreDetailUrl(rowData[6])}
+                                                        target='_blank'
+                                                        rel='noopener noreferrer'
+                                                    >link
+                                                    </a>
+                                                </strong>),
+                                        }}
+                                    />
+                                </Typography>
+                            </TableCell>
+                        </TableRow>
+                    );
+                }
             },
         };
         return (
@@ -528,67 +664,73 @@ class APISecurityAudit extends Component {
                                             </VisibilitySensor>
                                         </div>
                                         <div className={classes.auditSummaryDivRight}>
-                                            <Typography variant='body1'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.APIDefinition.AuditApi.overallScore'
-                                                    defaultMessage='{overallScoreText} {overallScore} / 100'
-                                                    values={{
-                                                        overallScoreText: <strong>Overall Score:</strong>,
-                                                        overallScore: this.roundScore(overallScore),
-                                                    }}
-                                                />
-                                            </Typography>
-                                            <Typography variant='body1'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.APIDefinition.AuditApi.TotalNumOfErrors'
-                                                    defaultMessage='{totalNumOfErrorsText} {totalNumOfErrors}'
-                                                    values={{
-                                                        totalNumOfErrorsText: <strong>Total Number of Errors: </strong>,
-                                                        totalNumOfErrors: numErrors,
-                                                    }}
-                                                />
-                                            </Typography>
-                                            <React.Fragment>
+                                            {{}.hasOwnProperty.call(reportObject, 'score') &&
                                                 <Typography variant='body1'>
                                                     <FormattedMessage
-                                                        id='Apis.Details.APIDefinition.AuditApi.OverallCriticality'
-                                                        defaultMessage='{overallCriticalityText} {overallCriticality}'
+                                                        id='Apis.Details.APIDefinition.AuditApi.overallScore'
+                                                        defaultMessage='{overallScoreText} {overallScore} / 100'
                                                         values={{
-                                                            overallCriticalityText: (
-                                                                <strong>Overall Severity:</strong>
-                                                            ),
-                                                            overallCriticality: (
-                                                                this.criticalityObject[reportObject.criticality]
-                                                            ),
+                                                            overallScoreText: <strong>Overall Score:</strong>,
+                                                            overallScore: this.roundScore(overallScore),
                                                         }}
                                                     />
-                                                    <Tooltip
-                                                        placement='right'
-                                                        classes={{
-                                                            tooltip: classes.htmlTooltip,
-                                                        }}
-                                                        title={
-                                                            <React.Fragment>
-                                                                <FormattedMessage
-                                                                    id='Apis.Details.APIDefinition.AuditApi.tooltip'
-                                                                    defaultMessage={
-                                                                        'Severity ranges from INFO, LOW, MEDIUM, ' +
-                                                                        'HIGH to CRITICAL, with INFO being ' +
-                                                                        'low vulnerability and CRITICAL' +
-                                                                        'being high vulnerability'
-                                                                    }
-                                                                />
-                                                            </React.Fragment>
-                                                        }
-                                                    >
-                                                        <Button className={classes.helpButton}>
-                                                            <HelpOutline className={classes.helpIcon} />
-                                                        </Button>
-                                                    </Tooltip>
                                                 </Typography>
-                                            </React.Fragment>
+                                            }
+                                            {numErrors !== null &&
+                                                <Typography variant='body1'>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.APIDefinition.AuditApi.TotalNumOfErrors'
+                                                        defaultMessage='{totalNumOfErrorsText} {totalNumOfErrors}'
+                                                        values={{
+                                                            totalNumOfErrorsText: <strong>Total Number of Errors: </strong>,
+                                                            totalNumOfErrors: numErrors,
+                                                        }}
+                                                    />
+                                                </Typography>
+                                            }
+                                            {{}.hasOwnProperty.call(reportObject, 'criticality') &&
+                                                <React.Fragment>
+                                                    <Typography variant='body1'>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.APIDefinition.AuditApi.OverallCriticality'
+                                                            defaultMessage='{overallCriticalityText} {overallCriticality}'
+                                                            values={{
+                                                                overallCriticalityText: (
+                                                                    <strong>Overall Severity:</strong>
+                                                                ),
+                                                                overallCriticality: (
+                                                                    this.criticalityObject[reportObject.criticality]
+                                                                ),
+                                                            }}
+                                                        />
+                                                        <Tooltip
+                                                            placement='right'
+                                                            classes={{
+                                                                tooltip: classes.htmlTooltip,
+                                                            }}
+                                                            title={
+                                                                <React.Fragment>
+                                                                    <FormattedMessage
+                                                                        id='Apis.Details.APIDefinition.AuditApi.tooltip'
+                                                                        defaultMessage={
+                                                                            'Severity ranges from INFO, LOW, MEDIUM, ' +
+                                                                            'HIGH to CRITICAL, with INFO being ' +
+                                                                            'low vulnerability and CRITICAL' +
+                                                                            'being high vulnerability'
+                                                                        }
+                                                                    />
+                                                                </React.Fragment>
+                                                            }
+                                                        >
+                                                            <Button className={classes.helpButton}>
+                                                                <HelpOutline className={classes.helpIcon} />
+                                                            </Button>
+                                                        </Tooltip>
+                                                    </Typography>
+                                                </React.Fragment>
+                                            }
                                             <hr />
-                                            {reportObject.security.issues !== null &&
+                                            {{}.hasOwnProperty.call(reportObject, 'security') &&
                                                 <Typography variant='body1'>
                                                     <FormattedMessage
                                                         id='Apis.Details.APIDefinition.AuditApi.SecuritySummary'
@@ -620,7 +762,7 @@ class APISecurityAudit extends Component {
                                                     </VisibilitySensor>
                                                 </Typography>
                                             }
-                                            {reportObject.data.issues !== null &&
+                                            {{}.hasOwnProperty.call(reportObject, 'data') &&
                                                 <Typography variant='body1'>
                                                     <FormattedMessage
                                                         id='Apis.Details.APIDefinition.AuditApi.DataValidationSummary'
@@ -650,12 +792,30 @@ class APISecurityAudit extends Component {
                                                     </VisibilitySensor>
                                                 </Typography>
                                             }
+                                            {{}.hasOwnProperty.call(reportObject, 'validationErrors') &&
+                                                <InlineMessage type='info' height={140}>
+                                                    <div className={classes.contentWrapper}>
+                                                        <Typography variant='h5' component='h3' className={classes.head}>
+                                                            <FormattedMessage
+                                                                id='Apis.Details.APIDefinition.AuditApi.FailedToValidate.Heading'
+                                                                defaultMessage='Failed to Validate OpenAPI File'
+                                                            />
+                                                        </Typography>
+                                                        <Typography component='p' className={classes.content}>
+                                                            <FormattedMessage
+                                                                id='Apis.Details.APIDefinition.AuditApi.FailedToValidate.Content'
+                                                                defaultMessage='Fix the critical errors shown below and run the audit again.'
+                                                            />
+                                                        </Typography>
+                                                    </div>
+                                                </InlineMessage>
+                                            }
                                         </div>
                                     </div>
                                 </div>
                             </Paper>
                         </div>
-                        {{}.hasOwnProperty.call(reportObject, 'validation') &&
+                        {
                             <div className={classes.paperDiv}>
                                 <Paper elevation={1} className={classes.rootPaper}>
                                     <div>
@@ -665,13 +825,83 @@ class APISecurityAudit extends Component {
                                                 defaultMessage='OpenAPI Format Requirements'
                                             />
                                         </Typography>
-
+                                        {{}.hasOwnProperty.call(reportObject, 'semanticErrors') &&
+                                            <React.Fragment>
+                                                {/* <Typography variant='body1'>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.APIDefinition.AuditApi.OASSemanticErrorIssueCount'
+                                                        defaultMessage='{semanticErrorIssueCountText} {semanticErrorIssueCount}'
+                                                        values={{
+                                                            semanticErrorIssueCountText: (
+                                                                <strong>Number of Semantic Issues: </strong>
+                                                            ),
+                                                            semanticErrorIssueCount: (
+                                                                reportObject.semanticErrors.issues
+                                                            ),
+                                                        }}
+                                                    />
+                                                </Typography> */}
+                                                <div>
+                                                    <Typography variant='body1'>
+                                                        <MuiThemeProvider theme={this.getMuiTheme()}>
+                                                            <MUIDataTable
+                                                                title='Semantic Errors'
+                                                                data={this.getRowData(
+                                                                    reportObject.semanticErrors.issues,
+                                                                    'OpenAPI Format Requirements',
+                                                                    'error',
+                                                                )}
+                                                                columns={errorColumns}
+                                                                options={options}
+                                                            />
+                                                        </MuiThemeProvider>
+                                                    </Typography>
+                                                </div>
+                                            </React.Fragment>
+                                        }
+                                        {{}.hasOwnProperty.call(reportObject, 'validationErrors') &&
+                                            <React.Fragment>
+                                                {/* <Typography variant='body1'>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.APIDefinition.AuditApi.OASStructuralErrorIssueCount'
+                                                        defaultMessage='{structuralErrorIssueCountText} {structuralErrorIssueCount}'
+                                                        values={{
+                                                            structuralErrorIssueCountText: (
+                                                                <strong>Number of Structural Issues: </strong>
+                                                            ),
+                                                            structuralErrorIssueCount: (
+                                                                reportObject.validationErrors.issues
+                                                            ),
+                                                        }}
+                                                    />
+                                                </Typography> */}
+                                                <div>
+                                                    <Typography variant='body1'>
+                                                        <MuiThemeProvider theme={this.getErrorMuiTheme()}>
+                                                            <MUIDataTable
+                                                                title='Structural Errors'
+                                                                data={this.getRowData(
+                                                                    reportObject.validationErrors.issues,
+                                                                    'OpenAPI Format Requirements',
+                                                                    'error',
+                                                                )}
+                                                                columns={errorColumns}
+                                                                options={options}
+                                                            />
+                                                        </MuiThemeProvider>
+                                                    </Typography>
+                                                </div>
+                                            </React.Fragment>
+                                        }
+                                        {!{}.hasOwnProperty.call(reportObject, 'validationErrors') &&
+                                        !{}.hasOwnProperty.call(reportObject, 'semanticErrors') &&
                                         <Typography variant='body1'>
                                             <FormattedMessage
                                                 id='Apis.Details.APIDefinition.AuditApi.OASNoIssuesFound'
-                                                defaultMessage='No issues found'
+                                                defaultMessage='No Issues Found'
                                             />
                                         </Typography>
+                                        }
                                     </div>
                                 </Paper>
                             </div>
@@ -761,6 +991,7 @@ class APISecurityAudit extends Component {
                                                             data={this.getRowData(
                                                                 reportObject.security.issues,
                                                                 'Security',
+                                                                'normal',
                                                             )}
                                                             columns={columns}
                                                             options={options}
@@ -858,6 +1089,7 @@ class APISecurityAudit extends Component {
                                                             data={this.getRowData(
                                                                 reportObject.data.issues,
                                                                 'Data Validation',
+                                                                'normal',
                                                             )}
                                                             columns={columns}
                                                             options={options}
