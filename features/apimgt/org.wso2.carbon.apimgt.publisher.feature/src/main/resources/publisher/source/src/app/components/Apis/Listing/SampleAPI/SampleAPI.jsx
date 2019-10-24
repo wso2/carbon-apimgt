@@ -32,6 +32,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import AuthManager from 'AppData/AuthManager';
 import APICreateMenu from '../components/APICreateMenu';
 import getSampleSwagger from './SamplePetStore.js';
 
@@ -240,17 +241,19 @@ class SampleAPI extends Component {
                             <Create />
                             <FormattedMessage id='create.new.api' defaultMessage='Create New API' />
                         </APICreateMenu>
-                        <Button
-                            size='small'
-                            color='primary'
-                            disabled={deploying}
-                            variant='outlined'
-                            onClick={this.handleDeploySample}
-                        >
-                            <GetApp />
-                            <FormattedMessage id='deploy.sample.api' defaultMessage='Deploy Sample API' />
-                            {deploying && <CircularProgress size={24} className={classes.buttonProgress} />}
-                        </Button>
+                        {!AuthManager.isNotCreator() &&
+                            <Button
+                                size='small'
+                                color='primary'
+                                disabled={deploying}
+                                variant='outlined'
+                                onClick={this.handleDeploySample}
+                            >
+                                <GetApp />
+                                <FormattedMessage id='deploy.sample.api' defaultMessage='Deploy Sample API' />
+                                {deploying && <CircularProgress size={24} className={classes.buttonProgress} />}
+                            </Button>
+                        }
                     </div>
                 </div>
             </InlineMessage>
