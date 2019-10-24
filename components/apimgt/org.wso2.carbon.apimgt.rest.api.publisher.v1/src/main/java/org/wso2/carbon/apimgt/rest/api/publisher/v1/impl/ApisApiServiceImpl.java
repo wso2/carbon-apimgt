@@ -2150,7 +2150,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     api.addMonetizationProperty(currentEntry.getKey(), currentEntry.getValue());
                 }
             }
-            apiProvider.configureMonetizationInAPIArtifact(api);
             Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
             HashMap monetizationDataMap = new Gson().fromJson(api.getMonetizationProperties().toString(), HashMap.class);
             boolean isMonetizationStateChangeSuccessful = false;
@@ -2172,6 +2171,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
             if (isMonetizationStateChangeSuccessful) {
+                apiProvider.configureMonetizationInAPIArtifact(api);
                 APIMonetizationInfoDTO monetizationInfoDTO = APIMappingUtil.getMonetizationInfoDTO(apiIdentifier);
                 return Response.ok().entity(monetizationInfoDTO).build();
             } else {
