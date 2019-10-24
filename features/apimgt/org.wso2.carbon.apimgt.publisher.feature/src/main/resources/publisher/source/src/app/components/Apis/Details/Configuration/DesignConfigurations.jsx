@@ -153,7 +153,7 @@ export default function DesignConfigurations() {
      */
     function configReducer(state, configAction) {
         const { action, value } = configAction;
-        const nextState = { ...copyAPIConfig(state) };
+        const nextState = copyAPIConfig(state);
         switch (action) {
             case 'description':
             case 'isDefaultVersion':
@@ -161,11 +161,16 @@ export default function DesignConfigurations() {
             case 'responseCachingEnabled':
             case 'cacheTimeout':
             case 'enableSchemaValidation':
-            case 'accessControl':
             case 'visibility':
             case 'maxTps':
             case 'tags':
                 nextState[action] = value;
+                return nextState;
+            case 'accessControl':
+                nextState[action] = value;
+                if(value === 'NONE') {
+                    nextState.accessControlRoles = [];
+                }
                 return nextState;
             case 'accessControlRoles':
                 return { ...copyAPIConfig(state), [action]: value };
