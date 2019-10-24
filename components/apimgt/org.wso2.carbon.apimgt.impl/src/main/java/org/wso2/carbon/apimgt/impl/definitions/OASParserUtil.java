@@ -266,45 +266,55 @@ public class OASParserUtil {
                 if (REQUEST_BODIES.equalsIgnoreCase(category)) {
                     Map<String, RequestBody> sourceRequestBodies = sourceComponents.getRequestBodies();
 
-                    for (String refKey : refCategoryEntry.getValue()) {
-                        RequestBody requestBody = sourceRequestBodies.get(refKey);
-                        components.addRequestBodies(refKey, requestBody);
+                    if (sourceRequestBodies != null) {
+                        for (String refKey : refCategoryEntry.getValue()) {
+                            RequestBody requestBody = sourceRequestBodies.get(refKey);
+                            components.addRequestBodies(refKey, requestBody);
+                        }
                     }
                 }
 
                 if (SCHEMAS.equalsIgnoreCase(category)) {
                     Map<String, Schema> sourceSchemas = sourceComponents.getSchemas();
 
-                    for (String refKey : refCategoryEntry.getValue()) {
-                        Schema schema = sourceSchemas.get(refKey);
-                        components.addSchemas(refKey, schema);
+                    if (sourceSchemas != null) {
+                        for (String refKey : refCategoryEntry.getValue()) {
+                            Schema schema = sourceSchemas.get(refKey);
+                            components.addSchemas(refKey, schema);
+                        }
                     }
                 }
 
                 if (PARAMETERS.equalsIgnoreCase(category)) {
                     Map<String, Parameter> parameters = sourceComponents.getParameters();
 
-                    for (String refKey : refCategoryEntry.getValue()) {
-                        Parameter parameter = parameters.get(refKey);
-                        components.addParameters(refKey, parameter);
+                    if (parameters != null) {
+                        for (String refKey : refCategoryEntry.getValue()) {
+                            Parameter parameter = parameters.get(refKey);
+                            components.addParameters(refKey, parameter);
+                        }
                     }
                 }
 
                 if (RESPONSES.equalsIgnoreCase(category)) {
                     Map<String, ApiResponse> responses = sourceComponents.getResponses();
 
-                    for (String refKey : refCategoryEntry.getValue()) {
-                        ApiResponse response = responses.get(refKey);
-                        components.addResponses(refKey, response);
+                    if (responses != null) {
+                        for (String refKey : refCategoryEntry.getValue()) {
+                            ApiResponse response = responses.get(refKey);
+                            components.addResponses(refKey, response);
+                        }
                     }
                 }
 
                 if (HEADERS.equalsIgnoreCase(category)) {
                     Map<String, Header> headers = sourceComponents.getHeaders();
 
-                    for (String refKey : refCategoryEntry.getValue()) {
-                        Header header = headers.get(refKey);
-                        components.addHeaders(refKey, header);
+                    if (headers != null) {
+                        for (String refKey : refCategoryEntry.getValue()) {
+                            Header header = headers.get(refKey);
+                            components.addHeaders(refKey, header);
+                        }
                     }
                 }
             }
@@ -336,39 +346,47 @@ public class OASParserUtil {
                 if (SCHEMAS.equalsIgnoreCase(category)) {
                     Map<String, Schema> sourceSchemas = sourceComponents.getSchemas();
 
-                    for (String refKey : refCategoryEntry.getValue()) {
-                        Schema schema = sourceSchemas.get(refKey);
-                        extractReferenceFromSchema(schema, context);
+                    if (sourceSchemas != null) {
+                        for (String refKey : refCategoryEntry.getValue()) {
+                            Schema schema = sourceSchemas.get(refKey);
+                            extractReferenceFromSchema(schema, context);
+                        }
                     }
                 }
 
                 if (PARAMETERS.equalsIgnoreCase(category)) {
                     Map<String, Parameter> parameters = sourceComponents.getParameters();
 
-                    for (String refKey : refCategoryEntry.getValue()) {
-                        Parameter parameter = parameters.get(refKey);
-                        Content content = parameter.getContent();
-                        extractReferenceFromContent(content, context);
+                    if (parameters != null) {
+                        for (String refKey : refCategoryEntry.getValue()) {
+                            Parameter parameter = parameters.get(refKey);
+                            Content content = parameter.getContent();
+                            extractReferenceFromContent(content, context);
+                        }
                     }
                 }
 
                 if (RESPONSES.equalsIgnoreCase(category)) {
                     Map<String, ApiResponse> responses = sourceComponents.getResponses();
 
-                    for (String refKey : refCategoryEntry.getValue()) {
-                        ApiResponse response = responses.get(refKey);
-                        Content content = response.getContent();
-                        extractReferenceFromContent(content, context);
+                    if (responses != null) {
+                        for (String refKey : refCategoryEntry.getValue()) {
+                            ApiResponse response = responses.get(refKey);
+                            Content content = response.getContent();
+                            extractReferenceFromContent(content, context);
+                        }
                     }
                 }
 
                 if (HEADERS.equalsIgnoreCase(category)) {
                     Map<String, Header> headers = sourceComponents.getHeaders();
 
-                    for (String refKey : refCategoryEntry.getValue()) {
-                        Header header = headers.get(refKey);
-                        Content content = header.getContent();
-                        extractReferenceFromContent(content, context);
+                    if (headers != null) {
+                        for (String refKey : refCategoryEntry.getValue()) {
+                            Header header = headers.get(refKey);
+                            Content content = header.getContent();
+                            extractReferenceFromContent(content, context);
+                        }
                     }
                 }
             }
