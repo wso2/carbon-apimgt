@@ -1463,34 +1463,50 @@ public class ApiMgtDAO {
     public Set<Scope> getScopesForApplicationSubscription(Subscriber subscriber, int applicationId)
             throws APIManagementException {
         HashMap<String, Scope> scopeHashMap = new HashMap<>();
+        Set<Integer> apiIdSet = new HashSet<>();
         int tenantId = APIUtil.getTenantId(subscriber.getName());
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
-            String sqlQueryforGetSubscribedApis = SQLConstants.GET_SUBSCRIBED_API_IDs_BY_APP_ID_SQL;
-            String sqlQuery = SQLConstants.GET_SCOPE_BY_SUBSCRIBED_API_PREFIX + sqlQueryforGetSubscribedApis +
-                    SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_SUFFIX;
+            String sqlQueryForGetSubscribedApis = SQLConstants.GET_SUBSCRIBED_API_IDs_BY_APP_ID_SQL;
+            PreparedStatement getSubscribedApisAndProducts = conn.prepareStatement(sqlQueryForGetSubscribedApis);
+            getSubscribedApisAndProducts.setInt(1, tenantId);
+            getSubscribedApisAndProducts.setInt(2, applicationId);
+            ResultSet resultSet = getSubscribedApisAndProducts.executeQuery();
+            while (resultSet.next()) {
+                int apiId = resultSet.getInt("API_ID");
+                String getIncludedApisInProductQuery = SQLConstants.GET_INCLUDED_APIS_IN_PRODUCT_SQL;
+                PreparedStatement getIncludedApisInProduct = conn.prepareStatement(getIncludedApisInProductQuery);
+                getIncludedApisInProduct.setInt(1, apiId);
+                ResultSet resultSet1 = getIncludedApisInProduct.executeQuery();
+                while (resultSet1.next()) {
+                    int includedApiId = resultSet1.getInt("API_ID");
+                    apiIdSet.add(includedApiId);
+                }
+                apiIdSet.add(apiId);
+            }
+            String apiIdList = StringUtils.join(apiIdSet, ", ");
+            String sqlQuery = SQLConstants.GET_SCOPE_BY_SUBSCRIBED_API_PREFIX + apiIdList
+                    + SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_SUFFIX;
 
             if (conn.getMetaData().getDriverName().contains("Oracle")) {
-                sqlQuery = SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_ORACLE_SQL + sqlQueryforGetSubscribedApis +
-                        SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_SUFFIX;
+                sqlQuery = SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_ORACLE_SQL + apiIdList
+                        + SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_SUFFIX;
             }
             try (PreparedStatement statement = conn.prepareStatement(sqlQuery)) {
-                statement.setInt(1, tenantId);
-                statement.setInt(2, applicationId);
-                try (ResultSet resultSet = statement.executeQuery()) {
-                    while (resultSet.next()) {
+                try (ResultSet finalResultSet = statement.executeQuery()) {
+                    while (finalResultSet.next()) {
                         Scope scope;
-                        String scopeKey = resultSet.getString(1);
+                        String scopeKey = finalResultSet.getString(1);
                         if (scopeHashMap.containsKey(scopeKey)) {
                             // scope already exists append roles.
                             scope = scopeHashMap.get(scopeKey);
-                            scope.setRoles(scope.getRoles().concat("," + resultSet.getString(4)).trim());
+                            scope.setRoles(scope.getRoles().concat("," + finalResultSet.getString(4)).trim());
                         } else {
                             scope = new Scope();
                             scope.setKey(scopeKey);
-                            scope.setName(resultSet.getString(2));
-                            scope.setDescription(resultSet.getString(3));
-                            scope.setRoles(resultSet.getString(4).trim());
+                            scope.setName(finalResultSet.getString(2));
+                            scope.setDescription(finalResultSet.getString(3));
+                            scope.setRoles(finalResultSet.getString(4).trim());
                         }
                         scopeHashMap.put(scopeKey, scope);
                     }

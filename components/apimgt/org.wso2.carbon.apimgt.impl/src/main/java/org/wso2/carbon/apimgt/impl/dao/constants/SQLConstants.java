@@ -126,6 +126,13 @@ public class SQLConstants {
                     "   AND APP.APPLICATION_ID= ? " +
                     "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
+    public static final String GET_INCLUDED_APIS_IN_PRODUCT_SQL =
+            "SELECT "
+                    + "DISTINCT API_ID "
+                    + "FROM AM_API_URL_MAPPING "
+                    + "WHERE URL_MAPPING_ID IN "
+                    + "(SELECT URL_MAPPING_ID FROM AM_API_PRODUCT_MAPPING WHERE API_ID = ?)";
+
     public static final String GET_SUBSCRIBED_APIS_OF_USER_BY_APP_SQL =
             " SELECT " +
                     "   API.API_PROVIDER AS API_PROVIDER," +
