@@ -20,6 +20,7 @@ import qs from 'qs';
 import CONSTS from 'AppData/Constants';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import Configurations from 'Config';
+import API from 'AppData/api.js';
 import Utils from './Utils';
 import User from './User';
 import APIClient from './APIClient';
@@ -178,6 +179,15 @@ class AuthManager {
     }
 
     static isRestricted(scopesAllowedToEdit, api) {
+        // determines whether the apiType is API PRODUCT and user has publisher role, then allow access.
+        if (api.apiType === API.CONSTS.APIProduct) {
+            if (AuthManager.getUser().scopes.includes('apim:api_publish')) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
         // determines whether the user is a publisher or creator (based on what is passed from the element)
         // if (scopesAllowedToEdit.filter(element => AuthManager.getUser().scopes.includes(element)).length > 0) {
         if (scopesAllowedToEdit.find(element => AuthManager.getUser().scopes.includes(element))) {
