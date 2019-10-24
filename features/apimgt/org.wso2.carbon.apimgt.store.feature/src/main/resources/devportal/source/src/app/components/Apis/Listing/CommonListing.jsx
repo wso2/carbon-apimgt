@@ -133,14 +133,14 @@ const styles = theme => ({
         cursor: 'pointer',
     },
     rotatedText: {
-        transform: 'rotate(90deg)',
+        transform: 'rotate(270deg)',
         transformOrigin: 'left bottom 0',
         position: 'absolute',
         whiteSpace: 'nowrap',
-        top: theme.custom.infoBar.height,
-        marginLeft: 4,
+        top: theme.custom.infoBar.height * 2,
+        marginLeft: 23,
         cursor: 'pointer',
-    }
+    },
 });
 
 /**
@@ -213,7 +213,7 @@ class CommonListing extends React.Component {
             },
         } = theme;
         const { listType, allTags, showLeftMenu } = this.state;
-        const strokeColorMain = theme.custom.tagCloud.leftMenu.background;
+        const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
         const searchParam = new URLSearchParams(search);
         const searchQuery = searchParam.get('query');
         let selectedTag = null;
@@ -249,11 +249,8 @@ class CommonListing extends React.Component {
                             <Icon>keyboard_arrow_right</Icon>
                         </div>
                         <div className={classes.rotatedText} onClick={this.toggleLeftMenu}>
-                                <FormattedMessage
-                                    defaultMessage='Tag Cloud'
-                                    id='Apis.Listing.Listing.ApiTagCloud.title'
-                                />
-                            </div>
+                            <FormattedMessage defaultMessage='Tag Cloud' id='Apis.Listing.Listing.ApiTagCloud.title' />
+                        </div>
                     </div>
                 )}
 

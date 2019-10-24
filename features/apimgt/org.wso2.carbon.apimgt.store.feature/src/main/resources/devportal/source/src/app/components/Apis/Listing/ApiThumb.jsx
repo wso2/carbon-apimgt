@@ -31,6 +31,7 @@ import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import ImageGenerator from './ImageGenerator';
 import Api from '../../../data/api';
 import { ApiContext } from '../Details/ApiContext';
+import classNames from 'classnames';
 
 /**
  *
@@ -43,7 +44,15 @@ const styles = theme => ({
         maxWidth: theme.custom.thumbnail.width,
         transition: 'box-shadow 0.3s ease-in-out',
     },
-    apiDetails: { padding: theme.spacing.unit },
+    apiDetails: {
+        padding: theme.spacing.unit,
+        background: theme.custom.thumbnail.contentBackgroundColor,
+        padding: theme.spacing.unit,
+        color: theme.palette.getContrastText(theme.custom.thumbnail.contentBackgroundColor),
+        '& a': {
+            color: theme.palette.getContrastText(theme.custom.thumbnail.contentBackgroundColor),
+        },
+    },
     suppressLinkStyles: {
         textDecoration: 'none',
         color: theme.palette.text.disabled,
@@ -60,12 +69,6 @@ const styles = theme => ({
     },
     thumbContent: {
         width: theme.custom.thumbnail.width - theme.spacing(2),
-        backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing.unit,
-        color: theme.palette.getContrastText(theme.palette.background.paper),
-        '& a': {
-            color: theme.palette.getContrastText(theme.palette.background.paper),
-        },
     },
     thumbLeft: {
         alignSelf: 'flex-start',
@@ -83,7 +86,6 @@ const styles = theme => ({
     thumbHeader: {
         width: theme.custom.thumbnail.width - theme.spacing.unit,
         whiteSpace: 'nowrap',
-        color: theme.palette.text.secondary,
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         cursor: 'pointer',
@@ -257,7 +259,13 @@ class ApiThumb extends React.Component {
         let ImageView;
         if (imageObj) {
             ImageView = (
-                <img height={imageHeight} width={imageWidth} src={imageObj} alt='API Thumbnail' className={classes.media} />
+                <img
+                    height={imageHeight}
+                    width={imageWidth}
+                    src={imageObj}
+                    alt='API Thumbnail'
+                    className={classes.media}
+                />
             );
         } else {
             ImageView = (
@@ -282,7 +290,7 @@ class ApiThumb extends React.Component {
                 onMouseOut={this.toggleMouseOver}
                 onBlur={this.toggleMouseOver}
                 raised={isHover}
-                className={classes.card}
+                className={classNames('image-thumbnail', classes.card)}
             >
                 <CardMedia>
                     <Link to={detailsLink} className={classes.suppressLinkStyles}>
@@ -291,7 +299,7 @@ class ApiThumb extends React.Component {
                     </Link>
                 </CardMedia>
                 {showInfo && (
-                    <CardContent className={classes.apiDetails}>
+                    <CardContent classes={{ root: classes.apiDetails }}>
                         <Link to={detailsLink} className={classes.textWrapper}>
                             <Typography
                                 className={classes.thumbHeader}
@@ -341,7 +349,7 @@ class ApiThumb extends React.Component {
                                     variant='subtitle1'
                                     gutterBottom
                                     align='left'
-                                    className={classes.ratingWrapper}
+                                    className={classNames('api-thumb-rating', classes.ratingWrapper)}
                                 >
                                     <StarRatingBar
                                         apiRating={api.avgRating}
