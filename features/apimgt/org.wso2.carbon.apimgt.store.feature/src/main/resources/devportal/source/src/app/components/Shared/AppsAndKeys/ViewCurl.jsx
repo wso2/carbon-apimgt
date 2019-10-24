@@ -139,7 +139,7 @@ function ViewCurl(props) {
                     <div>
                         <span className={classes.command}>curl -k -X POST </span> {tokenURL}
                         <span className={classes.command}> -d </span>{' '}
-                        {'"grant_type=client_credentials&username=Username&password=Password"'}
+                        {'"grant_type=client_credentials"'}
                     </div>
                     <div>
                         <span className={classes.command}> -H </span>
@@ -154,7 +154,7 @@ function ViewCurl(props) {
                     <Tooltip title={tokenCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
                         <CopyToClipboard
                             text={`curl -k -X POST ${tokenURL} -d ` +
-                            '"grant_type=client_credentials&username=Username&password=Password" -H' +
+                            '"grant_type=client_credentials" -H' +
                             `"Authorization: Basic ${bas64Encoded}"`}
                             onCopy={onCopy}
                         >
