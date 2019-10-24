@@ -108,8 +108,8 @@ const endpointTypes = [
     { key: 'http', value: 'HTTP/REST Endpoint' },
     { key: 'default', value: 'Dynamic Endpoints' },
     { key: 'address', value: 'HTTP/SOAP Endpoint' },
-    { key: 'prototyped', value: 'Prototyped' },
-    { key: 'INLINE', value: 'Mocked' },
+    { key: 'prototyped', value: 'Prototype Endpoint' },
+    { key: 'INLINE', value: 'Prototype Implementation' },
 ];
 
 /**
@@ -198,8 +198,8 @@ function EndpointOverview(props) {
                 { key: 'http', value: 'HTTP/REST Endpoint' },
                 { key: 'address', value: 'HTTP/SOAP Endpoint' },
                 { key: 'default', value: 'Dynamic Endpoints' },
-                { key: 'prototyped', value: 'Prototyped' },
-                { key: 'INLINE', value: 'Mocked' },
+                { key: 'prototyped', value: 'Prototype Endpoint' },
+                { key: 'INLINE', value: 'Prototype Implementation' },
             ];
         }
         return supportedEndpointTypes;
