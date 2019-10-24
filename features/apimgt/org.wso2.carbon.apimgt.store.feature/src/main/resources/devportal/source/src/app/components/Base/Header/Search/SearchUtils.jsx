@@ -57,44 +57,46 @@ function renderInput(inputProps) {
     }
     return (
         <React.Fragment>
-            <NativeSelect
-                onChange={onDropDownChange}
-                className={classes.selectRoot}
-            >
-                <FormattedMessage
-                    id='Base.Header.headersearch.SearchUtils.lcState.all'
-                    defaultMessage='All'
+            <div style={{ whiteSpace: 'nowrap' }}>
+                <NativeSelect
+                    onChange={onDropDownChange}
+                    className={classes.selectRoot}
                 >
-                    {placeholder => <option value=''>{placeholder}</option>}
-                </FormattedMessage>
-                <FormattedMessage
-                    id='Base.Header.headersearch.SearchUtils.lcState.published'
-                    defaultMessage='Production'
-                >
-                    {placeholder => <option value='PUBLISHED'>{placeholder}</option>}
-                </FormattedMessage>
-                <FormattedMessage
-                    id='Base.Header.headersearch.SearchUtils.lcState.prototyped'
-                    defaultMessage='Prototyped'
-                >
-                    {placeholder => <option value='PROTOTYPED'>{placeholder}</option>}
-                </FormattedMessage>
-            </NativeSelect>
-            <TextField
-                id='searchQuery'
-                InputProps={{
-                    inputRef: ref,
-                    className: classes.input,
-                    classes: { focused: classes.inputFocused },
-                    startAdornment: (
-                        <InputAdornment position='start'>
-                            <SearchOutlined />
-                        </InputAdornment>
-                    ),
-                    endAdornment: loadingAdorment,
-                    ...other,
-                }}
-            />
+                    <FormattedMessage
+                        id='Base.Header.headersearch.SearchUtils.lcState.all'
+                        defaultMessage='All'
+                    >
+                        {placeholder => <option value=''>{placeholder}</option>}
+                    </FormattedMessage>
+                    <FormattedMessage
+                        id='Base.Header.headersearch.SearchUtils.lcState.published'
+                        defaultMessage='Production'
+                    >
+                        {placeholder => <option value='PUBLISHED'>{placeholder}</option>}
+                    </FormattedMessage>
+                    <FormattedMessage
+                        id='Base.Header.headersearch.SearchUtils.lcState.prototyped'
+                        defaultMessage='Prototyped'
+                    >
+                        {placeholder => <option value='PROTOTYPED'>{placeholder}</option>}
+                    </FormattedMessage>
+                </NativeSelect>
+                <TextField
+                    id='searchQuery'
+                    InputProps={{
+                        inputRef: ref,
+                        className: classes.input,
+                        classes: { focused: classes.inputFocused },
+                        startAdornment: (
+                            <InputAdornment position='start'>
+                                <SearchOutlined />
+                            </InputAdornment>
+                        ),
+                        endAdornment: loadingAdorment,
+                        ...other,
+                    }}
+                />
+            </div>
         </React.Fragment>
     );
 }
