@@ -9028,7 +9028,22 @@ public final class APIUtil {
             for (APIProductResource resource : resources) {
                 String apiPath = APIUtil.getAPIPath(resource.getApiIdentifier());
 
-                Resource productResource = registry.get(apiPath);
+                Resource productResource = null;
+                try {
+                    // Handles store and publisher visibility issue when associated apis have different visibility
+                    // restrictions.
+                    productResource = registry.get(apiPath);
+                } catch (RegistryException e) {
+                    if (e.getClass().equals(AuthorizationFailedException.class)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("User is not authorized to access the resource " + apiPath);
+                        }
+                        continue;
+                    } else {
+                        String msg = "Failed to get product resource";
+                        throw new APIManagementException(msg, e);
+                    }
+                }
                 String artifactId = productResource.getUUID();
                 resource.setApiId(artifactId);
 
