@@ -213,6 +213,12 @@ class CreateScope extends React.Component {
         if (valid[id].invalid) {
             valid[id].error = 'Scope name cannot be empty';
         }
+
+        if (/\s/.test(value)) {
+            valid[id].invalid = true;
+            valid[id].error = 'Scope name cannot have spaces';
+        }
+
         const exist = scopes.find((scope) => {
             return scope.name === value;
         });
