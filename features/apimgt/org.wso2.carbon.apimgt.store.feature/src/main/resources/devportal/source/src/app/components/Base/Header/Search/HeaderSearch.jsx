@@ -50,7 +50,7 @@ const styles = theme => ({
         listStyleType: 'none',
     },
     input: {
-        width: '300px',
+        width: '280px',
         background: theme.palette.getContrastText(theme.custom.appBar.background),
         '-webkit-transition': 'all .35s ease-in-out',
         transition: 'all .35s ease-in-out',
