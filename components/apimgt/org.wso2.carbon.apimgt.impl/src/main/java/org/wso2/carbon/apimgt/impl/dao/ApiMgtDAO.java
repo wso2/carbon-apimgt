@@ -1462,22 +1462,26 @@ public class ApiMgtDAO {
 
     public Set<Scope> getScopesForApplicationSubscription(Subscriber subscriber, int applicationId)
             throws APIManagementException {
+        PreparedStatement getIncludedApisInProduct = null;
+        PreparedStatement getSubscribedApisAndProducts = null;
+        ResultSet resultSet = null;
+        ResultSet resultSet1 = null;
         HashMap<String, Scope> scopeHashMap = new HashMap<>();
         Set<Integer> apiIdSet = new HashSet<>();
         int tenantId = APIUtil.getTenantId(subscriber.getName());
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             String sqlQueryForGetSubscribedApis = SQLConstants.GET_SUBSCRIBED_API_IDs_BY_APP_ID_SQL;
-            PreparedStatement getSubscribedApisAndProducts = conn.prepareStatement(sqlQueryForGetSubscribedApis);
+            getSubscribedApisAndProducts = conn.prepareStatement(sqlQueryForGetSubscribedApis);
             getSubscribedApisAndProducts.setInt(1, tenantId);
             getSubscribedApisAndProducts.setInt(2, applicationId);
-            ResultSet resultSet = getSubscribedApisAndProducts.executeQuery();
+            resultSet = getSubscribedApisAndProducts.executeQuery();
             while (resultSet.next()) {
                 int apiId = resultSet.getInt("API_ID");
                 String getIncludedApisInProductQuery = SQLConstants.GET_INCLUDED_APIS_IN_PRODUCT_SQL;
-                PreparedStatement getIncludedApisInProduct = conn.prepareStatement(getIncludedApisInProductQuery);
+                getIncludedApisInProduct = conn.prepareStatement(getIncludedApisInProductQuery);
                 getIncludedApisInProduct.setInt(1, apiId);
-                ResultSet resultSet1 = getIncludedApisInProduct.executeQuery();
+                resultSet1 = getIncludedApisInProduct.executeQuery();
                 while (resultSet1.next()) {
                     int includedApiId = resultSet1.getInt("API_ID");
                     apiIdSet.add(includedApiId);
@@ -1514,6 +1518,9 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to retrieve scopes for application subscription ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(getSubscribedApisAndProducts, null, resultSet);
+            APIMgtDBUtil.closeAllConnections(getIncludedApisInProduct, null, resultSet1);
         }
         return populateScopeSet(scopeHashMap);
     }
@@ -9379,15 +9386,39 @@ public class ApiMgtDAO {
     public Map<String, String> getScopeRolesOfApplication(String consumerKey) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
+        ResultSet resultSet1 = null;
+        ResultSet resultSet2 = null;
         PreparedStatement ps = null;
+        PreparedStatement getSubscribedApisAndProducts = null;
+        PreparedStatement getIncludedApisInProduct = null;
+
+        Set<Integer> apiIdSet = new HashSet<>();
 
         try {
             conn = APIMgtDBUtil.getConnection();
-
-            String sqlQuery = SQLConstants.GET_SCOPE_ROLES_OF_APPLICATION_SQL;
-
+            String sqlQueryForGetSubscribedApis = SQLConstants.GET_SUBSCRIBED_APIS_FROM_CONSUMER_KEY;
+            getSubscribedApisAndProducts = conn.prepareStatement(sqlQueryForGetSubscribedApis);
+            getSubscribedApisAndProducts.setString(1, consumerKey);
+            resultSet1 = getSubscribedApisAndProducts.executeQuery();
+            while (resultSet1.next()) {
+                int apiId = resultSet1.getInt("API_ID");
+                String getIncludedApisInProductQuery = SQLConstants.GET_INCLUDED_APIS_IN_PRODUCT_SQL;
+                getIncludedApisInProduct = conn.prepareStatement(getIncludedApisInProductQuery);
+                getIncludedApisInProduct.setInt(1, apiId);
+                resultSet2 = getIncludedApisInProduct.executeQuery();
+                while (resultSet2.next()) {
+                    int includedApiId = resultSet2.getInt("API_ID");
+                    apiIdSet.add(includedApiId);
+                }
+                apiIdSet.add(apiId);
+            }
+            String apiIdList = StringUtils.join(apiIdSet, ", ");
+            String sqlQuery = SQLConstants.GET_SCOPE_ROLES_OF_APPLICATION_SQL + apiIdList + SQLConstants.CLOSING_BRACE;
+            if (conn.getMetaData().getDriverName().contains("Oracle")) {
+                sqlQuery =
+                        SQLConstants.GET_SCOPE_ROLES_OF_APPLICATION_ORACLE_SQL + apiIdList + SQLConstants.CLOSING_BRACE;
+            }
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, consumerKey);
             resultSet = ps.executeQuery();
             Map<String, String> scopes = new HashMap<String, String>();
             while (resultSet.next()) {
@@ -9405,6 +9436,8 @@ public class ApiMgtDAO {
             handleException("Failed to retrieve scopes of application" + consumerKey, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            APIMgtDBUtil.closeAllConnections(getSubscribedApisAndProducts, null, resultSet1);
+            APIMgtDBUtil.closeAllConnections(getIncludedApisInProduct, null, resultSet2);
         }
         return null;
     }

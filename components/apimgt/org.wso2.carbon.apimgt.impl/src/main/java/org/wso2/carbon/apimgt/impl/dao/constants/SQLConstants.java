@@ -2453,22 +2453,24 @@ public class SQLConstants {
             " WHERE" +
             "   A.API_ID = ? ";
 
+    public static final String GET_SUBSCRIBED_APIS_FROM_CONSUMER_KEY =
+        "SELECT SUB.API_ID "
+                + "FROM AM_SUBSCRIPTION SUB, AM_APPLICATION_KEY_MAPPING AKM "
+                + "WHERE AKM.CONSUMER_KEY = ? AND AKM.APPLICATION_ID = SUB.APPLICATION_ID";
+
     public static final String GET_SCOPE_ROLES_OF_APPLICATION_SQL =
-            "SELECT " +
-            "   IOS.NAME, " +
-            "   ISB.SCOPE_BINDING " +
-            " FROM " +
-            "   IDN_OAUTH2_SCOPE IOS, " +
-            "   AM_APPLICATION_KEY_MAPPING AKM, " +
-            "   AM_SUBSCRIPTION SUB, " +
-            "   AM_API_SCOPES SCOPE, " +
-            "   IDN_OAUTH2_SCOPE_BINDING ISB" +
-            " WHERE" +
-            "   AKM.CONSUMER_KEY = ? " +
-            "   AND AKM.APPLICATION_ID = SUB.APPLICATION_ID " +
-            "   AND SUB.API_ID = SCOPE.API_ID " +
-            "   AND IOS.SCOPE_ID = ISB.SCOPE_ID " +
-            "   AND SCOPE.SCOPE_ID = IOS.SCOPE_ID";
+            "SELECT "
+                    + "DISTINCT A.NAME, C.SCOPE_BINDING "
+                    + "FROM ((IDN_OAUTH2_SCOPE AS A INNER JOIN AM_API_SCOPES AS B ON A.SCOPE_ID = B.SCOPE_ID) "
+                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING AS C ON B.SCOPE_ID = C.SCOPE_ID ) WHERE B.API_ID IN (";
+
+    public static final String GET_SCOPE_ROLES_OF_APPLICATION_ORACLE_SQL =
+            "SELECT "
+                    + "DISTINCT A.NAME, C.SCOPE_BINDING "
+                    + "FROM ((IDN_OAUTH2_SCOPE A INNER JOIN AM_API_SCOPES B ON A.SCOPE_ID = B.SCOPE_ID) "
+                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING C ON B.SCOPE_ID = C.SCOPE_ID ) WHERE B.API_ID IN (";
+
+    public static final String CLOSING_BRACE = ")";
 
     public static final String GET_SCOPES_FOR_API_LIST = "SELECT "
             + "B.API_ID,A.SCOPE_ID, A.NAME, A.DESCRIPTION "
