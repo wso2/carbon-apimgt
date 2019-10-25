@@ -1,6 +1,3 @@
-// TODO - Remove the disable commands for eslint when not needed
-/* eslint-disable indent */
-/* eslint-disable react/jsx-indent */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
@@ -344,7 +341,7 @@ class APISecurityAudit extends Component {
 
             for (let j = 0; j < regexPatterns.length; j++) {
                 if (regexPatterns[j] !== '') {
-                     if (j !== 0 && lastTerms.length !== 0 && lastTerms[lastTerms.length - 1] !== null) {
+                    if (j !== 0 && lastTerms.length !== 0 && lastTerms[lastTerms.length - 1] !== null) {
                         lastTerms.push(editor.getModel().findNextMatch(
                             regexPatterns[j],
                             { lineNumber: lastTerms[lastTerms.length - 1].range.endLineNumber, column: 1 },
@@ -737,12 +734,12 @@ class APISecurityAudit extends Component {
                                                         defaultMessage='{securitySummary}'
                                                         values={{
                                                             securitySummary: (
-                                                            <strong>
-                                                                Security -
-                                                                ({
-                                                                    this.roundScore(reportObject.security.score)
-                                                                } / 30)
-                                                            </strong>
+                                                                <strong>
+                                                                    Security -
+                                                                    ({
+                                                                        this.roundScore(reportObject.security.score)
+                                                                    } / 30)
+                                                                </strong>
                                                             ),
                                                         }}
                                                     />
