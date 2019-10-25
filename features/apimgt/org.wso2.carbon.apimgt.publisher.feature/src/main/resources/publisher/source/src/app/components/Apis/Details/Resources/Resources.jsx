@@ -67,6 +67,31 @@ export default function Resources(props) {
     /**
      *
      *
+     * @param {*} currentPolicies
+     * @param {*} policyAction
+     * @returns
+     */
+    function resourcePoliciesReducer(currentPolicies, policyAction) {
+        const { action, data } = policyAction;
+        const { target, verb, value } = data || {};
+        let nextResourcePolicies = { ...currentPolicies };
+        switch (action) {
+            case 'init':
+                nextResourcePolicies = value;
+                break;
+            default:
+                break;
+        }
+        return nextResourcePolicies;
+    }
+    const [resourcePolicies, resourcePoliciesDispatcher] = useReducer(
+        resourcePoliciesReducer,
+        api.isSOAPToREST() ? {} : null,
+    );
+
+    /**
+     *
+     *
      * @param {*} currenPaths
      * @param {*} action
      */
@@ -181,14 +206,15 @@ export default function Resources(props) {
     // can't depends on API id because we need to consider the changes in operations in api object
     // memoized (https://reactjs.org/docs/hooks-reference.html#usememo) to improve pref,
     // localized to inject local apiThrottlingPolicy data
-    const localApi = useMemo(
+    const localAPI = useMemo(
         () => ({
             id: api.id,
             apiThrottlingPolicy,
+            resourcePolicies,
             scopes: api.scopes,
             operations: api.isAPIProduct() ? {} : mapAPIOperations(api.operations),
         }),
-        [api, apiThrottlingPolicy],
+        [api, apiThrottlingPolicy, resourcePolicies],
     );
     /**
      *
@@ -291,7 +317,29 @@ export default function Resources(props) {
                 }
                 console.error(error);
             });
-
+        if (api.isSOAPToREST()) {
+            api.getResourcePolicies('in').then((response) => {
+                const mappedPolicies = {};
+                for (const policy of response.body.list) {
+                    const { resourcePath: target, httpVerb: verb, ...rest } = policy;
+                    if (!mappedPolicies[target]) {
+                        mappedPolicies[target] = {
+                            [verb]: rest,
+                        };
+                    } else {
+                        mappedPolicies[target][verb] = rest;
+                    }
+                }
+                resourcePoliciesDispatcher({ action: 'init', data: { value: { in: mappedPolicies } } });
+            }).catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                    setPageError(error.response.body);
+                }
+                setPageError(error.message);
+                console.error(error);
+            });
+        }
         // Fetch API level throttling policies only when the page get mounted for the first time `componentDidMount`
         API.policies('api').then((response) => {
             setOperationRateLimits(response.body.list);
@@ -301,7 +349,7 @@ export default function Resources(props) {
 
     // Note: Make sure not to use any hooks after/within this condition , because it returns conditionally
     // If you do so, You will probably get `Rendered more hooks than during the previous render.` exception
-    if (isEmpty(openAPISpec)) {
+    if (!pageError && isEmpty(openAPISpec)) {
         return (
             <Grid container direction='row' justify='center' alignItems='center'>
                 <Grid item>
@@ -363,9 +411,8 @@ export default function Resources(props) {
                                                     spec={openAPISpec}
                                                     operation={operation}
                                                     operationRateLimits={operationRateLimits}
-                                                    api={localApi}
-                                                    markAsDelete={Boolean(markedOperations[target]
-                                                        && markedOperations[target][verb])}
+                                                    api={localAPI}
+                                                    markAsDelete={Boolean(markedOperations[target] && markedOperations[target][verb])}
                                                     onMarkAsDelete={onMarkAsDelete}
                                                     disableUpdate={
                                                         disableUpdate || isRestricted(['apim:api_create'], api)
