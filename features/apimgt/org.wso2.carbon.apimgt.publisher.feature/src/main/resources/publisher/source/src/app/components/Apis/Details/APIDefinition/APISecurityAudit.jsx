@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
@@ -679,7 +680,9 @@ class APISecurityAudit extends Component {
                                                         id='Apis.Details.APIDefinition.AuditApi.TotalNumOfErrors'
                                                         defaultMessage='{totalNumOfErrorsText} {totalNumOfErrors}'
                                                         values={{
-                                                            totalNumOfErrorsText: <strong>Total Number of Errors: </strong>,
+                                                            totalNumOfErrorsText: (
+                                                                <strong>Total Number of Errors: </strong>
+                                                            ),
                                                             totalNumOfErrors: numErrors,
                                                         }}
                                                     />
@@ -690,7 +693,9 @@ class APISecurityAudit extends Component {
                                                     <Typography variant='body1'>
                                                         <FormattedMessage
                                                             id='Apis.Details.APIDefinition.AuditApi.OverallCriticality'
-                                                            defaultMessage='{overallCriticalityText} {overallCriticality}'
+                                                            defaultMessage={
+                                                                '{overallCriticalityText} {overallCriticality}'
+                                                            }
                                                             values={{
                                                                 overallCriticalityText: (
                                                                     <strong>Overall Severity:</strong>
