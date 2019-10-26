@@ -3335,7 +3335,7 @@ paths:
         - $ref: "#/parameters/Accept"
         - $ref: "#/parameters/apiId"
       tags:
-        API Audit
+        - API Audit
       responses:
         200:
           description: |

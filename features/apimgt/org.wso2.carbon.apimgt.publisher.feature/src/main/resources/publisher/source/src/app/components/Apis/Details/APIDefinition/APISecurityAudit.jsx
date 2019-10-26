@@ -23,7 +23,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import Tooltip from '@material-ui/core/Tooltip';
 import Button from '@material-ui/core/Button';
 import HelpOutline from '@material-ui/icons/HelpOutline';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import { CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import VisibilitySensor from 'react-visibility-sensor';
@@ -398,9 +398,32 @@ class APISecurityAudit extends Component {
         } = this.state;
 
         const reportObject = JSON.parse(report);
-
         if (loading) {
-            return <Progress />;
+            return (
+                <div>
+                    <InlineMessage type='info' height={140}>
+                        <div className={classes.contentWrapper}>
+                            <Typography
+                                variant='h5'
+                                component='h3'
+                                className={classes.head}
+                            >
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.AuditApi.WaitForReport'
+                                    defaultMessage='Please wait...'
+                                />
+                            </Typography>
+                            <Typography component='p' className={classes.content}>
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.AuditApi.WaitForReport.Content'
+                                    defaultMessage='Auditing an API for the first time will take some time'
+                                />
+                            </Typography>
+                        </div>
+                    </InlineMessage>
+                    <Progress />
+                </div>
+            );
         }
         const columns = [
             {
@@ -1099,4 +1122,4 @@ APISecurityAudit.propTypes = {
     }).isRequired,
 };
 
-export default withRouter(withStyles(styles)(APISecurityAudit));
+export default withRouter(injectIntl(withStyles(styles)(APISecurityAudit)));
