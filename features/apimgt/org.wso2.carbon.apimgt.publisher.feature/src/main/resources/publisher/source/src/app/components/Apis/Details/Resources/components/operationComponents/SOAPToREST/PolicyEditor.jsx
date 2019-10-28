@@ -16,6 +16,7 @@
  * under the License.
  */
 import React, { Suspense, lazy, useState } from 'react';
+import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -179,3 +180,19 @@ export default function PolicyEditor(props) {
         </Dialog>
     );
 }
+PolicyEditor.defaultProps = {
+    open: false,
+    onClose: () => {},
+    prefersDarkMode: false,
+
+};
+PolicyEditor.propTypes = {
+    open: PropTypes.bool,
+    onClose: PropTypes.func,
+    prefersDarkMode: PropTypes.bool,
+    originalResourcePolicy: PropTypes.shape({}).isRequired,
+    selectedPolicy: PropTypes.shape({}).isRequired,
+    setPolicyContent: PropTypes.func.isRequired,
+    resourcePoliciesDispatcher: PropTypes.func.isRequired,
+    direction: PropTypes.oneOf(['in', 'out']).isRequired,
+};

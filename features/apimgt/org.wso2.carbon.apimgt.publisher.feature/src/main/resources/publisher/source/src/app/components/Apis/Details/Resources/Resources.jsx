@@ -431,7 +431,8 @@ export default function Resources(props) {
                                                     operation={operation}
                                                     operationRateLimits={operationRateLimits}
                                                     api={localAPI}
-                                                    markAsDelete={Boolean(markedOperations[target] && markedOperations[target][verb])}
+                                                    markAsDelete={Boolean(markedOperations[target]
+                                                        && markedOperations[target][verb])}
                                                     onMarkAsDelete={onMarkAsDelete}
                                                     disableUpdate={
                                                         disableUpdate || isRestricted(['apim:api_create'], api)
