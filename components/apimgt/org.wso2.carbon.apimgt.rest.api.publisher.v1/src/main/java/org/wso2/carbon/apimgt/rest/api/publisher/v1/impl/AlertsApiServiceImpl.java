@@ -41,6 +41,8 @@ public class AlertsApiServiceImpl implements AlertsApiService {
     private AlertConfigurator publisherAlertConfigurator = null;
     private static final Log log = LogFactory.getLog(AlertsApiServiceImpl.class);
     private static final String AGENT = "publisher";
+    private static final String API_NAME = "apiName";
+    private static final String API_VERSION = "apiVersion";
 
     @Override
     public Response addAlertConfig(String alertType, String configurationId, AlertConfigInfoDTO body,
@@ -82,13 +84,22 @@ public class AlertsApiServiceImpl implements AlertsApiService {
     public Response getAllAlertConfigs(String alertType, MessageContext messageContext) {
         String userName = RestApiUtil.getLoggedInUsername();
         try {
+            Map<String, List<String>> allowedAPIVersionInfo = AlertsMappingUtil.getAllowedAPIInfo();
             publisherAlertConfigurator = AlertConfigManager.getInstance().getAlertConfigurator(AGENT);
             List<Map<String, String>> alertConfigList = publisherAlertConfigurator
                     .getAlertConfiguration(userName, alertType);
             List<AlertConfigDTO> alertConfigDTOList = new ArrayList<>();
             for (Map<String, String> alertConfig : alertConfigList) {
-                AlertConfigDTO alertConfigDTO = AlertsMappingUtil.toAlertConfigDTO(alertConfig);
-                alertConfigDTOList.add(alertConfigDTO);
+                List<String> allowedVersions = allowedAPIVersionInfo.get(alertConfig.get(API_NAME));
+                if (allowedVersions != null) {
+                    String configVersion = alertConfig.get(API_VERSION);
+                    for (String version : allowedVersions) {
+                        if (configVersion.equals(version)) {
+                            AlertConfigDTO alertConfigDTO = AlertsMappingUtil.toAlertConfigDTO(alertConfig);
+                            alertConfigDTOList.add(alertConfigDTO);
+                        }
+                    }
+                }
             }
             return Response.status(Response.Status.OK).entity(alertConfigDTOList).build();
         } catch (APIManagementException e) {
