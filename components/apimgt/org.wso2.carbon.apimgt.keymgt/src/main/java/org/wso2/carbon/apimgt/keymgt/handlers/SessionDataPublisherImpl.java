@@ -56,6 +56,8 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
 
     public static final Log log = LogFactory.getLog(SessionDataPublisherImpl.class);
     private static final String handlerName = "APIMSessionDataPublisherImpl";
+    private static final String DEVPORTAL_CLIENT_APP_NAME = "admin_devportal";
+    private static final String PUBLISHER_CLIENT_APP_NAME = "admin_publisher";
 
     @Override public void doPublishAuthenticationStepSuccess(AuthenticationData authenticationData) {
 
@@ -133,8 +135,8 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
         }
 
         for (OAuthConsumerAppDTO appDTO : appDTOs) {
-            if (StringUtils.equalsIgnoreCase("admin_store", appDTO.getApplicationName()) || StringUtils
-                    .equalsIgnoreCase("admin_publisher", appDTO.getApplicationName())) {
+            if (StringUtils.equalsIgnoreCase(DEVPORTAL_CLIENT_APP_NAME, appDTO.getApplicationName()) || StringUtils
+                    .equalsIgnoreCase(PUBLISHER_CLIENT_APP_NAME, appDTO.getApplicationName())) {
                 Set<AccessTokenDO> accessTokenDOs = null;
                 try {
                     // Retrieve all ACTIVE or EXPIRED access tokens for particular client authorized by this user
