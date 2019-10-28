@@ -710,8 +710,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                         Integer numErrors = Integer.valueOf(
                                 (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR))
                                         .get(APIConstants.DATA)).get(APIConstants.NUM_ERRORS));
-                        String isValid = (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR))
-                                .get(APIConstants.DATA)).get(APIConstants.IS_VALID);
                         String decodedReport = new String(Base64Utils.decode(report), "UTF-8");
                         AuditReportDTO auditReportDTO = new AuditReportDTO();
                         auditReportDTO.setReport(decodedReport);

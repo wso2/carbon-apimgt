@@ -542,6 +542,8 @@ class APISecurityAudit extends Component {
         const options = {
             filterType: 'dropdown',
             responsive: 'stacked',
+            print: false,
+            download: false,
             selectableRows: false,
             expandableRows: true,
             expandableRowsOnClick: true,
