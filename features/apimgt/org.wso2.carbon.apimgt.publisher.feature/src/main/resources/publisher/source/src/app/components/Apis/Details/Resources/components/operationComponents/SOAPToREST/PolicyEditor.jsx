@@ -15,21 +15,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
-import CloseIcon from '@material-ui/icons/Close';
-import Slide from '@material-ui/core/Slide';
-import MonacoEditor from 'react-monaco-editor';
+import Fade from '@material-ui/core/Fade';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import Alert from 'AppComponents/Shared/Alert';
+import Grid from '@material-ui/core/Grid';
+import Banner from 'AppComponents/Shared/Banner';
+import CloseConfirmation from './CloseConfirmation';
+
+const MonacoEditor = lazy(() => import('react-monaco-editor'));
 
 const useStyles = makeStyles(theme => ({
     appBar: {
-        position: 'relative',
+        // position: 'relative',
+        top: 'auto',
+        bottom: 0,
     },
     title: {
         marginLeft: theme.spacing(2),
@@ -38,7 +44,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Transition = React.forwardRef((props, ref) => {
-    return <Slide in ref={ref} {...props} />;
+    return <Fade in ref={ref} {...props} />;
 });
 
 /**
@@ -49,24 +55,127 @@ const Transition = React.forwardRef((props, ref) => {
  */
 export default function PolicyEditor(props) {
     const classes = useStyles();
-    const { open, onClose, monacoProps } = props;
+    const [api] = useAPI();
+    const {
+        open,
+        onClose,
+        prefersDarkMode,
+        originalResourcePolicy,
+        selectedPolicy,
+        setPolicyContent,
+        resourcePoliciesDispatcher,
+        direction,
+    } = props;
+    const [pageError, setPageError] = useState(null);
+    const [openConfirmation, setOpenConfirmation] = useState(false);
+    const [saving, setSaving] = useState(false);
+
+    const editorOptions = {
+        selectOnLineNumbers: true,
+        readOnly: saving,
+        smoothScrolling: true,
+        wordWrap: 'on',
+    };
+    const editorProps = {
+        language: 'xml',
+        height: 'calc(100vh)',
+        theme: prefersDarkMode ? 'vs-dark' : 'vs',
+        value: selectedPolicy.content,
+        options: editorOptions,
+        onChange: setPolicyContent,
+    };
+
+    /**
+     *
+     *
+     */
+    function confirmAndClose() {
+        // No need to confirm if user have not done any changes
+        if (selectedPolicy.content !== originalResourcePolicy.content) {
+            setOpenConfirmation(true);
+        } else {
+            onClose();
+        }
+    }
+    /**
+     *
+     *
+     */
+    function save() {
+        setSaving(true);
+        api.updateResourcePolicy(selectedPolicy)
+            .then((response) => {
+                Alert.success('Resource policy updated successfully');
+                resourcePoliciesDispatcher({ action: 'update', data: { value: response.body, direction } });
+                onClose();
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                    setPageError(error.response.body);
+                } else {
+                    // TODO add i18n ~tmkb
+                    const message = error.message || 'Something went wrong while updating resource policy!';
+                    Alert.error(message);
+                    setPageError(message);
+                }
+                console.error(error);
+            })
+            .finally(() => setSaving(false));
+    }
 
     return (
         <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>
-            <AppBar className={classes.appBar}>
-                <Toolbar>
-                    <IconButton edge='start' color='inherit' onClick={onClose} aria-label='close'>
-                        <CloseIcon />
-                    </IconButton>
-                    <Typography variant='h6' className={classes.title}>
-                        Discard
-                    </Typography>
-                    <Button color='inherit' onClick={() => {}}>
-                        save
-                    </Button>
+            <AppBar position='fixed' color='default' className={classes.appBar}>
+                <Toolbar variant='dense'>
+                    <Grid container direction='row' justify='flex-start' alignItems='flex-start'>
+                        <Grid item>
+                            <Button
+                                disabled={saving}
+                                variant='outlined'
+                                color='primary'
+                                className={classes.title}
+                                onClick={save}
+                            >
+                                save & close
+                                {saving && <CircularProgress size={18} />}
+                            </Button>
+                        </Grid>
+                        <Grid item>
+                            <Button color='inherit' className={classes.title} onClick={confirmAndClose}>
+                                close
+                            </Button>
+                        </Grid>
+                    </Grid>
                 </Toolbar>
             </AppBar>
-            <MonacoEditor {...monacoProps} />
+            <Grid container direction='row' justify='center' alignItems='center'>
+                {pageError && (
+                    <Grid item xs={12}>
+                        <Banner
+                            onClose={() => setPageError(null)}
+                            disableActions
+                            dense
+                            paperProps={{ elevation: 1 }}
+                            type='error'
+                            message={pageError}
+                        />
+                    </Grid>
+                )}
+            </Grid>
+            <Grid item xs={12}>
+                <Suspense fallback={<CircularProgress disableShrink />}>
+                    <MonacoEditor {...editorProps} />
+                </Suspense>
+            </Grid>
+            <CloseConfirmation
+                open={openConfirmation}
+                onClose={() => {
+                    setPolicyContent(originalResourcePolicy.content);
+                    setOpenConfirmation(false);
+                }}
+                closeEditor={onClose}
+            />
         </Dialog>
     );
 }

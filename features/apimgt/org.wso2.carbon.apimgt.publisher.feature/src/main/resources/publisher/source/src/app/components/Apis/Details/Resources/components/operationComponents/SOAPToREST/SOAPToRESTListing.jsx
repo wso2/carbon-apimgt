@@ -16,34 +16,24 @@
  * under the License.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, Suspense, lazy, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import MonacoEditor from 'react-monaco-editor';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Button from '@material-ui/core/Button';
-import { makeStyles } from '@material-ui/core/styles';
 import EditIcon from '@material-ui/icons/Edit';
-import AspectRatioIcon from '@material-ui/icons/AspectRatio';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
-import { capitalizeFirstLetter } from 'AppData/stringFormatter';
 import isEmpty from 'lodash/isEmpty';
+import Paper from '@material-ui/core/Paper';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import Box from '@material-ui/core/Box';
 
 import PolicyEditor from './PolicyEditor';
 
-const useStyles = makeStyles({
-    root: {
-        width: '100%',
-        overflowX: 'auto',
-    },
-    table: {
-        minWidth: 650,
-    },
-});
+const MonacoEditor = lazy(() => import('react-monaco-editor'));
 
 /**
  *
@@ -53,33 +43,44 @@ const useStyles = makeStyles({
  * @returns
  */
 export default function SOAPToRESTListing(props) {
-    const {
-        operation, operationsDispatcher, target, verb, disableUpdate, api,
-    } = props;
+    const { resourcePolicy, resourcePoliciesDispatcher } = props;
+    const [resourcePolicyIn, setResourcePolicyIn] = useState(resourcePolicy.in);
+    const [resourcePolicyOut, setResourcePolicyOut] = useState(resourcePolicy.out);
+    useEffect(() => {
+        setResourcePolicyIn(resourcePolicy.in);
+        setResourcePolicyOut(resourcePolicy.out);
+    }, [resourcePolicy]);
     // Get use preference from OS https://material-ui.com/customization/palette/#user-preference
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
     const [openEditor, setOpenEditor] = useState(false);
-    const { resourcePolicies } = api;
+    const [selectedTab, setTabIndex] = useState('in');
     const editorOptions = {
         selectOnLineNumbers: true,
         readOnly: true,
         smoothScrolling: true,
         wordWrap: 'on',
     };
-    if (isEmpty(resourcePolicies)) {
-        return (
-            <Grid item>
-                <CircularProgress disableShrink />
-            </Grid>
-        );
-    }
+    const selectedPolicy = selectedTab === 'in' ? resourcePolicyIn : resourcePolicyOut;
     const editorProps = {
         language: 'xml',
-        height: 'calc(100vh)',
+        height: 'calc(50vh)',
         theme: prefersDarkMode ? 'vs-dark' : 'vs',
-        value: resourcePolicies.in[target.slice(1)][verb].content,
+        value: selectedPolicy.content,
         options: editorOptions,
     };
+
+    /**
+     *
+     *
+     * @param {*} content
+     */
+    function setPolicyContent(content) {
+        if (selectedTab === 'in') {
+            setResourcePolicyIn({ ...resourcePolicyIn, content });
+        } else {
+            setResourcePolicyOut({ ...resourcePolicyOut, content });
+        }
+    }
     return (
         <Fragment>
             <Grid item xs={12} md={12}>
@@ -88,16 +89,40 @@ export default function SOAPToRESTListing(props) {
                     <Divider variant='middle' />
                 </Typography>
             </Grid>
-            <Grid item md={1} />
-            <Grid item md={11}>
-                <Button onClick={() => setOpenEditor(true)} variant='outlined' size='small' color='primary'>
-                    Edit <EditIcon />
-                </Button>
-            </Grid>
             <Grid item xs={12}>
-                <MonacoEditor {...editorProps} />
+                <Tabs
+                    value={selectedTab}
+                    indicatorColor='primary'
+                    textColor='primary'
+                    onChange={(event, tab) => setTabIndex(tab)}
+                    aria-label='Resource mediation in/out tabs'
+                >
+                    <Tab value='in' label='In' />
+                    <Tab value='out' label='Out' />
+                </Tabs>
+                <Box p={1}>
+                    <Button onClick={() => setOpenEditor(true)} variant='outlined' size='small' color='primary'>
+                        Edit <EditIcon />
+                    </Button>
+                    {!openEditor && (
+                        <Paper elevation={4}>
+                            <Suspense fallback={<CircularProgress disableShrink />}>
+                                <MonacoEditor {...editorProps} />
+                            </Suspense>
+                        </Paper>
+                    )}
+                </Box>
             </Grid>
-            <PolicyEditor monacoProps={editorProps} onClose={() => setOpenEditor(false)} open={openEditor} />
+            <PolicyEditor
+                resourcePoliciesDispatcher={resourcePoliciesDispatcher}
+                setPolicyContent={setPolicyContent}
+                selectedPolicy={selectedPolicy}
+                originalResourcePolicy={resourcePolicy[selectedTab]}
+                direction={selectedTab}
+                prefersDarkMode={prefersDarkMode}
+                onClose={() => setOpenEditor(false)}
+                open={openEditor}
+            />
         </Fragment>
     );
 }
@@ -106,8 +131,8 @@ SOAPToRESTListing.defaultProps = {
     disableUpdate: false,
 };
 SOAPToRESTListing.propTypes = {
-    operation: PropTypes.shape({}).isRequired,
-    api: PropTypes.shape({}).isRequired,
+    resourcePoliciesDispatcher: PropTypes.func.isRequired,
+    resourcePolicy: PropTypes.shape({}).isRequired,
     operationsDispatcher: PropTypes.func.isRequired,
     target: PropTypes.string.isRequired,
     verb: PropTypes.string.isRequired,

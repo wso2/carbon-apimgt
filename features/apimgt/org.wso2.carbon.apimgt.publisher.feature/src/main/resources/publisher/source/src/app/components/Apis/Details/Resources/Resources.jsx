@@ -73,21 +73,21 @@ export default function Resources(props) {
      */
     function resourcePoliciesReducer(currentPolicies, policyAction) {
         const { action, data } = policyAction;
-        const { target, verb, value } = data || {};
+        const { value } = data || {}; // target, verb,
         let nextResourcePolicies = { ...currentPolicies };
         switch (action) {
             case 'init':
                 nextResourcePolicies = value;
+                break;
+            case 'update':
+                nextResourcePolicies[value.resourcePath][value.httpVerb][data.direction] = value;
                 break;
             default:
                 break;
         }
         return nextResourcePolicies;
     }
-    const [resourcePolicies, resourcePoliciesDispatcher] = useReducer(
-        resourcePoliciesReducer,
-        api.isSOAPToREST() ? {} : null,
-    );
+    const [resourcePolicies, resourcePoliciesDispatcher] = useReducer(resourcePoliciesReducer, null);
 
     /**
      *
@@ -210,11 +210,10 @@ export default function Resources(props) {
         () => ({
             id: api.id,
             apiThrottlingPolicy,
-            resourcePolicies,
             scopes: api.scopes,
             operations: api.isAPIProduct() ? {} : mapAPIOperations(api.operations),
         }),
-        [api, apiThrottlingPolicy, resourcePolicies],
+        [api, apiThrottlingPolicy],
     );
     /**
      *
@@ -318,27 +317,41 @@ export default function Resources(props) {
                 console.error(error);
             });
         if (api.isSOAPToREST()) {
-            api.getResourcePolicies('in').then((response) => {
-                const mappedPolicies = {};
-                for (const policy of response.body.list) {
-                    const { resourcePath: target, httpVerb: verb, ...rest } = policy;
-                    if (!mappedPolicies[target]) {
-                        mappedPolicies[target] = {
-                            [verb]: rest,
-                        };
-                    } else {
-                        mappedPolicies[target][verb] = rest;
+            const promisedInPolicies = api.getResourcePolicies('in');
+            const promisedOutPolicies = api.getResourcePolicies('out');
+            Promise.all([promisedInPolicies, promisedOutPolicies])
+                .then(([inPolicies, outPolicies]) => {
+                    const mappedPolicies = {};
+                    for (const policy of inPolicies.body.list) {
+                        const { resourcePath, httpVerb } = policy;
+                        if (!mappedPolicies[resourcePath]) {
+                            mappedPolicies[resourcePath] = {
+                                [httpVerb]: { in: policy },
+                            };
+                        } else {
+                            mappedPolicies[resourcePath][httpVerb] = { in: policy };
+                        }
                     }
-                }
-                resourcePoliciesDispatcher({ action: 'init', data: { value: { in: mappedPolicies } } });
-            }).catch((error) => {
-                if (error.response) {
-                    Alert.error(error.response.body.description);
-                    setPageError(error.response.body);
-                }
-                setPageError(error.message);
-                console.error(error);
-            });
+                    for (const policy of outPolicies.body.list) {
+                        const { resourcePath, httpVerb } = policy;
+                        if (!mappedPolicies[resourcePath]) {
+                            mappedPolicies[resourcePath] = {
+                                [httpVerb]: { out: policy },
+                            };
+                        } else {
+                            mappedPolicies[resourcePath][httpVerb].out = policy;
+                        }
+                    }
+                    resourcePoliciesDispatcher({ action: 'init', data: { value: mappedPolicies } });
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        Alert.error(error.response.body.description);
+                        setPageError(error.response.body);
+                    }
+                    setPageError(error.message);
+                    console.error(error);
+                });
         }
         // Fetch API level throttling policies only when the page get mounted for the first time `componentDidMount`
         API.policies('api').then((response) => {
@@ -407,6 +420,12 @@ export default function Resources(props) {
                                                     target={target}
                                                     verb={verb}
                                                     highlight
+                                                    resourcePoliciesDispatcher={resourcePoliciesDispatcher}
+                                                    resourcePolicy={
+                                                        resourcePolicies &&
+                                                        resourcePolicies[target.slice(1)] &&
+                                                        resourcePolicies[target.slice(1)][verb]
+                                                    }
                                                     operationsDispatcher={operationsDispatcher}
                                                     spec={openAPISpec}
                                                     operation={operation}

@@ -61,6 +61,8 @@ function Operation(props) {
         markAsDelete,
         hideParameters,
         spec,
+        resourcePolicy,
+        resourcePoliciesDispatcher,
         target,
         verb,
     } = props;
@@ -239,12 +241,13 @@ function Operation(props) {
                                 verb={verb}
                             />
                         )}
-                        {api.resourcePolicies && (
+                        {resourcePolicy && (
                             <SOAPToRESTListing
                                 operation={operation}
                                 operationsDispatcher={operationsDispatcher}
                                 operationRateLimits={operationRateLimits}
-                                api={api}
+                                resourcePolicy={resourcePolicy}
+                                resourcePoliciesDispatcher={resourcePoliciesDispatcher}
                                 disableUpdate={disableUpdate}
                                 spec={spec}
                                 target={target}

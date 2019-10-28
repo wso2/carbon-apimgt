@@ -196,11 +196,21 @@ class API extends Resource {
         return Promise.all(promisedPolicies).then(policies => policies.map(response => response.body));
     }
 
-    getResourcePolicies(sequenceType='in') {
+    getResourcePolicies(sequenceType = 'in') {
         return this.client.then(client => {
             return client.apis['API Resource Policies'].get_apis__apiId__resource_policies({
                 apiId: this.id,
                 sequenceType,
+            });
+        });
+    }
+
+    updateResourcePolicy(resourcePolicy) {
+        return this.client.then(client => {
+            return client.apis['API Resource Policies'].put_apis__apiId__resource_policies__resourcePolicyId_({
+                apiId: this.id,
+                resourcePolicyId: resourcePolicy.id,
+                body: resourcePolicy,
             });
         });
     }
