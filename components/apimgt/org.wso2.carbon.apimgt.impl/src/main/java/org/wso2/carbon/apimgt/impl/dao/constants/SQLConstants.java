@@ -1081,6 +1081,7 @@ public class SQLConstants {
             "   AND SP.APPLICATION_ID=APP.APPLICATION_ID" +
             "   AND APP.SUBSCRIBER_ID=SB.SUBSCRIBER_ID " +
             "   AND API.API_ID = SP.API_ID" +
+            "   AND SP.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'" +
             "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
     public static final String GET_API_SUBSCRIPTION_COUNT_BY_API_SQL =
