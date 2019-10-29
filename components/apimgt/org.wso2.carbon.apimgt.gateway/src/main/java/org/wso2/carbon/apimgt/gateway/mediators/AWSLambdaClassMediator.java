@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
-
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -95,6 +94,8 @@ public class AWSLambdaClassMediator extends AbstractMediator {
                     .withInvocationType(InvocationType.RequestResponse);
             InvokeResult invokeResult = awsLambda.invoke(invokeRequest);
             response = invokeResult.getPayload();
+        } catch (com.amazonaws.SdkClientException e) {
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
         }
