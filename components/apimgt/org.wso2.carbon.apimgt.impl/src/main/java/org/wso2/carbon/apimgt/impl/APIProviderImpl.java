@@ -7057,6 +7057,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             //delete registry resources
+            artifactManager.removeGenericArtifact(apiProductArtifact);
             artifactManager.removeGenericArtifact(productResourceUUID);
 
             apiMgtDAO.deleteAPIProduct(identifier);
