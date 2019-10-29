@@ -93,6 +93,13 @@ public class SubscriberKeyMgtClient {
         return oAuthApplicationInfo;
     }
 
+    public OAuthApplicationInfo updateOAuthApplicationbyApplicationInfo(String userId, String applicationName, String callbackUrl,
+                                                                        String consumerKey, String[] grantTypes,org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo oauthAppInfo)
+            throws RemoteException, APIKeyMgtSubscriberServiceAPIManagementException,
+            APIKeyMgtSubscriberServiceAPIKeyMgtException, APIKeyMgtSubscriberServiceIdentityException {
+        return subscriberServiceStub.updateOAuthApplicationByApplicationInfo(userId,applicationName,callbackUrl,consumerKey,grantTypes,oauthAppInfo);
+    }
+
     public OAuthApplicationInfo updateOAuthApplication(String userId, String applicationName, String callbackUrl,
                                                        String consumerKey, String[] grantTypes)
             throws RemoteException, APIKeyMgtSubscriberServiceAPIManagementException,

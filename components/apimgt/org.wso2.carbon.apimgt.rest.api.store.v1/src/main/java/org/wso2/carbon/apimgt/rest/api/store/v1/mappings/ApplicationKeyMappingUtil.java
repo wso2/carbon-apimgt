@@ -23,13 +23,17 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -51,11 +55,14 @@ public class ApplicationKeyMappingUtil {
     @SuppressWarnings("unchecked")
     public static ApplicationKeyDTO fromApplicationKeyToDTO(Map<String, Object> keyDetails, String applicationKeyType) {
         ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
+        String username = RestApiUtil.getLoggedInUsername();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         applicationKeyDTO.setConsumerKey((String) keyDetails.get(APIConstants.FrontEndParameterNames.CONSUMER_KEY));
         applicationKeyDTO
                 .setConsumerSecret((String) keyDetails.get(APIConstants.FrontEndParameterNames.CONSUMER_SECRET));
         applicationKeyDTO.setKeyState((String) keyDetails.get(APIConstants.FrontEndParameterNames.KEY_STATE));
         try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             String appDetailsString = (String) keyDetails.get(ApplicationConstants.OAUTH_APP_DETAILS);
             if (appDetailsString != null) {
                 JSONObject appDetailsJsonObj = (JSONObject) new JSONParser().parse(appDetailsString);
@@ -71,6 +78,20 @@ public class ApplicationKeyMappingUtil {
                 }
             }
 
+            if(apiConsumer.isAdvanceEnabled(tenantDomain)) {
+                applicationKeyDTO.setUserAccessTokenDefaultValidityPeriod((long) keyDetails.get("userAccessTokenExpiryTime"));
+                applicationKeyDTO.setApplicationAccessTokenExpiryTime((long) keyDetails.get("applicationAccessTokenExpiryTime"));
+                applicationKeyDTO.setIdTokenExpiryTime((long) keyDetails.get("idTokenExpiryTime"));
+                applicationKeyDTO.setRefreshTokenExpiryTime((long) keyDetails.get("refreshTokenExpiryTime"));
+
+                applicationKeyDTO.setIdTokenEncryptionEnabled((boolean)keyDetails.get("isIdTokenEncryptionEnabled"));
+                applicationKeyDTO.setRequestObjectSignatureValidationEnabled((boolean)keyDetails.get("isRequestObjectSignatureValidationEnabled"));
+                applicationKeyDTO.setFederatedIdentityProvider(ApplicationKeyDTO.FederatedIdentityProviderEnum.fromValue((String) keyDetails.get("federatedIdentityProvider")));
+                applicationKeyDTO.setAudiences(Arrays.asList((String[]) keyDetails.get("audiences")));
+                applicationKeyDTO.setPkceMandatory((boolean) keyDetails.get("pkceMandatory"));
+                applicationKeyDTO.setPkceSupportPlain((boolean) keyDetails.get("pkceSupportPlain"));
+                applicationKeyDTO.setRenewRefreshTokenEnabled((String) keyDetails.get("renewRefreshTokenEnabled"));
+            }
             ApplicationTokenDTO tokenDTO = new ApplicationTokenDTO();
             tokenDTO.setValidityTime((Long) keyDetails.get(APIConstants.AccessTokenConstants.VALIDITY_TIME));
             tokenDTO.setAccessToken((String) keyDetails.get(APIConstants.AccessTokenConstants.ACCESS_TOKEN));
@@ -84,6 +105,9 @@ public class ApplicationKeyMappingUtil {
             String errorMsg = "Error while parsing application details string";
             log.error(errorMsg, e);
             throw new InternalServerErrorException(errorMsg, e);
+        }
+        catch(APIManagementException e){
+
         }
         return applicationKeyDTO;
     }

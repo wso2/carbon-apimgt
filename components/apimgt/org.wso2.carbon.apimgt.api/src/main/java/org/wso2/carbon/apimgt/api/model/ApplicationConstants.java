@@ -52,4 +52,16 @@ public final class  ApplicationConstants {
     public static final String IMPLICIT_CONST = "implicit";
     public static final String AUTHORIZATION_CODE = "authorization_code";
     public static final String INBOUNT_AUTH_CONSUMER_SECRET = "oauthConsumerSecret";
+    public static final String USER_ACCESS_TOKEN_DEFAULT_VALIDITY_PERIOD = "userAccessTokenDefaultValidityPeriod";
+    public static final String APPLICATION_ACCESS_TOKEN_EXPIRY_TIME = "applicationAccessTokenExpiryTime";
+    public static final String REFRESH_TOKEN_EXPIRY_TIME = "refreshTokenExpiryTime";
+    public static final String ID_TOKEN_EXPIRY_TIME = "idTokenExpiryTime";
+    public static final String BY_PASS_CLIENT_CREDENTIALS = "byPassClientCredentials";
+    public static final String IS_RENEW_REFRESH_ENABLE = "renewRefreshTokenEnabled";
+    public static final String IS_ID_TOKEN_ENCRYPTION_ENABLE = "idTokenEncryptionEnabled";
+    public static final String PKCE_MANDOTORY_ENABLE = "pkceMandatoryEnabled";
+    public static final String PKCE_SUPPORT_PLAIN = "pkceSupportPlain";
+    public static final String AUDIENCES          = "audiences";
+    public static final String REQUEST_OBJECT_SIGNATURE_VALIDATION_ENABLED = "requestObjectSignatureValidationEnabled";
+    public static final String FEDERATED_IDENTITY_PROVIDER          = "federatedIdentityProvider";
 }

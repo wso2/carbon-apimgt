@@ -126,6 +126,201 @@
                     </tr>
                     <tr>
                         <td class="parameter">
+                            <p>userAccessTokenDefaultValidityPeriod</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">Maximum validity time for the access token</p></td>
+                        <td class="parameter">
+                                <a href="#!/models#long">long</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">3600</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>applicationAccessTokenExpiryTime</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">Maximum validity time for the access token</p></td>
+                        <td class="parameter">
+                                <a href="#!/models#long">long</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">3600</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>refreshTokenExpiryTime</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">Maximum validity time for the access token</p></td>
+                        <td class="parameter">
+                                <a href="#!/models#long">long</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">3600</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>idTokenExpiryTime</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">Maximum validity time for the access token</p></td>
+                        <td class="parameter">
+                                <a href="#!/models#long">long</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">3600</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>renewRefreshTokenEnabled</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">nnnnn</p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">false</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>idTokenEncryptionEnabled</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">whether id encryption is enable.</p></td>
+                        <td class="parameter">
+                                <a href="#!/models#boolean">boolean</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>idTokenEncryptionAlgorithm</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>byPassClientCredentials</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">This option will allow the client to authenticate without a client secret</p></td>
+                        <td class="parameter">
+                                <a href="#!/models#boolean">boolean</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">false</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>pkceMandatory</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">Only allow applications that bear PKCE Code Challenge with them.</p></td>
+                        <td class="parameter">
+                                <a href="#!/models#boolean">boolean</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">false</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>pkceSupportPlain</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">Server supports &#39;S256&#39; PKCE tranformation algorithm by default.</p></td>
+                        <td class="parameter">
+                                <a href="#!/models#boolean">boolean</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">false</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>audiences</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">valid array of audiences</p></td>
+                        <td class="parameter">
+                                <a href="#!/models#array">array</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">&quot;http://org.wso2.apimgt/gateway&quot;</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>requestObjectSignatureValidationEnabled</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">enabling object signature validation.</p></td>
+                        <td class="parameter">
+                                <a href="#!/models#boolean">boolean</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">false</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>federatedIdentityProvider</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">configure identity providers for federated authentication.</p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
                             <p>token</p>
                             <p class="param-required">
                                 

@@ -6,21 +6,35 @@
          <xs:complexType name="OAuthApplicationInfo">
             <xs:sequence>
                <xs:element minOccurs="0" name="appOwner" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="applicationAccessTokenExpiryTime" nillable="true" type="xs:long"/>
+               <xs:element maxOccurs="unbounded" minOccurs="0" name="audiences" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="callBackURL" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="clientId" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="clientName" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="clientSecret" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="federatedIdentityProvider" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="idTokenEncryptionAlgorithm" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="idTokenEncryptionMethod" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="idTokenExpiryTime" nillable="true" type="xs:long"/>
+               <xs:element minOccurs="0" name="isBypassClientCredentials" nillable="true" type="xs:boolean"/>
+               <xs:element minOccurs="0" name="isIdTokenEncryptionEnabled" nillable="true" type="xs:boolean"/>
+               <xs:element minOccurs="0" name="isRequestObjectSignatureValidationEnabled" nillable="true" type="xs:boolean"/>
                <xs:element minOccurs="0" name="isSaasApplication" type="xs:boolean"/>
-                <xs:element minOccurs="0" name="jsonAppAttribute" nillable="true" type="xs:string"/>
-                <xs:element minOccurs="0" name="jsonString" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="jsonAppAttribute" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="jsonString" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="pkceMandatory" nillable="true" type="xs:boolean"/>
+               <xs:element minOccurs="0" name="pkceSupportPlain" nillable="true" type="xs:boolean"/>
+               <xs:element minOccurs="0" name="refreshTokenExpiryTime" nillable="true" type="xs:long"/>
+               <xs:element minOccurs="0" name="renewRefreshTokenEnabled" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="tokenType" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="userAccessTokenExpiryTime" nillable="true" type="xs:long"/>
             </xs:sequence>
          </xs:complexType>
          <xs:complexType name="Application">
             <xs:sequence>
                <xs:element minOccurs="0" name="UUID" nillable="true" type="xs:string"/>
-                <xs:element maxOccurs="unbounded" minOccurs="0" name="applicationAttributes" nillable="true" type="xs:string"/>
-                <xs:element minOccurs="0" name="applicationWorkFlowStatus" nillable="true" type="xs:string"/>
+               <xs:element maxOccurs="unbounded" minOccurs="0" name="applicationAttributes" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="applicationWorkFlowStatus" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="callbackUrl" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="createdTime" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="description" nillable="true" type="xs:string"/>
@@ -126,6 +140,25 @@
             </xs:complexType>
          </xs:element>
          <xs:element name="updateOAuthApplicationResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="return" nillable="true" type="ax2106:OAuthApplicationInfo"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="updateOAuthApplicationByApplicationInfo">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="applicationName" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="callbackUrl" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="consumerKey" nillable="true" type="xs:string"/>
+                  <xs:element maxOccurs="unbounded" minOccurs="0" name="grantTypes" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="oauthApplicationInfo" nillable="true" type="ax2106:OAuthApplicationInfo"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="updateOAuthApplicationByApplicationInfoResponse">
             <xs:complexType>
                <xs:sequence>
                   <xs:element minOccurs="0" name="return" nillable="true" type="ax2106:OAuthApplicationInfo"/>
@@ -380,6 +413,12 @@
    <wsdl:message name="createOAuthApplicationResponse">
       <wsdl:part name="parameters" element="ns1:createOAuthApplicationResponse"/>
    </wsdl:message>
+   <wsdl:message name="updateOAuthApplicationByApplicationInfoRequest">
+      <wsdl:part name="parameters" element="ns1:updateOAuthApplicationByApplicationInfo"/>
+   </wsdl:message>
+   <wsdl:message name="updateOAuthApplicationByApplicationInfoResponse">
+      <wsdl:part name="parameters" element="ns1:updateOAuthApplicationByApplicationInfoResponse"/>
+   </wsdl:message>
    <wsdl:message name="updateOAuthApplicationRequest">
       <wsdl:part name="parameters" element="ns1:updateOAuthApplication"/>
    </wsdl:message>
@@ -456,6 +495,13 @@
          <wsdl:output message="tns:createOAuthApplicationResponse" wsaw:Action="urn:createOAuthApplicationResponse"/>
          <wsdl:fault message="tns:APIKeyMgtSubscriberServiceAPIKeyMgtException" name="APIKeyMgtSubscriberServiceAPIKeyMgtException" wsaw:Action="urn:createOAuthApplicationAPIKeyMgtSubscriberServiceAPIKeyMgtException"/>
          <wsdl:fault message="tns:APIKeyMgtSubscriberServiceAPIManagementException" name="APIKeyMgtSubscriberServiceAPIManagementException" wsaw:Action="urn:createOAuthApplicationAPIKeyMgtSubscriberServiceAPIManagementException"/>
+      </wsdl:operation>
+      <wsdl:operation name="updateOAuthApplicationByApplicationInfo">
+         <wsdl:input message="tns:updateOAuthApplicationByApplicationInfoRequest" wsaw:Action="urn:updateOAuthApplicationByApplicationInfo"/>
+         <wsdl:output message="tns:updateOAuthApplicationByApplicationInfoResponse" wsaw:Action="urn:updateOAuthApplicationByApplicationInfoResponse"/>
+         <wsdl:fault message="tns:APIKeyMgtSubscriberServiceAPIKeyMgtException" name="APIKeyMgtSubscriberServiceAPIKeyMgtException" wsaw:Action="urn:updateOAuthApplicationByApplicationInfoAPIKeyMgtSubscriberServiceAPIKeyMgtException"/>
+         <wsdl:fault message="tns:APIKeyMgtSubscriberServiceAPIManagementException" name="APIKeyMgtSubscriberServiceAPIManagementException" wsaw:Action="urn:updateOAuthApplicationByApplicationInfoAPIKeyMgtSubscriberServiceAPIManagementException"/>
+         <wsdl:fault message="tns:APIKeyMgtSubscriberServiceIdentityException" name="APIKeyMgtSubscriberServiceIdentityException" wsaw:Action="urn:updateOAuthApplicationByApplicationInfoAPIKeyMgtSubscriberServiceIdentityException"/>
       </wsdl:operation>
       <wsdl:operation name="updateOAuthApplication">
          <wsdl:input message="tns:updateOAuthApplicationRequest" wsaw:Action="urn:updateOAuthApplication"/>
@@ -625,6 +671,24 @@
          </wsdl:fault>
          <wsdl:fault name="APIKeyMgtSubscriberServiceAPIKeyMgtException">
             <soap:fault use="literal" name="APIKeyMgtSubscriberServiceAPIKeyMgtException"/>
+         </wsdl:fault>
+      </wsdl:operation>
+      <wsdl:operation name="updateOAuthApplicationByApplicationInfo">
+         <soap:operation soapAction="urn:updateOAuthApplicationByApplicationInfo" style="document"/>
+         <wsdl:input>
+            <soap:body use="literal"/>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"/>
+         </wsdl:output>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIManagementException">
+            <soap:fault use="literal" name="APIKeyMgtSubscriberServiceAPIManagementException"/>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIKeyMgtException">
+            <soap:fault use="literal" name="APIKeyMgtSubscriberServiceAPIKeyMgtException"/>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceIdentityException">
+            <soap:fault use="literal" name="APIKeyMgtSubscriberServiceIdentityException"/>
          </wsdl:fault>
       </wsdl:operation>
       <wsdl:operation name="updateOAuthApplication">
@@ -819,6 +883,24 @@
             <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceAPIKeyMgtException"/>
          </wsdl:fault>
       </wsdl:operation>
+      <wsdl:operation name="updateOAuthApplicationByApplicationInfo">
+         <soap12:operation soapAction="urn:updateOAuthApplicationByApplicationInfo" style="document"/>
+         <wsdl:input>
+            <soap12:body use="literal"/>
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal"/>
+         </wsdl:output>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIManagementException">
+            <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceAPIManagementException"/>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIKeyMgtException">
+            <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceAPIKeyMgtException"/>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceIdentityException">
+            <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceIdentityException"/>
+         </wsdl:fault>
+      </wsdl:operation>
       <wsdl:operation name="updateOAuthApplication">
          <soap12:operation soapAction="urn:updateOAuthApplication" style="document"/>
          <wsdl:input>
@@ -947,6 +1029,15 @@
       </wsdl:operation>
       <wsdl:operation name="createOAuthApplication">
          <http:operation location="createOAuthApplication"/>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"/>
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="parameters"/>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="updateOAuthApplicationByApplicationInfo">
+         <http:operation location="updateOAuthApplicationByApplicationInfo"/>
          <wsdl:input>
             <mime:content type="text/xml" part="parameters"/>
          </wsdl:input>

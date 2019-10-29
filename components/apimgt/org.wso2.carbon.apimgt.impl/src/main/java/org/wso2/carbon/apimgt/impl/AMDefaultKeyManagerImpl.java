@@ -92,7 +92,45 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         // OAuthApplications are created by calling to APIKeyMgtSubscriber Service
         OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getOAuthApplicationInfo();
-
+        String jsonPayload = oAuthApplicationInfo.getJsonString();
+        if(jsonPayload != null){
+            JSONObject jsonObj = new JSONObject(jsonPayload);
+            if(jsonObj!=null) {
+                if (jsonObj.has(ApplicationConstants.USER_ACCESS_TOKEN_DEFAULT_VALIDITY_PERIOD)) {
+                    oAuthApplicationInfo.setUserAccessTokenExpiryTime((jsonObj.getLong(ApplicationConstants.USER_ACCESS_TOKEN_DEFAULT_VALIDITY_PERIOD)));
+                }
+                if (jsonObj.has(ApplicationConstants.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME)) {
+                    oAuthApplicationInfo.setApplicationAccessTokenExpiryTime(jsonObj.getLong(ApplicationConstants.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME));
+                }
+                if (jsonObj.has(ApplicationConstants.REFRESH_TOKEN_EXPIRY_TIME)) {
+                    oAuthApplicationInfo.setRefreshTokenExpiryTime(jsonObj.getLong(ApplicationConstants.REFRESH_TOKEN_EXPIRY_TIME));
+                }
+                if (jsonObj.has(ApplicationConstants.ID_TOKEN_EXPIRY_TIME)) {
+                    oAuthApplicationInfo.setIdTokenExpiryTime(jsonObj.getLong(ApplicationConstants.ID_TOKEN_EXPIRY_TIME));
+                }
+                if (jsonObj.has(ApplicationConstants.IS_RENEW_REFRESH_ENABLE)) {
+                    oAuthApplicationInfo.setRenewRefreshTokenEnabled(jsonObj.getString(ApplicationConstants.IS_RENEW_REFRESH_ENABLE));
+                }
+                if (jsonObj.has(ApplicationConstants.PKCE_MANDOTORY_ENABLE)) {
+                    oAuthApplicationInfo.setPkceMandatory(jsonObj.getBoolean(ApplicationConstants.PKCE_MANDOTORY_ENABLE));
+                }
+                if (jsonObj.has(ApplicationConstants.PKCE_SUPPORT_PLAIN)) {
+                    oAuthApplicationInfo.setPkceSupportPlain(jsonObj.getBoolean(ApplicationConstants.PKCE_SUPPORT_PLAIN));
+                }
+                if (jsonObj.has(ApplicationConstants.REQUEST_OBJECT_SIGNATURE_VALIDATION_ENABLED)) {
+                    oAuthApplicationInfo.setIsRequestObjectSignatureValidationEnabled(jsonObj.getBoolean(ApplicationConstants.REQUEST_OBJECT_SIGNATURE_VALIDATION_ENABLED));
+                }
+                if (jsonObj.has(ApplicationConstants.IS_ID_TOKEN_ENCRYPTION_ENABLE)) {
+                    oAuthApplicationInfo.setIsIdTokenEncryptionEnabled(jsonObj.getBoolean(ApplicationConstants.IS_ID_TOKEN_ENCRYPTION_ENABLE));
+                }
+                if(jsonObj.has(ApplicationConstants.FEDERATED_IDENTITY_PROVIDER)){
+                    oAuthApplicationInfo.setFederatedIdentityProvider(jsonObj.getString(ApplicationConstants.FEDERATED_IDENTITY_PROVIDER));
+                }
+                if(jsonObj.has(ApplicationConstants.AUDIENCES)){
+                    oAuthApplicationInfo.setAudiences(jsonObj.getString(ApplicationConstants.AUDIENCES).split(","));
+                }
+            }
+        }
         // Subscriber's name should be passed as a parameter, since it's under the subscriber the OAuth App is created.
         String userId = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.
                 OAUTH_CLIENT_USERNAME);
@@ -122,10 +160,23 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             applicationToCreate.setAppOwner(userId);
             applicationToCreate.setJsonString(oAuthApplicationInfo.getJsonString());
             applicationToCreate.setTokenType(oAuthApplicationInfo.getTokenType());
+            applicationToCreate.setUserAccessTokenExpiryTime(oAuthApplicationInfo.getUserAccessTokenExpiryTime());
+            applicationToCreate.setApplicationAccessTokenExpiryTime(oAuthApplicationInfo.getApplicationAccessTokenExpiryTime());
+            applicationToCreate.setRefreshTokenExpiryTime(oAuthApplicationInfo.getRefreshTokenExpiryTime());
+            applicationToCreate.setIdTokenExpiryTime(oAuthApplicationInfo.getIdTokenExpiryTime());
+            applicationToCreate.setRenewRefreshTokenEnabled(oAuthApplicationInfo.getRenewRefreshTokenEnabled());
+            applicationToCreate.setFederatedIdentityProvider(oAuthApplicationInfo.getFederatedIdentityProvider());
+            applicationToCreate.setAudiences(oAuthApplicationInfo.getAudiences());
+            applicationToCreate.setPkceMandatory(oAuthApplicationInfo.getPkceMandatory());
+            applicationToCreate.setPkceSupportPlain(oAuthApplicationInfo.getPkceSupportPlain());
+            applicationToCreate.setIsIdTokenEncryptionEnabled(oAuthApplicationInfo.getIsIdTokenEncryptionEnabled());
+            /*applicationToCreate.setIdTokenEncryptionAlgorithm(oAuthApplicationInfo.getIdTokenEncryptionAlgorithm());
+            applicationToCreate.setIdTokenEncryptionMethod(oAuthApplicationInfo.getIdTokenEncryptionMethod());*/
+            applicationToCreate.setIsRequestObjectSignatureValidationEnabled(oAuthApplicationInfo.getIsRequestObjectSignatureValidationEnabled());
             info = createOAuthApplicationbyApplicationInfo(applicationToCreate);
         } catch (Exception e) {
             handleException("Can not create OAuth application  : " + applicationName, e);
-        } 
+        }
 
         if (info == null || info.getJsonString() == null) {
             handleException("OAuth app does not contains required data  : " + applicationName,
@@ -138,6 +189,17 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         oAuthApplicationInfo.setCallBackURL(info.getCallBackURL());
         oAuthApplicationInfo.setClientSecret(info.getClientSecret());
         oAuthApplicationInfo.setIsSaasApplication(info.getIsSaasApplication());
+        oAuthApplicationInfo.setUserAccessTokenExpiryTime(info.getUserAccessTokenExpiryTime());
+        oAuthApplicationInfo.setApplicationAccessTokenExpiryTime(info.getApplicationAccessTokenExpiryTime());
+        oAuthApplicationInfo.setRefreshTokenExpiryTime(info.getRefreshTokenExpiryTime());
+        oAuthApplicationInfo.setIdTokenExpiryTime(info.getIdTokenExpiryTime());
+        //oAuthApplicationInfo.setIdTokenEncryptionEnabled(info.getIsIdTokenEncryptionEnabled());
+        //oAuthApplicationInfo.setRequestObjectSignatureEnabled(info.getIsRequestObjectSignatureEnabled());
+        oAuthApplicationInfo.setPkceMandatory(info.getPkceMandatory());
+        oAuthApplicationInfo.setPkceSupportPlain(info.getPkceSupportPlain());
+        oAuthApplicationInfo.setAudiences(info.getAudiences());
+        oAuthApplicationInfo.setRenewRefreshTokenEnabled(info.getRenewRefreshTokenEnabled());
+        oAuthApplicationInfo.setFederatedIdentityProvider(info.getFederatedIdentityProvider());
 
         try {
             JSONObject jsonObject = new JSONObject(info.getJsonString());
@@ -192,19 +254,87 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             if (log.isDebugEnabled() && applicationName != null) {
                 log.debug("Client Name : " + applicationName);
             }
-            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationInfo = updateOAuthApplication(userId,
-                            applicationName, oAuthApplicationInfo.getCallBackURL(),oAuthApplicationInfo.getClientId(), 
-                            grantTypes);
+            String jsonPayload = oAuthApplicationInfo.getJsonString();
+            if(jsonPayload != null){
+                JSONObject jsonObj = new JSONObject(jsonPayload);
+                if(jsonObj!=null) {
+                    if (jsonObj.has(ApplicationConstants.USER_ACCESS_TOKEN_DEFAULT_VALIDITY_PERIOD)) {
+                        oAuthApplicationInfo.setUserAccessTokenExpiryTime((jsonObj.getLong(ApplicationConstants.USER_ACCESS_TOKEN_DEFAULT_VALIDITY_PERIOD)));
+                    }
+                    if (jsonObj.has(ApplicationConstants.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME)) {
+                        oAuthApplicationInfo.setApplicationAccessTokenExpiryTime(jsonObj.getLong(ApplicationConstants.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME));
+                    }
+                    if (jsonObj.has(ApplicationConstants.REFRESH_TOKEN_EXPIRY_TIME)) {
+                        oAuthApplicationInfo.setRefreshTokenExpiryTime(jsonObj.getLong(ApplicationConstants.REFRESH_TOKEN_EXPIRY_TIME));
+                    }
+                    if (jsonObj.has(ApplicationConstants.ID_TOKEN_EXPIRY_TIME)) {
+                        oAuthApplicationInfo.setIdTokenExpiryTime(jsonObj.getLong(ApplicationConstants.ID_TOKEN_EXPIRY_TIME));
+                    }
+                    if (jsonObj.has(ApplicationConstants.IS_RENEW_REFRESH_ENABLE)) {
+                        oAuthApplicationInfo.setRenewRefreshTokenEnabled(jsonObj.getString(ApplicationConstants.IS_RENEW_REFRESH_ENABLE));
+                    }
+                    if(jsonObj.has(ApplicationConstants.BY_PASS_CLIENT_CREDENTIALS)){
+                        oAuthApplicationInfo.setIsBypassClientCredentials(jsonObj.getBoolean(ApplicationConstants.BY_PASS_CLIENT_CREDENTIALS));
+                    }
+                    if (jsonObj.has(ApplicationConstants.PKCE_MANDOTORY_ENABLE)) {
+                        oAuthApplicationInfo.setPkceMandatory(jsonObj.getBoolean(ApplicationConstants.PKCE_MANDOTORY_ENABLE));
+                    }
+                    if (jsonObj.has(ApplicationConstants.PKCE_SUPPORT_PLAIN)) {
+                        oAuthApplicationInfo.setPkceSupportPlain(jsonObj.getBoolean(ApplicationConstants.PKCE_SUPPORT_PLAIN));
+                    }
+                    if (jsonObj.has(ApplicationConstants.REQUEST_OBJECT_SIGNATURE_VALIDATION_ENABLED)) {
+                        oAuthApplicationInfo.setIsRequestObjectSignatureValidationEnabled(jsonObj.getBoolean(ApplicationConstants.REQUEST_OBJECT_SIGNATURE_VALIDATION_ENABLED));
+                    }
+                    if (jsonObj.has(ApplicationConstants.IS_ID_TOKEN_ENCRYPTION_ENABLE)) {
+                        oAuthApplicationInfo.setIsIdTokenEncryptionEnabled(jsonObj.getBoolean(ApplicationConstants.IS_ID_TOKEN_ENCRYPTION_ENABLE));
+                    }
+                    if(jsonObj.has(ApplicationConstants.FEDERATED_IDENTITY_PROVIDER)){
+                        oAuthApplicationInfo.setFederatedIdentityProvider(jsonObj.getString(ApplicationConstants.FEDERATED_IDENTITY_PROVIDER));
+                    }
+                }
+            }
+            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToUpdate =
+                    new org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo();
+            applicationToUpdate.setJsonString(oAuthApplicationInfo.getJsonString());
+            applicationToUpdate.setClientName(oAuthApplicationInfo.getClientName());
+            applicationToUpdate.setClientId(oAuthApplicationInfo.getClientId());
+            applicationToUpdate.setCallBackURL(oAuthApplicationInfo.getCallBackURL());
+            applicationToUpdate.setTokenType(oAuthApplicationInfo.getTokenType());
+            applicationToUpdate.setUserAccessTokenExpiryTime(oAuthApplicationInfo.getUserAccessTokenExpiryTime());
+            applicationToUpdate.setApplicationAccessTokenExpiryTime(oAuthApplicationInfo.getApplicationAccessTokenExpiryTime());
+            applicationToUpdate.setRefreshTokenExpiryTime(oAuthApplicationInfo.getRefreshTokenExpiryTime());
+            applicationToUpdate.setIdTokenExpiryTime(oAuthApplicationInfo.getIdTokenExpiryTime());
+            applicationToUpdate.setIsBypassClientCredentials(oAuthApplicationInfo.getIsBypassClientCredentials());
+            applicationToUpdate.setRenewRefreshTokenEnabled(oAuthApplicationInfo.getRenewRefreshTokenEnabled());
+            applicationToUpdate.setFederatedIdentityProvider(oAuthApplicationInfo.getFederatedIdentityProvider());
+            applicationToUpdate.setAudiences(oAuthApplicationInfo.getAudiences());
+            applicationToUpdate.setPkceMandatory(oAuthApplicationInfo.getPkceMandatory());
+            applicationToUpdate.setPkceSupportPlain(oAuthApplicationInfo.getPkceSupportPlain());
+            applicationToUpdate.setIsIdTokenEncryptionEnabled(oAuthApplicationInfo.getIsIdTokenEncryptionEnabled());
+            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationInfoAdditional = updateOAuthApplicationbyApplicationInfo(userId,applicationName,oAuthApplicationInfo.getCallBackURL(),oAuthApplicationInfo.getClientId(),grantTypes,applicationToUpdate);
             OAuthApplicationInfo newAppInfo = new OAuthApplicationInfo();
-            newAppInfo.setClientId(applicationInfo.getClientId());
-            newAppInfo.setCallBackURL(applicationInfo.getCallBackURL());
-            newAppInfo.setClientSecret(applicationInfo.getClientSecret());
-            newAppInfo.setJsonString(applicationInfo.getJsonString());
+            newAppInfo.setClientId(applicationInfoAdditional.getClientId());
+            newAppInfo.setCallBackURL(applicationInfoAdditional.getCallBackURL());
+            newAppInfo.setClientSecret(applicationInfoAdditional.getClientSecret());
+            newAppInfo.setJsonString(applicationInfoAdditional.getJsonString());
+            newAppInfo.setUserAccessTokenExpiryTime(applicationInfoAdditional.getUserAccessTokenExpiryTime());
+            newAppInfo.setApplicationAccessTokenExpiryTime(applicationInfoAdditional.getApplicationAccessTokenExpiryTime());
+            newAppInfo.setRefreshTokenExpiryTime(applicationInfoAdditional.getRefreshTokenExpiryTime());
+            newAppInfo.setIdTokenExpiryTime(applicationInfoAdditional.getIdTokenExpiryTime());
+            newAppInfo.setIsBypassClientCredentials(applicationInfoAdditional.getIsBypassClientCredentials());
+            newAppInfo.setIsIdTokenEncryptionEnabled(applicationInfoAdditional.getIsIdTokenEncryptionEnabled());
+            newAppInfo.setIsRequestObjectSignatureValidationEnabled(applicationInfoAdditional.getIsRequestObjectSignatureValidationEnabled());
+            newAppInfo.setPkceMandatory(applicationInfoAdditional.getPkceMandatory());
+            newAppInfo.setPkceSupportPlain(applicationInfoAdditional.getPkceSupportPlain());
+            newAppInfo.setAudiences(applicationInfoAdditional.getAudiences());
+            newAppInfo.setRenewRefreshTokenEnabled(applicationInfoAdditional.getRenewRefreshTokenEnabled());
+            newAppInfo.setFederatedIdentityProvider(applicationInfoAdditional.getFederatedIdentityProvider());
+            newAppInfo.setJsonAppAttribute(applicationInfoAdditional.getJsonAppAttribute());
 
             return newAppInfo;
         } catch (Exception e) {
             handleException("Error occurred while updating OAuth Client : ", e);
-        } 
+        }
         return null;
     }
 
@@ -296,7 +426,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         } catch (Exception e) {
             handleException("Can not retrieve OAuth application for the given consumer key : " + consumerKey, e);
-        } 
+        }
         return oAuthApplicationInfo;
     }
 
@@ -341,8 +471,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 int statusCode;
                 String responseBody;
                 try {
-                    HttpResponse revokeResponse = executeHTTPrequest(revokeEndpointPort, revokeEndpointProtocol, 
-                                                                     httpRevokePost);
+                    HttpResponse revokeResponse = executeHTTPrequest(revokeEndpointPort, revokeEndpointProtocol,
+                            httpRevokePost);
                     statusCode = revokeResponse.getStatusLine().getStatusCode();
                     responseBody = EntityUtils.toString(revokeResponse.getEntity());
                 } finally {
@@ -351,7 +481,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
                 if (statusCode != 200) {
                     String errorReason = "Token revoke failed : HTTP error code : " + statusCode +
-                                                                                             ". Reason " + responseBody;
+                            ". Reason " + responseBody;
                     throw new APIManagementException(errorReason);
                 } else {
                     if (log.isDebugEnabled()) {
@@ -520,7 +650,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         oAuthApplicationInfo.setClientSecret(clientSecret);
         //for the first time we set default time period.
         oAuthApplicationInfo.addParameter(ApplicationConstants.VALIDITY_PERIOD,
-                                      getConfigurationParamValue(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD));
+                getConfigurationParamValue(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD));
 
 
         //check whether given consumer key and secret match or not. If it does not match throw an exception.
@@ -534,7 +664,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         } catch (Exception e) {
             handleException("Some thing went wrong while getting OAuth application for given consumer key " +
                     oAuthApplicationInfo.getClientId(), e);
-        } 
+        }
         if (info != null && info.getClientId() == null) {
             return null;
         }
@@ -582,7 +712,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             this.configuration = configuration;
         } else {
             // If the provided configuration is null, read the Server-URL and other properties from
-            // APIKeyValidator section.            
+            // APIKeyValidator section.
 
             /*
              * we need to read identity.xml here because we need to get default validity time for access_token in order
@@ -600,7 +730,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 OMElement loginConfigElem =  oauthElem.getFirstChildWithName(getQNameWithIdentityNS("AccessTokenDefaultValidityPeriod"));
                 validityPeriod = loginConfigElem.getText();
             }
-            
+
             if (this.configuration == null) {
                 this.configuration = new KeyManagerConfiguration();
                 this.configuration.setManualModeSupported(true);
@@ -608,10 +738,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 this.configuration.setTokenValidityConfigurable(true);
                 this.configuration.addParameter(APIConstants.AUTHSERVER_URL, getConfigurationElementValue(APIConstants
                         .KEYMANAGER_SERVERURL));
-                this.configuration.addParameter(APIConstants.KEY_MANAGER_USERNAME, 
-                                                getConfigurationElementValue(APIConstants.API_KEY_VALIDATOR_USERNAME));
-                this.configuration.addParameter(APIConstants.KEY_MANAGER_PASSWORD, 
-                                                getConfigurationElementValue(APIConstants.API_KEY_VALIDATOR_PASSWORD))
+                this.configuration.addParameter(APIConstants.KEY_MANAGER_USERNAME,
+                        getConfigurationElementValue(APIConstants.API_KEY_VALIDATOR_USERNAME));
+                this.configuration.addParameter(APIConstants.KEY_MANAGER_PASSWORD,
+                        getConfigurationElementValue(APIConstants.API_KEY_VALIDATOR_PASSWORD))
                 ;
                 this.configuration.addParameter(APIConstants.REVOKE_URL, getConfigurationElementValue(APIConstants
                         .REVOKE_API_URL));
@@ -684,7 +814,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try {
             apiKey = apiMgtDAO.getAccessTokenInfoByConsumerKey(consumerKey);
             if (apiKey != null) {
-                tokenInfo.setAccessToken(apiKey.getAccessToken());                
+                tokenInfo.setAccessToken(apiKey.getAccessToken());
                 tokenInfo.setConsumerSecret(apiKey.getConsumerSecret());
                 tokenInfo.setValidityPeriod(apiKey.getValidityPeriod());
                 tokenInfo.setScope(apiKey.getTokenScope().split("\\s"));
@@ -713,7 +843,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo createOAuthApplicationbyApplicationInfo(
-                      org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToCreate) throws Exception {
+            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToCreate) throws Exception {
         SubscriberKeyMgtClient keyMgtClient = null;
         try {
             keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
@@ -723,9 +853,21 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
     }
-    
-    protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo updateOAuthApplication(String userId, 
-                  String applicationName, String callBackURL, String clientId, String[] grantTypes) throws Exception {
+
+    protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo updateOAuthApplicationbyApplicationInfo(String userId, String applicationName, String callBackURL, String clientId, String[] grantTypes
+            ,org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToUpdate) throws Exception {
+        SubscriberKeyMgtClient keyMgtClient = null;
+        try {
+            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
+            return keyMgtClient.updateOAuthApplicationbyApplicationInfo(userId,applicationName,callBackURL,clientId,grantTypes,applicationToUpdate);
+        } finally {
+            SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
+        }
+
+    }
+
+    protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo updateOAuthApplication(String userId,
+                                                                                               String applicationName, String callBackURL, String clientId, String[] grantTypes) throws Exception {
         SubscriberKeyMgtClient keyMgtClient = null;
         try {
             keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
@@ -749,9 +891,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
         }
     }
-    
+
     protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo getOAuthApplication(String consumerKey)
-                                                                                                    throws Exception {
+            throws Exception {
         SubscriberKeyMgtClient keyMgtClient = null;
         try {
             keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
@@ -760,10 +902,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
         }
     }
-    
+
     /**
      * Executes the HTTP request and returns the response
-     * @param port 
+     * @param port
      * @param protocol
      * @param httpPost Post payload
      * @return response
@@ -774,7 +916,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
         return httpClient.execute(httpPost);
     }
-    
+
     /**
      * Returns the value of the provided APIM configuration element
      * @param property APIM configuration element name
@@ -784,7 +926,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(property);
     }
-    
+
     /**
      * Return the value of the provided configuration parameter
      * @param parameter Parameter name
@@ -793,8 +935,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     protected String getConfigurationParamValue(String parameter) {
         return configuration.getParameter(parameter);
     }
-    
-    
+
+
     /**
      * Returns the OAuth application details if the token is valid
      * @param requestDTO Token validation request
@@ -804,15 +946,15 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         OAuth2TokenValidationService oAuth2TokenValidationService = new OAuth2TokenValidationService();
         return oAuth2TokenValidationService.findOAuthConsumerIfTokenIsValid(requestDTO);
     }
-    
+
     /**
      * Check whether Token partitioning is enabled
      * @return true/false
      */
     protected boolean checkAccessTokenPartitioningEnabled() {
-        return APIUtil.checkAccessTokenPartitioningEnabled(); 
+        return APIUtil.checkAccessTokenPartitioningEnabled();
     }
-    
+
     /**
      * Check whether user name assertion is enabled
      * @return true/false
@@ -820,7 +962,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     protected boolean checkUserNameAssertionEnabled() {
         return APIUtil.checkUserNameAssertionEnabled();
     }
-    
+
     /**
      * Returns OAuth Configuration from identity.xml
      * @return OAuth Configuration

@@ -4589,6 +4589,67 @@ definitions:
         type: string
         description: Application group id (if any).
         example: 02
+      userAccessTokenDefaultValidityPeriod:
+        type: integer
+        format: int64
+        description: Maximum validity time for the access token
+        example: 3600
+      applicationAccessTokenExpiryTime:
+        type: integer
+        format: int64
+        description: Maximum validity time for the access token
+        example: 3600
+      refreshTokenExpiryTime:
+        type: integer
+        format: int64
+        description: Maximum validity time for the access token
+        example: 3600
+      idTokenExpiryTime:
+        type: integer
+        format: int64
+        description: Maximum validity time for the access token
+        example: 3600
+      renewRefreshTokenEnabled:
+        type: string
+        description: nnnnn
+        example: false
+      idTokenEncryptionEnabled:
+        type: boolean
+        description: whether id encryption is enable.
+      idTokenEncryptionAlgorithm:
+        type: string
+        enum:
+          - RSA-OAEP
+          - RSA1_5
+      byPassClientCredentials:
+        type: boolean
+        description: This option will allow the client to authenticate without a client secret
+        example: false
+      pkceMandatory:
+        type: boolean
+        description: Only allow applications that bear PKCE Code Challenge with them.
+        example: false
+      pkceSupportPlain:
+        type: boolean
+        description: Server supports 'S256' PKCE tranformation algorithm by default.
+        example: false
+      audiences:
+        type: array
+        items:
+          type: string
+        description: valid array of audiences
+        example: http://org.wso2.apimgt/gateway
+      requestObjectSignatureValidationEnabled:
+        type: boolean
+        description: enabling object signature validation.
+        example: false
+      federatedIdentityProvider:
+        type: string
+        enum:
+          - Google-OpenID-Connect
+          - shibboleth-IDP
+          - facebook
+        description: configure identity providers for federated authentication.
       token:
         $ref: '#/definitions/ApplicationToken'
 
@@ -4666,6 +4727,65 @@ definitions:
         type: string
         description: Additional properties needed.
         example: ""
+      userAccessTokenDefaultValidityPeriod:
+        type: string
+        description: work
+        example: ""
+      applicationAccessTokenExpiryTime:
+        type: string
+        description: Maximum validity time for the access token
+        example: 3600
+      refreshTokenExpiryTime:
+        type: string
+        description: Maximum validity time for the access token
+        example: 3600
+      idTokenExpiryTime:
+        type: string
+        description: Maximum validity time for the access token
+        example: 3600
+      renewRefreshTokenEnabled:
+        type: string
+        description: nnnnn
+        example: ""
+      byPassClientCredentials:
+        type: boolean
+        description: This option will allow the client to authenticate without a client secret
+        example: false
+      pkceMandatory:
+        type: boolean
+        description: Only allow applications that bear PKCE Code Challenge with them.
+        example: false
+      pkceSupportPlain:
+        type: boolean
+        description: Server supports 'S256' PKCE tranformation algorithm by default.
+        example: false
+      audiences:
+        type: array
+        items:
+          type: string
+        description: valid array of audiences
+        example: [http://org.wso2.apimgt/gateway]
+      requestObjectSignatureValidationEnabled:
+        type: boolean
+        description: enabling object signature validation.
+        example: false
+      idTokenEncryptionEnabled:
+        type: boolean
+        description: whether id encryption is enable.
+        example: false
+      idTokenEncryptionAlgorithm:
+        type: string
+        enum:
+          - RSA-OAEP
+          - RSA1_5
+        description: id token encrryption
+      federatedIdentityProvider:
+        type: string
+        enum:
+          - Google-OpenID-Connect
+          - shibboleth-IDP
+          - facebook
+        description: configure identity providers for federated authentication.
 
 #-----------------------------------------------------
 # The Application Key Mapping Request schema

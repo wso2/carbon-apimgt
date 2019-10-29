@@ -916,6 +916,8 @@ public interface APIConsumer extends APIManager {
 
     boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException;
 
+    boolean isAdvanceEnabled(String tenantDomain) throws APIManagementException;
+
     /**
      * This methods loads the monetization implementation class
      *

@@ -1,20 +1,20 @@
 /*
-*  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package org.wso2.carbon.apimgt.api.model;
 
@@ -26,20 +26,34 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 /*
-* Captures common attributes used in an OAuth Application.
-* */
+ * Captures common attributes used in an OAuth Application.
+ * */
 public class OAuthApplicationInfo {
 
     private String clientId;
     private String clientName;
     private String callBackURL;
     private String clientSecret;
+    private boolean pkceSupportPlain;
+    private boolean pkceMandatory;
+    private long userAccessTokenExpiryTime;
+    private long applicationAccessTokenExpiryTime;
+    private long refreshTokenExpiryTime;
+    private long idTokenExpiryTime;
+    private String[] audiences;
+    private String renewRefreshTokenEnabled;
+    private boolean isRequestObjectSignatureValidationEnabled;
+    private boolean isIdTokenEncryptionEnabled;
+    private String idTokenEncryptionAlgorithm;
+    private String idTokenEncryptionMethod;
+    private String federatedIdentityProvider;
     private Map<String,Object> parameters = new HashMap<String, Object>();
     private boolean isSaasApplication;
     private String appOwner;
     private String jsonString;
     private Map<String, String> appAttributes = new HashMap<>();
     private String jsonAppAttribute;
+    private boolean isBypassClientCredentials;
 
     private String tokenType;
 
@@ -187,6 +201,120 @@ public class OAuthApplicationInfo {
 
     public void setTokenType(String tokenType) {
         this.tokenType = tokenType;
+    }
+
+    public long getUserAccessTokenExpiryTime() {
+        return this.userAccessTokenExpiryTime;
+    }
+
+    public void setUserAccessTokenExpiryTime(long userAccessTokenExpiryTime) {
+        this.userAccessTokenExpiryTime = userAccessTokenExpiryTime;
+    }
+
+    public long getApplicationAccessTokenExpiryTime() {
+        return this.applicationAccessTokenExpiryTime;
+    }
+
+    public void setApplicationAccessTokenExpiryTime(long applicationAccessTokenExpiryTime) {
+        this.applicationAccessTokenExpiryTime = applicationAccessTokenExpiryTime;
+    }
+
+    public long getRefreshTokenExpiryTime() {
+        return this.refreshTokenExpiryTime;
+    }
+
+    public void setRefreshTokenExpiryTime(long refreshTokenExpiryTime) {
+        this.refreshTokenExpiryTime = refreshTokenExpiryTime;
+    }
+
+    public long getIdTokenExpiryTime() {
+        return this.idTokenExpiryTime;
+    }
+
+    public void setIdTokenExpiryTime(long idTokenExpiryTime) {
+        this.idTokenExpiryTime = idTokenExpiryTime;
+    }
+
+    public boolean getPkceSupportPlain() {
+        return this.pkceSupportPlain;
+    }
+
+    public void setPkceSupportPlain(boolean pkceSupportPlain) {
+        this.pkceSupportPlain = pkceSupportPlain;
+    }
+
+    public boolean getPkceMandatory() {
+        return this.pkceMandatory;
+    }
+
+    public void setPkceMandatory(boolean pkceMandatory) {
+        this.pkceMandatory = pkceMandatory;
+    }
+
+    public String[] getAudiences() {
+        return this.audiences;
+    }
+
+    public void setAudiences(String[] audiences) {
+        if (audiences != null) {
+            this.audiences = audiences;
+        }
+
+    }
+
+    public boolean getIsIdTokenEncryptionEnabled() {
+        return this.isIdTokenEncryptionEnabled;
+    }
+
+    public void setIsIdTokenEncryptionEnabled(boolean isIdTokenEncryptionEnabled) {
+        this.isIdTokenEncryptionEnabled = isIdTokenEncryptionEnabled;
+    }
+    public boolean getIsRequestObjectSignatureValidationEnabled() {
+        return this.isRequestObjectSignatureValidationEnabled;
+    }
+
+    public void setIsRequestObjectSignatureValidationEnabled(boolean isRequestObjectSignatureValidationEnabled) {
+        this.isRequestObjectSignatureValidationEnabled = isRequestObjectSignatureValidationEnabled;
+    }
+
+    public String getIdTokenEncryptionMethod() {
+        return this.idTokenEncryptionMethod;
+    }
+
+    public void setIdTokenEncryptionMethod(String idTokenEncryptionMethod) {
+        this.idTokenEncryptionMethod = idTokenEncryptionMethod;
+    }
+
+    public String getIdTokenEncryptionAlgorithm() {
+        return this.idTokenEncryptionAlgorithm;
+    }
+
+    public void setIdTokenEncryptionAlgorithm(String idTokenEncryptionAlgorithm) {
+        this.idTokenEncryptionAlgorithm = idTokenEncryptionAlgorithm;
+    }
+
+    public void setRenewRefreshTokenEnabled(String renewRefreshTokenEnabled) {
+        this.renewRefreshTokenEnabled = renewRefreshTokenEnabled;
+    }
+
+    public String getRenewRefreshTokenEnabled() {
+        return this.renewRefreshTokenEnabled;
+    }
+
+    public void setFederatedIdentityProvider(String federatedIdentityProvider) {
+        this.federatedIdentityProvider = federatedIdentityProvider;
+    }
+
+    public String getFederatedIdentityProvider() {
+        return this.federatedIdentityProvider;
+    }
+
+    public boolean getIsBypassClientCredentials() {
+        return this.isBypassClientCredentials;
+    }
+
+    public void setIsBypassClientCredentials(boolean isBypassClientCredentials) {
+        this.isBypassClientCredentials = isBypassClientCredentials;
     }
 
 }

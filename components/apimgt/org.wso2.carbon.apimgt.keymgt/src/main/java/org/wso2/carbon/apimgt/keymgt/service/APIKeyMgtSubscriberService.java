@@ -1,20 +1,20 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*WSO2 Inc. licenses this file to you under the Apache License,
-*Version 2.0 (the "License"); you may not use this file except
-*in compliance with the License.
-*You may obtain a copy of the License at
-*
-*http://www.apache.org/licenses/LICENSE-2.0
-*
-*Unless required by applicable law or agreed to in writing,
-*software distributed under the License is distributed on an
-*"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-*KIND, either express or implied.  See the License for the
-*specific language governing permissions and limitations
-*under the License.
-*/
+ *Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *WSO2 Inc. licenses this file to you under the Apache License,
+ *Version 2.0 (the "License"); you may not use this file except
+ *in compliance with the License.
+ *You may obtain a copy of the License at
+ *
+ *http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *Unless required by applicable law or agreed to in writing,
+ *software distributed under the License is distributed on an
+ *"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *KIND, either express or implied.  See the License for the
+ *specific language governing permissions and limitations
+ *under the License.
+ */
 
 package org.wso2.carbon.apimgt.keymgt.service;
 
@@ -55,8 +55,11 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
+import org.wso2.carbon.identity.application.common.model.AuthenticationStep;
+import org.wso2.carbon.identity.application.common.model.IdentityProvider;
 import org.wso2.carbon.identity.application.common.model.InboundAuthenticationConfig;
 import org.wso2.carbon.identity.application.common.model.InboundAuthenticationRequestConfig;
+import org.wso2.carbon.identity.application.common.model.LocalAndOutboundAuthenticationConfig;
 import org.wso2.carbon.identity.application.common.model.Property;
 import org.wso2.carbon.identity.application.common.model.ServiceProvider;
 import org.wso2.carbon.identity.application.common.model.ServiceProviderProperty;
@@ -171,15 +174,30 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             oAuthConsumerAppDTO.setCallbackUrl(callbackUrl);
             //set username to avoid issues with email user name login
             oAuthConsumerAppDTO.setUsername(userName);
-            String[] audienceStringArray = new String[1];
-            audienceStringArray[0] = APIConstants.JWT_DEFAULT_AUDIENCE;
-            oAuthConsumerAppDTO.setAudiences(audienceStringArray);
+            List<String> audiencesArray = new ArrayList<String>();
+            audiencesArray.add(APIConstants.JWT_DEFAULT_AUDIENCE);
+            oAuthConsumerAppDTO.setUserAccessTokenExpiryTime((oauthApplicationInfo.getUserAccessTokenExpiryTime()));
+            oAuthConsumerAppDTO.setApplicationAccessTokenExpiryTime(oauthApplicationInfo.getApplicationAccessTokenExpiryTime());
+            oAuthConsumerAppDTO.setRefreshTokenExpiryTime(oauthApplicationInfo.getRefreshTokenExpiryTime());
+            oAuthConsumerAppDTO.setIdTokenExpiryTime(oauthApplicationInfo.getIdTokenExpiryTime());
+            oAuthConsumerAppDTO.setRenewRefreshTokenEnabled(oauthApplicationInfo.getRenewRefreshTokenEnabled());
+            oAuthConsumerAppDTO.setPkceMandatory(oauthApplicationInfo.getPkceMandatory());
+            oAuthConsumerAppDTO.setPkceSupportPlain(oauthApplicationInfo.getPkceSupportPlain());
+            oAuthConsumerAppDTO.setRequestObjectSignatureValidationEnabled(oauthApplicationInfo.getIsRequestObjectSignatureValidationEnabled());
+            oAuthConsumerAppDTO.setIdTokenEncryptionEnabled(oauthApplicationInfo.getIsIdTokenEncryptionEnabled());
+            oAuthConsumerAppDTO.setAudiences(oauthApplicationInfo.getAudiences());
 
+            if(oauthApplicationInfo.getAudiences()!=null){
+                audiencesArray.addAll(Arrays.asList(oauthApplicationInfo.getAudiences()));
+            }
+            String[] array = new String[audiencesArray.size()];
+            audiencesArray.toArray(array);
+            oAuthConsumerAppDTO.setAudiences(array);
             //check whether grant types are provided
             String[] allowedGrantTypes = null;
             String jsonPayload = oauthApplicationInfo.getJsonString();
             if(jsonPayload != null){
-                
+
                 String grantTypesString = null;
                 JSONObject jsonObj = new JSONObject(jsonPayload);
                 if(jsonObj != null && jsonObj.has("grant_types")){
@@ -188,8 +206,21 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                 if(grantTypesString !=  null){
                     allowedGrantTypes = grantTypesString.split(",");
                 } else {
-                  //set allowed grant types if grant types are not provided
+                    //set allowed grant types if grant types are not provided
                     allowedGrantTypes = oAuthAdminService.getAllowedGrantTypes();
+                }
+                if(oauthApplicationInfo.getFederatedIdentityProvider()!=null){
+                    IdentityProvider identityProvider= appMgtService.getIdentityProvider(oauthApplicationInfo.getFederatedIdentityProvider(),tenantDomain);
+                    LocalAndOutboundAuthenticationConfig authenticationConfig = new LocalAndOutboundAuthenticationConfig();
+                    authenticationConfig.setAuthenticationType("federated");
+                    IdentityProvider[] identityProviders=new IdentityProvider[1];
+                    identityProviders[0]=identityProvider;
+                    AuthenticationStep step = new AuthenticationStep();
+                    step.setFederatedIdentityProviders(identityProviders); //OpenIDConnectAuthenticator
+                    AuthenticationStep[] steps = new AuthenticationStep[1];
+                    steps[0] = step;
+                    authenticationConfig.setAuthenticationSteps(steps);
+                    serviceProviderCreated.setLocalAndOutBoundAuthenticationConfig(authenticationConfig);
                 }
                 if (jsonObj != null && jsonObj.has(APIConstants.JSON_CLIENT_ID)) {
                     String clientId = (String) jsonObj.get(APIConstants.JSON_CLIENT_ID);
@@ -203,12 +234,12 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                         }
                     }
                 }
-                
+
             } else {
                 //set allowed grant types if grant types are not provided
                 allowedGrantTypes = oAuthAdminService.getAllowedGrantTypes();
             }
-            
+
             // CallbackURL is needed for authorization_code and implicit grant types. If CallbackURL is empty,
             // simply remove those grant types from the list
             StringBuilder grantTypeString = new StringBuilder();
@@ -274,6 +305,16 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             oAuthApplicationInfo.setCallBackURL(createdApp.getCallbackUrl());
             oAuthApplicationInfo.setClientSecret(createdApp.getOauthConsumerSecret());
             oAuthApplicationInfo.setIsSaasApplication(serviceProviderCreated.isSaasApp());
+            oAuthApplicationInfo.setUserAccessTokenExpiryTime(createdApp.getUserAccessTokenExpiryTime());
+            oAuthApplicationInfo.setApplicationAccessTokenExpiryTime(createdApp.getApplicationAccessTokenExpiryTime());
+            oAuthApplicationInfo.setIdTokenExpiryTime(createdApp.getIdTokenExpiryTime());
+            oAuthApplicationInfo.setRefreshTokenExpiryTime(createdApp.getRefreshTokenExpiryTime());
+            oAuthApplicationInfo.setRenewRefreshTokenEnabled(createdApp.getRenewRefreshTokenEnabled());
+            oAuthApplicationInfo.setPkceSupportPlain(createdApp.getPkceSupportPlain());
+            oAuthApplicationInfo.setPkceMandatory(createdApp.getPkceMandatory());
+            oAuthApplicationInfo.setIsRequestObjectSignatureValidationEnabled(createdApp.isRequestObjectSignatureValidationEnabled());
+            oAuthApplicationInfo.setIsIdTokenEncryptionEnabled(createdApp.isIdTokenEncryptionEnabled());
+            oAuthApplicationInfo.setAudiences(createdApp.getAudiences());
 
             oAuthApplicationInfo.addParameter(ApplicationConstants.
                     OAUTH_REDIRECT_URIS, createdApp.getCallbackUrl());
@@ -306,7 +347,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @throws APIManagementException
      */
     public OAuthApplicationInfo createOAuthApplication(String userId, String applicationName, String callbackUrl,
-            String tokenType) throws APIKeyMgtException, APIManagementException {
+                                                       String tokenType) throws APIKeyMgtException, APIManagementException {
 
         OAuthApplicationInfo oauthApplicationInfo = new OAuthApplicationInfo();
         oauthApplicationInfo.setClientName(applicationName);
@@ -314,6 +355,203 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         oauthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, userId);
         oauthApplicationInfo.setTokenType(tokenType);
         return createOAuthApplicationByApplicationInfo(oauthApplicationInfo);
+    }
+
+    public OAuthApplicationInfo updateOAuthApplicationByApplicationInfo(String userId, String applicationName, String callbackUrl,
+                                                                        String consumerKey, String[] grantTypes,OAuthApplicationInfo oauthApplicationInfo)
+            throws APIKeyMgtException, APIManagementException {
+
+
+
+
+        if (userId == null || userId.isEmpty()) {
+            return null;
+        }
+
+        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
+        String baseUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        String userName = MultitenantUtils.getTenantAwareUsername(userId);
+        String userNameForSP = userName;
+
+        if (log.isDebugEnabled()) {
+
+            StringBuilder message = new StringBuilder();
+            message.append("Updating OAuthApplication for ").append(userId).append(" with details : ");
+            if (consumerKey != null) {
+                message.append(" consumerKey = ").append(consumerKey);
+            }
+
+            if (callbackUrl != null) {
+                message.append(", callbackUrl = ").append(callbackUrl);
+            }
+
+            if (applicationName != null) {
+                message.append(", applicationName = ").append(applicationName);
+            }
+
+            if (grantTypes != null && grantTypes.length > 0) {
+                message.append(", grant Types = ");
+                for (String grantType : grantTypes) {
+                    message.append(grantType).append(" ");
+                }
+            }
+            log.debug(message.toString());
+        }
+
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+
+        // Acting as the provided user. When creating Service Provider/OAuth App,
+        // username is fetched from CarbonContext
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
+
+        try {
+
+            // Replace domain separator by "_" if user is coming from a secondary userstore.
+            String domain = UserCoreUtil.extractDomainFromName(userNameForSP);
+            String identityFederator=null;
+            if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
+                userNameForSP = userNameForSP.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
+            }
+
+            if (applicationName != null && !applicationName.isEmpty()) {
+                // Append the username before Application name to make application name unique across two users.
+                String displayName;
+                if (applicationName.endsWith("_" + APIConstants.API_KEY_TYPE_PRODUCTION) || applicationName.endsWith("_"
+                        + APIConstants.API_KEY_TYPE_SANDBOX)) {
+                    displayName = applicationName.substring(0, applicationName.lastIndexOf("_"));
+                } else {
+                    displayName = applicationName;
+                }
+
+                applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + applicationName;
+                log.debug("Application Name has changed, hence updating Service Provider Name..");
+
+                // Get ServiceProvider Name by consumer Key.
+
+                ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
+                LocalAndOutboundAuthenticationConfig authenticationConfig = new LocalAndOutboundAuthenticationConfig();
+                if(oauthApplicationInfo.getFederatedIdentityProvider()!=null){
+                    identityFederator=oauthApplicationInfo.getFederatedIdentityProvider();
+                    IdentityProvider identityProvider= appMgtService.getIdentityProvider(identityFederator,tenantDomain);
+                    authenticationConfig.setAuthenticationType("federated");
+                    IdentityProvider[] identityProviders=new IdentityProvider[1];
+                    identityProviders[0]=identityProvider;
+                    AuthenticationStep step = new AuthenticationStep();
+                    step.setFederatedIdentityProviders(identityProviders); //OpenIDConnectAuthenticator
+                    AuthenticationStep[] steps = new AuthenticationStep[1];
+                    steps[0] = step;
+                    authenticationConfig.setAuthenticationSteps(steps);
+                }
+                String appName = appMgtService.getServiceProviderNameByClientId(consumerKey, "oauth2", tenantDomain);
+                ServiceProvider serviceProvider =
+                        appMgtService.getApplicationExcludingFileBasedSPs(appName, tenantDomain);
+                if (serviceProvider != null) {
+                    serviceProvider.setApplicationName(applicationName);
+                    serviceProvider.setDescription("Service Provider for application " + applicationName);
+
+                    ServiceProviderProperty[] serviceProviderPropertiesArray = serviceProvider.getSpProperties();
+                    ArrayList<ServiceProviderProperty> serviceProviderProperties = new ArrayList<>();
+                    if (serviceProviderPropertiesArray != null) {
+                        serviceProviderProperties = new ArrayList<>(Arrays.asList(serviceProviderPropertiesArray));
+                    }
+                    boolean displayNameExist = false;
+                    //check displayName property and modify if found
+                    for (ServiceProviderProperty serviceProviderProperty : serviceProviderProperties) {
+                        if (APIConstants.APP_DISPLAY_NAME.equals(serviceProviderProperty.getName())) {
+                            serviceProviderProperty.setValue(displayName);
+                            displayNameExist = true;
+                            break;
+                        }
+                    }
+                    //if displayName not found add new property
+                    if (!displayNameExist) {
+                        ServiceProviderProperty serviceProviderProperty = new ServiceProviderProperty();
+                        serviceProviderProperty.setName(APIConstants.APP_DISPLAY_NAME);
+                        serviceProviderProperty.setValue(displayName);
+                        serviceProviderProperties.add(serviceProviderProperty);
+                    }
+                    serviceProvider.setSpProperties(serviceProviderProperties.toArray(new ServiceProviderProperty[0]));
+                    serviceProvider.setApplicationName(applicationName);
+                    serviceProvider.setDescription("Service Provider for application " + applicationName);
+                    serviceProvider.setLocalAndOutBoundAuthenticationConfig(authenticationConfig);
+                    appMgtService.updateApplication(serviceProvider, tenantDomain, userName);
+                    log.debug("Service Provider Name Updated to : " + applicationName);
+                }
+
+            }
+
+            OAuthAdminService oAuthAdminService = new OAuthAdminService();
+            OAuthConsumerAppDTO oAuthConsumerAppDTO = oAuthAdminService.getOAuthApplicationData(consumerKey);
+            oAuthConsumerAppDTO.setUserAccessTokenExpiryTime((oauthApplicationInfo.getUserAccessTokenExpiryTime()));
+            oAuthConsumerAppDTO.setApplicationAccessTokenExpiryTime(oauthApplicationInfo.getApplicationAccessTokenExpiryTime());
+            oAuthConsumerAppDTO.setRefreshTokenExpiryTime(oauthApplicationInfo.getRefreshTokenExpiryTime());
+            oAuthConsumerAppDTO.setIdTokenExpiryTime(oauthApplicationInfo.getIdTokenExpiryTime());
+            oAuthConsumerAppDTO.setRenewRefreshTokenEnabled(oauthApplicationInfo.getRenewRefreshTokenEnabled());
+            oAuthConsumerAppDTO.setPkceMandatory(oauthApplicationInfo.getPkceMandatory());
+            oAuthConsumerAppDTO.setPkceSupportPlain(oauthApplicationInfo.getPkceSupportPlain());
+            oAuthConsumerAppDTO.setRequestObjectSignatureValidationEnabled(oauthApplicationInfo.getIsRequestObjectSignatureValidationEnabled());
+            oAuthConsumerAppDTO.setIdTokenEncryptionEnabled(oauthApplicationInfo.getIsIdTokenEncryptionEnabled());
+            oAuthConsumerAppDTO.setBypassClientCredentials(oauthApplicationInfo.getIsBypassClientCredentials());
+            oAuthConsumerAppDTO.setAudiences(oauthApplicationInfo.getAudiences());
+            if (oAuthConsumerAppDTO != null) {
+                // TODO: Make sure that App is only updated by the user who created it.
+                //if(userName.equals(oAuthConsumerAppDTO.getUsername()))
+                if (callbackUrl != null && !callbackUrl.isEmpty()) {
+                    oAuthConsumerAppDTO.setCallbackUrl(callbackUrl);
+                    log.debug("CallbackURL is set to : " + callbackUrl);
+                }
+                oAuthConsumerAppDTO.setOauthConsumerKey(consumerKey);
+                if (applicationName != null && !applicationName.isEmpty()) {
+                    oAuthConsumerAppDTO.setApplicationName(applicationName);
+                    log.debug("Name of the OAuthApplication is set to : " + applicationName);
+                }
+
+                if (grantTypes != null && grantTypes.length > 0) {
+                    StringBuilder builder = new StringBuilder();
+                    for (String grantType : grantTypes) {
+                        builder.append(grantType + " ");
+                    }
+                    builder.deleteCharAt(builder.length() - 1);
+                    oAuthConsumerAppDTO.setGrantTypes(builder.toString());
+                } else {
+                    //update the grant type with respect to callback url
+                    String[] allowedGrantTypes = oAuthAdminService.getAllowedGrantTypes();
+                    StringBuilder grantTypeString = new StringBuilder();
+
+                    for (String grantType : allowedGrantTypes) {
+                        if (callbackUrl == null || callbackUrl.isEmpty()) {
+                            if ("authorization_code".equals(grantType) || "implicit".equals(grantType)) {
+                                continue;
+                            }
+                        }
+                        grantTypeString.append(grantType).append(" ");
+                    }
+                    oAuthConsumerAppDTO.setGrantTypes(grantTypeString.toString().trim());
+                }
+
+
+                oAuthAdminService.updateConsumerApplication(oAuthConsumerAppDTO);
+                log.debug("Updated the OAuthApplication...");
+
+                oAuthConsumerAppDTO = oAuthAdminService.getOAuthApplicationData(consumerKey);
+                OAuthApplicationInfo oAuthApplicationInfo = createOAuthAppInfoFromDTO(oAuthConsumerAppDTO);
+                if(identityFederator!=null){
+                    oAuthApplicationInfo.setFederatedIdentityProvider(identityFederator);
+                }
+                return oAuthApplicationInfo;
+            }
+
+        } catch (IdentityApplicationManagementException e) {
+            APIUtil.handleException("Error occurred while creating ServiceProvider for app " + applicationName, e);
+        } catch (Exception e) {
+            APIUtil.handleException("Error occurred while creating OAuthApp " + applicationName, e);
+        } finally {
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().endTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(baseUser);
+        }
+        return null;
+
     }
 
     /**
@@ -397,7 +635,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                 ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
                 String appName = appMgtService.getServiceProviderNameByClientId(consumerKey, "oauth2", tenantDomain);
                 ServiceProvider serviceProvider =
-                                        appMgtService.getApplicationExcludingFileBasedSPs(appName, tenantDomain);
+                        appMgtService.getApplicationExcludingFileBasedSPs(appName, tenantDomain);
                 if (serviceProvider != null) {
                     serviceProvider.setApplicationName(applicationName);
                     serviceProvider.setDescription("Service Provider for application " + applicationName);
@@ -719,7 +957,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     /**
      * Renew the ApplicationAccesstoken, Call Token endpoint and get parameters.
      * Revoke old token.(create a post request to getNewAccessToken with client_credentials
-        grant type.)
+     grant type.)
      *
      * @param tokenType
      * @param oldAccessToken
@@ -762,9 +1000,9 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         String revokeEndpoint = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.REVOKE_API_URL);
 
-		URL revokeEndpointURL = new URL(revokeEndpoint);
-		String revokeEndpointProtocol = revokeEndpointURL.getProtocol();
-		int revokeEndpointPort = revokeEndpointURL.getPort();
+        URL revokeEndpointURL = new URL(revokeEndpoint);
+        String revokeEndpointProtocol = revokeEndpointURL.getProtocol();
+        int revokeEndpointPort = revokeEndpointURL.getPort();
 
 
         HttpClient tokenEPClient =  APIUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
@@ -1169,6 +1407,16 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         oAuthApplicationInfo.setClientId(createdApp.getOauthConsumerKey());
         oAuthApplicationInfo.setCallBackURL(createdApp.getCallbackUrl());
         oAuthApplicationInfo.setClientSecret(createdApp.getOauthConsumerSecret());
+        oAuthApplicationInfo.setUserAccessTokenExpiryTime(createdApp.getUserAccessTokenExpiryTime());
+        oAuthApplicationInfo.setApplicationAccessTokenExpiryTime(createdApp.getApplicationAccessTokenExpiryTime());
+        oAuthApplicationInfo.setIdTokenExpiryTime(createdApp.getIdTokenExpiryTime());
+        oAuthApplicationInfo.setRefreshTokenExpiryTime(createdApp.getRefreshTokenExpiryTime());
+        oAuthApplicationInfo.setRenewRefreshTokenEnabled(createdApp.getRenewRefreshTokenEnabled());
+        oAuthApplicationInfo.setPkceSupportPlain(createdApp.getPkceSupportPlain());
+        oAuthApplicationInfo.setPkceMandatory(createdApp.getPkceMandatory());
+        oAuthApplicationInfo.setIsRequestObjectSignatureValidationEnabled(createdApp.isRequestObjectSignatureValidationEnabled());
+        oAuthApplicationInfo.setIsIdTokenEncryptionEnabled(createdApp.isIdTokenEncryptionEnabled());
+        oAuthApplicationInfo.setAudiences(createdApp.getAudiences());
 
         oAuthApplicationInfo.addParameter(ApplicationConstants.
                 OAUTH_REDIRECT_URIS, createdApp.getCallbackUrl());

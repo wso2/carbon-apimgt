@@ -105,6 +105,7 @@ public final class APIConstants {
     public static final String RESOURCE_FOLDER_LOCATION = "repository" + File.separator + "resources";
 
     public static final String API_TENANT_CONF_ENABLE_MONITZATION_KEY = "EnableMonetization";
+    public static final String API_TENANT_CONF_ENABLE_ADVANCE_KEY = "EnableAdvance";
 
     public static final String API_TENANT_CONF_DEFAULT_ROLES = "DefaultRoles";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_ROLENAME = "RoleName";
