@@ -1,8 +1,10 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.InvocationType;
@@ -75,12 +77,17 @@ public class AWSLambdaClassMediator extends AbstractMediator {
      */
     public ByteBuffer invokeLambda(String payload) {
         ByteBuffer response = null;
+        AWSCredentialsProvider credentialsProvider;
         try {
-            String decryptedSecretKey = decrypt(secretKey);
-            BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, decryptedSecretKey);
-            AWSStaticCredentialsProvider credentials = new AWSStaticCredentialsProvider(awsCredentials);
+            if (accessKey.equals("") && secretKey.equals("")) {
+                credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
+            } else {
+                String decryptedSecretKey = decrypt(secretKey);
+                BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, decryptedSecretKey);
+                credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
+            }
             AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
-                    .withCredentials(credentials)
+                    .withCredentials(credentialsProvider)
                     .build();
             InvokeRequest invokeRequest = new InvokeRequest()
                     .withFunctionName(resourceName)

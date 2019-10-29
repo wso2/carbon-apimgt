@@ -72,6 +72,7 @@ function Endpoints(props) {
     const [swagger, setSwagger] = useState(defaultSwagger);
     const [endpointValidity, setAPIEndpointsValid] = useState({ isValid: true, message: '' });
     const [isUpdating, setUpdating] = useState(false);
+    const [awsAccessMethod, setAwsAccessMethod] = React.useState('role-supplied');
 
     const apiReducer = (initState, configAction) => {
         const tmpEndpointConfig = cloneDeep(initState.endpointConfig);
@@ -212,20 +213,22 @@ function Endpoints(props) {
         }
         const endpointType = endpointConfig.endpoint_type;
         if (endpointType === 'awslambda') {
-            if (endpointConfig.amznAccessKey === '' || endpointConfig.amznSecretKey === '') {
-                return {
-                    isValid: false,
-                    message: intl.formatMessage({
-                        id: 'Apis.Details.Endpoints.Endpoints.missing.accessKey.secretKey.error',
-                        defaultMessage: 'Access Key and Secret Key should not be empty',
-                    }),
-                };
-            }
-            if (endpointConfig.amznAccessKey !== '' && endpointConfig.amznSecretKey.charAt(0) === '~') {
-                return {
-                    isValid: false,
-                    message: '',
-                };
+            if (awsAccessMethod === 'stored') {
+                if (endpointConfig.amznAccessKey === '' || endpointConfig.amznSecretKey === '') {
+                    return {
+                        isValid: false,
+                        message: intl.formatMessage({
+                            id: 'Apis.Details.Endpoints.Endpoints.missing.accessKey.secretKey.error',
+                            defaultMessage: 'Access Key and Secret Key should not be empty',
+                        }),
+                    };
+                }
+                if (endpointConfig.amznAccessKey !== '' && endpointConfig.amznSecretKey.charAt(0) === '~') {
+                    return {
+                        isValid: false,
+                        message: '',
+                    };
+                }
             }
         } else if (endpointType === 'load_balance') {
             /**
@@ -354,6 +357,8 @@ function Endpoints(props) {
                                     onChangeAPI={apiDispatcher}
                                     endpointsDispatcher={apiDispatcher}
                                     saveAndRedirect={saveAndRedirect}
+                                    awsAccessMethod={awsAccessMethod}
+                                    setAwsAccessMethod={setAwsAccessMethod}
                                 />
                             </Grid>
                         </Grid>

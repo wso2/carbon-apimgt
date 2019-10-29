@@ -702,7 +702,9 @@ public class APIMappingUtil {
                 JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfig);
                 // AWS Lambda: set special character to secret key before passing
                 if (endpointConfigJson.get("endpoint_type").equals("awslambda")) {
-                    endpointConfigJson.put("amznSecretKey", "~" + endpointConfigJson.get("amznSecretKey"));
+                    if (!endpointConfigJson.get("amznSecretKey").equals("")) {
+                        endpointConfigJson.put("amznSecretKey", "~" + endpointConfigJson.get("amznSecretKey"));
+                    }
                 }
                 dto.setEndpointConfig(endpointConfigJson);
             } catch (ParseException e) {

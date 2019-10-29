@@ -18,8 +18,10 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.*;
@@ -593,14 +595,16 @@ public class ApisApiServiceImpl implements ApisApiService {
                 LinkedHashMap endpointConfig = (LinkedHashMap) body.getEndpointConfig();
                 if (endpointConfig.containsKey("amznSecretKey")) {
                     String secretKey = (String) endpointConfig.get("amznSecretKey");
-                    if (secretKey.charAt(0) != '~') {
-                        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-                        String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
-                        endpointConfig.put("amznSecretKey", encryptedSecretKey);
-                        body.setEndpointConfig(endpointConfig);
-                    } else {
-                        endpointConfig.put("amznSecretKey", secretKey.substring(1));
-                        body.setEndpointConfig(endpointConfig);
+                    if (!secretKey.equals("")) {
+                        if (secretKey.charAt(0) != '~') {
+                            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                            String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                            endpointConfig.put("amznSecretKey", encryptedSecretKey);
+                            body.setEndpointConfig(endpointConfig);
+                        } else {
+                            endpointConfig.put("amznSecretKey", secretKey.substring(1));
+                            body.setEndpointConfig(endpointConfig);
+                        }
                     }
                 }
             }
@@ -721,13 +725,18 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (endpointConfig != null) {
                 if (endpointConfig.containsKey("amznAccessKey") && endpointConfig.containsKey("amznSecretKey")) {
                     String accessKey = (String) endpointConfig.get("amznAccessKey");
-                    String encryptedSecretKey = (String) endpointConfig.get("amznSecretKey");
-                    CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-                    String secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(encryptedSecretKey), "UTF-8");
-                    BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
-                    AWSStaticCredentialsProvider credentials = new AWSStaticCredentialsProvider(awsCredentials);
+                    String secretKey = (String) endpointConfig.get("amznSecretKey");
+                    AWSCredentialsProvider credentialsProvider;
+                    if (accessKey.equals("") && secretKey.equals("")) {
+                        credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
+                    } else {
+                        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                        String decryptedSecretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey), "UTF-8");
+                        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, decryptedSecretKey);
+                        credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
+                    }
                     AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
-                            .withCredentials(credentials)
+                            .withCredentials(credentialsProvider)
                             .build();
                     ListFunctionsResult listFunctionsResult = awsLambda.listFunctions();
                     List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();

@@ -6,6 +6,9 @@ import {
     makeStyles,
     Typography,
     Tooltip,
+    RadioGroup,
+    FormControlLabel,
+    Radio,
 } from '@material-ui/core';
 import Icon from '@material-ui/core/Icon';
 import { FormattedMessage } from 'react-intl';
@@ -20,6 +23,9 @@ const useStyles = makeStyles(theme => ({
         marginRight: theme.spacing(1),
         width: 300,
     },
+    helpIcon: {
+        fontSize: 20,
+    },
 }));
 
 /**
@@ -33,34 +39,67 @@ export default function Credentials(props) {
         epConfig,
         setEpConfig,
         endpointsDispatcher,
+        awsAccessMethod,
+        setAwsAccessMethod,
     } = props;
     const classes = useStyles();
     const [isValid, setIsValid] = useState(null);
     const [isChanged, setIsChanged] = useState(false);
+    const handleChange = (event) => {
+        const newEpConfig = { ...epConfig };
+        newEpConfig.amznAccessKey = '';
+        newEpConfig.amznSecretKey = '';
+        setEpConfig(newEpConfig);
+        endpointsDispatcher({ action: 'set_awsCredentials', value: newEpConfig });
+        setAwsAccessMethod(event.target.value);
+    };
     useEffect(() => {
-        API.getAmznResourceNames(apiId)
-            .then((response) => {
-                setIsValid(response.body);
-            });
+        if (awsAccessMethod === 'role-supplied') {
+            API.getAmznResourceNames(apiId)
+                .then((response) => {
+                    setIsValid(response.body);
+                });
+        }
+        if (epConfig.amznAccessKey !== '' && epConfig.amznSecretKey !== '') {
+            setAwsAccessMethod('stored');
+        }
     }, []);
     return (
         <div>
-            <Grid item>
-                <Typography className={classes.typography}>
-                    <FormattedMessage
-                        id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
-                        '.endpoint.credentials'}
-                        defaultMessage='AWS Credentials'
+            <Typography className={classes.typography}>
+                <FormattedMessage
+                    id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
+                    '.endpoint.accessMethod'}
+                    defaultMessage='Access Method'
+                />
+            </Typography>
+            <RadioGroup aria-label='accessMethod' name='accessMethod' value={awsAccessMethod} onChange={handleChange}>
+                <div>
+                    <FormControlLabel
+                        value='role-supplied'
+                        control={<Radio color='primary' />}
+                        label='Using IAM role-supplied temporary AWS credentials'
                     />
-                </Typography>
-                { isValid ?
-                    <Tooltip title='AWS Credentials are valid'><Icon color='primary'>check_circle</Icon></Tooltip> :
-                    <div />
-                }
-            </Grid>
+                    <Tooltip
+                        title={'You can and should use an IAM role to manage temporary credentials for ' +
+                            'applications that run on an EC2 instance'
+                        }
+                    >
+                        <Icon className={classes.helpIcon}>help_outline</Icon>
+                    </Tooltip>
+                </div>
+                <div>
+                    <FormControlLabel
+                        value='stored'
+                        control={<Radio color='primary' />}
+                        label='Using stored AWS credentials'
+                    />
+                </div>
+            </RadioGroup>
             <Grid item>
                 <TextField
                     required
+                    disabled={awsAccessMethod === 'role-supplied'}
                     id='outlined-required'
                     label='Access Key'
                     margin='normal'
@@ -76,13 +115,15 @@ export default function Credentials(props) {
                 />
                 <TextField
                     required
+                    disabled={awsAccessMethod === 'role-supplied'}
                     id='outlined-password-input-required'
                     label='Secret Key'
                     type='password'
                     margin='normal'
                     variant='outlined'
                     className={classes.textField}
-                    value={isChanged ? epConfig.amznSecretKey : 'AWS__SECRET__KEY'}
+                    // eslint-disable-next-line no-nested-ternary
+                    value={isChanged ? epConfig.amznSecretKey : (epConfig.amznSecretKey === '' ? '' : 'AWS_SECRET_KEY')}
                     onChange={(event) => {
                         const newEpConfig = { ...epConfig };
                         newEpConfig.amznSecretKey = event.target.value;
@@ -91,6 +132,10 @@ export default function Credentials(props) {
                         setIsChanged(true);
                     }}
                 />
+                { isValid && awsAccessMethod === 'role-supplied' ?
+                    <Tooltip title='AWS Credentials are valid'><Icon color='primary'>check_circle</Icon></Tooltip> :
+                    <div />
+                }
             </Grid>
         </div>
     );
@@ -101,4 +146,6 @@ Credentials.propTypes = {
     epConfig: PropTypes.shape({}).isRequired,
     setEpConfig: PropTypes.func.isRequired,
     endpointsDispatcher: PropTypes.func.isRequired,
+    awsAccessMethod: PropTypes.shape('').isRequired,
+    setAwsAccessMethod: PropTypes.func.isRequired,
 };
