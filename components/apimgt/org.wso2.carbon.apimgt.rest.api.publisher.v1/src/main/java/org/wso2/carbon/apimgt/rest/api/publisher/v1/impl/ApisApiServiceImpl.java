@@ -750,6 +750,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     return Response.ok().entity(arns.toString()).build();
                 }
             }
+        } catch (com.amazonaws.SdkClientException e) {
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
         }

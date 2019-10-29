@@ -54,7 +54,7 @@ export default function Credentials(props) {
         setAwsAccessMethod(event.target.value);
     };
     useEffect(() => {
-        if (awsAccessMethod === 'role-supplied') {
+        if (awsAccessMethod === 'stored') {
             API.getAmznResourceNames(apiId)
                 .then((response) => {
                     setIsValid(response.body);
@@ -132,7 +132,7 @@ export default function Credentials(props) {
                         setIsChanged(true);
                     }}
                 />
-                { isValid && awsAccessMethod === 'role-supplied' ?
+                { isValid && awsAccessMethod === 'stored' ?
                     <Tooltip title='AWS Credentials are valid'><Icon color='primary'>check_circle</Icon></Tooltip> :
                     <div />
                 }

@@ -164,7 +164,9 @@ export default function IntegrationDownshift(props) {
     useEffect(() => {
         API.getAmznResourceNames(api.id)
             .then((response) => {
-                setArns(response.body.list);
+                if (response.body) {
+                    setArns(response.body.list);
+                }
             });
     }, []);
     return (
