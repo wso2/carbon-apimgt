@@ -3656,6 +3656,9 @@ public final class APIUtil {
                         }
                     }
                 } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Store view roles for " + artifactPath + " : " + publisherAccessRoles.toString());
+                    }
                     authorizationManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
                     authorizationManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
                 }
