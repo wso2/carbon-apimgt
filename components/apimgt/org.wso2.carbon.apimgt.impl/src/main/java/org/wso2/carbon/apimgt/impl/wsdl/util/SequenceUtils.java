@@ -128,7 +128,7 @@ public class SequenceUtils {
             for (Object sequence : sequences.keySet()) {
                 String sequenceContent = (String) ((JSONObject) sequences.get(sequence)).get("content");
                 String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                        provider + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
+                        APIUtil.replaceEmailDomain(provider) + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
                         + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE
                         + RegistryConstants.PATH_SEPARATOR + seqType + RegistryConstants.PATH_SEPARATOR + sequence
                         + ".xml";
