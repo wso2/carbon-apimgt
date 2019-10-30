@@ -349,6 +349,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleBadRequest("Valid roles should be added under 'visibleRoles' to restrict " +
                     "the visibility", log);
         }
+        if (body.getVisibleRoles() != null) {
+            String errorMessage = RestApiPublisherUtils.validateRoles(body.getVisibleRoles());
+            if (!errorMessage.isEmpty()) {
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        }
 
         //Get all existing versions of  api been adding
         List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
@@ -601,6 +607,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             if (body.getAccessControlRoles() != null) {
                 String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getAccessControlRoles());
+                if (!errorMessage.isEmpty()) {
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+            }
+            if (body.getVisibleRoles() != null) {
+                String errorMessage = RestApiPublisherUtils.validateRoles(body.getVisibleRoles());
                 if (!errorMessage.isEmpty()) {
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
