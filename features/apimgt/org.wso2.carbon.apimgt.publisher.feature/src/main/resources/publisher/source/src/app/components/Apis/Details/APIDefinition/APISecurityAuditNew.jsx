@@ -19,24 +19,21 @@ import Typography from '@material-ui/core/Typography';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import Alert from 'AppComponents/Shared/Alert';
-import Tooltip from '@material-ui/core/Tooltip';
-import Button from '@material-ui/core/Button';
-import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
 
 import 'react-circular-progressbar/dist/styles.css';
-import Paper from '@material-ui/core/Paper';
-import { withStyles, createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { withStyles, createMuiTheme } from '@material-ui/core/styles';
 import Progress from 'AppComponents/Shared/Progress';
 import { withRouter } from 'react-router';
-
-import MUIDataTable from 'mui-datatables';
 
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import MonacoEditor from 'react-monaco-editor';
 
 import AuditSummary from './APISecurityAudit/components/AuditSummary';
+import OpenAPIRequirements from './APISecurityAudit/components/OpenAPIRequirements';
+import Security from './APISecurityAudit/components/Security';
+import Data from './APISecurityAudit/components/Data';
 
 const styles = theme => ({
     rootPaper: {
@@ -618,202 +615,38 @@ class APISecurityAudit1 extends Component {
                             reportObject={reportObject}
                             numErrors={numErrors}
                             overallScore={overallScore}
+                            roundScore={this.roundScore}
+                        />
+                        <OpenAPIRequirements
+                            classes={classes}
+                            reportObject={reportObject}
+                            errorColumns={errorColumns}
+                            options={options}
+                            getRowData={this.getRowData}
+                            getMuiTheme={this.getMuiTheme}
+                            getErrorMuiTheme={this.getErrorMuiTheme}
                         />
                         {{}.hasOwnProperty.call(reportObject, 'security') &&
-                            <div className={classes.paperDiv}>
-                                <Paper elevation={1} className={classes.rootPaper}>
-                                    <div>
-                                        <Typography variant='h5' className={classes.sectionHeadingTypography}>
-                                            <FormattedMessage
-                                                id='Apis.Details.APIDefinition.AuditApi.Security'
-                                                defaultMessage='Security'
-                                            />
-                                        </Typography>
-                                        <Typography variant='body1'>
-                                            <FormattedMessage
-                                                id='Apis.Details.APIDefinition.AuditApi.SecurityNumOfIssues'
-                                                defaultMessage='{securityNumOfIssuesText} {securityNumOfIssues}'
-                                                values={{
-                                                    securityNumOfIssuesText: (
-                                                        <strong>Number of Issues:</strong>
-                                                    ),
-                                                    securityNumOfIssues: reportObject.security.issueCounter,
-                                                }}
-                                            />
-                                        </Typography>
-                                        <Typography variant='body1'>
-                                            <FormattedMessage
-                                                id='Apis.Details.APIDefinition.AuditApi.SecurityScore'
-                                                defaultMessage='{securityScoreText} {securityScore}  / 30'
-                                                values={{
-                                                    securityScoreText: (
-                                                        <strong>Score:</strong>
-                                                    ),
-                                                    securityScore: (
-                                                        (Math.round(reportObject.security.score * 100) / 100)
-                                                    ),
-                                                }}
-                                            />
-                                        </Typography>
-                                        <React.Fragment>
-                                            <Typography variant='body1'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.APIDefinition.AuditApi.securityCriticality'
-                                                    defaultMessage='{securityCriticalityText} {securityCriticality}'
-                                                    values={{
-                                                        securityCriticalityText: (
-                                                            <strong>Severity:</strong>
-                                                        ),
-                                                        securityCriticality: (
-                                                            this.criticalityObject[reportObject.security.criticality]
-                                                        ),
-                                                    }}
-                                                />
-                                                <Tooltip
-                                                    placement='right'
-                                                    classes={{
-                                                        tooltip: classes.htmlTooltip,
-                                                    }}
-                                                    title={
-                                                        <React.Fragment>
-                                                            <FormattedMessage
-                                                                id='Apis.Details.APIDefinition.AuditApi.tooltip'
-                                                                defaultMessage={
-                                                                    'Severity ranges from INFO, LOW, MEDIUM, HIGH ' +
-                                                                    'to CRITICAL, with INFO being ' +
-                                                                    'low vulnerability and CRITICAL' +
-                                                                    'being high vulnerability'
-                                                                }
-                                                            />
-                                                        </React.Fragment>
-                                                    }
-                                                >
-                                                    <Button className={classes.helpButton}>
-                                                        <HelpOutline className={classes.helpIcon} />
-                                                    </Button>
-                                                </Tooltip>
-                                            </Typography>
-                                        </React.Fragment>
-                                        {(reportObject.security.issueCounter !== 0) &&
-                                            <div>
-                                                <hr />
-                                                <Typography variant='body1'>
-                                                    <MuiThemeProvider theme={this.getMuiTheme()}>
-                                                        <MUIDataTable
-                                                            title='Issues'
-                                                            data={this.getRowData(
-                                                                reportObject.security.issues,
-                                                                'Security',
-                                                                'normal',
-                                                            )}
-                                                            columns={columns}
-                                                            options={options}
-                                                        />
-                                                    </MuiThemeProvider>
-                                                </Typography>
-                                            </div>
-                                        }
-                                    </div>
-                                </Paper>
-                            </div>
+                            <Security
+                                classes={classes}
+                                reportObject={reportObject}
+                                criticalityObject={this.criticalityObject}
+                                columns={columns}
+                                options={options}
+                                getRowData={this.getRowData}
+                                getMuiTheme={this.getMuiTheme}
+                            />
                         }
                         {{}.hasOwnProperty.call(reportObject, 'data') &&
-                            <div className={classes.paperDiv}>
-                                <Paper elevation={1} className={classes.rootPaper}>
-                                    <div>
-                                        <Typography variant='h5' className={classes.sectionHeadingTypography}>
-                                            <FormattedMessage
-                                                id='Apis.Details.APIDefinition.AuditApi.DataValidation'
-                                                defaultMessage='Data Validation'
-                                            />
-                                        </Typography>
-                                        <Typography variant='body1'>
-                                            <FormattedMessage
-                                                id='Apis.Details.APIDefinition.AuditApi.DataValidationNumOfIssues'
-                                                defaultMessage='{dataNumOfIssuesText} {dataNumOfIssues}'
-                                                values={{
-                                                    dataNumOfIssuesText: (
-                                                        <strong>Number of Issues:</strong>
-                                                    ),
-                                                    dataNumOfIssues: reportObject.data.issueCounter,
-                                                }}
-                                            />
-                                        </Typography>
-                                        <Typography variant='body1'>
-                                            <FormattedMessage
-                                                id='Apis.Details.APIDefinition.AuditApi.DataValidationScore'
-                                                defaultMessage='{dataScoreText} {dataScore}  / 70'
-                                                values={{
-                                                    dataScoreText: (
-                                                        <strong>Score:</strong>
-                                                    ),
-                                                    dataScore: (
-                                                        (Math.round(reportObject.data.score * 100) / 100)
-                                                    ),
-                                                }}
-                                            />
-                                        </Typography>
-                                        <React.Fragment>
-                                            <Typography variant='body1'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.APIDefinition.AuditApi.dataCriticality'
-                                                    defaultMessage='{dataCriticalityText} {dataCriticality}'
-                                                    values={{
-                                                        dataCriticalityText: (
-                                                            <strong>Severity:</strong>
-                                                        ),
-                                                        dataCriticality: (
-                                                            this.criticalityObject[reportObject.data.criticality]
-                                                        ),
-                                                    }}
-                                                />
-                                                <Tooltip
-                                                    placement='right'
-                                                    classes={{
-                                                        tooltip: classes.htmlTooltip,
-                                                    }}
-                                                    title={
-                                                        <React.Fragment>
-                                                            <FormattedMessage
-                                                                id='Apis.Details.APIDefinition.AuditApi.tooltip'
-                                                                defaultMessage={
-                                                                    'Severity ranges from INFO, LOW, MEDIUM, ' +
-                                                                    'HIGH to CRITICAL, with INFO being ' +
-                                                                    'low vulnerability and CRITICAL' +
-                                                                    'being high vulnerability'
-                                                                }
-                                                            />
-                                                        </React.Fragment>
-                                                    }
-                                                >
-                                                    <Button className={classes.helpButton}>
-                                                        <HelpOutline className={classes.helpIcon} />
-                                                    </Button>
-                                                </Tooltip>
-                                            </Typography>
-                                        </React.Fragment>
-                                        {(reportObject.data.issueCounter !== 0) &&
-                                            <div>
-                                                <hr />
-                                                <Typography variant='body1'>
-                                                    <MuiThemeProvider theme={this.getMuiTheme()}>
-                                                        <MUIDataTable
-                                                            title='Issues'
-                                                            data={this.getRowData(
-                                                                reportObject.data.issues,
-                                                                'Data Validation',
-                                                                'normal',
-                                                            )}
-                                                            columns={columns}
-                                                            options={options}
-                                                        />
-                                                    </MuiThemeProvider>
-                                                </Typography>
-                                            </div>
-                                        }
-                                    </div>
-                                </Paper>
-                            </div>
+                            <Data
+                                classes={classes}
+                                reportObject={reportObject}
+                                criticalityObject={this.criticalityObject}
+                                columns={columns}
+                                options={options}
+                                getRowData={this.getRowData}
+                                getMuiTheme={this.getMuiTheme}
+                            />
                         }
                     </div>
                 )}

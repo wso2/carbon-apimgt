@@ -1,3 +1,4 @@
+/* eslint-disable require-jsdoc */
 /* eslint-disable max-len */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://wso2.com) All Rights Reserved.
@@ -248,6 +249,7 @@ class APISecurityAudit extends Component {
      * @return {*} dataObject The dataObject array
      */
     getRowData(issues, category, rowType) {
+        // TODO - Add the new column to the rowObject before simlink
         const dataObject = [];
         for (const item in issues) {
             if ({}.hasOwnProperty.call(issues, item)) {
@@ -257,12 +259,12 @@ class APISecurityAudit extends Component {
                         if (issues[item].issues[i].specificDescription) {
                             rowObject.push(
                                 issues[item].issues[i].specificDescription, issues[item].issues[i].pointer,
-                                category, rowType,
+                                category, rowType, item,
                             );
                         } else {
                             rowObject.push(
                                 issues[item].description, issues[item].issues[i].pointer,
-                                category, rowType,
+                                category, rowType, item,
                             );
                         }
                     } else if (rowType === 'normal') {
@@ -273,7 +275,7 @@ class APISecurityAudit extends Component {
                                 this.roundScore(issues[item].issues[i].score), issues[item].issues[i].pointer,
                                 issues[item].issues[i].tooManyImpacted,
                                 issues[item].issues[i].pointersAffected, category, issues[item].tooManyError,
-                                rowType,
+                                rowType, item,
                             );
                         } else {
                             rowObject.push(
@@ -281,7 +283,7 @@ class APISecurityAudit extends Component {
                                 issues[item].description, this.roundScore(issues[item].issues[i].score),
                                 issues[item].issues[i].pointer, issues[item].issues[i].tooManyImpacted,
                                 issues[item].issues[i].pointersAffected, category, issues[item].tooManyError,
-                                rowType,
+                                rowType, item,
                             );
                         }
                     }
@@ -295,26 +297,41 @@ class APISecurityAudit extends Component {
     /**
      * Method to get the URL to display for each issue
      * TODO - Has to be replaced with API of database from 42Crunch when it is made available by them
-     * @param {*} category Category of Issue
+     * TODO - Check if the old category parameter is required.
+     * @param {*} key issue key
      * @returns {*} String URL
      */
-    getMoreDetailUrl(category) {
-        const baseUrl = 'https://apisecurity.io/ref/';
-        let url = '';
+    // eslint-disable-next-line no-unused-vars
+    getMoreDetailUrl(category, key) {
+        // eslint-disable-next-line no-unused-vars
+        const baseUrl = 'https://apisecurity.io/encyclopedia/content/';
+        // let url = '';
+        const url = 'https://apisecurity.io/encyclopedia/content/oasv3/oasconformance/structure/v3-validation-array-void.htm';
+        // TODO - Add logic to identify whether the report is oasv3 or v2 to append that part to the URL.
 
-        switch (category) {
-            case 'OpenAPI Format Requirements':
-                url = baseUrl + 'oasconformance/';
-                break;
-            case 'Security':
-                url = baseUrl + 'security/';
-                break;
-            case 'Data Validation':
-                url = baseUrl + 'datavalidation/datavalidation/';
-                break;
-            default:
-                url = baseUrl;
-        }
+        // if (reportObject.oasVersion === '3.0.0') {
+
+        // } else {
+
+        // }
+
+        // const formattedKey = key.replace('.', '-');
+        // console.log(formattedKey);
+
+        // switch (category) {
+        //     case 'OpenAPI Format Requirements':
+        //         url = baseUrl + 'oasconformance/';
+        //         break;
+        //     case 'Security':
+        //         url = baseUrl + 'security/';
+        //         break;
+        //     case 'Data Validation':
+        //         url = baseUrl + 'datavalidation/datavalidation/';
+        //         break;
+        //     default:
+        //         url = baseUrl;
+        // }
+        // TODO - Insert logic to handle formattedKey here. How do we find out which category is each formattedKey in? to append the url
         return url;
     }
 
@@ -495,6 +512,14 @@ class APISecurityAudit extends Component {
                     sort: false,
                 },
             },
+            {
+                name: 'ReferenceUrl',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                    sort: false,
+                },
+            },
         ];
 
         const errorColumns = [
@@ -523,6 +548,14 @@ class APISecurityAudit extends Component {
             },
             {
                 name: 'isError',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                    sort: false,
+                },
+            },
+            {
+                name: 'ReferenceUrl',
                 options: {
                     display: 'excluded',
                     filter: false,
@@ -574,7 +607,7 @@ class APISecurityAudit extends Component {
                                             link: (
                                                 <strong>
                                                     <a
-                                                        href={this.getMoreDetailUrl(rowData[2])}
+                                                        href={this.getMoreDetailUrl(rowData[2], rowData[4])}
                                                         target='_blank'
                                                         rel='noopener noreferrer'
                                                     >link
@@ -611,7 +644,7 @@ class APISecurityAudit extends Component {
                                             link: (
                                                 <strong>
                                                     <a
-                                                        href={this.getMoreDetailUrl(rowData[6])}
+                                                        href={this.getMoreDetailUrl(rowData[6], rowData[9])}
                                                         target='_blank'
                                                         rel='noopener noreferrer'
                                                     >link
@@ -896,8 +929,29 @@ class APISecurityAudit extends Component {
                                                 </div>
                                             </React.Fragment>
                                         }
+                                        {{}.hasOwnProperty.call(reportObject, 'warnings') &&
+                                            <React.Fragment>
+                                                <div>
+                                                    <Typography variant='body1'>
+                                                        <MuiThemeProvider theme={this.getErrorMuiTheme()}>
+                                                            <MUIDataTable
+                                                                title='Best Practices issues'
+                                                                data={this.getRowData(
+                                                                    reportObject.warnings.issues,
+                                                                    'OpenAPI Format Requirements',
+                                                                    'error',
+                                                                )}
+                                                                columns={errorColumns}
+                                                                options={options}
+                                                            />
+                                                        </MuiThemeProvider>
+                                                    </Typography>
+                                                </div>
+                                            </React.Fragment>
+                                        }
                                         {!{}.hasOwnProperty.call(reportObject, 'validationErrors') &&
                                         !{}.hasOwnProperty.call(reportObject, 'semanticErrors') &&
+                                        !{}.hasOwnProperty.call(reportObject, 'warnings') &&
                                         <Typography variant='body1'>
                                             <FormattedMessage
                                                 id='Apis.Details.APIDefinition.AuditApi.OASNoIssuesFound'

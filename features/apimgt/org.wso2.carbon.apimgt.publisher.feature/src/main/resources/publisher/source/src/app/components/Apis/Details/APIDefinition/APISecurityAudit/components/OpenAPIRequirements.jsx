@@ -20,15 +20,21 @@ import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import MUIDataTable from 'mui-datatables';
+import PropTypes from 'prop-types';
 
 /**
  * Function to display the OpenAPI Requirement component
+ * @param {*} props props
  * @returns {*} OpenAPIRequirements component
  */
-export default function OpenAPIRequirements() {
+export default function OpenAPIRequirements(props) {
     const {
         classes,
         reportObject,
+        errorColumns,
+        options,
+        getRowData,
+        getErrorMuiTheme,
     } = props;
 
     return (
@@ -45,10 +51,10 @@ export default function OpenAPIRequirements() {
                         <React.Fragment>
                             <div>
                                 <Typography variant='body1'>
-                                    <MuiThemeProvider theme={this.getMuiTheme()}>
+                                    <MuiThemeProvider theme={getErrorMuiTheme()}>
                                         <MUIDataTable
                                             title='Semantic Errors'
-                                            data={this.getRowData(
+                                            data={getRowData(
                                                 reportObject.semanticErrors.issues,
                                                 'OpenAPI Format Requirements',
                                                 'error',
@@ -65,10 +71,10 @@ export default function OpenAPIRequirements() {
                         <React.Fragment>
                             <div>
                                 <Typography variant='body1'>
-                                    <MuiThemeProvider theme={this.getErrorMuiTheme()}>
+                                    <MuiThemeProvider theme={getErrorMuiTheme()}>
                                         <MUIDataTable
                                             title='Structural Errors'
-                                            data={this.getRowData(
+                                            data={getRowData(
                                                 reportObject.validationErrors.issues,
                                                 'OpenAPI Format Requirements',
                                                 'error',
@@ -95,3 +101,17 @@ export default function OpenAPIRequirements() {
         </div>
     );
 }
+
+OpenAPIRequirements.propTypes = {
+    classes: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
+    // TODO - Check if these proptypes are required and whether they are correct
+    reportObject: PropTypes.shape({}).isRequired,
+    errorColumns: PropTypes.shape({}).isRequired,
+    options: PropTypes.shape({}).isRequired,
+    getRowData: PropTypes.shape({}).isRequired,
+    getErrorMuiTheme: PropTypes.shape({}).isRequired,
+};

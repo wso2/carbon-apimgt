@@ -1,3 +1,5 @@
+// TODO - Remove the following line if it can be resolved.
+/* eslint-disable max-len */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
@@ -37,6 +39,7 @@ export default function AuditSummary(props) {
         reportObject,
         numErrors,
         overallScore,
+        roundScore,
     } = props;
 
     return (
@@ -95,7 +98,7 @@ export default function AuditSummary(props) {
                                         defaultMessage='{overallScoreText} {overallScore} / 100'
                                         values={{
                                             overallScoreText: <strong>Overall Score:</strong>,
-                                            overallScore: this.roundScore(overallScore),
+                                            overallScore: roundScore(overallScore),
                                         }}
                                     />
                                 </Typography>
@@ -164,7 +167,7 @@ export default function AuditSummary(props) {
                                                 <strong>
                                                     Security -
                                                     ({
-                                                        this.roundScore(reportObject.security.score)
+                                                        roundScore(reportObject.security.score)
                                                     } / 30)
                                                 </strong>
                                             ),
@@ -195,7 +198,7 @@ export default function AuditSummary(props) {
                                             dataValidationSummary: (
                                                 <strong>
                                                     Data Validation -
-                                                    ({this.roundScore(reportObject.data.score)} / 70)
+                                                    ({roundScore(reportObject.data.score)} / 70)
                                                 </strong>
                                             ),
                                         }}
@@ -203,7 +206,7 @@ export default function AuditSummary(props) {
                                     <VisibilitySensor>
                                         {({ isVisible }) => {
                                             const progressScore = isVisible ?
-                                                ((this.roundScore(reportObject.data.score) / 70
+                                                ((roundScore(reportObject.data.score) / 70
                                                 ) * 100) : 0;
                                             return (
                                                 <Line
@@ -229,6 +232,8 @@ export default function AuditSummary(props) {
                                                 defaultMessage='Failed to Validate OpenAPI File'
                                             />
                                         </Typography>
+                                        {/* TODO - Check the more than 120 characters warning
+                                        issue - Has been disabled for the file */}
                                         <Typography component='p' className={classes.content}>
                                             <FormattedMessage
                                                 id='Apis.Details.APIDefinition.AuditApi.FailedToValidate.Content'
@@ -252,9 +257,9 @@ AuditSummary.propTypes = {
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,
-    // TODO - Check if these proptypes are required and whether they are correct
     criticalityObject: PropTypes.shape({}).isRequired,
     reportObject: PropTypes.shape({}).isRequired,
     numErrors: PropTypes.shape({}).isRequired,
     overallScore: PropTypes.shape({}).isRequired,
+    roundScore: PropTypes.shape({}).isRequired,
 };
