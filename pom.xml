@@ -1596,7 +1596,7 @@
         <carbon.identity-outbound-auth-samlsso.version>5.2.6</carbon.identity-outbound-auth-samlsso.version>
         <carbon.identity-data-publisher-application-authentication.version>5.3.3</carbon.identity-data-publisher-application-authentication.version>
 
-        <graphql.java.version>13.0.wso2v1</graphql.java.version>
+        <graphql.java.version>13.0.wso2v2</graphql.java.version>
 
         <carbon.governance.version>4.8.10</carbon.governance.version>
         <carbon.deployment.version>4.9.11</carbon.deployment.version>
