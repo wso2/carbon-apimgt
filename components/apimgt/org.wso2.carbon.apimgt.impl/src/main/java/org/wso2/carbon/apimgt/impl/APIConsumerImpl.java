@@ -637,7 +637,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     /**
      * The method to get Light Weight APIs to Store view
      * @param tenantDomain tenant domain
-     * @param start start limi
+     * @param start start limit
      * @param end end limit
      * @return Set<API>  Set of APIs
      * @throws APIManagementException
