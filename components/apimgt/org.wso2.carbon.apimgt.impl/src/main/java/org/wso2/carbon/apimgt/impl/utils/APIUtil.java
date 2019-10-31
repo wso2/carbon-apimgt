@@ -970,7 +970,7 @@ public final class APIUtil {
                         replaceEmailDomainBack(providerName));
                 List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
                 String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
-                if (policies != null && !"".equals(policies)) {
+                if (!StringUtils.isEmpty(policies)) {
                     String[] policyNames = policies.split("\\|\\|");
                     for (String policyName : policyNames) {
                         if (definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)) {
@@ -1031,16 +1031,14 @@ public final class APIUtil {
                         artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
             } catch (ParseException e) {
                 String msg = "Failed to parse endpoint config JSON of API: " + apiName + " " + apiVersion;
-                log.error(msg, e);
                 throw new APIManagementException(msg, e);
             } catch (ClassCastException e) {
                 String msg = "Invalid endpoint config JSON found in API: " + apiName + " " + apiVersion;
-                log.error(msg, e);
                 throw new APIManagementException(msg, e);
             }
 
         } catch (GovernanceException e) {
-            String msg = "Failed to get API from artifact ";
+            String msg = "Failed to get API from artifact";
             throw new APIManagementException(msg, e);
         }
         return api;
