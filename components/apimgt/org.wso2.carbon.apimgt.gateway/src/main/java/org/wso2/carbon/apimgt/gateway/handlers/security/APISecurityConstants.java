@@ -67,6 +67,7 @@ public class APISecurityConstants {
     public static final int GRAPHQL_INVALID_QUERY = 900422;
     public static final String GRAPHQL_API_FAILURE_HANDLER = "_graphql_failure_handler";
     public static final String GRAPHQL_INVALID_QUERY_MESSAGE= "INVALID QUERY";
+    public static final String QUERY_TOO_COMPLEX = "QUERY TOO COMPLEX";
 
     // We have added this because we need to add an additional description to the original one and we need to
     // separate the 2 messages

@@ -17,6 +17,10 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 
+import graphql.ExecutionResult;
+import graphql.GraphQL;
+import graphql.GraphQLError;
+import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.language.Definition;
 import graphql.language.Document;
 import graphql.language.Field;
@@ -72,6 +76,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
     private static final String UNICODE_TRANSFORMATION_FORMAT = "UTF-8";
     private static final String GRAPHQL_IDENTIFIER = "_graphQL";
     private static final String CLASS_NAME_AND_METHOD = "_GraphQLAPIHandler_handleRequest";
+    private static final int MAX_QUERY_DEPTH = 3;
     private static final Log log = LogFactory.getLog(GraphQLAPIHandler.class);
     private GraphQLSchema schema = null;
     private static Validator validator;
@@ -115,12 +120,12 @@ public class GraphQLAPIHandler extends AbstractHandler {
                         if (log.isDebugEnabled()) {
                             log.debug("Invalid query parameter " + queryParams[0]);
                         }
-                        handleFailure(messageContext, "Invalid query parameter");
+                        handleFailure(messageContext, APISecurityConstants.GRAPHQL_INVALID_QUERY_MESSAGE, "Invalid query parameter");
                         return false;
                     }
                 }
             } else {
-                handleFailure(messageContext, "Request path cannot be empty");
+                handleFailure(messageContext, APISecurityConstants.GRAPHQL_INVALID_QUERY_MESSAGE, "Request path cannot be empty");
                 return false;
             }
 
@@ -140,6 +145,14 @@ public class GraphQLAPIHandler extends AbstractHandler {
                             messageContext.setProperty(HTTP_VERB, httpVerb);
                             ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty(HTTP_METHOD,
                                     operation.getOperation().toString());
+
+                            // Analyse the query
+                            if (operation.getOperation().equals(Operation.QUERY) || operation.getOperation().equals(Operation.SUBSCRIPTION)) {
+                                if (!analyseQuery(messageContext, payload)) {
+                                    log.error("Query is too complex");
+                                    return false;
+                                }
+                            }
                             String operationList = getOperationList(messageContext, operation);
                             messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, operationList);
                             if (log.isDebugEnabled()) {
@@ -148,7 +161,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                             return true;
                         }
                     } else {
-                        handleFailure(messageContext, "Operation definition cannot be empty");
+                        handleFailure(messageContext, APISecurityConstants.GRAPHQL_INVALID_QUERY_MESSAGE,"Operation definition cannot be empty");
                         return false;
                     }
                 }
@@ -157,7 +170,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
             }
         } catch (IOException | XMLStreamException | InvalidSyntaxException e) {
             log.error(e.getMessage());
-            handleFailure(messageContext, e.getMessage());
+            handleFailure(messageContext, APISecurityConstants.GRAPHQL_INVALID_QUERY_MESSAGE, e.getMessage());
         }
         return false;
     }
@@ -339,10 +352,59 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 validationErrorMessageList.add(error.getDescription());
             }
             validationErrorMessage = String.join(",", validationErrorMessageList);
-            handleFailure(messageContext, validationErrorMessage);
+            handleFailure(messageContext, APISecurityConstants.GRAPHQL_INVALID_QUERY_MESSAGE, validationErrorMessage);
             return false;
         }
         return true;
+    }
+
+    /**
+     * This method analyses the query
+     *
+     * @param messageContext message context of the request
+     * @param payload payload of the request
+     * @return true or false
+     */
+    private boolean analyseQuery(MessageContext messageContext, String payload) {
+        if(queryDepthAnalysis(messageContext, payload)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * This method analyses the query depth
+     *
+     * @param messageContext message context of the request
+     * @param payload payload of the request
+     * @return true or false
+     */
+    private boolean queryDepthAnalysis(MessageContext messageContext, String payload) {
+        MaxQueryDepthInstrumentation maxQueryDepthInstrumentation = new MaxQueryDepthInstrumentation(MAX_QUERY_DEPTH);
+
+        GraphQL runtime = GraphQL.newGraphQL(schema)
+                .instrumentation(maxQueryDepthInstrumentation)
+                .build();
+
+        try {
+            ExecutionResult executionResult = runtime.execute(payload);
+            List<GraphQLError> errors = executionResult.getErrors();
+            if (errors.size()>0) {
+                for (GraphQLError error : errors) {
+                    log.error(error);
+                }
+                handleFailure(messageContext, APISecurityConstants.QUERY_TOO_COMPLEX, errors.toString());
+                return false;
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Maximum query depth of " + MAX_QUERY_DEPTH + " was not exceeded");
+            }
+            return true;
+        } catch (Throwable e) {
+            log.error(e);
+        }
+        return false;
     }
 
     /**
@@ -351,8 +413,8 @@ public class GraphQLAPIHandler extends AbstractHandler {
      * @param messageContext message context of the request
      * @param errorMessage   error message of the failure
      */
-    private void handleFailure(MessageContext messageContext, String errorMessage) {
-        OMElement payload = getFaultPayload(errorMessage);
+    private void handleFailure(MessageContext messageContext, String errorMessage, String errorDescription) {
+        OMElement payload = getFaultPayload(errorMessage, errorDescription);
         Utils.setFaultPayload(messageContext, payload);
         Mediator sequence = messageContext.getSequence(APISecurityConstants.GRAPHQL_API_FAILURE_HANDLER);
         if (sequence != null && !sequence.mediate(messageContext)) {
@@ -365,7 +427,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
      * @param message fault message
      * @return the OMElement
      */
-    private OMElement getFaultPayload(String message) {
+    private OMElement getFaultPayload(String message, String description) {
         OMFactory fac = OMAbstractFactory.getOMFactory();
         OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS,
                 APISecurityConstants.API_SECURITY_NS_PREFIX);
@@ -374,9 +436,9 @@ public class GraphQLAPIHandler extends AbstractHandler {
         OMElement errorCode = fac.createOMElement("code", ns);
         errorCode.setText(APISecurityConstants.GRAPHQL_INVALID_QUERY + "");
         OMElement errorMessage = fac.createOMElement("message", ns);
-        errorMessage.setText(APISecurityConstants.GRAPHQL_INVALID_QUERY_MESSAGE);
+        errorMessage.setText(message);
         OMElement errorDetail = fac.createOMElement("description", ns);
-        errorDetail.setText(message);
+        errorDetail.setText(description);
 
         payload.addChild(errorCode);
         payload.addChild(errorMessage);
