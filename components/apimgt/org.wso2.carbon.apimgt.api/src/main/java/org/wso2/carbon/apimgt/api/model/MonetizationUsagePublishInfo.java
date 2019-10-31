@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.api.model;
 
-
 /*
  * Captures the properties of monetization usage publisher.
  **/
