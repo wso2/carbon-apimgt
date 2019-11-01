@@ -3561,7 +3561,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
             } else {
-                log.debug("Gateway is not existed for the current API Provider");
+                log.debug("Gateway does not exist for the current API Provider");
             }
             //Check if there are already published external APIStores.If yes,removing APIs from them.
             Set<APIStore> apiStoreSet = getPublishedExternalAPIStores(api.getId());
