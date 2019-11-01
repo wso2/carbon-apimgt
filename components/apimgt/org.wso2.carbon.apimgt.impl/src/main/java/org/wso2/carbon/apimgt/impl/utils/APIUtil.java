@@ -970,7 +970,7 @@ public final class APIUtil {
                         replaceEmailDomainBack(providerName));
                 List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
                 String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
-                if (policies != null && !"".equals(policies)) {
+                if (!StringUtils.isEmpty(policies)) {
                     String[] policyNames = policies.split("\\|\\|");
                     for (String policyName : policyNames) {
                         if (definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)) {
@@ -981,7 +981,6 @@ public final class APIUtil {
                         }
                     }
                 }
-
                 api.addAvailableTiers(availablePolicy);
                 String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
                 api.setMonetizationCategory(getAPIMonetizationCategory(availablePolicy, tenantDomainName));
@@ -995,26 +994,20 @@ public final class APIUtil {
                     for (String tierName : tierNames) {
                         Tier tier = new Tier(tierName);
                         availableTier.add(tier);
-
                     }
-
                     api.addAvailableTiers(availableTier);
                     api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
                 } else {
                     api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
                 }
             }
-
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
-
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
-
             api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
             api.setSubscriptionAvailableTenants(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
-
             api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
@@ -1031,16 +1024,14 @@ public final class APIUtil {
                         artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
             } catch (ParseException e) {
                 String msg = "Failed to parse endpoint config JSON of API: " + apiName + " " + apiVersion;
-                log.error(msg, e);
                 throw new APIManagementException(msg, e);
             } catch (ClassCastException e) {
                 String msg = "Invalid endpoint config JSON found in API: " + apiName + " " + apiVersion;
-                log.error(msg, e);
                 throw new APIManagementException(msg, e);
             }
 
         } catch (GovernanceException e) {
-            String msg = "Failed to get API from artifact ";
+            String msg = "Failed to get API from artifact";
             throw new APIManagementException(msg, e);
         }
         return api;
