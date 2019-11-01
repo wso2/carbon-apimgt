@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.api;
 
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
@@ -1277,4 +1278,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if API Manager core level exception occurred
      */
     void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException;
+
+    JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException;
 }

@@ -681,16 +681,16 @@ public class ApisApiServiceImpl implements ApisApiService {
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = api.getId();
             String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
-            // Get configuration file and retrieve API token
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
-            String apiToken = config.getFirstProperty(APIConstants.API_SECURITY_AUDIT_API_TOKEN);
+            // Get configuration file, retrieve API token and collection id
+            JSONObject securityAuditPropertyObject = apiProvider.getSecurityAuditAttributesFromConfig(username);
+            String apiToken = (String) securityAuditPropertyObject.get("apiToken");
+            String collectionId = (String) securityAuditPropertyObject.get("collectionId");
             // Retrieve the uuid from the database
             String auditUuid = ApiMgtDAO.getInstance().getAuditApiId(apiIdentifier);
             if (auditUuid != null) {
                 updateAuditApi(apiDefinition, apiToken, auditUuid, isDebugEnabled);
             } else {
-                auditUuid = createAuditApi(config, apiToken, apiIdentifier, apiDefinition, isDebugEnabled);
+                auditUuid = createAuditApi(collectionId, apiToken, apiIdentifier, apiDefinition, isDebugEnabled);
             }
             // Logic for the HTTP request
             String getUrl = APIConstants.BASE_AUDIT_URL + "/" + auditUuid + APIConstants.ASSESSMENT_REPORT;
@@ -777,14 +777,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
     }
 
-    private String createAuditApi(APIManagerConfiguration config, String apiToken, APIIdentifier apiIdentifier,
+    private String createAuditApi(String collectionId, String apiToken, APIIdentifier apiIdentifier,
             String apiDefinition, boolean isDebugEnabled)
             throws IOException, APIManagementException, ParseException {
         HttpURLConnection httpConn;
         OutputStream outputStream;
         PrintWriter writer;
         String auditUuid = null;
-        String collectionId = config.getFirstProperty(APIConstants.API_SECURITY_AUDIT_CID);
         URL url = new URL(APIConstants.BASE_AUDIT_URL);
         httpConn = (HttpURLConnection) url.openConnection();
         httpConn.setUseCaches(false);

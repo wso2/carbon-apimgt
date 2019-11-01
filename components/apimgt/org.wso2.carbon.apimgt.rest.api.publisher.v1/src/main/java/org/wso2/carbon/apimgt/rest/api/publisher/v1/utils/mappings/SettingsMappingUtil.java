@@ -24,6 +24,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -129,12 +130,16 @@ public class SettingsMappingUtil {
      * This method returns the Security Audit properties from the configuration
      *
      */
-    private SecurityAuditAttributeDTO getSecurityAuditProperties() {
+    private SecurityAuditAttributeDTO getSecurityAuditProperties() throws APIManagementException {
         SecurityAuditAttributeDTO properties = new SecurityAuditAttributeDTO();
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String apiToken = config.getFirstProperty(APIConstants.API_SECURITY_AUDIT_API_TOKEN);
-        String collectionId = config.getFirstProperty(APIConstants.API_SECURITY_AUDIT_CID);
+
+        String username = RestApiUtil.getLoggedInUsername();
+        APIProvider apiProvider = RestApiUtil.getProvider(username);
+
+        JSONObject securityAuditPropertyObject = apiProvider.getSecurityAuditAttributesFromConfig(username);
+        String apiToken = (String) securityAuditPropertyObject.get(APIConstants.SECURITY_AUDIT_API_TOKEN);
+        String collectionId = (String) securityAuditPropertyObject.get(APIConstants.SECURITY_AUDIT_COLLECTION_ID);
+
         properties.setApiToken(apiToken);
         properties.setCollectionId(collectionId);
         return properties;

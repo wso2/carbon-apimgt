@@ -215,6 +215,10 @@ public final class APIConstants {
     public static final String API_SECURITY_AUDIT = "APISecurityAudit.";
     public static final String API_SECURITY_AUDIT_API_TOKEN = API_SECURITY_AUDIT + "APIToken";
     public static final String API_SECURITY_AUDIT_CID = API_SECURITY_AUDIT + "CollectionID";
+
+    public static final String SECURITY_AUDIT_CONFIGURATION = "SecurityAuditConfig";
+    public static final String SECURITY_AUDIT_API_TOKEN = "apiToken";
+    public static final String SECURITY_AUDIT_COLLECTION_ID = "collectionId";
     // For HTTP requests
     public static final String HEADER_ACCEPT = "Accept";
     public static final String HEADER_CONTENT_TYPE = "Content-Type";

@@ -7668,4 +7668,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
         return getGraphqlSchemaDefinition(apiId);
     }
+
+    public JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
+
+        int tenantId = 0;
+        try {
+            tenantId = getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            handleException("Error in getting tenantId of: " + tenantDomain, e);
+        }
+        JSONObject securityAuditConfig = APIUtil.getSecurityAuditAttributesFromRegistry(tenantId);
+
+        if (securityAuditConfig != null) {
+            return securityAuditConfig;
+        } else {
+            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put(APIConstants.SECURITY_AUDIT_API_TOKEN, configuration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_API_TOKEN));
+            jsonObject.put(APIConstants.SECURITY_AUDIT_COLLECTION_ID, configuration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_CID));
+            return jsonObject;
+        }
+    }
 }
