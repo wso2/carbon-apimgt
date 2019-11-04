@@ -9558,4 +9558,15 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
     }
+
+    /**
+     * return skipRolesByRegex config
+     *
+     */
+    public static String getSkipRolesByRegex() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
+        return skipRolesByRegex;
+    }
 }
