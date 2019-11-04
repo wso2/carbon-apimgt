@@ -278,7 +278,7 @@ class InfoBar extends React.Component {
         const {
             custom: {
                 leftMenu: { position },
-                infoBar: { showThumbnail },
+                infoBar: { showThumbnail, height },
                 tagWise: { key, active },
                 social: { showRating },
             },
@@ -315,7 +315,7 @@ class InfoBar extends React.Component {
                     </Link>
                     {showThumbnail && (
                         <React.Fragment>
-                            <VerticalDivider height={70} />
+                            <VerticalDivider height={height} />
                             <ApiThumb api={api} customWidth={70} customHeight={50} showInfo={false} />
                         </React.Fragment>
                     )}

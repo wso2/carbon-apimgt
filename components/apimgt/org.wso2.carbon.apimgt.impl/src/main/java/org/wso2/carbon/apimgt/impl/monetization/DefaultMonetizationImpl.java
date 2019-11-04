@@ -96,8 +96,7 @@ public class DefaultMonetizationImpl implements Monetization {
         try {
             apiAdmin.updateMonetizationUsagePublishInfo(monetizationUsagePublishInfo);
         } catch (APIManagementException e) {
-            String errorMsg = "Failed to update the monetization usage publish info";
-            throw new MonetizationException(errorMsg, e);
+            throw new MonetizationException("Failed to update the monetization usage publish info", e);
         }
         return true;
     }

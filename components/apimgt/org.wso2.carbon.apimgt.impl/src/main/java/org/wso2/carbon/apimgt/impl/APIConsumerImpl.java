@@ -41,6 +41,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
@@ -635,7 +636,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
-     * The method to get Light Weight APIs to Store view      *
+     * The method to get Light Weight APIs to Store view
+     * @param tenantDomain tenant domain
+     * @param start start limit
+     * @param end end limit
      * @return Set<API>  Set of APIs
      * @throws APIManagementException
      */
@@ -824,8 +828,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
-
-
             criteria = criteria + APIUtil.getORBasedSearchCriteria(apiStatus);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
             if (artifactManager != null) {
@@ -848,7 +850,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                     int tempLength = 0;
                     for (GovernanceArtifact artifact : genericArtifacts) {
-
                         API api = null;
                         try {
                             api = APIUtil.getLightWeightAPI(artifact);
@@ -923,9 +924,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         result.put("totalLength", totalLength);
         result.put("isMore", isMore);
         return result;
-
     }
-
 
     /**
      * Regenerate consumer secret.
@@ -5210,7 +5209,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     log.debug(identifierType + " " + identifier + " cannot be accessed by user '" + username + "'. It "
                             + "has a store visibility  restriction");
                 }
-                throw new APIManagementException(
+                throw new APIMgtAuthorizationFailedException(
                         APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view  the " + identifierType + " " + identifier);
             }
         } catch (RegistryException e) {

@@ -108,8 +108,8 @@ const endpointTypes = [
     { key: 'http', value: 'HTTP/REST Endpoint' },
     { key: 'default', value: 'Dynamic Endpoints' },
     { key: 'address', value: 'HTTP/SOAP Endpoint' },
-    { key: 'prototyped', value: 'Prototyped' },
-    { key: 'INLINE', value: 'Mocked' },
+    { key: 'prototyped', value: 'Prototype Endpoint' },
+    { key: 'INLINE', value: 'Prototype Implementation' },
     { key: 'awslambda', value: 'AWS Lambda' },
 ];
 
@@ -202,8 +202,8 @@ function EndpointOverview(props) {
                 { key: 'http', value: 'HTTP/REST Endpoint' },
                 { key: 'address', value: 'HTTP/SOAP Endpoint' },
                 { key: 'default', value: 'Dynamic Endpoints' },
-                { key: 'prototyped', value: 'Prototyped' },
-                { key: 'INLINE', value: 'Mocked' },
+                { key: 'prototyped', value: 'Prototype Endpoint' },
+                { key: 'INLINE', value: 'Prototype Implementation' },
                 { key: 'awslambda', value: 'AWS Lambda' },
             ];
         }
@@ -816,18 +816,18 @@ function EndpointOverview(props) {
                     <Typography>
                         <FormattedMessage
                             id='Apis.Details.Endpoints.EndpointOverview.endpoint.type.change.confirmation.message'
-                            defaultMessage='Your current endpoint configuration will be lost. Continue?'
+                            defaultMessage='Your current endpoint configuration will be lost.'
                         />
                     </Typography>
                 </DialogContent>
                 <DialogActions>
                     <Button
                         onClick={() => { setTypeChangeConfirmation({ openDialog: false }); }}
-                        color='secondary'
+                        color='primary'
                     >
                         <FormattedMessage
                             id='Apis.Details.Endpoints.EndpointOverview.change.type.cancel'
-                            defaultMessage='NO'
+                            defaultMessage='Cancel'
                         />
                     </Button>
                     <Button
@@ -835,8 +835,8 @@ function EndpointOverview(props) {
                         color='primary'
                     >
                         <FormattedMessage
-                            id='Apis.Details.Endpoints..EndpointOverview.change.type.ok'
-                            defaultMessage='Yes'
+                            id='Apis.Details.Endpoints..EndpointOverview.change.type.proceed'
+                            defaultMessage='Proceed'
                         />
                     </Button>
                 </DialogActions>

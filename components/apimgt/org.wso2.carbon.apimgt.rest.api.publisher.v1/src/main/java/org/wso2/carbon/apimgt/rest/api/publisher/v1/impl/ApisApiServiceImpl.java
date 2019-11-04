@@ -37,6 +37,7 @@ import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
+import org.apache.axiom.om.OMElement;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -85,6 +86,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -385,6 +388,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleBadRequest("Valid roles should be added under 'visibleRoles' to restrict " +
                     "the visibility", log);
         }
+        if (body.getVisibleRoles() != null) {
+            String errorMessage = RestApiPublisherUtils.validateRoles(body.getVisibleRoles());
+            if (!errorMessage.isEmpty()) {
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        }
 
         //Get all existing versions of  api been adding
         List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
@@ -585,6 +594,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIIdentifier apiIdentifier = originalAPI.getId();
             boolean isWSAPI = originalAPI.getType() != null
                             && APIConstants.APITransportType.WS.toString().equals(originalAPI.getType());
+            boolean isGraphql = originalAPI.getType() != null
+                    && APIConstants.APITransportType.GRAPHQL.toString().equals(originalAPI.getType());
 
             org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] apiDtoClassAnnotatedScopes =
                     APIDTO.class.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
@@ -658,6 +669,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
             }
+            if (body.getVisibleRoles() != null) {
+                String errorMessage = RestApiPublisherUtils.validateRoles(body.getVisibleRoles());
+                if (!errorMessage.isEmpty()) {
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+            }
             if (body.getAdditionalProperties() != null) {
                 String errorMessage = RestApiPublisherUtils.validateAdditionalProperties(body.getAdditionalProperties());
                 if (!errorMessage.isEmpty()) {
@@ -685,8 +702,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 SwaggerData swaggerData = new SwaggerData(apiToUpdate);
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
                 apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition);
+                if (!isGraphql) {
+                    apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
+                }
             }
-
             apiProvider.manageAPI(apiToUpdate);
 
             API updatedApi = apiProvider.getAPI(apiIdentifier);
@@ -2098,9 +2117,20 @@ public class ApisApiServiceImpl implements ApisApiService {
                     fileContentType = fileDetail.getContentType().toString();
                 }
 
-                ResourceFile contentFile = new ResourceFile(fileInputStream, fileContentType);
-                //Adding api specific mediation policy
-                mediationPolicyUrl = apiProvider.addResourceFile(apiIdentifier, mediationResourcePath, contentFile);
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                IOUtils.copy(fileInputStream, outputStream);
+                byte[] sequenceBytes = outputStream.toByteArray();
+                InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
+                OMElement seqElement = APIUtil.buildOMElement(new ByteArrayInputStream(sequenceBytes));
+                String localName = seqElement.getLocalName();
+
+                if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
+                    ResourceFile contentFile = new ResourceFile(inSequenceStream, fileContentType);
+                    //Adding api specific mediation policy
+                    mediationPolicyUrl = apiProvider.addResourceFile(apiIdentifier, mediationResourcePath, contentFile);
+                } else {
+                    throw new APIManagementException("Sequence is malformed");
+                }
             } else if (inlineContent != null) {
                 //todo
             }
@@ -2134,6 +2164,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             String errorMessage = "Error while getting location header for created " +
                     "mediation policy " + fileName;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (Exception e) {
+            RestApiUtil.handleInternalServerError("An Error has occurred while adding mediation policy", e, log);
         } finally {
             IOUtils.closeQuietly(fileInputStream);
         }
@@ -2214,7 +2246,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     api.addMonetizationProperty(currentEntry.getKey(), currentEntry.getValue());
                 }
             }
-            apiProvider.configureMonetizationInAPIArtifact(api);
             Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
             HashMap monetizationDataMap = new Gson().fromJson(api.getMonetizationProperties().toString(), HashMap.class);
             boolean isMonetizationStateChangeSuccessful = false;
@@ -2236,6 +2267,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
             if (isMonetizationStateChangeSuccessful) {
+                apiProvider.configureMonetizationInAPIArtifact(api);
                 APIMonetizationInfoDTO monetizationInfoDTO = APIMappingUtil.getMonetizationInfoDTO(apiIdentifier);
                 return Response.ok().entity(monetizationInfoDTO).build();
             } else {

@@ -332,10 +332,12 @@ class Layout extends React.Component {
                                     >
                                         <Button className={classes.publicStore}>
                                             <Icon className={classes.icons}>public</Icon>
-                                            <FormattedMessage
-                                                id='Base.index.go.to.public.store'
-                                                defaultMessage='Go to public Dev Portal'
-                                            />
+                                            <Hidden mdDown>
+                                                <FormattedMessage
+                                                    id='Base.index.go.to.public.store'
+                                                    defaultMessage='Go to public Dev Portal'
+                                                />
+                                            </Hidden>
                                         </Button>
                                     </Link>
                                 )}
@@ -352,10 +354,12 @@ class Layout extends React.Component {
                                         <Link to='/settings' id='settingsLink'>
                                             <Button className={classes.userLink}>
                                                 <Icon className={classes.icons}>settings</Icon>
-                                                <FormattedMessage
-                                                    id='Base.index.settings.caption'
-                                                    defaultMessage='Settings'
-                                                />
+                                                <Hidden mdDown>
+                                                    <FormattedMessage
+                                                        id='Base.index.settings.caption'
+                                                        defaultMessage='Settings'
+                                                    />
+                                                </Hidden>
                                             </Button>
                                         </Link>
                                         <Button

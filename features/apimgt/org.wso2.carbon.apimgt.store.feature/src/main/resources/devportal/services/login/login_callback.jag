@@ -86,6 +86,9 @@
     cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P1', 'value':idTokenPart1, 'path': app.context + "/services/logout", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
     response.addCookie(cookie);
 
+    cookie = {'name': 'IS_LOGIN_DEFAULT', 'value':'true', 'path': app.context, "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
+    response.addCookie(cookie);
+
     var state = request.getParameter("state");
     if (state !== null) {
         state = decodeURI(state);

@@ -38,12 +38,12 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
-const SUPPORTED_LOCATIONS = ['query', 'header', 'cookie', 'body']; // 'Path'
+const SUPPORTED_PARAM_TYPES = ['query', 'header', 'cookie', 'body']; // 'Path'
 
 /**
  *
  * Add resource parameter according to swagger spec
- * A unique parameter is defined by a combination of a name and location and schema or content is required
+ * A unique parameter is defined by a combination of a name and param type and schema or content is required
  * OpenAPI 3.0 spec: https://swagger.io/specification/#parameterObject
  *
  * @export
@@ -113,11 +113,11 @@ function AddParameter(props) {
         clearInputs();
     }
     return (
-        <Grid container direction='row' spacing={0} justify='center' alignItems='center'>
-            <Grid item md={2}>
+        <Grid container direction='row' spacing={1} justify='center' alignItems='center'>
+            <Grid item xs={4} md={3}>
                 <FormControl margin='dense' variant='outlined' className={classes.formControl}>
                     <InputLabel ref={inputLabel} htmlFor='param-in'>
-                        Location
+                        Parameter Type
                     </InputLabel>
 
                     <Select
@@ -136,21 +136,21 @@ function AddParameter(props) {
                             },
                         }}
                     >
-                        {SUPPORTED_LOCATIONS.map((location) => {
-                            if (location === 'body' && !['post', 'put', 'patch'].includes(verb)) {
+                        {SUPPORTED_PARAM_TYPES.map((paramType) => {
+                            if (paramType === 'body' && !['post', 'put', 'patch'].includes(verb)) {
                                 return null;
                             }
                             return (
-                                <MenuItem value={location} dense>
-                                    {capitalizeFirstLetter(location)}
+                                <MenuItem value={paramType} dense>
+                                    {capitalizeFirstLetter(paramType)}
                                 </MenuItem>
                             );
                         })}
                     </Select>
-                    <FormHelperText id='my-helper-text'>Select the parameter location</FormHelperText>
+                    <FormHelperText id='my-helper-text'>Select the parameter type</FormHelperText>
                 </FormControl>
             </Grid>
-            <Grid item md={4}>
+            <Grid item xs={4} md={4}>
                 <TextField
                     id='parameter-name'
                     label={newParameter.in === 'body' ? 'Content Type' : 'Name'}
@@ -170,7 +170,7 @@ function AddParameter(props) {
                     }}
                 />
             </Grid>
-            <Grid item md={6}>
+            <Grid item xs={4} md={5}>
                 <Tooltip
                     title={
                         <FormattedMessage

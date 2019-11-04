@@ -84,7 +84,7 @@ const styles = theme => ({
         paddingTop: theme.spacing(3),
     },
     saveButton: {
-        marginRight: theme.spacing(2),
+        marginRight: theme.spacing(1),
     },
     helpText: {
         color: theme.palette.text.hint,
@@ -213,6 +213,12 @@ class CreateScope extends React.Component {
         if (valid[id].invalid) {
             valid[id].error = 'Scope name cannot be empty';
         }
+
+        if (/\s/.test(value)) {
+            valid[id].invalid = true;
+            valid[id].error = 'Scope name cannot have spaces';
+        }
+
         const exist = scopes.find((scope) => {
             return scope.name === value;
         });
@@ -474,7 +480,7 @@ class CreateScope extends React.Component {
                                         )}
                                     </Button>
                                     <Link to={url}>
-                                        <Button variant='contained'>
+                                        <Button>
                                             <FormattedMessage
                                                 id='Apis.Details.Scopes.CreateScope.cancel'
                                                 defaultMessage='Cancel'

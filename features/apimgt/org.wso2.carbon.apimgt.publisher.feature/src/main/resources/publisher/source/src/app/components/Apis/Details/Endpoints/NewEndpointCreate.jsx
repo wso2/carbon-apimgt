@@ -72,7 +72,12 @@ const styles = theme => ({
  * @return {any} The HTML representation of the component.
  * */
 function NewEndpointCreate(props) {
-    const { classes, intl, generateEndpointConfig } = props;
+    const {
+        classes,
+        intl,
+        generateEndpointConfig,
+        apiType,
+    } = props;
     const [endpointImplType, setImplType] = useState('mock');
     const endpointTypes = [
         {
@@ -86,6 +91,7 @@ function NewEndpointCreate(props) {
                 defaultMessage: 'A REST API endpoint based on a URI template.',
             }),
             options: null,
+            disabled: ['SOAPTOREST'],
         },
         {
             type: 'address',
@@ -98,6 +104,7 @@ function NewEndpointCreate(props) {
                 defaultMessage: 'The direct URI of the web service.',
             }),
             options: null,
+            disabled: ['GRAPHQL'],
         },
         {
             type: 'prototyped',
@@ -114,8 +121,8 @@ function NewEndpointCreate(props) {
                 {
                     type: 'mock',
                     name: intl.formatMessage({
-                        id: 'Apis.Details.Endpoints.NewEndpointCreate.mock.endpoints',
-                        defaultMessage: 'Mock Endpoint',
+                        id: 'Apis.Details.Endpoints.NewEndpointCreate.prototype.implementation',
+                        defaultMessage: 'Prototype Implementation',
                     }),
                 },
                 {
@@ -126,6 +133,7 @@ function NewEndpointCreate(props) {
                     }),
                 },
             ],
+            disabled: ['GRAPHQL'],
         },
         {
             type: 'dynamic',
@@ -138,6 +146,7 @@ function NewEndpointCreate(props) {
                 defaultMessage: 'If you need to send the request to the URI specified in the TO header.',
             }),
             options: null,
+            disabled: [],
         },
         {
             type: 'awslambda',
@@ -162,7 +171,7 @@ function NewEndpointCreate(props) {
                 />
             </Typography>
             <Grid container justify='flex-start' spacing={2}>
-                {endpointTypes.map(((type) => {
+                {endpointTypes.filter(type => !type.disabled.includes(apiType)).map(((type) => {
                     return (
                         <Grid item className={classes.inlineMessageContainer}>
                             <Card className={classes.endpointTypeCard}>
@@ -223,6 +232,7 @@ NewEndpointCreate.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
     generateEndpointConfig: PropTypes.func.isRequired,
+    apiType: PropTypes.string.isRequired,
 };
 
 export default withStyles(styles)(injectIntl(NewEndpointCreate));

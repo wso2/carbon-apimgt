@@ -339,7 +339,7 @@ function Endpoints(props) {
         <React.Fragment>
             {/* Since the api is set to the state in component did mount, check both the api and the apiObject. */}
             {(api.endpointConfig === null && apiObject.endpointConfig === null) ?
-                <NewEndpointCreate generateEndpointConfig={generateEndpointConfig} /> :
+                <NewEndpointCreate generateEndpointConfig={generateEndpointConfig} apiType={apiObject.type} /> :
                 <div className={classes.root}>
                     <Typography variant='h4' align='left' gutterBottom>
                         <FormattedMessage

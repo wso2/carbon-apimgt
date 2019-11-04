@@ -1893,9 +1893,6 @@ public class APIStoreHostObject extends ScriptableObject {
         } catch (APIManagementException e) {
             log.error("Error from Registry API while getting API Information", e);
             return result;
-        } catch (Exception e) {
-            log.error("Error while getting API Information", e);
-            return result;
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }

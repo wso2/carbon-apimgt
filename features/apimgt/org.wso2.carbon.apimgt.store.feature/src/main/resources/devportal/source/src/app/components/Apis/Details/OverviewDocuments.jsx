@@ -132,7 +132,7 @@ function OverviewDocuments(props) {
             <Grid item xs={12}>
                 <div className={classes.subscriptionTop}>
                     <div className={classes.boxBadge}>{docs.length}</div>
-                    <Link to={'/apis/' + apiId + '/docs'} className={classes.linkStyle}>
+                    <Link to={'/apis/' + apiId + '/documents'} className={classes.linkStyle}>
                         <FormattedMessage id='Apis.Details.Overview.documents.count.sufix' defaultMessage='Documents' />
                     </Link>
                 </div>
@@ -143,7 +143,7 @@ function OverviewDocuments(props) {
                 </Typography>
                 {docs.length > 0 && (
                     <div className={classes.subscriptionBox}>
-                        <Link to={'/apis/' + apiId + '/docs'} className={classes.linkStyle}>
+                        <Link to={'/apis/' + apiId + '/documents'} className={classes.linkStyle}>
                             {docs[0].name}
                         </Link>
                         {/* <Typography variant='caption'>
