@@ -57,6 +57,7 @@ public class AWSLambdaClassMediator extends AbstractMediator {
         try {
             // set response to messageContext
             JsonUtil.getNewJsonPayload(axis2MessageContext, strResponse, true, true);
+            axis2MessageContext.setProperty("HTTP_SC", 200);
             axis2MessageContext.removeProperty("NO_ENTITY_BODY");
             axis2MessageContext.setProperty("messageType", "application/json");
             axis2MessageContext.setProperty("ContentType", "application/json");
