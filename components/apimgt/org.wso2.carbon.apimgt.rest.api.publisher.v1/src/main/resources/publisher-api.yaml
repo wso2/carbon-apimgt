@@ -8934,12 +8934,19 @@ definitions:
   SecurityAuditAttribute:
     title: SecurityAuditAttributeDTO
     properties:
+      isGlobal:
+        type: boolean
+        example: false
+      overrideGlobal:
+        type: boolean
+        example: false
       apiToken:
         type: string
         example: b1267ytf-b7gc-4aee-924d-ece81241efec
       collectionId:
         type: string
         example: 456ef957-5a79-449f-83y3-9027945d3c60
+
 
 #-----------------------------------------------------
 # The pagination resource

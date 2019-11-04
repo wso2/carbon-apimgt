@@ -15,8 +15,44 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class SecurityAuditAttributeDTO   {
   
+    private Boolean isGlobal = null;
+    private Boolean overrideGlobal = null;
     private String apiToken = null;
     private String collectionId = null;
+
+  /**
+   **/
+  public SecurityAuditAttributeDTO isGlobal(Boolean isGlobal) {
+    this.isGlobal = isGlobal;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("isGlobal")
+  public Boolean isIsGlobal() {
+    return isGlobal;
+  }
+  public void setIsGlobal(Boolean isGlobal) {
+    this.isGlobal = isGlobal;
+  }
+
+  /**
+   **/
+  public SecurityAuditAttributeDTO overrideGlobal(Boolean overrideGlobal) {
+    this.overrideGlobal = overrideGlobal;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("overrideGlobal")
+  public Boolean isOverrideGlobal() {
+    return overrideGlobal;
+  }
+  public void setOverrideGlobal(Boolean overrideGlobal) {
+    this.overrideGlobal = overrideGlobal;
+  }
 
   /**
    **/
@@ -62,13 +98,15 @@ public class SecurityAuditAttributeDTO   {
       return false;
     }
     SecurityAuditAttributeDTO securityAuditAttribute = (SecurityAuditAttributeDTO) o;
-    return Objects.equals(apiToken, securityAuditAttribute.apiToken) &&
+    return Objects.equals(isGlobal, securityAuditAttribute.isGlobal) &&
+        Objects.equals(overrideGlobal, securityAuditAttribute.overrideGlobal) &&
+        Objects.equals(apiToken, securityAuditAttribute.apiToken) &&
         Objects.equals(collectionId, securityAuditAttribute.collectionId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiToken, collectionId);
+    return Objects.hash(isGlobal, overrideGlobal, apiToken, collectionId);
   }
 
   @Override
@@ -76,6 +114,8 @@ public class SecurityAuditAttributeDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class SecurityAuditAttributeDTO {\n");
     
+    sb.append("    isGlobal: ").append(toIndentedString(isGlobal)).append("\n");
+    sb.append("    overrideGlobal: ").append(toIndentedString(overrideGlobal)).append("\n");
     sb.append("    apiToken: ").append(toIndentedString(apiToken)).append("\n");
     sb.append("    collectionId: ").append(toIndentedString(collectionId)).append("\n");
     sb.append("}");
