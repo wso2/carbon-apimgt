@@ -185,8 +185,6 @@ function createEndpointConfig(endpointType) {
             tmpEndpointConfig.endpoint_type = 'awslambda';
             tmpEndpointConfig.amznAccessKey = '';
             tmpEndpointConfig.amznSecretKey = '';
-            // tmpEndpointConfig.production_endpoints = { config: null, url: '' };
-            // tmpEndpointConfig.sandbox_endpoints = { config: null, url: '' };
             break;
         default:
             tmpEndpointConfig.endpoint_type = 'default';
