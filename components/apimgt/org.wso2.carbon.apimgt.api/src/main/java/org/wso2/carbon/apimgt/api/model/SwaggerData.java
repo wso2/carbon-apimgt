@@ -38,7 +38,7 @@ public class SwaggerData {
         private String authType;
         private String policy;
         private Scope scope;
-        private String amznResourcename;
+        private String amznResourceName;
 
         public String getPath() {
             return path;
@@ -80,12 +80,12 @@ public class SwaggerData {
             this.scope = scope;
         }
 
-        public String getAmznResourcename() {
-            return amznResourcename;
+        public String getAmznResourceName() {
+            return amznResourceName;
         }
 
-        public void setAmznResourcename(String arn) {
-            this.amznResourcename = arn;
+        public void setAmznResourceName(String arn) {
+            this.amznResourceName = arn;
         }
 
     }
@@ -134,7 +134,7 @@ public class SwaggerData {
             resource.scope = uriTemplate.getScope();
             // AWS Lambda: set arn to resource
             if (endpointConfig != null && endpointConfig.get("endpoint_type").equals("awslambda")) {
-                resource.amznResourcename = uriTemplate.getAmznResourceName();
+                resource.amznResourceName = uriTemplate.getAmznResourceName();
             }
             resources.add(resource);
         }

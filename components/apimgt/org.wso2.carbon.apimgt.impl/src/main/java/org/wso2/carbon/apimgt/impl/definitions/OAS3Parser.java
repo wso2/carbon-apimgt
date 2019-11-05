@@ -743,8 +743,8 @@ public class OAS3Parser extends APIDefinition {
         operation.addExtension(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
         operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
         // AWS Lambda: set arn to swagger
-        if (resource.getAmznResourcename() != null) {
-            operation.addExtension("x-amzn-resource-name", resource.getAmznResourcename());
+        if (resource.getAmznResourceName() != null) {
+            operation.addExtension("x-amzn-resource-name", resource.getAmznResourceName());
         }
         updateLegacyScopesFromOperation(resource, operation);
         List<SecurityRequirement> security = operation.getSecurity();
