@@ -43,7 +43,6 @@ export default function Credentials(props) {
         setAwsAccessMethod,
     } = props;
     const classes = useStyles();
-    const [isValid, setIsValid] = useState(null);
     const [isChanged, setIsChanged] = useState(false);
     const handleChange = (event) => {
         const newEpConfig = { ...epConfig };
@@ -54,12 +53,6 @@ export default function Credentials(props) {
         setAwsAccessMethod(event.target.value);
     };
     useEffect(() => {
-        if (awsAccessMethod === 'stored') {
-            API.getAmznResourceNames(apiId)
-                .then((response) => {
-                    setIsValid(response.body);
-                });
-        }
         if (epConfig.amznAccessKey !== '' && epConfig.amznSecretKey !== '') {
             setAwsAccessMethod('stored');
         }
@@ -132,10 +125,6 @@ export default function Credentials(props) {
                         setIsChanged(true);
                     }}
                 />
-                { isValid && awsAccessMethod === 'stored' ?
-                    <Tooltip title='AWS Credentials are valid'><Icon color='primary'>check_circle</Icon></Tooltip> :
-                    <div />
-                }
             </Grid>
         </div>
     );

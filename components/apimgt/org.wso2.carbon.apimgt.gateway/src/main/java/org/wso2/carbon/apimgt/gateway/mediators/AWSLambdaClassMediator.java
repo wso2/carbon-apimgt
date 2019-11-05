@@ -41,7 +41,6 @@ import java.nio.charset.Charset;
 
 public class AWSLambdaClassMediator extends AbstractMediator {
     private static final Log log = LogFactory.getLog(AWSLambdaClassMediator.class);
-
     private String accessKey = "";
     private String secretKey = "";
     private String resourceName = "";
@@ -52,7 +51,7 @@ public class AWSLambdaClassMediator extends AbstractMediator {
 
     /**
      * mediate to AWS Lambda
-     * @param messageContext - should contain the payload
+     * @param messageContext - contains the payload
      * @return true
      */
     public boolean mediate(MessageContext messageContext) {
@@ -70,9 +69,9 @@ public class AWSLambdaClassMediator extends AbstractMediator {
         // byte buffer to string conversion
         String strResponse = new String(response.array(), Charset.forName("UTF-8"));
 
+        // set response to messageContext
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         try {
-            // set response to messageContext
             JsonUtil.getNewJsonPayload(axis2MessageContext, strResponse, true, true);
             axis2MessageContext.setProperty("HTTP_SC", 200);
             axis2MessageContext.removeProperty("NO_ENTITY_BODY");
@@ -87,7 +86,6 @@ public class AWSLambdaClassMediator extends AbstractMediator {
 
     /**
      * invoke AWS Lambda function
-     *
      * @param payload - input parameters to pass to AWS Lambda function as a JSONString
      * @return ByteBuffer response
      *

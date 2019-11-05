@@ -84,8 +84,8 @@ public class SwaggerData {
             return amznResourceName;
         }
 
-        public void setAmznResourceName(String arn) {
-            this.amznResourceName = arn;
+        public void setAmznResourceName(String amznResourceName) {
+            this.amznResourceName = amznResourceName;
         }
 
     }
