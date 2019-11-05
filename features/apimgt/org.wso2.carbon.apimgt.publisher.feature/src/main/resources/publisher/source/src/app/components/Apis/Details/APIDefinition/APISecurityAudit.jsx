@@ -249,7 +249,6 @@ class APISecurityAudit extends Component {
      * @return {*} dataObject The dataObject array
      */
     getRowData(issues, category, rowType) {
-        // TODO - Add the new column to the rowObject before simlink
         const dataObject = [];
         for (const item in issues) {
             if ({}.hasOwnProperty.call(issues, item)) {
@@ -296,7 +295,6 @@ class APISecurityAudit extends Component {
 
     /**
      * Method to get the URL to display for each issue
-     * TODO - Has to be replaced with API of database from 42Crunch when it is made available by them
      * TODO - Check if the old category parameter is required.
      * @param {*} key issue key
      * @returns {*} String URL
