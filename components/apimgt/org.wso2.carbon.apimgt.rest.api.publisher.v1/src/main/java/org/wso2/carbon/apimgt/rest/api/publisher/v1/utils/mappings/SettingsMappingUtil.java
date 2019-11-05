@@ -137,15 +137,17 @@ public class SettingsMappingUtil {
         APIProvider apiProvider = RestApiUtil.getProvider(username);
 
         JSONObject securityAuditPropertyObject = apiProvider.getSecurityAuditAttributesFromConfig(username);
-        String apiToken = (String) securityAuditPropertyObject.get(APIConstants.SECURITY_AUDIT_API_TOKEN);
-        String collectionId = (String) securityAuditPropertyObject.get(APIConstants.SECURITY_AUDIT_COLLECTION_ID);
-        Boolean isGlobal = (Boolean) securityAuditPropertyObject.get(APIConstants.SECURITY_AUDIT_IS_GLOBAL);
-        Boolean overrideGlobal = (Boolean) securityAuditPropertyObject.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL);
+        if (securityAuditPropertyObject != null) {
+            String apiToken = (String) securityAuditPropertyObject.get(APIConstants.SECURITY_AUDIT_API_TOKEN);
+            String collectionId = (String) securityAuditPropertyObject.get(APIConstants.SECURITY_AUDIT_COLLECTION_ID);
+//            Boolean isGlobal = (Boolean) securityAuditPropertyObject.get(APIConstants.SECURITY_AUDIT_IS_GLOBAL);
+//            Boolean overrideGlobal = (Boolean) securityAuditPropertyObject.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL);
 
-        properties.setApiToken(apiToken);
-        properties.setCollectionId(collectionId);
-        properties.setIsGlobal(isGlobal);
-        properties.setOverrideGlobal(overrideGlobal);
+            properties.setApiToken(apiToken);
+            properties.setCollectionId(collectionId);
+//            properties.setIsGlobal(isGlobal);
+//            properties.setOverrideGlobal(overrideGlobal);
+        }
         return properties;
     }
 }

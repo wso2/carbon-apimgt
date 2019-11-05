@@ -7694,6 +7694,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else {
                 return getSecurityAuditConfigurationProperties(tenantDomain);
             }
+        } else {
+            return getSecurityAuditConfigurationProperties(tenantDomain);
         }
         return null;
     }
