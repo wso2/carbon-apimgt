@@ -7669,6 +7669,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return getGraphqlSchemaDefinition(apiId);
     }
 
+    /**
+     * This method returns the security audit properties
+     *
+     * @param userId user id
+     * @return JSONObject security audit properties
+     * @throws APIManagementException
+     */
     public JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException {
         String tenantDomain = MultitenantUtils.getTenantDomain(userId);
 
@@ -7700,6 +7707,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return null;
     }
 
+    /**
+     * This method returns security audit properties from the API Manager Configuration
+     *
+     * @param tenantDomain tenant domain name
+     * @return JSONObject security audit properties
+     */
     private JSONObject getSecurityAuditConfigurationProperties(String tenantDomain) {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();

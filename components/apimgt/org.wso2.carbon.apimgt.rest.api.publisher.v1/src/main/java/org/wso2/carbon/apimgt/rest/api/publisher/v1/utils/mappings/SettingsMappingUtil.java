@@ -129,6 +129,8 @@ public class SettingsMappingUtil {
     /**
      * This method returns the Security Audit properties from the configuration
      *
+     * @return SecurityAuditAttributeDTO Security Audit Attributes
+     * @throws APIManagementException
      */
     private SecurityAuditAttributeDTO getSecurityAuditProperties() throws APIManagementException {
         SecurityAuditAttributeDTO properties = new SecurityAuditAttributeDTO();

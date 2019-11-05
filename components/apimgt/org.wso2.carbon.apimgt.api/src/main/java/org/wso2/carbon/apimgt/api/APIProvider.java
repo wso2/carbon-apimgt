@@ -1279,5 +1279,12 @@ public interface APIProvider extends APIManager {
      */
     void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException;
 
+    /**
+     * This method returns the security audit properties
+     *
+     * @param userId user id
+     * @return JSONObject object with security audit properties
+     * @throws APIManagementException
+     */
     JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException;
 }
