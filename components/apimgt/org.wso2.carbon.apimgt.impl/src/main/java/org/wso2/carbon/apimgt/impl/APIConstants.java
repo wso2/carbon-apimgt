@@ -221,7 +221,6 @@ public final class APIConstants {
     public static final String SECURITY_AUDIT_API_TOKEN = "apiToken";
     public static final String SECURITY_AUDIT_COLLECTION_ID = "collectionId";
     public static final String SECURITY_AUDIT_OVERRIDE_GLOBAL = "overrideGlobal";
-    public static final String SECURITY_AUDIT_IS_GLOBAL = "isGlobal";
     // For HTTP requests
     public static final String HEADER_ACCEPT = "Accept";
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
