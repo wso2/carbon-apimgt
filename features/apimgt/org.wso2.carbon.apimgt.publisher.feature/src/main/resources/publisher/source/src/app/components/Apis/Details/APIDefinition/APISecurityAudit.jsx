@@ -933,7 +933,7 @@ class APISecurityAudit extends Component {
                                                     <Typography variant='body1'>
                                                         <MuiThemeProvider theme={this.getErrorMuiTheme()}>
                                                             <MUIDataTable
-                                                                title='Best Practices issues'
+                                                                title='Best Practices Issues'
                                                                 data={this.getRowData(
                                                                     reportObject.warnings.issues,
                                                                     'OpenAPI Format Requirements',
