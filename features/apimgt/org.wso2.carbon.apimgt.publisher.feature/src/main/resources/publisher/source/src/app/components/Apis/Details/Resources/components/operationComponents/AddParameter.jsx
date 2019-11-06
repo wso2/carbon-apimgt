@@ -185,6 +185,7 @@ function AddParameter(props) {
                     <span>
                         <Button
                             style={{ marginLeft: '20px', marginBottom: '15px', marginRight: '20px' }}
+                            disabled={!newParameter.in}
                             size='small'
                             variant='outlined'
                             aria-label='add'
