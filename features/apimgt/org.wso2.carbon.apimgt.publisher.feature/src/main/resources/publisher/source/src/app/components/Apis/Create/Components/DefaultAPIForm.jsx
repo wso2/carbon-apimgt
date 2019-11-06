@@ -92,6 +92,21 @@ function actualContext({ context, version }) {
 }
 
 /**
+ * This method used to  compare the context values
+ * @param {*} value  input value
+ * @param {*} result resulted value
+ * @returns {Boolean} true or false
+ */
+function checkContext(value, result) {
+    const contextVal = value.includes('/') ? value.toLowerCase() : '/' + value.toLowerCase();
+    if (contextVal === '/' + result.toLowerCase().slice(result.toLowerCase().lastIndexOf('/') + 1)
+     || contextVal === result.toLowerCase()) {
+        return true;
+    }
+    return false;
+}
+
+/**
  * Improved API create default form
  *
  * @export
@@ -169,11 +184,10 @@ export default function DefaultAPIForm(props) {
                 const apiContext = value.includes('/') ? value : '/' + value;
                 if (contextValidity === null) {
                     APIValidation.apiParameter.validate(field + ':' + apiContext).then((result) => {
-                        if (result.body.list.length > 0 && (value.includes('/') ? value.toLowerCase() :
-                            '/' + value.toLowerCase()) === result.body.list[0].context.toLowerCase()) {
+                        if (result.body.list.length > 0 && checkContext(value, result.body.list[0].context)) {
                             updateValidity({
                                 ...validity,
-                                context: { details: [{ message: apiContext + ' context with version exists' }] },
+                                context: { details: [{ message: apiContext + ' context already exists' }] },
                             });
                         } else {
                             updateValidity({ ...validity, context: contextValidity, version: null });
@@ -191,6 +205,7 @@ export default function DefaultAPIForm(props) {
                     + api.context + '/' + value;
                     APIValidation.apiParameter.validate('context:' + api.context +
                     ' version:' + value).then((result) => {
+                        // version of APIProduct equals to 1.0.0
                         if (result.body.list.length > 0 && (
                             (result.body.list[0].version !== undefined &&
                             (result.body.list[0].version.toLowerCase() ===
@@ -200,7 +215,7 @@ export default function DefaultAPIForm(props) {
                                 version: { message: apiVersion + ' context with version already exists' },
                             });
                         } else {
-                            updateValidity({ ...validity, version: versionValidity, context: null });
+                            updateValidity({ ...validity, version: versionValidity });
                         }
                     });
                 } else {
