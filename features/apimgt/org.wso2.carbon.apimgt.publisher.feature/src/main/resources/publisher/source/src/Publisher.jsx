@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
 import AuthManager from 'AppData/AuthManager';
 import CONSTS from 'AppData/Constants';
@@ -27,10 +27,11 @@ import Progress from 'AppComponents/Shared/Progress';
 import PublisherRootErrorBoundary from 'AppComponents/Shared/PublisherRootErrorBoundary';
 import Configurations from 'Config';
 import { IntlProvider } from 'react-intl';
-import ProtectedApp from './app/ProtectedApp';
 
 // Localization
 import LoginDenied from './app/LoginDenied';
+
+const ProtectedApp = lazy(() => import('./app/ProtectedApp'));
 
 /**
  * Language.
@@ -157,7 +158,11 @@ class Publisher extends React.Component {
                                     if (notEnoughPermission) {
                                         return <LoginDenied />;
                                     }
-                                    return <ProtectedApp user={user} />;
+                                    return (
+                                        <Suspense fallback={<Progress />}>
+                                            <ProtectedApp user={user} />
+                                        </Suspense>
+                                    );
                                 }}
                             />
                         </Switch>
