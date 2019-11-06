@@ -24,13 +24,11 @@
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var log = new Log("Login Callback Endpoint: ");
 
-    var forwarded_for = request.getHeader('x-forwarded-for');
     var serverUrl = '';
-    if (app.reverseProxy.enabled === true) {
-        serverUrl = app.reverseProxy.origin;
-    } else if (forwarded_for) {
+    var forwarded_for = request.getHeader(app.reverseProxy.forwardedHeader);
+    if (app.reverseProxy.auto && forwarded_for) {
         serverUrl = "https://" + forwarded_for;
-    }  else {
+    } else {
         serverUrl = utils.getServerURL();
     }
     var tokenRequestData = {
