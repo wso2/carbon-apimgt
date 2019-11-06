@@ -2293,6 +2293,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             boolean isLazyLoad) throws APIManagementException {
         Map<String, Object> searchResults =
                 super.searchPaginatedAPIs(searchQuery, requestedTenantDomain, start, end, isLazyLoad);
+        if (APIUtil.isAllowDisplayMultipleVersions()) {
+            return searchResults;
+        }
         return filterMultipleVersionedAPIs(searchResults);
     }
 
