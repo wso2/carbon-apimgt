@@ -8683,6 +8683,13 @@ public final class APIUtil {
         return null;
     }
 
+    /**
+     * Get the Security Audit Attributes for tenant from the Registry
+     *
+     * @param tenantId tenant id
+     * @return JSONObject JSONObject containing the properties
+     * @throws APIManagementException Throw if a registry or parse exception arises
+     */
     public static JSONObject getSecurityAuditAttributesFromRegistry(int tenantId) throws APIManagementException {
         try {
             Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
