@@ -302,9 +302,9 @@ class APISecurityAudit extends Component {
     // eslint-disable-next-line no-unused-vars
     getMoreDetailUrl(category, key) {
         // eslint-disable-next-line no-unused-vars
-        const baseUrl = 'https://apisecurity.io/encyclopedia/content/';
-        // let url = '';
-        const url = 'https://apisecurity.io/encyclopedia/content/oasv3/oasconformance/structure/v3-validation-array-void.htm';
+        // const baseUrl = 'https://apisecurity.io/encyclopedia/content/';
+        const baseUrl = 'https://apisecurity.io/ref/';
+        let url = '';
         // TODO - Add logic to identify whether the report is oasv3 or v2 to append that part to the URL.
 
         // if (reportObject.oasVersion === '3.0.0') {
@@ -316,19 +316,19 @@ class APISecurityAudit extends Component {
         // const formattedKey = key.replace('.', '-');
         // console.log(formattedKey);
 
-        // switch (category) {
-        //     case 'OpenAPI Format Requirements':
-        //         url = baseUrl + 'oasconformance/';
-        //         break;
-        //     case 'Security':
-        //         url = baseUrl + 'security/';
-        //         break;
-        //     case 'Data Validation':
-        //         url = baseUrl + 'datavalidation/datavalidation/';
-        //         break;
-        //     default:
-        //         url = baseUrl;
-        // }
+        switch (category) {
+            case 'OpenAPI Format Requirements':
+                url = baseUrl + 'oasconformance/';
+                break;
+            case 'Security':
+                url = baseUrl + 'security/';
+                break;
+            case 'Data Validation':
+                url = baseUrl + 'datavalidation/datavalidation/';
+                break;
+            default:
+                url = baseUrl;
+        }
         // TODO - Insert logic to handle formattedKey here. How do we find out which category is each formattedKey in? to append the url
         return url;
     }
