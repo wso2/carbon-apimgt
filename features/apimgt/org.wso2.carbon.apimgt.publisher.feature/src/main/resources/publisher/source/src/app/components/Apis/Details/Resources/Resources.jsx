@@ -222,7 +222,7 @@ export default function Resources(props) {
      * @returns
      */
     function resolveAndUpdateSpec(rawSpec) {
-        return Swagger.resolve({ spec: rawSpec }).then(({ spec, errors }) => {
+        return Swagger.resolve({ spec: rawSpec, allowMetaPatches: false }).then(({ spec, errors }) => {
             const value = spec;
             delete value.$$normalized;
             operationsDispatcher({ action: 'init', data: value.paths });

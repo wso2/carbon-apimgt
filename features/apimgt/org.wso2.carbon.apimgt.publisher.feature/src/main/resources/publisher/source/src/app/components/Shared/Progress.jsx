@@ -17,9 +17,22 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
-const Progress = () => {
-    return <div className='apim-dual-ring' />;
+const Progress = (props) => {
+    const { message } = props;
+    return (
+        <div className='apim-dual-ring'>
+            <span style={{ width: '200px' }}>{message}</span>
+        </div>
+    );
 };
 
+Progress.defaultProps = {
+    message: '',
+};
+
+Progress.propTypes = {
+    message: PropTypes.string,
+};
 export default Progress;
