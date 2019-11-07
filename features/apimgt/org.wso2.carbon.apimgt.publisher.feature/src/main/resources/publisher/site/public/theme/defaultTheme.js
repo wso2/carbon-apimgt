@@ -1,4 +1,4 @@
-const APP_CONTEXT = '/testapp';
+const APP_CONTEXT = '/publisher';
 const STORE_APP_CONTEXT = '/devportal';
 const Configurations = {
     themes: {
@@ -110,7 +110,7 @@ const Configurations = {
     app: {
         context: APP_CONTEXT,
         reverseProxy: {
-            auto: true,
+            auto: false,
             forwardedHeader: 'x-forwarded-for',
             loopbackHost: 'localhost',
             defaultHTTPSPort: 9443,
