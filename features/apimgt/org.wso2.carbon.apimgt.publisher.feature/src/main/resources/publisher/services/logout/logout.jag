@@ -25,8 +25,11 @@
     var idTokenP2 = request.getCookie("AM_ID_TOKEN_DEFAULT_P2").value;
     var idToken = idTokenP1 + idTokenP2;
     var serverUrl = '';
-    if (app.reverseProxy.enabled === true) {
-        serverUrl = app.reverseProxy.origin;
+    var forwarded_for = request.getHeader(app.reverseProxy.forwardedHeader);
+    if (app.reverseProxy.auto && forwarded_for) {
+        // Even though we redirect to custom URL, IS redirection happens to carbon host/proxy port combination
+        // i:e https://<carbonhost>:<proxyport|serverport>/authenticationendpoint/oauth2_logout_consent.do?sp=admin_admin_publisher&tenantDomain=carbon.super
+        serverUrl = "https://" + forwarded_for;
     } else {
         var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
         serverUrl = utils.getServerURL();
