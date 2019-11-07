@@ -1,8 +1,0 @@
-{
-    "client_id": "54e529e3-760f-4c43-87a8-cbb4d6c29fba",
-    "callback_url": "https://localhost:9443/login/callback/publisher",
-    "scopes": "apim:api_delete apim:api_publish apim:external_services_discover apim:subscription_block apim:api_update apim:subscription_view apim:api_create apim:apidef_update apim:api_view apim:dedicated_gateway openid",
-    "authorizationEndpoint": "https://localhost:9080/oauth2/authorize",
-    "is_sso_enabled": false,
-    "is_multi_environment_overview_enabled": false
-  }

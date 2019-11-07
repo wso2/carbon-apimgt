@@ -1,9 +1,0 @@
-{
-    "environments": [
-      {
-        "host": "",
-        "loginTokenPath": "/login/token",
-        "label": "Default"
-      }
-    ]
-  }

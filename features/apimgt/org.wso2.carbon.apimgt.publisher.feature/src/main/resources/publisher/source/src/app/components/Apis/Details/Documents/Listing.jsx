@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
@@ -35,11 +35,12 @@ import { isRestricted } from 'AppData/AuthManager';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import Create from './Create';
 import MarkdownEditor from './MarkdownEditor';
-import TextEditor from './TextEditor';
 import Edit from './Edit';
 import Delete from './Delete';
 import DeleteMultiple from './DeleteMultiple';
 import Download from './Download';
+
+const TextEditor = lazy(() => import('./TextEditor'));
 
 const styles = theme => ({
     root: {
@@ -178,8 +179,7 @@ class Listing extends React.Component {
         const { docs, showAddDocs, docsToDelete } = this.state;
         const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
         const url = `/${urlPrefix}/${api.id}/documents/create`;
-        const showActionsColumn =
-            isRestricted(['apim:api_publish','apim:api_create'], api) ? 'excluded' : true;
+        const showActionsColumn = isRestricted(['apim:api_publish', 'apim:api_create'], api) ? 'excluded' : true;
         const options = {
             title: false,
             filter: false,
@@ -293,12 +293,21 @@ class Listing extends React.Component {
                                     <table className={classes.actionTable}>
                                         <tr>
                                             <td>
-                                                <TextEditor
-                                                    docName={docName}
-                                                    docId={docId}
-                                                    apiId={this.apiId}
-                                                    apiType={api.apiType}
-                                                />
+                                                <Suspense
+                                                    fallback={
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Documents.Listing.loading'
+                                                            defaultMessage='Loading...'
+                                                        />
+                                                    }
+                                                >
+                                                    <TextEditor
+                                                        docName={docName}
+                                                        docId={docId}
+                                                        apiId={this.apiId}
+                                                        apiType={api.apiType}
+                                                    />
+                                                </Suspense>
                                             </td>
                                             <td>
                                                 <Edit
@@ -417,8 +426,11 @@ class Listing extends React.Component {
                             resourceMethod={resourceMethod.POST}
                         >
                             <Link to={!isRestricted(['apim:api_create', 'apim:api_publish'], api) && url}>
-                                <Button size='small' className={classes.button}
-                                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}>
+                                <Button
+                                    size='small'
+                                    className={classes.button}
+                                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                                >
                                     <AddCircle className={classes.buttonIcon} />
                                     <FormattedMessage
                                         id='Apis.Details.Documents.Listing.add.new.document.button'
@@ -461,8 +473,12 @@ class Listing extends React.Component {
                                 </Typography>
                                 <div className={classes.actions}>
                                     <Link to={!isRestricted(['apim:api_create', 'apim:api_publish'], api) && url}>
-                                        <Button variant='contained' color='primary' className={classes.button}
-                                                disabled={isRestricted(['apim:api_create','apim:api_publish'], api)}>
+                                        <Button
+                                            variant='contained'
+                                            color='primary'
+                                            className={classes.button}
+                                            disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                                        >
                                             <FormattedMessage
                                                 id='Apis.Details.Documents.Listing.add.new.msg.button'
                                                 defaultMessage='Add New Document'

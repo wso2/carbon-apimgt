@@ -34,11 +34,12 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
 import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined';
-// splitted operation components
+// spliced operation components
 
 import DescriptionAndSummary from './operationComponents/DescriptionAndSummary';
 import OperationGovernance from './operationComponents/OperationGovernance';
 import Parameters from './operationComponents/Parameters';
+import SOAPToRESTListing from './operationComponents/SOAPToREST/SOAPToRESTListing';
 
 /**
  *
@@ -60,6 +61,8 @@ function Operation(props) {
         markAsDelete,
         hideParameters,
         spec,
+        resourcePolicy,
+        resourcePoliciesDispatcher,
         target,
         verb,
     } = props;
@@ -127,7 +130,7 @@ function Operation(props) {
                 <Box className={classes.overlayUnmarkDelete}>
                     <Tooltip title='Marked for delete' aria-label='Marked for delete'>
                         <Button onClick={toggleDelete} variant='outlined' style={{ marginTop: '10px' }}>
-                            Undo
+                            Undo Delete
                         </Button>
                     </Tooltip>
                 </Box>
@@ -238,6 +241,19 @@ function Operation(props) {
                                 verb={verb}
                             />
                         )}
+                        {resourcePolicy && (
+                            <SOAPToRESTListing
+                                operation={operation}
+                                operationsDispatcher={operationsDispatcher}
+                                operationRateLimits={operationRateLimits}
+                                resourcePolicy={resourcePolicy}
+                                resourcePoliciesDispatcher={resourcePoliciesDispatcher}
+                                disableUpdate={disableUpdate}
+                                spec={spec}
+                                target={target}
+                                verb={verb}
+                            />
+                        )}
                     </Grid>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
@@ -247,7 +263,6 @@ function Operation(props) {
 Operation.defaultProps = {
     highlight: false,
     disableUpdate: false,
-    /* Set following prop to false , After implementing the `Parameter` section */
     hideParameters: false,
     disableDelete: false,
     onMarkAsDelete: () => {},
@@ -255,13 +270,16 @@ Operation.defaultProps = {
     operationRateLimits: [], // Response body.list from apis policies for `api` throttling policies type
 };
 Operation.propTypes = {
-    api: PropTypes.shape({ scopes: PropTypes.arrayOf(PropTypes.shape({})) }).isRequired,
+    api: PropTypes.shape({ scopes: PropTypes.arrayOf(PropTypes.shape({})), resourcePolicies: PropTypes.shape({}) })
+        .isRequired,
     operationsDispatcher: PropTypes.func.isRequired,
     onMarkAsDelete: PropTypes.func,
+    resourcePoliciesDispatcher: PropTypes.func.isRequired,
     markAsDelete: PropTypes.bool,
     disableDelete: PropTypes.bool,
     disableUpdate: PropTypes.bool,
     hideParameters: PropTypes.bool,
+    resourcePolicy: PropTypes.shape({}).isRequired,
     operation: PropTypes.shape({}).isRequired,
     target: PropTypes.string.isRequired,
     verb: PropTypes.string.isRequired,

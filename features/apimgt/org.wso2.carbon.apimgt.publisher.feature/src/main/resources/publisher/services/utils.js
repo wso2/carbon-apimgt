@@ -1,4 +1,5 @@
-<%
+/* eslint-disable*/
+// Disable eslint check since this is only used in jaggeryjs codes
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -16,13 +17,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-    include("/services/constants.jag");
+var app = require('/site/public/theme/defaultTheme.js').Configurations.app;
 
-    var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
-    var serverPort = utils.getManagementTransportPort(MGT_TRANSPORT.split(":")[0]);
+var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-    var getServerPort = function () {
-        return serverPort;
-    };
-
-%>
+var getLoopbackOrigin = function() {
+    return (
+        'https://' +
+        app.reverseProxy.loopbackHost +
+        ':' +
+        String(parseInt(app.reverseProxy.defaultHTTPSPort) + utils.getPortOffset())
+    );
+};
