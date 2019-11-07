@@ -43,6 +43,7 @@ const styles = theme => ({
         margin: theme.spacing.unit * (3 / 2),
         maxWidth: theme.custom.thumbnail.width,
         transition: 'box-shadow 0.3s ease-in-out',
+        position: 'relative',
     },
     apiDetails: {
         padding: theme.spacing.unit,
@@ -134,6 +135,15 @@ const styles = theme => ({
     },
     ratingWrapper: {
         marginTop: '20px',
+    },
+    textblock: {
+        color: theme.palette.text.secondary,
+        position: 'absolute',
+        bottom: '35px',
+        right: '10px',
+        background: theme.custom.thumbnail.contentBackgroundColor,
+        'padding-left': '10px',
+        'padding-right': '10px',
     },
 });
 
@@ -292,6 +302,9 @@ class ApiThumb extends React.Component {
                 raised={isHover}
                 className={classNames('image-thumbnail', classes.card)}
             >
+                {this.context.isMonetizationEnabled && (
+                    <div className={classes.textblock}>{api.monetizationLabel}</div>
+                )}
                 <CardMedia>
                     <Link to={detailsLink} className={classes.suppressLinkStyles}>
                         {!defaultImage && ImageView}

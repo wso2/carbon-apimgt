@@ -618,6 +618,21 @@ public class APIMappingUtil {
         String subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
         apiInfoDTO.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
                 subscriptionAllowedTenants));
+        int free = 0, commercial = 0;
+        for (Tier tier : throttlingPolicies) {
+            if(tier.getTierPlan().equalsIgnoreCase("FREE")) {
+                free = free + 1;
+            } else if (tier.getTierPlan().equalsIgnoreCase("COMMERCIAL")) {
+                commercial = commercial + 1;
+            }
+        }
+        if (free > 0 && commercial == 0){
+            apiInfoDTO.setMonetizationLabel("FREE");
+        } else if (free == 0 && commercial > 0) {
+            apiInfoDTO.setMonetizationLabel("PAID");
+        } else if (free > 0 && commercial > 0) {
+            apiInfoDTO.setMonetizationLabel("FREEMIUM");
+        }
         return apiInfoDTO;
     }
 
