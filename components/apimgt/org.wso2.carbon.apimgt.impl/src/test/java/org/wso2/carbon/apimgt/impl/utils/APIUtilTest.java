@@ -2032,6 +2032,32 @@ public class APIUtilTest {
     }
 
     @Test
+    public void testGetSecurityAuditAttributesFromRegistry() throws Exception {
+        final int tenantId = -1234;
+        final String property = APIConstants.SECURITY_AUDIT_CONFIGURATION;
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getConfigSystemRegistry(tenantId)).thenReturn(userRegistry);
+        Mockito.when(userRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
+        Mockito.when(userRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
+        File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
+                getResource("tenant-conf.json").getFile());
+        String tenantConfValue = FileUtils.readFileToString(siteConfFile);
+        Mockito.when(resource.getContent()).thenReturn(tenantConfValue.getBytes());
+        JSONParser parser = new JSONParser();
+        JSONObject json = (JSONObject) parser.parse(tenantConfValue);
+        JSONObject securityAuditAttributes = (JSONObject) json.get(property);
+        JSONObject auditAttributes = APIUtil.getSecurityAuditAttributesFromRegistry(tenantId);
+        Assert.assertEquals(securityAuditAttributes, auditAttributes);
+    }
+
+    @Test
     public void testSanitizeUserRole() throws Exception {
         Assert.assertEquals("Test%26123", APIUtil.sanitizeUserRole("Test&123"));
         Assert.assertEquals("Test%26123%26test", APIUtil.sanitizeUserRole("Test&123&test"));

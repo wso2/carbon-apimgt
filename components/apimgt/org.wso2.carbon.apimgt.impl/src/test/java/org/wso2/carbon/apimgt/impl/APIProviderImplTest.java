@@ -4409,4 +4409,36 @@ public class APIProviderImplTest {
             Assert.assertEquals(msg, e.getMessage());
         }
     }
+
+    @Test
+    public void testGetSecurityAuditAttributesFromConfig() throws APIManagementException {
+        // TODO - Test if the flow is right using debugging and call the private method to get
+        // properties from the toml
+        PowerMockito.mockStatic(MultitenantUtils.class);
+        PowerMockito.when(MultitenantUtils.getTenantDomain(Mockito.anyString())).thenReturn("carbon.super");
+        PowerMockito.when(APIUtil.getTenantId("admin")).thenReturn(-1234);
+        // TODO - Check if handling exceptions method should be mocked.
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("apiToken", "2780f0ca-3423-435f-0e9f-a634e0do65915");
+        jsonObject.put("collectionId", "8750f8ca-34f9-4baf-8b9f-c6854ed06534");
+        jsonObject.put("overrideGlobal", "true");
+        PowerMockito.when(APIUtil.getSecurityAuditAttributesFromRegistry(-1234)).thenReturn(jsonObject);
+    }
+
+    @Test
+    public void testGetSecurityAuditConfigurationProperties() {
+        PowerMockito.mockStatic(MultitenantUtils.class);
+        PowerMockito.when(MultitenantUtils.getTenantDomain("admin")).thenReturn("carbon.super");
+        APIManagerConfiguration apiManagerConfiguration = PowerMockito.mock(APIManagerConfiguration.class);
+        ServiceReferenceHolder serviceReferenceHolder = PowerMockito.mock(ServiceReferenceHolder.class);
+        APIManagerConfigurationService apiManagerConfigurationService = PowerMockito.mock(APIManagerConfigurationService.class);
+
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(Mockito.anyString())).thenReturn("2780f0ca-3423-435f-0e9f-a634e0do65915");
+        Mockito.when(apiManagerConfiguration.getFirstProperty(Mockito.anyString())).thenReturn("8750f8ca-34f9-4baf-8b9f-c6854ed06534");
+        Mockito.when(apiManagerConfiguration.getFirstProperty(Mockito.anyString())).thenReturn("true");
+        // TODO - Check if any returns are needed
+    }
 }
