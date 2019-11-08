@@ -56,7 +56,6 @@ function AddParameter(props) {
     } = props;
     const inputLabel = useRef(null);
     const [labelWidth, setLabelWidth] = useState(0);
-    const [isParameterExist, setIsParameterExist] = useState(false);
     const iff = (condition, then, otherwise) => (condition ? then : otherwise);
     // For more info about Data Models (Schemas) refer https://swagger.io/docs/specification/data-models/
     const initParameter = { in: '', name: '', schema: { type: 'string' } };
@@ -85,16 +84,15 @@ function AddParameter(props) {
         setLabelWidth(inputLabel.current.offsetWidth);
     }, []);
 
-    React.useEffect(() => {
-        const isParameterExistValue = operation.parameters && operation.parameters.map(operations =>
-            (!!((operations.in === newParameter.in && operations.name === newParameter.name))));
+    let isParameterExist = false;
+    const isParameterExistValue = operation.parameters && operation.parameters.map(operations =>
+        (operations.in === newParameter.in && operations.name === newParameter.name));
 
-        if (isParameterExistValue && isParameterExistValue.includes(true)) {
-            setIsParameterExist(true);
-        } else {
-            setIsParameterExist(false);
-        }
-    }, [newParameter]);
+    if (isParameterExistValue && isParameterExistValue.includes(true)) {
+        isParameterExist = true;
+    } else {
+        isParameterExist = false;
+    }
 
     const classes = useStyles();
 
