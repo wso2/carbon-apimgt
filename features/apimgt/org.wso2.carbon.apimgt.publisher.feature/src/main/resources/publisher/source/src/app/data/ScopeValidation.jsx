@@ -67,7 +67,7 @@ const resourceMethod = {
  * @class ScopeValidation
  * @extends {React.Component}
  */
-class ScopeValidation extends React.Component {
+export default class ScopeValidation extends React.Component {
     /**
      *
      * Get scope for resources
