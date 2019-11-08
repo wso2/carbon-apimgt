@@ -16,9 +16,8 @@
  * under the License.
  */
 
+import React, { Suspense, lazy } from 'react';
 import AppContext from 'AppComponents/Shared/AppContext';
-
-import React, { Suspense } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -38,7 +37,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import MonacoEditor from 'react-monaco-editor';
 import yaml from 'js-yaml';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api.js';
@@ -50,7 +48,8 @@ import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import APISecurityAudit from './APISecurityAudit';
 import ImportDefinition from './ImportDefinition';
 
-const EditorDialog = React.lazy(() => import('./SwaggerEditorDrawer'));
+const EditorDialog = lazy(() => import('./SwaggerEditorDrawer'));
+const MonacoEditor = lazy(() => import('react-monaco-editor'));
 
 const styles = theme => ({
     titleWrapper: {
@@ -184,14 +183,14 @@ class APIDefinition extends React.Component {
         this.setState({ swagger: formattedString, format: convertTo, convertTo: format });
     }
 
-    setSchemaDefinition=(swagger, graphQL) => {
+    setSchemaDefinition = (swagger, graphQL) => {
         if (swagger) {
             this.setState({ swagger });
         }
         if (graphQL) {
             this.setState({ graphQL });
         }
-    }
+    };
     /**
      * Util function to get the format which the definition can be converted to.
      * @param {*} format : The current format of definition.
@@ -388,9 +387,9 @@ class APIDefinition extends React.Component {
                                 />
                             </Button>
                         )}
-                        {api.type !== 'APIProduct' && <ImportDefinition
-                            setSchemaDefinition={this.setSchemaDefinition}
-                        />}
+                        {api.type !== 'APIProduct' && (
+                            <ImportDefinition setSchemaDefinition={this.setSchemaDefinition} />
+                        )}
                         <a className={classes.downloadLink} href={downloadLink} download={fileName}>
                             <Button size='small' className={classes.button}>
                                 <CloudDownloadRounded className={classes.buttonIcon} />
@@ -413,20 +412,18 @@ class APIDefinition extends React.Component {
                             )
                         }
 
-                        {isRestricted(['apim:api_create'], api)
-                            && (
-                                <Typography variant='body2' color='primary'>
-                                    <FormattedMessage
-                                        id='Apis.Details.APIDefinition.APIDefinition.update.not.allowed'
-                                        defaultMessage='Unauthorized: Insufficient permissions to update API Definition'
-                                    />
-                                </Typography>
-                            )
-                        }
+                        {isRestricted(['apim:api_create'], api) && (
+                            <Typography variant='body2' color='primary'>
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.APIDefinition.update.not.allowed'
+                                    defaultMessage='Unauthorized: Insufficient permissions to update API Definition'
+                                />
+                            </Typography>
+                        )}
                     </div>
                     {isGraphQL === 0 && (
                         <div className={classes.titleWrapper}>
-                            <Button size='small' className={classes.button} onClick={this.onChangeFormatClick} >
+                            <Button size='small' className={classes.button} onClick={this.onChangeFormatClick}>
                                 <SwapHorizontalCircle className={classes.buttonIcon} />
                                 <FormattedMessage
                                     id='Apis.Details.APIDefinition.APIDefinition.convert.to'
@@ -448,18 +445,30 @@ class APIDefinition extends React.Component {
                         options={editorOptions}
                     />
                 )}
+                <div>
+                    <Suspense fallback={<Progress />}>
+                        <MonacoEditor
+                            language={format}
+                            width='100%'
+                            height='calc(100vh - 51px)'
+                            theme='vs-dark'
+                            value={swagger !== null ? swagger : graphQL}
+                            options={editorOptions}
+                        />
+                    </Suspense>
+                </div>
                 <Dialog fullScreen open={openEditor} onClose={this.closeEditor} TransitionComponent={this.transition}>
                     <Paper square className={classes.popupHeader}>
                         <IconButton
                             className={classes.button}
                             color='inherit'
                             onClick={this.closeEditor}
-                            aria-label={(
+                            aria-label={
                                 <FormattedMessage
                                     id='Apis.Details.APIDefinition.APIDefinition.btn.close'
                                     defaultMessage='Close'
                                 />
-                            )}
+                            }
                         >
                             <Icon>close</Icon>
                         </IconButton>
@@ -477,7 +486,7 @@ class APIDefinition extends React.Component {
                         </Button>
                     </Paper>
                     <Suspense
-                        fallback={(
+                        fallback={
                             <div>
                                 (
                                 <FormattedMessage
@@ -486,7 +495,7 @@ class APIDefinition extends React.Component {
                                 />
                                 )
                             </div>
-                        )}
+                        }
                     >
                         <EditorDialog />
                     </Suspense>
@@ -510,8 +519,8 @@ class APIDefinition extends React.Component {
                             <FormattedMessage
                                 id='Apis.Details.APIDefinition.APIDefinition.api.definition.save.confirmation'
                                 defaultMessage={
-                                    'Are you sure you want to save the API Definition? This might affect the'
-                                    + ' existing resources.'
+                                    'Are you sure you want to save the API Definition? This might affect the' +
+                                    ' existing resources.'
                                 }
                             />
                         </DialogContentText>
@@ -523,12 +532,7 @@ class APIDefinition extends React.Component {
                                 defaultMessage='CANCEL'
                             />
                         </Button>
-                        <Button
-                            onClick={this.handleOk}
-                            color='primary'
-                            autoFocus
-                            variant='contained'
-                        >
+                        <Button onClick={this.handleOk} color='primary' autoFocus variant='contained'>
                             <FormattedMessage
                                 id='Apis.Details.APIDefinition.APIDefinition.btn.yes'
                                 defaultMessage='SAVE'

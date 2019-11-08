@@ -5375,15 +5375,15 @@ public final class APIUtil {
 
             if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + "/" +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
             } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + "/" +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
             } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + "/" +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
             }
 

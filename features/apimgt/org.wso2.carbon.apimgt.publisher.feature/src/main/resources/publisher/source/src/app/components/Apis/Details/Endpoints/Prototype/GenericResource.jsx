@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, lazy, Suspense } from 'react';
 import { isRestricted } from 'AppData/AuthManager';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import {
@@ -29,10 +29,12 @@ import {
     makeStyles,
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import MonacoEditor from 'react-monaco-editor';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import Utils from 'AppData/Utils';
+import CircularProgress from '@material-ui/core/CircularProgress';
+
+const MonacoEditor = lazy(() => import('react-monaco-editor'));
 
 /**
  * The generic resource component.
@@ -55,7 +57,7 @@ function GenericResource(props) {
             chipTextColor = theme.palette.getContrastText(theme.custom.resourceChipColors[resourceMethod]);
         }
 
-        return ({
+        return {
             editor: {
                 width: '100%',
                 height: '500px',
@@ -77,28 +79,20 @@ function GenericResource(props) {
                 backgroundColor: Utils.hexToRGBA(chipColor, 0.1),
                 border: `${chipColor} 1px solid`,
             },
-        });
+        };
     });
 
     const classes = useStyles();
     return (
         <Grid item>
             <ExpansionPanel className={classes.chipExpansionPanel}>
-                <ExpansionPanelSummary
-                    className={classes.prototypeResourceHeader}
-                    expandIcon={<ExpandMoreIcon />}
-                >
+                <ExpansionPanelSummary className={classes.prototypeResourceHeader} expandIcon={<ExpandMoreIcon />}>
                     <Grid container spacing={12}>
                         <Grid xs={1}>
-                            <Chip
-                                label={resourceMethod}
-                                className={classes.chipActive}
-                            />
+                            <Chip label={resourceMethod} className={classes.chipActive} />
                         </Grid>
                         <Grid xs className={classes.resourcePathContainer}>
-                            <Typography>
-                                {resourcePath}
-                            </Typography>
+                            <Typography>{resourcePath}</Typography>
                         </Grid>
                     </Grid>
                 </ExpansionPanelSummary>
@@ -113,18 +107,20 @@ function GenericResource(props) {
                             </Typography>
                         </Grid>
                         <Grid item>
-                            <MonacoEditor
-                                height='50vh'
-                                width='100%'
-                                theme='vs-dark'
-                                value={scriptContent}
-                                options={{
-                                    selectOnLineNumbers: true,
-                                    readOnly: `${(isRestricted(['apim:api_create'], api))}`,
-                                }}
-                                language='javascript'
-                                onChange={content => onChange(content, resourcePath, resourceMethod)}
-                            />
+                            <Suspense fallback={<CircularProgress />}>
+                                <MonacoEditor
+                                    height='50vh'
+                                    width='100%'
+                                    theme='vs-dark'
+                                    value={scriptContent}
+                                    options={{
+                                        selectOnLineNumbers: true,
+                                        readOnly: `${isRestricted(['apim:api_create'], api)}`,
+                                    }}
+                                    language='javascript'
+                                    onChange={content => onChange(content, resourcePath, resourceMethod)}
+                                />
+                            </Suspense>
                         </Grid>
                     </Grid>
                 </ExpansionPanelDetails>

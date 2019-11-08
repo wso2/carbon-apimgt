@@ -21,7 +21,6 @@
     var site = require("/site/public/theme/defaultTheme.js").Configurations.app;
 
     include("/services/constants.jag");
-    include("/services/jagg.jag");
 
     var cookie = {
         'name': 'AM_ACC_TOKEN_DEFAULT_P2',
@@ -89,6 +88,6 @@
     response.addCookie(cookie);
 
     log.debug("redirecting to logout");
-    response.sendRedirect("/publisher/logout");
+    response.sendRedirect(site.context + "/logout");
 
 %>

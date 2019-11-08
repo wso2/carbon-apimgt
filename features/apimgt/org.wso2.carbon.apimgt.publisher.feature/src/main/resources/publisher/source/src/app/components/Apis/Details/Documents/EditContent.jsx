@@ -16,11 +16,12 @@
  * under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { withRouter } from 'react-router-dom';
 import isEmpty from 'lodash.isempty';
 import MarkdownEditor from './MarkdownEditor';
-import TextEditor from './TextEditor';
+
+const TextEditor = lazy(() => import('./TextEditor'));
 
 function EditContent(props) {
     const [doc, setDoc] = useState(null);
@@ -45,7 +46,15 @@ function EditContent(props) {
             {doc && doc.sourceType === 'MARKDOWN' && (
                 <MarkdownEditor docName={doc.name} docId={doc.documentId} showAtOnce />
             )}
-            {doc && doc.sourceType === 'INLINE' && <TextEditor docName={doc.name} docId={doc.documentId} showAtOnce />}
+            {doc && doc.sourceType === 'INLINE' && (
+                <Suspense
+                    fallback={
+                        <FormattedMessage id='Apis.Details.Documents.EditContent.loading' defaultMessage='Loading...' />
+                    }
+                >
+                    <TextEditor docName={doc.name} docId={doc.documentId} showAtOnce />
+                </Suspense>
+            )}
         </React.Fragment>
     );
 }

@@ -3,5 +3,15 @@
 exports[`Progress component test should comply with the snapshot 1`] = `
 <div
   className="apim-dual-ring"
-/>
+>
+  <span
+    style={
+      Object {
+        "width": "200px",
+      }
+    }
+  >
+    
+  </span>
+</div>
 `;
