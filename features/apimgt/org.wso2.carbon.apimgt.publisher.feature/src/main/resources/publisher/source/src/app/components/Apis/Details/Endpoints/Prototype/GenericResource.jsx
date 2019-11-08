@@ -34,7 +34,7 @@ import PropTypes from 'prop-types';
 import Utils from 'AppData/Utils';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-const MonacoEditor = lazy(() => import('react-monaco-editor'));
+const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "GenResourceMonaco" */));
 
 /**
  * The generic resource component.

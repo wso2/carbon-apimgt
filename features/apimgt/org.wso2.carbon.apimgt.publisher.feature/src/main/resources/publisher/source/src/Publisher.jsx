@@ -32,7 +32,7 @@ import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 // Localization
 import LoginDenied from './app/LoginDenied';
 
-const ProtectedApp = lazy(() => import('./app/ProtectedApp'));
+const ProtectedApp = lazy(() => import('./app/ProtectedApp' /* webpackChunkName: "ProtectedApps" */));
 
 /**
  * Language.
