@@ -194,29 +194,29 @@ const styles = (theme) => {
         },
         appNameXSmall: {
             whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
             overflowX: 'auto',
+            overflowY: 'hidden',
             maxWidth: 200,
             lineHeight: 1.3,
         },
         appNameSmall: {
             whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
             overflowX: 'auto',
+            overflowY: 'hidden',
             maxWidth: 310,
             lineHeight: 1.3,
         },
         appNameMid: {
             whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
             overflowX: 'auto',
+            overflowY: 'hidden',
             maxWidth: 640,
             lineHeight: 1.3,
         },
         appNameBig: {
             whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
             overflowX: 'auto',
+            overflowY: 'hidden',
             maxWidth: 980,
             lineHeight: 1.3,
         },
@@ -314,12 +314,9 @@ class InfoBar extends React.Component {
                     <Link to='/applications' className={classes.backLink}>
                         <Icon className={classes.backIcon}>keyboard_arrow_left</Icon>
                         <div className={classes.backText}>
-                            <FormattedMessage
-                                id='Applications.Details.InfoBar.new.back.to'
-                                defaultMessage='BACK TO'
-                            />{' '}
+                            <FormattedMessage id='Applications.Details.InfoBar.new.back.to' defaultMessage='BACK TO' />{' '}
                             <br />
-                            <FormattedMessage id='Applications.Details.InfoBar.listing' defaultMessage='APPLICATIONS' />
+                            <FormattedMessage id='Applications.Details.InfoBar.listing' defaultMessage='LISTING' />
                         </div>
                     </Link>
                     <VerticalDivider height={70} />
