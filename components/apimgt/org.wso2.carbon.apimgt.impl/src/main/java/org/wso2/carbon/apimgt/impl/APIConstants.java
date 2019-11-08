@@ -1022,6 +1022,8 @@ public final class APIConstants {
     public static final String OPERATION_AUTH_SCHEME_MAPPING = "OperationAuthSchemeMapping";
     public static final String OPERATION_SECURITY_ENABLED = "Enabled";
     public static final String OPERATION_SECURITY_DISABLED = "Disabled";
+    public static final String GRAPHQL_PAYLOAD = "GRAPHQL_PAYLOAD";
+    public static final String GRAPHQL_SCHEMA = "GRAPHQL_SCHEMA";
 
     //URI Authentication Schemes
     public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =

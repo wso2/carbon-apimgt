@@ -17,10 +17,6 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 
-import graphql.ExecutionResult;
-import graphql.GraphQL;
-import graphql.GraphQLError;
-import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.language.Definition;
 import graphql.language.Document;
 import graphql.language.Field;
@@ -76,7 +72,6 @@ public class GraphQLAPIHandler extends AbstractHandler {
     private static final String UNICODE_TRANSFORMATION_FORMAT = "UTF-8";
     private static final String GRAPHQL_IDENTIFIER = "_graphQL";
     private static final String CLASS_NAME_AND_METHOD = "_GraphQLAPIHandler_handleRequest";
-    private static final int MAX_QUERY_DEPTH = 3;
     private static final Log log = LogFactory.getLog(GraphQLAPIHandler.class);
     private GraphQLSchema schema = null;
     private static Validator validator;
@@ -124,6 +119,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                         return false;
                     }
                 }
+                messageContext.setProperty(APIConstants.GRAPHQL_PAYLOAD, payload);
             } else {
                 handleFailure(messageContext, APISecurityConstants.GRAPHQL_INVALID_QUERY_MESSAGE, "Request path cannot be empty");
                 return false;
@@ -145,14 +141,6 @@ public class GraphQLAPIHandler extends AbstractHandler {
                             messageContext.setProperty(HTTP_VERB, httpVerb);
                             ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty(HTTP_METHOD,
                                     operation.getOperation().toString());
-
-                            // Analyse the query
-                            if (operation.getOperation().equals(Operation.QUERY) || operation.getOperation().equals(Operation.SUBSCRIPTION)) {
-                                if (!analyseQuery(messageContext, payload)) {
-                                    log.error("Query is too complex");
-                                    return false;
-                                }
-                            }
                             String operationList = getOperationList(messageContext, operation);
                             messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, operationList);
                             if (log.isDebugEnabled()) {
@@ -316,6 +304,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
         messageContext.setProperty(APIConstants.OPERATION_THROTTLING_MAPPING, operationThrottlingMappingList);
         messageContext.setProperty(APIConstants.OPERATION_AUTH_SCHEME_MAPPING, operationAuthSchemeMappingList);
         messageContext.setProperty(APIConstants.API_TYPE, GRAPHQL_API);
+        messageContext.setProperty(APIConstants.GRAPHQL_SCHEMA, schema);
     }
 
     /**
@@ -356,55 +345,6 @@ public class GraphQLAPIHandler extends AbstractHandler {
             return false;
         }
         return true;
-    }
-
-    /**
-     * This method analyses the query
-     *
-     * @param messageContext message context of the request
-     * @param payload payload of the request
-     * @return true or false
-     */
-    private boolean analyseQuery(MessageContext messageContext, String payload) {
-        if(queryDepthAnalysis(messageContext, payload)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * This method analyses the query depth
-     *
-     * @param messageContext message context of the request
-     * @param payload payload of the request
-     * @return true or false
-     */
-    private boolean queryDepthAnalysis(MessageContext messageContext, String payload) {
-        MaxQueryDepthInstrumentation maxQueryDepthInstrumentation = new MaxQueryDepthInstrumentation(MAX_QUERY_DEPTH);
-
-        GraphQL runtime = GraphQL.newGraphQL(schema)
-                .instrumentation(maxQueryDepthInstrumentation)
-                .build();
-
-        try {
-            ExecutionResult executionResult = runtime.execute(payload);
-            List<GraphQLError> errors = executionResult.getErrors();
-            if (errors.size()>0) {
-                for (GraphQLError error : errors) {
-                    log.error(error);
-                }
-                handleFailure(messageContext, APISecurityConstants.QUERY_TOO_COMPLEX, errors.toString());
-                return false;
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("Maximum query depth of " + MAX_QUERY_DEPTH + " was not exceeded");
-            }
-            return true;
-        } catch (Throwable e) {
-            log.error(e);
-        }
-        return false;
     }
 
     /**
