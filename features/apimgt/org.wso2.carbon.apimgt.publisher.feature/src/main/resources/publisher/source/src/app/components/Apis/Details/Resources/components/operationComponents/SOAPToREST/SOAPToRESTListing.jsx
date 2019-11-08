@@ -32,7 +32,7 @@ import Box from '@material-ui/core/Box';
 
 import PolicyEditor from './PolicyEditor';
 
-const MonacoEditor = lazy(() => import('react-monaco-editor'));
+const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "SOAPToRESTMonaco" */));
 
 /**
  *

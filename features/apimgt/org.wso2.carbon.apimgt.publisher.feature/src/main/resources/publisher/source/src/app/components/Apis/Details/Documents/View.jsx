@@ -35,7 +35,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
-const ReactMarkdown = lazy(() => import('react-markdown'));
+const ReactMarkdown = lazy(() => import('react-markdown' /* webpackChunkName: "ViewReactMD" */));
 
 const styles = theme => ({
     root: {

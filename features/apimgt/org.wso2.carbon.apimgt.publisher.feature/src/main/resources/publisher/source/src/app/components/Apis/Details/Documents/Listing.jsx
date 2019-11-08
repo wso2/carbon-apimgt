@@ -40,7 +40,7 @@ import Delete from './Delete';
 import DeleteMultiple from './DeleteMultiple';
 import Download from './Download';
 
-const TextEditor = lazy(() => import('./TextEditor'));
+const TextEditor = lazy(() => import('./TextEditor' /* webpackChunkName: "ListingTextEditor" */));
 
 const styles = theme => ({
     root: {
