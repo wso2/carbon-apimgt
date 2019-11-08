@@ -61,7 +61,11 @@ const tokens = (props) => {
                 }
                 break;
             case 'timeout':
-                newRequest.timeout = currentTarget.value;
+                if (!isNaN(currentTarget.value)) {
+                    newRequest.timeout = currentTarget.value;
+                } else {
+                    newRequest.timeout = null;
+                }
                 break;
             default:
                 break;
