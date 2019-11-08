@@ -243,6 +243,7 @@ class ApiThumb extends React.Component {
             imageObj, selectedIcon, color, backgroundIndex, category, isHover,
         } = this.state;
         const path = this.getPathPrefix();
+        const { isMonetizationEnabled } = this.context;
 
         const detailsLink = path + this.props.api.id;
         const {
@@ -302,7 +303,7 @@ class ApiThumb extends React.Component {
                 raised={isHover}
                 className={classNames('image-thumbnail', classes.card)}
             >
-                {this.context.isMonetizationEnabled && (
+                {isMonetizationEnabled && (
                     <div className={classes.textblock}>{api.monetizationLabel}</div>
                 )}
                 <CardMedia>
