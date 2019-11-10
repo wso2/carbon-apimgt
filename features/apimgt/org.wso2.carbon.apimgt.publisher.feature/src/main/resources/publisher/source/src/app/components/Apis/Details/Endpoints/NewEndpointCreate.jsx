@@ -159,7 +159,7 @@ function NewEndpointCreate(props) {
                 defaultMessage: 'If you need to invoke AWS Lambda functions through API gateway.',
             }),
             options: null,
-            disabled: [],
+            disabled: ['SOAPTOREST', 'GRAPHQL'],
         },
     ];
 

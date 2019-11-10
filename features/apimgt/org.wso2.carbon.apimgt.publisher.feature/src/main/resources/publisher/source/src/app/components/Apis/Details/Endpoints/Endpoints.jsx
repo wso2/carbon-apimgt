@@ -72,7 +72,7 @@ function Endpoints(props) {
     const [swagger, setSwagger] = useState(defaultSwagger);
     const [endpointValidity, setAPIEndpointsValid] = useState({ isValid: true, message: '' });
     const [isUpdating, setUpdating] = useState(false);
-    const [awsAccessMethod, setAwsAccessMethod] = React.useState('role-supplied');
+    const [awsAccessMethod, setAwsAccessMethod] = useState('role-supplied');
 
     const apiReducer = (initState, configAction) => {
         const tmpEndpointConfig = cloneDeep(initState.endpointConfig);
@@ -224,7 +224,7 @@ function Endpoints(props) {
                     };
                 }
             }
-            if (endpointConfig.amznAccessKey !== '' && endpointConfig.amznSecretKey.charAt(0) === '~') {
+            if (endpointConfig.amznAccessKey !== '' && endpointConfig.amznSecretKey === 'AWS_SECRET_KEY') {
                 return {
                     isValid: false,
                     message: '',
@@ -312,6 +312,14 @@ function Endpoints(props) {
     useEffect(() => {
         setAPIEndpointsValid(validate(apiObject.endpointImplementationType));
     }, [apiObject]);
+
+    useEffect(() => {
+        const { endpointConfig } = api;
+        if (endpointConfig && endpointConfig.endpoint_type && endpointConfig.endpoint_type === 'awslambda') {
+            setAwsAccessMethod(endpointConfig.amznAccessKey !== '' && endpointConfig.amznSecretKey !== '' ?
+                'stored' : 'role-supplied');
+        }
+    }, []);
 
     const saveAndRedirect = () => {
         saveAPI(true);

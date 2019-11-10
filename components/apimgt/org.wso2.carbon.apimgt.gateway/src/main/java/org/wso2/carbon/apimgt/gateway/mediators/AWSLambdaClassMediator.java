@@ -21,6 +21,7 @@ import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.InvocationType;
@@ -34,9 +35,12 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.json.XML;
-import java.nio.ByteBuffer;
+
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
 public class AWSLambdaClassMediator extends AbstractMediator {
@@ -55,50 +59,65 @@ public class AWSLambdaClassMediator extends AbstractMediator {
      * @return true
      */
     public boolean mediate(MessageContext messageContext) {
-        // convert XML payload to JSON payload
-        JSONObject soapBody = XML.toJSONObject(messageContext.getEnvelope().getBody().toString()).getJSONObject("soapenv:Body");
-
-        String jsonPayload = "{}";
-        if (soapBody.has("jsonObject")) {
-            jsonPayload = soapBody.getJSONObject("jsonObject").toString();
-        }
-
-        // get response from Lambda
-        ByteBuffer response = invokeLambda(jsonPayload);
-
-        // byte buffer to string conversion
-        String strResponse = new String(response.array(), Charset.forName("UTF-8"));
-
-        // set response to messageContext
-        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         try {
-            JsonUtil.getNewJsonPayload(axis2MessageContext, strResponse, true, true);
-            axis2MessageContext.setProperty("HTTP_SC", 200);
-            axis2MessageContext.removeProperty("NO_ENTITY_BODY");
-            axis2MessageContext.setProperty("messageType", "application/json");
-            axis2MessageContext.setProperty("ContentType", "application/json");
-        } catch (AxisFault axisFault) {
-            axisFault.printStackTrace();
-        }
+            int httpSC;
+            String payload;
+            String jsonPayload;
+            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
+                    .getAxis2MessageContext();
 
+//            if (axis2MessageContext.getProperty("org.apache.synapse.commons.json.JsonInputStream.IsJsonObject")) {
+//                payload = axis2MessageContext.getProperty("org.apache.synapse.commons.json.JsonInputStream");
+//            } else {
+//                payload = "{}";
+//            }
+
+            JSONObject soapBody = XML.toJSONObject(messageContext.getEnvelope().getBody().toString())
+                    .getJSONObject("soapenv:Body");
+            if (soapBody.has("jsonObject")) {
+                payload = soapBody.getJSONObject("jsonObject").toString();
+            } else {
+                payload = "{}";
+            }
+
+            InvokeResult invokeResult = invokeLambda(payload);
+            if (invokeResult != null) {
+                httpSC = invokeResult.getStatusCode();
+                jsonPayload = new String(invokeResult.getPayload().array(), Charset.forName(APIConstants
+                        .DigestAuthConstants.CHARSET));
+            } else {
+                httpSC = 400;
+                jsonPayload = "{statusCode: 400, message: 'Bad request'}";
+            }
+            JsonUtil.getNewJsonPayload(axis2MessageContext, jsonPayload, true, true);
+            axis2MessageContext.setProperty("HTTP_SC", httpSC);
+            axis2MessageContext.setProperty("messageType", APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            axis2MessageContext.setProperty("ContentType", APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            axis2MessageContext.removeProperty("NO_ENTITY_BODY");
+        } catch (AxisFault e) {
+            log.error("Error while retrieving axis2MessageContext", e);
+        }
         return true;
     }
 
     /**
      * invoke AWS Lambda function
      * @param payload - input parameters to pass to AWS Lambda function as a JSONString
-     * @return ByteBuffer response
-     *
+     * @return InvokeResult
      */
-    public ByteBuffer invokeLambda(String payload) {
-        ByteBuffer response = null;
-        AWSCredentialsProvider credentialsProvider;
+    private InvokeResult invokeLambda(String payload) {
         try {
-            if (accessKey.equals("") && secretKey.equals("")) {
+            AWSCredentialsProvider credentialsProvider;
+            if ("".equals(accessKey) && "".equals(secretKey)) {
                 credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
             } else {
-                String decryptedSecretKey = decrypt(secretKey);
-                BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, decryptedSecretKey);
+                if (APIConstants.AMZN_SECRET_KEY_PREFIX.equals(secretKey.substring(0,
+                        APIConstants.AMZN_SECRET_KEY_PREFIX_LENGTH))) {
+                    CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                    setSecretKey(new String(cryptoUtil.base64DecodeAndDecrypt(secretKey.substring(
+                            APIConstants.AMZN_SECRET_KEY_PREFIX_LENGTH)), APIConstants.DigestAuthConstants.CHARSET));
+                }
+                BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
                 credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
             }
             AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
@@ -108,20 +127,13 @@ public class AWSLambdaClassMediator extends AbstractMediator {
                     .withFunctionName(resourceName)
                     .withPayload(payload)
                     .withInvocationType(InvocationType.RequestResponse);
-            InvokeResult invokeResult = awsLambda.invoke(invokeRequest);
-            response = invokeResult.getPayload();
-        } catch (com.amazonaws.SdkClientException e) {
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
+            return awsLambda.invoke(invokeRequest);
+        } catch (SdkClientException e) {
+            log.error("Error while invoking the lambda function", e);
+        } catch (CryptoException | UnsupportedEncodingException e) {
+            log.error("Error while decrypting the secret key", e);
         }
-        return response;
-    }
-
-    public String decrypt (String cipherText) throws Exception {
-        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-        String plainText = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey), "UTF-8");
-        return plainText;
+        return null;
     }
 
     public String getType() {

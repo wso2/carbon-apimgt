@@ -1152,6 +1152,7 @@ public final class APIConstants {
     public static final String CUSTOM_ERROR_MESSAGE = "ERROR_MESSAGE";
     //Swagger v2.0 constants
     public static final String SWAGGER_X_SCOPE = "x-scope";
+    public static final String SWAGGER_X_AMZN_RESOURCE_NAME = "x-amzn-resource-name";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
     public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
     public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
@@ -1800,5 +1801,10 @@ public final class APIConstants {
     public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
     public static final String UTILITY_WEB_APP_EP = "/throttle/data/v1";
     public static final String API_KEY_REVOKE_PATH = "/apikey/revoke";
+
+    // AWS Lambda: Constants for aws lambda
+    public static final String AWS_SECRET_KEY = "AWS_SECRET_KEY";
+    public static final String AMZN_SECRET_KEY_PREFIX = "aws:";
+    public static final int AMZN_SECRET_KEY_PREFIX_LENGTH = 4;
 
 }

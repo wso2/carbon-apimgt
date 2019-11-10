@@ -27,6 +27,8 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import Icon from '@material-ui/core/Icon';
 import API from 'AppData/api';
 
 /**
@@ -171,14 +173,14 @@ export default function IntegrationDownshift(props) {
     }, []);
     return (
         <Fragment>
-            <Grid item md={12}>
+            <Grid item md={12} xs={12}>
                 <Typography variant='subtitle1'>
                     Amazon Resource Name (ARN)
                     <Divider variant='middle' />
                 </Typography>
             </Grid>
-            <Grid item md={1} />
-            <Grid item md={5}>
+            <Grid item md={1} xs={1} />
+            <Grid item md={10} xs={11}>
                 <Downshift
                     id='downshift-options'
                     onSelect={(changes) => {
@@ -229,7 +231,16 @@ export default function IntegrationDownshift(props) {
                                     fullWidth: true,
                                     classes,
                                     InputLabelProps: getLabelProps({ shrink: true }),
-                                    InputProps: { onBlur, onChange, onFocus },
+                                    InputProps: {
+                                        onBlur,
+                                        onChange,
+                                        onFocus,
+                                        endAdornment: (
+                                            <InputAdornment position='end'>
+                                                <Icon className={classes.helpIcon}>keyboard_arrow_down</Icon>
+                                            </InputAdornment>
+                                        ),
+                                    },
                                     inputProps,
                                 })}
 

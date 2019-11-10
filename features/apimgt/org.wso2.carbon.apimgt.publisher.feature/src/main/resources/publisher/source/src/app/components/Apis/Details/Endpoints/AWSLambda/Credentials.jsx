@@ -29,7 +29,11 @@ import {
     Radio,
 } from '@material-ui/core';
 import Icon from '@material-ui/core/Icon';
+import LaunchIcon from '@material-ui/icons/Launch';
 import { FormattedMessage } from 'react-intl';
+import { Link } from 'react-router-dom';
+import API from 'AppData/api';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 
 const useStyles = makeStyles(theme => ({
     typography: {
@@ -52,29 +56,42 @@ const useStyles = makeStyles(theme => ({
  */
 export default function Credentials(props) {
     const {
-        epConfig,
-        setEpConfig,
+        apiId,
+        endpointConfig,
         endpointsDispatcher,
         awsAccessMethod,
         setAwsAccessMethod,
     } = props;
     const classes = useStyles();
-    const [isChanged, setIsChanged] = useState(false);
+    const [isValid, setIsValid] = useState(false);
     const handleChange = (event) => {
-        const newEpConfig = { ...epConfig };
-        newEpConfig.amznAccessKey = '';
-        newEpConfig.amznSecretKey = '';
-        setEpConfig(newEpConfig);
-        endpointsDispatcher({ action: 'set_awsCredentials', value: newEpConfig });
+        const newEndpointConfig = { ...endpointConfig };
+        newEndpointConfig.amznAccessKey = '';
+        newEndpointConfig.amznSecretKey = '';
+        endpointsDispatcher({ action: 'set_awsCredentials', value: newEndpointConfig });
         setAwsAccessMethod(event.target.value);
     };
     useEffect(() => {
-        if (epConfig.amznAccessKey !== '' && epConfig.amznSecretKey !== '') {
-            setAwsAccessMethod('stored');
-        }
+        API.getAmznResourceNames(apiId)
+            .then((response) => {
+                setIsValid(response.body);
+            });
     }, []);
     return (
-        <div>
+        <React.Fragment>
+            {isValid &&
+                <InlineMessage type='info' height={100} className={classes.emptyBox} >
+                    <div className={classes.contentWrapper}>
+                        <Typography component='p' className={classes.content}>
+                            <FormattedMessage
+                                id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
+                                    '.endpoint.credential.warning'}
+                                defaultMessage='Given credentials seem to be invalid.'
+                            />
+                        </Typography>
+                    </div>
+                </InlineMessage>
+            }
             <Typography className={classes.typography}>
                 <FormattedMessage
                     id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
@@ -87,11 +104,22 @@ export default function Credentials(props) {
                     <FormControlLabel
                         value='role-supplied'
                         control={<Radio color='primary' />}
-                        label='Using IAM role-supplied temporary AWS credentials'
+                        label={
+                            <FormattedMessage
+                                id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
+                                '.endpoint.accessMethod.roleSupplied'}
+                                defaultMessage='Using IAM role-supplied temporary AWS credentials'
+                            />
+                        }
                     />
                     <Tooltip
-                        title={'You can and should use an IAM role to manage temporary credentials for ' +
-                            'applications that run on an EC2 instance'
+                        title={
+                            <FormattedMessage
+                                id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
+                                '.endpoint.tooltip'}
+                                defaultMessage={'You can and should use an IAM role to manage temporary credentials ' +
+                                'for applications that run on an EC2 instance'}
+                            />
                         }
                     >
                         <Icon className={classes.helpIcon}>help_outline</Icon>
@@ -101,7 +129,13 @@ export default function Credentials(props) {
                     <FormControlLabel
                         value='stored'
                         control={<Radio color='primary' />}
-                        label='Using stored AWS credentials'
+                        label={
+                            <FormattedMessage
+                                id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
+                                '.endpoint.accessMethod.stored'}
+                                defaultMessage='Using stored AWS credentials'
+                            />
+                        }
                     />
                 </div>
             </RadioGroup>
@@ -110,45 +144,67 @@ export default function Credentials(props) {
                     required
                     disabled={awsAccessMethod === 'role-supplied'}
                     id='outlined-required'
-                    label='Access Key'
+                    label={
+                        <FormattedMessage
+                            id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
+                            '.endpoint.accessKey'}
+                            defaultMessage='Access Key'
+                        />
+                    }
                     margin='normal'
                     variant='outlined'
                     className={classes.textField}
-                    value={epConfig.amznAccessKey}
+                    value={endpointConfig.amznAccessKey}
                     onChange={(event) => {
-                        const newEpConfig = { ...epConfig };
-                        newEpConfig.amznAccessKey = event.target.value;
-                        setEpConfig(newEpConfig);
-                        endpointsDispatcher({ action: 'set_awsCredentials', value: newEpConfig });
+                        const newEndpointConfig = { ...endpointConfig };
+                        newEndpointConfig.amznAccessKey = event.target.value;
+                        endpointsDispatcher({ action: 'set_awsCredentials', value: newEndpointConfig });
                     }}
                 />
                 <TextField
                     required
                     disabled={awsAccessMethod === 'role-supplied'}
                     id='outlined-password-input-required'
-                    label='Secret Key'
+                    label={
+                        <FormattedMessage
+                            id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
+                            '.endpoint.secretKey'}
+                            defaultMessage='Secret Key'
+                        />
+                    }
                     type='password'
                     margin='normal'
                     variant='outlined'
                     className={classes.textField}
-                    // eslint-disable-next-line no-nested-ternary
-                    value={isChanged ? epConfig.amznSecretKey : (epConfig.amznSecretKey === '' ? '' : 'AWS_SECRET_KEY')}
+                    value={endpointConfig.amznSecretKey}
                     onChange={(event) => {
-                        const newEpConfig = { ...epConfig };
-                        newEpConfig.amznSecretKey = event.target.value;
-                        setEpConfig(newEpConfig);
-                        endpointsDispatcher({ action: 'set_awsCredentials', value: newEpConfig });
-                        setIsChanged(true);
+                        const newEndpointConfig = { ...endpointConfig };
+                        newEndpointConfig.amznSecretKey = event.target.value;
+                        endpointsDispatcher({ action: 'set_awsCredentials', value: newEndpointConfig });
                     }}
                 />
             </Grid>
-        </div>
+            {endpointConfig.endpoint_type === 'awslambda' &&
+                <Grid item>
+                    <Link to={`/apis/${apiId}/resources`} target='_blank'>
+                        <Typography style={{ marginLeft: '10px' }} color='primary' display='inline' variant='caption'>
+                            <FormattedMessage
+                                id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
+                                '.endpoint.linkToResources'}
+                                defaultMessage='Goto Resources to add ARNs'
+                            />
+                            <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
+                        </Typography>
+                    </Link>
+                </Grid>
+            }
+        </React.Fragment>
     );
 }
 
 Credentials.propTypes = {
-    epConfig: PropTypes.shape({}).isRequired,
-    setEpConfig: PropTypes.func.isRequired,
+    apiId: PropTypes.shape('').isRequired,
+    endpointConfig: PropTypes.shape({}).isRequired,
     endpointsDispatcher: PropTypes.func.isRequired,
     awsAccessMethod: PropTypes.shape('').isRequired,
     setAwsAccessMethod: PropTypes.func.isRequired,

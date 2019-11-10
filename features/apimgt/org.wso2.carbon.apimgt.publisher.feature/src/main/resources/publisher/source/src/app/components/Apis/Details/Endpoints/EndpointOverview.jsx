@@ -605,8 +605,8 @@ function EndpointOverview(props) {
                             <Paper className={classes.endpointContainer}>
                                 {endpointType.key === 'awslambda' ?
                                     <Credentials
-                                        epConfig={epConfig}
-                                        setEpConfig={setEpConfig}
+                                        apiId={api.id}
+                                        endpointConfig={endpointConfig}
                                         endpointsDispatcher={endpointsDispatcher}
                                         awsAccessMethod={awsAccessMethod}
                                         setAwsAccessMethod={setAwsAccessMethod}
