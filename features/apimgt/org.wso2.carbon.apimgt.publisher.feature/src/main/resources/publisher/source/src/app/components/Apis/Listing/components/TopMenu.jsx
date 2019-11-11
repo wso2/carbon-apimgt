@@ -121,7 +121,7 @@ function TopMenu(props) {
             <div className={classes.mainTitleWrapper}>
                 {data && (
                     <React.Fragment>
-                        <Typography variant='display1' className={classes.mainTitle} component='div'>
+                        <Typography variant='h5' className={classes.mainTitle} component='div'>
                             {isAPIProduct ? (
                                 <FormattedMessage
                                     id='Apis.Listing.components.TopMenu.apiproducts'

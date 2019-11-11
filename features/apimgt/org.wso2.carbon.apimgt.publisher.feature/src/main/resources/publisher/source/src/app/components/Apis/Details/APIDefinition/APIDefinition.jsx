@@ -48,8 +48,8 @@ import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import APISecurityAudit from './APISecurityAudit';
 import ImportDefinition from './ImportDefinition';
 
-const EditorDialog = lazy(() => import('./SwaggerEditorDrawer'));
-const MonacoEditor = lazy(() => import('react-monaco-editor'));
+const EditorDialog = lazy(() => import('./SwaggerEditorDrawer' /* webpackChunkName: "EditorDialog" */));
+const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "APIDefMonacoEditor" */));
 
 const styles = theme => ({
     titleWrapper: {
