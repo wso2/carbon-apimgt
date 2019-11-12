@@ -434,27 +434,20 @@ class APIDefinition extends React.Component {
                         </div>
                     )}
                 </div>
-                {isAuditApiClicked ? (
-                    <APISecurityAudit apiId={api.id} />
-                ) : (
-                    <MonacoEditor
-                        width='100%'
-                        height='calc(100vh - 51px)'
-                        theme='vs-dark'
-                        value={swagger !== null ? swagger : graphQL}
-                        options={editorOptions}
-                    />
-                )}
                 <div>
                     <Suspense fallback={<Progress />}>
-                        <MonacoEditor
-                            language={format}
-                            width='100%'
-                            height='calc(100vh - 51px)'
-                            theme='vs-dark'
-                            value={swagger !== null ? swagger : graphQL}
-                            options={editorOptions}
-                        />
+                        {isAuditApiClicked ? (
+                            <APISecurityAudit apiId={api.id} />
+                        ) : (
+                            <MonacoEditor
+                                language={format}
+                                width='100%'
+                                height='calc(100vh - 51px)'
+                                theme='vs-dark'
+                                value={swagger !== null ? swagger : graphQL}
+                                options={editorOptions}
+                            />
+                        )}
                     </Suspense>
                 </div>
                 <Dialog fullScreen open={openEditor} onClose={this.closeEditor} TransitionComponent={this.transition}>
