@@ -837,6 +837,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
             auditUuid = (String) ((JSONObject) responseJson.get(APIConstants.DESC)).get(APIConstants.ID);
             ApiMgtDAO.getInstance().addAuditApiMapping(apiIdentifier, auditUuid);
+        } else {
+            throw new APIManagementException(
+                    "Error while retrieving data from " + APIConstants.BASE_AUDIT_URL + ". Found http status: " +
+                    httpConn.getResponseCode() + " - " + httpConn.getResponseMessage());
         }
         return auditUuid;
     }
