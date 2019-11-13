@@ -21,7 +21,7 @@ import { withRouter } from 'react-router-dom';
 import isEmpty from 'lodash.isempty';
 import MarkdownEditor from './MarkdownEditor';
 
-const TextEditor = lazy(() => import('./TextEditor'));
+const TextEditor = lazy(() => import('./TextEditor' /* webpackChunkName: "EditContentTextEditor" */));
 
 function EditContent(props) {
     const [doc, setDoc] = useState(null);

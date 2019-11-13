@@ -1,4 +1,3 @@
-<%
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -17,15 +16,10 @@
  * under the License.
  */
 
- // TODO: Wrap these consts with an object and do `require` when needed ~tmkb
-var SETTINGS_REST_API_URL_SUFFIX = "/api/am/publisher/v1.0/settings";
-var DCR_URL_SUFFIX =  "/client-registration/v0.15/register";
-var AUTHORIZE_ENDPOINT_SUFFIX = "/oauth2/authorize";
-var TOKEN_URL_SUFFIX = "/oauth2/token";
-var REVOKE_URL_SUFFIX = "/oauth2/revoke";
-var LOGIN_CALLBACK_URL_SUFFIX = "/services/auth/callback/login";
-var LOGOUT_CALLBACK_URL_SUFFIX = "/services/auth/callback/logout"
+import Joi from '@hapi/joi';
 
-var PUBLISHER_CLIENT_APP_NAME_OLD = "admin_publisher";
-var PUBLISHER_CLIENT_APP_NAME = "apim_publisher";
-%>
+const definition = {
+    timeout: Joi.number().integer(),
+};
+
+export default definition;

@@ -30,7 +30,7 @@ import Grid from '@material-ui/core/Grid';
 import Banner from 'AppComponents/Shared/Banner';
 import CloseConfirmation from './CloseConfirmation';
 
-const MonacoEditor = lazy(() => import('react-monaco-editor'));
+const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "PolicyEditorMonaco" */));
 
 const useStyles = makeStyles(theme => ({
     appBar: {

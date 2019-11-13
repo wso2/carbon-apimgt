@@ -34,8 +34,8 @@ import Alert from 'AppComponents/Shared/Alert';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-const MonacoEditor = lazy(() => import('react-monaco-editor'));
-const ReactMarkdown = lazy(() => import('react-markdown'));
+const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "MDMonacoEditor" */));
+const ReactMarkdown = lazy(() => import('react-markdown' /* webpackChunkName: "MDReactMarkdown" */));
 
 const styles = {
     appBar: {

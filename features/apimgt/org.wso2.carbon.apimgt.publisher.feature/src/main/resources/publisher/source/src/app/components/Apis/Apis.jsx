@@ -16,11 +16,20 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Route, Switch } from 'react-router-dom';
+import Progress from 'AppComponents/Shared/Progress';
 import APICreateRoutes from './Create/APICreateRoutes';
+
 import Listing from './Listing/Listing';
-import Details from './Details/index';
+
+
+const Details = lazy(() => import('./Details/index' /* webpackChunkName: "DeferredDetails" */));
+const DeferredDetails = props => (
+    <Suspense fallback={<Progress message='Loading Details component ...' />}>
+        <Details {...props} />
+    </Suspense>
+);
 
 /**
  * Have used key={Date.now()} for `Route` element in `/apis` and `/api-products`
@@ -33,8 +42,8 @@ const Apis = () => {
             <Route path='/apis/search' render={props => <Listing {...props} isAPIProduct={false} />} />
             <Route path='/apis/create' component={APICreateRoutes} />
             <Route path='/api-products/create' component={APICreateRoutes} />
-            <Route path='/apis/:apiUUID/' render={props => <Details {...props} isAPIProduct={false} />} />
-            <Route path='/api-products/:apiProdUUID/' render={props => <Details {...props} isAPIProduct />} />
+            <Route path='/apis/:apiUUID/' render={props => <DeferredDetails {...props} isAPIProduct={false} />} />
+            <Route path='/api-products/:apiProdUUID/' render={props => <DeferredDetails {...props} isAPIProduct />} />
         </Switch>
     );
 };

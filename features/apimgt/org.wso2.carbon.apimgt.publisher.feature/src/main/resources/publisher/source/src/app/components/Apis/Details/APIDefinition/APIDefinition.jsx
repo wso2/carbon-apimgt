@@ -44,8 +44,8 @@ import { isRestricted } from 'AppData/AuthManager';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import ImportDefinition from './ImportDefinition';
 
-const EditorDialog = lazy(() => import('./SwaggerEditorDrawer'));
-const MonacoEditor = lazy(() => import('react-monaco-editor'));
+const EditorDialog = lazy(() => import('./SwaggerEditorDrawer' /* webpackChunkName: "EditorDialog" */));
+const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "APIDefMonacoEditor" */));
 
 const styles = theme => ({
     titleWrapper: {

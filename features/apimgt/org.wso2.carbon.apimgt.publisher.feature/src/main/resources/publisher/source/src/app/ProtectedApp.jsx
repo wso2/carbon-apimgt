@@ -36,7 +36,7 @@ import { AppContextProvider } from 'AppComponents/Shared/AppContext';
 import SettingsBase from 'AppComponents/Apis/Settings/SettingsBase';
 import Progress from 'AppComponents/Shared/Progress';
 
-const Apis = lazy(() => import('AppComponents/Apis/Apis'));
+const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "DeferredAPIs" */));
 const DeferredAPIs = () => (
     <Suspense fallback={<Progress message='Loading components ...' />}>
         <Apis />

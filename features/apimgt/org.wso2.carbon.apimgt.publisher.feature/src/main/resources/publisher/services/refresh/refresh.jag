@@ -40,15 +40,17 @@
 
         var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
         var systemApplicationDAO = new SystemApplicationDTO();
-        var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_publisher");
-
-        if(systemApplicationDTO == null) {
-            log.error("Oauth application details not found for 'admin_publisher'");
+        var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME);
+        if (systemApplicationDTO === null) {
+            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD);
+        }
+        if (systemApplicationDTO == null) {
+            log.error("Oauth application details not found for 'publisher'");
             response.status = 401;
             response.contentType = "application/json";
             var res= {};
             res.error = true;
-            res.message = "Oauth application details not found for 'admin_publisher'";
+            res.message = "Oauth application details not found for 'publisher'";
             print(res);
         } else {
             var clientId = systemApplicationDTO.getConsumerKey();
