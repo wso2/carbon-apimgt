@@ -17,13 +17,13 @@
  * under the License.
  */
     include("/services/constants.jag");
-    include("/services/jagg.jag");
+    var appUtils = require("/services/utils.js");
 
     var log = new Log("Jaggery service for token introspection");
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-    var userInfoEndpoint = MGT_TRANSPORT + HOST + ":" + getServerPort() + "/oauth2/userinfo";
-    var introspectEndpoint = MGT_TRANSPORT + HOST + ":" + getServerPort() + "/oauth2/introspect";
+    var userInfoEndpoint = appUtils.getLoopbackOrigin() + "/oauth2/userinfo";
+    var introspectEndpoint = appUtils.getLoopbackOrigin() + "/oauth2/introspect";
     var tokenP1 = request.getCookie("WSO2_AM_TOKEN_1_Default")? request.getCookie("WSO2_AM_TOKEN_1_Default").value : null;
     var tokenP2 = request.getCookie("AM_ACC_TOKEN_DEFAULT_P2")? request.getCookie("AM_ACC_TOKEN_DEFAULT_P2").value : null;
     var token = tokenP1 + tokenP2;

@@ -3311,11 +3311,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             String publisherAccessControlRoles = api.getAccessControlRoles();
+            updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
+                    api.getAdditionalProperties());
             APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                     artifactPath, registry);
 
-            updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
-                    api.getAdditionalProperties());
             registry.commitTransaction();
             transactionCommitted = true;
 
@@ -6556,6 +6556,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status)) {
                                 API api = APIUtil.getAPI(artifact, registry);
                                 if (api != null) {
+                                    APIUtil.updateAPIProductDependencies(api, registry);
                                     apiList.add(api);
                                     apiNames.append(api.getId().getApiName());
                                 }
@@ -6564,6 +6565,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             if (APIConstants.PUBLISHED.equals(status)) {
                                 API api = APIUtil.getAPI(artifact, registry);
                                 if (api != null) {
+                                    APIUtil.updateAPIProductDependencies(api, registry);
                                     apiList.add(api);
                                     apiNames.append(api.getId().getApiName());
                                 }
@@ -7055,6 +7057,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             //delete registry resources
+            artifactManager.removeGenericArtifact(apiProductArtifact);
             artifactManager.removeGenericArtifact(productResourceUUID);
 
             apiMgtDAO.deleteAPIProduct(identifier);

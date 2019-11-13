@@ -23,6 +23,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -32,8 +34,10 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -44,12 +48,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest( {AbstractJWTGenerator.class,APIUtil.class,KeyStoreManager.class})
+@PrepareForTest( {AbstractJWTGenerator.class,APIUtil.class,KeyStoreManager.class,CarbonUtils.class})
 public class TokenGenTest {
     private static final Log log = LogFactory.getLog(TokenGenTest.class);
 
     @Before
     public void setUp() throws Exception {
+        PowerMockito.mockStatic(CarbonUtils.class);
+        ServerConfiguration serverConfiguration = Mockito.mock(ServerConfiguration.class);
+        Mockito.when(serverConfiguration.getFirstProperty(APIConstants.PORT_OFFSET_CONFIG)).thenReturn("2");
+        PowerMockito.when(CarbonUtils.getServerConfiguration()).thenReturn(serverConfiguration);
         String dbConfigPath = System.getProperty("APIManagerDBConfigurationPath");
         APIManagerConfiguration config = new APIManagerConfiguration();
         config.load(dbConfigPath);

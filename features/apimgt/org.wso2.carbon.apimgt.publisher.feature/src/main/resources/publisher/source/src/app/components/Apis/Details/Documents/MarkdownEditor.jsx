@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, Suspense, lazy } from 'react';
 import { withRouter } from 'react-router-dom';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
@@ -29,11 +29,13 @@ import Slide from '@material-ui/core/Slide';
 import Icon from '@material-ui/core/Icon';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import ReactMarkdown from 'react-markdown';
-import MonacoEditor from 'react-monaco-editor';
 import Api from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
+import CircularProgress from '@material-ui/core/CircularProgress';
+
+const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "MDMonacoEditor" */));
+const ReactMarkdown = lazy(() => import('react-markdown' /* webpackChunkName: "MDReactMarkdown" */));
 
 const styles = {
     appBar: {
@@ -65,7 +67,7 @@ const styles = {
 };
 
 function Transition(props) {
-    return <Slide direction='up' {...props} />;
+    return <Slide direction="up" {...props} />;
 }
 
 function MarkdownEditor(props) {
@@ -73,10 +75,12 @@ function MarkdownEditor(props) {
     const { api, isAPIProduct } = useContext(APIContext);
 
     const [open, setOpen] = useState(showAtOnce);
-    const [code, setCode] = useState(intl.formatMessage({
-        id: 'documents.markdown.editor.default',
-        defaultMessage: '#Enter your markdown content',
-    }));
+    const [code, setCode] = useState(
+        intl.formatMessage({
+            id: 'documents.markdown.editor.default',
+            defaultMessage: '#Enter your markdown content',
+        }),
+    );
     const toggleOpen = () => {
         if (!open) updateDoc();
         if (open && showAtOnce) {
@@ -86,7 +90,7 @@ function MarkdownEditor(props) {
         }
         setOpen(!open);
     };
-    const updateCode = (newCode) => {
+    const updateCode = newCode => {
         setCode(newCode);
     };
     const editorDidMount = (editor, monaco) => {
@@ -96,14 +100,16 @@ function MarkdownEditor(props) {
         const restAPI = new Api();
         const docPromise = restAPI.addInlineContentToDocument(api.id, props.docId, 'MARKDOWN', code);
         docPromise
-            .then((doc) => {
-                Alert.info(`${doc.name} ${intl.formatMessage({
-                    id: 'Apis.Details.Documents.MarkdownEditor.update.success.message',
-                    defaultMessage: 'updated successfully.',
-                })}`);
+            .then(doc => {
+                Alert.info(
+                    `${doc.name} ${intl.formatMessage({
+                        id: 'Apis.Details.Documents.MarkdownEditor.update.success.message',
+                        defaultMessage: 'updated successfully.',
+                    })}`,
+                );
                 toggleOpen();
             })
-            .catch((error) => {
+            .catch(error => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
@@ -118,10 +124,10 @@ function MarkdownEditor(props) {
 
         const docPromise = restAPI.getInlineContentOfDocument(api.id, props.docId);
         docPromise
-            .then((doc) => {
+            .then(doc => {
                 setCode(doc.text);
             })
-            .catch((error) => {
+            .catch(error => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
@@ -138,52 +144,56 @@ function MarkdownEditor(props) {
             <Button onClick={toggleOpen}>
                 <Icon>code</Icon>
                 <FormattedMessage
-                    id='Apis.Details.Documents.MarkdownEditor.edit.content'
-                    defaultMessage='Edit Content'
+                    id="Apis.Details.Documents.MarkdownEditor.edit.content"
+                    defaultMessage="Edit Content"
                 />
             </Button>
             <Dialog fullScreen open={open} onClose={toggleOpen} TransitionComponent={Transition}>
                 <Paper square className={classes.popupHeader}>
-                    <IconButton color='inherit' onClick={toggleOpen} aria-label='Close'>
+                    <IconButton color="inherit" onClick={toggleOpen} aria-label="Close">
                         <Icon>close</Icon>
                     </IconButton>
-                    <Typography variant='h4' className={classes.docName}>
+                    <Typography variant="h4" className={classes.docName}>
                         <FormattedMessage
-                            id='Apis.Details.Documents.MarkdownEditor.edit.content.of'
-                            defaultMessage='Edit Content of'
+                            id="Apis.Details.Documents.MarkdownEditor.edit.content.of"
+                            defaultMessage="Edit Content of"
                         />{' '}
                         "{props.docName}"
                     </Typography>
-                    <Button className={classes.button} variant='contained' color='primary' onClick={addContentToDoc}>
+                    <Button className={classes.button} variant="contained" color="primary" onClick={addContentToDoc}>
                         <FormattedMessage
-                            id='Apis.Details.Documents.MarkdownEditor.update.content.button'
-                            defaultMessage='Update Content'
+                            id="Apis.Details.Documents.MarkdownEditor.update.content.button"
+                            defaultMessage="Update Content"
                         />
                     </Button>
                     <Button className={classes.button} onClick={toggleOpen}>
                         <FormattedMessage
-                            id='Apis.Details.Documents.MarkdownEditor.cancel.button'
-                            defaultMessage='Cancel'
+                            id="Apis.Details.Documents.MarkdownEditor.cancel.button"
+                            defaultMessage="Cancel"
                         />
                     </Button>
                 </Paper>
                 <div className={classes.splitWrapper}>
                     <Grid container spacing={7}>
                         <Grid item xs={6}>
-                            <MonacoEditor
-                                width='100%'
-                                height='100vh'
-                                language='markdown'
-                                theme='vs-dark'
-                                value={code}
-                                options={{ selectOnLineNumbers: true }}
-                                onChange={updateCode}
-                                editorDidMount={editorDidMount}
-                            />
+                            <Suspense fallback={<CircularProgress />}>
+                                <MonacoEditor
+                                    width="100%"
+                                    height="100vh"
+                                    language="markdown"
+                                    theme="vs-dark"
+                                    value={code}
+                                    options={{ selectOnLineNumbers: true }}
+                                    onChange={updateCode}
+                                    editorDidMount={editorDidMount}
+                                />
+                            </Suspense>
                         </Grid>
                         <Grid item xs={6}>
                             <div className={classes.markdownViewWrapper}>
-                                <ReactMarkdown source={code} />
+                                <Suspense fallback={<CircularProgress />}>
+                                    <ReactMarkdown source={code} />
+                                </Suspense>
                             </div>
                         </Grid>
                     </Grid>

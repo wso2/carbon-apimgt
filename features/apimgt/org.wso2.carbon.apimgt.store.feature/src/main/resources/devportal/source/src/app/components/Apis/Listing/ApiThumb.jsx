@@ -31,6 +31,7 @@ import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import ImageGenerator from './ImageGenerator';
 import Api from '../../../data/api';
 import { ApiContext } from '../Details/ApiContext';
+import classNames from 'classnames';
 
 /**
  *
@@ -42,8 +43,17 @@ const styles = theme => ({
         margin: theme.spacing.unit * (3 / 2),
         maxWidth: theme.custom.thumbnail.width,
         transition: 'box-shadow 0.3s ease-in-out',
+        position: 'relative',
     },
-    apiDetails: { padding: theme.spacing.unit },
+    apiDetails: {
+        padding: theme.spacing.unit,
+        background: theme.custom.thumbnail.contentBackgroundColor,
+        padding: theme.spacing.unit,
+        color: theme.palette.getContrastText(theme.custom.thumbnail.contentBackgroundColor),
+        '& a': {
+            color: theme.palette.getContrastText(theme.custom.thumbnail.contentBackgroundColor),
+        },
+    },
     suppressLinkStyles: {
         textDecoration: 'none',
         color: theme.palette.text.disabled,
@@ -60,12 +70,6 @@ const styles = theme => ({
     },
     thumbContent: {
         width: theme.custom.thumbnail.width - theme.spacing(2),
-        backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing.unit,
-        color: theme.palette.getContrastText(theme.palette.background.paper),
-        '& a': {
-            color: theme.palette.getContrastText(theme.palette.background.paper),
-        },
     },
     thumbLeft: {
         alignSelf: 'flex-start',
@@ -83,7 +87,6 @@ const styles = theme => ({
     thumbHeader: {
         width: theme.custom.thumbnail.width - theme.spacing.unit,
         whiteSpace: 'nowrap',
-        color: theme.palette.text.secondary,
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         cursor: 'pointer',
@@ -133,6 +136,15 @@ const styles = theme => ({
     ratingWrapper: {
         marginTop: '20px',
     },
+    textblock: {
+        color: theme.palette.text.secondary,
+        position: 'absolute',
+        bottom: '35px',
+        right: '10px',
+        background: theme.custom.thumbnail.contentBackgroundColor,
+        'padding-left': '10px',
+        'padding-right': '10px',
+    },
 });
 
 const windowURL = window.URL || window.webkitURL;
@@ -146,9 +158,9 @@ const windowURL = window.URL || window.webkitURL;
 class ApiThumb extends React.Component {
     /**
      *Creates an instance of APIThumb.
-    * @param {*} props
-    * @memberof APIThumb
-    */
+     * @param {*} props
+     * @memberof APIThumb
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -231,39 +243,46 @@ class ApiThumb extends React.Component {
             imageObj, selectedIcon, color, backgroundIndex, category, isHover,
         } = this.state;
         const path = this.getPathPrefix();
+        const { isMonetizationEnabled } = this.context;
 
         const detailsLink = path + this.props.api.id;
-        const { api, classes, theme } = this.props;
-        const { thumbnail } = theme.custom;
         const {
-            name, version, context,
-        } = api;
+            api, classes, theme, customWidth, customHeight, showInfo,
+        } = this.props;
+        const { thumbnail } = theme.custom;
+        const { name, version, context } = api;
 
         let { provider } = api;
-        if (api.businessInformation && api.businessInformation.businessOwner
-            && api.businessInformation.businessOwner.trim() !== '') {
+        if (
+            api.businessInformation &&
+            api.businessInformation.businessOwner &&
+            api.businessInformation.businessOwner.trim() !== ''
+        ) {
             provider = api.businessInformation.businessOwner;
         }
         if (!api.lifeCycleStatus) {
             api.lifeCycleStatus = api.status;
         }
-        const imageWidth = thumbnail.width;
+        const imageWidth = customWidth || thumbnail.width;
+        const imageHeight = customHeight || 140;
         const defaultImage = thumbnail.defaultApiImage;
 
         let ImageView;
         if (imageObj) {
-            ImageView = (<img
-                height={140}
-                width={imageWidth}
-                src={imageObj}
-                alt='API Thumbnail'
-                className={classes.media}
-            />);
+            ImageView = (
+                <img
+                    height={imageHeight}
+                    width={imageWidth}
+                    src={imageObj}
+                    alt='API Thumbnail'
+                    className={classes.media}
+                />
+            );
         } else {
             ImageView = (
                 <ImageGenerator
                     width={imageWidth}
-                    height={140}
+                    height={imageHeight}
                     api={api}
                     fixedIcon={{
                         key: selectedIcon,
@@ -282,84 +301,111 @@ class ApiThumb extends React.Component {
                 onMouseOut={this.toggleMouseOver}
                 onBlur={this.toggleMouseOver}
                 raised={isHover}
-                className={classes.card}
+                className={classNames('image-thumbnail', classes.card)}
             >
-                <CardMedia >
+                {isMonetizationEnabled && (
+                    <div className={classes.textblock}>{api.monetizationLabel}</div>
+                )}
+                <CardMedia>
                     <Link to={detailsLink} className={classes.suppressLinkStyles}>
                         {!defaultImage && ImageView}
                         {defaultImage && <img src={defaultImage} alt='img' />}
                     </Link>
                 </CardMedia>
-                <CardContent className={classes.apiDetails}>
-                    <Link to={detailsLink} className={classes.textWrapper}>
-                        <Typography
-                            className={classes.thumbHeader}
-                            variant='h5'
-                            gutterBottom
-                            onClick={this.handleRedirectToAPIOverview}
-                            title={name}
-                        >
-                            {name}
-                        </Typography>
-                    </Link>
-                    <div className={classes.row}>
-                        <Typography variant='caption' gutterBottom align='left' className={classes.thumbBy}>
-                            <FormattedMessage defaultMessage='By' id='Apis.Listing.ApiThumb.by' />
-                            <FormattedMessage defaultMessage=' : ' id='Apis.Listing.ApiThumb.by.colon' />
-                            {provider}
-                        </Typography>
-                    </div>
-                    <div className={classes.thumbInfo}>
+                {showInfo && (
+                    <CardContent classes={{ root: classes.apiDetails }}>
+                        <Link to={detailsLink} className={classes.textWrapper}>
+                            <Typography
+                                className={classes.thumbHeader}
+                                variant='h5'
+                                gutterBottom
+                                onClick={this.handleRedirectToAPIOverview}
+                                title={name}
+                            >
+                                {name}
+                            </Typography>
+                        </Link>
                         <div className={classes.row}>
+                            <Typography variant='caption' gutterBottom align='left' className={classes.thumbBy}>
+                                <FormattedMessage defaultMessage='By' id='Apis.Listing.ApiThumb.by' />
+                                <FormattedMessage defaultMessage=' : ' id='Apis.Listing.ApiThumb.by.colon' />
+                                {provider}
+                            </Typography>
+                        </div>
+                        <div className={classes.thumbInfo}>
+                            <div className={classes.row}>
+                                <div className={classes.thumbLeft}>
+                                    <Typography variant='subtitle1'>{version}</Typography>
+                                    <Typography variant='caption' gutterBottom align='left'>
+                                        <FormattedMessage defaultMessage='Version' id='Apis.Listing.ApiThumb.version' />
+                                    </Typography>
+                                </div>
+                            </div>
+                            <div className={classes.row}>
+                                <div className={classes.thumbRight}>
+                                    <Typography variant='subtitle1' align='right' className={classes.contextBox}>
+                                        {context}
+                                    </Typography>
+                                    <Typography
+                                        variant='caption'
+                                        gutterBottom
+                                        align='right'
+                                        className={classes.context}
+                                    >
+                                        <FormattedMessage defaultMessage='Context' id='Apis.Listing.ApiThumb.context' />
+                                    </Typography>
+                                </div>
+                            </div>
+                        </div>
+                        <div className={classes.thumbInfo}>
                             <div className={classes.thumbLeft}>
-                                <Typography variant='subtitle1'>{version}</Typography>
-                                <Typography variant='caption' gutterBottom align='left'>
-                                    <FormattedMessage defaultMessage='Version' id='Apis.Listing.ApiThumb.version' />
-                                </Typography>
-                            </div>
-                        </div>
-                        <div className={classes.row}>
-                            <div className={classes.thumbRight}>
-                                <Typography variant='subtitle1' align='right' className={classes.contextBox}>
-                                    {context}
-                                </Typography>
-                                <Typography variant='caption' gutterBottom align='right' className={classes.context}>
-                                    <FormattedMessage defaultMessage='Context' id='Apis.Listing.ApiThumb.context' />
-                                </Typography>
-                            </div>
-                        </div>
-                    </div>
-                    <div className={classes.thumbInfo}>
-                        <div className={classes.thumbLeft}>
-                            <Typography variant='subtitle1' gutterBottom align='left' className={classes.ratingWrapper}>
-                                <StarRatingBar
-                                    apiRating={api.avgRating}
-                                    apiId={api.id}
-                                    isEditable={false}
-                                    showSummary={false}
-                                />
-                            </Typography>
-                        </div>
-                        <div className={classes.thumbRight}>
-                            <Typography variant='subtitle1' gutterBottom align='right' className={classes.chipWrapper}>
-                                {(api.type === 'GRAPHQL' || api.transportType === 'GRAPHQL') && (
-                                    <Chip
-                                        label={api.transportType === undefined ? api.type : api.transportType}
-                                        color='primary'
+                                <Typography
+                                    variant='subtitle1'
+                                    gutterBottom
+                                    align='left'
+                                    className={classNames('api-thumb-rating', classes.ratingWrapper)}
+                                >
+                                    <StarRatingBar
+                                        apiRating={api.avgRating}
+                                        apiId={api.id}
+                                        isEditable={false}
+                                        showSummary={false}
                                     />
-                                )}
-                            </Typography>
+                                </Typography>
+                            </div>
+                            <div className={classes.thumbRight}>
+                                <Typography
+                                    variant='subtitle1'
+                                    gutterBottom
+                                    align='right'
+                                    className={classes.chipWrapper}
+                                >
+                                    {(api.type === 'GRAPHQL' || api.transportType === 'GRAPHQL') && (
+                                        <Chip
+                                            label={api.transportType === undefined ? api.type : api.transportType}
+                                            color='primary'
+                                        />
+                                    )}
+                                </Typography>
+                            </div>
                         </div>
-                    </div>
-                </CardContent>
+                    </CardContent>
+                )}
             </Card>
         );
     }
 }
-
+ApiThumb.defaultProps = {
+    customWidth: null,
+    customHeight: null,
+    showInfo: true,
+};
 ApiThumb.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
+    customWidth: PropTypes.number,
+    customHeight: PropTypes.number,
+    showInfo: PropTypes.bool,
 };
 
 ApiThumb.contextType = ApiContext;

@@ -271,7 +271,7 @@ const Alerts = (props) => {
             console.error(err);
             Alert.error(intl.formatMessage({
                 id: 'Apis.Settings.Alerts.Alerts.unsubscribe.error.msg',
-                defaultMessage: 'Error occurred while Unsubscribing.',
+                defaultMessage: 'Error occurred while unsubscribing.',
             }));
         }).finally(() => setInProgress({ unSubscribing: false }));
     };
@@ -367,7 +367,7 @@ const Alerts = (props) => {
                                         <Button
                                             disabled={emails.length === 0 || subscribedAlerts.length === 0}
                                             onClick={handleSubscribe}
-                                            variant='outlined'
+                                            variant='contained'
                                             color='primary'
                                         >
                                             {isInProgress.subscribing && <CircularProgress size={15} />}
@@ -377,7 +377,8 @@ const Alerts = (props) => {
                                     <Grid item>
                                         <Button
                                             disabled={isInProgress.subscribing}
-                                            color='secondary'
+                                            variant='contained'
+                                            color='primary'
                                             onClick={() => setUnsubscribeAll(true)}
                                         >
                                             {isInProgress.unSubscribing && <CircularProgress size={15} />}
@@ -417,7 +418,7 @@ const Alerts = (props) => {
                     <Typography className={classes.configDialogHeading}>
                         <FormattedMessage
                             id='Apis.Settings.Alerts.Alerts.unsubscribe.confirm.dialog.heading'
-                            defaultMessage='Confirm Unsubscribe from All Alerts'
+                            defaultMessage='Confirm unsubscription from All Alerts'
                         />
                     </Typography>
                 </DialogTitle>

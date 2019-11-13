@@ -18,7 +18,7 @@
 /* TODO: Move this file to components/Shared/ location ~tmkb */
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import APIClient from 'AppData/APIClient';
 import AuthManager from 'AppData/AuthManager';
 
 const resourcePath = {
@@ -67,7 +67,23 @@ const resourceMethod = {
  * @class ScopeValidation
  * @extends {React.Component}
  */
-class ScopeValidation extends React.Component {
+export default class ScopeValidation extends React.Component {
+    /**
+     *
+     * Get scope for resources
+     * @static
+     * @param {String} resourcePath
+     * @param {String} resourceMethod
+     * @returns Boolean
+     * @memberof AuthManager
+     */
+    static hasScopes(currentResourcePath, currentResourceMethod) {
+        const userScopes = AuthManager.getUser().scopes;
+        const validScope = APIClient.getScopeForResource(currentResourcePath, currentResourceMethod);
+        return validScope.then((scope) => {
+            return userScopes.includes(scope);
+        });
+    }
     /**
      * Creates an instance of ScopeValidation.
      * @param {any} props @inheritDoc
@@ -83,7 +99,7 @@ class ScopeValidation extends React.Component {
      * @memberof ScopeValidation
      */
     componentDidMount() {
-        const hasScope = AuthManager.hasScopes(this.props.resourcePath, this.props.resourceMethod);
+        const hasScope = ScopeValidation.hasScopes(this.props.resourcePath, this.props.resourceMethod);
         hasScope.then((haveScope) => {
             this.setState({ haveScope });
         });

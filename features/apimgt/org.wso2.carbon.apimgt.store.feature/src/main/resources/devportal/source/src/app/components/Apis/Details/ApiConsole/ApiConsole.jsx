@@ -365,7 +365,7 @@ class ApiConsole extends React.Component {
                                     <Typography component='p'>
                                         <FormattedMessage
                                             id='api.console.require.access.token'
-                                            defaultMessage={'You require an access token to try the API. Please log '
+                                            defaultMessage={'You need an access token to try the API. Please log '
                                             + 'in and subscribe to the API to generate an access token. If you already '
                                             + 'have an access token, please provide it below.'}
                                         />
@@ -440,7 +440,7 @@ class ApiConsole extends React.Component {
                                                         <em>
                                                             <FormattedMessage
                                                                 id='micro.gateways'
-                                                                defaultMessage='Micro Gateways'
+                                                                defaultMessage='Microgateways'
                                                             />
                                                         </em>
                                                     </MenuItem>
@@ -519,6 +519,7 @@ class ApiConsole extends React.Component {
                 </Paper>
                 <Paper className={classes.paper}>
                     <SwaggerUI
+                        api={this.state.api}
                         accessTokenProvider={this.accessTokenProvider}
                         spec={swagger}
                         authorizationHeader={authorizationHeader}

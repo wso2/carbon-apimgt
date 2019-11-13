@@ -64,7 +64,7 @@ export default function ApiCreateWSDL(props) {
             case 'isFormValid':
                 return { ...currentState, [action]: value };
             case 'inputType':
-                return { ...currentState, [action]: value, inputValue: value === 'url' ? '' : [] };
+                return { ...currentState, [action]: value, inputValue: value === 'url' ? '' : null };
             default:
                 return currentState;
         }

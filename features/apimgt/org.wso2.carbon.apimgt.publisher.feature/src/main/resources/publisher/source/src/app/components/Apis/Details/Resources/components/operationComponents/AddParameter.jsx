@@ -38,12 +38,12 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
-const SUPPORTED_LOCATIONS = ['query', 'header', 'cookie', 'body']; // 'Path'
+const SUPPORTED_PARAM_TYPES = ['query', 'header', 'cookie', 'body']; // 'Path'
 
 /**
  *
  * Add resource parameter according to swagger spec
- * A unique parameter is defined by a combination of a name and location and schema or content is required
+ * A unique parameter is defined by a combination of a name and param type and schema or content is required
  * OpenAPI 3.0 spec: https://swagger.io/specification/#parameterObject
  *
  * @export
@@ -51,9 +51,12 @@ const SUPPORTED_LOCATIONS = ['query', 'header', 'cookie', 'body']; // 'Path'
  * @returns
  */
 function AddParameter(props) {
-    const { operationsDispatcher, target, verb } = props;
+    const {
+        operation, operationsDispatcher, target, verb,
+    } = props;
     const inputLabel = useRef(null);
     const [labelWidth, setLabelWidth] = useState(0);
+    const iff = (condition, then, otherwise) => (condition ? then : otherwise);
     // For more info about Data Models (Schemas) refer https://swagger.io/docs/specification/data-models/
     const initParameter = { in: '', name: '', schema: { type: 'string' } };
 
@@ -80,6 +83,17 @@ function AddParameter(props) {
     React.useEffect(() => {
         setLabelWidth(inputLabel.current.offsetWidth);
     }, []);
+
+    let isParameterExist = false;
+    const isParameterExistValue = operation.parameters && operation.parameters.map(operations =>
+        (operations.in === newParameter.in && operations.name === newParameter.name));
+
+    if (isParameterExistValue && isParameterExistValue.includes(true)) {
+        isParameterExist = true;
+    } else {
+        isParameterExist = false;
+    }
+
     const classes = useStyles();
 
     /**
@@ -113,11 +127,11 @@ function AddParameter(props) {
         clearInputs();
     }
     return (
-        <Grid container direction='row' spacing={0} justify='center' alignItems='center'>
-            <Grid item md={2}>
+        <Grid container direction='row' spacing={1} justify='center' alignItems='center'>
+            <Grid item xs={4} md={3}>
                 <FormControl margin='dense' variant='outlined' className={classes.formControl}>
-                    <InputLabel ref={inputLabel} htmlFor='param-in'>
-                        Location
+                    <InputLabel ref={inputLabel} htmlFor='param-in' error={isParameterExist}>
+                        Parameter Type
                     </InputLabel>
 
                     <Select
@@ -135,29 +149,37 @@ function AddParameter(props) {
                                 horizontal: 'left',
                             },
                         }}
+                        error={isParameterExist}
                     >
-                        {SUPPORTED_LOCATIONS.map((location) => {
-                            if (location === 'body' && !['post', 'put', 'patch'].includes(verb)) {
+                        {SUPPORTED_PARAM_TYPES.map((paramType) => {
+                            if (paramType === 'body' && !['post', 'put', 'patch'].includes(verb)) {
                                 return null;
                             }
                             return (
-                                <MenuItem value={location} dense>
-                                    {capitalizeFirstLetter(location)}
+                                <MenuItem value={paramType} dense>
+                                    {capitalizeFirstLetter(paramType)}
                                 </MenuItem>
                             );
                         })}
                     </Select>
-                    <FormHelperText id='my-helper-text'>Select the parameter location</FormHelperText>
+                    {isParameterExist ?
+                        (<FormHelperText id='my-helper-text' error>Parameter type already exists</FormHelperText>)
+                        : (<FormHelperText id='my-helper-text'>Select the parameter type</FormHelperText>) }
+
                 </FormControl>
             </Grid>
-            <Grid item md={4}>
+            <Grid item xs={4} md={4}>
                 <TextField
                     id='parameter-name'
                     label={newParameter.in === 'body' ? 'Content Type' : 'Name'}
                     name='name'
                     value={newParameter.name}
                     onChange={({ target: { name, value } }) => newParameterDispatcher({ type: name, value })}
-                    helperText={newParameter.in === 'body' ? 'Enter content type' : 'Enter parameter name'}
+                    helperText={isParameterExist ? 'Parameter name already exists' :
+                        iff(
+                            newParameter.in === 'body',
+                            'Enter content type', 'Enter parameter name',
+                        )}
                     fullWidth
                     margin='dense'
                     variant='outlined'
@@ -168,9 +190,10 @@ function AddParameter(props) {
                             addNewParameter();
                         }
                     }}
+                    error={isParameterExist}
                 />
             </Grid>
-            <Grid item md={6}>
+            <Grid item xs={4} md={5}>
                 <Tooltip
                     title={
                         <FormattedMessage
@@ -185,6 +208,7 @@ function AddParameter(props) {
                     <span>
                         <Button
                             style={{ marginLeft: '20px', marginBottom: '15px', marginRight: '20px' }}
+                            disabled={!newParameter.in || !newParameter.name || isParameterExist}
                             size='small'
                             variant='outlined'
                             aria-label='add'
@@ -219,6 +243,7 @@ function AddParameter(props) {
 }
 
 AddParameter.propTypes = {
+    operation: PropTypes.shape({}).isRequired,
     operationsDispatcher: PropTypes.func.isRequired,
     target: PropTypes.string.isRequired,
     verb: PropTypes.string.isRequired,

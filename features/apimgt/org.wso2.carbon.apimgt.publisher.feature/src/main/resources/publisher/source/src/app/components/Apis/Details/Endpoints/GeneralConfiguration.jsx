@@ -115,7 +115,7 @@ function GeneralConfiguration(props) {
                 if (err.message === 'Conflict') {
                     Alert.error(intl.formatMessage({
                         id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.alias.exist',
-                        defaultMessage: 'Adding Certificate Failed. Certificate alias exists.',
+                        defaultMessage: 'Adding Certificate Failed. Certificate Alias Exists.',
                     }));
                 } else if (err.response) {
                     Alert.error(err.response.body.description);
@@ -127,7 +127,6 @@ function GeneralConfiguration(props) {
                 }
             });
     };
-
     /**
      * Method to delete the selected certificate.
      *

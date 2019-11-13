@@ -432,11 +432,11 @@ class Details extends Component {
             const resourceNotFoundMessageText = defineMessages({
                 titleMessage: {
                     id: 'Apis.Details.index.api.not.found.title',
-                    defaultMessage: 'API is Not Found in the {environmentLabel} Environment',
+                    defaultMessage: 'API is not found in the {environmentLabel} Environment',
                 },
                 bodyMessage: {
                     id: 'Apis.Details.index.api.not.found.body',
-                    defaultMessage: "Can't find the API with the given id",
+                    defaultMessage: 'Cannot find the API with the given id',
                 },
             });
             const resourceNotFountMessage = {

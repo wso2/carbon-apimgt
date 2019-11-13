@@ -143,7 +143,7 @@ function TagCloudListingTags(props) {
         <div className={classes.mainTitle}>
             <Typography variant='subtitle1' gutterBottom align='center'>
                 <FormattedMessage
-                    defaultMessage='Tags Connot be Found'
+                    defaultMessage='Tags cannot be found'
                     id='Apis.Listing.TagCloudListingTags.tagsNotFound'
                 />
             </Typography>

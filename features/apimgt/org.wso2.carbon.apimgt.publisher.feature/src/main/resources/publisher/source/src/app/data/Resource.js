@@ -63,4 +63,8 @@ export default class Resource {
     isGraphql() {
         return this.type === 'GRAPHQL';
     }
+
+    isSOAPToREST() {
+        return this.type === 'SOAPTOREST';
+    }
 }

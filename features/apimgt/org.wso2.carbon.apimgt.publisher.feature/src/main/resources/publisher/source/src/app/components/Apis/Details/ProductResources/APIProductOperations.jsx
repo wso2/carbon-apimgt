@@ -26,6 +26,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import Box from '@material-ui/core/Box';
 import API from 'AppData/api';
+import { isRestricted } from 'AppData/AuthManager';
 
 import Resources from 'AppComponents/Apis/Details/Resources/Resources';
 import APIRateLimiting from '../Resources/components/APIRateLimiting';
@@ -80,27 +81,31 @@ export default function APIProductOperations() {
                 <APIRateLimiting
                     operationRateLimits={operationRateLimits}
                     api={api}
+                    isAPIProduct
                     value={apiThrottlingPolicy}
                     onChange={setApiThrottlingPolicy}
                 />
             </Grid>
-            <Grid item md={12}>
-                <Box ml={1}>
-                    <Button onClick={saveChanges} disabled={false} variant='contained' size='small' color='primary'>
-                        Save
-                        {isSaving && <CircularProgress size={24} />}
-                    </Button>
-                    <Box display='inline' ml={1}>
-                        <Button
-                            size='small'
-                            variant='outlined'
-                            onClick={() => setApiThrottlingPolicy(api.apiThrottlingPolicy)}
-                        >
-                            Reset
+            {!isRestricted(['apim:api_create'], api) && (
+                <Grid item md={12}>
+                    <Box ml={1}>
+                        <Button onClick={saveChanges} disabled={false} variant='contained' size='small' color='primary'>
+                            Save
+                            {isSaving && <CircularProgress size={24} />}
                         </Button>
+                        <Box display='inline' ml={1}>
+                            <Button
+                                size='small'
+                                variant='outlined'
+                                onClick={() => setApiThrottlingPolicy(api.apiThrottlingPolicy)}
+                            >
+                                Reset
+                            </Button>
+                        </Box>
                     </Box>
-                </Box>
-            </Grid>
+                </Grid>
+            )}
+
             <Grid item md={12}>
                 <Resources
                     hideAPIDefinitionLink

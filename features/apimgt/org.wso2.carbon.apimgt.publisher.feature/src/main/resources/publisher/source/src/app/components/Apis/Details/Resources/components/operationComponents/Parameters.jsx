@@ -42,16 +42,21 @@ export default function Parameters(props) {
     const haveParameters = (operation.parameters && operation.parameters.length !== 0) || operation.requestBody;
     return (
         <Fragment>
-            <Grid item md={12}>
+            <Grid item xs={12} md={12}>
                 <Typography variant='subtitle1'>
                     Parameters
                     <Divider variant='middle' />
                 </Typography>
             </Grid>
-            <Grid item md={1} />
+            <Grid item xs={1} />
             <Grid item xs={11}>
                 {!disableUpdate && (
-                    <AddParameter target={target} verb={verb} operationsDispatcher={operationsDispatcher} />
+                    <AddParameter
+                        target={target}
+                        verb={verb}
+                        operationsDispatcher={operationsDispatcher}
+                        operation={operation}
+                    />
                 )}
             </Grid>
             <Grid item md={1} />

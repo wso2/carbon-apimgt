@@ -57,6 +57,7 @@ public enum KeyTypeEnum {
     private String validityTime = null;
     private String clientId = null;
     private String clientSecret = null;
+    private String additionalProperties = null;
 
   /**
    **/
@@ -184,6 +185,24 @@ public enum KeyTypeEnum {
     this.clientSecret = clientSecret;
   }
 
+  /**
+   * Additional properties needed.
+   **/
+  public ApplicationKeyGenerateRequestDTO additionalProperties(String additionalProperties) {
+    this.additionalProperties = additionalProperties;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "", value = "Additional properties needed.")
+  @JsonProperty("additionalProperties")
+  public String getAdditionalProperties() {
+    return additionalProperties;
+  }
+  public void setAdditionalProperties(String additionalProperties) {
+    this.additionalProperties = additionalProperties;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -200,12 +219,13 @@ public enum KeyTypeEnum {
         Objects.equals(scopes, applicationKeyGenerateRequest.scopes) &&
         Objects.equals(validityTime, applicationKeyGenerateRequest.validityTime) &&
         Objects.equals(clientId, applicationKeyGenerateRequest.clientId) &&
-        Objects.equals(clientSecret, applicationKeyGenerateRequest.clientSecret);
+        Objects.equals(clientSecret, applicationKeyGenerateRequest.clientSecret) &&
+        Objects.equals(additionalProperties, applicationKeyGenerateRequest.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyType, grantTypesToBeSupported, callbackUrl, scopes, validityTime, clientId, clientSecret);
+    return Objects.hash(keyType, grantTypesToBeSupported, callbackUrl, scopes, validityTime, clientId, clientSecret, additionalProperties);
   }
 
   @Override
@@ -220,6 +240,7 @@ public enum KeyTypeEnum {
     sb.append("    validityTime: ").append(toIndentedString(validityTime)).append("\n");
     sb.append("    clientId: ").append(toIndentedString(clientId)).append("\n");
     sb.append("    clientSecret: ").append(toIndentedString(clientSecret)).append("\n");
+    sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -270,11 +270,33 @@ public class APIMappingUtil {
         }
 
         Set<String> deniedTiers = apiConsumer.getDeniedTiers(tenantId);
-        for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
-            if (!deniedTiers.contains(tier.getName())) {
+        for (org.wso2.carbon.apimgt.api.model.Tier currentTier : apiTiers) {
+            if (!deniedTiers.contains(currentTier.getName())) {
                 APITiersDTO apiTiersDTO = new APITiersDTO();
-                apiTiersDTO.setTierName(tier.getName());
-                apiTiersDTO.setTierPlan(tier.getTierPlan());
+                apiTiersDTO.setTierName(currentTier.getName());
+                apiTiersDTO.setTierPlan(currentTier.getTierPlan());
+                //monetization attributes are applicable only for commercial tiers
+                if (APIConstants.COMMERCIAL_TIER_PLAN.equalsIgnoreCase(currentTier.getTierPlan())) {
+                    APIMonetizationAttributesDTO monetizationAttributesDTO = new APIMonetizationAttributesDTO();
+                    if (MapUtils.isNotEmpty(currentTier.getMonetizationAttributes())) {
+                        Map<String, String> monetizationAttributes = currentTier.getMonetizationAttributes();
+                        //check the billing plan (fixed or price per request)
+                        if (monetizationAttributes.get(APIConstants.Monetization.FIXED_PRICE) != null) {
+                            monetizationAttributesDTO.setFixedPrice(monetizationAttributes.get
+                                    (APIConstants.Monetization.FIXED_PRICE));
+                        } else if (monetizationAttributes.get(APIConstants.Monetization.PRICE_PER_REQUEST) != null) {
+                            monetizationAttributesDTO.setPricePerRequest(monetizationAttributes.get
+                                    (APIConstants.Monetization.PRICE_PER_REQUEST));
+                        }
+                        monetizationAttributesDTO.setCurrencyType(monetizationAttributes.get
+                                (APIConstants.Monetization.CURRENCY) != null ? monetizationAttributes.get
+                                (APIConstants.Monetization.CURRENCY) : StringUtils.EMPTY);
+                        monetizationAttributesDTO.setBillingCycle(monetizationAttributes.get
+                                (APIConstants.Monetization.BILLING_CYCLE) != null ? monetizationAttributes.get
+                                (APIConstants.Monetization.BILLING_CYCLE) : StringUtils.EMPTY);
+                    }
+                    apiTiersDTO.setMonetizationAttributes(monetizationAttributesDTO);
+                }
                 tiersToReturn.add(apiTiersDTO);
             }
         }
@@ -596,6 +618,21 @@ public class APIMappingUtil {
         String subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
         apiInfoDTO.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
                 subscriptionAllowedTenants));
+        int free = 0, commercial = 0;
+        for (Tier tier : throttlingPolicies) {
+            if(tier.getTierPlan().equalsIgnoreCase(RestApiConstants.FREE)) {
+                free = free + 1;
+            } else if (tier.getTierPlan().equalsIgnoreCase(RestApiConstants.COMMERCIAL)) {
+                commercial = commercial + 1;
+            }
+        }
+        if (free > 0 && commercial == 0){
+            apiInfoDTO.setMonetizationLabel(RestApiConstants.FREE);
+        } else if (free == 0 && commercial > 0) {
+            apiInfoDTO.setMonetizationLabel(RestApiConstants.PAID);
+        } else if (free > 0 && commercial > 0) {
+            apiInfoDTO.setMonetizationLabel(RestApiConstants.FREEMIUM);
+        }
         return apiInfoDTO;
     }
 

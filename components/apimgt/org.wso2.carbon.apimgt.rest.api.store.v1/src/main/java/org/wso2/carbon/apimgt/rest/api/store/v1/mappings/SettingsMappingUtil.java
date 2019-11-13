@@ -24,7 +24,6 @@ import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -42,7 +41,7 @@ public class SettingsMappingUtil {
 
     private static final Log log = LogFactory.getLog(SettingsMappingUtil.class);
 
-    public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable) throws APIManagementException {
+    public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable, Boolean moneatizationEnabled) throws APIManagementException {
         SettingsDTO settingsDTO = new SettingsDTO();
         if (isUserAvailable) {
             settingsDTO.setGrantTypes(APIUtil.getGrantTypes());
@@ -56,6 +55,7 @@ public class SettingsMappingUtil {
             settingsDTO.setScopes(GetScopeList());
             settingsDTO.setApplicationSharingEnabled(APIUtil.isMultiGroupAppSharingEnabled());
             settingsDTO.setMapExistingAuthApps(APIUtil.isMapExistingAuthAppsEnabled());
+            settingsDTO.setMonetizationEnabled(moneatizationEnabled);
         }
         return settingsDTO;
     }

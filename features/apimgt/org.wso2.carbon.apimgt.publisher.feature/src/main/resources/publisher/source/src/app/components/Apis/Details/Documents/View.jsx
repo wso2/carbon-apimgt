@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, Suspense, lazy } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -24,17 +24,18 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Icon from '@material-ui/core/Icon';
 import Button from '@material-ui/core/Button';
-import ReactMarkdown from 'react-markdown';
 import ReactSafeHtml from 'react-safe-html';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import TableRow from '@material-ui/core/TableRow';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
+const ReactMarkdown = lazy(() => import('react-markdown' /* webpackChunkName: "ViewReactMD" */));
 
 const styles = theme => ({
     root: {
@@ -109,12 +110,12 @@ function View(props) {
     useEffect(() => {
         const docPromise = restAPI.getDocument(api.id, documentId);
         docPromise
-            .then((doc) => {
+            .then(doc => {
                 const { body } = doc;
                 setDoc(body);
                 if (body.sourceType === 'MARKDOWN' || body.sourceType === 'INLINE') loadContentForDoc();
             })
-            .catch((error) => {
+            .catch(error => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
@@ -124,10 +125,10 @@ function View(props) {
     const loadContentForDoc = () => {
         const docPromise = restAPI.getInlineContentOfDocument(api.id, documentId);
         docPromise
-            .then((doc) => {
+            .then(doc => {
                 setCode(doc.text);
             })
-            .catch((error) => {
+            .catch(error => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
@@ -178,16 +179,18 @@ function View(props) {
     const handleDownload = () => {
         const promised_get_content = restAPI.getFileForDocument(api.id, documentId);
         promised_get_content
-            .then((done) => {
+            .then(done => {
                 downloadFile(done, document);
             })
-            .catch((error) => {
+            .catch(error => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
-                    Alert.error(intl.formatMessage({
-                        id: 'Apis.Details.Documents.View.error.downloading',
-                        defaultMessage: 'Error downloading the file',
-                    }));
+                    Alert.error(
+                        intl.formatMessage({
+                            id: 'Apis.Details.Documents.View.error.downloading',
+                            defaultMessage: 'Error downloading the file',
+                        }),
+                    );
                 }
             });
     };
@@ -199,68 +202,68 @@ function View(props) {
                 <div className={classes.root}>
                     <div className={classes.titleWrapper}>
                         <Link to={listingPath} className={classes.titleLink}>
-                            <Typography variant='h5' align='left' className={classes.mainTitle}>
-                                <FormattedMessage id='Apis.Details.Documents.View.heading' defaultMessage='Documents' />
+                            <Typography variant="h5" align="left" className={classes.mainTitle}>
+                                <FormattedMessage id="Apis.Details.Documents.View.heading" defaultMessage="Documents" />
                             </Typography>
                         </Link>
                         <Icon>keyboard_arrow_right</Icon>
-                        <Typography variant='h5'>{doc.name}</Typography>
+                        <Typography variant="h5">{doc.name}</Typography>
                     </div>
                     <Paper className={classes.paper}>
                         <Table className={classes.table}>
                             <TableBody>
                                 <TableRow>
                                     <TableCell className={classes.leftCell}>
-                                        <Typography variant='body1'>
+                                        <Typography variant="body1">
                                             <FormattedMessage
-                                                id='Apis.Details.Documents.View.meta.name'
-                                                defaultMessage='Name'
+                                                id="Apis.Details.Documents.View.meta.name"
+                                                defaultMessage="Name"
                                             />
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
-                                        <Typography variant='body1'>{doc.name}</Typography>
+                                        <Typography variant="body1">{doc.name}</Typography>
                                     </TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell>
-                                        <Typography variant='body1'>
+                                        <Typography variant="body1">
                                             <FormattedMessage
-                                                id='Apis.Details.Documents.View.meta.summary'
-                                                defaultMessage='Summary'
+                                                id="Apis.Details.Documents.View.meta.summary"
+                                                defaultMessage="Summary"
                                             />
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
-                                        <Typography variant='body1'>{doc.summary}</Typography>
+                                        <Typography variant="body1">{doc.summary}</Typography>
                                     </TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell>
-                                        <Typography variant='body1'>
+                                        <Typography variant="body1">
                                             <FormattedMessage
-                                                id='Apis.Details.Documents.View.meta.catogery'
-                                                defaultMessage='Catogoriezed as'
+                                                id="Apis.Details.Documents.View.meta.catogery"
+                                                defaultMessage="Categorized as"
                                             />
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
-                                        <Typography variant='body1'>
+                                        <Typography variant="body1">
                                             {doc.type === 'OTHER' ? doc.otherTypeName : doc.type}
                                         </Typography>{' '}
                                     </TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell>
-                                        <Typography variant='body1'>
+                                        <Typography variant="body1">
                                             <FormattedMessage
-                                                id='Apis.Details.Documents.View.meta.source'
-                                                defaultMessage='Source Type'
+                                                id="Apis.Details.Documents.View.meta.source"
+                                                defaultMessage="Source Type"
                                             />
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
-                                        <Typography variant='body1'>{doc.sourceType}</Typography>{' '}
+                                        <Typography variant="body1">{doc.sourceType}</Typography>{' '}
                                     </TableCell>
                                 </TableRow>
                             </TableBody>
@@ -268,24 +271,28 @@ function View(props) {
                     </Paper>
 
                     <Paper className={classes.paper}>
-                        {doc.sourceType === 'MARKDOWN' && <ReactMarkdown source={code} />}
+                        {doc.sourceType === 'MARKDOWN' && (
+                            <Suspense fallback={<CircularProgress />}>
+                                <ReactMarkdown source={code} />
+                            </Suspense>
+                        )}
                         {doc.sourceType === 'INLINE' && <ReactSafeHtml html={code} />}
                         {doc.sourceType === 'URL' && (
-                            <a className={classes.displayURL} href={doc.sourceUrl} target='_blank'>
+                            <a className={classes.displayURL} href={doc.sourceUrl} target="_blank">
                                 {doc.sourceUrl}
                                 <Icon className={classes.displayURLLink}>open_in_new</Icon>
                             </a>
                         )}
                         {doc.sourceType === 'FILE' && (
                             <Button
-                                variant='contained'
-                                color='default'
+                                variant="contained"
+                                color="default"
                                 className={classes.button}
                                 onClick={handleDownload}
                             >
                                 <FormattedMessage
-                                    id='Apis.Details.Documents.View.btn.download'
-                                    defaultMessage='Download'
+                                    id="Apis.Details.Documents.View.btn.download"
+                                    defaultMessage="Download"
                                 />
 
                                 <Icon>arrow_downward</Icon>

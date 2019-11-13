@@ -186,7 +186,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         boolean isBlockedRequest = false;
         boolean apiLevelThrottledTriggered = false;
         boolean policyLevelUserTriggered = false;
-        boolean isUnlimittedTier = false;
         String ipLevelBlockingKey;
         String appLevelBlockingKey = "";
         boolean stopOnQuotaReach = true;
@@ -243,6 +242,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                     return false;
                 }
                 for (VerbInfoDTO verbInfoDTO : verbInfoDTOList) {
+                    boolean isUnlimittedTier = false;
                     resourceLevelThrottleKey = verbInfoDTO.getRequestKey();
                     resourceLevelTier = verbInfoDTO.getThrottling();
                     if (APIConstants.UNLIMITED_TIER.equalsIgnoreCase(resourceLevelTier)) {

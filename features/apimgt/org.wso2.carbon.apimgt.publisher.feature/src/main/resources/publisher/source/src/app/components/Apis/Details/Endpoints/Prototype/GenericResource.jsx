@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, lazy, Suspense } from 'react';
 import { isRestricted } from 'AppData/AuthManager';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import {
@@ -26,28 +26,15 @@ import {
     ExpansionPanelSummary,
     Grid,
     Typography,
-    withStyles,
+    makeStyles,
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import MonacoEditor from 'react-monaco-editor';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
+import Utils from 'AppData/Utils';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
-const styles = theme => ({
-    editor: {
-        width: '100%',
-    },
-    chipActive: {
-        borderRadius: '5px',
-        width: '80%',
-    },
-    resourcePathContainer: {
-        paddingTop: theme.spacing(),
-    },
-    genericResourceContent: {
-        boxShadow: 'inset 0px 3px 2px 0px #aaaaaa',
-    },
-});
+const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "GenResourceMonaco" */));
 
 /**
  * The generic resource component.
@@ -57,66 +44,88 @@ const styles = theme => ({
  * */
 function GenericResource(props) {
     const {
-        resourcePath, resourceMethod, scriptContent, classes, theme, onChange,
+        resourcePath, resourceMethod, scriptContent, onChange,
     } = props;
     const { api } = useContext(APIContext);
-    let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[resourceMethod] : null;
-    let chipTextColor = '#000000';
-    if (!chipColor) {
-        console.log('Check the theme settings. The resourceChipColors is not populated properlly');
-        chipColor = '#cccccc';
-    } else {
-        chipTextColor = theme.palette.getContrastText(theme.custom.resourceChipColors[resourceMethod]);
-    }
+    const useStyles = makeStyles((theme) => {
+        let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[resourceMethod] : null;
+        let chipTextColor = '#000000';
+        if (!chipColor) {
+            console.log('Check the theme settings. The resourceChipColors is not populated properlly');
+            chipColor = '#cccccc';
+        } else {
+            chipTextColor = theme.palette.getContrastText(theme.custom.resourceChipColors[resourceMethod]);
+        }
 
+        return {
+            editor: {
+                width: '100%',
+                height: '500px',
+            },
+            chipActive: {
+                borderRadius: '5px',
+                width: '80%',
+                backgroundColor: chipColor,
+                color: chipTextColor,
+                ...theme.typography.button,
+            },
+            resourcePathContainer: {
+                paddingTop: theme.spacing(),
+            },
+            prototypeResourceHeader: {
+                borderBottom: `${chipColor} 1px solid`,
+            },
+            chipExpansionPanel: {
+                backgroundColor: Utils.hexToRGBA(chipColor, 0.1),
+                border: `${chipColor} 1px solid`,
+            },
+        };
+    });
+
+    const classes = useStyles();
     return (
-        <ExpansionPanel>
-            <ExpansionPanelSummary
-                className={classes.prototypeResourceHeader}
-                expandIcon={<ExpandMoreIcon />}
-            >
-                <Grid container spacing={12}>
-                    <Grid xs={1}>
-                        <Chip
-                            label={resourceMethod}
-                            style={{ backgroundColor: chipColor, color: chipTextColor }}
-                            className={classes.chipActive}
-                        />
+        <Grid item>
+            <ExpansionPanel className={classes.chipExpansionPanel}>
+                <ExpansionPanelSummary className={classes.prototypeResourceHeader} expandIcon={<ExpandMoreIcon />}>
+                    <Grid container spacing={12}>
+                        <Grid xs={1}>
+                            <Chip label={resourceMethod} className={classes.chipActive} />
+                        </Grid>
+                        <Grid xs className={classes.resourcePathContainer}>
+                            <Typography>{resourcePath}</Typography>
+                        </Grid>
                     </Grid>
-                    <Grid xs className={classes.resourcePathContainer}>
-                        <Typography>
-                            {resourcePath}
-                        </Typography>
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails className={classes.genericResourceContent}>
+                    <Grid container direction='column'>
+                        <Grid item>
+                            <Typography variant='subtitle2'>
+                                <FormattedMessage
+                                    id='Apis.Details.Endpoints.Prototype.InlineEndpoints.script'
+                                    defaultMessage='Script'
+                                />
+                            </Typography>
+                        </Grid>
+                        <Grid item>
+                            <Suspense fallback={<CircularProgress />}>
+                                <MonacoEditor
+                                    height='50vh'
+                                    width='100%'
+                                    theme='vs-dark'
+                                    value={scriptContent}
+                                    options={{
+                                        selectOnLineNumbers: true,
+                                        readOnly: `${isRestricted(['apim:api_create'], api)}`,
+                                    }}
+                                    language='javascript'
+                                    onChange={content => onChange(content, resourcePath, resourceMethod)}
+                                />
+                            </Suspense>
+                        </Grid>
                     </Grid>
-                </Grid>
-            </ExpansionPanelSummary>
-            <ExpansionPanelDetails className={classes.genericResourceContent}>
-                <Grid container direction='column'>
-                    <Grid item>
-                        <Typography variant='h6'>
-                            <FormattedMessage
-                                id='Apis.Details.Endpoints.Prototype.InlineEndpoints.script'
-                                defaultMessage='Script'
-                            /> { ' : ' }
-                        </Typography>
-                    </Grid>
-                    <Grid item>
-                        <MonacoEditor
-                            height='50vh'
-                            width='100%'
-                            theme='vs-dark'
-                            value={scriptContent}
-                            options={{
-                                selectOnLineNumbers: true,
-                                readOnly: `${(isRestricted(['apim:api_create'], api))}`,
-                            }}
-                            language='javascript'
-                            onChange={content => onChange(content, resourcePath, resourceMethod)}
-                        />
-                    </Grid>
-                </Grid>
-            </ExpansionPanelDetails>
-        </ExpansionPanel>
+                </ExpansionPanelDetails>
+            </ExpansionPanel>
+        </Grid>
     );
 }
 
@@ -129,4 +138,4 @@ GenericResource.propTypes = {
     onChange: PropTypes.func.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(GenericResource);
+export default GenericResource;

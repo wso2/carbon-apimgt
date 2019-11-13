@@ -282,6 +282,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             }
 
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(api.getUUID(), tenantDomain);
+            apiTypeWrapper.setTier(body.getTier());
 
             //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
             //  throw an APIMgtAuthorizationFailedException with the reason as the message

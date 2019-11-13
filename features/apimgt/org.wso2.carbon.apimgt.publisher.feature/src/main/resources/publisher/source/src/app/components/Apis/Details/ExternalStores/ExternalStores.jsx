@@ -72,11 +72,11 @@ export default function ExternalStores() {
         const resourceNotFoundMessageText = defineMessages({
             titleMessage: {
                 id: 'Apis.Details.ExternalStores.ExternalStores.external.stores.not.found.title',
-                defaultMessage: 'External Developert Portals Not Found for API : {apiUUID}',
+                defaultMessage: 'External Developert Portals not found for the API : {apiUUID}',
             },
             bodyMessage: {
                 id: 'Apis.Details.ExternalStores.ExternalStores.external.stores.not.found.body',
-                defaultMessage: 'No External Developer Portals configured for current tenant',
+                defaultMessage: 'No External Developer Portals configured for the current tenant',
             },
         });
         const resourceNotFountMessage = {

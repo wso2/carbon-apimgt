@@ -16,14 +16,13 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Suspense, lazy } from 'react';
 import PropTypes from 'prop-types';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 // import MaterialDesignCustomTheme from 'AppComponents/Shared/CustomTheme';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-import Apis from 'AppComponents/Apis/Apis';
 import Api from 'AppData/api';
 import Base from 'AppComponents/Base';
 import AuthManager from 'AppData/AuthManager';
@@ -35,7 +34,14 @@ import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import { IntlProvider } from 'react-intl';
 import { AppContextProvider } from 'AppComponents/Shared/AppContext';
 import SettingsBase from 'AppComponents/Apis/Settings/SettingsBase';
+import Progress from 'AppComponents/Shared/Progress';
 
+const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "DeferredAPIs" */));
+const DeferredAPIs = () => (
+    <Suspense fallback={<Progress message='Loading components ...' />}>
+        <Apis />
+    </Suspense>
+);
 const theme = createMuiTheme(Configurations.themes.light);
 
 /**
@@ -99,23 +105,25 @@ export default class Protected extends Component {
             );
         }
         return (
-            settings && (
-                <AppContextProvider value={{ settings, user }}>
-                    <MuiThemeProvider theme={theme}>
-                        <AppErrorBoundary>
-                            <Base header={header}>
+            <MuiThemeProvider theme={theme}>
+                <AppErrorBoundary>
+                    <Base header={header}>
+                        {settings ? (
+                            <AppContextProvider value={{ settings, user }}>
                                 <Switch>
                                     <Redirect exact from='/' to='/apis' />
-                                    <Route path='/apis' component={Apis} />
-                                    <Route path='/api-products' component={Apis} />
+                                    <Route path='/apis' component={DeferredAPIs} />
+                                    <Route path='/api-products' component={DeferredAPIs} />
                                     <Route path='/settings' component={SettingsBase} />
                                     <Route component={ResourceNotFound} />
                                 </Switch>
-                            </Base>
-                        </AppErrorBoundary>
-                    </MuiThemeProvider>
-                </AppContextProvider>
-            )
+                            </AppContextProvider>
+                        ) : (
+                            <Progress message='Loading Settings ...' />
+                        )}
+                    </Base>
+                </AppErrorBoundary>
+            </MuiThemeProvider>
         );
     }
 }
