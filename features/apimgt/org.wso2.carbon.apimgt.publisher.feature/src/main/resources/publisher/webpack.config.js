@@ -76,6 +76,7 @@ const config = {
     externals: {
         Config: 'Configurations',
         MaterialIcons: 'MaterialIcons',
+        Settings: 'Settings',
     },
     plugins: [new MonacoWebpackPlugin({ languages: ['xml', 'json', 'yaml'], features: [] })],
 };
