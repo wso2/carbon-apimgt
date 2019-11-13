@@ -992,4 +992,8 @@
     </AISecurityHandler>
     {% endif %}
 
+    {% if apim.skip_roles_by_regex is defined %}
+    <skipRolesByRegex>{{apim.skip_roles_by_regex.regex}}</skipRolesByRegex>
+    {% endif %}
+
 </APIManager>
