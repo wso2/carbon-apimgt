@@ -56,7 +56,7 @@
     var systemApplicationDAO = new SystemApplicationDAO();
     var clientId ;
     // this is to support migration from admin_store to admin_devportal
-    systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(_OLD);
+    systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME_OLD);
     if (systemApplicationDTO === null) {
         systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME);
     }
