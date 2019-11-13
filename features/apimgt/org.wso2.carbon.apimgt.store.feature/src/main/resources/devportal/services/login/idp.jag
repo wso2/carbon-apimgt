@@ -56,9 +56,9 @@
     var systemApplicationDAO = new SystemApplicationDAO();
     var clientId ;
     // this is to support migration from admin_store to admin_devportal
-    systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME_OLD);
+    systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME);
     if (systemApplicationDTO === null) {
-        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME);
+        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME_OLD);
     }
 
     var lock = SystemApplicationDAO.getLock();
@@ -68,9 +68,9 @@
         try {
             lock.acquire();
             // this is to support migration from admin_store to admin_devportal
-            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME_OLD);
+            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME);
             if (systemApplicationDTO === null) {
-                systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME);
+                systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME_OLD);
             }
             if (systemApplicationDTO === null) {
                 var dcrRequestData = {
