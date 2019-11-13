@@ -156,8 +156,7 @@ function AddOperation(props) {
     return (
         <Paper style={{ marginTop: '12px' }}>
             <Grid container direction='row' spacing={0} justify='center' alignItems='center'>
-                <Grid item xs={1} />
-                <Grid item md={4} xs={11}>
+                <Grid item md={5} xs={12}>
                     <FormControl margin='dense' variant='outlined' className={classes.formControl}>
                         <InputLabel ref={inputLabel} htmlFor='outlined-age-simple'>
                             HTTP Verb
@@ -231,8 +230,7 @@ function AddOperation(props) {
                         </FormHelperText>
                     </FormControl>
                 </Grid>
-                <Grid item md={0} xs={1} />
-                <Grid item md={5} xs={9}>
+                <Grid item md={5} xs={8}>
                     <TextField
                         id='operation-target'
                         label='URI Pattern'
@@ -260,7 +258,7 @@ function AddOperation(props) {
                         }}
                     />
                 </Grid>
-                <Grid item md={1} xs={2}>
+                <Grid item md={2} xs={4}>
                     <Tooltip
                         title={
                             <FormattedMessage

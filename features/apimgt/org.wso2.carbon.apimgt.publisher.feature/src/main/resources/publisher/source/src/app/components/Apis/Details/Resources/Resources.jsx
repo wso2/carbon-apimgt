@@ -390,7 +390,7 @@ export default function Resources(props) {
                 </Grid>
             )}
             {!isRestricted(['apim:api_create'], api) && !disableAddOperation && (
-                <Grid item md={12}>
+                <Grid item md={12} xs={12}>
                     <AddOperation operationsDispatcher={operationsDispatcher} />
                 </Grid>
             )}
