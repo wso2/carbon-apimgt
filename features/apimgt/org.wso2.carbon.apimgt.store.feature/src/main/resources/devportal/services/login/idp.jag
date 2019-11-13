@@ -34,16 +34,12 @@
     application.put("serverPort", serverPort);
 
     var settingsAPIUrl = appUtils.getLoopbackOrigin() + SETTINGS_REST_API_URL_SUFFIX;
-    log.error("*********************   " + settingsAPIUrl);
-    log.error("*********************  getManagementTransportPort = " + utils.getManagementTransportPort(""));
-    log.error("*********************  isProxyPortEnabled = " + utils.isProxyPortEnabled("https"));
     var settingsResponse = get(settingsAPIUrl, {}, "json");
 
     var dcrUrl = appUtils.getLoopbackOrigin() + DCR_URL_SUFFIX;
     var authorizeEndpoint = utils.getServerURL() + AUTHORIZE_ENDPOINT_SUFFIX;
     var loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
     var logoutCallbackUrl = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
-     log.error("*********************   loginCallbackUrl= " + loginCallbackUrl);
     var callbackUrl = "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";
     var scopes = settingsResponse.data.scopes.join(" ");
     var referer = request.getHeader("Referer");

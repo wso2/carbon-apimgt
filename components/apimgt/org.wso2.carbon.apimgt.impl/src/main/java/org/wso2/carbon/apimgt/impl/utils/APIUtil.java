@@ -7108,7 +7108,7 @@ public final class APIUtil {
     }
 
     public static int getManagementTransportPort (String mgtTransport){
-        if(StringUtils.isEmpty(mgtTransport)){
+        if (StringUtils.isEmpty(mgtTransport)) {
             mgtTransport = APIConstants.HTTPS_PROTOCOL;
         }
         AxisConfiguration axisConfiguration = ServiceReferenceHolder
