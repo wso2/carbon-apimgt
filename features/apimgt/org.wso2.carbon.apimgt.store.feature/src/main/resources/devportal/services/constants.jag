@@ -28,6 +28,6 @@ var LOGIN_CALLBACK_URL_SUFFIX = "/services/auth/callback/login";
 var LOGOUT_CALLBACK_URL_SUFFIX = "/services/auth/callback/logout"
 
 var STORE_CLIENT_APP_NAME_OLD = "admin_store";
-var STORE_CLIENT_APP_NAME = "admin_devportal";
+var STORE_CLIENT_APP_NAME = "apim_devportal";
 
 %>
