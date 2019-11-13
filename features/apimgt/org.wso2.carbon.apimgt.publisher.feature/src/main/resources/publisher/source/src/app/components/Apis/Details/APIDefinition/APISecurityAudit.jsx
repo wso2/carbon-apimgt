@@ -1,4 +1,3 @@
-/* eslint-disable require-jsdoc */
 /* eslint-disable max-len */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://wso2.com) All Rights Reserved.
@@ -295,26 +294,12 @@ class APISecurityAudit extends Component {
 
     /**
      * Method to get the URL to display for each issue
-     * TODO - Check if the old category parameter is required.
-     * @param {*} key issue key
+     * @param {*} category Category of the issue
      * @returns {*} String URL
      */
-    // eslint-disable-next-line no-unused-vars
-    getMoreDetailUrl(category, key) {
-        // eslint-disable-next-line no-unused-vars
-        // const baseUrl = 'https://apisecurity.io/encyclopedia/content/';
+    getMoreDetailUrl(category) {
         const baseUrl = 'https://apisecurity.io/ref/';
         let url = '';
-        // TODO - Add logic to identify whether the report is oasv3 or v2 to append that part to the URL.
-
-        // if (reportObject.oasVersion === '3.0.0') {
-
-        // } else {
-
-        // }
-
-        // const formattedKey = key.replace('.', '-');
-        // console.log(formattedKey);
 
         switch (category) {
             case 'OpenAPI Format Requirements':
@@ -329,7 +314,6 @@ class APISecurityAudit extends Component {
             default:
                 url = baseUrl;
         }
-        // TODO - Insert logic to handle formattedKey here. How do we find out which category is each formattedKey in? to append the url
         return url;
     }
 
@@ -605,7 +589,7 @@ class APISecurityAudit extends Component {
                                             link: (
                                                 <strong>
                                                     <a
-                                                        href={this.getMoreDetailUrl(rowData[2], rowData[4])}
+                                                        href={this.getMoreDetailUrl(rowData[2])}
                                                         target='_blank'
                                                         rel='noopener noreferrer'
                                                     >link
@@ -642,7 +626,7 @@ class APISecurityAudit extends Component {
                                             link: (
                                                 <strong>
                                                     <a
-                                                        href={this.getMoreDetailUrl(rowData[6], rowData[9])}
+                                                        href={this.getMoreDetailUrl(rowData[6])}
                                                         target='_blank'
                                                         rel='noopener noreferrer'
                                                     >link
