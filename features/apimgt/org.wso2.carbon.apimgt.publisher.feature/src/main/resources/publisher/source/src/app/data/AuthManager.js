@@ -94,11 +94,7 @@ class AuthManager {
                 let username;
                 if (data.active) {
                     const currentEnv = Utils.getCurrentEnvironment();
-                    if (data.username.endsWith('@carbon.super')) {
-                        username = data.username.replace('@carbon.super', '');
-                    } else {
-                        ({ username } = data);
-                    }
+                    ({ username } = data);
                     user = new User(currentEnv.label, username);
                     const scopes = data.scope.split(' ');
                     if (this.hasBasicLoginPermission(scopes)) {
