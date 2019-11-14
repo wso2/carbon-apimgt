@@ -17,11 +17,13 @@
  */
 
 import React, { Suspense, lazy } from 'react';
+import AppContext from 'AppComponents/Shared/AppContext';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import EditRounded from '@material-ui/icons/EditRounded';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
+import LockRounded from '@material-ui/icons/LockRounded';
 import SwapHorizontalCircle from '@material-ui/icons/SwapHorizontalCircle';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
@@ -39,9 +41,11 @@ import yaml from 'js-yaml';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api.js';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
+import { withRouter } from 'react-router';
 import json2yaml from 'json2yaml';
 import { isRestricted } from 'AppData/AuthManager';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
+import APISecurityAudit from './APISecurityAudit';
 import ImportDefinition from './ImportDefinition';
 
 const EditorDialog = lazy(() => import('./SwaggerEditorDrawer' /* webpackChunkName: "EditorDialog" */));
@@ -86,6 +90,7 @@ const styles = theme => ({
  * 'Import API Definition'.
  * */
 class APIDefinition extends React.Component {
+    static contextType = AppContext;
     /**
      * @inheritDoc
      */
@@ -97,6 +102,8 @@ class APIDefinition extends React.Component {
             graphQL: null,
             format: null,
             convertTo: null,
+            isAuditApiClicked: false,
+            securityAuditProperties: [],
         };
         this.handleNo = this.handleNo.bind(this);
         this.handleOk = this.handleOk.bind(this);
@@ -105,6 +112,7 @@ class APIDefinition extends React.Component {
         this.closeEditor = this.closeEditor.bind(this);
         this.hasJsonStructure = this.hasJsonStructure.bind(this);
         this.getConvertToFormat = this.getConvertToFormat.bind(this);
+        this.onAuditApiClick = this.onAuditApiClick.bind(this);
         this.onChangeFormatClick = this.onChangeFormatClick.bind(this);
         this.openUpdateConfirmation = this.openUpdateConfirmation.bind(this);
         this.updateSwaggerDefinition = this.updateSwaggerDefinition.bind(this);
@@ -115,12 +123,15 @@ class APIDefinition extends React.Component {
      */
     componentDidMount() {
         const { api } = this.props;
+        const { settings } = this.context;
         let promisedApi;
         if (api.type === 'GRAPHQL') {
             promisedApi = api.getSchema(api.id);
         } else {
             promisedApi = api.getSwagger(api.id);
         }
+
+        this.setState({ securityAuditProperties: settings.securityAuditProperties });
 
         promisedApi
             .then((response) => {
@@ -148,6 +159,13 @@ class APIDefinition extends React.Component {
                     doRedirectToLogin();
                 }
             });
+    }
+
+    /**
+      * Set isAuditApiClicked to true when Audit API is clicked
+      */
+    onAuditApiClick() {
+        this.setState({ isAuditApiClicked: true });
     }
 
     /**
@@ -228,6 +246,16 @@ class APIDefinition extends React.Component {
     closeEditor() {
         window.localStorage.setItem('swagger-editor-content', '');
         this.setState({ openEditor: false });
+        const { intl, api, history } = this.props;
+        const { isAuditApiClicked } = this.state;
+        if (isAuditApiClicked === true) {
+            Alert.info(intl.formatMessage({
+                id: 'Apis.Details.APIDefinition.info.updating.auditapi',
+                defaultMessage: 'To reflect the changes made, you need to click Audit API',
+            }));
+            const redirectUrl = '/apis/' + api.id + '/api definition';
+            history.push(redirectUrl);
+        }
     }
 
     /**
@@ -298,7 +326,8 @@ class APIDefinition extends React.Component {
      */
     render() {
         const {
-            swagger, graphQL, openEditor, openDialog, format, convertTo, notFound,
+            swagger, graphQL, openEditor, openDialog, format, convertTo, notFound, isAuditApiClicked,
+            securityAuditProperties,
         } = this.state;
         const { classes, resourceNotFountMessage, api } = this.props;
         let downloadLink;
@@ -370,6 +399,19 @@ class APIDefinition extends React.Component {
                                 />
                             </Button>
                         </a>
+
+                        {(securityAuditProperties.apiToken && securityAuditProperties.collectionId) &&
+                            (
+                                <Button size='small' className={classes.button} onClick={this.onAuditApiClick}>
+                                    <LockRounded className={classes.buttonIcon} />
+                                    <FormattedMessage
+                                        id='Apis.Details.APIDefinition.APIDefinition.audit.api'
+                                        defaultMessage='Audit API'
+                                    />
+                                </Button>
+                            )
+                        }
+
                         {isRestricted(['apim:api_create'], api) && (
                             <Typography variant='body2' color='primary'>
                                 <FormattedMessage
@@ -394,14 +436,18 @@ class APIDefinition extends React.Component {
                 </div>
                 <div>
                     <Suspense fallback={<Progress />}>
-                        <MonacoEditor
-                            language={format}
-                            width='100%'
-                            height='calc(100vh - 51px)'
-                            theme='vs-dark'
-                            value={swagger !== null ? swagger : graphQL}
-                            options={editorOptions}
-                        />
+                        {isAuditApiClicked ? (
+                            <APISecurityAudit apiId={api.id} />
+                        ) : (
+                            <MonacoEditor
+                                language={format}
+                                width='100%'
+                                height='calc(100vh - 51px)'
+                                theme='vs-dark'
+                                value={swagger !== null ? swagger : graphQL}
+                                options={editorOptions}
+                            />
+                        )}
                     </Suspense>
                 </div>
                 <Dialog fullScreen open={openEditor} onClose={this.closeEditor} TransitionComponent={this.transition}>
@@ -523,4 +569,4 @@ APIDefinition.propTypes = {
         formatMessage: PropTypes.func,
     }).isRequired,
 };
-export default injectIntl(withStyles(styles, { withTheme: true })(APIDefinition));
+export default withRouter(injectIntl(withStyles(styles, { withTheme: true })(APIDefinition)));

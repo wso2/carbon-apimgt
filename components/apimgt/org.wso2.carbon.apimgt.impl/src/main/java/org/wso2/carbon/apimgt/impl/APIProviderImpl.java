@@ -7685,4 +7685,68 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
         return getGraphqlSchemaDefinition(apiId);
     }
+
+    /**
+     * This method returns the security audit properties
+     *
+     * @param userId user id
+     * @return JSONObject security audit properties
+     * @throws APIManagementException
+     */
+    public JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
+
+        int tenantId = 0;
+        try {
+            tenantId = getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            handleException("Error in getting tenantId of: " + tenantDomain, e);
+        }
+        JSONObject securityAuditConfig = APIUtil.getSecurityAuditAttributesFromRegistry(tenantId);
+        if (securityAuditConfig != null) {
+            if ((securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL) != null) &&
+                    (Boolean) securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL)) {
+                String apiToken = (String) securityAuditConfig.get(APIConstants.SECURITY_AUDIT_API_TOKEN);
+                String collectionId = (String) securityAuditConfig.get(APIConstants.SECURITY_AUDIT_COLLECTION_ID);
+                JSONObject tenantProperties = new JSONObject();
+
+                if (StringUtils.isNotEmpty(apiToken) && StringUtils.isNotEmpty(collectionId)) {
+                    tenantProperties.put(APIConstants.SECURITY_AUDIT_API_TOKEN, apiToken);
+                    tenantProperties.put(APIConstants.SECURITY_AUDIT_COLLECTION_ID, collectionId);
+                    return tenantProperties;
+                }
+            } else {
+                return getSecurityAuditConfigurationProperties(tenantDomain);
+            }
+        } else {
+            return getSecurityAuditConfigurationProperties(tenantDomain);
+        }
+        return null;
+    }
+
+    /**
+     * This method returns security audit properties from the API Manager Configuration
+     *
+     * @param tenantDomain tenant domain name
+     * @return JSONObject security audit properties
+     */
+    private JSONObject getSecurityAuditConfigurationProperties(String tenantDomain) {
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String apiToken = configuration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_API_TOKEN);
+        String collectionId = configuration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_CID);
+        boolean isGlobal = Boolean.parseBoolean(configuration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_GLOBAL));
+        JSONObject configProperties = new JSONObject();
+
+        if (StringUtils.isNotEmpty(apiToken) && StringUtils.isNotEmpty(collectionId)) {
+            configProperties.put(APIConstants.SECURITY_AUDIT_API_TOKEN, apiToken);
+            configProperties.put(APIConstants.SECURITY_AUDIT_COLLECTION_ID, collectionId);
+            if (isGlobal || "carbon.super".equals(tenantDomain)) {
+                return configProperties;
+            } else {
+                return null;
+            }
+        }
+        return null;
+    }
 }

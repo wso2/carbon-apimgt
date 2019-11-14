@@ -14114,6 +14114,54 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Add new Audit API ID
+     *
+     * @param apiIdentifier APIIdentifier object to retrieve API ID
+     * @param uuid Audit API ID
+     * @throws APIManagementException
+     */
+    public void addAuditApiMapping(APIIdentifier apiIdentifier, String uuid) throws APIManagementException {
+        Connection connection = null;
+        String query = SQLConstants.ADD_SECURITY_AUDIT_MAP_SQL;
+        int apiId = getAPIID(apiIdentifier, connection);
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                ps.setInt(1, apiId);
+                ps.setString(2, uuid);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            handleException("Error while adding new audit api id: ", e);
+        }
+    }
+
+    /**
+     * Get Audit API ID
+     *
+     * @param apiIdentifier APIIdentifier object to retrieve API ID
+     * @throws APIManagementException
+     */
+    public String getAuditApiId(APIIdentifier apiIdentifier) throws APIManagementException {
+        Connection connection = null;
+        String query = SQLConstants.GET_AUDIT_UUID_SQL;
+        int apiId = getAPIID(apiIdentifier, connection);
+        String auditUuid = null;
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                ps.setInt(1, apiId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        auditUuid = rs.getString("AUDIT_UUID");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while getting audit api id: ", e);
+        }
+        return auditUuid;
+    }
+
+    /**
      * Configure email list
      * modify email list by adding or removing emails
      */
