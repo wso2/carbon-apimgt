@@ -1,4 +1,4 @@
-const APP_CONTEXT = '/pubs';
+const APP_CONTEXT = '/publisher';
 const STORE_APP_CONTEXT = '/devportal';
 const Configurations = {
     themes: {
