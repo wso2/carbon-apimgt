@@ -7121,7 +7121,8 @@ public final class APIUtil {
     }
 
     public static int getCarbonTransportPort(String mgtTransport) {
-        if(StringUtils.isEmpty(mgtTransport)){
+
+        if (StringUtils.isEmpty(mgtTransport)) {
             mgtTransport = APIConstants.HTTPS_PROTOCOL;
         }
         AxisConfiguration axisConfiguration = ServiceReferenceHolder
@@ -7129,12 +7130,14 @@ public final class APIUtil {
         return CarbonUtils.getTransportPort(axisConfiguration, mgtTransport);
 
     }
+
     /*
-    * Checks whether the proxy port is configured.
-    * @param transport  The transport
-    * @return boolean proxyport is enabled
-    * */
-    public static boolean isProxyPortEnabled(String mgtTransport){
+     * Checks whether the proxy port is configured.
+     * @param transport  The transport
+     * @return boolean proxyport is enabled
+     * */
+    public static boolean isProxyPortEnabled(String mgtTransport) {
+
         AxisConfiguration axisConfiguration = ServiceReferenceHolder
                 .getContextService().getServerConfigContext().getAxisConfiguration();
         int mgtTransportProxyPort = CarbonUtils.getTransportProxyPort(axisConfiguration, mgtTransport);
