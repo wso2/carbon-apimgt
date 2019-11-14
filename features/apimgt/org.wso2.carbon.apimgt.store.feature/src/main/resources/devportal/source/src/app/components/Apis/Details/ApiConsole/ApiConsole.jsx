@@ -145,7 +145,7 @@ class ApiConsole extends React.Component {
             })
             .then((subscriptionsResponse) => {
                 if (subscriptionsResponse != null) {
-                    subscriptions = subscriptionsResponse.obj.list.filter(item => item.status === 'UNBLOCKED');
+                    subscriptions = subscriptionsResponse.obj.list.filter(item => item.status === 'UNBLOCKED' || item.status === 'PROD_ONLY_BLOCKED');
 
                     if (subscriptions && subscriptions.length > 0) {
                         selectedApplication = subscriptions[0].applicationId;
@@ -304,17 +304,25 @@ class ApiConsole extends React.Component {
      * @memberof ApiConsole
      */
     updateApplication() {
-        const { selectedApplication, selectedKeyType } = this.state;
+        const { selectedApplication, selectedKeyType, subscriptions } = this.state;
         const promiseApp = Application.get(selectedApplication);
         let accessToken;
+        let keyType;
+
+        if (subscriptions != null && subscriptions.find(sub => sub.applicationId === selectedApplication).status === 'PROD_ONLY_BLOCKED') {
+            this.setState({ selectedKeyType: 'SANDBOX'});
+            keyType = 'SANDBOX';
+        } else {
+            keyType = selectedKeyType;
+        }
 
         promiseApp
             .then((application) => {
                 return application.getKeys();
             })
             .then((appKeys) => {
-                if (appKeys.get(selectedKeyType)) {
-                    ({ accessToken } = appKeys.get(selectedKeyType).token);
+                if (appKeys.get(keyType)) {
+                    ({ accessToken } = appKeys.get(keyType).token);
                 }
                 this.setState({ accessToken, keys: appKeys });
             });
