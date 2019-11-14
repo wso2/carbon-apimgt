@@ -49,6 +49,12 @@ const styles = theme => ({
         padding: 0,
         listStyleType: 'none',
     },
+    inputRoot: {
+        flexDirection: 'row',
+    },
+    searchBoxWrap: {
+        display: 'flex',
+    },
     input: {
         width: '280px',
         background: theme.palette.getContrastText(theme.custom.appBar.background),
