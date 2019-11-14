@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
@@ -6,7 +6,7 @@ import LaunchIcon from '@material-ui/icons/Launch';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
-
+import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
@@ -66,10 +66,17 @@ const APIDetailsTopMenu = (props) => {
         classes, theme, api, isAPIProduct, imageUpdate,
     } = props;
     const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
-    const { settings } = useAppContext();
+    const { settings, user } = useAppContext();
     let apiType = 'API';
     if (isAPIProduct) {
         apiType = 'PRODUCT';
+    }
+    const { tenantList } = useContext(ApiContext);
+    const userNameSplit = user.name.split('@');
+    const tenantDomain = userNameSplit[userNameSplit.length - 1];
+    let devportalUrl = `${settings.storeUrl}/apis/${api.id}/overview`;
+    if (tenantList && tenantList.length > 0) {
+        devportalUrl = `${settings.storeUrl}/apis/${api.id}/overview?tenant=${tenantDomain}`;
     }
     // todo: need to support rev proxy ~tmkb
     return (
@@ -109,7 +116,7 @@ const APIDetailsTopMenu = (props) => {
                 <a
                     target='_blank'
                     rel='noopener noreferrer'
-                    href={`${settings.storeUrl}/apis/${api.id}/overview`}
+                    href={devportalUrl}
                     className={classes.viewInStoreLauncher}
                     style={{ minWidth: 90 }}
                 >
