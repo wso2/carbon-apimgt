@@ -414,7 +414,6 @@ class InfoBar extends React.Component {
                     </Grid>
                     <VerticalDivider height={70} />
                     <Grid xs={1} m={1} className={classes.editButton}>
-
                         {isUserOwner ? (
                             <Link to={`/applications/${applicationId}/edit/`} className={classes.editButton}>
                                 <IconButton
@@ -482,7 +481,6 @@ class InfoBar extends React.Component {
                                     defaultMessage='Delete'
                                 />
                             </Typography>
-
                         </IconButton>
                         <DeleteConfirmation
                             handleAppDelete={this.handleAppDelete}
