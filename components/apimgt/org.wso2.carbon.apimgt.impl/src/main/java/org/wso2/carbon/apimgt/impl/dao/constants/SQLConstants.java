@@ -3098,6 +3098,16 @@ public class SQLConstants {
                 "ON RES_SCOPE.SCOPE_ID = SCOPE.SCOPE_ID " +
             "WHERE RES_SCOPE.RESOURCE_PATH = ?";
 
+    /** API Categories related constants **/
+
+    public static final String ADD_CATEGORY_SQL = "INSERT INTO AM_API_CATEGORIES "
+            + "(CATEGORY_ID, NAME, DESCRIPTION, TENANT_ID) VALUES (?,?,?,?)";
+
+    public static final String GET_CATEGORIES_BY_TENANT_ID_SQL = "SELECT * FROM AM_API_CATEGORIES WHERE TENANT_ID = ?";
+
+    public static final String IS_API_CATEGORY_NAME_EXISTS = "SELECT COUNT(CATEGORY_ID) AS API_CATEGORY_COUNT FROM "
+            + "AM_API_CATEGORIES WHERE NAME = ? AND TENANT_ID = ?";
+
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{

@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
@@ -122,6 +123,23 @@ public interface APIAdmin  {
      */
     void updateMonetizationUsagePublishInfo(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
             throws APIManagementException;
+
+    /**
+     * Adds a new category for the tenant
+     *
+     * @param userName    logged in user name
+     * @param category        category to add
+     * @throws APIManagementException if failed add category
+     */
+    APICategory addCategory(String userName, APICategory category) throws APIManagementException;
+
+    /**
+     * Get all available API categories of the tenant
+     *
+     * @param tenantDomain    tenant domain
+     * @throws APIManagementException if failed add category
+     */
+    List<APICategory> getAllCategories(String tenantDomain) throws APIManagementException;
 
     /**
      * The method converts the date into timestamp

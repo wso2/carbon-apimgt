@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -14321,4 +14322,87 @@ public class ApiMgtDAO {
             handleException("Error while deleting expired JWTs from revoke table.", e);
         }
     }
+
+    /**
+     * Adds an API category
+     *
+     * @param tenantID     Logged in user's tenant ID
+     * @param category     Category
+     * @return Category
+     */
+    public APICategory addCategory(int tenantID, APICategory category) throws APIManagementException {
+        String uuid = UUID.randomUUID().toString();
+        category.setId(uuid);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_CATEGORY_SQL)) {
+            statement.setString(1, uuid);
+            statement.setString(2, category.getName());
+            statement.setString(3, category.getDescription());
+            statement.setInt(4, tenantID);
+            statement.executeUpdate();
+
+        } catch (SQLException e) {
+            handleException("Failed to add Category: " + uuid, e);
+        }
+        return category;
+    }
+
+    /**
+     * Get all available API categories of the tenant
+     *
+     * @param tenantDomain
+     * @return API Categories List
+     */
+    public List<APICategory> getAllCategories(String tenantDomain) throws APIManagementException {
+        List<APICategory> categoriesList = new ArrayList<>();
+        int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_CATEGORIES_BY_TENANT_ID_SQL)) {
+            statement.setInt(1, tenantID);
+
+            ResultSet rs = statement.executeQuery();
+            while(rs.next()) {
+                String id = rs.getString("CATEGORY_ID");
+                String name = rs.getString("NAME");
+                String description = rs.getString("DESCRIPTION");
+
+                APICategory category = new APICategory();
+                category.setId(id);
+                category.setName(name);
+                category.setDescription(description);
+                category.setTenantID(tenantID);
+                categoriesList.add(category);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve API categories of tenant : " + tenantDomain, e);
+        }
+        return categoriesList;
+    }
+
+    /**
+     * Checks whether the given category name is already available under given tenant domain
+     *
+     * @param categoryName
+     * @param tenantID
+     * @return
+     */
+    public boolean isAPICategoryNameExists(String categoryName, int tenantID) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SQLConstants.IS_API_CATEGORY_NAME_EXISTS)) {
+            statement.setString(1, categoryName);
+            statement.setInt(2, tenantID);
+
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt("API_CATEGORY_COUNT");
+                if (count > 0) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check whether API category name : " + categoryName + " exists", e);
+        }
+        return false;
+    }
+
 }

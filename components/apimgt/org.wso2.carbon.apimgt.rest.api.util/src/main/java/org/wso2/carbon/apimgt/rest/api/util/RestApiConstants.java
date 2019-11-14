@@ -97,6 +97,7 @@ public final class RestApiConstants {
             + "/subscription";
     public static final String RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL = RESOURCE_PATH_THROTTLING_POLICIES
             + "/custom";
+    public static final String RESOURCE_PATH_CATEGORY = "/categories";
 
     public static final String SERVER_URL = "/applications";
     public static final String SERVER_USER_NAME = "/applications";

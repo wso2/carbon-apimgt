@@ -28,8 +28,10 @@ import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
+import org.wso2.carbon.apimgt.impl.utils.APICategoryUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -279,5 +281,18 @@ public class APIAdminImpl implements APIAdmin {
      */
     public void deleteBotDataEmailList(String uuid) throws APIManagementException, SQLException {
         apiMgtDAO.deleteBotDataEmailList(uuid);
+    }
+
+    public APICategory addCategory(String userName, APICategory category) throws APIManagementException {
+        int tenantID = APIUtil.getTenantId(userName);
+        if (APICategoryUtil.isCategoryNameExists(category.getName(), tenantID)) {
+            APIUtil.handleException("Category with name '" + category.getName() + "' already exists");
+        }
+        //todo-category: check whether user has admin permissions to add category
+        return apiMgtDAO.addCategory(tenantID, category);
+    }
+
+    public List<APICategory> getAllCategories(String tenantDomain) throws APIManagementException {
+        return apiMgtDAO.getAllCategories(tenantDomain);
     }
 }
