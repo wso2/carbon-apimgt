@@ -1583,7 +1583,7 @@
 
         <carbon.commons.version>4.7.11</carbon.commons.version>
         <carbon.registry.version>4.7.19</carbon.registry.version>
-        <carbon.mediation.version>4.7.20</carbon.mediation.version>
+        <carbon.mediation.version>4.7.24</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
         <carbon.identity.version>5.14.96</carbon.identity.version>
