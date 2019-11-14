@@ -28,6 +28,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -134,6 +135,7 @@ import org.wso2.carbon.governance.custom.lifecycles.checklist.beans.LifecycleBea
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleBeanPopulator;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.Property;
+import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.common.CommonConstants;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
@@ -145,6 +147,7 @@ import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
+import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
@@ -769,6 +772,33 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateResourceThrottlingTiers(api, tenantDomain);
+
+        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+
+        //Add default API LC if it is not there
+        try {
+            if (!CommonUtil.lifeCycleExists(APIConstants.API_LIFE_CYCLE,
+                    registryService.getConfigSystemRegistry(tenantId))) {
+                String defaultLifecyclePath = CommonUtil.getDefaltLifecycleConfigLocation() + File.separator
+                        + APIConstants.API_LIFE_CYCLE + APIConstants.XML_EXTENSION;
+                File file = new File(defaultLifecyclePath);
+                String content = null;
+                if (file != null && file.exists()) {
+                    content = FileUtils.readFileToString(file);
+                }
+                if (content != null) {
+                    CommonUtil.addLifecycle(content, registryService.getConfigSystemRegistry(tenantId),
+                            CommonUtil.getRootSystemRegistry(tenantId));
+                }
+            }
+        } catch (RegistryException e) {
+            handleException("Error occurred while adding default APILifeCycle.", e);
+        } catch (IOException e) {
+            handleException("Error occurred while loading APILifeCycle.xml.", e);
+        } catch (XMLStreamException e) {
+            handleException("Error occurred while adding default API LifeCycle.", e);
+        }
+
         createAPI(api);
 
         if (log.isDebugEnabled()) {
