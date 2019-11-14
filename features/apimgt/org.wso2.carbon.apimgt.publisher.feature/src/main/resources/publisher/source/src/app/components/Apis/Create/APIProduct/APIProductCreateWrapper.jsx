@@ -164,35 +164,33 @@ export default function ApiProductCreateWrapper(props) {
     const steps = getSteps();
 
     const createAPIProduct = () => {
-        {
-            setCreating(true);
-            const {
-                name, context, policies,
-            } = apiInputs;
-            const apiData = {
-                name,
-                context,
-                policies,
-                apis: apiResources,
-            };
-            apiData.gatewayEnvironments = settings.environment.map(env => env.name);
-            apiData.transport = ['http', 'https'];
-            const newAPIProduct = new APIProduct(apiData);
-            newAPIProduct
-                .saveProduct(apiData)
-                .then((apiProduct) => {
-                    Alert.info('API Product created successfully');
-                    history.push(`/api-products/${apiProduct.id}/overview`);
-                })
-                .catch((error) => {
-                    if (error.response) {
-                        Alert.error(error.response.body.description);
-                    } else {
-                        Alert.error('Something went wrong while adding the API Product');
-                    }
-                })
-                .finally(() => setCreating(false));
-        }
+        setCreating(true);
+        const {
+            name, context, policies,
+        } = apiInputs;
+        const apiData = {
+            name,
+            context,
+            policies,
+            apis: apiResources,
+        };
+        apiData.gatewayEnvironments = settings.environment.map(env => env.name);
+        apiData.transport = ['http', 'https'];
+        const newAPIProduct = new APIProduct(apiData);
+        newAPIProduct
+            .saveProduct(apiData)
+            .then((apiProduct) => {
+                Alert.info('API Product created successfully');
+                history.push(`/api-products/${apiProduct.id}/overview`);
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while adding the API Product');
+                }
+            })
+            .finally(() => setCreating(false));
     };
 
     return (
@@ -242,7 +240,7 @@ export default function ApiProductCreateWrapper(props) {
                             />
                         )}
                     </Grid>
-                    { wizardStep === 0 && <Grid item md={1} />}
+                    {wizardStep === 0 && <Grid item md={1} />}
                     <Grid item md={9}>
                         <Grid
                             className={wizardStep === 1 && classes.saveButton}
@@ -254,15 +252,15 @@ export default function ApiProductCreateWrapper(props) {
                         >
                             <Grid item>
                                 {wizardStep === 1 &&
-                                <Button
-                                    onClick={() =>
-                                        setWizardStep(step => step - 1)}
-                                >
-                                    <FormattedMessage
-                                        id='Apis.Create.APIProduct.APIProductCreateWrapper.back'
-                                        defaultMessage='Back'
-                                    />
-                                </Button>}
+                                    <Button
+                                        onClick={() =>
+                                            setWizardStep(step => step - 1)}
+                                    >
+                                        <FormattedMessage
+                                            id='Apis.Create.APIProduct.APIProductCreateWrapper.back'
+                                            defaultMessage='Back'
+                                        />
+                                    </Button>}
                                 {wizardStep === 0 && (
                                     <Link to='/apis/'>
                                         <Button>
