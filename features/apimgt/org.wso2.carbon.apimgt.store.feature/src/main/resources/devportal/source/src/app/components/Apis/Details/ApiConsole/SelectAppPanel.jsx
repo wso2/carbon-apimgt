@@ -62,7 +62,7 @@ const SelectAppPanel = (props) => {
                             margin='normal'
                             variant='outlined'
                         >
-                            {(subscriptions.find(sub => sub.applicationId === selectedApplication).status === 'UNBLOCKED') &&
+                            {(subscriptions != null && subscriptions.find(sub => sub.applicationId === selectedApplication).status === 'UNBLOCKED') &&
                             <MenuItem value='PRODUCTION'>
                                 <FormattedMessage
                                     id='Apis.Details.ApiConsole.SelectAppPanel.production'

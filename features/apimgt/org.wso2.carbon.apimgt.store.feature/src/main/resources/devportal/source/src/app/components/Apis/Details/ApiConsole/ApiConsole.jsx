@@ -309,7 +309,7 @@ class ApiConsole extends React.Component {
         let accessToken;
         let keyType;
 
-        if (subscriptions.find(sub => sub.applicationId === selectedApplication).status === 'PROD_ONLY_BLOCKED') {
+        if (subscriptions != null && subscriptions.find(sub => sub.applicationId === selectedApplication).status === 'PROD_ONLY_BLOCKED') {
             this.setState({ selectedKeyType: 'SANDBOX'});
             keyType = 'SANDBOX';
         } else {
