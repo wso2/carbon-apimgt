@@ -796,7 +796,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
                 if (!(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)) {
                     throw new APIManagementException(
-                            "Error while sending data to " + putUrl + ". Found http status " + response
+                            "Error while sending data to the API Security Audit Feature. Found http status " + response
                                     .getStatusLine());
                 }
             } finally {
@@ -867,7 +867,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             ApiMgtDAO.getInstance().addAuditApiMapping(apiIdentifier, auditUuid);
         } else {
             throw new APIManagementException(
-                    "Error while retrieving data from " + APIConstants.BASE_AUDIT_URL + ". Found http status: " +
+                    "Error while retrieving data for the API Security Audit Report. Found http status: " +
                     httpConn.getResponseCode() + " - " + httpConn.getResponseMessage());
         }
         return auditUuid;
