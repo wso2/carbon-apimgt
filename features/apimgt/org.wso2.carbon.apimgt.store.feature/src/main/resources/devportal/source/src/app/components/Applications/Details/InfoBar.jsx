@@ -366,6 +366,7 @@ class InfoBar extends React.Component {
         if (!application) {
             return <Loading />;
         }
+        const isUserOwner = AuthManager.getUser().name === applicationOwner;
 
         return (
             <div className={classes.infoBarMain}>
@@ -413,28 +414,51 @@ class InfoBar extends React.Component {
                     </Grid>
                     <VerticalDivider height={70} />
                     <Grid xs={1} m={1} className={classes.editButton}>
-                        <Link to={`/applications/${applicationId}/edit/`} className={classes.editButton}>
-                            <IconButton
-                                disabled={AuthManager.getUser().name !== applicationOwner}
-                                style={{ padding: '4px' }}
-                                color='default'
-                                classes={{ label: classes.iconButton }}
-                                aria-label={(
-                                    <FormattedMessage
-                                        id='Applications.Details.InfoBar.edit'
-                                        defaultMessage='Edit'
-                                    />
-                                )}
-                            >
-                                <Icon>edit</Icon>
-                                <Typography variant='caption' style={{ marginTop: '2px' }} >
-                                    <FormattedMessage
-                                        id='Applications.Details.InfoBar.edit.text'
-                                        defaultMessage='Edit'
-                                    />
-                                </Typography>
-                            </IconButton>
-                        </Link>
+
+                        {isUserOwner ? (
+                            <Link to={`/applications/${applicationId}/edit/`} className={classes.editButton}>
+                                <IconButton
+                                    style={{ padding: '4px' }}
+                                    color='default'
+                                    classes={{ label: classes.iconButton }}
+                                    aria-label={(
+                                        <FormattedMessage
+                                            id='Applications.Details.InfoBar.edit'
+                                            defaultMessage='Edit'
+                                        />
+                                    )}
+                                >
+                                    <Icon>edit</Icon>
+                                    <Typography variant='caption' style={{ marginTop: '2px' }} >
+                                        <FormattedMessage
+                                            id='Applications.Details.InfoBar.edit.text'
+                                            defaultMessage='Edit'
+                                        />
+                                    </Typography>
+                                </IconButton>
+                            </Link>) :
+                            (
+                                <IconButton
+                                    disabled
+                                    style={{ padding: '4px' }}
+                                    color='default'
+                                    classes={{ label: classes.iconButton }}
+                                    aria-label={(
+                                        <FormattedMessage
+                                            id='Applications.Details.InfoBar.edit'
+                                            defaultMessage='Edit'
+                                        />
+                                    )}
+                                >
+                                    <Icon>edit</Icon>
+                                    <Typography variant='caption' style={{ marginTop: '2px' }} >
+                                        <FormattedMessage
+                                            id='Applications.Details.InfoBar.edit.text'
+                                            defaultMessage='Edit'
+                                        />
+                                    </Typography>
+                                </IconButton>
+                            )}
                     </Grid>
                     <VerticalDivider height={70} />
                     <Grid xs={1} m={1} className={classes.button}>
