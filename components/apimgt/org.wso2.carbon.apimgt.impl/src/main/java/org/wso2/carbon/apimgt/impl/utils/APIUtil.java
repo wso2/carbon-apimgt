@@ -970,7 +970,7 @@ public final class APIUtil {
                         replaceEmailDomainBack(providerName));
                 List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
                 String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
-                if (policies != null && !"".equals(policies)) {
+                if (!StringUtils.isEmpty(policies)) {
                     String[] policyNames = policies.split("\\|\\|");
                     for (String policyName : policyNames) {
                         if (definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)) {
@@ -981,7 +981,6 @@ public final class APIUtil {
                         }
                     }
                 }
-
                 api.addAvailableTiers(availablePolicy);
                 String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
                 api.setMonetizationCategory(getAPIMonetizationCategory(availablePolicy, tenantDomainName));
@@ -995,26 +994,20 @@ public final class APIUtil {
                     for (String tierName : tierNames) {
                         Tier tier = new Tier(tierName);
                         availableTier.add(tier);
-
                     }
-
                     api.addAvailableTiers(availableTier);
                     api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
                 } else {
                     api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
                 }
             }
-
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
-
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
-
             api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
             api.setSubscriptionAvailableTenants(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
-
             api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
@@ -1031,16 +1024,14 @@ public final class APIUtil {
                         artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
             } catch (ParseException e) {
                 String msg = "Failed to parse endpoint config JSON of API: " + apiName + " " + apiVersion;
-                log.error(msg, e);
                 throw new APIManagementException(msg, e);
             } catch (ClassCastException e) {
                 String msg = "Invalid endpoint config JSON found in API: " + apiName + " " + apiVersion;
-                log.error(msg, e);
                 throw new APIManagementException(msg, e);
             }
 
         } catch (GovernanceException e) {
-            String msg = "Failed to get API from artifact ";
+            String msg = "Failed to get API from artifact";
             throw new APIManagementException(msg, e);
         }
         return api;
@@ -1973,7 +1964,7 @@ public final class APIUtil {
             // isWSDL2Document(api.getWsdlUrl()) method only understands http or file system urls.
             // Hence if this is a registry url, should not go in to the following if block
             if (!api.getWsdlUrl().matches(wsdRegistryPath) && (api.getWsdlUrl().startsWith("http:") || api.getWsdlUrl()
-                    .startsWith("https:") || api.getWsdlUrl().startsWith("file:"))) {
+                    .startsWith("https:") || api.getWsdlUrl().startsWith("file:") || api.getWsdlUrl().startsWith("/t"))) {
                 URL wsdlUrl;
                 try {
                     wsdlUrl = new URL(api.getWsdlUrl());
@@ -3656,6 +3647,9 @@ public final class APIUtil {
                         }
                     }
                 } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Store view roles for " + artifactPath + " : " + publisherAccessRoles.toString());
+                    }
                     authorizationManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
                     authorizationManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
                 }
@@ -5381,15 +5375,15 @@ public final class APIUtil {
 
             if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + "/" +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
             } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + "/" +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
             } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + "/" +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
             }
 
@@ -6053,7 +6047,7 @@ public final class APIUtil {
 
     /**
      * This method will check the validity of given url. WSDL url should be
-     * contain http, https or file system patch
+     * contain http, https, "/t" (for tenant APIs) or file system path
      * otherwise we will mark it as invalid wsdl url. How ever here we do not
      * validate wsdl content.
      *
@@ -6063,7 +6057,7 @@ public final class APIUtil {
     public static boolean isValidWSDLURL(String wsdlURL, boolean required) {
         if (wsdlURL != null && !"".equals(wsdlURL)) {
             if (wsdlURL.startsWith("http:") || wsdlURL.startsWith("https:") ||
-                    wsdlURL.startsWith("file:") || (wsdlURL.startsWith("/registry") && !wsdlURL.endsWith(".zip"))) {
+                    wsdlURL.startsWith("file:") || (wsdlURL.startsWith("/registry") || wsdlURL.startsWith("/t") && !wsdlURL.endsWith(".zip"))) {
                 return true;
             }
         } else if (!required) {
@@ -9563,5 +9557,16 @@ public final class APIUtil {
             String msg = "Unable to signing certificate alias in the token";
             throw new APIManagementException(msg, e);
         }
+    }
+
+    /**
+     * return skipRolesByRegex config
+     *
+     */
+    public static String getSkipRolesByRegex() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
+        return skipRolesByRegex;
     }
 }

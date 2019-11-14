@@ -18,139 +18,150 @@
  */
 
     include("/services/constants.jag");
-    include("/services/jagg.jag");
+    var appUtils = require("/services/utils.js");
     var site = require("/site/public/theme/defaultTheme.js").Configurations.app;
 
     var log = new Log();
     var cookieToken = request.getCookie("AM_REF_TOKEN_DEFAULT_P2");
-    var refreshToken = request.getParameter("refresh_token", "UTF-8")
-        + cookieToken ? cookieToken : '';
-    var tokenRequestData = {
-        "grant_type": "refresh_token",
-        "refresh_token": refreshToken
-    };
-
-    var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
-    var systemApplicationDAO = new SystemApplicationDTO();
-    var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_publisher");
-
-    if(systemApplicationDTO == null) {
-        log.error("Oauth application details not found for 'admin_publisher'");
-        response.status = 401;
+    var tokenParam = request.getParameter("refresh_token", "UTF-8")
+    if(!cookieToken || !tokenParam) {
+        log.error("Token request with no AM_REF_TOKEN_DEFAULT_P2 HTTP only cookie or no tokenParam received!!");
+        response.status = 400;
         response.contentType = "application/json";
         var res= {};
         res.error = true;
-        res.message = "Oauth application details not found for 'admin_publisher'";
+        res.message = "Cookie and/or param token part is missing!";
         print(res);
     } else {
-        var clientId = systemApplicationDTO.getConsumerKey();
-        var clientSecret = systemApplicationDTO.getConsumerSecret();
-        var Base64 = org.apache.axiom.om.util.Base64;
-        var String = Packages.java.lang.String;
-        var Integer = Packages.java.lang.Integer;
-        var base64encoded = Base64.encode(new String(clientId + ":" + clientSecret).getBytes());
-        var tokenEndpoint = MGT_TRANSPORT + HOST + ":" + getServerPort() + TOKEN_URL_SUFFIX;
-        var result = post(tokenEndpoint, tokenRequestData, {"Authorization": "Basic " + base64encoded});
-        if (result.xhr.status === 200) {
-            response.contentType = "application/json";
-            var tokenResponse = JSON.parse(result.data);
+        var tokenRequestData = {
+            "grant_type": "refresh_token",
+            "refresh_token": tokenParam + cookieToken.value
+        };
 
-            var tokenLength = tokenResponse.access_token.length;
-            var accessToken = String(tokenResponse.access_token);
-
-            var idTokenLength = tokenResponse.id_token.length;
-            var idToken = String(tokenResponse.id_token);
-
-            var idTokenPart1 = idToken.substring(0, idTokenLength / 2);
-            var idTokenPart2 = idToken.substring(idTokenLength / 2, idTokenLength);
-
-            var accessTokenPart1 = accessToken.substring(0, tokenLength / 2);
-            var accessTokenPart2 = accessToken.substring(tokenLength / 2, tokenLength);
-
-            var refreshToken = String(tokenResponse.refresh_token);
-            tokenLength = tokenResponse.refresh_token.length;
-            var refreshTokenPart1 = refreshToken.substring(0, tokenLength / 2);
-            var refreshTokenPart2 = refreshToken.substring(tokenLength / 2, tokenLength);
-
-            // Setting access token part 1 as secured HTTP only cookie, Can't restrict the path to /api/am/publisher
-            // because partial HTTP only cookie is required for get the user information from access token,
-            // hence setting the HTTP only access token path to App context
-            var cookie = {
-                'name': 'AM_ACC_TOKEN_DEFAULT_P2',
-                'value': accessTokenPart2,
-                'path': site.context + "/",
-                "httpOnly": true,
-                "secure": true,
-                "maxAge": Integer(tokenResponse.expires_in)
-            };
-            response.addCookie(cookie);
-
-            cookie = {
-                'name': 'AM_ACC_TOKEN_DEFAULT_P2',
-                'value': accessTokenPart2,
-                'path': "/api/am/publisher/",
-                "httpOnly": true,
-                "secure": true,
-                "maxAge": Integer(tokenResponse.expires_in)
-            };
-            response.addCookie(cookie);
-
-            cookie = {
-                'name': 'AM_REF_TOKEN_DEFAULT_P2',
-                'value': refreshTokenPart2,
-                'path': site.context + "/",
-                "httpOnly": true,
-                "secure": true,
-                "maxAge": -1
-            };
-            response.addCookie(cookie);
-
-            cookie = {
-                'name': 'WSO2_AM_TOKEN_1_Default',
-                'value': accessTokenPart1,
-                'path': site.context + "/",
-                "secure": true,
-                "maxAge": Integer(tokenResponse.expires_in)
-            };
-            response.addCookie(cookie);
-
-            cookie = {
-                'name': 'WSO2_AM_REFRESH_TOKEN_1_Default',
-                'value': refreshTokenPart1,
-                'path': site.context + "/",
-                "secure": true,
-                "maxAge": 86400
-            };
-            response.addCookie(cookie);
-
-            cookie = {
-                'name': 'AM_ID_TOKEN_DEFAULT_P2',
-                'value': idTokenPart2,
-                'path': site.context + "/services/logout",
-                "secure": true,
-                "maxAge": Integer(tokenResponse.expires_in)
-            };
-            response.addCookie(cookie);
-
-            cookie = {
-                'name': 'AM_ID_TOKEN_DEFAULT_P1',
-                'value': idTokenPart1,
-                'path': site.context + "/services/logout",
-                "secure": true,
-                "maxAge": Integer(tokenResponse.expires_in)
-            };
-            response.addCookie(cookie);
-            var obj = {};
-            print(obj);
-        } else {
-            log.warn("Something went wrong while refreshing the token" );
-            log.error(response);
-            response.status = 500;
+        var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
+        var systemApplicationDAO = new SystemApplicationDTO();
+        var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME);
+        if (systemApplicationDTO === null) {
+            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD);
+        }
+        if (systemApplicationDTO == null) {
+            log.error("Oauth application details not found for 'publisher'");
+            response.status = 401;
             response.contentType = "application/json";
             var res= {};
             res.error = true;
-            res.message = "Something went wrong while refreshing the token!!";
+            res.message = "Oauth application details not found for 'publisher'";
             print(res);
+        } else {
+            var clientId = systemApplicationDTO.getConsumerKey();
+            var clientSecret = systemApplicationDTO.getConsumerSecret();
+            var Base64 = org.apache.axiom.om.util.Base64;
+            var String = Packages.java.lang.String;
+            var Integer = Packages.java.lang.Integer;
+            var base64encoded = Base64.encode(new String(clientId + ":" + clientSecret).getBytes());
+            var tokenEndpoint = appUtils.getLoopbackOrigin() + TOKEN_URL_SUFFIX;
+            var result = post(tokenEndpoint, tokenRequestData, {"Authorization": "Basic " + base64encoded});
+            if (result.xhr.status === 200) {
+                response.contentType = "application/json";
+                var tokenResponse = JSON.parse(result.data);
+
+                var tokenLength = tokenResponse.access_token.length;
+                var accessToken = String(tokenResponse.access_token);
+
+                var idTokenLength = tokenResponse.id_token.length;
+                var idToken = String(tokenResponse.id_token);
+
+                var idTokenPart1 = idToken.substring(0, idTokenLength / 2);
+                var idTokenPart2 = idToken.substring(idTokenLength / 2, idTokenLength);
+
+                var accessTokenPart1 = accessToken.substring(0, tokenLength / 2);
+                var accessTokenPart2 = accessToken.substring(tokenLength / 2, tokenLength);
+                var refreshToken = String(tokenResponse.refresh_token);
+                tokenLength = tokenResponse.refresh_token.length;
+                var refreshTokenPart1 = refreshToken.substring(0, tokenLength / 2);
+                var refreshTokenPart2 = refreshToken.substring(tokenLength / 2, tokenLength);
+
+                // Setting access token part 1 as secured HTTP only cookie, Can't restrict the path to /api/am/publisher
+                // because partial HTTP only cookie is required for get the user information from access token,
+                // hence setting the HTTP only access token path to App context
+                var cookie = {
+                    'name': 'AM_ACC_TOKEN_DEFAULT_P2',
+                    'value': accessTokenPart2,
+                    'path': site.context + "/",
+                    "httpOnly": true,
+                    "secure": true,
+                    "maxAge": Integer(tokenResponse.expires_in)
+                };
+                response.addCookie(cookie);
+
+                cookie = {
+                    'name': 'AM_ACC_TOKEN_DEFAULT_P2',
+                    'value': accessTokenPart2,
+                    'path': "/api/am/publisher/",
+                    "httpOnly": true,
+                    "secure": true,
+                    "maxAge": Integer(tokenResponse.expires_in)
+                };
+                response.addCookie(cookie);
+
+                cookie = {
+                    'name': 'AM_REF_TOKEN_DEFAULT_P2',
+                    'value': refreshTokenPart2,
+                    'path': site.context + "/",
+                    "httpOnly": true,
+                    "secure": true,
+                    "maxAge": 86400 // TODO: Default value a day, need to get this from idn configs ~tmkb
+                };
+                response.addCookie(cookie);
+
+                cookie = {
+                    'name': 'WSO2_AM_TOKEN_1_Default',
+                    'value': accessTokenPart1,
+                    'path': site.context + "/",
+                    "secure": true,
+                    "maxAge": Integer(tokenResponse.expires_in)
+                };
+                response.addCookie(cookie);
+
+                cookie = {
+                    'name': 'WSO2_AM_REFRESH_TOKEN_1_Default',
+                    'value': refreshTokenPart1,
+                    'path': site.context + "/",
+                    "secure": true,
+                    "maxAge": 86400 // TODO: Default value a day, need to get this from idn configs ~tmkb
+                };
+                response.addCookie(cookie);
+
+                cookie = {
+                    'name': 'AM_ID_TOKEN_DEFAULT_P2',
+                    'value': idTokenPart2,
+                    'path': site.context + "/services/logout",
+                    "secure": true,
+                    "maxAge": Integer(tokenResponse.expires_in)
+                };
+                response.addCookie(cookie);
+
+                cookie = {
+                    'name': 'AM_ID_TOKEN_DEFAULT_P1',
+                    'value': idTokenPart1,
+                    'path': site.context + "/services/logout",
+                    "secure": true,
+                    "maxAge": Integer(tokenResponse.expires_in)
+                };
+                response.addCookie(cookie);
+                var obj = {};
+                print(obj);
+            } else {
+                log.warn("Something went wrong while refreshing the token" );
+                log.error(response);
+                response.status = 500;
+                response.contentType = "application/json";
+                var res= {};
+                res.error = true;
+                res.message = "Something went wrong while refreshing the token!!";
+                print(res);
+            }
         }
     }
+
 %>

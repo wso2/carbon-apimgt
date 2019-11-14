@@ -55,7 +55,11 @@
     var SystemApplicationDAO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
     var systemApplicationDAO = new SystemApplicationDAO();
     var clientId ;
+    // this is to support migration from admin_store to admin_devportal
     systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME);
+    if (systemApplicationDTO === null) {
+        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME_OLD);
+    }
 
     var lock = SystemApplicationDAO.getLock();
     if (systemApplicationDTO  !== null) {
@@ -63,8 +67,12 @@
     } else {
         try {
             lock.acquire();
+            // this is to support migration from admin_store to admin_devportal
             systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME);
-            if (systemApplicationDTO == null) {
+            if (systemApplicationDTO === null) {
+                systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME_OLD);
+            }
+            if (systemApplicationDTO === null) {
                 var dcrRequestData = {
                     "callbackUrl": callbackUrl,
                     "clientName": STORE_CLIENT_APP_NAME,

@@ -361,6 +361,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleBadRequest("Valid roles should be added under 'visibleRoles' to restrict " +
                     "the visibility", log);
         }
+        if (body.getVisibleRoles() != null) {
+            String errorMessage = RestApiPublisherUtils.validateRoles(body.getVisibleRoles());
+            if (!errorMessage.isEmpty()) {
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        }
 
         //Get all existing versions of  api been adding
         List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
@@ -617,6 +623,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
             }
+            if (body.getVisibleRoles() != null) {
+                String errorMessage = RestApiPublisherUtils.validateRoles(body.getVisibleRoles());
+                if (!errorMessage.isEmpty()) {
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+            }
             if (body.getAdditionalProperties() != null) {
                 String errorMessage = RestApiPublisherUtils.validateAdditionalProperties(body.getAdditionalProperties());
                 if (!errorMessage.isEmpty()) {
@@ -661,7 +673,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while updating API : " + apiId, e, log);
             } else {
-                String errorMessage = "Error while updating API : " + apiId;
+                String errorMessage = "Error while updating the API : " + apiId + " - " + e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (FaultGatewaysException e) {
@@ -2476,7 +2488,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while updating swagger definition of API: " + apiId, e, log);
             } else {
-                String errorMessage = "Error while retrieving API : " + apiId;
+                String errorMessage = "Error while updating the swagger definition of the API: " + apiId + " - "
+                        + e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (FaultGatewaysException e) {

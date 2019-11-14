@@ -1,4 +1,5 @@
-<%
+/* eslint-disable*/
+// Disable eslint check since this is only used in jaggeryjs codes
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -16,16 +17,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+var app = require('/site/public/theme/defaultTheme.js').Configurations.app;
 
- // TODO: Wrap these consts with an object and do `require` when needed ~tmkb
-var SETTINGS_REST_API_URL_SUFFIX = "/api/am/publisher/v1.0/settings";
-var DCR_URL_SUFFIX =  "/client-registration/v0.15/register";
-var AUTHORIZE_ENDPOINT_SUFFIX = "/oauth2/authorize";
-var TOKEN_URL_SUFFIX = "/oauth2/token";
-var REVOKE_URL_SUFFIX = "/oauth2/revoke";
-var LOGIN_CALLBACK_URL_SUFFIX = "/services/auth/callback/login";
-var LOGOUT_CALLBACK_URL_SUFFIX = "/services/auth/callback/logout"
+var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-var PUBLISHER_CLIENT_APP_NAME_OLD = "admin_publisher";
-var PUBLISHER_CLIENT_APP_NAME = "apim_publisher";
-%>
+var getLoopbackOrigin = function() {
+    return (
+        'https://' +
+        app.reverseProxy.loopbackHost +
+        ':' +
+        String(parseInt(app.reverseProxy.defaultHTTPSPort) + utils.getPortOffset())
+    );
+};

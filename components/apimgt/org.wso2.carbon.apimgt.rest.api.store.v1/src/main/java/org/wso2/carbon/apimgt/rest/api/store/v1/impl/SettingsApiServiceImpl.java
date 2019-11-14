@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIConsumerImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SettingsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeDTO;
@@ -36,6 +37,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -49,12 +51,15 @@ public class SettingsApiServiceImpl implements SettingsApiService {
     public Response settingsGet(MessageContext messageContext) {
         try {
             String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = MultitenantUtils.getTenantDomain(username);
+            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+            boolean monetizationEnabled = apiConsumer.isMonetizationEnabled(tenantDomain);
             boolean isUserAvailable = false;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
                 isUserAvailable = true;
             }
             SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
-            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO(isUserAvailable);
+            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO( isUserAvailable, monetizationEnabled );
             return Response.ok().entity(settingsDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Store Settings";

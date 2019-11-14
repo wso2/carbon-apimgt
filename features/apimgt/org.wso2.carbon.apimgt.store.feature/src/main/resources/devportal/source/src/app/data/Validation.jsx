@@ -1,4 +1,3 @@
-<%
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -16,13 +15,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-    include("/services/constants.jag");
 
-    var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
-    var serverPort = utils.getManagementTransportPort(MGT_TRANSPORT.split(":")[0]);
+import Joi from '@hapi/joi';
 
-    var getServerPort = function () {
-        return serverPort;
-    };
+const definition = {
+    timeout: Joi.number().integer(),
+};
 
-%>
+export default definition;

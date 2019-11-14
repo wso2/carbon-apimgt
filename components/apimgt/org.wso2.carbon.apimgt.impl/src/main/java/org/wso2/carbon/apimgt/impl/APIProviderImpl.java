@@ -3316,11 +3316,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             String publisherAccessControlRoles = api.getAccessControlRoles();
+            updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
+                    api.getAdditionalProperties());
             APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                     artifactPath, registry);
 
-            updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
-                    api.getAdditionalProperties());
             registry.commitTransaction();
             transactionCommitted = true;
 
@@ -3566,7 +3566,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
             } else {
-                log.debug("Gateway is not existed for the current API Provider");
+                log.debug("Gateway does not exist for the current API Provider");
             }
             //Check if there are already published external APIStores.If yes,removing APIs from them.
             Set<APIStore> apiStoreSet = getPublishedExternalAPIStores(api.getId());
@@ -6612,6 +6612,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         rolesQuery.append('(');
         rolesQuery.append(APIConstants.NULL_USER_ROLE_LIST);
         String[] userRoles = APIUtil.getListOfRoles(userNameWithoutChange);
+        String skipRolesByRegex = APIUtil.getSkipRolesByRegex();
+        if (StringUtils.isNotEmpty(skipRolesByRegex)) {
+            List<String> filteredUserRoles = new ArrayList<>(Arrays.asList(userRoles));
+            String[] regexList = skipRolesByRegex.split(",");
+            for (int i = 0; i < regexList.length; i++) {
+                Pattern p = Pattern.compile(regexList[i]);
+                Iterator<String> itr = filteredUserRoles.iterator();
+                while(itr.hasNext()) {
+                    String role = itr.next();
+                    Matcher m = p.matcher(role);
+                    if (m.matches()) {
+                        itr.remove();
+                    }
+                }
+            }
+            userRoles = filteredUserRoles.toArray(new String[0]);
+        }
         if (userRoles != null) {
             for (String userRole : userRoles) {
                 rolesQuery.append(" OR ");
