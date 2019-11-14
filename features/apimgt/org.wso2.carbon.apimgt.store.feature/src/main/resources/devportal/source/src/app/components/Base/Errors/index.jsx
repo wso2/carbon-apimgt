@@ -18,5 +18,6 @@
 
 import ResourceNotFound from './ResourceNotFound'
 import ScopeNotFound from './ScopeNotFound'
+import PageNotFound from './PageNotFound'
 
-export { ResourceNotFound, ScopeNotFound }
+export { ResourceNotFound, ScopeNotFound, PageNotFound }

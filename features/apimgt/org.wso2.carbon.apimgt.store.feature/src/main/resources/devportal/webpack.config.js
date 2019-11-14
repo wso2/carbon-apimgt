@@ -45,6 +45,7 @@ const config = {
                 test: /\.js$/,
                 use: ['source-map-loader'],
                 enforce: 'pre',
+                exclude: [/node_modules\/swagger-ui/g],
             },
             {
                 test: /\.(js|jsx)$/,
