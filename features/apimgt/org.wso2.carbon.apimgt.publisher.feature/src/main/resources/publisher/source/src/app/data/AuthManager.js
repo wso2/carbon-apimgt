@@ -20,10 +20,9 @@ import qs from 'qs';
 import CONSTS from 'AppData/Constants';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import Configurations from 'Config';
-import API from 'AppData/api.js';
 import Utils from './Utils';
 import User from './User';
-import APIClient from './APIClient';
+
 /**
  * Class managing authentication
  */
@@ -92,15 +91,9 @@ class AuthManager {
             .then(response => response.json())
             .then((data) => {
                 let user = null;
-                let username;
                 if (data.active) {
                     const currentEnv = Utils.getCurrentEnvironment();
-                    if (data.username.endsWith('@carbon.super')) {
-                        username = data.username.replace('@carbon.super', '');
-                    } else {
-                        ({ username } = data);
-                    }
-                    user = new User(currentEnv.label, username);
+                    user = new User(currentEnv.label, data.username);
                     const scopes = data.scope.split(' ');
                     if (this.hasBasicLoginPermission(scopes)) {
                         user.scopes = scopes;
@@ -149,23 +142,6 @@ class AuthManager {
         Utils.getCookie(User.CONST.WSO2_AM_REFRESH_TOKEN_1, currentEnv);
     }
 
-    /**
-     *
-     * Get scope for resources
-     * @static
-     * @param {String} resourcePath
-     * @param {String} resourceMethod
-     * @returns Boolean
-     * @memberof AuthManager
-     */
-    static hasScopes(resourcePath, resourceMethod) {
-        const userscopes = AuthManager.getUser().scopes;
-        const validScope = APIClient.getScopeForResource(resourcePath, resourceMethod);
-        return validScope.then((scope) => {
-            return userscopes.includes(scope);
-        });
-    }
-
     static isNotCreator() {
         return !AuthManager.getUser().scopes.includes('apim:api_create');
     }
@@ -180,7 +156,7 @@ class AuthManager {
 
     static isRestricted(scopesAllowedToEdit, api) {
         // determines whether the apiType is API PRODUCT and user has publisher role, then allow access.
-        if (api.apiType === API.CONSTS.APIProduct) {
+        if (api.apiType === 'APIProduct') {
             if (AuthManager.getUser().scopes.includes('apim:api_publish')) {
                 return false;
             } else {

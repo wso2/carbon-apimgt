@@ -23,6 +23,7 @@ public class SettingsDTO   {
     private List<EnvironmentDTO> environment = new ArrayList<>();
     private List<String> scopes = new ArrayList<>();
     private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<>();
+    private Object securityAuditProperties = null;
     private Boolean externalStoresEnabled = null;
 
   /**
@@ -95,6 +96,23 @@ public class SettingsDTO   {
   }
 
   /**
+   **/
+  public SettingsDTO securityAuditProperties(Object securityAuditProperties) {
+    this.securityAuditProperties = securityAuditProperties;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("securityAuditProperties")
+  public Object getSecurityAuditProperties() {
+    return securityAuditProperties;
+  }
+  public void setSecurityAuditProperties(Object securityAuditProperties) {
+    this.securityAuditProperties = securityAuditProperties;
+  }
+
+  /**
    * Is External Stores configuration enabled 
    **/
   public SettingsDTO externalStoresEnabled(Boolean externalStoresEnabled) {
@@ -126,12 +144,13 @@ public class SettingsDTO   {
         Objects.equals(environment, settings.environment) &&
         Objects.equals(scopes, settings.scopes) &&
         Objects.equals(monetizationAttributes, settings.monetizationAttributes) &&
+        Objects.equals(securityAuditProperties, settings.securityAuditProperties) &&
         Objects.equals(externalStoresEnabled, settings.externalStoresEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(storeUrl, environment, scopes, monetizationAttributes, externalStoresEnabled);
+    return Objects.hash(storeUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled);
   }
 
   @Override
@@ -143,6 +162,7 @@ public class SettingsDTO   {
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    monetizationAttributes: ").append(toIndentedString(monetizationAttributes)).append("\n");
+    sb.append("    securityAuditProperties: ").append(toIndentedString(securityAuditProperties)).append("\n");
     sb.append("    externalStoresEnabled: ").append(toIndentedString(externalStoresEnabled)).append("\n");
     sb.append("}");
     return sb.toString();

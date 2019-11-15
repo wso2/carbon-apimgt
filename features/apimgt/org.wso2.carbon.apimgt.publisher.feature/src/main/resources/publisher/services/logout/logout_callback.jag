@@ -18,15 +18,13 @@
  */
 
     var log = new Log("Logout Callback Function");
-    var site = require("/site/public/theme/defaultTheme.js").Configurations.app;
-
+    var app = require("/site/public/theme/settings.js").Settings.app;
     include("/services/constants.jag");
-    include("/services/jagg.jag");
 
     var cookie = {
         'name': 'AM_ACC_TOKEN_DEFAULT_P2',
         'value': '',
-        'path': site.context + "/",
+        'path': app.context + "/",
         "httpOnly": true,
         "secure": true,
         "maxAge": 2
@@ -46,7 +44,7 @@
     cookie = {
         'name': 'AM_REF_TOKEN_DEFAULT_P2',
         'value': '',
-        'path': site.context + "/",
+        'path': app.context + "/",
         "httpOnly": true,
         "secure": true,
         "maxAge": 2
@@ -56,7 +54,7 @@
     cookie = {
         'name': 'WSO2_AM_TOKEN_1_Default',
         'value': '',
-        'path': site.context + "/",
+        'path': app.context + "/",
         "secure": true,
         "maxAge": 2};
     response.addCookie(cookie);
@@ -64,7 +62,7 @@
     cookie = {
         'name': 'WSO2_AM_REFRESH_TOKEN_1_Default',
         'value': '',
-        'path': site.context + "/",
+        'path': app.context + "/",
         "secure": true,
         "maxAge": 2
     };
@@ -73,7 +71,7 @@
     cookie = {
         'name': 'AM_ID_TOKEN_DEFAULT_P2',
         'value': '',
-        'path': site.context + "/services/logout",
+        'path': app.context + "/services/logout",
         "secure": true,
         "maxAge": 2
     };
@@ -82,13 +80,13 @@
     cookie = {
         'name': 'AM_ID_TOKEN_DEFAULT_P1',
         'value': '',
-        'path': site.context + "/services/logout",
+        'path': app.context + "/services/logout",
         "secure": true,
         "maxAge": 2
     };
     response.addCookie(cookie);
 
     log.debug("redirecting to logout");
-    response.sendRedirect("/publisher/logout");
+    response.sendRedirect(app.context + "/logout");
 
 %>

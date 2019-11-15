@@ -7108,6 +7108,9 @@ public final class APIUtil {
     }
 
     public static int getManagementTransportPort (String mgtTransport){
+        if (StringUtils.isEmpty(mgtTransport)) {
+            mgtTransport = APIConstants.HTTPS_PROTOCOL;
+        }
         AxisConfiguration axisConfiguration = ServiceReferenceHolder
                 .getContextService().getServerConfigContext().getAxisConfiguration();
         int mgtTransportPort = CarbonUtils.getTransportProxyPort(axisConfiguration, mgtTransport);
@@ -7115,6 +7118,30 @@ public final class APIUtil {
             mgtTransportPort = CarbonUtils.getTransportPort(axisConfiguration, mgtTransport);
         }
         return mgtTransportPort;
+    }
+
+    public static int getCarbonTransportPort(String mgtTransport) {
+
+        if (StringUtils.isEmpty(mgtTransport)) {
+            mgtTransport = APIConstants.HTTPS_PROTOCOL;
+        }
+        AxisConfiguration axisConfiguration = ServiceReferenceHolder
+                .getContextService().getServerConfigContext().getAxisConfiguration();
+        return CarbonUtils.getTransportPort(axisConfiguration, mgtTransport);
+
+    }
+
+    /*
+     * Checks whether the proxy port is configured.
+     * @param transport  The transport
+     * @return boolean proxyport is enabled
+     * */
+    public static boolean isProxyPortEnabled(String mgtTransport) {
+
+        AxisConfiguration axisConfiguration = ServiceReferenceHolder
+                .getContextService().getServerConfigContext().getAxisConfiguration();
+        int mgtTransportProxyPort = CarbonUtils.getTransportProxyPort(axisConfiguration, mgtTransport);
+        return mgtTransportProxyPort > 0;
     }
 
     public static String getServerURL() throws APIManagementException {
@@ -8684,6 +8711,37 @@ public final class APIUtil {
     }
 
     /**
+     * Get the Security Audit Attributes for tenant from the Registry
+     *
+     * @param tenantId tenant id
+     * @return JSONObject JSONObject containing the properties
+     * @throws APIManagementException Throw if a registry or parse exception arises
+     */
+    public static JSONObject getSecurityAuditAttributesFromRegistry(int tenantId) throws APIManagementException {
+        try {
+            Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
+            if (registryConfig.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                Resource resource = registryConfig.get(APIConstants.API_TENANT_CONF_LOCATION);
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                if (content != null) {
+                    JSONObject tenantConfigs = (JSONObject) new JSONParser().parse(content);
+                    String property = APIConstants.SECURITY_AUDIT_CONFIGURATION;
+                    if (tenantConfigs.keySet().contains(property)) {
+                        return (JSONObject) tenantConfigs.get(property);
+                    }
+                }
+            }
+        } catch (RegistryException exception) {
+            String msg = "Error while retrieving Security Audit attributes from tenant registry.";
+            throw new APIManagementException(msg, exception);
+        } catch (ParseException parseException) {
+            String msg = "Couldn't create json object from Swagger object for custom security audit attributes.";
+            throw new APIManagementException(msg, parseException);
+        }
+        return null;
+    }
+
+    /**
      * Validate the input file name for invalid path elements
      *
      * @param fileName
@@ -9557,5 +9615,16 @@ public final class APIUtil {
             String msg = "Unable to signing certificate alias in the token";
             throw new APIManagementException(msg, e);
         }
+    }
+
+    /**
+     * return skipRolesByRegex config
+     *
+     */
+    public static String getSkipRolesByRegex() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
+        return skipRolesByRegex;
     }
 }

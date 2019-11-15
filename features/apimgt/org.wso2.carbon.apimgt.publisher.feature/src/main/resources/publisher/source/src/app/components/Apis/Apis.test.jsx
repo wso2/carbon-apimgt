@@ -78,7 +78,7 @@ describe('Test APIs main routing component', () => {
     });
 
     test.todo('should return API Details component when request path match with /apis/:apiUUID/');
-    test('should return PageNotFound component if there is no matching path', () => {
+    test.skip('should return PageNotFound component if there is no matching path', () => {
         const url = '/apis/chuck/norris';
         const noneExistingPath = (
             <MemoryRouter initialEntries={[url]}>

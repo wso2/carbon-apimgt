@@ -177,6 +177,18 @@ class API extends Resource {
     }
 
     /**
+     * Get API Security Audit Report
+     */
+    getSecurityAuditReport(apiId) {
+        const promiseGetAuditReport = this.client.then((client) => {
+            return client.apis['API Audit'].get_apis__apiId__auditapi({
+                apiId: apiId
+            }, this._requestMetaData());
+        });
+        return promiseGetAuditReport;
+    }
+
+    /**
      * Get detailed policy information of the API
      * @returns {Promise} Promise containing policy detail request calls for all the available policies
      * @memberof API
@@ -196,11 +208,21 @@ class API extends Resource {
         return Promise.all(promisedPolicies).then(policies => policies.map(response => response.body));
     }
 
-    getResourcePolicies() {
+    getResourcePolicies(sequenceType = 'in') {
         return this.client.then(client => {
             return client.apis['API Resource Policies'].get_apis__apiId__resource_policies({
                 apiId: this.id,
-                sequenceType: 'in',
+                sequenceType,
+            });
+        });
+    }
+
+    updateResourcePolicy(resourcePolicy) {
+        return this.client.then(client => {
+            return client.apis['API Resource Policies'].put_apis__apiId__resource_policies__resourcePolicyId_({
+                apiId: this.id,
+                resourcePolicyId: resourcePolicy.id,
+                body: resourcePolicy,
             });
         });
     }
@@ -2169,6 +2191,7 @@ class API extends Resource {
         });
     }
 }
+
 
 API.CONSTS = {
     API: 'API',

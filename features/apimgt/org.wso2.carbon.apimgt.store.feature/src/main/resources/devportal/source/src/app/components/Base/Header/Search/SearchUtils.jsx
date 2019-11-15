@@ -57,7 +57,7 @@ function renderInput(inputProps) {
     }
     return (
         <React.Fragment>
-            <div style={{ whiteSpace: 'nowrap' }}>
+            <div className={classes.searchBoxWrap}>
                 <NativeSelect
                     onChange={onDropDownChange}
                     className={classes.selectRoot}
@@ -83,6 +83,7 @@ function renderInput(inputProps) {
                 </NativeSelect>
                 <TextField
                     id='searchQuery'
+                    classes={{ root: classes.inputRoot }}
                     InputProps={{
                         inputRef: ref,
                         className: classes.input,

@@ -383,7 +383,7 @@ const Alerts = (props) => {
                                         <Button
                                             disabled={emails.length === 0 || subscribedAlerts.length === 0}
                                             onClick={handleSubscribe}
-                                            variant='outlined'
+                                            variant='contained'
                                             color='primary'
                                         >
                                             {isInProgress.subscribing && <CircularProgress size={15} />}
@@ -393,7 +393,8 @@ const Alerts = (props) => {
                                     <Grid item>
                                         <Button
                                             disabled={isInProgress.subscribing}
-                                            color='secondary'
+                                            color='primary'
+                                            variant='contained'
                                             onClick={() => setUnsubscribeAll(true)}
                                         >
                                             {isInProgress.unSubscribing && <CircularProgress size={15} />}
