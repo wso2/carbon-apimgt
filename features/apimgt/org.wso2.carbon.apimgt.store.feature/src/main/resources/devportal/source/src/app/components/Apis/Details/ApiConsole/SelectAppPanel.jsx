@@ -28,7 +28,7 @@ const SelectAppPanel = (props) => {
                             onChange={handleChanges}
                             SelectProps={subscriptions}
                             helperText={<FormattedMessage
-                                defaultMessage='Please select an applications'
+                                defaultMessage='Please select an application'
                                 id='Apis.Details.ApiConsole.SelectAppPanel.select.an.application'
                             />}
                             margin='normal'
@@ -56,7 +56,7 @@ const SelectAppPanel = (props) => {
                             name='selectedKeyType'
                             onChange={handleChanges}
                             helperText={<FormattedMessage
-                                defaultMessage='Please select an key type'
+                                defaultMessage='Please select a key type'
                                 id='Apis.Details.ApiConsole.SelectAppPanel.select.key.type'
                             />}
                             margin='normal'
