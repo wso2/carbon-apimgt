@@ -53,14 +53,14 @@ const styles = theme => ({
     formControl: {
         display: 'flex',
         flexDirection: 'row',
-        padding: `${theme.spacing.unit * 2}px 2px`,
+        padding: `${theme.spacing(2)}px 2px`,
     },
     dropzone: {
         border: '1px dashed ' + theme.palette.primary.main,
         borderRadius: '5px',
         cursor: 'pointer',
         height: 'calc(100vh - 50em)',
-        padding: `${theme.spacing.unit * 2}px ${theme.spacing.unit * 2}px`,
+        padding: `${theme.spacing(2)}px ${theme.spacing(2)}px`,
         position: 'relative',
         textAlign: 'center',
         width: '100%',

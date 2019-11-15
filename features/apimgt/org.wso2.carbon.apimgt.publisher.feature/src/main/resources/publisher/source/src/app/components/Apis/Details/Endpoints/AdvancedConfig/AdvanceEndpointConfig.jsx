@@ -48,9 +48,9 @@ const styles = theme => ({
     },
     subTitle: {
         fontSize: '1rem',
-        paddingTop: theme.spacing(),
-        paddingBottom: theme.spacing(),
-        marginBottom: theme.spacing(),
+        paddingTop: theme.spacing(1),
+        paddingBottom: theme.spacing(1),
+        marginBottom: theme.spacing(1),
     },
     configContainer: {
         paddingTop: '10px',
@@ -61,7 +61,7 @@ const styles = theme => ({
         padding: '5px',
     },
     textField: {
-        marginRight: theme.spacing(),
+        marginRight: theme.spacing(1),
         width: '45%',
     },
     advanceDialogActions: {

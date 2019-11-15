@@ -46,7 +46,7 @@ const styles = theme => ({
     configButtonContainer: {
         display: 'flex',
         justifyContent: 'flex-end',
-        paddingTop: theme.spacing(),
+        paddingTop: theme.spacing(1),
     },
 });
 

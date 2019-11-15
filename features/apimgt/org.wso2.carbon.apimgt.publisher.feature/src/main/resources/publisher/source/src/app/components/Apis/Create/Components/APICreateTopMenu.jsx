@@ -28,10 +28,10 @@ import CustomIcon from 'AppComponents/Shared/CustomIcon';
 
 const styles = theme => ({
     rightIcon: {
-        marginLeft: theme.spacing.unit,
+        marginLeft: theme.spacing(1),
     },
     button: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
         marginBottom: 0,
     },
     buttonRight: {
@@ -70,7 +70,7 @@ const styles = theme => ({
         alignItems: 'center',
         textDecoration: 'none',
         display: 'flex',
-        paddingLeft: theme.spacing.unit * 3,
+        paddingLeft: theme.spacing(3),
     },
     backIcon: {
         color: theme.palette.primary.main,

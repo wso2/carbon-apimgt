@@ -31,14 +31,14 @@ import { isRestricted } from 'AppData/AuthManager';
 
 const styles = theme => ({
     subscriptionPoliciesPaper: {
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
         padding: theme.spacing(2),
     },
     grid: {
-        margin: theme.spacing.unit * 1.25,
+        margin: theme.spacing(1.25),
     },
     gridLabel: {
-        marginTop: theme.spacing.unit * 1.5,
+        marginTop: theme.spacing(1.5),
     },
     mainTitle: {
         paddingLeft: 0,

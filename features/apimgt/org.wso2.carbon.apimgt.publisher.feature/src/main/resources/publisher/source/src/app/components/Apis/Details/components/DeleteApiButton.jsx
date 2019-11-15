@@ -41,7 +41,7 @@ const styles = theme => ({
         flex: 0,
         display: 'flex',
         justifyContent: 'flex-end',
-        paddingRight: theme.spacing.unit * 2,
+        paddingRight: theme.spacing(2),
     },
     delete: {
         display: 'flex',

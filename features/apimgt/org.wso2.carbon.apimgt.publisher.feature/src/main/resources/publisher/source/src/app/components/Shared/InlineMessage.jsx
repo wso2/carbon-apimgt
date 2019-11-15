@@ -10,7 +10,7 @@ const styles = theme => ({
     root: {
         display: 'flex',
         alignItems: 'center',
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
         borderRadius: theme.shape.borderRadius,
         border: 'solid 1px ' + theme.palette.secondary.main,
         '& span.material-icons.info': {
@@ -23,13 +23,13 @@ const styles = theme => ({
         },
     },
     button: {
-        marginTop: theme.spacing.unit,
-        marginBottom: theme.spacing.unit,
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(1),
     },
     content: {
-        paddingTop: theme.spacing.unit,
-        paddingBottom: theme.spacing.unit,
-        paddingRight: theme.spacing.unit,
+        paddingTop: theme.spacing(1),
+        paddingBottom: theme.spacing(1),
+        paddingRight: theme.spacing(1),
     },
 });
 

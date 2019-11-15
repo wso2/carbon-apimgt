@@ -38,7 +38,7 @@ const styles = theme => ({
         color: theme.palette.grey[500],
         border: 'dashed 1px ' + theme.palette.grey[500],
         background: theme.palette.grey[100],
-        padding: theme.spacing.unit * 4,
+        padding: theme.spacing(4),
         textAlign: 'center',
         cursor: 'pointer',
     },
@@ -63,7 +63,7 @@ const styles = theme => ({
     },
     errorIcon: {
         color: theme.palette.error.main,
-        marginRight: theme.spacing.unit * 2,
+        marginRight: theme.spacing(2),
     },
     fileNameWrapper: {
         flexDirection: 'row',

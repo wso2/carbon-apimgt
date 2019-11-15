@@ -58,10 +58,10 @@ const useStyles = makeStyles(theme => ({
         border: '1px solid red',
     },
     iconButton: {
-        padding: theme.spacing(),
+        padding: theme.spacing(1),
     },
     iconButtonValid: {
-        padding: theme.spacing(),
+        padding: theme.spacing(1),
         color: green[500],
     },
 }));

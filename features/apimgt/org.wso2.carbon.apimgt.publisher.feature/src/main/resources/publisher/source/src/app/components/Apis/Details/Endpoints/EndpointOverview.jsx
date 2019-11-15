@@ -47,18 +47,18 @@ import AdvanceEndpointConfig from './AdvancedConfig/AdvanceEndpointConfig';
 
 const styles = theme => ({
     listing: {
-        margin: theme.spacing(),
-        padding: theme.spacing(),
+        margin: theme.spacing(1),
+        padding: theme.spacing(1),
     },
     endpointContainer: {
         paddingLeft: theme.spacing(2),
-        padding: theme.spacing(),
+        padding: theme.spacing(1),
     },
     endpointName: {
-        paddingLeft: theme.spacing(),
+        paddingLeft: theme.spacing(1),
         fontSize: '1rem',
-        paddingTop: theme.spacing(),
-        paddingBottom: theme.spacing(),
+        paddingTop: theme.spacing(1),
+        paddingBottom: theme.spacing(1),
     },
     endpointTypesWrapper: {
         padding: theme.spacing(3),
@@ -73,18 +73,18 @@ const styles = theme => ({
         flexDirection: 'row',
     },
     endpointsWrapperLeft: {
-        padding: theme.spacing(),
+        padding: theme.spacing(1),
         borderRight: '#c4c4c4',
         borderRightStyle: 'solid',
         borderRightWidth: 'thin',
     },
     endpointsWrapperRight: {
-        padding: theme.spacing(),
+        padding: theme.spacing(1),
     },
     endpointsTypeSelectWrapper: {
         marginLeft: theme.spacing(2),
         marginRight: theme.spacing(2),
-        padding: theme.spacing(),
+        padding: theme.spacing(1),
         display: 'flex',
         justifyContent: 'space-between',
     },
@@ -92,9 +92,9 @@ const styles = theme => ({
         display: 'flex',
     },
     defaultEndpointWrapper: {
-        paddingLeft: theme.spacing(),
-        paddingRight: theme.spacing(),
-        marginRight: theme.spacing(),
+        paddingLeft: theme.spacing(1),
+        paddingRight: theme.spacing(1),
+        marginRight: theme.spacing(1),
     },
     configDialogHeader: {
         fontWeight: '600',

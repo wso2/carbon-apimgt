@@ -31,8 +31,8 @@ const styles = theme => ({
         background: theme.palette.background.appBar,
     },
     typoRoot: {
-        marginLeft: theme.spacing.unit * 3,
-        marginRight: theme.spacing.unit * 3,
+        marginLeft: theme.spacing(3),
+        marginRight: theme.spacing(3),
         textTransform: 'capitalize',
     },
     brandLink: {
@@ -65,10 +65,10 @@ const styles = theme => ({
     errorTitle: {
         display: 'flex',
         alignItems: 'center',
-        paddingTop: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit * 2,
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
         '& h2': {
-            paddingLeft: theme.spacing.unit * 2,
+            paddingLeft: theme.spacing(2),
         },
     },
     link: {

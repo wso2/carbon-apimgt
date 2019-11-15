@@ -42,8 +42,8 @@ const styles = theme => ({
         alignItems: 'center',
     },
     historyHead: {
-        marginTop: theme.spacing.unit * 2,
-        marginBottom: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2),
     },
 });
 /**

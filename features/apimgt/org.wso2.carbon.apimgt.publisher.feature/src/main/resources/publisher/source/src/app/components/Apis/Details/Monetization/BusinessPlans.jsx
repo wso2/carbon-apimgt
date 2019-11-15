@@ -17,7 +17,7 @@ const styles = theme => ({
         paddingBottom: '10px',
     },
     margin: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(),
     },
     rightDataColumn: {
         display: 'flex',

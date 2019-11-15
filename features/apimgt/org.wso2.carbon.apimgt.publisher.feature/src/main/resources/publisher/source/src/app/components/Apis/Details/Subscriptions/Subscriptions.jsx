@@ -39,7 +39,7 @@ const useStyles = makeStyles(theme => ({
         marginTop: theme.spacing(2),
     },
     emptyBox: {
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
     },
     heading: {
         marginTop: theme.spacing(3),

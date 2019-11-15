@@ -56,7 +56,7 @@ const styles = theme => ({
         color: theme.palette.grey[500],
     },
     docBadge: {
-        padding: theme.spacing.unit,
+        padding: theme.spacing(1),
         background: theme.palette.primary.main,
         position: 'absolute',
         top: 0,
@@ -64,22 +64,22 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
     button: {
-        padding: theme.spacing.unit * 2,
-        marginTop: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
+        marginTop: theme.spacing(2),
     },
     displayURL: {
-        padding: theme.spacing.unit * 2,
-        marginTop: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
+        marginTop: theme.spacing(2),
         background: theme.palette.grey[200],
         color: theme.palette.getContrastText(theme.palette.grey[200]),
         display: 'flex',
     },
     displayURLLink: {
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
     },
     paper: {
         marginTop: 20,
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         height: '100%',
     },
     leftCell: {

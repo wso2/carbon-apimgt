@@ -42,8 +42,8 @@ import MonacoEditor from 'react-monaco-editor';
 
 const styles = theme => ({
     rootPaper: {
-        padding: theme.spacing.unit * 3,
-        margin: theme.spacing.unit * 2,
+        padding: theme.spacing(3),
+        margin: theme.spacing(2),
     },
     inlineDecoration: {
         background: '#FF0000',

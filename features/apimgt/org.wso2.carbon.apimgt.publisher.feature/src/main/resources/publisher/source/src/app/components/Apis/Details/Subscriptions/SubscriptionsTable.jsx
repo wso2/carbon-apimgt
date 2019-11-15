@@ -48,9 +48,9 @@ import Invoice from './Invoice';
 
 const styles = theme => ({
     button: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
     },
-    headline: { paddingTop: theme.spacing.unit * 1.25, paddingLeft: theme.spacing.unit * 2.5 },
+    headline: { paddingTop: theme.spacing(1.25), paddingLeft: theme.spacing(2.5) },
     popupHeadline: {
         alignItems: 'center',
         borderBottom: '2px solid #40E0D0',
@@ -66,25 +66,25 @@ const styles = theme => ({
     },
     searchDiv: {
         float: 'right',
-        paddingTop: theme.spacing.unit * 1.25,
-        paddingRight: theme.spacing.unit * 1.25,
+        paddingTop: theme.spacing(1.25),
+        paddingRight: theme.spacing(1.25),
     },
     searchRoot: {
-        paddingTop: theme.spacing.unit * 0.25,
-        paddingBottom: theme.spacing.unit * 0.25,
-        paddingRight: theme.spacing.unit * 0.5,
-        paddingLeft: theme.spacing.unit * 0.5,
+        paddingTop: theme.spacing(0.25),
+        paddingBottom: theme.spacing(0.25),
+        paddingRight: theme.spacing(0.5),
+        paddingLeft: theme.spacing(0.5),
         display: 'flex',
         alignItems: 'right',
-        width: theme.spacing.unit * 50,
+        width: theme.spacing(50),
         borderBottom: '1px solid #E8E8E8',
     },
     searchInput: {
-        marginLeft: theme.spacing.unit,
+        marginLeft: theme.spacing(1),
         flex: 1,
     },
     searchIconButton: {
-        padding: theme.spacing.unit * 1.25,
+        padding: theme.spacing(1.25),
     },
     noDataMessage: {
         display: 'flex',

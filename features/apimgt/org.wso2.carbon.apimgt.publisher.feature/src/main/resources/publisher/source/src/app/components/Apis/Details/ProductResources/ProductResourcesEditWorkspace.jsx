@@ -46,7 +46,7 @@ import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 const useStyles = makeStyles(theme => ({
     searchWrapper: {
         padding: 0,
-        marginTop: theme.spacing.unit,
+        marginTop: theme.spacing(1),
         '& input': {
             padding: '12px 14px',
         },
@@ -71,33 +71,33 @@ const useStyles = makeStyles(theme => ({
     leftMost: {
         background: theme.palette.grey[700],
         color: theme.palette.getContrastText(theme.palette.grey[700]),
-        padding: theme.spacing.unit,
+        padding: theme.spacing(1),
     },
     rightMost: {
         background: theme.palette.grey[600],
         color: theme.palette.getContrastText(theme.palette.grey[600]),
-        padding: theme.spacing.unit,
+        padding: theme.spacing(1),
     },
     colTitle: {
         background: theme.palette.grey[400],
         color: theme.palette.getContrastText(theme.palette.grey[400]),
-        padding: theme.spacing.unit,
+        padding: theme.spacing(1),
         fontWeight: 200,
         minHeight: 25,
     },
     treeItemMain: {
         background: theme.palette.grey[100],
         color: theme.palette.getContrastText(theme.palette.grey[100]),
-        padding: theme.spacing.unit,
+        padding: theme.spacing(1),
     },
     treeItemMainWrapper: {
         paddingLeft: theme.spacing(2),
     },
     treeItem: {
         '& .material-icons': {
-            fontSize: theme.spacing.unit * 2,
+            fontSize: theme.spacing(2),
             cursor: 'pointer',
-            marginRight: theme.spacing.unit,
+            marginRight: theme.spacing(1),
         },
         display: 'flex',
         alignItems: 'center',
@@ -105,13 +105,13 @@ const useStyles = makeStyles(theme => ({
     },
     hr: {
         flex: 1,
-        marginLeft: theme.spacing.unit,
-        marginRight: theme.spacing.unit,
+        marginLeft: theme.spacing(1),
+        marginRight: theme.spacing(1),
         color: theme.palette.getContrastText(theme.palette.grey[100]),
     },
     methodView: {
-        marginLeft: theme.spacing.unit,
-        marginRight: theme.spacing.unit,
+        marginLeft: theme.spacing(1),
+        marginRight: theme.spacing(1),
     },
     middleText: {
         flex: 1,
@@ -120,17 +120,17 @@ const useStyles = makeStyles(theme => ({
         background: theme.palette.grey[100],
     },
     selectedTitle: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
     },
     buttonWrapper: {
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
         textDecorate: 'none',
     },
     selectedApiDescription: {
         padding: '0px 16px',
     },
     messageWrapper: {
-        padding: theme.spacing.unit * 3,
+        padding: theme.spacing(3),
     },
     tootBar: {
         display: 'flex',

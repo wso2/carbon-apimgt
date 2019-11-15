@@ -45,7 +45,7 @@ const styles = theme => ({
         position: 'relative',
         margin: theme.spacing(1),
     },
-    headline: { paddingTop: theme.spacing.unit * 1.25, paddingLeft: theme.spacing.unit * 2.5 },
+    headline: { paddingTop: theme.spacing(1.25), paddingLeft: theme.spacing(2.5) },
     heading: {
         flexGrow: 1,
         marginTop: 10,
@@ -68,7 +68,7 @@ const styles = theme => ({
         marginRight: theme.spacing(1),
     },
     content: {
-        margin: `${theme.spacing.unit * 2}px 0 ${theme.spacing.unit * 2}px 0`,
+        margin: `${theme.spacing(2)}px 0 ${theme.spacing(2)}px 0`,
     },
     head: {
         fontWeight: 200,

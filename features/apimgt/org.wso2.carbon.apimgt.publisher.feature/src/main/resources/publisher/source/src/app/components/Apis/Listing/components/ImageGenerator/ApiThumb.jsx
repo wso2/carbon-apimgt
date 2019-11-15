@@ -36,15 +36,15 @@ import ThumbnailView from './ThumbnailView';
 
 const styles = theme => ({
     card: {
-        margin: theme.spacing.unit * (3 / 2),
-        maxWidth: theme.spacing.unit * 32,
+        margin: theme.spacing(3 / 2),
+        maxWidth: theme.spacing(32),
         transition: 'box-shadow 0.3s ease-in-out',
     },
     providerText: {
         textTransform: 'capitalize',
     },
-    apiDetails: { padding: theme.spacing.unit },
-    apiActions: { justifyContent: 'space-between', padding: `0px 0px ${theme.spacing.unit}px 8px` },
+    apiDetails: { padding: theme.spacing(1) },
+    apiActions: { justifyContent: 'space-between', padding: `0px 0px ${theme.spacing(1)}px 8px` },
     deleteProgress: {
         color: green[200],
         position: 'absolute',
@@ -63,15 +63,15 @@ const styles = theme => ({
     imageWrapper: {
         color: theme.palette.text.secondary,
         backgroundColor: theme.palette.background.paper,
-        width: theme.custom.thumbnail.width + theme.spacing.unit,
+        width: theme.custom.thumbnail.width + theme.spacing(1),
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
     },
     thumbContent: {
-        width: theme.custom.thumbnail.width - theme.spacing.unit,
+        width: theme.custom.thumbnail.width - theme.spacing(1),
         backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing.unit,
+        padding: theme.spacing(1),
     },
     thumbLeft: {
         alignSelf: 'flex-start',

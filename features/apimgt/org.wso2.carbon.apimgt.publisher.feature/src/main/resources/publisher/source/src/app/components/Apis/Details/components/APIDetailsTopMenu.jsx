@@ -93,7 +93,7 @@ const APIDetailsTopMenu = (props) => {
             </Link>
             <VerticalDivider height={70} />
             <ThumbnailView api={api} width={70} height={50} imageUpdate={imageUpdate} />
-            <div style={{ marginLeft: theme.spacing.unit, maxWidth: 500 }}>
+            <div style={{ marginLeft: theme.spacing(1), maxWidth: 500 }}>
                 <Typography variant='h4' className={classes.apiName}>
                     {api.name} {isAPIProduct ? '' : ':' + api.version}
                 </Typography>

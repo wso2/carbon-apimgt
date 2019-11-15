@@ -76,8 +76,8 @@ const styles = theme => ({
         marginTop: 0,
     },
     FormControlLabel: {
-        marginBottom: theme.spacing.unit,
-        marginTop: theme.spacing.unit,
+        marginBottom: theme.spacing(1),
+        marginTop: theme.spacing(1),
         fontSize: theme.typography.caption.fontSize,
     },
     buttonSection: {
@@ -88,7 +88,7 @@ const styles = theme => ({
     },
     helpText: {
         color: theme.palette.text.hint,
-        marginTop: theme.spacing.unit,
+        marginTop: theme.spacing(1),
     },
     extraPadding: {
         paddingLeft: theme.spacing(2),

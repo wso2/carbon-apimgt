@@ -46,7 +46,7 @@ const styles = theme => ({
     },
     formControl: {
         flexDirection: 'row',
-        padding: `${theme.spacing.unit * 2}px 2px`,
+        padding: `${theme.spacing(2)}px 2px`,
     },
     itemWrapper: {
         width: 500,

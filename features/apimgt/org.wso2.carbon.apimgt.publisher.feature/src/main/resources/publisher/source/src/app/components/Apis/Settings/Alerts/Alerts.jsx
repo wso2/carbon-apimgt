@@ -50,7 +50,7 @@ const styles = theme => ({
         padding: theme.spacing(2),
     },
     manageAlertHeading: {
-        marginBottom: theme.spacing(),
+        marginBottom: theme.spacing(1),
     },
     chipInput: {
         width: '100%',
@@ -64,7 +64,7 @@ const styles = theme => ({
         fontWeight: '600',
     },
     btnContainer: {
-        marginTop: theme.spacing(),
+        marginTop: theme.spacing(1),
     },
 });
 

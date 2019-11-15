@@ -29,7 +29,7 @@ const styles = theme => ({
         fontWeight: 'bold',
     },
     settinsIcon: {
-        marginRight: theme.spacing(),
+        marginRight: theme.spacing(1),
     },
 });
 

@@ -33,9 +33,9 @@ const styles = theme => ({
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
-        paddingLeft: theme.spacing.unit * 2,
-        paddingTop: theme.spacing.unig,
-        marginTop: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
+        paddingTop: theme.spacing(1),
+        marginTop: theme.spacing(2),
     },
     category: {
         width: '12%',

@@ -30,7 +30,7 @@ import LaunchIcon from '@material-ui/icons/Launch';
 
 const useStyles = makeStyles(theme => ({
     stateButton: {
-        marginRight: theme.spacing.unit,
+        marginRight: theme.spacing(),
     },
     paperCenter: {
         padding: theme.spacing(2),

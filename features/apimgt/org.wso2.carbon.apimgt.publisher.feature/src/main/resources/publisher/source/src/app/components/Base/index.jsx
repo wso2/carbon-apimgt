@@ -27,7 +27,7 @@ const styles = theme => ({
         background: theme.palette.background.appBar,
     },
     icon: {
-        marginRight: theme.spacing.unit * 2,
+        marginRight: theme.spacing(2),
     },
     menuIcon: {
         color: theme.palette.getContrastText(theme.palette.background.appBar),
@@ -56,7 +56,7 @@ const styles = theme => ({
     },
     footer: {
         backgroundColor: theme.palette.grey.A100,
-        paddingLeft: theme.spacing.unit * 3,
+        paddingLeft: theme.spacing(3),
         height: 50,
         alignItems: 'center',
         display: 'flex',

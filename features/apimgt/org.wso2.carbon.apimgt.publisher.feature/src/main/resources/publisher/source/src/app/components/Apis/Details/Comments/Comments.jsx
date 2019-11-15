@@ -32,12 +32,12 @@ const styles = theme => ({
     root: {
         display: 'flex',
         alignItems: 'center',
-        paddingTop: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit * 2,
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
         paddingTop: theme.spacing.unig,
     },
     titleSub: {
@@ -48,7 +48,7 @@ const styles = theme => ({
         cursor: 'pointer',
     },
     verticalSpace: {
-        marginTop: theme.spacing.unit * 0.2,
+        marginTop: theme.spacing(0.2),
     },
     loadMoreLink: {
         textDecoration: 'underline',
