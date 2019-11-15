@@ -20,7 +20,6 @@
     var log = new Log("Logout Callback Function");
     var site = require("/site/public/theme/settings.js").Settings.app;
     include("/services/constants.jag");
-    include("/services/jagg.jag");
 
     var cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': '', 'path': site.context + "/", "httpOnly": true, "secure": true, "maxAge": 2};
     response.addCookie(cookie);
@@ -36,6 +35,6 @@
     response.addCookie(cookie);
 
     log.debug("redirecting to logout");
-    response.sendRedirect("/devportal/logout");
+    response.sendRedirect(site.context + "/logout");
 
 %>
