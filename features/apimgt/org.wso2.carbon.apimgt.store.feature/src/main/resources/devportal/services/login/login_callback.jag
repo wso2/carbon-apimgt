@@ -18,12 +18,13 @@
  */
 
     include("/services/constants.jag");
-    include("/services/jagg.jag");
+    var appUtils = require("/services/utils.js");
     var app = require("/site/public/theme/settings.js").Settings.app;
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var serverUrl = "";
-        if (app.reverseProxy.enabled === true) {
-        serverUrl = app.reverseProxy.origin;
+    var forwarded_for = request.getHeader(app.customUrl.forwardedHeader);
+    if (app.customUrl.enabled && forwarded_for) {
+        serverUrl = MGT_TRANSPORT + forwarded_for;
     } else {
         serverUrl = utils.getServerURL();
     }
@@ -34,15 +35,18 @@
     };
     var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
     var systemApplicationDAO = new SystemApplicationDTO();
-    var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_store");
-
+    // this is to support migration from admin_store to admin_devportal
+    var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME);
+    if (systemApplicationDTO === null) {
+        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME_OLD);
+    }
     var clientId = systemApplicationDTO.getConsumerKey();
     var clientSecret = systemApplicationDTO.getConsumerSecret();
     var Base64 = org.apache.axiom.om.util.Base64;
     var String = Packages.java.lang.String;
     var Integer = Packages.java.lang.Integer;
     var base64encoded = Base64.encode ( new String (clientId + ":" + clientSecret).getBytes());
-    var tokenEndpoint = utils.getServerURL() + TOKEN_URL_SUFFIX;
+    var tokenEndpoint = appUtils.getLoopbackOrigin() + TOKEN_URL_SUFFIX;
     var result = post(tokenEndpoint, tokenRequestData,{"Authorization": "Basic " + base64encoded});
 
     response.contentType = "application/json";
@@ -92,9 +96,9 @@
     var state = request.getParameter("state");
     if (state !== null) {
         state = decodeURI(state);
-        response.sendRedirect("/devportal" + state);
+        response.sendRedirect(app.context + state);
     } else {
-        response.sendRedirect("/devportal/apis");
+        response.sendRedirect(app.context + "/apis");
     }
 
 %>

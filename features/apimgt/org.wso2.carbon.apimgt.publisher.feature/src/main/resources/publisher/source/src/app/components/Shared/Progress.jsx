@@ -23,7 +23,7 @@ const Progress = (props) => {
     const { message } = props;
     return (
         <div className='apim-dual-ring'>
-            <span style={{ width: '200px' }}>{message}</span>
+            <span style={{ width: '200px', display: 'block', marginLeft: '-33px' }}>{message}</span>
         </div>
     );
 };

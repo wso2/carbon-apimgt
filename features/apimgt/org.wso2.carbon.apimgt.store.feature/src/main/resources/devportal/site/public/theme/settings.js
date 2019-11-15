@@ -1,9 +1,12 @@
 const Settings = {
     app: {
-        context: '/devportal',
-        reverseProxy: {
+        context: '/store',
+        customUrl: {
             enabled: false,
-            origin: 'https://localhost:9443',
+            forwardedHeader: 'X-Forwarded-For',
+        },
+        origin: {
+            host: 'localhost',
         },
     },
     grantTypes: {

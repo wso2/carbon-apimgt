@@ -109,11 +109,12 @@ const Configurations = {
     },
     app: {
         context: APP_CONTEXT,
-        reverseProxy: {
-            auto: false,
+        customUrl: {
+            enabled: false,
             forwardedHeader: 'x-forwarded-for',
-            loopbackHost: 'localhost',
-            defaultHTTPSPort: 9443,
+        },
+        origin: {
+            host: 'localhost',
         },
         storeContext: STORE_APP_CONTEXT,
         feedback: {

@@ -62,12 +62,14 @@ const SelectAppPanel = (props) => {
                             margin='normal'
                             variant='outlined'
                         >
+                            {(subscriptions != null && subscriptions.find(sub => sub.applicationId === selectedApplication).status === 'UNBLOCKED') &&
                             <MenuItem value='PRODUCTION'>
                                 <FormattedMessage
                                     id='Apis.Details.ApiConsole.SelectAppPanel.production'
                                     defaultMessage='PRODUCTION'
                                 />
                             </MenuItem>
+                            }
                             <MenuItem value='SANDBOX'>
                                 <FormattedMessage
                                     id='Apis.Details.ApiConsole.SelectAppPanel.sandbox'

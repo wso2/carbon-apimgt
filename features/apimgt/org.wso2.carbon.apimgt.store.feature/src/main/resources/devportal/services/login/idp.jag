@@ -19,22 +19,24 @@
 
     var log = new Log("Services login DCR request");
     var app = require("/site/public/theme/settings.js").Settings.app;
+    var appUtils = require("/services/utils.js");
     include("/services/constants.jag");
 
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var serverPort = utils.getManagementTransportPort(MGT_TRANSPORT.split(":")[0]);
     var serverUrl = utils.getServerURL();
-    if (app.reverseProxy.enabled === true) {
-        serverUrl = app.reverseProxy.origin;
+    var forwarded_for = request.getHeader(app.customUrl.forwardedHeader);
+    if (app.customUrl.enabled && forwarded_for) {
+        serverUrl = MGT_TRANSPORT + forwarded_for;
     } else {
         serverUrl = utils.getServerURL();
     }
     application.put("serverPort", serverPort);
 
-    var settingsAPIUrl = utils.getServerURL() + SETTINGS_REST_API_URL_SUFFIX;
+    var settingsAPIUrl = appUtils.getLoopbackOrigin() + SETTINGS_REST_API_URL_SUFFIX;
     var settingsResponse = get(settingsAPIUrl, {}, "json");
 
-    var dcrUrl = utils.getServerURL() + DCR_URL_SUFFIX;
+    var dcrUrl = appUtils.getLoopbackOrigin() + DCR_URL_SUFFIX;
     var authorizeEndpoint = utils.getServerURL() + AUTHORIZE_ENDPOINT_SUFFIX;
     var loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
     var logoutCallbackUrl = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
@@ -55,7 +57,11 @@
     var SystemApplicationDAO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
     var systemApplicationDAO = new SystemApplicationDAO();
     var clientId ;
+    // this is to support migration from admin_store to admin_devportal
     systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME);
+    if (systemApplicationDTO === null) {
+        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME_OLD);
+    }
 
     var lock = SystemApplicationDAO.getLock();
     if (systemApplicationDTO  !== null) {
@@ -63,8 +69,12 @@
     } else {
         try {
             lock.acquire();
+            // this is to support migration from admin_store to admin_devportal
             systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME);
-            if (systemApplicationDTO == null) {
+            if (systemApplicationDTO === null) {
+                systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME_OLD);
+            }
+            if (systemApplicationDTO === null) {
                 var dcrRequestData = {
                     "callbackUrl": callbackUrl,
                     "clientName": STORE_CLIENT_APP_NAME,

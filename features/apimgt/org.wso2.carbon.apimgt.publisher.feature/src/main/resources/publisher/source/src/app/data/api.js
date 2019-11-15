@@ -177,6 +177,18 @@ class API extends Resource {
     }
 
     /**
+     * Get API Security Audit Report
+     */
+    getSecurityAuditReport(apiId) {
+        const promiseGetAuditReport = this.client.then((client) => {
+            return client.apis['API Audit'].get_apis__apiId__auditapi({
+                apiId: apiId
+            }, this._requestMetaData());
+        });
+        return promiseGetAuditReport;
+    }
+
+    /**
      * Get detailed policy information of the API
      * @returns {Promise} Promise containing policy detail request calls for all the available policies
      * @memberof API

@@ -20,6 +20,7 @@ import React, { useContext } from 'react';
 
 const APIContext = React.createContext({
     api: null,
+    tenantList: [],
 });
 
 const { Provider: APIProvider } = APIContext;

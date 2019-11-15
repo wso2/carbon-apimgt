@@ -20,13 +20,13 @@
     include("/services/constants.jag");
     var appUtils = require("/services/utils.js");
 
-    var app = require("/site/public/theme/defaultTheme.js").Configurations.app;
+    var app = require("/site/public/theme/settings.js").Settings.app;
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var log = new Log("Login Callback Endpoint: ");
 
     var serverUrl = '';
-    var forwarded_for = request.getHeader(app.reverseProxy.forwardedHeader);
-    if (app.reverseProxy.auto && forwarded_for) {
+    var forwarded_for = request.getHeader(app.customUrl.forwardedHeader);
+    if (app.customUrl.enabled && forwarded_for) {
         serverUrl = "https://" + forwarded_for;
     } else {
         serverUrl = utils.getServerURL();
@@ -39,8 +39,11 @@
 
     var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
     var systemApplicationDAO = new SystemApplicationDTO();
-    var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_publisher");
-
+    // this is to support migration from admin_publisher to apim_publisher
+    var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME);
+    if (systemApplicationDTO === null) {
+        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD);
+    }
     var clientId = systemApplicationDTO.getConsumerKey();
     var clientSecret = systemApplicationDTO.getConsumerSecret();
     var Base64 = org.apache.axiom.om.util.Base64;

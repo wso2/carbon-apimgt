@@ -18,7 +18,6 @@
  */
 
 var MGT_TRANSPORT = "https://";
-var HOST = "localhost";
 var SETTINGS_REST_API_URL_SUFFIX = "/api/am/store/v1.0/settings";
 var DCR_URL_SUFFIX =  "/client-registration/v0.15/register";
 var AUTHORIZE_ENDPOINT_SUFFIX = "/oauth2/authorize";
@@ -27,5 +26,7 @@ var REVOKE_URL_SUFFIX = "/oauth2/revoke";
 var LOGIN_CALLBACK_URL_SUFFIX = "/services/auth/callback/login";
 var LOGOUT_CALLBACK_URL_SUFFIX = "/services/auth/callback/logout"
 
-var STORE_CLIENT_APP_NAME = "admin_store";
+var STORE_CLIENT_APP_NAME_OLD = "admin_store";
+var STORE_CLIENT_APP_NAME = "apim_devportal";
+
 %>
