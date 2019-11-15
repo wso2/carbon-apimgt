@@ -251,6 +251,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
         HashMap<String, Boolean> operationAuthSchemeMappingList = new HashMap<>();
         HashMap<String, String> operationScopeMappingList = new HashMap<>();
         HashMap<String, ArrayList<String>> scopeRoleMappingList = new HashMap<>();
+        String GraphQLAccessControlPolicy = null;
 
         if (schema != null) {
             Set<GraphQLType> additionalTypes = schema.getAdditionalTypes();
@@ -287,6 +288,8 @@ public class GraphQLAPIHandler extends AbstractHandler {
                             log.debug("Added operation " + base64DecodedAdditionalType + "with security "
                                     + isSecurityEnabled);
                         }
+                    } else if (additionalType.getName().contains(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY)) {
+                        GraphQLAccessControlPolicy = base64DecodedAdditionalType;
                     }
                 }
                 if (!roleArrayList.isEmpty()) {
@@ -303,6 +306,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
         messageContext.setProperty(APIConstants.SCOPE_OPERATION_MAPPING, operationScopeMappingList);
         messageContext.setProperty(APIConstants.OPERATION_THROTTLING_MAPPING, operationThrottlingMappingList);
         messageContext.setProperty(APIConstants.OPERATION_AUTH_SCHEME_MAPPING, operationAuthSchemeMappingList);
+        messageContext.setProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY, GraphQLAccessControlPolicy);
         messageContext.setProperty(APIConstants.API_TYPE, GRAPHQL_API);
         messageContext.setProperty(APIConstants.GRAPHQL_SCHEMA, schema);
     }
