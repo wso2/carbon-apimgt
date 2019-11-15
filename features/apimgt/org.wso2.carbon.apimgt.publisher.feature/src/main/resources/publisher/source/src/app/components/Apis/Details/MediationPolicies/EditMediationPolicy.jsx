@@ -38,6 +38,8 @@ import Download from 'AppComponents/Shared/Download.js';
 import API from 'AppData/api.js';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 
+import EditCustomMediation from '../Configuration/CustomMediation/EditCustomMediation';
+
 const dropzoneStyles = {
     border: '1px dashed ',
     borderRadius: '5px',
@@ -96,6 +98,7 @@ function EditMediationPolicy(props) {
     // user uploaded api specific mediation policies
     const [seqCustom, setSeqCustom] = useState(null);
     const [provideBy, setProvideBy] = useState();
+    const [dialogWidth, setDialogWidth] = useState('sm');
     const { id: apiId } = api;
     const NONE = 'none';
     const [localSelectedPolicyFile, setLocalSelectedPolicyFile] = useState(selectedMediationPolicy);
@@ -314,12 +317,17 @@ function EditMediationPolicy(props) {
         const inputValue = event.target.value;
         setProvideBy(inputValue);
         setActivePolicy({});
+        if (inputValue === 'custom') {
+            setDialogWidth('m');
+        } else {
+            setDialogWidth('sm');
+        }
     }
     return (
         <Dialog
             disableBackdropClick
             disableEscapeKeyDown
-            maxWidth='sm'
+            maxWidth={dialogWidth}
             fullWidth
             aria-labelledby='confirmation-dialog-title'
             open={editing}
@@ -366,7 +374,7 @@ function EditMediationPolicy(props) {
                     </RadioGroup>
                     {provideBy === 'custom' && (
                         <React.Fragment>
-                            <Dropzone
+                            {/* <Dropzone
                                 multiple={false}
                                 className={classes.dropzone}
                                 activeClassName={classes.acceptDrop}
@@ -392,7 +400,8 @@ function EditMediationPolicy(props) {
                                         </div>
                                     </div>
                                 )}
-                            </Dropzone>
+                            </Dropzone> */}
+                            <EditCustomMediation/>
                             <RadioGroup
                                 aria-label='inflow'
                                 name='inflow'

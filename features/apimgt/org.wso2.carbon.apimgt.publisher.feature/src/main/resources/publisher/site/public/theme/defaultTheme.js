@@ -4,6 +4,19 @@ const REVERSE_PROXY = {
     origin: 'https://localhost:9443',
 };
 const STORE_APP_CONTEXT = '/devportal';
+
+const mediatorIcons = [
+    { key: 'logmediator', name: 'Log', src1: APP_CONTEXT + '/site/public/images/mediatorIcons/LogMediator.png', src2: APP_CONTEXT + '/site/public/images/mediatorIcons/log-mediator.png' },
+    { key: 'propertymediator', name: 'Property', src1: APP_CONTEXT + '/site/public/images/mediatorIcons/PropertyMediator.png', src2: APP_CONTEXT + '/site/public/images/mediatorIcons/property-mediator.png' },
+    { key: 'dropmediator', name: 'Drop', src1: APP_CONTEXT + '/site/public/images/mediatorIcons/DropMediator.png', src2: APP_CONTEXT + '/site/public/images/mediatorIcons/drop-mediator.png'},
+    { key: 'filtermediator', name: 'Filter', src1: APP_CONTEXT + '/site/public/images/mediatorIcons/FilterMediator.png', src2: APP_CONTEXT + '/site/public/images/mediatorIcons/filter-mediator.png' },
+    { key: 'foreachmediator', name: 'ForEach', src1: APP_CONTEXT + '/site/public/images/mediatorIcons/ForEachMediator.png', src2: APP_CONTEXT + '/site/public/images/mediatorIcons/foreach-mediator.png' },
+    { key: 'paloadfactorymediator', name: 'PayloadFactory', src1: APP_CONTEXT + '/site/public/images/mediatorIcons/PayloadFactoryMediator.png', src2: APP_CONTEXT + '/site/public/images/mediatorIcons/payloadFactory-mediator.png'},
+    { key: 'propertygroupmediator', name: 'PropertyGroup', src1: APP_CONTEXT + '/site/public/images/mediatorIcons/PropertyGroupMediator.png', src2: APP_CONTEXT + '/site/public/images/mediatorIcons/propertyGroup-mediator.png' },
+    { key: 'switchmediator', name: 'Switch', src1: APP_CONTEXT + '/site/public/images/mediatorIcons/SwitchMediator.png', src2: APP_CONTEXT + '/site/public/images/mediatorIcons/switch-mediator.png' },
+    { key: 'validatemediator', name: 'Validate', src1: APP_CONTEXT + '/site/public/images/mediatorIcons/ValidateMediator.png', src2: APP_CONTEXT + '/site/public/images/mediatorIcons/validate-mediator.png' },
+];
+
 const Configurations = {
     themes: {
         light: {
@@ -120,6 +133,7 @@ const Configurations = {
             serviceURL: '',
         },
     },
+    mediatorIcons: mediatorIcons,
 };
 if (typeof module !== 'undefined') {
     module.exports = Configurations; // Added for tests
