@@ -59,28 +59,7 @@ public class ResourceConfigContext extends ConfigContextDecorator {
             if (api.getUriTemplates() == null || api.getUriTemplates().isEmpty()) {
                 throw new APIManagementException("At least one resource is required");
             }
-            if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
-                String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-                if (api.getId().getProviderName().contains("-AT-")) {
-                    String provider = api.getId().getProviderName().replace("-AT-", "@");
-                    tenantDomain = MultitenantUtils.getTenantDomain(provider);
-                }
-                int tenantId;
-                try {
-                    tenantId = ServiceReferenceHolder.getInstance().getRealmService().
-                            getTenantManager().getTenantId(tenantDomain);
-                    if (APIUtil.isPerAPISequence(api.getFaultSequence(), tenantId, api.getId(),
-                            APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT)) {
-                        this.faultSeqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
-                    }
-                } catch (UserStoreException e) {
-                    throw new APIManagementException("Error while retrieving tenant Id from " +
-                            api.getId().getProviderName(), e);
-                } catch (APIManagementException e) {
-                    throw new APIManagementException("Error while checking whether sequence " + api.getFaultSequence() +
-                            " is a per API sequence.", e);
-                }
-            }
+            this.faultSeqExt = APIUtil.getFaultSequenceName(api);
         }
     }
 

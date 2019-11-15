@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.xml.namespace.QName;
 import java.io.ByteArrayInputStream;
@@ -232,7 +233,18 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public boolean addClientCertificateToGateway(String certificate, String alias) {
-        return addCertificateToListenerOrSenderProfile(certificate, alias, true);
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        /*
+        Tenant ID is appended with alias to make sure, only the admins from the same tenant, can delete the
+        certificates later.
+         */
+        if (alias.endsWith("_" + tenantId) || tenantId == org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID) {
+            return addCertificateToListenerOrSenderProfile(certificate, alias, true);
+        } else {
+            log.warn("Attempt to add an alias " + alias + " by tenant " + tenantId + " has been rejected. Please "
+                    + "make sure to provide a alias name that ends with '_" + tenantId + "' .");
+            return false;
+        }
     }
 
     /**
@@ -280,7 +292,20 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public boolean deleteClientCertificateFromGateway(String alias) {
-        return deleteCertificateFromListenerAndSenderProfiles(alias, true);
+
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        /*
+            Tenant ID is checked to make sure that tenant admins cannot delete the alias that do not belong their
+            tenant. Super tenant is special cased, as it is required to delete the certificates from different tenants.
+         */
+        if (alias.endsWith("_" + tenantId) || tenantId == org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID) {
+            return deleteCertificateFromListenerAndSenderProfiles(alias, true);
+        } else {
+            log.warn("Attempt to delete the alias " + alias + " by tenant " + tenantId + " has been rejected. Only "
+                    + "the client certificates that belongs to " + tenantId + " can be deleted. All the client "
+                    + "certificates belongs to " + tenantId + " have '_" + tenantId + "' suffix in alias");
+            return false;
+        }
     }
 
     /**

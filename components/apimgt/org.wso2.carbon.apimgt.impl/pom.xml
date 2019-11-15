@@ -202,10 +202,6 @@
             <artifactId>org.wso2.carbon.apimgt.gateway.stub</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.mediation</groupId>
-            <artifactId>org.wso2.carbon.endpoint.stub</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
             <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
         </dependency>
@@ -336,10 +332,6 @@
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.mediation</groupId>
-            <artifactId>org.wso2.carbon.localentry.stub</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -534,6 +526,7 @@
                             org.wso2.carbon.apimgt.gateway.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.tier.cache.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.gateway.dto.stub.*;version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.api.dto.xsd.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.utils.*; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.authenticator.stub.*;version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.base;version="${imp.pkg.version.org.wso2.carbon.base}",
@@ -544,8 +537,6 @@
                             org.wso2.carbon.user.mgt.stub.*;version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.user.mgt.*;version="${carbon.identity.imp.pkg.version}",
                             org.xml.sax,
-                            org.wso2.carbon.rest.api.stub.*,
-                            org.wso2.carbon.localentry.stub.*,
                             org.wso2.carbon.um.ws.api.stub,
                             org.wso2.carbon.apimgt.localentry.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.securevault.*,

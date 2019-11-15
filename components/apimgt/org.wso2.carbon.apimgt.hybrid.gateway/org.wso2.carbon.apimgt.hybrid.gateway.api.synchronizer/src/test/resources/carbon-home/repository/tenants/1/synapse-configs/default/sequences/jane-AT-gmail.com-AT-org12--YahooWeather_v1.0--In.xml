@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><sequence xmlns="http://ws.apache.org/ns/synapse" name="jane-AT-gmail.com-AT-org12--YahooWeather:v1.0--In" trace="disable">
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="jane-AT-gmail.com-AT-org12--YahooWeather:v1.0--In" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
     <property expression="concat('?q=select%20*%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%22',syn:get-property('uri.var.zipcode'),',',syn:get-property('uri.var.country'),'%22)&amp;format=json')" name="YQL" scope="default" type="STRING"/>
     <property expression="get-property('YQL')" name="REST_URL_POSTFIX" scope="axis2" type="STRING"/>
 </sequence>
