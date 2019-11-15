@@ -86,5 +86,5 @@ module.exports = {
     "no-else-return": "off",
     "no-unused-vars": ["error"]
   },
-  plugins: ["react", "jest"]
+  plugins: ["react", "jest", "prettier"]
 };
