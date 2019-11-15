@@ -1562,14 +1562,9 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>com.amazonaws</groupId>
-                <artifactId>aws-java-sdk-core</artifactId>
-                <version>${com.amazonaws.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.amazonaws</groupId>
-                <artifactId>aws-java-sdk-lambda</artifactId>
-                <version>${com.amazonaws.version}</version>
+                <groupId>org.wso2.orbit.com.amazonaws</groupId>
+                <artifactId>awslambda</artifactId>
+                <version>1.11.253.wso2v1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -1802,7 +1797,5 @@
         <pax.logging.api.version>1.11.2</pax.logging.api.version>
         <import.package.version.commons.logging>[1.2.0,2.0.0)</import.package.version.commons.logging>
 
-        <!-- amazon aws version -->
-        <com.amazonaws.version>1.11.253</com.amazonaws.version>
     </properties>
 </project>

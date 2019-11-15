@@ -27,21 +27,18 @@ import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.InvocationType;
 import com.amazonaws.services.lambda.model.InvokeRequest;
 import com.amazonaws.services.lambda.model.InvokeResult;
-import org.apache.axis2.AxisFault;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
-import org.json.XML;
 
+import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 
 public class AWSLambdaClassMediator extends AbstractMediator {
     private static final Log log = LogFactory.getLog(AWSLambdaClassMediator.class);
@@ -59,44 +56,29 @@ public class AWSLambdaClassMediator extends AbstractMediator {
      * @return true
      */
     public boolean mediate(MessageContext messageContext) {
-        try {
-            int httpSC;
-            String payload;
-            String jsonPayload;
-            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
-                    .getAxis2MessageContext();
+        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
+                .getAxis2MessageContext();
 
-//            if (axis2MessageContext.getProperty("org.apache.synapse.commons.json.JsonInputStream.IsJsonObject")) {
-//                payload = axis2MessageContext.getProperty("org.apache.synapse.commons.json.JsonInputStream");
-//            } else {
-//                payload = "{}";
-//            }
+        String payload;
+        if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
+            payload = JsonUtil.jsonPayloadToString(axis2MessageContext);
+        } else {
+            payload = "{}";
+        }
 
-            JSONObject soapBody = XML.toJSONObject(messageContext.getEnvelope().getBody().toString())
-                    .getJSONObject("soapenv:Body");
-            if (soapBody.has("jsonObject")) {
-                payload = soapBody.getJSONObject("jsonObject").toString();
-            } else {
-                payload = "{}";
-            }
+        InvokeResult invokeResult = invokeLambda(payload);
 
-            InvokeResult invokeResult = invokeLambda(payload);
-            if (invokeResult != null) {
-                httpSC = invokeResult.getStatusCode();
-                jsonPayload = new String(invokeResult.getPayload().array(), Charset.forName(APIConstants
-                        .DigestAuthConstants.CHARSET));
-            } else {
-                httpSC = 400;
-                jsonPayload = "{statusCode: 400, message: 'Bad request'}";
-            }
-            JsonUtil.getNewJsonPayload(axis2MessageContext, jsonPayload, true, true);
-            axis2MessageContext.setProperty("HTTP_SC", httpSC);
+        if (invokeResult != null) {
+            JsonUtil.setJsonStream(axis2MessageContext, new ByteArrayInputStream(invokeResult.getPayload().array()));
+            axis2MessageContext.setProperty("HTTP_SC", invokeResult.getStatusCode());
             axis2MessageContext.setProperty("messageType", APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             axis2MessageContext.setProperty("ContentType", APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             axis2MessageContext.removeProperty("NO_ENTITY_BODY");
-        } catch (AxisFault e) {
-            log.error("Error while retrieving axis2MessageContext", e);
+        } else {
+            axis2MessageContext.setProperty("HTTP_SC", 400);
+            axis2MessageContext.setProperty("NO_ENTITY_BODY", true);
         }
+
         return true;
     }
 

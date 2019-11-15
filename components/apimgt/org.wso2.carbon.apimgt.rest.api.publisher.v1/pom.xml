@@ -182,12 +182,8 @@
             <version>${graphql.java.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-lambda</artifactId>
+            <groupId>org.wso2.orbit.com.amazonaws</groupId>
+            <artifactId>awslambda</artifactId>
         </dependency>
     </dependencies>
     <build>

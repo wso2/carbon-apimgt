@@ -644,8 +644,9 @@ public final class APIUtil {
                     JSONObject path = (JSONObject) paths.get(uTemplate);
                     if (path != null) {
                         JSONObject operation = (JSONObject) path.get(method.toLowerCase());
-                        if (operation.containsKey("x-amzn-resource-name")) {
-                            uriTemplate.setAmznResourceName((String) operation.get("x-amzn-resource-name"));
+                        if (operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
+                            uriTemplate.setAmznResourceName((String)
+                                    operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
                         }
                     }
                 }

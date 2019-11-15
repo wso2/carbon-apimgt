@@ -33,7 +33,7 @@ import LaunchIcon from '@material-ui/icons/Launch';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
 import API from 'AppData/api';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import Banner from 'AppComponents/Shared/Banner';
 
 const useStyles = makeStyles(theme => ({
     typography: {
@@ -46,6 +46,12 @@ const useStyles = makeStyles(theme => ({
     },
     helpIcon: {
         fontSize: 20,
+    },
+    banner: {
+        marginLeft: theme.spacing(1),
+        marginRight: theme.spacing(1),
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(1),
     },
 }));
 
@@ -63,35 +69,23 @@ export default function Credentials(props) {
         setAwsAccessMethod,
     } = props;
     const classes = useStyles();
-    const [isValid, setIsValid] = useState(false);
+    const [pageError, setPageError] = useState(null);
     const handleChange = (event) => {
         const newEndpointConfig = { ...endpointConfig };
         newEndpointConfig.amznAccessKey = '';
         newEndpointConfig.amznSecretKey = '';
         endpointsDispatcher({ action: 'set_awsCredentials', value: newEndpointConfig });
         setAwsAccessMethod(event.target.value);
+        setPageError(null);
     };
     useEffect(() => {
         API.getAmznResourceNames(apiId)
             .then((response) => {
-                setIsValid(response.body);
+                setPageError(response.body.error);
             });
     }, []);
     return (
         <React.Fragment>
-            {isValid &&
-                <InlineMessage type='info' height={100} className={classes.emptyBox} >
-                    <div className={classes.contentWrapper}>
-                        <Typography component='p' className={classes.content}>
-                            <FormattedMessage
-                                id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
-                                    '.endpoint.credential.warning'}
-                                defaultMessage='Given credentials seem to be invalid.'
-                            />
-                        </Typography>
-                    </div>
-                </InlineMessage>
-            }
             <Typography className={classes.typography}>
                 <FormattedMessage
                     id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
@@ -184,18 +178,27 @@ export default function Credentials(props) {
                     }}
                 />
             </Grid>
-            {endpointConfig.endpoint_type === 'awslambda' &&
-                <Grid item>
-                    <Link to={`/apis/${apiId}/resources`} target='_blank'>
-                        <Typography style={{ marginLeft: '10px' }} color='primary' display='inline' variant='caption'>
-                            <FormattedMessage
-                                id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
-                                '.endpoint.linkToResources'}
-                                defaultMessage='Goto Resources to add ARNs'
-                            />
-                            <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
-                        </Typography>
-                    </Link>
+            <Grid item>
+                <Link to={`/apis/${apiId}/resources`} target='_blank'>
+                    <Typography style={{ marginLeft: '10px' }} color='primary' display='inline' variant='caption'>
+                        <FormattedMessage
+                            id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
+                            '.endpoint.linkToResources'}
+                            defaultMessage='Goto Resources to map ARNs'
+                        />
+                        <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
+                    </Typography>
+                </Link>
+            </Grid>
+            {pageError &&
+                <Grid item className={classes.banner}>
+                    <Banner
+                        disableActions
+                        dense
+                        paperProps={{ elevation: 1 }}
+                        type='warning'
+                        message={pageError}
+                    />
                 </Grid>
             }
         </React.Fragment>

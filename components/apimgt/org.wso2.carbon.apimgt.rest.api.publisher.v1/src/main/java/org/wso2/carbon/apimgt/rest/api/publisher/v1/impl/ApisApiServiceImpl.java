@@ -87,7 +87,12 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -739,6 +744,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     // AWS Lambda: rest api operation to get ARNs
     @Override
     public Response apisApiIdAmznResourceNamesGet(String apiId, MessageContext messageContext) {
+        JSONObject arns = new JSONObject();
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -769,7 +775,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                             .build();
                     ListFunctionsResult listFunctionsResult = awsLambda.listFunctions();
                     List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
-                    JSONObject arns = new JSONObject();
                     arns.put("count", functionConfigurations.size());
                     JSONArray list = new JSONArray();
                     for (FunctionConfiguration functionConfiguration : functionConfigurations) {
@@ -780,7 +785,15 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
         } catch (SdkClientException e) {
-            log.error("Error while listing lambda functions", e);
+            if (e.getCause() instanceof UnknownHostException) {
+                arns.put("error", "No internet connection to validate the given access method.");
+                log.error("No internet connection to validate the given access method.", e);
+                return Response.ok().entity(arns.toString()).build();
+            } else {
+                arns.put("error", "Unable to validate the given access method.");
+                log.error("Unable to validate the given access method.", e);
+                return Response.ok().entity(arns.toString()).build();
+            }
         } catch (ParseException e) {
             log.error("Error while parsing endpoint config", e);
         } catch (CryptoException | UnsupportedEncodingException e) {
