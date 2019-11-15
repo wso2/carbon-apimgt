@@ -1,6 +1,6 @@
 const Settings = {
     app: {
-        context: '/store',
+        context: '/devportal',
         customUrl: {
             enabled: false,
             forwardedHeader: 'X-Forwarded-For',
