@@ -179,7 +179,7 @@ export default function Credentials(props) {
                 />
             </Grid>
             <Grid item>
-                <Link to={`/apis/${apiId}/resources`} target='_blank'>
+                <Link to={`/apis/${apiId}/resources`}>
                     <Typography style={{ marginLeft: '10px' }} color='primary' display='inline' variant='caption'>
                         <FormattedMessage
                             id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
