@@ -24,6 +24,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -41,6 +43,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
@@ -79,6 +82,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -398,6 +403,13 @@ public final class APIImportUtil {
             addAPISpecificSequences(pathToArchive, importedApi, registry);
             addAPIWsdl(pathToArchive, importedApi, apiProvider, registry);
             addEndpointCertificates(pathToArchive, importedApi, apiProvider, tenantId);
+            
+            if(apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Mutual SSL enabled. Importing client certificates.");
+                }
+                addClientCertificates(pathToArchive, apiProvider);
+            }
 
             // Change API lifecycle if state transition is required
             if (StringUtils.isNotEmpty(lifecycleAction)) {
@@ -838,7 +850,54 @@ public final class APIImportUtil {
             throw new APIImportExportException(errorMessage, e);
         }
     }
+    
+    /**
+     * Import client certificates for Mutual SSL related configuration
+     * 
+     * @param pathToArchive location of the extracted folder of the API
+     * @throws APIImportExportException
+     */
+    private static void addClientCertificates(String pathToArchive, APIProvider apiProvider)
+            throws APIImportExportException {
+        String jsonContent = null;
+        String pathToYamlFile = pathToArchive + APIImportExportConstants.YAML_CLIENT_CERTIFICATE_FILE;
+        String pathToJsonFile = pathToArchive + APIImportExportConstants.JSON_CLIENT_CERTIFICATE_FILE;
 
+        try {
+            // try loading file as YAML
+            if (CommonUtil.checkFileExistence(pathToYamlFile)) {
+                log.debug("Found client certificate file " + pathToYamlFile);
+                String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
+                jsonContent = CommonUtil.yamlToJson(yamlContent);
+            } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
+                // load as a json fallback
+                log.debug("Found client certificate file " + pathToJsonFile);
+                jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
+            }
+            if (jsonContent == null) {
+                log.debug("No client certificate file found to be added, skipping");
+                return;
+            }
+            Gson gson = new Gson();
+            List<ClientCertificateDTO> certificateMetadataDTOS = gson.fromJson(jsonContent, 
+                    new TypeToken<ArrayList<ClientCertificateDTO>>(){}.getType());
+            for (ClientCertificateDTO certDTO : certificateMetadataDTOS) {
+                apiProvider.addClientCertificate(
+                        APIUtil.replaceEmailDomainBack(certDTO.getApiIdentifier().getProviderName()),
+                        certDTO.getApiIdentifier(), certDTO.getCertificate(), certDTO.getAlias(),
+                        certDTO.getTierName());
+            }
+        } catch (IOException e) {
+            String errorMessage = "Error in reading " + APIImportExportConstants.YAML_ENDPOINTS_CERTIFICATE_FILE
+                    + " file";
+            log.error(errorMessage, e);
+            throw new APIImportExportException(errorMessage, e);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while importing client certificate";
+            log.error(errorMessage, e);
+            throw new APIImportExportException(errorMessage, e);
+        }
+    }
     /**
      * Update API with the certificate.
      * If certificate alias already exists for tenant in database, certificate content will be
