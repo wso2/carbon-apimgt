@@ -224,7 +224,7 @@ export default function DesignConfigurations() {
                     </Grid>
                     <Grid item md={12}>
                         <Paper elevation={0}>
-                            <form noValidate autoComplete='off'>
+                            <div>
                                 <Box px={8} py={5}>
                                     <Box py={1}>
                                         <Grid container spacing={0} >
@@ -298,7 +298,7 @@ export default function DesignConfigurations() {
                                         </Box>
                                     )}
                                 </Box>
-                            </form>
+                            </div>
                         </Paper>
                     </Grid>
                 </Grid>

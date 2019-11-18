@@ -82,6 +82,10 @@ class Avatar extends Component {
      */
     render() {
         const { classes, user } = this.props;
+        let username = user.name;
+        if (user.name.endsWith('@carbon.super')) {
+            username = user.name.replace('@carbon.super', '');
+        }
         const { anchorEl } = this.state;
         return (
             <React.Fragment>
@@ -93,7 +97,7 @@ class Avatar extends Component {
                     onClick={this.handleClick}
                     className={classes.userLink}
                 >
-                    <AccountCircle className={classes.accountIcon} /> {user.name}
+                    <AccountCircle className={classes.accountIcon} /> {username}
                 </IconButton>
                 <Menu
                     id='logout-menu'

@@ -2293,6 +2293,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             boolean isLazyLoad) throws APIManagementException {
         Map<String, Object> searchResults =
                 super.searchPaginatedAPIs(searchQuery, requestedTenantDomain, start, end, isLazyLoad);
+        if (APIUtil.isAllowDisplayMultipleVersions()) {
+            return searchResults;
+        }
         return filterMultipleVersionedAPIs(searchResults);
     }
 
@@ -4960,6 +4963,23 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         rolesQuery.append('(');
         rolesQuery.append(APIConstants.NULL_USER_ROLE_LIST);
         String[] userRoles = APIUtil.getListOfRoles((userNameWithoutChange != null)? userNameWithoutChange: username);
+        String skipRolesByRegex = APIUtil.getSkipRolesByRegex();
+        if (StringUtils.isNotEmpty(skipRolesByRegex)) {
+            List<String> filteredUserRoles = new ArrayList<>(Arrays.asList(userRoles));
+            String[] regexList = skipRolesByRegex.split(",");
+            for (int i = 0; i < regexList.length; i++) {
+                Pattern p = Pattern.compile(regexList[i]);
+                Iterator<String> itr = filteredUserRoles.iterator();
+                while(itr.hasNext()) {
+                    String role = itr.next();
+                    Matcher m = p.matcher(role);
+                    if (m.matches()) {
+                        itr.remove();
+                    }
+                }
+            }
+            userRoles = filteredUserRoles.toArray(new String[0]);
+        }
         if (userRoles != null) {
             for (String userRole : userRoles) {
                 rolesQuery.append(" OR ");

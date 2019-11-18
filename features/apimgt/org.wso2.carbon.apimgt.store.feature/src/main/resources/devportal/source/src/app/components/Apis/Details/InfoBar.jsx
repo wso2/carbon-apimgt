@@ -310,7 +310,7 @@ class InfoBar extends React.Component {
                         <div className={classes.backText}>
                             <FormattedMessage id='Apis.Details.InfoBar.back.to' defaultMessage='BACK TO' />
                             <br />
-                            <FormattedMessage id='Apis.Details.InfoBar.listing' defaultMessage='LISTING' />
+                            <FormattedMessage id='Apis.Details.InfoBar.listing' defaultMessage='APIS' />
                         </div>
                     </Link>
                     {showThumbnail && (

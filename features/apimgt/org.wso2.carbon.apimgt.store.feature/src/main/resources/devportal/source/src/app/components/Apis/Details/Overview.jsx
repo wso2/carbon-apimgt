@@ -35,6 +35,7 @@ import API from 'AppData/api';
 import AuthManager from 'AppData/AuthManager';
 import View from 'AppComponents/Apis/Details/Documents/View';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import Box from '@material-ui/core/Box';
 import { app } from 'Settings';
 import { ApiContext } from './ApiContext';
 import Resources from './Resources';
@@ -182,7 +183,7 @@ function Overview(props) {
             },
         },
     } = theme;
-    const { api, applicationsAvailable, subscribedApplications } = useContext(ApiContext);
+    const { api, applicationsAvailable } = useContext(ApiContext);
     const [totalComments, setCount] = useState(0);
     const [totalDocuments, setDocsCount] = useState(0);
     const [overviewDocOverride, setOverviewDocOverride] = useState(null);
@@ -201,7 +202,7 @@ function Overview(props) {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
                     Alert.error('Error occured');
                 }
@@ -297,70 +298,61 @@ function Overview(props) {
                                                 }
                                             />
                                         </Typography>
+                                        <Box display='block' mt={2}>
+                                            <Grid item xs={12}>
+                                                {user && (
+                                                    <Box display='inline' mr={2}>
+                                                        <Link
+                                                            to={{
+                                                                pathname: '/apis/' + api.id + '/credentials/wizard',
+                                                            }}
+                                                            style={!api.isSubscriptionAvailable ?
+                                                                { pointerEvents: 'none' } : null}
+                                                        >
+                                                            <Button
+                                                                variant='contained'
+                                                                color='primary'
+                                                                size='large'
+                                                                disabled={!api.isSubscriptionAvailable}
+                                                            >
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.Overview.credential.wizard.title'
+                                                                    defaultMessage='Key Generation Wizard'
+                                                                />
+                                                            </Button>
+                                                        </Link>
+                                                    </Box>
+                                                )}
+                                                {applicationsAvailable && applicationsAvailable.length > 0 && (
+                                                    <Box display='inline'>
+                                                        <React.Fragment>
+                                                            <Link
+                                                                to={'/apis/' + api.id + '/credentials'}
+                                                                style={
+                                                                    !api.isSubscriptionAvailable ?
+                                                                        { pointerEvents: 'none' } : null
+                                                                }
+                                                            >
+                                                                <Button
+                                                                    variant='contained'
+                                                                    color='primary'
+                                                                    size='large'
+                                                                    disabled={!api.isSubscriptionAvailable}
+                                                                >
+                                                                    <FormattedMessage
+                                                                        id={'Apis.Details.Overview.subscribe' +
+                                                                        'to.application.btn'}
+                                                                        defaultMessage='Subscribe to an Application'
+                                                                    />
+                                                                </Button>
+                                                            </Link>
+                                                        </React.Fragment>
+                                                    </Box>
+                                                )}
+                                            </Grid>
+                                        </Box>
                                     </Grid>
-                                    {user && (
-                                        <Grid item>
-                                            <Link
-                                                to={{
-                                                    pathname: '/apis/' + api.id + '/credentials/wizard',
-                                                }}
-                                                style={!api.isSubscriptionAvailable ? { pointerEvents: 'none' } : null}
-                                            >
-                                                <Button
-                                                    variant='contained'
-                                                    color='primary'
-                                                    size='large'
-                                                    disabled={!api.isSubscriptionAvailable}
-                                                >
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Overview.credential.wizard.title'
-                                                        defaultMessage='Key Generation Wizard'
-                                                    />
-                                                </Button>
-                                            </Link>
-                                        </Grid>
-                                    )}
-                                    {applicationsAvailable && applicationsAvailable.length > 0 && (
-                                        <Grid item>
-                                            <React.Fragment>
-                                                <Link
-                                                    to={'/apis/' + api.id + '/credentials'}
-                                                    style={
-                                                        !api.isSubscriptionAvailable ? { pointerEvents: 'none' } : null
-                                                    }
-                                                >
-                                                    <Button
-                                                        variant='contained'
-                                                        color='primary'
-                                                        size='large'
-                                                        disabled={!api.isSubscriptionAvailable}
-                                                    >
-                                                        <FormattedMessage
-                                                            id='Apis.Details.Overview.subscribe.to.application.btn'
-                                                            defaultMessage='Subscribe to an Application'
-                                                        />
-                                                    </Button>
-                                                </Link>
-                                            </React.Fragment>
-                                        </Grid>
-                                    )}
-                                    <Grid item xs={12}>
-                                        <Typography variant='subtitle2'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Overview.view.credentials'
-                                                defaultMessage='View Credentials'
-                                            />
-                                        </Typography>
-                                        <Link to={'/apis/' + api.id + '/credentials'} className={classes.linkStyle}>
-                                            <Typography variant='body2'>
-                                                {subscribedApplications.length}{' '}
-                                                <FormattedMessage
-                                                    id='Apis.Details.Overview.subscriptions'
-                                                    defaultMessage='Subscriptions >>'
-                                                />
-                                            </Typography>
-                                        </Link>
-                                    </Grid>
+
                                 </Grid>
                             </ExpansionPanelDetails>
                         )}

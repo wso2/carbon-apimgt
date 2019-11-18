@@ -127,7 +127,6 @@ function GeneralConfiguration(props) {
                 }
             });
     };
-
     /**
      * Method to delete the selected certificate.
      *

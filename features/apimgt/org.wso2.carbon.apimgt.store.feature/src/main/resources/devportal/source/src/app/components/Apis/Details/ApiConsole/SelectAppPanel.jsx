@@ -28,7 +28,7 @@ const SelectAppPanel = (props) => {
                             onChange={handleChanges}
                             SelectProps={subscriptions}
                             helperText={<FormattedMessage
-                                defaultMessage='Please select an applications'
+                                defaultMessage='Please select an application'
                                 id='Apis.Details.ApiConsole.SelectAppPanel.select.an.application'
                             />}
                             margin='normal'
@@ -56,18 +56,20 @@ const SelectAppPanel = (props) => {
                             name='selectedKeyType'
                             onChange={handleChanges}
                             helperText={<FormattedMessage
-                                defaultMessage='Please select an key type'
+                                defaultMessage='Please select a key type'
                                 id='Apis.Details.ApiConsole.SelectAppPanel.select.key.type'
                             />}
                             margin='normal'
                             variant='outlined'
                         >
+                            {(subscriptions != null && subscriptions.find(sub => sub.applicationId === selectedApplication).status === 'UNBLOCKED') &&
                             <MenuItem value='PRODUCTION'>
                                 <FormattedMessage
                                     id='Apis.Details.ApiConsole.SelectAppPanel.production'
                                     defaultMessage='PRODUCTION'
                                 />
                             </MenuItem>
+                            }
                             <MenuItem value='SANDBOX'>
                                 <FormattedMessage
                                     id='Apis.Details.ApiConsole.SelectAppPanel.sandbox'

@@ -304,7 +304,7 @@ class Subscriptions extends React.Component {
                     </Typography>
 
                     <Grid container className='tab-grid' spacing={2}>
-                        <Grid item xs={5} className={classes.cardGrid}>
+                        <Grid item xs={4} className={classes.cardGrid}>
                             <APIList
                                 apisNotFound={apisNotFound}
                                 unsubscribedAPIList={unsubscribedAPIList}
@@ -312,7 +312,7 @@ class Subscriptions extends React.Component {
                                 handleSubscribe={(app, api, policy) => this.handleSubscribe(app, api, policy)}
                             />
                         </Grid>
-                        <Grid item xs={7} xl={10}>
+                        <Grid item xs={8} xl={11}>
                             <Card className={classes.card}>
                                 <CardActions>
                                     <Typography variant='h6' gutterBottom className={classes.cardTitle}>
@@ -333,7 +333,14 @@ class Subscriptions extends React.Component {
                                                     <TableCell className={classes.firstCell}>
                                                         <FormattedMessage
                                                             id='Applications.Details.Subscriptions.api.name'
-                                                            defaultMessage='API Name'
+                                                            defaultMessage='API'
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <FormattedMessage
+                                                            id={`Applications.Details.Subscriptions
+                                                                    .subscription.tier`}
+                                                            defaultMessage='Lifecycle State'
                                                         />
                                                     </TableCell>
                                                     <TableCell>
@@ -346,7 +353,7 @@ class Subscriptions extends React.Component {
                                                     <TableCell>
                                                         <FormattedMessage
                                                             id='Applications.Details.Subscriptions.Status'
-                                                            defaultMessage='Status'
+                                                            defaultMessage='Subscription Status'
                                                         />
                                                     </TableCell>
                                                     <TableCell>

@@ -308,16 +308,8 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public boolean isConfigured() {
-
-        boolean isTableExists;
         boolean isFilePresent = new File(SSL_PROFILE_FILE_PATH).exists();
-        try {
-            isTableExists = certificateMgtDAO.isTableExists();
-        } catch (CertificateManagementException e) {
-            log.error("Error retrieving database metadata. ", e);
-            return false;
-        }
-        return isFilePresent && isTableExists;
+        return isFilePresent;
     }
 
     @Override

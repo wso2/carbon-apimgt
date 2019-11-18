@@ -51,7 +51,12 @@ export default function Parameters(props) {
             <Grid item xs={1} />
             <Grid item xs={11}>
                 {!disableUpdate && (
-                    <AddParameter target={target} verb={verb} operationsDispatcher={operationsDispatcher} />
+                    <AddParameter
+                        target={target}
+                        verb={verb}
+                        operationsDispatcher={operationsDispatcher}
+                        operation={operation}
+                    />
                 )}
             </Grid>
             <Grid item md={1} />

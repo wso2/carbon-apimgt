@@ -19,18 +19,23 @@
 import React from 'react';
 import API from 'AppData/api.js';
 import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
-import getMockedModel from 'AppTests/Utils/MockAPIModel.js';
+import getMockedModel, { getAllScopes } from 'AppTests/Utils/MockAPIModel.js';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import Configurations from 'Config';
 import { MemoryRouter } from 'react-router-dom';
+import ScopeValidation from 'AppData/ScopeValidation';
 import AuthManager from 'AppData/AuthManager';
 import SampleAPI from './SampleAPI/SampleAPI';
 import Listing from './Listing';
 import TableView from './TableView/TableView';
+import User from 'AppData/User';
 
 
-jest.mock('AppData/AuthManager');
+const mockedGetUser = jest.fn();
+AuthManager.getUser = mockedGetUser.bind(AuthManager);
+
+jest.mock('AppData/ScopeValidation');
 jest.mock('AppData/api.js', () => {
     const mockedAPI = function () {
         return {
@@ -49,9 +54,13 @@ const mockedHasScopes = jest.fn();
 const mockedAll = jest.fn();
 
 describe('APIs <Listing/> component tests', () => {
-    beforeAll(() => {
+    beforeAll(async () => {
         API.all = mockedAll.bind(API);
-        AuthManager.hasScopes = mockedHasScopes.bind(AuthManager);
+        ScopeValidation.hasScopes = mockedHasScopes.bind(ScopeValidation);
+        const mockedUser = new User('DEFAULT', 'admin');
+        const allScopes = await getAllScopes();
+        mockedUser.scopes = allScopes.filter(policy => policy !== 'apim:api_publish');
+        mockedGetUser.mockReturnValue(mockedUser);
     });
 
     afterEach(() => {

@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
@@ -70,11 +71,27 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={ "AWS Lambda (Individual)",  })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK. Requested ARN List of the API is returned ", response = String.class),
         @ApiResponse(code = 404, message = "Not Found. Requested resource does not exist. ", response = ErrorDTO.class) })
     public Response apisApiIdAmznResourceNamesGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
         return delegate.apisApiIdAmznResourceNamesGet(apiId, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/auditapi")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve the Security Audit Report of the Audit API", notes = "Retrieve the Security Audit Report of the Audit API ", response = AuditReportDTO.class, authorizations = {
+            @Authorization(value = "OAuth2Security", scopes = {
+                    @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            })
+    }, tags={ "API Audit",  })
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. The Security Audit Report has been returned. ", response = AuditReportDTO.class),
+            @ApiResponse(code = 404, message = "Not Found. The Security Audit Report was not found. ", response = ErrorDTO.class) })
+    public Response apisApiIdAuditapiGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
+        return delegate.apisApiIdAuditapiGet(apiId, accept, securityContext);
     }
 
     @GET

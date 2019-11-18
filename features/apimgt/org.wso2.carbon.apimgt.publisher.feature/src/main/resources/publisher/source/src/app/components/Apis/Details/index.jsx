@@ -181,6 +181,14 @@ class Details extends Component {
             } else {
                 this.setAPI();
             }
+            const api = new API();
+            api.getTenantsByState('active')
+                .then((response) => {
+                    const { list } = response.body;
+                    this.setState({ tenantList: list });
+                }).catch((error) => {
+                    console.error('error when getting tenants ' + error);
+                });
         }
     }
 
@@ -407,7 +415,7 @@ class Details extends Component {
      */
     render() {
         const {
-            api, apiNotFound, isAPIProduct, imageUpdate,
+            api, apiNotFound, isAPIProduct, imageUpdate, tenantList,
         } = this.state;
         const {
             classes,
@@ -462,6 +470,7 @@ class Details extends Component {
                         isAPIProduct,
                         setAPI: this.setAPI,
                         setImageUpdate: this.setImageUpdate,
+                        tenantList,
                     }}
                 >
                     <div className={classes.LeftMenu}>
