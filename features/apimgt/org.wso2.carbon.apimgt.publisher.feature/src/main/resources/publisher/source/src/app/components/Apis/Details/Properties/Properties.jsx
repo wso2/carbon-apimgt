@@ -516,7 +516,8 @@ function Properties(props) {
                                             color='primary'
                                             onClick={handleSubmit}
                                             disabled={
-                                                editing || updating
+                                                editing || updating || (isEmpty(additionalProperties) &&
+                                                !isAdditionalPropertiesStale)
                                                 || isRestricted(['apim:api_create', 'apim:api_publish'], api)
                                             }
                                         >
