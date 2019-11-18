@@ -36,30 +36,30 @@ const useStyles = makeStyles(theme => ({
         flexWrap: 'wrap',
     },
     formControl: {
-        margin: theme.spacing.unit * 1,
+        margin: theme.spacing(1),
         minWidth: 400,
     },
     textControl: {
-        margin: theme.spacing.unit * 1,
+        margin: theme.spacing(1),
         minWidth: 300,
     },
     selectEmpty: {
         marginTop: theme.spacing(2),
     },
     subscriptionAvailabilityPaper: {
-        marginTop: theme.spacing.unit * 2,
-        paddingLeft: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
+        paddingLeft: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
     },
     grid: {
         display: 'flex',
-        margin: theme.spacing.unit * 1.25,
+        margin: theme.spacing(1.25),
     },
     gridLabel: {
-        marginTop: theme.spacing.unit * 3.5,
+        marginTop: theme.spacing(3.5),
     },
     saveButton: {
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
     },
     heading: {
         marginTop: theme.spacing(3),

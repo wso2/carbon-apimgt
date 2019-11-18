@@ -41,7 +41,7 @@ const styles = theme => ({
         marginTop: 40,
     },
     stateButton: {
-        marginRight: theme.spacing.unit,
+        marginRight: theme.spacing(),
     },
     paperCenter: {
         padding: theme.spacing(2),

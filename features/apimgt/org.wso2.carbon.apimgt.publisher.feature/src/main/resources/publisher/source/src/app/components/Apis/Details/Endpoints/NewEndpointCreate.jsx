@@ -36,10 +36,10 @@ import PropTypes from 'prop-types';
 
 const styles = theme => ({
     inlineMessageContainer: {
-        marginBottom: theme.spacing(),
+        marginBottom: theme.spacing(1),
     },
     endpointTypeCard: {
-        margin: theme.spacing(),
+        margin: theme.spacing(1),
         maxWidth: theme.spacing(32),
         transition: 'box-shadow 0.3s ease-in-out',
         height: theme.spacing(40),
@@ -50,7 +50,7 @@ const styles = theme => ({
         height: theme.spacing(40),
     },
     content: {
-        marginTop: theme.spacing(),
+        marginTop: theme.spacing(1),
     },
     cardActions: {
         justifyContent: 'flex-end',

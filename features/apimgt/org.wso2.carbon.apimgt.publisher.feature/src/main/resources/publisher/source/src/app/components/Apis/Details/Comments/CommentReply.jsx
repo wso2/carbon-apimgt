@@ -37,18 +37,18 @@ const styles = theme => ({
     },
     commentText: {
         color: theme.palette.getContrastText(theme.palette.background.default),
-        marginTop: theme.spacing.unig,
+        marginTop: theme.spacing(1),
         width: '100%',
         whiteSpace: 'pre-wrap',
         overflowWrap: 'break-word',
     },
     root: {
-        marginTop: theme.spacing.unit * 2.5,
+        marginTop: theme.spacing(2.5),
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
-        paddingLeft: theme.spacing.unit * 2,
-        paddingTop: theme.spacing.unig,
+        paddingLeft: theme.spacing(2),
+        paddingTop: theme.spacing(1),
     },
 });
 

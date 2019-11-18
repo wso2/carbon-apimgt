@@ -60,7 +60,7 @@ const styles = theme => ({
         padding: theme.spacing(2),
     },
     configNameHeading: {
-        marginBottom: theme.spacing(),
+        marginBottom: theme.spacing(1),
         borderBottom: '#cccccc 1px inset',
     },
 });

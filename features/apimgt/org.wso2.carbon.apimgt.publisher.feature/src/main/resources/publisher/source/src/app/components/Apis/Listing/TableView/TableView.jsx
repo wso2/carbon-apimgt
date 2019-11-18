@@ -38,8 +38,8 @@ import CustomIcon from 'AppComponents/Shared/CustomIcon';
 
 const styles = theme => ({
     contentInside: {
-        padding: theme.spacing.unit * 3,
-        paddingTop: theme.spacing.unit * 2,
+        padding: theme.spacing(3),
+        paddingTop: theme.spacing(2),
         '& > div[class^="MuiPaper-root-"]': {
             boxShadow: 'none',
             backgroundColor: 'transparent',

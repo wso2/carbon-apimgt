@@ -62,33 +62,33 @@ const styles = theme => ({
         paddingLeft: 0,
     },
     FormControl: {
-        padding: `0 0 0 ${theme.spacing.unit}px`,
+        padding: `0 0 0 ${theme.spacing(1)}px`,
         width: '100%',
         marginTop: 0,
     },
     FormControlOdd: {
-        padding: `0 0 0 ${theme.spacing.unit}px`,
+        padding: `0 0 0 ${theme.spacing(1)}px`,
         backgroundColor: theme.palette.background.paper,
         width: '100%',
         marginTop: 0,
     },
     FormControlLabel: {
-        marginBottom: theme.spacing.unit,
-        marginTop: theme.spacing.unit,
+        marginBottom: theme.spacing(1),
+        marginTop: theme.spacing(1),
         fontSize: theme.typography.caption.fontSize,
     },
     buttonSection: {
-        paddingTop: theme.spacing.unit * 3,
+        paddingTop: theme.spacing(3),
     },
     saveButton: {
-        marginRight: theme.spacing.unit * 2,
+        marginRight: theme.spacing(2),
     },
     helpText: {
         color: theme.palette.text.hint,
-        marginTop: theme.spacing.unit,
+        marginTop: theme.spacing(1),
     },
     extraPadding: {
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
     },
     addNewOther: {
         paddingTop: 40,

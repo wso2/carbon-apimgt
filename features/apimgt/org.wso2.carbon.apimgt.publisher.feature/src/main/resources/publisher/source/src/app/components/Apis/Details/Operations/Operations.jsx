@@ -48,8 +48,8 @@ const styles = theme => ({
         flexWrap: 'wrap',
     },
     textField: {
-        marginLeft: theme.spacing.unit,
-        marginRight: theme.spacing.unit,
+        marginLeft: theme.spacing(1),
+        marginRight: theme.spacing(1),
         width: 400,
     },
     mainTitle: {
@@ -64,7 +64,7 @@ const styles = theme => ({
         alignItems: 'center',
     },
     button: {
-        marginLeft: theme.spacing.unit * 2,
+        marginLeft: theme.spacing(2),
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
     buttonMain: {
@@ -76,20 +76,20 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.paper),
         border: 'solid 1px ' + theme.palette.grey['300'],
         borderRadius: theme.shape.borderRadius,
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
     },
     addNewHeader: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         backgroundColor: theme.palette.grey['300'],
         fontSize: theme.typography.h6.fontSize,
         color: theme.typography.h6.color,
         fontWeight: theme.typography.h6.fontWeight,
     },
     addNewOther: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
     },
     radioGroup: {
         display: 'flex',
@@ -104,7 +104,7 @@ const styles = theme => ({
         marginRight: 10,
     },
     expansionPanel: {
-        marginBottom: theme.spacing.unit,
+        marginBottom: theme.spacing(1),
     },
     expansionPanelDetails: {
         flexDirection: 'column',

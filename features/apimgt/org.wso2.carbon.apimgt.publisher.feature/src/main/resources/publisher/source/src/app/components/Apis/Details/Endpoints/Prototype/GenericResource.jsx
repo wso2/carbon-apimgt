@@ -70,7 +70,7 @@ function GenericResource(props) {
                 ...theme.typography.button,
             },
             resourcePathContainer: {
-                paddingTop: theme.spacing(),
+                paddingTop: theme.spacing(1),
             },
             prototypeResourceHeader: {
                 borderBottom: `${chipColor} 1px solid`,

@@ -72,7 +72,7 @@ const styles = theme => ({
         borderRadius: '5px',
         cursor: 'pointer',
         height: 'calc(100vh - 10em)',
-        padding: `${theme.spacing.unit * 2}px 0px`,
+        padding: `${theme.spacing(2)}px 0px`,
         position: 'relative',
         textAlign: 'center',
         width: '100%',
@@ -93,7 +93,7 @@ const styles = theme => ({
         objectFit: 'cover',
     },
     preview: {
-        height: theme.spacing.unit * 25,
+        height: theme.spacing(25),
     },
     rejectDrop: {
         backgroundColor: red[50],

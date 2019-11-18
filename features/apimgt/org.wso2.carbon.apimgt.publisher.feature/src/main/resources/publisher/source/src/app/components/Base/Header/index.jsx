@@ -36,8 +36,8 @@ const styles = theme => ({
         background: theme.palette.background.appBar,
     },
     typoRoot: {
-        marginLeft: theme.spacing.unit * 3,
-        marginRight: theme.spacing.unit * 3,
+        marginLeft: theme.spacing(3),
+        marginRight: theme.spacing(3),
         textTransform: 'capitalize',
     },
     brandLink: {

@@ -42,18 +42,18 @@ const styles = theme => ({
         position: 'relative',
     },
     headline: {
-        paddingTop: theme.spacing.unit * 1.25,
-        paddingLeft: theme.spacing.unit * 2.5,
+        paddingTop: theme.spacing(1.25),
+        paddingLeft: theme.spacing(2.5),
     },
     head: {
-        paddingBottom: theme.spacing.unit * 2,
+        paddingBottom: theme.spacing(2),
         fontWeight: 200,
     },
     content: {
-        paddingBottom: theme.spacing.unit * 2,
+        paddingBottom: theme.spacing(2),
     },
     buttonLeft: {
-        marginRight: theme.spacing.unit,
+        marginRight: theme.spacing(1),
     },
 });
 

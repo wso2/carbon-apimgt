@@ -50,7 +50,7 @@ const styles = theme => ({
         paddingLeft: 0,
     },
     button: {
-        marginLeft: theme.spacing.unit * 2,
+        marginLeft: theme.spacing(2),
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
     buttonIcon: {
@@ -66,7 +66,7 @@ const styles = theme => ({
         tableLayout: 'fixed',
     },
     addNewHeader: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         backgroundColor: theme.palette.grey['300'],
         fontSize: theme.typography.h6.fontSize,
         color: theme.typography.h6.color,
@@ -77,7 +77,7 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.paper),
         border: 'solid 1px ' + theme.palette.grey['300'],
         borderRadius: theme.shape.borderRadius,
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,

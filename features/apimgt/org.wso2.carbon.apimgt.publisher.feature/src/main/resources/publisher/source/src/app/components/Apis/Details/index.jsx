@@ -87,8 +87,8 @@ const styles = theme => ({
     },
     leftLInkMain: {
         borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
-        paddingBottom: theme.spacing.unit,
-        paddingTop: theme.spacing.unit,
+        paddingBottom: theme.spacing(1),
+        paddingTop: theme.spacing(1),
         cursor: 'pointer',
         backgroundColor: theme.palette.background.leftMenuActive,
         color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
@@ -103,12 +103,12 @@ const styles = theme => ({
         flex: 1,
         flexDirection: 'column',
         marginLeft: theme.custom.leftMenuWidth,
-        paddingBottom: theme.spacing.unit * 3,
+        paddingBottom: theme.spacing(3),
     },
     contentInside: {
-        paddingLeft: theme.spacing.unit * 3,
-        paddingRight: theme.spacing.unit * 3,
-        paddingTop: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(3),
+        paddingRight: theme.spacing(3),
+        paddingTop: theme.spacing(2),
     },
 });
 

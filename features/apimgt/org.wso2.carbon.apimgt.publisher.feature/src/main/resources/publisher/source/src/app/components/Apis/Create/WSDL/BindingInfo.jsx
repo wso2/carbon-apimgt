@@ -11,7 +11,7 @@ const styles = theme => ({
     FormControl: {
         padding: 0,
         width: '100%',
-        marginTop: theme.spacing.unit * 3,
+        marginTop: theme.spacing(3),
     },
     radioWrapper: {
         display: 'flex',
