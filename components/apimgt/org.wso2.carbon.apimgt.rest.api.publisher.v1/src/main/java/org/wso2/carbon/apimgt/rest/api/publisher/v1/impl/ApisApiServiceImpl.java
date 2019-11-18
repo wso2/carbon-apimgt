@@ -750,38 +750,40 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             String endpointConfigString = api.getEndpointConfig();
-            JSONParser jsonParser = new JSONParser();
-            JSONObject endpointConfig = (JSONObject) jsonParser.parse(endpointConfigString);
-            if (endpointConfig != null) {
-                if (endpointConfig.containsKey("amznAccessKey") && endpointConfig.containsKey("amznSecretKey")) {
-                    String accessKey = (String) endpointConfig.get("amznAccessKey");
-                    String secretKey = (String) endpointConfig.get("amznSecretKey");
-                    AWSCredentialsProvider credentialsProvider;
-                    if ("".equals(accessKey) && "".equals(secretKey)) {
-                        credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
-                    } else {
-                        if (APIConstants.AMZN_SECRET_KEY_PREFIX.equals(secretKey.substring(0,
-                                APIConstants.AMZN_SECRET_KEY_PREFIX_LENGTH))) {
-                            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-                            secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey.substring(
-                                    APIConstants.AMZN_SECRET_KEY_PREFIX_LENGTH)),
-                                    APIConstants.DigestAuthConstants.CHARSET);
+            if (!"".equals(endpointConfigString)) {
+                JSONParser jsonParser = new JSONParser();
+                JSONObject endpointConfig = (JSONObject) jsonParser.parse(endpointConfigString);
+                if (endpointConfig != null) {
+                    if (endpointConfig.containsKey("amznAccessKey") && endpointConfig.containsKey("amznSecretKey")) {
+                        String accessKey = (String) endpointConfig.get("amznAccessKey");
+                        String secretKey = (String) endpointConfig.get("amznSecretKey");
+                        AWSCredentialsProvider credentialsProvider;
+                        if ("".equals(accessKey) && "".equals(secretKey)) {
+                            credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
+                        } else {
+                            if (APIConstants.AMZN_SECRET_KEY_PREFIX.equals(secretKey.substring(0,
+                                    APIConstants.AMZN_SECRET_KEY_PREFIX_LENGTH))) {
+                                CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                                secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey.substring(
+                                        APIConstants.AMZN_SECRET_KEY_PREFIX_LENGTH)),
+                                        APIConstants.DigestAuthConstants.CHARSET);
+                            }
+                            BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
+                            credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
                         }
-                        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
-                        credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
+                        AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
+                                .withCredentials(credentialsProvider)
+                                .build();
+                        ListFunctionsResult listFunctionsResult = awsLambda.listFunctions();
+                        List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
+                        arns.put("count", functionConfigurations.size());
+                        JSONArray list = new JSONArray();
+                        for (FunctionConfiguration functionConfiguration : functionConfigurations) {
+                            list.put(functionConfiguration.getFunctionArn());
+                        }
+                        arns.put("list", list);
+                        return Response.ok().entity(arns.toString()).build();
                     }
-                    AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
-                            .withCredentials(credentialsProvider)
-                            .build();
-                    ListFunctionsResult listFunctionsResult = awsLambda.listFunctions();
-                    List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
-                    arns.put("count", functionConfigurations.size());
-                    JSONArray list = new JSONArray();
-                    for (FunctionConfiguration functionConfiguration : functionConfigurations) {
-                        list.put(functionConfiguration.getFunctionArn());
-                    }
-                    arns.put("list", list);
-                    return Response.ok().entity(arns.toString()).build();
                 }
             }
         } catch (SdkClientException e) {
