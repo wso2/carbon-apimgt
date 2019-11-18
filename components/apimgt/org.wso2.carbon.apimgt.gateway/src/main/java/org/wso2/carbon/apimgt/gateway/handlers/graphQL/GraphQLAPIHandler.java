@@ -289,7 +289,8 @@ public class GraphQLAPIHandler extends AbstractHandler {
                                     + isSecurityEnabled);
                         }
                     } else if (additionalType.getName().contains(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY)) {
-                        GraphQLAccessControlPolicy = base64DecodedAdditionalType;
+                        String base64DecodedPolicy = new String(Base64.getUrlDecoder().decode(type.getName()));
+                        GraphQLAccessControlPolicy = base64DecodedPolicy;
                     }
                 }
                 if (!roleArrayList.isEmpty()) {

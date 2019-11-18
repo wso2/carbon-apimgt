@@ -108,11 +108,11 @@ public class GraphQLSecurityHandler extends AbstractHandler {
      * This method returns the maximum query depth value
      *
      * @param userRoles list of user roles
-     * @param jsonObject object with role to depth mappings
+     * @param policyDefinition object with role to depth mappings
      * @return maximum query depth value if exists, or -1 to denote no depth limitation
      */
-    private int getMaxQueryDepth(String[] userRoles, JSONObject jsonObject) {
-        Object depthObject = jsonObject.get("DEPTH");
+    private int getMaxQueryDepth(String[] userRoles, JSONObject policyDefinition) {
+        Object depthObject = policyDefinition.get("DEPTH");
         ArrayList<Integer> allocatedDepths = new ArrayList<Integer>();
         for (String role: userRoles) {
             try {
@@ -154,45 +154,41 @@ public class GraphQLSecurityHandler extends AbstractHandler {
      * @return true or false
      */
     private boolean queryDepthAnalysis(MessageContext messageContext, String payload) {
+        JSONParser jsonParser = new JSONParser();
         String username = APISecurityUtils.getAuthenticationContext(messageContext).getUsername();
         try {
             String[] userRoles = getUserRoles(username);
-            Entry localEntryObj = (Entry) messageContext.getConfiguration().getLocalRegistry().get("policy_1");
-            if (localEntryObj != null) {
-                System.out.println(localEntryObj);
-                JSONParser jsonParser = new JSONParser();
-                String policyDefinition = localEntryObj.getValue().toString();
-                JSONObject jsonObject = (JSONObject) jsonParser.parse(policyDefinition);
-                MAX_QUERY_DEPTH = getMaxQueryDepth(userRoles, jsonObject);
-                if (MAX_QUERY_DEPTH > 0) {
+            String GraphQLAccessControlPolicy = (String) messageContext.getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY);
+            JSONObject policyDefinition = (JSONObject) jsonParser.parse(GraphQLAccessControlPolicy);
+            MAX_QUERY_DEPTH = getMaxQueryDepth(userRoles, policyDefinition);
+            if (MAX_QUERY_DEPTH > 0) {
 
-                    MaxQueryDepthInstrumentation maxQueryDepthInstrumentation = new MaxQueryDepthInstrumentation(MAX_QUERY_DEPTH);
+                MaxQueryDepthInstrumentation maxQueryDepthInstrumentation = new MaxQueryDepthInstrumentation(MAX_QUERY_DEPTH);
 
-                    GraphQL runtime = GraphQL.newGraphQL(schema)
-                            .instrumentation(maxQueryDepthInstrumentation)
-                            .build();
+                GraphQL runtime = GraphQL.newGraphQL(schema)
+                        .instrumentation(maxQueryDepthInstrumentation)
+                        .build();
 
-                    try {
-                        ExecutionResult executionResult = runtime.execute(payload);
-                        List<GraphQLError> errors = executionResult.getErrors();
-                        if (errors.size()>0) {
-                            for (GraphQLError error : errors) {
-                                log.error(error);
-                            }
-                            handleFailure(messageContext, APISecurityConstants.QUERY_TOO_COMPLEX, errors.toString());
-                            return false;
+                try {
+                    ExecutionResult executionResult = runtime.execute(payload);
+                    List<GraphQLError> errors = executionResult.getErrors();
+                    if (errors.size()>0) {
+                        for (GraphQLError error : errors) {
+                            log.error(error);
                         }
-                        if (log.isDebugEnabled()) {
-                            log.debug("Maximum query depth of " + MAX_QUERY_DEPTH + " was not exceeded");
-                        }
-                        return true;
-                    } catch (Throwable e) {
-                        log.error(e);
+                        handleFailure(messageContext, APISecurityConstants.QUERY_TOO_COMPLEX, errors.toString());
+                        return false;
                     }
-
-                } else {
-                    return true; // No depth limitation check
+                    if (log.isDebugEnabled()) {
+                        log.debug("Maximum query depth of " + MAX_QUERY_DEPTH + " was not exceeded");
+                    }
+                    return true;
+                } catch (Throwable e) {
+                    log.error(e);
                 }
+
+            } else {
+                return true; // No depth limitation check
             }
         } catch (APISecurityException | ParseException e) {
             e.printStackTrace();
