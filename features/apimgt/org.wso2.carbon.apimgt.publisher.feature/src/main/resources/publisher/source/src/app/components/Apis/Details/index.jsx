@@ -87,8 +87,8 @@ const styles = theme => ({
     },
     leftLInkMain: {
         borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
-        paddingBottom: theme.spacing.unit,
-        paddingTop: theme.spacing.unit,
+        paddingBottom: theme.spacing(1),
+        paddingTop: theme.spacing(1),
         cursor: 'pointer',
         backgroundColor: theme.palette.background.leftMenuActive,
         color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
@@ -103,12 +103,12 @@ const styles = theme => ({
         flex: 1,
         flexDirection: 'column',
         marginLeft: theme.custom.leftMenuWidth,
-        paddingBottom: theme.spacing.unit * 3,
+        paddingBottom: theme.spacing(3),
     },
     contentInside: {
-        paddingLeft: theme.spacing.unit * 3,
-        paddingRight: theme.spacing.unit * 3,
-        paddingTop: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(3),
+        paddingRight: theme.spacing(3),
+        paddingTop: theme.spacing(2),
     },
 });
 
@@ -181,6 +181,14 @@ class Details extends Component {
             } else {
                 this.setAPI();
             }
+            const api = new API();
+            api.getTenantsByState('active')
+                .then((response) => {
+                    const { list } = response.body;
+                    this.setState({ tenantList: list });
+                }).catch((error) => {
+                    console.error('error when getting tenants ' + error);
+                });
         }
     }
 
@@ -407,7 +415,7 @@ class Details extends Component {
      */
     render() {
         const {
-            api, apiNotFound, isAPIProduct, imageUpdate,
+            api, apiNotFound, isAPIProduct, imageUpdate, tenantList,
         } = this.state;
         const {
             classes,
@@ -462,6 +470,7 @@ class Details extends Component {
                         isAPIProduct,
                         setAPI: this.setAPI,
                         setImageUpdate: this.setImageUpdate,
+                        tenantList,
                     }}
                 >
                     <div className={classes.LeftMenu}>

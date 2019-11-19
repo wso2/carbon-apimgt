@@ -38,8 +38,8 @@ const styles = theme => ({
         flexWrap: 'wrap',
     },
     textField: {
-        marginLeft: theme.spacing.unit,
-        marginRight: theme.spacing.unit,
+        marginLeft: theme.spacing(),
+        marginRight: theme.spacing(),
         width: 400,
     },
     mainTitle: {
@@ -49,19 +49,19 @@ const styles = theme => ({
         width: 400,
     },
     dropDown: {
-        width: theme.spacing.unit * 11.25,
+        width: theme.spacing(11.25),
     },
     divider: {
         marginTop: 20,
         marginBottom: 20,
     },
     chip: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(),
         color: theme.palette.text.secondary,
         minWidth: 100,
     },
     chipActive: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(),
         color: theme.palette.text.secondary,
         background: theme.palette.background.active,
         minWidth: 100,
@@ -84,21 +84,21 @@ const styles = theme => ({
     },
     resourceRoot: {
         background: theme.palette.grey['100'],
-        paddingLeft: theme.spacing.unit,
-        paddingRight: theme.spacing.unit,
+        paddingLeft: theme.spacing(),
+        paddingRight: theme.spacing(),
         borderRadius: theme.shape.borderRadius,
-        marginBottom: theme.spacing.unit,
+        marginBottom: theme.spacing(),
     },
     deleteButton: {
         marginLeft: 'auto',
     },
     pathDisplay: {
-        marginRight: theme.spacing.unit * 2,
-        marginLeft: theme.spacing.unit * 2,
+        marginRight: theme.spacing(2),
+        marginLeft: theme.spacing(2),
     },
     descriptionWrapper: {
-        paddingTop: theme.spacing.unit,
-        paddingBottom: theme.spacing.unit,
+        paddingTop: theme.spacing(),
+        paddingBottom: theme.spacing(),
     },
     scopeSelect: {
         width: '100%',

@@ -3315,6 +3315,47 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ######################################################
+  # The Security Audit API List
+  ######################################################
+  /apis/{apiId}/auditapi:
+    #-----------------------------------------------------
+    # Retrieve the Security Audit Report of the Audit API
+    #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      x-examples:
+        $ref: "docs/examples/apis/apis_id_auditapi_get.yaml"
+      summary: Retrieve the Security Audit Report of the Audit API
+      description: |
+        Retrieve the Security Audit Report of the Audit API
+      parameters:
+        - $ref: "#/parameters/Accept"
+        - $ref: "#/parameters/apiId"
+      tags:
+        - API Audit
+      responses:
+        200:
+          description: |
+            OK.
+            The Security Audit Report has been returned.
+          headers:
+            Content-Type:
+              description: |
+                The content of the body.
+              default: application/json
+              type: string
+          schema:
+            $ref: '#/definitions/AuditReport'
+        404:
+          description: |
+            Not Found.
+            The Security Audit Report was not found.
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # The "ExternalStore Collection" resource APIs
 ######################################################
@@ -5808,9 +5849,9 @@ paths:
 # The Publisher settings List
 ######################################################
   /settings:
-#-----------------------------------------------------
-# Retrieve publisher settings
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve publisher settings
+    #-----------------------------------------------------
     get:
       summary: Retreive publisher settings
       security:
@@ -7045,6 +7086,27 @@ definitions:
                   type: string
                 priority:
                   type: integer
+
+  #-----------------------------------------------------
+  # The Audit Report resource
+  #-----------------------------------------------------
+  AuditReport:
+    title: Resource for Audit Report
+    properties:
+      report:
+        type: string
+        description: |
+          The API Security Audit Report
+      grade:
+        type: string
+        description: |
+          The overall grade of the Security Audit
+        example: "27.95"
+      numErrors:
+        type: integer
+        description: |
+          The number of errors in the API Definition
+        example: 20
 
   #-----------------------------------------------------
   # The API Product List resource
@@ -8856,11 +8918,35 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/MonetizationAttribute'
+      securityAuditProperties:
+        type: object
+        items:
+          type: string
       externalStoresEnabled:
         type: boolean
         description: |
           Is External Stores configuration enabled
         example: true
+
+  #-----------------------------------------------------
+  # The SecurityAuditAttribute resource
+  #-----------------------------------------------------
+  SecurityAuditAttribute:
+    title: SecurityAuditAttributeDTO
+    properties:
+      isGlobal:
+        type: boolean
+        example: false
+      overrideGlobal:
+        type: boolean
+        example: false
+      apiToken:
+        type: string
+        example: b1267ytf-b7gc-4aee-924d-ece81241efec
+      collectionId:
+        type: string
+        example: 456ef957-5a79-449f-83y3-9027945d3c60
+
 
 #-----------------------------------------------------
 # The pagination resource

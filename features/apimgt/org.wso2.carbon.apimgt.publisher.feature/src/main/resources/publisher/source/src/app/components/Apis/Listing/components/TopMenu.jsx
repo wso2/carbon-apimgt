@@ -32,10 +32,10 @@ import APICreateMenu from '../components/APICreateMenu';
 
 const styles = theme => ({
     rightIcon: {
-        marginLeft: theme.spacing.unit,
+        marginLeft: theme.spacing(1),
     },
     button: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
         marginBottom: 0,
     },
     buttonRight: {

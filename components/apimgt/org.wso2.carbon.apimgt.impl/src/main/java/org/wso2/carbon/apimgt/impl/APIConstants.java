@@ -210,6 +210,34 @@ public final class APIConstants {
 
     public static final String WORKFLOW_MEDIA_TYPE = "workflow-config";
 
+    // Constants used in API Security Audit feature
+    // For configs
+    public static final String API_SECURITY_AUDIT = "APISecurityAudit.";
+    public static final String API_SECURITY_AUDIT_API_TOKEN = API_SECURITY_AUDIT + "APIToken";
+    public static final String API_SECURITY_AUDIT_CID = API_SECURITY_AUDIT + "CollectionID";
+    public static final String API_SECURITY_AUDIT_GLOBAL = API_SECURITY_AUDIT + "Global";
+
+    public static final String SECURITY_AUDIT_CONFIGURATION = "SecurityAuditConfig";
+    public static final String SECURITY_AUDIT_API_TOKEN = "apiToken";
+    public static final String SECURITY_AUDIT_COLLECTION_ID = "collectionId";
+    public static final String SECURITY_AUDIT_OVERRIDE_GLOBAL = "overrideGlobal";
+    // For HTTP requests
+    public static final String HEADER_ACCEPT = "Accept";
+    public static final String HEADER_CONTENT_TYPE = "Content-Type";
+    public static final String HEADER_API_TOKEN = "X-API-KEY";
+    public static final String MULTIPART_FORM_BOUNDARY = "X-WSO2-BOUNDARY";
+    public static final String MULTIPART_LINE_FEED = "\r\n";
+    public static final String BASE_AUDIT_URL = "https://platform.42crunch.com/api/v1/apis";
+    public static final String MULTIPART_CONTENT_TYPE = "multipart/form-data; boundary=";
+    public static final String DATA = "data";
+    public static final String ATTR = "attr";
+    public static final String GRADE = "grade";
+    public static final String NUM_ERRORS = "numErrors";
+    public static final String DESC = "desc";
+    public static final String ID = "id";
+    public static final String IS_VALID = "isValid";
+    public static final String ASSESSMENT_REPORT = "/assessmentreport?";
+
     //registry resource containing the self signup user config
     public static final String SELF_SIGN_UP_CONFIG_LOCATION = API_APPLICATION_DATA_LOCATION + "/sign-up-config.xml";
     public static final String SELF_SIGN_UP_CONFIG_MEDIA_TYPE = "signup-config";
@@ -1800,5 +1828,7 @@ public final class APIConstants {
     public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
     public static final String UTILITY_WEB_APP_EP = "/throttle/data/v1";
     public static final String API_KEY_REVOKE_PATH = "/apikey/revoke";
+
+    public static final String SKIP_ROLES_BY_REGEX = "skipRolesByRegex";
 
 }

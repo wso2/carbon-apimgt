@@ -30,10 +30,10 @@ const styles = theme => ({
     },
     time: {
         color: theme.palette.getContrastText(theme.palette.background.default),
-        marginTop: theme.spacing.unit * 0.3,
+        marginTop: theme.spacing(0.3),
     },
     verticalSpace: {
-        marginTop: theme.spacing.unit * 0.2,
+        marginTop: theme.spacing(0.2),
     },
     disable: {
         color: theme.custom.disableColor,
@@ -49,11 +49,11 @@ const styles = theme => ({
         overflowWrap: 'break-word',
     },
     root: {
-        marginTop: theme.spacing.unit * 2.5,
+        marginTop: theme.spacing(2.5),
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
         paddingTop: theme.spacing.unig,
     },
 });

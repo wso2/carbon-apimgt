@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Stepper from '@material-ui/core/Stepper';
@@ -122,13 +122,20 @@ const useStyles = makeStyles(theme => ({
 export default function CustomizedSteppers() {
     const [api, updateAPI] = useAPI();
     const classes = useStyles();
-    const { settings } = useAppContext();
+    const { settings, user } = useAppContext();
     const isEndpointAvailable = api.endpointConfig !== null;
     const isTierAvailable = api.policies.length !== 0;
     const isPrototypedAvailable =
         api.endpointConfig !== null && api.endpointConfig.implementation_status === 'prototyped';
     const [lifecycleState, setlifecycleState] = useState([]);
     const [isUpdating, setUpdating] = useState(false);
+    const { tenantList } = useContext(ApiContext);
+    const userNameSplit = user.name.split('@');
+    const tenantDomain = userNameSplit[userNameSplit.length - 1];
+    let devportalUrl = `${settings.storeUrl}/apis/${api.id}/overview`;
+    if (tenantList && tenantList.length > 0) {
+        devportalUrl = `${settings.storeUrl}/apis/${api.id}/overview?tenant=${tenantDomain}`;
+    }
 
     useEffect(() => {
         api.getLcState(api.id)
@@ -186,11 +193,7 @@ export default function CustomizedSteppers() {
                             <a
                                 target='_blank'
                                 rel='noopener noreferrer'
-                                href={
-                                    `${settings.storeUrl}/apis/` +
-                                    api.id +
-                                    '/overview'
-                                }
+                                href={devportalUrl}
                                 className={classes.viewInStoreLauncher}
                             >
                                 <Typography
@@ -254,7 +257,7 @@ export default function CustomizedSteppers() {
                                     onClick={() => updateLCStateOfAPI(api.id, 'Deploy as a Prototype')}
                                     disabled={api.workflowStatus === 'CREATED' || AuthManager.isNotPublisher()}
                                 >
-                          Deploy as a prototype
+                                        Deploy as a prototype
                                     {isUpdating && <CircularProgress size={20} />}
                                 </Button>
 
@@ -266,7 +269,7 @@ export default function CustomizedSteppers() {
                                     disabled={(!isEndpointAvailable || !isTierAvailable) ||
                                         AuthManager.isNotPublisher() || api.workflowStatus === 'CREATED'}
                                 >
-                         Publish
+                                        Publish
                                     {isUpdating && <CircularProgress size={20} />}
                                 </Button>
                             )}

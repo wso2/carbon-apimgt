@@ -30,15 +30,15 @@ import ThumbnailView from './ThumbnailView';
 
 const styles = theme => ({
     card: {
-        margin: theme.spacing.unit * (3 / 2),
-        maxWidth: theme.spacing.unit * 32,
+        margin: theme.spacing(3 / 2),
+        maxWidth: theme.spacing(32),
         transition: 'box-shadow 0.3s ease-in-out',
     },
     providerText: {
         textTransform: 'capitalize',
     },
-    docDetails: { padding: theme.spacing.unit },
-    docActions: { justifyContent: 'space-between', padding: `0px 0px ${theme.spacing.unit}px 0px` },
+    docDetails: { padding: theme.spacing(1) },
+    docActions: { justifyContent: 'space-between', padding: `0px 0px ${theme.spacing(1)}px 0px` },
     deleteProgress: {
         color: green[200],
         position: 'absolute',

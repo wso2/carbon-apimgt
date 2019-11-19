@@ -17,15 +17,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-var app = require('/site/public/theme/defaultTheme.js').Configurations.app;
-
+var app = require('/site/public/theme/settings.js').Settings.app;
 var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 var getLoopbackOrigin = function() {
-    return (
-        'https://' +
-        app.reverseProxy.loopbackHost +
-        ':' +
-        String(parseInt(app.reverseProxy.defaultHTTPSPort) + utils.getPortOffset())
-    );
+    var mgtTransportPort = utils.getCarbonTransportPort("https");
+    var origin = 'https://' + app.origin.host + ":" + mgtTransportPort;
+    return origin;
 };

@@ -24,6 +24,7 @@ import Icon from '@material-ui/core/Icon';
 import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import Settings from 'AppComponents/Shared/SettingsContext';
 import API from 'AppData/api';
 import ApiBreadcrumbs from './ApiBreadcrumbs';
 import ApiTableView from './ApiTableView';
@@ -150,6 +151,8 @@ const styles = theme => ({
  * @extends {Component}
  */
 class CommonListing extends React.Component {
+    static contextType = Settings;
+
     /**
      * Constructor
      *
@@ -161,6 +164,7 @@ class CommonListing extends React.Component {
             listType: props.theme.custom.defaultApiView,
             allTags: null,
             showLeftMenu: false,
+            isMonetizationEnabled: false,
         };
     }
 
@@ -188,10 +192,21 @@ class CommonListing extends React.Component {
             .catch((error) => {
                 console.log(error);
             });
+        this.isMonetizationEnabled();
     }
     toggleLeftMenu = () => {
         this.setState(prevState => ({ showLeftMenu: !prevState.showLeftMenu }));
     };
+
+    /**
+     * retrieve Settings from the context and check the monetization enabled
+     */
+    isMonetizationEnabled = () => {
+        const settingsContext = this.context;
+        const enabled = settingsContext.settings.monetizationEnabled;
+        this.setState({ isMonetizationEnabled: enabled });
+    }
+
     /**
      *
      * @inheritdoctheme
@@ -212,7 +227,7 @@ class CommonListing extends React.Component {
                 tagCloud: { active: tagCloudActive },
             },
         } = theme;
-        const { listType, allTags, showLeftMenu } = this.state;
+        const { listType, allTags, showLeftMenu, isMonetizationEnabled } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
         const searchParam = new URLSearchParams(search);
         const searchQuery = searchParam.get('query');
@@ -308,12 +323,12 @@ class CommonListing extends React.Component {
                     {active && allTags && allTags.length > 0 && <ApiBreadcrumbs selectedTag={selectedTag} />}
                     <div className={classes.listContentWrapper}>
                         {listType === 'grid' && (
-                            <ApiContext.Provider value={{ apiType }}>
+                            <ApiContext.Provider value={{ apiType, isMonetizationEnabled }}>
                                 <ApiTableView gridView query={search} />
                             </ApiContext.Provider>
                         )}
                         {listType === 'list' && (
-                            <ApiContext.Provider value={{ apiType }}>
+                            <ApiContext.Provider value={{ apiType, isMonetizationEnabled }}>
                                 <ApiTableView gridView={false} query={search} />
                             </ApiContext.Provider>
                         )}

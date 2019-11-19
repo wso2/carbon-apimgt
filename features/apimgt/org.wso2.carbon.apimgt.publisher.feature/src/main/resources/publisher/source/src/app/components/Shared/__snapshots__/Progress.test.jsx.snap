@@ -7,6 +7,8 @@ exports[`Progress component test should comply with the snapshot 1`] = `
   <span
     style={
       Object {
+        "display": "block",
+        "marginLeft": "-33px",
         "width": "200px",
       }
     }

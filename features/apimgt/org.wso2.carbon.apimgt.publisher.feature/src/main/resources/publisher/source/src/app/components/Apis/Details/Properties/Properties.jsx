@@ -143,6 +143,17 @@ function Properties(props) {
     const [propertyValue, setPropertyValue] = useState(null);
     const [updating, setUpdating] = useState(false);
     const [editing, setEditing] = useState(false);
+    const [isAdditionalPropertiesStale, setIsAdditionalPropertiesStale] = useState(false);
+    const iff = (condition, then, otherwise) => (condition ? then : otherwise);
+
+    let isKeyWord = false;
+    const keywords = ['provider', 'version', 'context', 'status', 'description',
+        'subcontext', 'doc', 'lcState', 'name', 'tags'];
+    if (keywords.includes(propertyKey)) {
+        isKeyWord = true;
+    } else {
+        isKeyWord = false;
+    }
 
     const toggleAddProperty = () => {
         setShowAddProperty(!showAddProperty);
@@ -211,6 +222,10 @@ function Properties(props) {
             delete additionalPropertiesCopy[oldKey];
         }
         setAdditionalProperties(additionalPropertiesCopy);
+
+        if (additionalPropertiesCopy !== additionalProperties) {
+            setIsAdditionalPropertiesStale(true);
+        }
     };
 
     /**
@@ -327,7 +342,7 @@ function Properties(props) {
                     </Button>
                 )}
             </div>
-            {isEmpty(additionalProperties) && !showAddProperty && (
+            {isEmpty(additionalProperties) && !isAdditionalPropertiesStale && !showAddProperty && (
                 <div className={classes.messageBox}>
                     <InlineMessage type='info' height={140}>
                         <div className={classes.contentWrapper}>
@@ -364,7 +379,7 @@ function Properties(props) {
                     </InlineMessage>
                 </div>
             )}
-            {(!isEmpty(additionalProperties) || showAddProperty) && (
+            {(!isEmpty(additionalProperties) || showAddProperty || isAdditionalPropertiesStale) && (
                 <Grid container spacing={7}>
                     <Grid item xs={12}>
                         <Paper className={classes.paperRoot}>
@@ -406,7 +421,9 @@ function Properties(props) {
                                                         value={propertyKey === null ? '' : propertyKey}
                                                         onChange={handleChange('propertyKey')}
                                                         onKeyDown={handleKeyDown('propertyKey')}
-                                                        error={validateEmpty(propertyKey)}
+                                                        helperText={validateEmpty(propertyKey) ? '' :
+                                                            iff(isKeyWord, 'Invalid property name', '')}
+                                                        error={validateEmpty(propertyKey) || isKeyWord}
                                                         disabled={isRestricted(
                                                             ['apim:api_create', 'apim:api_publish'],
                                                             api,
@@ -443,6 +460,7 @@ function Properties(props) {
                                                             !propertyValue ||
                                                             !propertyKey ||
                                                             isRestricted(['apim:api_create', 'apim:api_publish'], api)
+                                                            || isKeyWord
                                                         }
                                                         onClick={handleAddToList}
                                                         className={classes.marginRight}
@@ -498,7 +516,8 @@ function Properties(props) {
                                             color='primary'
                                             onClick={handleSubmit}
                                             disabled={
-                                                editing || updating || isEmpty(additionalProperties)
+                                                editing || updating || (isEmpty(additionalProperties) &&
+                                                !isAdditionalPropertiesStale)
                                                 || isRestricted(['apim:api_create', 'apim:api_publish'], api)
                                             }
                                         >

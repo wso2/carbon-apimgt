@@ -38,14 +38,14 @@ import Alert from 'AppComponents/Shared/Alert';
 
 const styles = theme => ({
     button: {
-        marginLeft: theme.spacing.unit * 2,
+        marginLeft: theme.spacing(2),
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
     },
     addNewOther: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
     },
     radioGroup: {
         display: 'flex',
@@ -53,7 +53,7 @@ const styles = theme => ({
         width: 300,
     },
     expansionPanel: {
-        marginBottom: theme.spacing.unit,
+        marginBottom: theme.spacing(1),
     },
     group: {
         display: 'flex',
@@ -92,7 +92,7 @@ const styles = theme => ({
         borderRadius: '5px',
         cursor: 'pointer',
         height: 75,
-        padding: `${theme.spacing.unit * 2}px 0px`,
+        padding: `${theme.spacing(2)}px 0px`,
         position: 'relative',
         textAlign: 'center',
         width: '100%',

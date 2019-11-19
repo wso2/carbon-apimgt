@@ -24,13 +24,17 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityAuditAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -39,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashMap;
 
 
 public class SettingsMappingUtil {
@@ -63,6 +68,7 @@ public class SettingsMappingUtil {
             settingsDTO.setEnvironment(environmentListDTO.getList());
             settingsDTO.setStoreUrl(APIUtil.getStoreUrl());
             settingsDTO.setMonetizationAttributes(getMonetizationAttributes());
+            settingsDTO.setSecurityAuditProperties(getSecurityAuditProperties());
             settingsDTO.setExternalStoresEnabled(
                     APIUtil.isExternalStoresEnabled(RestApiUtil.getLoggedInUserTenantDomain()));
         }
@@ -118,5 +124,28 @@ public class SettingsMappingUtil {
             monetizationAttributeDTOSList.add(monetizationAttributeDTO);
         }
         return monetizationAttributeDTOSList;
+    }
+
+    /**
+     * This method returns the Security Audit properties from the configuration
+     *
+     * @return SecurityAuditAttributeDTO Security Audit Attributes
+     * @throws APIManagementException
+     */
+    private SecurityAuditAttributeDTO getSecurityAuditProperties() throws APIManagementException {
+        SecurityAuditAttributeDTO properties = new SecurityAuditAttributeDTO();
+
+        String username = RestApiUtil.getLoggedInUsername();
+        APIProvider apiProvider = RestApiUtil.getProvider(username);
+
+        JSONObject securityAuditPropertyObject = apiProvider.getSecurityAuditAttributesFromConfig(username);
+        if (securityAuditPropertyObject != null) {
+            String apiToken = (String) securityAuditPropertyObject.get(APIConstants.SECURITY_AUDIT_API_TOKEN);
+            String collectionId = (String) securityAuditPropertyObject.get(APIConstants.SECURITY_AUDIT_COLLECTION_ID);
+
+            properties.setApiToken(apiToken);
+            properties.setCollectionId(collectionId);
+        }
+        return properties;
     }
 }

@@ -18,14 +18,14 @@
  */
 
     var log = new Log("Services login DCR request");
-    var app = require("/site/public/theme/defaultTheme.js").Configurations.app;
+    var app = require("/site/public/theme/settings.js").Settings.app;
     var appUtils = require("/services/utils.js");
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     include("/services/constants.jag");
 
     var serverUrl = '';
-    var forwarded_for = request.getHeader(app.reverseProxy.forwardedHeader);
-    if (app.reverseProxy.auto && forwarded_for) {
+    var forwarded_for = request.getHeader(app.customUrl.forwardedHeader);
+    if (app.customUrl.enabled && forwarded_for) {
         serverUrl = "https://" + forwarded_for;
     } else {
         serverUrl = utils.getServerURL();
@@ -54,7 +54,9 @@
     var systemApplicationDAO = new SystemApplicationDAO();
     var clientId;
     systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME);
-
+    if (systemApplicationDTO === null) {
+        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD);
+    }
     var lock = SystemApplicationDAO.getLock();
     if (systemApplicationDTO !== null) {
         clientId = systemApplicationDTO.getConsumerKey();
@@ -62,6 +64,9 @@
         try {
             lock.acquire();
             systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME);
+            if (systemApplicationDTO === null) {
+                systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD);
+            }
             if (systemApplicationDTO == null) {
                 var dcrRequestData = {
                     "callbackUrl": callbackUrl,

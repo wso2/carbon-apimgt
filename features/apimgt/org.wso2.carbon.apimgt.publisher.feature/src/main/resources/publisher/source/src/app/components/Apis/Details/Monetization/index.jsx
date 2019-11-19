@@ -25,10 +25,10 @@ const styles = theme => ({
         flexWrap: 'wrap',
     },
     margin: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(),
     },
     paper: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         textAlign: 'left',
         color: theme.palette.text.secondary,
         paddingBottom: '10px',
@@ -40,7 +40,7 @@ const styles = theme => ({
         minWidth: '50%',
     },
     button: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(),
     },
 });
 

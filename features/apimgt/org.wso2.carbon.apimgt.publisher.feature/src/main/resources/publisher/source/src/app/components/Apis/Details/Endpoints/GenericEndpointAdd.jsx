@@ -38,11 +38,11 @@ const styles = theme => ({
         width: '100%',
     },
     input: {
-        marginLeft: theme.spacing(),
+        marginLeft: theme.spacing(1),
         flex: 1,
     },
     iconButton: {
-        padding: theme.spacing(),
+        padding: theme.spacing(1),
     },
 });
 

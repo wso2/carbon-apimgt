@@ -1730,6 +1730,11 @@ public class SQLConstants {
             "SELECT API_ID, API_TIER FROM AM_API WHERE API_PROVIDER = ? " +
                     "AND API_NAME = ? AND API_VERSION = ? AND API_TYPE = '" + APIConstants.API_PRODUCT + "'";
 
+    public static final String GET_AUDIT_UUID_SQL =
+            "SELECT MAP.AUDIT_UUID FROM AM_SECURITY_AUDIT_UUID_MAPPING MAP WHERE MAP.API_ID = ?";
+    public static final String ADD_SECURITY_AUDIT_MAP_SQL =
+            "INSERT INTO AM_SECURITY_AUDIT_UUID_MAPPING (API_ID, AUDIT_UUID) VALUES (?,?)";
+
     public static final String ADD_API_LIFECYCLE_EVENT_SQL =
             " INSERT INTO AM_API_LC_EVENT (API_ID, PREVIOUS_STATE, NEW_STATE, USER_ID, TENANT_ID, EVENT_DATE)" +
             " VALUES (?,?,?,?,?,?)";

@@ -39,11 +39,11 @@ const styles = theme => ({
         padding: theme.spacing(2),
     },
     prototypeEndpointsWrapper: {
-        marginTop: theme.spacing(),
+        marginTop: theme.spacing(1),
         width: '100%',
     },
     genericEndpointWrapper: {
-        padding: theme.spacing(),
+        padding: theme.spacing(1),
     },
     radioGroup: {
         display: 'flex',

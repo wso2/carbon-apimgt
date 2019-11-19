@@ -52,7 +52,7 @@ function Footer() {
                     <Typography noWrap>
                         <FormattedMessage
                             id='Base.Footer.Footer.product_details'
-                            defaultMessage='WSO2 API-M v3.0.0 | © 2019 WSO2 Inc'
+                            defaultMessage='WSO2 API-M v3.1.0 | © 2019 WSO2 Inc'
                         />
                     </Typography>
                 </Grid>

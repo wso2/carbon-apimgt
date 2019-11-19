@@ -45,7 +45,7 @@ import { getEndpointTypeProperty } from './endpointUtils';
 const styles = theme => ({
     endpointTypeSelect: {
         width: '50%',
-        marginTop: theme.spacing(),
+        marginTop: theme.spacing(1),
     },
     configHeaderContainer: {
         display: 'flex',

@@ -129,7 +129,7 @@ export default function Resources(props) {
                 break;
             case 'deleteParameter':
                 updatedOperation.parameters = updatedOperation.parameters.filter((parameter) => {
-                    return parameter.in !== value.in && parameter.name !== value.name;
+                    return !(parameter.in === value.in && parameter.name === value.name);
                 });
                 break;
             case 'throttlingPolicy':
@@ -160,6 +160,7 @@ export default function Resources(props) {
                         // use else condition because continue is not allowed by es-lint rules
                         addedOperations[data.target][currentVerb] = {
                             'x-wso2-new': true, // This is to identify unsaved newly added operations, Remove when PUT
+                            'x-auth-type': 'Application & Application User', // By default security is enabled
                             responses: { 200: { description: 'ok' } },
                             parameters,
                         };

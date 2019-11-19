@@ -30,7 +30,7 @@ const styles = theme => ({
     headingWrapper: {
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
-        paddingLeft: theme.spacing(),
+        paddingLeft: theme.spacing(1),
     },
 });
 
