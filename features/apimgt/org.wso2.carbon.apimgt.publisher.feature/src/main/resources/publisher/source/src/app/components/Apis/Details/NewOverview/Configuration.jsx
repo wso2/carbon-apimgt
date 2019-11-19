@@ -47,7 +47,7 @@ function Configuration(props) {
     const { api } = useContext(APIContext);
 
     return (
-        <React.Fragment>
+        <>
             <div>
                 <Typography variant='h5' component='h3' className={parentClasses.title}>
                     <FormattedMessage id='Apis.Details.NewOverview.MetaData.config' defaultMessage='Configuration' />
@@ -68,17 +68,17 @@ function Configuration(props) {
                                 classes={{
                                     tooltip: parentClasses.htmlTooltip,
                                 }}
-                                title={
-                                    <React.Fragment>
+                                title={(
+                                    <>
                                         <FormattedMessage
                                             id='Apis.Details.NewOverview.MetaData.transport.tooltip'
                                             defaultMessage={
-                                                'HTTP is less secure than HTTPS and ' +
-                                                'makes your API vulnerable to security threats.'
+                                                'HTTP is less secure than HTTPS and '
+                                                + 'makes your API vulnerable to security threats.'
                                             }
                                         />
-                                    </React.Fragment>
-                                }
+                                    </>
+                                )}
                             >
                                 <Button className={parentClasses.helpButton}>
                                     <HelpOutline className={parentClasses.helpIcon} />
@@ -89,24 +89,24 @@ function Configuration(props) {
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
                             {api.transport && api.transport.length !== 0 && (
-                                <React.Fragment>
+                                <>
                                     {api.transport.map((item, index) => (
                                         <span>
                                             {upperCaseString(item)}
                                             {api.transport.length !== index + 1 && ', '}
                                         </span>
                                     ))}
-                                </React.Fragment>
+                                </>
                             )}
                             {!api.transport && (
-                                <React.Fragment>
+                                <>
                                     <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
                                         <FormattedMessage
                                             id='Apis.Details.NewOverview.MetaData.transports.not.set'
                                             defaultMessage='-'
                                         />
                                     </Typography>
-                                </React.Fragment>
+                                </>
                             )}
                         </Typography>
                     </Grid>
@@ -123,14 +123,14 @@ function Configuration(props) {
                                 classes={{
                                     tooltip: parentClasses.htmlTooltip,
                                 }}
-                                title={
-                                    <React.Fragment>
+                                title={(
+                                    <>
                                         <FormattedMessage
                                             id='Apis.Details.NewOverview.MetaData.securityScheme.tooltip'
                                             defaultMessage='OAuth2 is used as the default security schema.'
                                         />
-                                    </React.Fragment>
-                                }
+                                    </>
+                                )}
                             >
                                 <Button className={parentClasses.helpButton}>
                                     <HelpOutline className={parentClasses.helpIcon} />
@@ -141,22 +141,22 @@ function Configuration(props) {
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
                             {api.securityScheme && api.securityScheme.length !== 0 && (
-                                <React.Fragment>
+                                <>
                                     {api.securityScheme
-                                        .filter(item => !item.includes('mandatory'))
-                                        .map(filteredItem => HUMAN_READABLE_SCHEMES[filteredItem])
+                                        .filter((item) => !item.includes('mandatory'))
+                                        .map((filteredItem) => HUMAN_READABLE_SCHEMES[filteredItem])
                                         .join(' , ')}
-                                </React.Fragment>
+                                </>
                             )}
                             {!api.securityScheme && (
-                                <React.Fragment>
+                                <>
                                     <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
                                         <FormattedMessage
                                             id='Apis.Details.NewOverview.MetaData.securityScheme.not.set'
                                             defaultMessage='-'
                                         />
                                     </Typography>
-                                </React.Fragment>
+                                </>
                             )}
                         </Typography>
                     </Grid>
@@ -173,26 +173,26 @@ function Configuration(props) {
                                 classes={{
                                     tooltip: parentClasses.htmlTooltip,
                                 }}
-                                title={
-                                    <React.Fragment>
+                                title={(
+                                    <>
                                         <FormattedMessage
                                             id='Apis.Details.NewOverview.MetaData.access.control.all.tooltip'
                                             defaultMessage={
-                                                'All : The API is viewable, ' +
-                                                'modifiable by all the publishers and creators.'
+                                                'All : The API is viewable, '
+                                                + 'modifiable by all the publishers and creators.'
                                             }
                                         />
                                         <br />
                                         <FormattedMessage
                                             id='Apis.Details.NewOverview.MetaData.access.control.tooltip'
                                             defaultMessage={
-                                                'Restricted by roles : The API can be viewable and' +
-                                                ' modifiable by only specific publishers and creators ' +
-                                                'with the roles that you specify'
+                                                'Restricted by roles : The API can be viewable and'
+                                                + ' modifiable by only specific publishers and creators '
+                                                + 'with the roles that you specify'
                                             }
                                         />
-                                    </React.Fragment>
-                                }
+                                    </>
+                                )}
                             >
                                 <Button className={parentClasses.helpButton}>
                                     <HelpOutline className={parentClasses.helpIcon} />
@@ -203,9 +203,9 @@ function Configuration(props) {
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
                             {api.accessControl && (
-                                <React.Fragment>
+                                <>
                                     {capitalizeFirstLetter(lowerCaseString(api.accessControl))}
-                                </React.Fragment>
+                                </>
                             )}
                             {api.accessControl === 'RESTRICTED' && ' ( Visible to '}
                             {api.accessControl === 'RESTRICTED' && api.accessControlRoles.join()}
@@ -223,16 +223,16 @@ function Configuration(props) {
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
-                            {api.workflowStatus && <React.Fragment>{api.workflowStatus}</React.Fragment>}
+                            {api.workflowStatus && <>{api.workflowStatus}</>}
                             {!api.workflowStatus && (
-                                <React.Fragment>
+                                <>
                                     <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
                                         <FormattedMessage
                                             id='Apis.Details.NewOverview.MetaData.workflowStatus.not.set'
                                             defaultMessage='-'
                                         />
                                     </Typography>
-                                </React.Fragment>
+                                </>
                             )}
                         </Typography>
                     </Grid>
@@ -249,26 +249,26 @@ function Configuration(props) {
                                 classes={{
                                     tooltip: parentClasses.htmlTooltip,
                                 }}
-                                title={
-                                    <React.Fragment>
+                                title={(
+                                    <>
                                         <FormattedMessage
                                             id='Apis.Details.NewOverview.MetaData.visibility.store.all.tooltip'
                                             defaultMessage={
-                                                'Public: The API is accessible to everyone and can be advertised ' +
-                                                'in multiple developer portals - a central developer portal ' +
-                                                'and/or non-WSO2 developer portals.'
+                                                'Public: The API is accessible to everyone and can be advertised '
+                                                + 'in multiple developer portals - a central developer portal '
+                                                + 'and/or non-WSO2 developer portals.'
                                             }
                                         />
                                         <br />
                                         <FormattedMessage
                                             id='Apis.Details.NewOverview.MetaData.visibility.store.res.tooltip'
                                             defaultMessage={
-                                                'Restricted by roles: The API is visible only to ' +
-                                                'specific user roles in the tenant developer portal that you specify.'
+                                                'Restricted by roles: The API is visible only to '
+                                                + 'specific user roles in the tenant developer portal that you specify.'
                                             }
                                         />
-                                    </React.Fragment>
-                                }
+                                    </>
+                                )}
                             >
                                 <Button className={parentClasses.helpButton}>
                                     <HelpOutline className={parentClasses.helpIcon} />
@@ -278,15 +278,17 @@ function Configuration(props) {
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
-                            {(api.visibility && api.visibility === 'PRIVATE') ?
-                                <React.Fragment>
-                                    {'Visible to my domain'}
-                                </React.Fragment>
-                                :
-                                <React.Fragment>
-                                    {capitalizeFirstLetter(lowerCaseString(api.visibility))}
-                                </React.Fragment>
-                            }
+                            {(api.visibility && api.visibility === 'PRIVATE')
+                                ? (
+                                    <>
+                                    Visible to my domain
+                                    </>
+                                )
+                                : (
+                                    <>
+                                        {capitalizeFirstLetter(lowerCaseString(api.visibility))}
+                                    </>
+                                )}
                             {api.visibility === 'RESTRICTED' && ' ( Visible to '}
                             {api.visibility === 'RESTRICTED' && api.visibleRoles.join()}
                             {api.visibility === 'RESTRICTED' && ' ) '}
@@ -294,7 +296,7 @@ function Configuration(props) {
                     </Grid>
                     <Policies parentClasses={parentClasses} />
                     {api.apiType === API.CONSTS.APIProduct ? null : (
-                        <React.Fragment>
+                        <>
                             <Grid item xs={12} md={6} lg={4}>
                                 <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                                     <FormattedMessage
@@ -304,8 +306,8 @@ function Configuration(props) {
                                 </Typography>
                             </Grid>
                             <Grid item xs={12} md={6} lg={8}>
-                                {api.tags &&
-                                    api.tags.map(tag => (
+                                {api.tags
+                                    && api.tags.map((tag) => (
                                         <Chip
                                             key={tag}
                                             label={tag}
@@ -317,7 +319,7 @@ function Configuration(props) {
                                         />
                                     ))}
                                 {api.tags.length === 0 && (
-                                    <React.Fragment>
+                                    <>
                                         <Typography
                                             component='p'
                                             variant='body1'
@@ -328,14 +330,14 @@ function Configuration(props) {
                                                 defaultMessage='-'
                                             />
                                         </Typography>
-                                    </React.Fragment>
+                                    </>
                                 )}
                             </Grid>
-                        </React.Fragment>
+                        </>
                     )}
                 </Grid>
             </Box>
-        </React.Fragment>
+        </>
     );
 }
 

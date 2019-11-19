@@ -37,7 +37,7 @@ import FormLabel from '@material-ui/core/FormLabel';
 import Alert from 'AppComponents/Shared/Alert';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
-const styles = theme => ({
+const styles = (theme) => ({
     FormControl: {
         padding: 0,
         width: '100%',
@@ -185,7 +185,7 @@ class CreateNewVersion extends React.Component {
         }
 
         return (
-            <React.Fragment>
+            <>
                 <Container maxWidth='md'>
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
@@ -203,16 +203,16 @@ class CreateNewVersion extends React.Component {
                                         fullWidth
                                         id='newVersion'
                                         error={
-                                            valid.version.empty ||
-                                            valid.version.alreadyExists ||
-                                            valid.version.hasSpecialChars
+                                            valid.version.empty
+                                            || valid.version.alreadyExists
+                                            || valid.version.hasSpecialChars
                                         }
-                                        label={
+                                        label={(
                                             <FormattedMessage
                                                 id='Apis.Details.NewVersion.NewVersion.new.version'
                                                 defaultMessage='New Version'
                                             />
-                                        }
+                                        )}
                                         helperText={
                                             helperText
                                         }
@@ -240,19 +240,19 @@ class CreateNewVersion extends React.Component {
                                             classes={{
                                                 tooltip: classes.htmlTooltip,
                                             }}
-                                            title={
-                                                <React.Fragment>
+                                            title={(
+                                                <>
                                                     <FormattedMessage
                                                         id='Apis.Details.NewVersion.NewVersion.tooltip'
                                                         defaultMessage={
-                                                            'Indicates if this is the default version of the API. ' +
-                                                            'If an API is invoked without specifying a version, ' +
-                                                            'the API Gateway will route the request to the default ' +
-                                                            'version of the API.'
+                                                            'Indicates if this is the default version of the API. '
+                                                            + 'If an API is invoked without specifying a version, '
+                                                            + 'the API Gateway will route the request to the default '
+                                                            + 'version of the API.'
                                                         }
                                                     />
-                                                </React.Fragment>
-                                            }
+                                                </>
+                                            )}
                                             interactive
                                             aria-label='Default Version Selector'
                                             tabIndex='-1'
@@ -289,9 +289,9 @@ class CreateNewVersion extends React.Component {
                                                     id='createBtn'
                                                     onClick={() => this.handleSubmit(api, newVersion, isDefaultVersion)}
                                                     disabled={
-                                                        valid.version.empty ||
-                                                        valid.version.alreadyExists ||
-                                                        valid.version.hasSpecialChars
+                                                        valid.version.empty
+                                                        || valid.version.alreadyExists
+                                                        || valid.version.hasSpecialChars
                                                     }
                                                 >
                                                     <FormattedMessage
@@ -317,7 +317,7 @@ class CreateNewVersion extends React.Component {
                         </Grid>
                     </Grid>
                 </Container>
-            </React.Fragment>
+            </>
         );
     }
 }

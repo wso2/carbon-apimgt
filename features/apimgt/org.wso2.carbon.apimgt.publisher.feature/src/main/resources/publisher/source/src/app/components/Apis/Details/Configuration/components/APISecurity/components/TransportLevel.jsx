@@ -45,9 +45,9 @@ import {
     DEFAULT_API_SECURITY_OAUTH2,
     API_SECURITY_BASIC_AUTH,
     API_SECURITY_API_KEY,
-} from '../APISecurity';
+} from './apiSecurityConstants';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     expansionPanel: {
         marginBottom: theme.spacing(1),
     },
@@ -173,7 +173,7 @@ function TransportLevel(props) {
         mandatoryValue = API_SECURITY_MUTUAL_SSL_MANDATORY;
     }
     return (
-        <React.Fragment>
+        <>
             <Grid item xs={12}>
                 <ExpansionPanel className={classes.expansionPanel}>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
@@ -195,8 +195,7 @@ function TransportLevel(props) {
                                     onChange={({ target: { checked, value } }) => configDispatcher({
                                         action: 'securityScheme',
                                         event: { checked, value },
-                                    })
-                                    }
+                                    })}
                                     value={API_SECURITY_MUTUAL_SSL}
                                     color='primary'
                                 />
@@ -212,31 +211,30 @@ function TransportLevel(props) {
                                     onChange={({ target: { name, value } }) => configDispatcher({
                                         action: 'securityScheme',
                                         event: { name, value },
-                                    })
-                                    }
+                                    })}
                                     row
                                 >
                                     <FormControlLabel
                                         value={API_SECURITY_MUTUAL_SSL_MANDATORY}
-                                        control={
+                                        control={(
                                             <Radio
-                                                disabled={!haveMultiLevelSecurity ||
-                                                isRestricted(['apim:api_create'], apiFromContext)}
+                                                disabled={!haveMultiLevelSecurity
+                                                || isRestricted(['apim:api_create'], apiFromContext)}
                                                 color='primary'
                                             />
-                                        }
+                                        )}
                                         label='Mandatory'
                                         labelPlacement='end'
                                     />
                                     <FormControlLabel
                                         value='optional'
-                                        control={
+                                        control={(
                                             <Radio
-                                                disabled={!haveMultiLevelSecurity ||
-                                                isRestricted(['apim:api_create'], apiFromContext)}
+                                                disabled={!haveMultiLevelSecurity
+                                                || isRestricted(['apim:api_create'], apiFromContext)}
                                                 color='primary'
                                             />
-                                        }
+                                        )}
                                         label='Optional'
                                         labelPlacement='end'
                                     />
@@ -266,7 +264,7 @@ function TransportLevel(props) {
                     </ExpansionPanelDetails>
                 </ExpansionPanel>
             </Grid>
-        </React.Fragment>
+        </>
     );
 }
 

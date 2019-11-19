@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, Fragment } from 'react';
+import React, { useState } from 'react';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -44,7 +44,7 @@ export default function SpecErrors(props) {
         return null;
     }
     return (
-        <Fragment>
+        <>
             <sup>
                 <Tooltip title='Show errors'>
                     <IconButton onClick={() => setOpen(true)} color='secondary' aria-label='Errors in spec'>
@@ -65,7 +65,7 @@ export default function SpecErrors(props) {
                 <DialogContent dividers>
                     <List>
                         {specErrors.map((error, index) => (
-                            <Fragment>
+                            <>
                                 {index % 2 !== 0 && <Divider light variant='inset' />}
                                 <ListItem>
                                     <ListItemText
@@ -74,19 +74,23 @@ export default function SpecErrors(props) {
                                             color: 'error',
                                         }}
                                         inset
-                                        secondary={
-                                            <React.Fragment>
+                                        secondary={(
+                                            <>
                                                 <Typography component='span' variant='body2' color='textPrimary'>
-                                                    In - {error.pointer}
+                                                    In -
+                                                    {' '}
+                                                    {error.pointer}
                                                 </Typography>
                                                 <Typography variant='caption' display='block' gutterBottom>
-                                                    Full Path - {error.fullPath.join('.')}
+                                                    Full Path -
+                                                    {' '}
+                                                    {error.fullPath.join('.')}
                                                 </Typography>
-                                            </React.Fragment>
-                                        }
+                                            </>
+                                        )}
                                     />
                                 </ListItem>
-                            </Fragment>
+                            </>
                         ))}
                     </List>
                 </DialogContent>
@@ -96,7 +100,7 @@ export default function SpecErrors(props) {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </Fragment>
+        </>
     );
 }
 

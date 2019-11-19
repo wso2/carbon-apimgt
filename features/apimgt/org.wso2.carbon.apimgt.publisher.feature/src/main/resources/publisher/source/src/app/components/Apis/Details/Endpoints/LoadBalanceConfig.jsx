@@ -15,7 +15,9 @@
  */
 
 import React, { useEffect, useState, useContext } from 'react';
-import { TextField, MenuItem, Grid, Button, withStyles } from '@material-ui/core';
+import {
+    TextField, MenuItem, Grid, Button, withStyles,
+} from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
@@ -42,7 +44,7 @@ const defaultTemplateObj = {
     sessionTimeOut: 300,
 };
 
-const styles = theme => ({
+const styles = (theme) => ({
     configButtonContainer: {
         display: 'flex',
         justifyContent: 'flex-end',
@@ -120,57 +122,65 @@ function LoadBalanceConfig(props) {
     };
 
     return (
-        <React.Fragment>
+        <>
             <Grid container direction='column'>
                 <TextField
                     id='algorithmSelect'
                     select
-                    label={<FormattedMessage
-                        id='Apis.Details.Endpoints.LoadBalanceConfig.algorithm'
-                        defaultMessage='Algorithm'
-                    />}
+                    label={(
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.LoadBalanceConfig.algorithm'
+                            defaultMessage='Algorithm'
+                        />
+                    )}
                     value={lbConfig.algoCombo}
                     onChange={handleAlgorithmChange}
                     helperText='Please select the Loadbalance Algorithm.'
                     margin='normal'
                     disabled={isRestricted(['apim:api_create'], api)}
                 >
-                    {algorithms.map(algo => (
+                    {algorithms.map((algo) => (
                         <MenuItem key={algo.key} value={algo.key} selected={lbConfig.algoCombo}>
                             {algo.value}
                         </MenuItem>
                     ))}
                 </TextField>
-                {(lbConfig.algoCombo === 'other') ?
-                    <TextField
-                        id='customAlgoInput'
-                        label={<FormattedMessage
-                            id='Apis.Details.Endpoints.LoadBalanceConfig.class.name.for.algorithm'
-                            defaultMessage='Class Name for Algorithm'
-                        />}
-                        required
-                        error={algoClassNameError}
-                        value={lbConfig.algoClassName}
-                        onChange={event => handleFieldChange(event, 'algoClassName')}
-                        onBlur={() => setAlgoClassNameError(lbConfig.algoClassName === '')}
-                        helperText='Enter the class name of the loadbalance algorithm'
-                        disabled={isRestricted(['apim:api_create'], api)}
-                        margin='normal'
-                    /> : <div /> }
+                {(lbConfig.algoCombo === 'other')
+                    ? (
+                        <TextField
+                            id='customAlgoInput'
+                            label={(
+                                <FormattedMessage
+                                    id='Apis.Details.Endpoints.LoadBalanceConfig.class.name.for.algorithm'
+                                    defaultMessage='Class Name for Algorithm'
+                                />
+                            )}
+                            required
+                            error={algoClassNameError}
+                            value={lbConfig.algoClassName}
+                            onChange={(event) => handleFieldChange(event, 'algoClassName')}
+                            onBlur={() => setAlgoClassNameError(lbConfig.algoClassName === '')}
+                            helperText='Enter the class name of the loadbalance algorithm'
+                            disabled={isRestricted(['apim:api_create'], api)}
+                            margin='normal'
+                        />
+                    ) : <div /> }
                 <TextField
                     id='sessionMgtSelect'
                     select
-                    label={<FormattedMessage
-                        id='Apis.Details.Endpoints.LoadBalanceConfig.session.management'
-                        defaultMessage='Session Management'
-                    />}
+                    label={(
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.LoadBalanceConfig.session.management'
+                            defaultMessage='Session Management'
+                        />
+                    )}
                     value={lbConfig.sessionManagement}
-                    onChange={event => handleFieldChange(event, 'sessionManagement')}
+                    onChange={(event) => handleFieldChange(event, 'sessionManagement')}
                     helperText='Please select the Session Management mechanism.'
                     margin='normal'
                     disabled={isRestricted(['apim:api_create'], api)}
                 >
-                    {sessionManagementOps.map(option => (
+                    {sessionManagementOps.map((option) => (
                         <MenuItem key={option.key} value={option.key}>
                             {option.value}
                         </MenuItem>
@@ -178,12 +188,14 @@ function LoadBalanceConfig(props) {
                 </TextField>
                 <TextField
                     id='sessionTimeout'
-                    label={<FormattedMessage
-                        id='Apis.Details.Endpoints.LoadBalanceConfig.session.timeout'
-                        defaultMessage='Session Timeout (Millis)'
-                    />}
+                    label={(
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.LoadBalanceConfig.session.timeout'
+                            defaultMessage='Session Timeout (Millis)'
+                        />
+                    )}
                     value={lbConfig.sessionTimeOut}
-                    onChange={event => handleFieldChange(event, 'sessionTimeOut')}
+                    onChange={(event) => handleFieldChange(event, 'sessionTimeOut')}
                     type='number'
                     placeholder='300'
                     margin='normal'
@@ -213,7 +225,7 @@ function LoadBalanceConfig(props) {
                     />
                 </Button>
             </Grid>
-        </React.Fragment>
+        </>
     );
 }
 

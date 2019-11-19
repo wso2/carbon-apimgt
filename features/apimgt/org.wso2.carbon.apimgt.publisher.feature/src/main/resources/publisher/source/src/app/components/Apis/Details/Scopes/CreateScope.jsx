@@ -40,7 +40,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import Api from 'AppData/api';
 import { isRestricted } from 'AppData/AuthManager';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         flexGrow: 1,
         marginTop: 10,
@@ -146,60 +146,52 @@ class CreateScope extends React.Component {
         this.handleRoleDeletion = this.handleRoleDeletion.bind(this);
     }
 
-    /**
-     * Add new scope
-     * @memberof Scopes
-     */
-    addScope() {
-        const {
-            intl, api, history, updateAPI,
-        } = this.props;
-        const urlPrefix = api.apiType === 'APIProduct' ? 'api-products' : 'apis';
-        if (this.validateScopeName('name', this.state.apiScope.name)) {
-            // return status of the validation
-            return;
+
+    handleRoleDeletion = (role) => {
+        const { validRoles, invalidRoles } = this.state;
+        if (invalidRoles.includes(role)) {
+            const invalidRolesArray = invalidRoles.filter((existingRole) => existingRole !== role);
+            this.setState({ invalidRoles: invalidRolesArray });
+            if (invalidRolesArray.length === 0) {
+                this.setState({ roleValidity: true });
+            }
+        } else {
+            this.setState({ validRoles: validRoles.filter((existingRole) => existingRole !== role) });
         }
-        const scope = this.state.apiScope;
-        scope.bindings = {
-            type: 'role',
-            values: this.state.validRoles,
-        };
-        const scopes = api.scopes.map((aScope) => {
-            return aScope;
-        });
-        scopes.push(scope);
-        const updateProperties = { scopes };
-        const promisedApiUpdate = updateAPI(updateProperties);
-        this.setState({ scopeAddDisabled: true });
-        promisedApiUpdate
+    };
+
+    handleRoleAddition(role) {
+        const { validRoles, invalidRoles } = this.state;
+        const promise = APIValidation.role.validate(base64url.encode(role));
+        promise
             .then(() => {
-                Alert.info(intl.formatMessage({
-                    id: 'Apis.Details.Scopes.CreateScope.scope.added.successfully',
-                    defaultMessage: 'Scope added successfully',
-                }));
-                const { apiScopes } = this.state;
-                const redirectURL = '/' + urlPrefix + '/' + api.id + '/scopes/';
-                history.push(redirectURL);
                 this.setState({
-                    apiScopes,
-                    apiScope: {},
-                    validRoles: [],
+                    roleValidity: true,
+                    validRoles: [...validRoles, role],
                 });
             })
             .catch((error) => {
-                const { response } = error;
-                if (response.body) {
-                    const { description } = response.body;
-                    Alert.error(description);
+                if (error.status === 404) {
+                    this.setState({
+                        roleValidity: false,
+                        invalidRoles: [...invalidRoles, role],
+                    });
+                } else {
+                    Alert.error('Error when validating role: ' + role);
+                    console.error('Error when validating role ' + error);
                 }
-            })
-            .finally(() => {
-                this.setState({ scopeAddDisabled: false });
             });
     }
 
-    handleScopeNameInput({ target: { id, value } }) {
-        this.validateScopeName(id, value);
+    validateScopeDescription({ target: { id, value } }) {
+        const { valid, apiScope } = this.state;
+        apiScope[id] = value;
+        valid[id].invalid = false;
+        valid[id].error = '';
+        this.setState({
+            valid,
+            apiScope,
+        });
     }
 
     validateScopeName(id, value) {
@@ -263,52 +255,61 @@ class CreateScope extends React.Component {
         return valid[id].invalid;
     }
 
-    validateScopeDescription({ target: { id, value } }) {
-        const { valid, apiScope } = this.state;
-        apiScope[id] = value;
-        valid[id].invalid = false;
-        valid[id].error = '';
-        this.setState({
-            valid,
-            apiScope,
+    /**
+     * Add new scope
+     * @memberof Scopes
+     */
+    addScope() {
+        const {
+            intl, api, history, updateAPI,
+        } = this.props;
+        const urlPrefix = api.apiType === 'APIProduct' ? 'api-products' : 'apis';
+        if (this.validateScopeName('name', this.state.apiScope.name)) {
+            // return status of the validation
+            return;
+        }
+        const scope = this.state.apiScope;
+        scope.bindings = {
+            type: 'role',
+            values: this.state.validRoles,
+        };
+        const scopes = api.scopes.map((aScope) => {
+            return aScope;
         });
-    }
-
-    handleRoleAddition(role) {
-        const { validRoles, invalidRoles } = this.state;
-        const promise = APIValidation.role.validate(base64url.encode(role));
-        promise
+        scopes.push(scope);
+        const updateProperties = { scopes };
+        const promisedApiUpdate = updateAPI(updateProperties);
+        this.setState({ scopeAddDisabled: true });
+        promisedApiUpdate
             .then(() => {
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Details.Scopes.CreateScope.scope.added.successfully',
+                    defaultMessage: 'Scope added successfully',
+                }));
+                const { apiScopes } = this.state;
+                const redirectURL = '/' + urlPrefix + '/' + api.id + '/scopes/';
+                history.push(redirectURL);
                 this.setState({
-                    roleValidity: true,
-                    validRoles: [...validRoles, role],
+                    apiScopes,
+                    apiScope: {},
+                    validRoles: [],
                 });
             })
             .catch((error) => {
-                if (error.status === 404) {
-                    this.setState({
-                        roleValidity: false,
-                        invalidRoles: [...invalidRoles, role],
-                    });
-                } else {
-                    Alert.error('Error when validating role: ' + role);
-                    console.error('Error when validating role ' + error);
+                const { response } = error;
+                if (response.body) {
+                    const { description } = response.body;
+                    Alert.error(description);
                 }
+            })
+            .finally(() => {
+                this.setState({ scopeAddDisabled: false });
             });
     }
 
-    handleRoleDeletion = (role) => {
-        const { validRoles, invalidRoles } = this.state;
-        if (invalidRoles.includes(role)) {
-            const invalidRolesArray = invalidRoles.filter(existingRole => existingRole !== role);
-            this.setState({ invalidRoles: invalidRolesArray });
-            if (invalidRolesArray.length === 0) {
-                this.setState({ roleValidity: true });
-            }
-        } else {
-            this.setState({ validRoles: validRoles.filter(existingRole => existingRole !== role) });
-        }
-    };
+    handleScopeNameInput({ target: { id, value } }) {
+        this.validateScopeName(id, value);
+    }
 
     /**
      *
@@ -387,12 +388,12 @@ class CreateScope extends React.Component {
                                         label='Description'
                                         variant='outlined'
                                         placeholder='Short description about the scope'
-                                        helperText={
+                                        helperText={(
                                             <FormattedMessage
                                                 id='Apis.Details.Scopes.CreateScope.short.description.about.the.scope'
                                                 defaultMessage='Short description about the scope'
                                             />
-                                        }
+                                        )}
                                         margin='normal'
                                         InputLabelProps={{
                                             shrink: true,
@@ -457,21 +458,21 @@ class CreateScope extends React.Component {
                                         color='primary'
                                         onClick={this.addScope}
                                         disabled={
-                                            isRestricted(['apim:api_create'], api) ||
-                                            this.state.valid.name.invalid ||
-                                            invalidRoles.length !== 0 ||
-                                            scopeAddDisabled
+                                            isRestricted(['apim:api_create'], api)
+                                            || this.state.valid.name.invalid
+                                            || invalidRoles.length !== 0
+                                            || scopeAddDisabled
                                         }
                                         className={classes.saveButton}
                                     >
                                         {scopeAddDisabled ? (
-                                            <React.Fragment>
+                                            <>
                                                 <FormattedMessage
                                                     id='Apis.Details.Scopes.CreateScope.saving'
                                                     defaultMessage='Saving'
                                                 />
                                                 <CircularProgress size={16} classes={{ root: classes.progress }} />
-                                            </React.Fragment>
+                                            </>
                                         ) : (
                                             <FormattedMessage
                                                 id='Apis.Details.Scopes.CreateScope.save'

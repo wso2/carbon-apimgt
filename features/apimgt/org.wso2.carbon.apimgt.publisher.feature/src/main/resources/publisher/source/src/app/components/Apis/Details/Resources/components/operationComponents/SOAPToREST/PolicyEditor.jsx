@@ -32,7 +32,7 @@ import CloseConfirmation from './CloseConfirmation';
 
 const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "PolicyEditorMonaco" */));
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     appBar: {
         // position: 'relative',
         top: 'auto',

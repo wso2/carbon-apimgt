@@ -38,7 +38,7 @@ import FormLabel from '@material-ui/core/FormLabel';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { capitalizeFirstLetter } from 'AppData/stringFormatter';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     form: {
         display: 'flex',
         flexDirection: 'column',
@@ -106,9 +106,13 @@ export default function EditParameter(props) {
         <Dialog fullWidth maxWidth='md' open={isEditing} onClose={handleClose} aria-labelledby='edit-parameter'>
             <DialogTitle disableTypography id='edit-parameter'>
                 <Typography variant='h6'>
-                    Edit{' '}
+                    Edit
+                    {' '}
                     <Typography display='inline' variant='subtitle1'>
-                        {capitalizeFirstLetter(parameter.in)} : {parameter.name}
+                        {capitalizeFirstLetter(parameter.in)}
+                        {' '}
+:
+                        {parameter.name}
                     </Typography>
                 </Typography>
             </DialogTitle>
@@ -162,8 +166,8 @@ export default function EditParameter(props) {
 
                             <Select
                                 value=''
-                                onChange={({ target: { name, value } }) =>
-                                    parameterActionDispatcher({ type: name, value })
+                                onChange={
+                                    ({ target: { name, value } }) => parameterActionDispatcher({ type: name, value })
                                 }
                                 inputProps={{
                                     name: 'type',
@@ -177,7 +181,7 @@ export default function EditParameter(props) {
                                     },
                                 }}
                             >
-                                {['number', 'integer'].map(dataType => (
+                                {['number', 'integer'].map((dataType) => (
                                     <MenuItem value={dataType} dense>
                                         {capitalizeFirstLetter(dataType)}
                                     </MenuItem>
@@ -191,8 +195,8 @@ export default function EditParameter(props) {
                             <InputLabel htmlFor='edit-parameter-format'>Format</InputLabel>
                             <Select
                                 value=''
-                                onChange={({ target: { name, value } }) =>
-                                    parameterActionDispatcher({ type: name, value })
+                                onChange={
+                                    ({ target: { name, value } }) => parameterActionDispatcher({ type: name, value })
                                 }
                                 inputProps={{
                                     name: 'format',
@@ -206,7 +210,7 @@ export default function EditParameter(props) {
                                     },
                                 }}
                             >
-                                {['float', 'double', 'int32', 'int64'].map(dataType => (
+                                {['float', 'double', 'int32', 'int64'].map((dataType) => (
                                     <MenuItem value={dataType} dense>
                                         {capitalizeFirstLetter(dataType)}
                                     </MenuItem>

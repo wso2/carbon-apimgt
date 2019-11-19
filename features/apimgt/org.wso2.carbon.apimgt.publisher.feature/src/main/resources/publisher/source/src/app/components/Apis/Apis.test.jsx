@@ -22,10 +22,9 @@ import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import Configurations from 'Config';
 import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import APIs from './Apis';
 import APICreateRoutes from './Create/APICreateRoutes';
-
-import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 
 
 jest.mock('./Listing/Listing', () => () => {

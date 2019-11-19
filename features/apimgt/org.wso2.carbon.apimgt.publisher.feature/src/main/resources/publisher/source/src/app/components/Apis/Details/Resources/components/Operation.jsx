@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import Grid from '@material-ui/core/Grid';
@@ -99,8 +99,9 @@ function Operation(props) {
         };
     });
     const apiOperation = api.operations[target] && api.operations[target][verb.toUpperCase()];
-    const isUsedInAPIProduct =
-        apiOperation && Array.isArray(apiOperation.usedProductIds) && apiOperation.usedProductIds.length;
+    const isUsedInAPIProduct = apiOperation && Array.isArray(
+        apiOperation.usedProductIds,
+    ) && apiOperation.usedProductIds.length;
 
     /**
      *
@@ -125,7 +126,7 @@ function Operation(props) {
     }
     const classes = useStyles();
     return (
-        <Fragment>
+        <>
             {markAsDelete && (
                 <Box className={classes.overlayUnmarkDelete}>
                     <Tooltip title='Marked for delete' aria-label='Marked for delete'>
@@ -180,7 +181,11 @@ function Operation(props) {
                                 <Box display='flex'>
                                     <ReportProblemOutlinedIcon fontSize='small' />
                                     <Box display='flex' ml={1} mt={1 / 4} fontSize='caption.fontSize'>
-                                        This operation is used in {isUsedInAPIProduct} API product(s)
+                                        This operation is used in
+                                        {' '}
+                                        {isUsedInAPIProduct}
+                                        {' '}
+API product(s)
                                     </Box>
                                 </Box>
                             </Grid>
@@ -257,7 +262,7 @@ function Operation(props) {
                     </Grid>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
-        </Fragment>
+        </>
     );
 }
 Operation.defaultProps = {
@@ -280,7 +285,10 @@ Operation.propTypes = {
     disableUpdate: PropTypes.bool,
     hideParameters: PropTypes.bool,
     resourcePolicy: PropTypes.shape({}).isRequired,
-    operation: PropTypes.shape({}).isRequired,
+    operation: PropTypes.shape({
+        'x-wso2-new': PropTypes.bool,
+        summary: PropTypes.string,
+    }).isRequired,
     target: PropTypes.string.isRequired,
     verb: PropTypes.string.isRequired,
     spec: PropTypes.shape({}).isRequired,

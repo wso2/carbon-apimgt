@@ -40,7 +40,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import UploadCertificate from 'AppComponents/Apis/Details/Endpoints/GeneralConfiguration/UploadCertificate';
 import API from '../../../../../data/api';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     fileinput: {
         display: 'none',
     },
@@ -189,15 +189,14 @@ function Certificates(props) {
                                     <ListItemAvatar>
                                         <Icon>lock</Icon>
                                     </ListItemAvatar>
-                                    {isMutualSSLEnabled ?
-                                        (<ListItemText primary={cert.alias} secondary={cert.tier} />) :
-                                        <ListItemText primary={cert.alias} secondary={cert.endpoint} />
-                                    }
+                                    {isMutualSSLEnabled
+                                        ? (<ListItemText primary={cert.alias} secondary={cert.tier} />)
+                                        : <ListItemText primary={cert.alias} secondary={cert.endpoint} />}
 
                                     <ListItemSecondaryAction>
                                         <IconButton
                                             edge='end'
-                                            onClick={event => showCertificateDetails(event, cert.alias)}
+                                            onClick={(event) => showCertificateDetails(event, cert.alias)}
                                         >
                                             <Icon>info</Icon>
                                         </IconButton>
@@ -205,9 +204,11 @@ function Certificates(props) {
                                             disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                             onClick={() => setCertificateToDelete({ open: true, alias: cert.alias })}
                                         >
-                                            <Icon className={isRestricted(['apim:api_create'], apiFromContext) ?
-                                                classes.deleteIconDisable : classes.deleteIcon}
-                                            > delete
+                                            <Icon className={isRestricted(['apim:api_create'], apiFromContext)
+                                                ? classes.deleteIconDisable : classes.deleteIcon}
+                                            >
+                                                {' '}
+delete
                                             </Icon>
                                         </IconButton>
                                     </ListItemSecondaryAction>
@@ -253,7 +254,8 @@ function Certificates(props) {
                         <FormattedMessage
                             id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.confirm.certificate.delete'
                             defaultMessage='Do you want to delete the Certificate?'
-                        />{' '}
+                        />
+                        {' '}
                         {' "' + certificateToDelete.alias + '"?'}
                     </Typography>
                 </DialogContent>

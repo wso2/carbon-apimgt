@@ -26,7 +26,7 @@ import Select from '@material-ui/core/Select';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
 
-const styles = theme => ({
+const styles = (theme) => ({
     commentIcon: {
         color: theme.palette.getContrastText(theme.palette.background.default),
     },
@@ -203,8 +203,7 @@ class CommentAdd extends React.Component {
                     <Grid item>
                         <Button onClick={() => this.handleClickCancel()} className={classes.button}>Cancel</Button>
                     </Grid>
-                )
-                        }
+                )}
                     </Grid>
                 </Grid>
             </Grid>

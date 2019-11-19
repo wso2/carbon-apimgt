@@ -24,7 +24,7 @@ import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 
-const styles = theme => ({
+const styles = (theme) => ({
     leftLInkText: {
         color: theme.palette.getContrastText(theme.palette.background.leftMenu),
         textTransform: theme.custom.leftMenuTextStyle,
@@ -71,6 +71,13 @@ const styles = theme => ({
         diplay: 'none',
     },
 });
+
+/**
+ *
+ *
+ * @param {*} props
+ * @returns
+ */
 function LeftMenuItem(props) {
     const [selected, setSelected] = useState(false);
 
@@ -132,7 +139,7 @@ function LeftMenuItem(props) {
                         strokeColor={strokeColor}
                         width={iconSize}
                         height={iconSize}
-                        icon={props.text}
+                        icon={text}
                         className={classNames(
                             classes.leftLInk,
                             {
@@ -141,7 +148,8 @@ function LeftMenuItem(props) {
                             'leftLink_Icon',
                         )}
                     />
-                )}
+                )
+            }
             <Typography
                 className={classNames(
                     classes.leftLInkText,
@@ -152,7 +160,7 @@ function LeftMenuItem(props) {
                     'leftLInkText',
                 )}
             >
-                {props.text}
+                {text}
             </Typography>
         </Link>
     );
@@ -190,6 +198,7 @@ LeftMenuItem.propTypes = {
     to: PropTypes.string.isRequired,
     route: PropTypes.string,
     history: PropTypes.shape({
+        listen: PropTypes.func.isRequired,
         location: PropTypes.string.isRequired,
     }).isRequired,
 };

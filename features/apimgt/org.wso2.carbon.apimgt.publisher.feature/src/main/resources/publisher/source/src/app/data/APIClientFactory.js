@@ -48,8 +48,8 @@ class APIClientFactory {
             label,
         } = environment;
         if (label === undefined) {
-            throw new Error('Environment label is undefined, Please provide' +
-                'a valid environment object with keys (host,label & loginTokenPath)');
+            throw new Error('Environment label is undefined, Please provide'
+                + 'a valid environment object with keys (host,label & loginTokenPath)');
         }
         let apiClient = this._APIClientMap.get(environment.label);
 

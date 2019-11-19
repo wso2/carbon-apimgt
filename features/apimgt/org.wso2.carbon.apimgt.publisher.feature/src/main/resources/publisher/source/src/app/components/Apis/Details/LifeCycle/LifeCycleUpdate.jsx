@@ -36,7 +36,7 @@ import LifeCycleImage from './LifeCycleImage';
 import CheckboxLabels from './CheckboxLabels';
 import LifecyclePending from './LifecyclePending';
 
-const styles = theme => ({
+const styles = (theme) => ({
     buttonsWrapper: {
         marginTop: 40,
     },
@@ -91,7 +91,7 @@ class LifeCycleUpdate extends Component {
     updateLCStateOfAPI(apiUUID, action) {
         this.setState({ isUpdating: action });
         let promisedUpdate;
-        const lifecycleChecklist = this.props.checkList.map(item => item.value + ':' + item.checked);
+        const lifecycleChecklist = this.props.checkList.map((item) => item.value + ':' + item.checked);
         if (lifecycleChecklist.length > 0) {
             promisedUpdate = this.api.updateLcState(apiUUID, action, lifecycleChecklist);
         } else {
@@ -193,9 +193,9 @@ class LifeCycleUpdate extends Component {
                     ...state,
                     displayName,
                     disabled:
-                        api.endpointConfig == null ||
-                        api.policies.length === 0 ||
-                        api.endpointConfig.implementation_status === 'prototyped',
+                        api.endpointConfig == null
+                        || api.policies.length === 0
+                        || api.endpointConfig.implementation_status === 'prototyped',
                 };
             }
             return {
@@ -218,9 +218,9 @@ class LifeCycleUpdate extends Component {
                                 <Grid item xs={8}>
                                     <LifeCycleImage lifeCycleStatus={newState || api.lifeCycleStatus} />
                                 </Grid>
-                                {(api.lifeCycleStatus === 'CREATED' ||
-                                    (api.lifeCycleStatus === 'PUBLISHED' && api.type !== 'GRAPHQL') ||
-                                    api.lifeCycleStatus === 'PROTOTYPED') && (
+                                {(api.lifeCycleStatus === 'CREATED'
+                                    || (api.lifeCycleStatus === 'PUBLISHED' && api.type !== 'GRAPHQL')
+                                    || api.lifeCycleStatus === 'PROTOTYPED') && (
                                     <Grid item xs={3}>
                                         <CheckboxLabels api={api} />
                                     </Grid>
@@ -235,14 +235,14 @@ class LifeCycleUpdate extends Component {
                             {checkList.map((checkItem, index) => (
                                 <FormControlLabel
                                     key={checkList[index].value}
-                                    control={
+                                    control={(
                                         <Checkbox
                                             checked={checkList[index].checked}
                                             onChange={handleChangeCheckList(index)}
                                             value={checkList[index].value}
                                             color='primary'
                                         />
-                                    }
+                                    )}
                                     label={checkList[index].label}
                                 />
                             ))}
@@ -250,8 +250,10 @@ class LifeCycleUpdate extends Component {
                     )}
                     <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
                         <div className={classes.buttonsWrapper}>
-                            {!isWorkflowPending &&
-                                lifecycleButtons.map((transitionState) => {
+                            {!isWorkflowPending
+                                && lifecycleButtons.map((transitionState) => {
+                                    /* Skip when transitions available for current state ,
+                            this occurs in states where have allowed re-publishing in prototype and published sates */
                                     return (
                                         <Button
                                             disabled={transitionState.disabled || this.state.isUpdating}
@@ -267,10 +269,7 @@ class LifeCycleUpdate extends Component {
                                             )}
                                         </Button>
                                     );
-                                })
-                            /* Skip when transitions available for current state ,
-                            this occurs in states where have allowed re-publishing in prototype and published sates */
-                            }
+                                })}
                         </div>
                     </ScopeValidation>
                 </Grid>

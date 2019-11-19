@@ -28,7 +28,7 @@ import green from '@material-ui/core/colors/green';
 
 import ThumbnailView from './ThumbnailView';
 
-const styles = theme => ({
+const styles = (theme) => ({
     card: {
         margin: theme.spacing(3 / 2),
         maxWidth: theme.spacing(32),
@@ -74,6 +74,7 @@ class DocThumb extends Component {
     toggleMouseOver(event) {
         this.setState({ isHover: event.type === 'mouseover' });
     }
+
     /**
      * @inheritdoc
      * @returns {React.Component} @inheritdoc
@@ -102,14 +103,16 @@ class DocThumb extends Component {
                             <FormattedMessage
                                 id='Apis.Listing.components.ImageGenerator.DocThumb.sourceType'
                                 defaultMessage='Source Type'
-                            />:
+                            />
+:
                             <Typography variant='body1'>{doc.sourceType}</Typography>
                         </Grid>
                         <Grid item md={6}>
                             <FormattedMessage
                                 id='Apis.Listing.components.ImageGenerator.DocThumb.apiName'
                                 defaultMessage='Api Name'
-                            />:
+                            />
+:
                             <Typography className={classes.providerText} variant='body1' gutterBottom>
                                 {doc.apiName}
                             </Typography>
@@ -118,7 +121,8 @@ class DocThumb extends Component {
                             <FormattedMessage
                                 id='Apis.Listing.components.ImageGenerator.DocThumb.apiVersion'
                                 defaultMessage='Api Version'
-                            />:
+                            />
+:
                             <Typography variant='body1' gutterBottom>
                                 {doc.apiVersion}
                             </Typography>

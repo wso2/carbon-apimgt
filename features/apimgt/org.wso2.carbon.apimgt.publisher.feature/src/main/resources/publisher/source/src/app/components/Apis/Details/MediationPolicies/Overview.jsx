@@ -38,7 +38,7 @@ import { isRestricted } from 'AppData/AuthManager';
 import Flow from './Flow';
 import Diagram from './Diagram';
 
-const styles = theme => ({
+const styles = (theme) => ({
     paperRoot: {
         padding: 20,
         marginTop: 20,
@@ -88,9 +88,9 @@ function Overview(props) {
     const { classes } = props;
     const { api, updateAPI } = useContext(ApiContext);
     const mediationPolicies = cloneDeep(api.mediationPolicies || []);
-    const [inPolicy, setInPolicy] = useState(mediationPolicies.filter(seq => seq.type === 'IN')[0]);
-    const [outPolicy, setOutPolicy] = useState(mediationPolicies.filter(seq => seq.type === 'OUT')[0]);
-    const [faultPolicy, setFaultPolicy] = useState(mediationPolicies.filter(seq => seq.type === 'FAULT')[0]);
+    const [inPolicy, setInPolicy] = useState(mediationPolicies.filter((seq) => seq.type === 'IN')[0]);
+    const [outPolicy, setOutPolicy] = useState(mediationPolicies.filter((seq) => seq.type === 'OUT')[0]);
+    const [faultPolicy, setFaultPolicy] = useState(mediationPolicies.filter((seq) => seq.type === 'FAULT')[0]);
     const [updating, setUpdating] = useState(false);
 
     /**
@@ -188,13 +188,13 @@ function Overview(props) {
                                         disabled={isRestricted(['apim:api_create'], api) || updating}
                                     >
                                         {updating ? (
-                                            <React.Fragment>
+                                            <>
                                                 <FormattedMessage
                                                     id='Apis.Details.MediationPolicies.MediationPolicies.saving'
                                                     defaultMessage='Saving..'
                                                 />
                                                 <CircularProgress className={classes.progress} size={16} />
-                                            </React.Fragment>
+                                            </>
                                         ) : (
                                             <FormattedMessage
                                                 id='Apis.Details.MediationPolicies.MediationPolicies.save'

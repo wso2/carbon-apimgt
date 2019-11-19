@@ -26,7 +26,7 @@ import { FormattedMessage } from 'react-intl';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 
-const styles = theme => ({
+const styles = (theme) => ({
     rightIcon: {
         marginLeft: theme.spacing(1),
     },
@@ -111,8 +111,8 @@ const APIDetailsTopMenu = ({ classes, theme }) => {
                         <FormattedMessage
                             id='fill.the.mandatory.fields'
                             defaultMessage={
-                                'Fill the mandatory fields (Name, Version, Context)' +
-                                ' and create the API. Configure the advanced configurations later.'
+                                'Fill the mandatory fields (Name, Version, Context)'
+                                + ' and create the API. Configure the advanced configurations later.'
                             }
                         />
                     </Typography>

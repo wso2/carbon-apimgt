@@ -43,7 +43,7 @@ import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import CONSTS from 'AppData/Constants';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     searchWrapper: {
         padding: 0,
         marginTop: theme.spacing(1),
@@ -153,10 +153,17 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
+
+/**
+ *
+ *
+ * @param {*} props
+ * @returns
+ */
 function ProductResourcesEdit(props) {
     const classes = useStyles();
     const {
-        apiResources, setApiResources, isStateCreate, api,
+        apiResources, setApiResources, isStateCreate, api, resourceNotFountMessage,
     } = props;
 
     // Define states
@@ -218,9 +225,9 @@ function ProductResourcesEdit(props) {
                             Object.keys(apiResource.operations).map((operationKey) => {
                                 const operation = apiResource.operations[operationKey];
                                 if (
-                                    operation &&
-                                    operation.target === target &&
-                                    operation.verb.toLowerCase() === verb.toLowerCase()
+                                    operation
+                                    && operation.target === target
+                                    && operation.verb.toLowerCase() === verb.toLowerCase()
                                 ) {
                                     // Operation is already there
                                     resourceFound = true;
@@ -320,9 +327,9 @@ function ProductResourcesEdit(props) {
                 Object.keys(apiResource.operations).map((innerKey, indexB) => {
                     const operation = apiResource.operations[innerKey];
                     if (
-                        operation &&
-                        operation.target === target &&
-                        operation.verb.toLowerCase() === verb.toLowerCase()
+                        operation
+                        && operation.target === target
+                        && operation.verb.toLowerCase() === verb.toLowerCase()
                     ) {
                         // Operation is already there
                         operationFound = true;
@@ -422,10 +429,10 @@ function ProductResourcesEdit(props) {
             });
     }, []);
     if (notFound) {
-        return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
+        return <ResourceNotFound message={resourceNotFountMessage} />;
     }
     return (
-        <React.Fragment>
+        <>
             {allApis.length === 0 && !fromSearch ? (
                 <Grid container>
                     <Typography className={classes.messageWrapper}>
@@ -436,10 +443,10 @@ function ProductResourcesEdit(props) {
                     </Typography>
                 </Grid>
             ) : (
-                <React.Fragment>
+                <>
                     {!isStateCreate && (
                         <Grid container>
-                            <React.Fragment>
+                            <>
                                 <Grid item xs={8} className={classes.leftMost}>
                                     <FormattedMessage
                                         id='Apis.Details.ProductResources.ProductResourcesWorkspace.find.and.select'
@@ -453,7 +460,7 @@ function ProductResourcesEdit(props) {
                                     />
                                     <div />
                                 </Grid>
-                            </React.Fragment>
+                            </>
                         </Grid>
                     )}
                     <Grid container>
@@ -497,9 +504,9 @@ function ProductResourcesEdit(props) {
                                                     dense
                                                     button
                                                     className={
-                                                        selectedApi &&
-                                                        apiObj.id === selectedApi.id &&
-                                                        classes.selectedApi
+                                                        selectedApi
+                                                        && apiObj.id === selectedApi.id
+                                                        && classes.selectedApi
                                                     }
                                                 >
                                                     <ListItemText
@@ -585,7 +592,7 @@ function ProductResourcesEdit(props) {
                                                             </ListItemIcon>
                                                             <ListItemText
                                                                 id={labelId}
-                                                                primary={
+                                                                primary={(
                                                                     <div>
                                                                         <MethodView
                                                                             method={innerKey}
@@ -593,25 +600,23 @@ function ProductResourcesEdit(props) {
                                                                         />
                                                                         <span>{key}</span>
                                                                     </div>
-                                                                }
+                                                                )}
                                                                 secondary={
-                                                                    methodObj['x-auth-type'] &&
-                                                                    methodObj['x-throttling-tier'] &&
-                                                                    `${methodObj['x-auth-type']} - ${
+                                                                    methodObj['x-auth-type']
+                                                                    && methodObj['x-throttling-tier']
+                                                                    && `${methodObj['x-auth-type']} - ${
                                                                         methodObj['x-throttling-tier']
                                                                     }`
                                                                 }
-                                                                onClick={() =>
-                                                                    updateResourceTree(
-                                                                        {
-                                                                            target: key,
-                                                                            verb: innerKey,
-                                                                            apiId: selectedApi.id,
-                                                                            name: selectedApi.name,
-                                                                        },
-                                                                        'add',
-                                                                    )
-                                                                }
+                                                                onClick={() => updateResourceTree(
+                                                                    {
+                                                                        target: key,
+                                                                        verb: innerKey,
+                                                                        apiId: selectedApi.id,
+                                                                        name: selectedApi.name,
+                                                                    },
+                                                                    'add',
+                                                                )}
                                                                 className={classes.middleText}
                                                             />
                                                             <ListItemSecondaryAction>
@@ -624,17 +629,15 @@ function ProductResourcesEdit(props) {
                                                                     <IconButton
                                                                         edge='end'
                                                                         aria-label='comments'
-                                                                        onClick={() =>
-                                                                            updateResourceTree(
-                                                                                {
-                                                                                    target: key,
-                                                                                    verb: innerKey,
-                                                                                    apiId: selectedApi.id,
-                                                                                    name: selectedApi.name,
-                                                                                },
-                                                                                'add',
-                                                                            )
-                                                                        }
+                                                                        onClick={() => updateResourceTree(
+                                                                            {
+                                                                                target: key,
+                                                                                verb: innerKey,
+                                                                                apiId: selectedApi.id,
+                                                                                name: selectedApi.name,
+                                                                            },
+                                                                            'add',
+                                                                        )}
                                                                     >
                                                                         <Icon>chevron_right</Icon>
                                                                     </IconButton>
@@ -674,9 +677,9 @@ function ProductResourcesEdit(props) {
                                             </Typography>
                                         </div>
                                     )}
-                                    {apiResources &&
-                                        apiResources.length > 0 &&
-                                        Object.keys(apiResources).map((key) => {
+                                    {apiResources
+                                        && apiResources.length > 0
+                                        && Object.keys(apiResources).map((key) => {
                                             const apiResource = apiResources[key];
                                             return (
                                                 <div key={apiResource.name}>
@@ -694,17 +697,15 @@ function ProductResourcesEdit(props) {
                                                                     <Typography variant='body2'>{target}</Typography>
                                                                     <hr className={classes.hr} />
                                                                     <Icon
-                                                                        onClick={() =>
-                                                                            updateResourceTree(
-                                                                                {
-                                                                                    target,
-                                                                                    verb,
-                                                                                    apiId: apiResource.apiId,
-                                                                                    name: apiResource.name,
-                                                                                },
-                                                                                'remove',
-                                                                            )
-                                                                        }
+                                                                        onClick={() => updateResourceTree(
+                                                                            {
+                                                                                target,
+                                                                                verb,
+                                                                                apiId: apiResource.apiId,
+                                                                                name: apiResource.name,
+                                                                            },
+                                                                            'remove',
+                                                                        )}
                                                                     >
                                                                         delete
                                                                     </Icon>
@@ -719,9 +720,9 @@ function ProductResourcesEdit(props) {
                             </Paper>
                         </Grid>
                     </Grid>
-                </React.Fragment>
+                </>
             )}
-        </React.Fragment>
+        </>
     );
 }
 ProductResourcesEdit.propTypes = {
@@ -729,5 +730,6 @@ ProductResourcesEdit.propTypes = {
     setApiResources: PropTypes.func.isRequired,
     isStateCreate: PropTypes.isRequired,
     api: PropTypes.isRequired,
+    resourceNotFountMessage: PropTypes.string.isRequired,
 };
 export default ProductResourcesEdit;

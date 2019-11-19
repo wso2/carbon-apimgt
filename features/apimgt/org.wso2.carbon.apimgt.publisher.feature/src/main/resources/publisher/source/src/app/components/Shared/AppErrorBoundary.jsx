@@ -24,7 +24,7 @@ import Footer from 'AppComponents/Base/Footer/Footer';
 import { FormattedMessage } from 'react-intl';
 import Configurations from 'Config';
 
-const styles = theme => ({
+const styles = (theme) => ({
     appBar: {
         zIndex: theme.zIndex.modal + 1,
         position: 'relative',
@@ -120,7 +120,7 @@ class AppErrorBoundary extends React.Component {
         };
         if (hasError) {
             return (
-                <React.Fragment>
+                <>
                     <AppBar className={classes.appBar} position='fixed'>
                         <Toolbar className={classes.toolbar}>
                             <div className={classes.errorDisplay} style={{ width: '100%' }}>
@@ -165,7 +165,7 @@ class AppErrorBoundary extends React.Component {
                         </div>
                     </div>
                     <Footer />
-                </React.Fragment>
+                </>
             );
         } else {
             return children;

@@ -28,7 +28,7 @@ import API from 'AppData/api';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         display: 'flex',
         alignItems: 'center',

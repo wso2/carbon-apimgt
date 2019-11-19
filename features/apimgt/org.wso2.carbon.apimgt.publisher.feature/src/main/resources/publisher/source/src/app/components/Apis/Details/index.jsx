@@ -36,7 +36,9 @@ import MonetizationIcon from '@material-ui/icons/LocalAtm';
 import StoreIcon from '@material-ui/icons/Store';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl, defineMessages } from 'react-intl';
-import { Redirect, Route, Switch, Link, matchPath } from 'react-router-dom';
+import {
+    Redirect, Route, Switch, Link, matchPath,
+} from 'react-router-dom';
 import isEmpty from 'lodash/isEmpty';
 import Utils from 'AppData/Utils';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
@@ -73,7 +75,7 @@ import ExternalStores from './ExternalStores/ExternalStores';
 import { APIProvider } from './components/ApiContext';
 import CreateNewVersion from './NewVersion/NewVersion';
 
-const styles = theme => ({
+const styles = (theme) => ({
     LeftMenu: {
         backgroundColor: theme.palette.background.leftMenu,
         width: theme.custom.leftMenuWidth,
@@ -165,6 +167,7 @@ class Details extends Component {
         this.updateAPI = this.updateAPI.bind(this);
         this.setImageUpdate = this.setImageUpdate.bind(this);
     }
+
     /**
      * @inheritDoc
      * @memberof Details
@@ -200,9 +203,9 @@ class Details extends Component {
      */
     componentDidUpdate() {
         const { api } = this.state;
-        const { apiUUID } = this.props.match.params;
-        const { apiProdUUID } = this.props.match.params;
-        const { isAPIProduct } = this.props.isAPIProduct;
+        const { match, isAPIProduct } = this.props;
+        const { apiUUID } = match.params;
+        const { apiProdUUID } = match.params;
         if (!api || (api.id === apiUUID || api.id === apiProdUUID)) {
             return;
         }
@@ -212,16 +215,18 @@ class Details extends Component {
             this.setAPI();
         }
     }
+
     /**
      *
      * This method is a hack to update the image in the toolbar when a new image is uploaded
      * @memberof Details
      */
     setImageUpdate() {
-        this.setState(previousState => ({
+        this.setState((previousState) => ({
             imageUpdate: previousState.imageUpdate + 1,
         }));
     }
+
     /**
      *
      *
@@ -231,7 +236,8 @@ class Details extends Component {
         if (newAPI) {
             this.setState({ api: newAPI });
         } else {
-            const { apiUUID } = this.props.match.params;
+            const { match } = this.props;
+            const { apiUUID } = match.params;
             const promisedApi = API.get(apiUUID);
             promisedApi
                 .then((api) => {
@@ -257,7 +263,8 @@ class Details extends Component {
      * @memberof Details
      */
     setAPIProduct() {
-        const { apiProdUUID } = this.props.match.params;
+        const { match } = this.props;
+        const { apiProdUUID } = match.params;
         const { isAPIProduct } = this.props;
         const promisedApi = APIProduct.get(apiProdUUID);
         promisedApi
@@ -285,7 +292,7 @@ class Details extends Component {
         switch (apiType) {
             case 'GRAPHQL':
                 return (
-                    <React.Fragment>
+                    <>
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.schema.definition',
@@ -295,13 +302,13 @@ class Details extends Component {
                             to={pathPrefix + 'schema definition'}
                             Icon={<CodeIcon />}
                         />
-                    </React.Fragment>
+                    </>
                 );
             case 'WS':
                 return '';
             default:
                 return (
-                    <React.Fragment>
+                    <>
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.api.definition2',
@@ -311,7 +318,7 @@ class Details extends Component {
                             to={pathPrefix + 'api definition'}
                             Icon={<CodeIcon />}
                         />
-                    </React.Fragment>
+                    </>
                 );
         }
     }
@@ -325,7 +332,7 @@ class Details extends Component {
         switch (apiType) {
             case 'GRAPHQL':
                 return (
-                    <React.Fragment>
+                    <>
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.operations',
@@ -334,13 +341,13 @@ class Details extends Component {
                             to={pathPrefix + 'operations'}
                             Icon={<ResourcesIcon />}
                         />
-                    </React.Fragment>
+                    </>
                 );
             case 'WS':
                 return '';
             default:
                 return (
-                    <React.Fragment>
+                    <>
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.resources',
@@ -349,7 +356,7 @@ class Details extends Component {
                             to={pathPrefix + 'resources'}
                             Icon={<ResourcesIcon />}
                         />
-                    </React.Fragment>
+                    </>
                 );
         }
     }
@@ -426,7 +433,7 @@ class Details extends Component {
             location: { pathname }, // nested destructuring
         } = this.props;
 
-        const settingsContext = this.context.settings;
+        const { settings: settingsContext } = this.context;
 
         // pageLocation renaming is to prevent es-lint errors saying can't use global name location
         if (!Details.isValidURL(pathname)) {
@@ -462,7 +469,7 @@ class Details extends Component {
         const { leftMenuIconMainSize } = theme.custom;
 
         return (
-            <React.Fragment>
+            <>
                 <APIProvider
                     value={{
                         api,
@@ -585,7 +592,7 @@ class Details extends Component {
                             to={pathPrefix + 'documents'}
                             Icon={<DocumentsIcon />}
                         />
-                        { !api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
+                        {!api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.monetization',
@@ -716,7 +723,7 @@ class Details extends Component {
                         </div>
                     </div>
                 </APIProvider>
-            </React.Fragment>
+            </>
         );
     }
 }

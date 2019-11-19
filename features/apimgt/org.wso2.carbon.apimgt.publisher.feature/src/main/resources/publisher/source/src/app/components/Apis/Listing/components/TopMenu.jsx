@@ -28,9 +28,9 @@ import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
-import APICreateMenu from '../components/APICreateMenu';
+import APICreateMenu from './APICreateMenu';
 
-const styles = theme => ({
+const styles = (theme) => ({
     rightIcon: {
         marginLeft: theme.spacing(1),
     },
@@ -120,7 +120,7 @@ function TopMenu(props) {
             </div>
             <div className={classes.mainTitleWrapper}>
                 {data && (
-                    <React.Fragment>
+                    <>
                         <Typography variant='h5' className={classes.mainTitle} component='div'>
                             {isAPIProduct ? (
                                 <FormattedMessage
@@ -136,10 +136,14 @@ function TopMenu(props) {
                                 id='Apis.Listing.components.TopMenu.displaying'
                                 defaultMessage='Displaying'
                             />
-                            {' '} {count} {' '}
+                            {' '}
+                            {' '}
+                            {count}
+                            {' '}
+                            {' '}
                             {getTitleForArtifactType(props)}
                         </Typography>
-                    </React.Fragment>
+                    </>
                 )}
             </div>
             <VerticalDivider height={70} />
@@ -183,7 +187,7 @@ TopMenu.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     setListType: PropTypes.func.isRequired,
     listType: PropTypes.string.isRequired,
-    data: PropTypes.shape({}).isRequired,
+    data: PropTypes.shape({ length: PropTypes.number }).isRequired,
     count: PropTypes.number.isRequired,
     theme: PropTypes.shape({
         custom: PropTypes.string,

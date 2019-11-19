@@ -84,7 +84,13 @@ module.exports = {
     "no-mixed-operators": ["error"],
     "jsx-quotes": ["error", "prefer-single"],
     "no-else-return": "off",
-    "no-unused-vars": ["error"]
+    "no-unused-vars": ["error"],
+    "react/jsx-props-no-spreading": [1, {
+      "exceptions":
+        ["Route", "Operation", "Listing", "DeferredDetails", "Details", "svg", "Paper", "EditableRow", "CreateScope", "EditScope", "WrappedComponent", "ErrorIcon", "WarningIcon","CheckCircleIcon","InfoIcon"]
+    }],
+    "react/prop-types": [1, { ignore: ["classes", "api", "theme", "history", "intl"] }], // https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/prop-types.md
+    "react/destructuring-assignment": [1, "always"]
   },
   plugins: ["react", "jest", "prettier"]
 };

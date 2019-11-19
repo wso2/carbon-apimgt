@@ -37,7 +37,7 @@ import mathPayload from './math';
 import calculatorPayload from './calculator';
 import SampleAPIProductWizard from './SampleAPIProductWizard';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     buttonProgress: {
         color: green[500],
         position: 'relative',
@@ -96,7 +96,6 @@ function SampleAPI(prop) {
             })
             .catch((error) => {
                 setStep(0);
-                this.setState({ deploying: false });
                 Alert.error(error);
             });
     }
@@ -123,8 +122,8 @@ function SampleAPI(prop) {
         const calculatorSearch = search(calculatorPayload);
         const mathApiSearch = search(mathPayload);
         Promise.all([calculatorSearch, mathApiSearch]).then(([calResponse, mathResponse]) => {
-            const calAPI = calResponse.body.list.find(api => api.name === calculatorPayload.name);
-            const mathAPI = mathResponse.body.list.find(api => api.name === mathPayload.name);
+            const calAPI = calResponse.body.list.find((api) => api.name === calculatorPayload.name);
+            const mathAPI = mathResponse.body.list.find((api) => api.name === mathPayload.name);
             let promisedCalAPI;
             let promisedMathAPI;
             if (!calAPI) {
@@ -137,8 +136,9 @@ function SampleAPI(prop) {
             } else {
                 promisedMathAPI = Promise.resolve(mathAPI);
             }
-            Promise.all([promisedCalAPI, promisedMathAPI]).then(([calculatorAPI, MathAPI]) =>
-                createSampleProduct(calculatorAPI.id, MathAPI.id));
+            Promise.all([promisedCalAPI, promisedMathAPI]).then(
+                ([calculatorAPI, MathAPI]) => createSampleProduct(calculatorAPI.id, MathAPI.id),
+            );
         });
     };
 
@@ -162,9 +162,9 @@ function SampleAPI(prop) {
                     <FormattedMessage
                         id='Apis.Listing.SampleAPIProduct.description'
                         defaultMessage={
-                            'The API resources in an API product can come from' +
-                            ' one or more APIs, so you can mix and match resources from multiple' +
-                            ' API resources to create specialized feature sets.'
+                            'The API resources in an API product can come from'
+                            + ' one or more APIs, so you can mix and match resources from multiple'
+                            + ' API resources to create specialized feature sets.'
                         }
                     />
                 </Typography>

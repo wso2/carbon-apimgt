@@ -29,7 +29,7 @@ import Paper from '@material-ui/core/Paper';
 import API from 'AppData/api';
 import { isRestricted } from 'AppData/AuthManager';
 
-const styles = theme => ({
+const styles = (theme) => ({
     subscriptionPoliciesPaper: {
         marginTop: theme.spacing(2),
         padding: theme.spacing(2),
@@ -81,7 +81,7 @@ class SubscriptionPoliciesManage extends Component {
         if (checked) {
             newSelectedPolicies.push(name);
         } else {
-            newSelectedPolicies = policies.filter(policy => policy !== name);
+            newSelectedPolicies = policies.filter((policy) => policy !== name);
         }
         setPolices(newSelectedPolicies);
     }
@@ -91,7 +91,7 @@ class SubscriptionPoliciesManage extends Component {
         const { subscriptionPolicies } = this.state;
 
         return (
-            <React.Fragment>
+            <>
                 <Typography variant='h4'>
                     <FormattedMessage
                         id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.business.plans'
@@ -107,23 +107,25 @@ class SubscriptionPoliciesManage extends Component {
                 <Paper className={classes.subscriptionPoliciesPaper}>
                     <FormControl className={classes.formControl}>
                         <FormGroup>
-                            { subscriptionPolicies && Object.entries(subscriptionPolicies).map(value => (
+                            { subscriptionPolicies && Object.entries(subscriptionPolicies).map((value) => (
                                 <FormControlLabel
                                     key={value[1].name}
-                                    control={<Checkbox
-                                        disabled={isRestricted(['apim:api_publish', 'apim:api_create'], api)}
-                                        color='primary'
-                                        checked={policies.includes(value[1].name)}
-                                        onChange={e => this.handleChange(e)}
-                                        name={value[1].name}
-                                    />}
+                                    control={(
+                                        <Checkbox
+                                            disabled={isRestricted(['apim:api_publish', 'apim:api_create'], api)}
+                                            color='primary'
+                                            checked={policies.includes(value[1].name)}
+                                            onChange={(e) => this.handleChange(e)}
+                                            name={value[1].name}
+                                        />
+                                    )}
                                     label={value[1].name + ' : ' + value[1].description}
                                 />
                             ))}
                         </FormGroup>
                     </FormControl>
                 </Paper>
-            </React.Fragment>
+            </>
         );
     }
 }

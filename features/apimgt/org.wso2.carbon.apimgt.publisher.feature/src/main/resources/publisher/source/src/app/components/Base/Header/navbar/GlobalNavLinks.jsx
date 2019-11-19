@@ -16,7 +16,9 @@
  * under the License.
  */
 import React, { useState, useEffect } from 'react';
-import { ListItemIcon, List, withStyles, ListItem, ListItemText } from '@material-ui/core';
+import {
+    ListItemIcon, List, withStyles, ListItem, ListItemText,
+} from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { Link, withRouter } from 'react-router-dom';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
@@ -24,7 +26,7 @@ import { FormattedMessage } from 'react-intl';
 import classNames from 'classnames';
 import AuthManager from 'AppData/AuthManager';
 
-const styles = theme => ({
+const styles = (theme) => ({
     listRoot: {
         padding: 0,
     },
@@ -52,6 +54,13 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.activeMenuItem),
     },
 });
+
+/**
+ *
+ *
+ * @param {*} props
+ * @returns
+ */
 function GlobalNavLinks(props) {
     const [selected, setSelected] = useState('apis');
     const {
@@ -99,32 +108,39 @@ function GlobalNavLinks(props) {
                     />
                 </ListItem>
             </Link>
-            { publisherUser &&
-            <Link
-                to='/api-products'
-                className={classNames({ [classes.selected]: selected === 'api-products', [classes.links]: true })}
-            >
-                <ListItem button>
-                    <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
-                        <CustomIcon width={iconWidth} height={iconWidth} icon='api-product' strokeColor={strokeColor} />
-                    </ListItemIcon>
-                    <ListItemText
-                        classes={{
-                            primary: classNames({
-                                [classes.selectedText]: selected === 'api-products',
-                                [classes.listText]: selected !== 'api-products' && !smallView,
-                                [classes.listTextSmall]: selected !== 'api-products' && smallView,
-                            }),
-                        }}
-                        primary={
-                            <FormattedMessage
-                                id='Base.Header.navbar.GlobalNavBar.api.products'
-                                defaultMessage='API Products'
+            { publisherUser
+            && (
+                <Link
+                    to='/api-products'
+                    className={classNames({ [classes.selected]: selected === 'api-products', [classes.links]: true })}
+                >
+                    <ListItem button>
+                        <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
+                            <CustomIcon
+                                width={iconWidth}
+                                height={iconWidth}
+                                icon='api-product'
+                                strokeColor={strokeColor}
                             />
-                        }
-                    />
-                </ListItem>
-            </Link>}
+                        </ListItemIcon>
+                        <ListItemText
+                            classes={{
+                                primary: classNames({
+                                    [classes.selectedText]: selected === 'api-products',
+                                    [classes.listText]: selected !== 'api-products' && !smallView,
+                                    [classes.listTextSmall]: selected !== 'api-products' && smallView,
+                                }),
+                            }}
+                            primary={(
+                                <FormattedMessage
+                                    id='Base.Header.navbar.GlobalNavBar.api.products'
+                                    defaultMessage='API Products'
+                                />
+                            )}
+                        />
+                    </ListItem>
+                </Link>
+            )}
         </List>
     );
 }

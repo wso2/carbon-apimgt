@@ -40,7 +40,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import Paper from '@material-ui/core/Paper';
 import API from '../../../../data/api';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         width: theme.custom.contentAreaWidth,
         marginTop: theme.spacing(3),
@@ -94,7 +94,7 @@ export default function ExternalStores() {
     function getPublishedExternalStores() {
         API.getPublishedExternalStores(api.id)
             .then((response) => {
-                const publishedStoreIds = response.body.list.map(store => store.id);
+                const publishedStoreIds = response.body.list.map((store) => store.id);
                 setPublishedExternalStores(publishedStoreIds);
             })
             .catch((error) => {
@@ -121,7 +121,7 @@ export default function ExternalStores() {
         setUpdating(true);
         API.publishAPIToExternalStores(api.id, publishedExternalStores)
             .then((response) => {
-                const successfulStores = response.body.list.map(store => store.id);
+                const successfulStores = response.body.list.map((store) => store.id);
                 Alert.success(intl.formatMessage({
                     id: 'Apis.Details.ExternalStores.ExternalStores.successfully.published.to.external.stores',
                     defaultMessage: 'Successfully Published to external developer portals: {successfulStores}',
@@ -144,7 +144,7 @@ export default function ExternalStores() {
     return (
         <div>
             <div>
-                <Typography variant='h4' align='left' >
+                <Typography variant='h4' align='left'>
                     <FormattedMessage
                         id='Apis.Details.ExternalStores.ExternalStores.external-stores'
                         defaultMessage='External Developer Portals'
@@ -182,7 +182,7 @@ export default function ExternalStores() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {allExternalStores.map(row => (
+                            {allExternalStores.map((row) => (
                                 <TableRow key={row.id}>
                                     <TableCell padding='checkbox'>
                                         <Checkbox
@@ -199,7 +199,7 @@ export default function ExternalStores() {
                                                         }
                                                     } else {
                                                         setPublishedExternalStores(publishedExternalStores
-                                                            .filter(store => store !== name));
+                                                            .filter((store) => store !== name));
                                                     }
                                                 }
                                             }
@@ -208,9 +208,16 @@ export default function ExternalStores() {
                                         />
                                     </TableCell>
                                     <TableCell component='th' scope='row'>
-                                        <Typography> {row.displayName} </Typography>
+                                        <Typography>
+                                            {' '}
+                                            {row.displayName}
+                                            {' '}
+                                        </Typography>
                                     </TableCell>
-                                    <TableCell> <Typography>{row.type}</Typography></TableCell>
+                                    <TableCell>
+                                        {' '}
+                                        <Typography>{row.type}</Typography>
+                                    </TableCell>
                                     <TableCell>
                                         <a
                                             target='_blank'
@@ -268,13 +275,12 @@ export default function ExternalStores() {
                                     <Typography variant='body2' color='primary'>
                                         <FormattedMessage
                                             id='Apis.Details.ExternalStores.ExternalStores.update.not.allowed'
-                                            defaultMessage={'* You are not authorized to publish the API' +
-                                                ' to external developer portals due to insufficient permissions'}
+                                            defaultMessage={'* You are not authorized to publish the API'
+                                                + ' to external developer portals due to insufficient permissions'}
                                         />
                                     </Typography>
                                 </Grid>
-                            )
-                        }
+                            )}
                     </Grid>
                 </Grid>
             </div>

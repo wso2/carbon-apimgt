@@ -30,7 +30,7 @@ import Avatar from './avatar/Avatar';
 import HeaderSearch from './headersearch/HeaderSearch';
 import GlobalNavBar from './navbar/GlobalNavBar';
 
-const styles = theme => ({
+const styles = (theme) => ({
     appBar: {
         position: 'relative',
         background: theme.palette.background.appBar,
@@ -85,14 +85,16 @@ class Header extends React.Component {
      * @memberof Header
      */
     toggleGlobalNavBar() {
-        this.setState({ openNavBar: !this.state.openNavBar });
+        const { openNavBar } = this.state;
+        this.setState({ openNavBar: !openNavBar });
     }
 
     /**
      * Show search input in sm breakpoint or lower resolution
      */
     toggleSmSearch() {
-        this.setState({ smScreen: !this.state.smScreen });
+        const { smScreen } = this.state;
+        this.setState({ smScreen: !smScreen });
     }
 
     /**
@@ -107,7 +109,7 @@ class Header extends React.Component {
             classes, avatar, settings, theme,
         } = this.props;
         return (
-            <React.Fragment>
+            <>
                 <AppBar className={classes.appBar} position='fixed'>
                     <Toolbar className={classes.toolbar}>
                         <Hidden mdUp>
@@ -137,7 +139,7 @@ class Header extends React.Component {
                         {avatar}
                     </Toolbar>
                 </AppBar>
-            </React.Fragment>
+            </>
         );
     }
 }

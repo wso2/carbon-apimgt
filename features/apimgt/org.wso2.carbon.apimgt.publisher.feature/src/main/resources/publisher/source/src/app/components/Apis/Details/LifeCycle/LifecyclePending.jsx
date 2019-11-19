@@ -24,7 +24,9 @@ import Box from '@material-ui/core/Box';
 import PropTypes from 'prop-types';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import Alert from 'AppComponents/Shared/Alert';
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core/';
+import {
+    Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
+} from '@material-ui/core/';
 import Slide from '@material-ui/core/Slide';
 
 const lifecyclePending = (props) => {

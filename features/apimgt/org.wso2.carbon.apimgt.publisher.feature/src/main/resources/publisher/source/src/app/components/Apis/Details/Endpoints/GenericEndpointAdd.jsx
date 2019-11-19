@@ -28,7 +28,7 @@ import PropTypes from 'prop-types';
 import { isRestricted } from 'AppData/AuthManager';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 
-const styles = theme => ({
+const styles = (theme) => ({
     endpointInputWrapper: {
         width: '100%',
         display: 'flex',
@@ -71,14 +71,16 @@ function GenericEndpointAdd(props) {
     return (
         <div className={classes.endpointInputWrapper}>
             <TextField
-                label={<FormattedMessage
-                    id='Apis.Details.Endpoints.GenericEndpoint.service.url.input'
-                    defaultMessage='Service URL'
-                />}
+                label={(
+                    <FormattedMessage
+                        id='Apis.Details.Endpoints.GenericEndpoint.service.url.input'
+                        defaultMessage='Service URL'
+                    />
+                )}
                 disabled={isRestricted(['apim:api_create'], api)}
                 className={classes.textField}
                 value={serviceUrl}
-                onChange={event => setServiceUrl(event.target.value)}
+                onChange={(event) => setServiceUrl(event.target.value)}
                 variant='outlined'
                 margin='normal'
                 placeholder='Enter the Endpoint URL and press + button'
@@ -100,7 +102,8 @@ function GenericEndpointAdd(props) {
                     ),
                 }}
             />
-        </div>);
+        </div>
+    );
 }
 
 GenericEndpointAdd.propTypes = {

@@ -94,6 +94,7 @@ class Overview extends Component {
         }
         return filename;
     }
+
     /**
      * Creates an instance of Overview.
      * @param {any} props @inheritDoc
@@ -115,6 +116,12 @@ class Overview extends Component {
         this.handleDeleteAdditionalProperties = this.handleDeleteAdditionalProperties.bind(this);
     }
 
+
+    /**
+     *
+     *
+     * @memberof Overview
+     */
     downloadWSDL() {
         const { id } = this.props.api;
         const api = new Api();
@@ -129,8 +136,9 @@ class Overview extends Component {
                 anchor.download = Overview.getWSDLFileName(response.headers['content-disposition']);
             } else {
                 // assumes a single WSDL in text format
-                anchor.download =
-                    this.state.api.provider + '-' + this.state.api.name + '-' + this.state.api.version + '.wsdl';
+                anchor.download = this.state.api.provider + '-'
+                + this.state.api.name + '-'
+                + this.state.api.version + '.wsdl';
             }
             anchor.click();
             windowUrl.revokeObjectURL(url);
@@ -207,15 +215,15 @@ class Overview extends Component {
      * Handle adding Additional properties
      */
     handleAddAdditionalProperties() {
-        this.setState({
+        this.setState((cState) => ({
             additionalProperties: [
-                ...this.state.additionalProperties,
+                ...cState.additionalProperties,
                 {
                     key: '',
                     value: '',
                 },
             ],
-        });
+        }));
     }
 
     /**
@@ -226,7 +234,7 @@ class Overview extends Component {
     handleDeleteAdditionalProperties(key) {
         const { additionalProperties } = this.state;
         this.setState({
-            additionalProperties: additionalProperties.filter(property => property.key !== key),
+            additionalProperties: additionalProperties.filter((property) => property.key !== key),
         });
     }
 
@@ -239,7 +247,7 @@ class Overview extends Component {
         const api = new Api();
         const apiId = this.props.api.id;
         const { editableDescriptionText } = this.state;
-        const promisedApi = api.get(apiId); 
+        const promisedApi = api.get(apiId);
         promisedApi
             .then((getResponse) => {
                 const apiData = getResponse.body;
@@ -283,6 +291,7 @@ class Overview extends Component {
         }
         return items;
     }
+
     /** @inheritDoc */
     render() {
         const { api, isEditable, classes } = this.props;
@@ -294,7 +303,10 @@ class Overview extends Component {
         return (
             <Grid container spacing={0} direction='column' justify='flex-start' alignItems='stretch'>
                 <Grid item container direction='row' justify='flex-end'>
-                    <span>Last Updated : {moment(api.lastUpdatedTime).fromNow()}</span>
+                    <span>
+Last Updated :
+                        {moment(api.lastUpdatedTime).fromNow()}
+                    </span>
                 </Grid>
                 <APIPropertyField name='Description'>
                     <TextField
@@ -430,7 +442,7 @@ class Overview extends Component {
                     />
                 </APIPropertyField>
                 {additionalProperties && (
-                    <React.Fragment>
+                    <>
                         <Grid item>
                             <Typography variant='h5'> Additional Properties</Typography>
                             <Divider />
@@ -445,7 +457,7 @@ class Overview extends Component {
                             <AddIcon id='1' />
                         </Button>
                         {this.renderAdditionalProperties(additionalProperties)}
-                    </React.Fragment>
+                    </>
                 )}
             </Grid>
         );

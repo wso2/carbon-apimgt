@@ -40,6 +40,7 @@ class Documents extends React.Component {
             documentsList: null,
         };
     }
+
     componentDidMount() {
         const { api: { apiType, id }, intl } = this.props;
         const API = apiType === Api.CONSTS.APIProduct ? new APIProduct() : new Api();
@@ -49,8 +50,10 @@ class Documents extends React.Component {
             this.setState({ documentsList: response.obj.list });
         }).catch((errorResponse) => {
             const errorData = JSON.parse(errorResponse.message);
-            const messageTxt =
-                'Error[' + errorData.code + ']: ' + errorData.description + ' | ' + errorData.message + '.';
+            const messageTxt = 'Error[' + errorData.code + ']: '
+            + errorData.description
+            + ' | ' + errorData.message
+            + '.';
             console.error(messageTxt);
             Alert.error(intl.formatMessage({
                 id: 'Apis.Details.NewOverview.Documents.error',
@@ -58,6 +61,7 @@ class Documents extends React.Component {
             }));
         });
     }
+
     render() {
         const { parentClasses, api } = this.props;
         const { documentsList } = this.state;
@@ -82,7 +86,7 @@ class Documents extends React.Component {
 
                 {documentsList && documentsList.length !== 0 && (
                     <List className={parentClasses.ListRoot}>
-                        {documentsList.map(item => (
+                        {documentsList.map((item) => (
                             <ListItemAvatar key={item.id}>
                                 <Avatar>
                                     <FileIcon />
@@ -94,10 +98,12 @@ class Documents extends React.Component {
                 )}
                 {documentsList && documentsList.length === 0 && (
                     <Typography component='p' variant='body1' className={parentClasses.subtitle}>
-                        &lt;<FormattedMessage
+                        &lt;
+                        <FormattedMessage
                             id='Apis.Details.NewOverview.Documents.not.created'
                             defaultMessage='Not Created'
-                        />&gt;
+                        />
+&gt;
                     </Typography>
                 )}
             </Paper>

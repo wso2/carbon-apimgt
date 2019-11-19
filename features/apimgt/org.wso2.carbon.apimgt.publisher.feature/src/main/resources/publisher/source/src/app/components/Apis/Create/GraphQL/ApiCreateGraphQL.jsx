@@ -176,8 +176,8 @@ export default function ApiCreateGraphQL(props) {
 
     return (
         <APICreateBase
-            title={
-                <React.Fragment>
+            title={(
+                <>
                     <Typography variant='h5'>
                         <FormattedMessage
                             id='Apis.Create.GraphQL.ApiCreateGraphQL.heading'
@@ -190,8 +190,8 @@ export default function ApiCreateGraphQL(props) {
                             defaultMessage='Create an API by importing an existing GraphQL SDL definition.'
                         />
                     </Typography>
-                </React.Fragment>
-            }
+                </>
+            )}
         >
             <Box>
                 {wizardStep === 0 && (
@@ -272,12 +272,19 @@ export default function ApiCreateGraphQL(props) {
                                     </Button>
                                 </Link>
                             )}
-                            {wizardStep === 1 && <Button onClick={() => setWizardStep(step => step - 1)}>Back</Button>}
+                            {wizardStep === 1 && (
+                                <Button onClick={
+                                    () => setWizardStep((step) => step - 1)
+                                }
+                                >
+                                    Back
+                                </Button>
+                            )}
                         </Grid>
                         <Grid item>
                             {wizardStep === 0 && (
                                 <Button
-                                    onClick={() => setWizardStep(step => step + 1)}
+                                    onClick={() => setWizardStep((step) => step + 1)}
                                     variant='contained'
                                     color='primary'
                                     disabled={!apiInputs.isFormValid}
@@ -292,7 +299,9 @@ export default function ApiCreateGraphQL(props) {
                                     disabled={!apiInputs.isFormValid || isCreating}
                                     onClick={createAPI}
                                 >
-                                    Create {isCreating && <CircularProgress size={24} />}
+                                    Create
+                                    {' '}
+                                    {isCreating && <CircularProgress size={24} />}
                                 </Button>
                             )}
                         </Grid>

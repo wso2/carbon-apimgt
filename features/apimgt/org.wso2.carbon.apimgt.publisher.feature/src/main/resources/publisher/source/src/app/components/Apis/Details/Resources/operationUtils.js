@@ -34,8 +34,8 @@ function getAPIProductTaggedOperations(apiProduct, openAPI) {
             // in `verb` if definition has mixed case verbs
             const openAPIOperation = openAPI.paths[target] && openAPI.paths[target][verb.toLowerCase()];
             if (!openAPIOperation) {
-                console.warn(`Could not find target = ${target} ` +
-                        `verb (lower cased) = ${verb.toLowerCase()} operation in OpenAPI definition`);
+                console.warn(`Could not find target = ${target} `
+                        + `verb (lower cased) = ${verb.toLowerCase()} operation in OpenAPI definition`);
                 // Skipping not found operations
                 return null;
             }
@@ -66,8 +66,8 @@ function getTaggedOperations(api, openAPI) {
             // issues in `verb` if definition has mixed case verbs
             const openAPIOperation = openAPI.paths[target] && openAPI.paths[target][verb.toLowerCase()];
             if (!openAPIOperation) {
-                console.warn(`Could not find target = ${target} ` +
-                        `verb (lower cased) = ${verb.toLowerCase()} operation in OpenAPI definition`);
+                console.warn(`Could not find target = ${target} `
+                        + `verb (lower cased) = ${verb.toLowerCase()} operation in OpenAPI definition`);
                 // Skipping not found operations
                 return null;
             }
@@ -148,12 +148,12 @@ function getOperationScopes(operation, spec) {
     const openAPIVersion = getVersion(spec);
     let scopes = [];
     if (VERSIONS.V3.includes(openAPIVersion)) {
-        if (Array.isArray(operation.security) && operation.security.find(item => item.default)) {
-            scopes = operation.security.find(item => item.default).default;
+        if (Array.isArray(operation.security) && operation.security.find((item) => item.default)) {
+            scopes = operation.security.find((item) => item.default).default;
         }
     } else if (VERSIONS.V2.includes(openAPIVersion)) {
-        if (Array.isArray(operation.security) && operation.security.find(item => item.default)) {
-            scopes = operation.security.find(item => item.default).default;
+        if (Array.isArray(operation.security) && operation.security.find((item) => item.default)) {
+            scopes = operation.security.find((item) => item.default).default;
         }
     }
     return scopes;
@@ -191,8 +191,8 @@ function isSelectAll(selectedOperations, operations) {
         if (Object.prototype.hasOwnProperty.call(operations, path)) {
             const verbs = operations[path];
             if (
-                !selectedOperations[path] ||
-                Object.keys(selectedOperations[path]).length !== Object.keys(verbs).length
+                !selectedOperations[path]
+                || Object.keys(selectedOperations[path]).length !== Object.keys(verbs).length
             ) {
                 return false;
             }

@@ -23,7 +23,7 @@ import { withStyles } from '@material-ui/core/styles';
 import AuthManager from 'AppData/AuthManager';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 
-const styles = theme => ({
+const styles = (theme) => ({
     link: {
         color: theme.palette.getContrastText(theme.palette.background.default),
         cursor: 'pointer',
@@ -142,8 +142,8 @@ class CommentOptions extends React.Component {
         const {
             classes, comment, editIndex, index, theme,
         } = this.props;
-        const canDelete =
-            comment.createdBy === AuthManager.getUser().name || AuthManager.getUser().name === theme.custom.adminRole;
+        const canDelete = (comment.createdBy === AuthManager.getUser().name)
+            || (AuthManager.getUser().name === theme.custom.adminRole);
         const canModify = comment.createdBy === AuthManager.getUser().name && comment.entryPoint === 'APIPublisher';
         return (
             <Grid container spacing={2} className={classes.verticalSpace} key={comment.commentId}>
