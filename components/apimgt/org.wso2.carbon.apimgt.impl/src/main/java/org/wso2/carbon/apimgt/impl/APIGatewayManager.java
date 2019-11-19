@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import io.swagger.annotations.Api;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
@@ -202,7 +203,8 @@ public class APIGatewayManager {
                             client.updateApi(builder, tenantDomain, api.getId());
                             // AWS Lambda: prevent saving endpoint if endpoint type is awslambda
                             JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
-                            if (!endpointConfig.get("endpoint_type").equals("awslambda")) {
+                            if (!endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                                    .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
                                 client.saveEndpoint(api, builder, tenantDomain);
                             }
                         }
@@ -263,7 +265,8 @@ public class APIGatewayManager {
                                 client.addApi(builder, tenantDomain, api.getId());
                                 // AWS Lambda: prevent adding endpoint if endpoint type is awslambda
                                 JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
-                                if (!endpointConfig.get("endpoint_type").equals("awslambda")) {
+                                if (!endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                                        .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
                                     client.saveEndpoint(api, builder, tenantDomain);
                                 }
                             }
@@ -532,7 +535,8 @@ public class APIGatewayManager {
                             } else {
                                 // AWS Lambda: prevent deleting endpoint if endpoint type is awslambda
                                 JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
-                                if (!endpointConfig.get("endpoint_type").equals("awslambda")) {
+                                if (!endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                                        .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
                                     client.deleteEndpoint(api, tenantDomain);
                                 }
                                 client.deleteApi(tenantDomain, api.getId());

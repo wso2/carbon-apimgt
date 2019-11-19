@@ -27,12 +27,14 @@ import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.InvocationType;
 import com.amazonaws.services.lambda.model.InvokeRequest;
 import com.amazonaws.services.lambda.model.InvokeResult;
+import org.apache.commons.lang.StringUtils;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
@@ -70,12 +72,12 @@ public class AWSLambdaClassMediator extends AbstractMediator {
 
         if (invokeResult != null) {
             JsonUtil.setJsonStream(axis2MessageContext, new ByteArrayInputStream(invokeResult.getPayload().array()));
-            axis2MessageContext.setProperty("HTTP_SC", invokeResult.getStatusCode());
+            axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, invokeResult.getStatusCode());
             axis2MessageContext.setProperty("messageType", APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             axis2MessageContext.setProperty("ContentType", APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             axis2MessageContext.removeProperty("NO_ENTITY_BODY");
         } else {
-            axis2MessageContext.setProperty("HTTP_SC", 400);
+            axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, APIMgtGatewayConstants.HTTP_SC_CODE);
             axis2MessageContext.setProperty("NO_ENTITY_BODY", true);
         }
 
@@ -90,11 +92,10 @@ public class AWSLambdaClassMediator extends AbstractMediator {
     private InvokeResult invokeLambda(String payload) {
         try {
             AWSCredentialsProvider credentialsProvider;
-            if ("".equals(accessKey) && "".equals(secretKey)) {
+            if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
                 credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
             } else {
-                if (APIConstants.AMZN_SECRET_KEY_PREFIX.equals(secretKey.substring(0,
-                        APIConstants.AMZN_SECRET_KEY_PREFIX_LENGTH))) {
+                if (secretKey.startsWith(APIConstants.AMZN_SECRET_KEY_PREFIX)) {
                     CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
                     setSecretKey(new String(cryptoUtil.base64DecodeAndDecrypt(secretKey.substring(
                             APIConstants.AMZN_SECRET_KEY_PREFIX_LENGTH)), APIConstants.DigestAuthConstants.CHARSET));

@@ -304,13 +304,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             // AWS Lambda: secret key encryption while creating the API
             if (body.getEndpointConfig() != null) {
                 LinkedHashMap endpointConfig = (LinkedHashMap) body.getEndpointConfig();
-                if (endpointConfig.containsKey("amznSecretKey")) {
-                    String secretKey = (String) endpointConfig.get("amznSecretKey");
+                if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                    String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
                     if (!"".equals(secretKey)) {
                         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
                         String encryptedSecretKey = APIConstants.AMZN_SECRET_KEY_PREFIX +
                                 cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
-                        endpointConfig.put("amznSecretKey", encryptedSecretKey);
+                        endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
                         body.setEndpointConfig(endpointConfig);
                     }
                 }
@@ -623,21 +623,21 @@ public class ApisApiServiceImpl implements ApisApiService {
             // AWS Lambda: secret key encryption while updating the API
             if (body.getEndpointConfig() != null) {
                 LinkedHashMap endpointConfig = (LinkedHashMap) body.getEndpointConfig();
-                if (endpointConfig.containsKey("amznSecretKey")) {
-                    String secretKey = (String) endpointConfig.get("amznSecretKey");
+                if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                    String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
                     if (!"".equals(secretKey)) {
                         if (!APIConstants.AWS_SECRET_KEY.equals(secretKey)) {
                             CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
                             String encryptedSecretKey = APIConstants.AMZN_SECRET_KEY_PREFIX +
                                     cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
-                            endpointConfig.put("amznSecretKey", encryptedSecretKey);
+                            endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
                             body.setEndpointConfig(endpointConfig);
                         } else {
                             JSONParser jsonParser = new JSONParser();
                             JSONObject originalEndpointConfig = (JSONObject)
                                     jsonParser.parse(originalAPI.getEndpointConfig());
-                            String encryptedSecretKey = (String) originalEndpointConfig.get("amznSecretKey");
-                            endpointConfig.put("amznSecretKey", encryptedSecretKey);
+                            String encryptedSecretKey = (String) originalEndpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                            endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
                             body.setEndpointConfig(endpointConfig);
                         }
                     }
@@ -770,15 +770,15 @@ public class ApisApiServiceImpl implements ApisApiService {
                 JSONParser jsonParser = new JSONParser();
                 JSONObject endpointConfig = (JSONObject) jsonParser.parse(endpointConfigString);
                 if (endpointConfig != null) {
-                    if (endpointConfig.containsKey("amznAccessKey") && endpointConfig.containsKey("amznSecretKey")) {
-                        String accessKey = (String) endpointConfig.get("amznAccessKey");
-                        String secretKey = (String) endpointConfig.get("amznSecretKey");
+                    if (endpointConfig.containsKey(APIConstants.AMZN_ACCESS_KEY) &&
+                            endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                        String accessKey = (String) endpointConfig.get(APIConstants.AMZN_ACCESS_KEY);
+                        String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
                         AWSCredentialsProvider credentialsProvider;
-                        if ("".equals(accessKey) && "".equals(secretKey)) {
+                        if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
                             credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
                         } else {
-                            if (APIConstants.AMZN_SECRET_KEY_PREFIX.equals(secretKey.substring(0,
-                                    APIConstants.AMZN_SECRET_KEY_PREFIX_LENGTH))) {
+                            if (secretKey.startsWith(APIConstants.AMZN_SECRET_KEY_PREFIX)) {
                                 CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
                                 secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey.substring(
                                         APIConstants.AMZN_SECRET_KEY_PREFIX_LENGTH)),

@@ -1284,6 +1284,7 @@ public final class APIConstants {
     public static final String ENDPOINT_CONFIG = "endpoint_config";
     public static final String ENDPOINT_TYPE_HTTP = "http";
     public static final String ENDPOINT_TYPE_ADDRESS = "address";
+    public static final String ENDPOINT_TYPE_AWSLAMBDA = "awslambda";
     public static final String ENDPOINT_PRODUCTION_FAILOVERS = "production_failovers";
     public static final String ENDPOINT_SANDBOX_FAILOVERS = "sandbox_failovers";
     public static final String ENDPOINT_PRODUCTION_ENDPOINTS = "production_endpoints";
@@ -1836,5 +1837,7 @@ public final class APIConstants {
     public static final String AWS_SECRET_KEY = "AWS_SECRET_KEY";
     public static final String AMZN_SECRET_KEY_PREFIX = "aws:";
     public static final int AMZN_SECRET_KEY_PREFIX_LENGTH = 4;
+    public static final String AMZN_ACCESS_KEY = "amznAccessKey";
+    public static final String AMZN_SECRET_KEY = "amznSecretKey";
 
 }
