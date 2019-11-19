@@ -4,14 +4,12 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography'
 import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
-//import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import PropTypes from 'prop-types';
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
-//import Dropzone from 'react-dropzone';
 import Grid from '@material-ui/core/Grid';
 import Configurations from 'Config';
 import IconButton from "@material-ui/core/IconButton";
@@ -22,7 +20,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import cloneDeep from 'lodash.clonedeep';
 import Icon from '@material-ui/core/Icon';
-import Alert from 'AppComponents/Shared/Alert';
+import MediationPolicies from '../../NewOverview/MediationPolicies';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -106,13 +104,15 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         borderRadius: 0,
     },
-    
     box: {
         display: 'inline-flex', 
         overflow: 'auto', 
         width: '100%', 
         height: 310,
         alignItems: 'center'
+    },
+    save: {
+       paddingBottom:10 
     }
 }));
 
@@ -122,8 +122,7 @@ function EditCustomMediation() {
     
     const [value, setValue] = React.useState(0);
     const [addedMediators, setAddedMediators] = useState([]);
-    const [deletedMediators, setDeletedMediators] = useState([]);
-    // const [popOpen, setPopOpen] = useState(false);
+    const [validity, setValidity] = useState({});
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -131,30 +130,48 @@ function EditCustomMediation() {
     
     const { mediatorIcons } = Configurations;
 
-    const addMediator = (key, src) => {
+    const addMediator = (src) => {
+       
+        const mediatorObj = { src:src, id:0 };
         const newAddedMediators = cloneDeep(addedMediators);
-        newAddedMediators.push(src);
+        newAddedMediators.push(mediatorObj); 
         setAddedMediators(newAddedMediators);
-        // if (newAddedMediators.length > 0) {
-        //     console.log(key)
-        // }   
+        addedMediators.forEach((src, index) => mediatorObj.id = index + 1);
+            
     }
 
-    const deleteMediator = ( item ) => {
+    const deleteMediator = ( id ) => {
+        
         let updatedMediators = cloneDeep(addedMediators);
-        setAddedMediators(updatedMediators.filter((src) => {
-            return src !== item;
+        setAddedMediators(updatedMediators.filter((mediatorObj) => {
+            return mediatorObj.id !== id;
         }));
-        
-        
-        // Alert.info(<FormattedMessage
-        //     id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.delete.success'
-        //     defaultMessage='Mediation policy deleted successfully.'
-        // />);
+       
     }
+
+    // function nameValidation() {
+        
+    //         const nameValidity = mediation-name;
+    //         console.log(value)
+    //         if (nameValidity === null) {
+    //             APIValidation.apiParameter.validate(field + ':' + value).then((result) => {
+    //                 if (result.body.list.length > 0 && value.toLowerCase() === result.body.list[0]
+    //                     .name.toLowerCase()) {
+    //                     updateValidity({
+    //                         ...validity,
+    //                         name: { details: [{ message: 'Name ' + value + ' already exists' }] },
+    //                     });
+    //                 } else {
+    //                     updateValidity({ ...validity, name: nameValidity });
+    //                 }
+    //             });
+    //         } else {
+    //             updateValidity({ ...validity, name: nameValidity });
+    //         }
+    // }
 
     return (
-        
+       
         <React.Fragment>
                 <Paper className={classes.paper} elevation={0}>   
                     
@@ -193,6 +210,18 @@ function EditCustomMediation() {
                         variant='outlined'
                         />
                     </form>
+                    {/* <Button
+                    color='primary'
+                    variant='contained'
+                    className={classes.save}
+                    onClick={nameValidation}
+                    value={MediationPolicies.name}
+                >
+                    <FormattedMessage
+                        id='Apis.Details.MediationPolicies.Edit.EditCustomMediation.save.btn'
+                        defaultMessage='Save'
+                    />
+                </Button> */}
                 </Paper>
                 <Grid container className={classes.wrapper}>
                     <Grid item xs={10}>
@@ -208,11 +237,11 @@ function EditCustomMediation() {
                             </AppBar>
                             <TabPanel value={value} index={0}>
                                 <div className={classes.box} >
-                                    {addedMediators.map((src) => {
+                                    {addedMediators.map((mediatorObj) => {
                                         return (addedMediators.length > 0 ) ?
                                             <div style={{ display: 'flex' }}>
-                                                <Button onClick={() => deleteMediator(src)}>
-                                                    <img src = {src} style={{ paddingRight: 10, height: 'fit-content' }}/>
+                                                <Button onClick={() => deleteMediator(mediatorObj.id)}>
+                                                    <img src = {mediatorObj.src} style={{ paddingRight: 10, height: 'fit-content' }}/>
                                                            
                                                 </Button>
                                                 <Icon style={{ paddingRight: 10, fontSize: 60, height: 'fit-content'}}>arrow_right_alt</Icon>
@@ -221,36 +250,6 @@ function EditCustomMediation() {
                                     }
                                     )}
                                 </div>
-                                    
-                                    
-                                    {/* <Dropzone
-                                        multiple={false}
-                                        className={classes.dropzone}
-                                        activeClassName={classes.acceptDrop}
-                                        rejectClassName={classes.rejectDrop}
-                                        // onDrop={(dropFile) => {
-                                        //     onDrop(dropFile);
-                                        // }}
-                                    >
-                                        {({ getRootProps, getInputProps }) => (
-                                            <div {...getRootProps({ style: dropzoneStyles })}>
-                                                <input {...getInputProps()} accept='application/xml,text/xml' />
-                                                <div className={classes.dropZoneWrapper}>
-                                                    
-                                                    <Icon className={classes.dropIcon}>cloud_upload</Icon>
-                                                    <Typography>
-                                                        <FormattedMessage
-                                                            id={
-                                                                'Apis.Details.MediationPolicies.Edit.EditMediationPolicy.' +
-                                                                'click.or.drop.to.upload.file'
-                                                            }
-                                                            defaultMessage='Click or drag the mediation file to upload.'
-                                                        />
-                                                    </Typography>
-                                             </div>
-                                            </div>
-                                        )}
-                                    </Dropzone>         */}
                             </TabPanel>
                             <TabPanel value={value} index={1}>
                                 Source
@@ -271,7 +270,7 @@ function EditCustomMediation() {
                                                 return (
                                                     <TableRow>
                                                         <TableCell component="th" align='left' style={{ padding: 0 }}>
-                                                            <IconButton classes={{root :classes.iconButtonOverride}} onClick={() => addMediator(mediator.key, mediator.src2)}>
+                                                            <IconButton classes={{root :classes.iconButtonOverride}} onClick={() => addMediator(mediator.src2)}>
                                                                 <img src={mediator.src1} style={{ paddingRight: 10 }}/>
                                                                 <Typography> { mediator.name} </Typography>
                                                             </IconButton>
@@ -279,11 +278,22 @@ function EditCustomMediation() {
                                                     </TableRow>
                                                 )})}
                                         </TableBody>
-
                                 </Table>    
                         </Paper>
                     </Grid>
-                </Grid>       
+                </Grid>    
+                <div className={classes.save}>
+                <Button
+                    color='primary'
+                    variant='contained'
+                    className={classes.save}
+                >
+                    <FormattedMessage
+                        id='Apis.Details.MediationPolicies.Edit.EditCustomMediation.save.btn'
+                        defaultMessage='Save'
+                    />
+                </Button>
+                </div>                           
         </React.Fragment>
     );
 }
