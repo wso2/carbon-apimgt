@@ -349,7 +349,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     body.getName() + "-" + body.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (CryptoException e) {
-            log.error("Error while encrypting the secret key", e);
+            log.error("Error while encrypting the secret key of API : " + body.getProvider() + "-" +
+                    body.getName() + "-" + body.getVersion(), e);
         }
         return null;
     }
@@ -750,9 +751,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             String errorMessage = "Error while updating API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (CryptoException e) {
-            log.error("Error while encrypting the secret key", e);
+            log.error("Error while encrypting the secret key of API : " + apiId, e);
         } catch (ParseException e) {
-            log.error("Error while parsing endpoint config", e);
+            log.error("Error while parsing endpoint config of API : " + apiId, e);
         }
         return null;
     }
@@ -804,20 +805,20 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (SdkClientException e) {
             if (e.getCause() instanceof UnknownHostException) {
-                arns.put("error", "No internet connection to validate the given access method.");
-                log.error("No internet connection to validate the given access method.", e);
+                arns.put("error", "No internet connection to connect the given access method.");
+                log.error("No internet connection to connect the given access method of API : " + apiId, e);
                 return Response.ok().entity(arns.toString()).build();
             } else {
-                arns.put("error", "Unable to validate the given access method.");
-                log.error("Unable to validate the given access method.", e);
+                arns.put("error", "Unable to access Lambda functions under the given access method.");
+                log.error("Unable to access Lambda functions under the given access method of API : " + apiId, e);
                 return Response.ok().entity(arns.toString()).build();
             }
         } catch (ParseException e) {
-            log.error("Error while parsing endpoint config", e);
+            log.error("Error while parsing endpoint config of API : " + apiId, e);
         } catch (CryptoException | UnsupportedEncodingException e) {
-            log.error("Error while decrypting the secret key", e);
+            log.error("Error while decrypting the secret key of API : " + apiId, e);
         } catch (APIManagementException e) {
-            log.error("Error while retrieving the API", e);
+            log.error("Error while retrieving the API : " + apiId, e);
         }
         return null;
     }
