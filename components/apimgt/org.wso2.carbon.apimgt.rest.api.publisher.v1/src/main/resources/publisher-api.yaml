@@ -2034,6 +2034,8 @@ paths:
     # Retrieve the ARNs of AWS Lambda functions
     #-----------------------------------------------------
     get:
+      x-examples:
+        $ref: docs/examples/apis/apis_id_amznresourcenames_get.yaml
       security:
         - OAuth2Security:
             - apim:api_view
