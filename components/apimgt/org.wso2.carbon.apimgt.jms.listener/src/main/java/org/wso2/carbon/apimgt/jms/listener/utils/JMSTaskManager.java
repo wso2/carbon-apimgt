@@ -402,10 +402,10 @@ public class JMSTaskManager {
      *
      * @return connected task count
      */
-    private int getConnectedTaskCount() {
+    private synchronized int getConnectedTaskCount() {
         int count = 0;
         for (MessageListenerTask lstTask : pollingTasks) {
-            if (lstTask.isConnected()) {
+            if (lstTask.isConnected() && lstTask.getConnection() != null) {
                 count++;
             }
         }
