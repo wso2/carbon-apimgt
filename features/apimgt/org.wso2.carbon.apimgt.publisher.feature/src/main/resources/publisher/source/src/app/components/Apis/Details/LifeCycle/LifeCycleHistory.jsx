@@ -30,7 +30,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { FormattedMessage } from 'react-intl';
 
-const styles = theme => ({
+const styles = (theme) => ({
     firstCol: {
         width: 100,
     },
@@ -64,27 +64,24 @@ const LifeCycleHistory = (props) => {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {props.lcHistory.map(entry =>
-                        entry.previousState && (
-                            <TableRow key={entry.postState}>
-                                <TableCell component='th' scope='row'>
-                                    <Avatar className={classes.avatar}>
-                                        <Person className={classes.personIcon} />
-                                    </Avatar>
-                                    <div>{entry.user}</div>
-                                </TableCell>
-                                <TableCell>
-                                    {
-                                        <FormattedMessage
-                                            id='Apis.Details.LifeCycle.LifeCycleHistory.lifecycle.state.history'
-                                            defaultMessage='LC has changed from {previous} to {post}'
-                                            values={{ previous: entry.previousState, post: entry.postState }}
-                                        />
-                                    }
-                                </TableCell>
-                                <TableCell>{moment(entry.updatedTime).fromNow()}</TableCell>
-                            </TableRow>
-                        ))}
+                    {props.lcHistory.map((entry) => entry.previousState && (
+                        <TableRow key={entry.postState}>
+                            <TableCell component='th' scope='row'>
+                                <Avatar className={classes.avatar}>
+                                    <Person className={classes.personIcon} />
+                                </Avatar>
+                                <div>{entry.user}</div>
+                            </TableCell>
+                            <TableCell>
+                                <FormattedMessage
+                                    id='Apis.Details.LifeCycle.LifeCycleHistory.lifecycle.state.history'
+                                    defaultMessage='LC has changed from {previous} to {post}'
+                                    values={{ previous: entry.previousState, post: entry.postState }}
+                                />
+                            </TableCell>
+                            <TableCell>{moment(entry.updatedTime).fromNow()}</TableCell>
+                        </TableRow>
+                    ))}
                 </TableBody>
             </Table>
         </Paper>

@@ -85,8 +85,9 @@ function AddParameter(props) {
     }, []);
 
     let isParameterExist = false;
-    const isParameterExistValue = operation.parameters && operation.parameters.map(operations =>
-        (operations.in === newParameter.in && operations.name === newParameter.name));
+    const isParameterExistValue = operation.parameters && operation.parameters.map(
+        (operations) => (operations.in === newParameter.in && operations.name === newParameter.name),
+    );
 
     if (isParameterExistValue && isParameterExistValue.includes(true)) {
         isParameterExist = true;
@@ -162,8 +163,8 @@ function AddParameter(props) {
                             );
                         })}
                     </Select>
-                    {isParameterExist ?
-                        (<FormHelperText id='my-helper-text' error>Parameter type already exists</FormHelperText>)
+                    {isParameterExist
+                        ? (<FormHelperText id='my-helper-text' error>Parameter type already exists</FormHelperText>)
                         : (<FormHelperText id='my-helper-text'>Select the parameter type</FormHelperText>) }
 
                 </FormControl>
@@ -175,8 +176,8 @@ function AddParameter(props) {
                     name='name'
                     value={newParameter.name}
                     onChange={({ target: { name, value } }) => newParameterDispatcher({ type: name, value })}
-                    helperText={isParameterExist ? 'Parameter name already exists' :
-                        iff(
+                    helperText={isParameterExist ? 'Parameter name already exists'
+                        : iff(
                             newParameter.in === 'body',
                             'Enter content type', 'Enter parameter name',
                         )}
@@ -195,12 +196,12 @@ function AddParameter(props) {
             </Grid>
             <Grid item xs={4} md={5}>
                 <Tooltip
-                    title={
+                    title={(
                         <FormattedMessage
                             id='Apis.Details.Resources.components.AddParameter.add.tooltip'
                             defaultMessage='Add new parameter'
                         />
-                    }
+                    )}
                     aria-label='AddParameter'
                     placement='bottom'
                     interactive
@@ -220,12 +221,12 @@ function AddParameter(props) {
                 </Tooltip>
                 <sup>
                     <Tooltip
-                        title={
+                        title={(
                             <FormattedMessage
                                 id='Apis.Details.Resources.components.AddParameter.clear.inputs.tooltip'
                                 defaultMessage='Clear inputs'
                             />
-                        }
+                        )}
                         aria-label='clear-inputs'
                         placement='bottom'
                         interactive

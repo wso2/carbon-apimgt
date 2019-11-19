@@ -25,7 +25,7 @@ import Listing from './Listing/Listing';
 
 
 const Details = lazy(() => import('./Details/index' /* webpackChunkName: "DeferredDetails" */));
-const DeferredDetails = props => (
+const DeferredDetails = (props) => (
     <Suspense fallback={<Progress message='Loading Details component ...' />}>
         <Details {...props} />
     </Suspense>
@@ -37,13 +37,23 @@ const DeferredDetails = props => (
 const Apis = () => {
     return (
         <Switch>
-            <Route exact path='/apis' key={Date.now()} render={props => <Listing {...props} isAPIProduct={false} />} />
-            <Route exact path='/api-products' key={Date.now()} render={props => <Listing {...props} isAPIProduct />} />
-            <Route path='/apis/search' render={props => <Listing {...props} isAPIProduct={false} />} />
+            <Route
+                exact
+                path='/apis'
+                key={Date.now()}
+                render={(props) => <Listing {...props} isAPIProduct={false} />}
+            />
+            <Route
+                exact
+                path='/api-products'
+                key={Date.now()}
+                render={(props) => <Listing {...props} isAPIProduct />}
+            />
+            <Route path='/apis/search' render={(props) => <Listing {...props} isAPIProduct={false} />} />
             <Route path='/apis/create' component={APICreateRoutes} />
             <Route path='/api-products/create' component={APICreateRoutes} />
-            <Route path='/apis/:apiUUID/' render={props => <DeferredDetails {...props} isAPIProduct={false} />} />
-            <Route path='/api-products/:apiProdUUID/' render={props => <DeferredDetails {...props} isAPIProduct />} />
+            <Route path='/apis/:apiUUID/' render={(props) => <DeferredDetails {...props} isAPIProduct={false} />} />
+            <Route path='/api-products/:apiProdUUID/' render={(props) => <DeferredDetails {...props} isAPIProduct />} />
         </Switch>
     );
 };

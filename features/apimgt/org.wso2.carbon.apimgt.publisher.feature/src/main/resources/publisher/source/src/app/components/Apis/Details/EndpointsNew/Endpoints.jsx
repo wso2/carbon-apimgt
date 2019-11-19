@@ -26,7 +26,7 @@ import { Link } from 'react-router-dom';
 import EndpointOverview from './EndpointOverview';
 import ApiContext from '../components/ApiContext';
 
-const styles = theme => ({
+const styles = (theme) => ({
     endpointTypesWrapper: {
         display: 'flex',
         alignItems: 'center',
@@ -64,7 +64,7 @@ function Endpoints(props) {
     };
 
     return (
-        <React.Fragment>
+        <>
             <Typography variant='h4' gutterBottom>
                 <FormattedMessage
                     id='Apis.Details.EndpointsNew.Endpoints.endpoints.header'
@@ -110,9 +110,10 @@ function Endpoints(props) {
                                 </Link>
                             </Grid>
                         </Grid>
-                    </div>)}
+                    </div>
+                )}
             </ApiContext.Consumer>
-        </React.Fragment>
+        </>
     );
 }
 

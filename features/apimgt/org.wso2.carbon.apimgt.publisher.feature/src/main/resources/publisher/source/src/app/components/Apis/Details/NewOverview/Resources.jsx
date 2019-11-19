@@ -112,7 +112,8 @@ class Resources extends React.Component {
                         id='Apis.Details.NewOverview.Resources.resource.not.found'
                         defaultMessage='resource not found...'
                     />
-                </div>);
+                </div>
+            );
         }
         if (!paths) {
             return (
@@ -121,11 +122,12 @@ class Resources extends React.Component {
                         id='Apis.Details.NewOverview.Resources.loading'
                         defaultMessage='loading...'
                     />
-                </div>);
+                </div>
+            );
         }
         const { classes, parentClasses, api } = this.props;
         return (
-            <React.Fragment>
+            <>
                 <div className={parentClasses.titleWrapper}>
                     { api.type === 'GraphQL' ? (
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
@@ -133,8 +135,9 @@ class Resources extends React.Component {
                                 id='Apis.Details.NewOverview.Operations.operations'
                                 defaultMessage='Operation'
                             />
-                        </Typography>) :
-                        (
+                        </Typography>
+                    )
+                        : (
                             <Typography variant='h5' component='h3' className={parentClasses.title}>
                                 <FormattedMessage
                                     id='Apis.Details.NewOverview.Resources.resources'
@@ -153,8 +156,8 @@ class Resources extends React.Component {
                                         {key}
                                     </Typography>
                                     {Object.keys(path).map((innerKey) => {
-                                        return CONSTS.HTTP_METHODS.includes(innerKey) ?
-                                            <RenderMethod method={innerKey} /> : null;
+                                        return CONSTS.HTTP_METHODS.includes(innerKey)
+                                            ? <RenderMethod method={innerKey} /> : null;
                                     })}
                                 </div>
                             );
@@ -175,7 +178,7 @@ class Resources extends React.Component {
                         </Typography>
                     </Link>
                 </Box>
-            </React.Fragment>
+            </>
         );
     }
 }

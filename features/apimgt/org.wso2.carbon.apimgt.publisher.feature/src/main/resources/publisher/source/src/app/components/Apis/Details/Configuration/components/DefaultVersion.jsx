@@ -59,8 +59,7 @@ export default function DefaultVersion(props) {
                                 target: { value },
                             }) => configDispatcher({
                                 action: 'isDefaultVersion', value: value === 'true',
-                            })
-                            }
+                            })}
                             style={{ display: 'flow-root' }}
                         >
                             <FormControlLabel
@@ -96,9 +95,9 @@ export default function DefaultVersion(props) {
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.defaultversion.tooltip'
                                 defaultMessage={
-                                    'Indicates if this is the default version of the API. If an ' +
-                                    'API is invoked without specifying a version, the API Gateway will ' +
-                                    'route the request to the default version of the API.'
+                                    'Indicates if this is the default version of the API. If an '
+                                    + 'API is invoked without specifying a version, the API Gateway will '
+                                    + 'route the request to the default version of the API.'
                                 }
                             />
                         )}

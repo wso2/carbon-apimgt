@@ -1,6 +1,6 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import { injectIntl, } from 'react-intl';
+import { injectIntl } from 'react-intl';
 
 const styles = theme => ({
     root: {
@@ -13,7 +13,7 @@ const waitingForApproval = (props) => {
         classes, keyState, states, intl,
     } = props;
     let message = intl.formatMessage({
-        defaultMessage: 'A request to register this application has been sent.',
+        defaultMessage: 'A request to register this application has been sent and is pending approval.',
         id: 'Shared.AppsAndKeys.WaitingForApproval.msg.ok',
     });
     if (keyState === states.REJECTED) {

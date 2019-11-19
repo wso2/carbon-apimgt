@@ -24,12 +24,15 @@ class ApiProgress extends React.Component {
         this.handleResourceIconDisplay = this.handleResourceIconDisplay.bind(this);
         this.handleTiersIconDisplay = this.handleTiersIconDisplay.bind(this);
     }
+
     handleResourceIconDisplay = () => {
         return this.props.resources === 'true' ? 'fw fw-resource' : 'fw fw-resource icon-white';
     };
+
     handleTiersIconDisplay = () => {
         return this.props.tiers === 'true' ? 'fw fw-throttling-policy' : 'fw fw-throttling-policy icon-white';
     };
+
     render() {
         return (
             <div>

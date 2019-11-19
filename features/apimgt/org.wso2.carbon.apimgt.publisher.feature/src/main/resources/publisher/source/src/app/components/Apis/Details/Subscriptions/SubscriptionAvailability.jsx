@@ -30,36 +30,36 @@ import TenantAutocomplete from 'AppComponents/Apis/Details/Subscriptions/TenantA
 import { isRestricted } from 'AppData/AuthManager';
 
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         display: 'flex',
         flexWrap: 'wrap',
     },
     formControl: {
-        margin: theme.spacing.unit * 1,
+        margin: theme.spacing(1),
         minWidth: 400,
     },
     textControl: {
-        margin: theme.spacing.unit * 1,
+        margin: theme.spacing(1),
         minWidth: 300,
     },
     selectEmpty: {
         marginTop: theme.spacing(2),
     },
     subscriptionAvailabilityPaper: {
-        marginTop: theme.spacing.unit * 2,
-        paddingLeft: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
+        paddingLeft: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
     },
     grid: {
         display: 'flex',
-        margin: theme.spacing.unit * 1.25,
+        margin: theme.spacing(1.25),
     },
     gridLabel: {
-        marginTop: theme.spacing.unit * 3.5,
+        marginTop: theme.spacing(3.5),
     },
     saveButton: {
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
     },
     heading: {
         marginTop: theme.spacing(3),
@@ -184,13 +184,13 @@ export default function SimpleSelect(props) {
                             </FormControl>
                         </Grid>
                         {isSpecificTenants ? (
-                            <Grid item xs={8} className={classes.tenantsList} >
+                            <Grid item xs={8} className={classes.tenantsList}>
                                 <TenantAutocomplete setTenantList={setTenantList} tenantList={tenantList} api={api} />
                             </Grid>
                         ) : <Grid item xs={8} />}
                     </Grid>
                 </form>
-            </Paper >
+            </Paper>
         </Grid>
     );
 }
@@ -202,4 +202,3 @@ SimpleSelect.propTypes = {
     setTenantList: PropTypes.func.isRequired,
     tenantList: PropTypes.shape([]).isRequired,
 };
-

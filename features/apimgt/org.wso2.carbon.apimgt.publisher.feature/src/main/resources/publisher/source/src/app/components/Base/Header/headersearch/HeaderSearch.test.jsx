@@ -38,7 +38,7 @@ jest.mock('history', () => {
     mockedPush.push = jest.fn();
     return {
         ...originalHistory,
-        createMemoryHistory: jest.fn(props => mockedPush),
+        createMemoryHistory: jest.fn((props) => mockedPush),
     };
 });
 
@@ -108,8 +108,8 @@ describe('Publisher <HeaderSearch> component tests', () => {
         const autoSuggestProps = wrapper.find(Autosuggest).props();
         const firstSuggestion = autoSuggestProps.suggestions[0];
         autoSuggestProps.onSuggestionSelected({ key: 'Enter' }, { suggestion: firstSuggestion });
-        const expectedPath = firstSuggestion.type === 'API' ? `/apis/${firstSuggestion.id}/overview` :
-            `/apis/${firstSuggestion.apiUUID}/documents/${firstSuggestion.id}/details`;
+        const expectedPath = firstSuggestion.type === 'API' ? `/apis/${firstSuggestion.id}/overview`
+            : `/apis/${firstSuggestion.apiUUID}/documents/${firstSuggestion.id}/details`;
         expect(wrapper.find('HeaderSearch').props().history.push.mock.calls[0][0]).toEqual(expectedPath);
     });
     test('Search results needs to be wiped out when search query is erased', async () => {

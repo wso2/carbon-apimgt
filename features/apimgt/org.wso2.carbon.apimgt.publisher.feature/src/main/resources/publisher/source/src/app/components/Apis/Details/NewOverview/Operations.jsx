@@ -30,7 +30,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 import ApiContext from '../components/ApiContext';
 
-const styles = theme => ({
+const styles = (theme) => ({
     contentWrapper: {
         marginTop: theme.spacing(2),
         maxHeight: '250px',
@@ -45,8 +45,8 @@ const styles = theme => ({
 function RenderMethodBase(props) {
     const { theme, method } = props;
     const methodLower = method.toLowerCase();
-    let chipColor = theme.custom.operationChipColor ?
-        theme.custom.operationChipColor[methodLower]
+    let chipColor = theme.custom.operationChipColor
+        ? theme.custom.operationChipColor[methodLower]
         : null;
     let chipTextColor = '#000000';
     if (!chipColor) {
@@ -55,12 +55,14 @@ function RenderMethodBase(props) {
     } else {
         chipTextColor = theme.palette.getContrastText(theme.custom.operationChipColor[methodLower]);
     }
-    return (<Chip
-        label={method}
-        style={{
-            backgroundColor: chipColor, color: chipTextColor, height: 20, fontSize: 9, width: 95,
-        }}
-    />);
+    return (
+        <Chip
+            label={method}
+            style={{
+                backgroundColor: chipColor, color: chipTextColor, height: 20, fontSize: 9, width: 95,
+            }}
+        />
+    );
 }
 
 RenderMethodBase.propTypes = {
@@ -79,7 +81,7 @@ function Operations(props) {
     return (
         <ApiContext.Consumer>
             {({ api }) => (
-                <React.Fragment>
+                <>
                     <div className={parentClasses.titleWrapper}>
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
                             <FormattedMessage
@@ -93,7 +95,7 @@ function Operations(props) {
                             <Table style={{ padding: 20 }}>
                                 {api.operations
                             && api.operations.length !== 0
-                            && api.operations.map(item => (
+                            && api.operations.map((item) => (
                                 <TableRow style={{ borderStyle: 'hidden' }}>
                                     <TableCell style={{ padding: 8 }}>
                                         <Typography className={parentClasses.heading} component='p' variant='body1'>
@@ -124,7 +126,7 @@ function Operations(props) {
                             </Link>
                         </Box>
                     </div>
-                </React.Fragment>
+                </>
             )}
         </ApiContext.Consumer>
     );
@@ -136,4 +138,3 @@ Operations.propTypes = {
 };
 
 export default withStyles(styles)(Operations);
-

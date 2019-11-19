@@ -27,9 +27,11 @@ import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import { FormattedMessage, injectIntl } from 'react-intl';
 
-import { renderInput, renderSuggestion, getSuggestions, getSuggestionValue, buildSearchQuery } from './SearchUtils';
+import {
+    renderInput, renderSuggestion, getSuggestions, getSuggestionValue, buildSearchQuery,
+} from './SearchUtils';
 
-const styles = theme => ({
+const styles = (theme) => ({
     container: {
         flexGrow: 0,
     },
@@ -91,6 +93,8 @@ const styles = theme => ({
  * @extends {React.Component}
  */
 class HeaderSearch extends React.Component {
+    suggestionSelected = false;
+
     /**
      *Creates an instance of HeaderSearch.
      * @param {Object} props @ignore
@@ -111,17 +115,19 @@ class HeaderSearch extends React.Component {
         this.renderSuggestionsContainer = this.renderSuggestionsContainer.bind(this);
         this.onSuggestionSelected = this.onSuggestionSelected.bind(this);
     }
+
     /**
      * To provide accessibility for Enter key upon suggestion selection
      * @param {React.SyntheticEvent} event event
      * @param {Object} suggestion This is either API object or document coming from search API call
      */
     onSuggestionSelected(event, { suggestion }) {
+        const { history } = this.props;
         this.suggestionSelected = true;
         if (event.key === 'Enter') {
-            const path = suggestion.type === 'API' ? `/apis/${suggestion.id}/overview` :
-                `/apis/${suggestion.apiUUID}/documents/${suggestion.id}/details`;
-            this.props.history.push(path);
+            const path = suggestion.type === 'API' ? `/apis/${suggestion.id}/overview`
+                : `/apis/${suggestion.apiUUID}/documents/${suggestion.id}/details`;
+            history.push(path);
         }
     }
 
@@ -137,7 +143,6 @@ class HeaderSearch extends React.Component {
         this.suggestionSelected = false;
     }
 
-    suggestionSelected = false;
 
     /**
      * On change search input element
@@ -175,6 +180,7 @@ class HeaderSearch extends React.Component {
             suggestions: [],
         });
     }
+
     /**
      *
      * When search input is focus out (Blur), Clear the input text to accept brand new search
@@ -204,6 +210,8 @@ class HeaderSearch extends React.Component {
         return isLoading ? (
             null
         ) : (
+            // Disabling the eslint rule because the container props can't know beforehand
+            // eslint-disable-next-line react/jsx-props-no-spreading
             <Paper {...containerProps} square>
                 {children}
             </Paper>
@@ -219,7 +227,7 @@ class HeaderSearch extends React.Component {
     render() {
         const { intl } = this.props;
         const { classes, smSearch } = this.props;
-        const { searchText, isLoading } = this.state;
+        const { searchText, isLoading, suggestions } = this.state;
         let autoFocus = false;
         let responsiveContainer = classes.container;
         if (smSearch) {
@@ -227,7 +235,7 @@ class HeaderSearch extends React.Component {
             responsiveContainer = classes.smContainer;
         }
         return (
-            <React.Fragment>
+            <>
                 <Autosuggest
                     theme={{
                         container: responsiveContainer,
@@ -235,7 +243,7 @@ class HeaderSearch extends React.Component {
                         suggestionsList: classes.suggestionsList,
                         suggestion: classes.suggestion,
                     }}
-                    suggestions={this.state.suggestions}
+                    suggestions={suggestions}
                     renderInputComponent={renderInput}
                     onSuggestionsFetchRequested={this.handleSuggestionsFetchRequested}
                     onSuggestionsClearRequested={this.handleSuggestionsClearRequested}
@@ -263,8 +271,8 @@ class HeaderSearch extends React.Component {
                     classes={{
                         tooltip: classes.InfoToolTip,
                     }}
-                    title={
-                        <React.Fragment>
+                    title={(
+                        <>
                             <FormattedMessage
                                 id='Base.Header.headersearch.HeaderSearch.tooltip.title'
                                 defaultMessage='Search Options for APIs and APIProducts'
@@ -331,15 +339,15 @@ class HeaderSearch extends React.Component {
                                     />
                                 </li>
                             </ol>
-                        </React.Fragment>
-                    }
+                        </>
+                    )}
                 >
                     <IconButton className={classes.infoButton}>
                         <InfoIcon />
                     </IconButton>
                 </Tooltip>
                 <div className={classes.emptyContainer} />
-            </React.Fragment>
+            </>
         );
     }
 }
@@ -361,4 +369,3 @@ HeaderSearch.propTypes = {
 };
 
 export default injectIntl(withRouter(withStyles(styles)(HeaderSearch)));
-

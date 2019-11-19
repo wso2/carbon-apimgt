@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -33,7 +33,7 @@ import { withRouter } from 'react-router';
 import Fade from '@material-ui/core/Fade';
 
 // Icon size reference https://github.com/mui-org/material-ui/blob/master/packages/material-ui/src/Icon/Icon.js#L48
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     xLarge: {
         fontSize: theme.typography.pxToRem(64),
     },
@@ -106,7 +106,7 @@ function Banner(props) {
                     <Grid container justify='flex-end' spacing={1}>
                         <Grid item>
                             {!disableActions && (
-                                <Fragment>
+                                <>
                                     <Button onClick={() => history.goBack()} color='primary'>
                                         <FormattedMessage
                                             id='app.components.Shared.Banner.back'
@@ -116,7 +116,7 @@ function Banner(props) {
                                     <Button onClick={() => window.location.reload()} color='primary'>
                                         Refresh
                                     </Button>
-                                </Fragment>
+                                </>
                             )}
                             {!disableClose && (
                                 <Button onClick={onClose || (() => setIsOpen(false))} color='primary'>
@@ -149,7 +149,7 @@ Banner.propTypes = {
     onClose: PropTypes.func,
     disableActions: PropTypes.bool,
     paperProps: PropTypes.shape({ elevation: PropTypes.number }),
-    history: PropTypes.shape({}).isRequired,
+    history: PropTypes.shape({ goBack: PropTypes.func }).isRequired,
 };
 
 export default withRouter(Banner);

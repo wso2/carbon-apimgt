@@ -22,9 +22,9 @@ import Alerts from 'AppComponents/Apis/Settings/Alerts/Alerts';
 import PropTypes from 'prop-types';
 
 
-const styles = theme => ({
+const styles = (theme) => ({
     settingsRoot: {
-        padding: theme.spacing(),
+        padding: theme.spacing(1),
         width: '100%',
     },
 });

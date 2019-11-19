@@ -35,7 +35,7 @@ import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm'
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import ProductResourcesEditWorkspace from 'AppComponents/Apis/Details/ProductResources/ProductResourcesEditWorkspace';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     Paper: {
         height: '40px',
     },
@@ -70,7 +70,7 @@ export default function ApiProductCreateWrapper(props) {
     const { settings } = useAppContext();
 
     const pageTitle = (
-        <React.Fragment>
+        <>
             <Typography variant='h5'>
                 <FormattedMessage
                     id='Apis.Create.APIProduct.APIProductCreateWrapper.heading'
@@ -81,12 +81,12 @@ export default function ApiProductCreateWrapper(props) {
                 <FormattedMessage
                     id='Apis.Create.APIProduct.APIProductCreateWrapper.sub.heading'
                     defaultMessage={
-                        'Create an API Product by providing a Name, a Context, Resources, ' +
-                        'and Business Plans (optional).'
+                        'Create an API Product by providing a Name, a Context, Resources, '
+                        + 'and Business Plans (optional).'
                     }
                 />
             </Typography>
-        </React.Fragment>
+        </>
     );
     /**
      *
@@ -164,46 +164,44 @@ export default function ApiProductCreateWrapper(props) {
     const steps = getSteps();
 
     const createAPIProduct = () => {
-        {
-            setCreating(true);
-            const {
-                name, context, policies,
-            } = apiInputs;
-            const apiData = {
-                name,
-                context,
-                policies,
-                apis: apiResources,
-            };
-            apiData.gatewayEnvironments = settings.environment.map(env => env.name);
-            apiData.transport = ['http', 'https'];
-            const newAPIProduct = new APIProduct(apiData);
-            newAPIProduct
-                .saveProduct(apiData)
-                .then((apiProduct) => {
-                    Alert.info('API Product created successfully');
-                    history.push(`/api-products/${apiProduct.id}/overview`);
-                })
-                .catch((error) => {
-                    if (error.response) {
-                        Alert.error(error.response.body.description);
-                    } else {
-                        Alert.error('Something went wrong while adding the API Product');
-                    }
-                })
-                .finally(() => setCreating(false));
-        }
+        setCreating(true);
+        const {
+            name, context, policies,
+        } = apiInputs;
+        const apiData = {
+            name,
+            context,
+            policies,
+            apis: apiResources,
+        };
+        apiData.gatewayEnvironments = settings.environment.map((env) => env.name);
+        apiData.transport = ['http', 'https'];
+        const newAPIProduct = new APIProduct(apiData);
+        newAPIProduct
+            .saveProduct(apiData)
+            .then((apiProduct) => {
+                Alert.info('API Product created successfully');
+                history.push(`/api-products/${apiProduct.id}/overview`);
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while adding the API Product');
+                }
+            })
+            .finally(() => setCreating(false));
     };
 
     return (
-        <React.Fragment>
+        <>
             <APICreateProductBase
                 title={pageTitle}
             >
                 <Box>
                     {wizardStep === 0 && (
                         <Stepper alternativeLabel activeStep={0}>
-                            {steps.map(label => (
+                            {steps.map((label) => (
                                 <Step key={label}>
                                     <StepLabel className={classes.alternativeLabel}>{label}</StepLabel>
                                 </Step>
@@ -213,7 +211,7 @@ export default function ApiProductCreateWrapper(props) {
                     )}
                     {wizardStep === 1 && (
                         <Stepper alternativeLabel activeStep={1}>
-                            {steps.map(label => (
+                            {steps.map((label) => (
                                 <Step key={label}>
                                     <StepLabel>{label}</StepLabel>
                                 </Step>
@@ -242,7 +240,7 @@ export default function ApiProductCreateWrapper(props) {
                             />
                         )}
                     </Grid>
-                    { wizardStep === 0 && <Grid item md={1} />}
+                    {wizardStep === 0 && <Grid item md={1} />}
                     <Grid item md={9}>
                         <Grid
                             className={wizardStep === 1 && classes.saveButton}
@@ -253,16 +251,17 @@ export default function ApiProductCreateWrapper(props) {
                             spacing={2}
                         >
                             <Grid item>
-                                {wizardStep === 1 &&
-                                <Button
-                                    onClick={() =>
-                                        setWizardStep(step => step - 1)}
-                                >
-                                    <FormattedMessage
-                                        id='Apis.Create.APIProduct.APIProductCreateWrapper.back'
-                                        defaultMessage='Back'
-                                    />
-                                </Button>}
+                                {wizardStep === 1
+                                    && (
+                                        <Button
+                                            onClick={() => setWizardStep((step) => step - 1)}
+                                        >
+                                            <FormattedMessage
+                                                id='Apis.Create.APIProduct.APIProductCreateWrapper.back'
+                                                defaultMessage='Back'
+                                            />
+                                        </Button>
+                                    )}
                                 {wizardStep === 0 && (
                                     <Link to='/apis/'>
                                         <Button>
@@ -274,7 +273,7 @@ export default function ApiProductCreateWrapper(props) {
                                     </Link>
                                 )}
                             </Grid>
-                            <Grid item >
+                            <Grid item>
                                 {wizardStep === 1 && (
                                     <Button
                                         variant='contained'
@@ -291,7 +290,7 @@ export default function ApiProductCreateWrapper(props) {
                                 )}
                                 {wizardStep === 0 && (
                                     <Button
-                                        onClick={() => setWizardStep(step => step + 1)}
+                                        onClick={() => setWizardStep((step) => step + 1)}
                                         variant='contained'
                                         color='primary'
                                         disabled={!apiInputs.isFormValid}
@@ -307,7 +306,7 @@ export default function ApiProductCreateWrapper(props) {
                     </Grid>
                 </Grid>
             </APICreateProductBase>
-        </React.Fragment>
+        </>
 
     );
 }

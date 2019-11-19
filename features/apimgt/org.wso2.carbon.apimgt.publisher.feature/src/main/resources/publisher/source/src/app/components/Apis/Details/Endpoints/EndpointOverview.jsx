@@ -45,20 +45,20 @@ import GenericEndpoint from './GenericEndpoint';
 import AdvanceEndpointConfig from './AdvancedConfig/AdvanceEndpointConfig';
 import Credentials from './AWSLambda/Credentials.jsx';
 
-const styles = theme => ({
+const styles = (theme) => ({
     listing: {
-        margin: theme.spacing(),
-        padding: theme.spacing(),
+        margin: theme.spacing(1),
+        padding: theme.spacing(1),
     },
     endpointContainer: {
         paddingLeft: theme.spacing(2),
-        padding: theme.spacing(),
+        padding: theme.spacing(1),
     },
     endpointName: {
-        paddingLeft: theme.spacing(),
+        paddingLeft: theme.spacing(1),
         fontSize: '1rem',
-        paddingTop: theme.spacing(),
-        paddingBottom: theme.spacing(),
+        paddingTop: theme.spacing(1),
+        paddingBottom: theme.spacing(1),
     },
     endpointTypesWrapper: {
         padding: theme.spacing(3),
@@ -73,18 +73,18 @@ const styles = theme => ({
         flexDirection: 'row',
     },
     endpointsWrapperLeft: {
-        padding: theme.spacing(),
+        padding: theme.spacing(1),
         borderRight: '#c4c4c4',
         borderRightStyle: 'solid',
         borderRightWidth: 'thin',
     },
     endpointsWrapperRight: {
-        padding: theme.spacing(),
+        padding: theme.spacing(1),
     },
     endpointsTypeSelectWrapper: {
         marginLeft: theme.spacing(2),
         marginRight: theme.spacing(2),
-        padding: theme.spacing(),
+        padding: theme.spacing(1),
         display: 'flex',
         justifyContent: 'space-between',
     },
@@ -92,9 +92,9 @@ const styles = theme => ({
         display: 'flex',
     },
     defaultEndpointWrapper: {
-        paddingLeft: theme.spacing(),
-        paddingRight: theme.spacing(),
-        marginRight: theme.spacing(),
+        paddingLeft: theme.spacing(1),
+        paddingRight: theme.spacing(1),
+        marginRight: theme.spacing(1),
     },
     configDialogHeader: {
         fontWeight: '600',
@@ -132,6 +132,7 @@ function EndpointOverview(props) {
     const { endpointConfig, endpointSecurity } = api;
     const [endpointType, setEndpointType] = useState(endpointTypes[0]);
     const [supportedEnpointTypes, setSupportedEndpointType] = useState([]);
+
     const [epConfig, setEpConfig] = useState(endpointConfig);
     const [endpointSecurityInfo, setEndpointSecurityInfo] = useState(null);
     const [advanceConfigOptions, setAdvancedConfigOptions] = useState({
@@ -156,8 +157,8 @@ function EndpointOverview(props) {
         const type = apiObject.endpointConfig && apiObject.endpointConfig.endpoint_type;
         if (apiObject.endpointImplementationType === 'INLINE') {
             return endpointTypes[4];
-        } else if (apiObject.endpointImplementationType === 'ENDPOINT' &&
-            apiObject.endpointConfig.implementation_status === 'prototyped') {
+        } else if (apiObject.endpointImplementationType === 'ENDPOINT'
+            && apiObject.endpointConfig.implementation_status === 'prototyped') {
             return endpointTypes[3];
         } else if (type === 'http') {
             return endpointTypes[0];
@@ -168,18 +169,18 @@ function EndpointOverview(props) {
         } else if (type === 'awslambda') {
             return endpointTypes[5];
         } else {
-            const availableEndpoints = (endpointConfig.production_endpoints && endpointConfig.production_endpoints) ||
-                (endpointConfig.sandbox_endpoints && endpointConfig.sandbox_endpoints);
+            const availableEndpoints = (endpointConfig.production_endpoints && endpointConfig.production_endpoints)
+                || (endpointConfig.sandbox_endpoints && endpointConfig.sandbox_endpoints);
             // Handle the all endpoints de-select condition... Rollback to http.
             if (!availableEndpoints) {
                 return endpointTypes[0];
             }
             if (Array.isArray(availableEndpoints)) {
-                return availableEndpoints[0].endpoint_type !== undefined ?
-                    endpointTypes[2] : endpointTypes[0];
+                return availableEndpoints[0].endpoint_type !== undefined
+                    ? endpointTypes[2] : endpointTypes[0];
             }
-            return availableEndpoints.endpoint_type !== undefined ?
-                endpointTypes[2] : endpointTypes[0];
+            return availableEndpoints.endpoint_type !== undefined
+                ? endpointTypes[2] : endpointTypes[0];
         }
     };
 
@@ -227,8 +228,8 @@ function EndpointOverview(props) {
 
     const getEndpoints = (type) => {
         if (epConfig[type]) {
-            return epConfig[type].length > 0 ?
-                epConfig[type][0].url : epConfig[type].url;
+            return epConfig[type].length > 0
+                ? epConfig[type][0].url : epConfig[type].url;
         }
         return '';
     };
@@ -412,8 +413,8 @@ function EndpointOverview(props) {
      * Handles the endpoint security toggle action.
      * */
     const handleToggleEndpointSecurity = () => {
-        const tmpSecurityInfo = endpointSecurityInfo === null ?
-            { type: 'BASIC', username: null, password: null } : null;
+        const tmpSecurityInfo = endpointSecurityInfo === null
+            ? { type: 'BASIC', username: null, password: null } : null;
         setEndpointSecurityInfo(tmpSecurityInfo);
         endpointsDispatcher({ action: 'endpointSecurity', value: tmpSecurityInfo });
     };
@@ -486,8 +487,9 @@ function EndpointOverview(props) {
      * */
     const saveAdvanceConfig = (advanceConfig) => {
         const config = cloneDeep(epConfig);
-        const endpointConfigProperty =
-            getEndpointTypeProperty(advanceConfigOptions.type, advanceConfigOptions.category);
+        const endpointConfigProperty = getEndpointTypeProperty(
+            advanceConfigOptions.type, advanceConfigOptions.category,
+        );
         const selectedEndpoints = config[endpointConfigProperty];
         if (Array.isArray(selectedEndpoints)) {
             if (advanceConfigOptions.type === 'failover') {
@@ -520,270 +522,311 @@ function EndpointOverview(props) {
         updateSwagger({ ...swaggerDef, paths });
     };
 
+
+    /**
+     *
+     *
+     * @param {*} event
+     */
+    function epCategoryOnChangeHandler(event) {
+        handleOnChangeEndpointCategoryChange('prod', event);
+    }
+
     return (
         <div className={classes.overviewWrapper}>
-            {api.type === 'WS' ?
-                <Paper className={classes.endpointContainer}>
-                    <Typography gutterBottom>
-                        <FormattedMessage
-                            id='Apis.Details.Endpoints.EndpointOverview.websoket.endpoint'
-                            defaultMessage='Websocket Endpoint'
+            {api.type === 'WS'
+                ? (
+                    <Paper className={classes.endpointContainer}>
+                        <Typography gutterBottom>
+                            <FormattedMessage
+                                id='Apis.Details.Endpoints.EndpointOverview.websoket.endpoint'
+                                defaultMessage='Websocket Endpoint'
+                            />
+                        </Typography>
+                        <GenericEndpoint
+                            autoFocus
+                            name='Websocket Endpoint'
+                            className={classes.defaultEndpointWrapper}
+                            endpointURL={getEndpoints('production_endpoints')}
+                            type=''
+                            index={0}
+                            category='production_endpoints'
+                            editEndpoint={editEndpoint}
+                            setAdvancedConfigOpen={toggleAdvanceConfig}
+                            apiId={api.id}
                         />
-                    </Typography>
-                    <GenericEndpoint
-                        autoFocus
-                        name='Websocket Endpoint'
-                        className={classes.defaultEndpointWrapper}
-                        endpointURL={getEndpoints('production_endpoints')}
-                        type=''
-                        index={0}
-                        category='production_endpoints'
-                        editEndpoint={editEndpoint}
-                        setAdvancedConfigOpen={toggleAdvanceConfig}
-                        apiId={api.id}
-                    />
-                </Paper>
-                :
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <FormControl component='fieldset' className={classes.formControl}>
-                            <RadioGroup
-                                aria-label='EndpointType'
-                                name='endpointType'
-                                className={classes.radioGroup}
-                                value={endpointType.key}
-                                onChange={handleEndpointTypeSelect}
-                            >
-                                {supportedEnpointTypes.map((endpoint) => {
-                                    if (api.lifeCycleStatus === 'CREATED') {
-                                        return (
-                                            <FormControlLabel
-                                                value={endpoint.key}
-                                                control={
-                                                    <Radio
-                                                        disabled={(isRestricted(['apim:api_create'], api))}
-                                                        color='primary'
-                                                    />
-                                                }
-                                                label={endpoint.value}
-                                            />);
-                                    } else if (api.lifeCycleStatus === 'PROTOTYPED') {
-                                        if (endpoint.key === 'prototyped' || endpoint.key === 'INLINE') {
+                    </Paper>
+                )
+                : (
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <FormControl component='fieldset' className={classes.formControl}>
+                                <RadioGroup
+                                    aria-label='EndpointType'
+                                    name='endpointType'
+                                    className={classes.radioGroup}
+                                    value={endpointType.key}
+                                    onChange={handleEndpointTypeSelect}
+                                >
+                                    {supportedEnpointTypes.map((endpoint) => {
+                                        if (api.lifeCycleStatus === 'CREATED') {
                                             return (
                                                 <FormControlLabel
                                                     value={endpoint.key}
-                                                    control={
+                                                    control={(
                                                         <Radio
                                                             disabled={(isRestricted(['apim:api_create'], api))}
                                                             color='primary'
                                                         />
-                                                    }
+                                                    )}
                                                     label={endpoint.value}
-                                                />);
-                                        }
-                                    } else if (endpoint.key !== 'prototyped' && endpoint.key !== 'INLINE') {
-                                        return (
-                                            <FormControlLabel
-                                                value={endpoint.key}
-                                                control={
-                                                    <Radio
-                                                        disabled={(isRestricted(['apim:api_create'], api))}
-                                                        color='primary'
-                                                    />
-                                                }
-                                                label={endpoint.value}
-                                            />);
-                                    }
-                                    return <div />;
-                                })}
-                            </RadioGroup>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12}>
-                        {endpointType.key === 'INLINE' ?
-                            <InlineEndpoints paths={swaggerDef.paths} updatePaths={updatePaths} /> :
-                            <Paper className={classes.endpointContainer}>
-                                {endpointType.key === 'awslambda' ?
-                                    <Credentials
-                                        apiId={api.id}
-                                        endpointConfig={endpointConfig}
-                                        endpointsDispatcher={endpointsDispatcher}
-                                        awsAccessMethod={awsAccessMethod}
-                                        setAwsAccessMethod={setAwsAccessMethod}
-                                    />
-                                    :
-                                    <div>
-                                        {endpointType.key === 'default' ?
-                                            <InlineMessage>
-                                                <div className={classes.contentWrapper}>
-                                                    <Typography component='p' className={classes.content}>
-                                                        <FormattedMessage
-                                                            id={'Apis.Details.Endpoints.EndpointOverview.upload' +
-                                                            '.mediation.message'}
-                                                            defaultMessage={'Please upload a mediation sequence file ' +
-                                                            'to Message Mediation Policies, which sets the endpoints.'}
-                                                        />
-                                                        <IconButton
-                                                            onClick={saveAndRedirect}
-                                                        >
-                                                            <LaunchIcon
-                                                                style={{ marginLeft: '2px' }}
-                                                                fontSize='small'
-                                                                color='primary'
-                                                            />
-                                                        </IconButton>
-                                                    </Typography>
-                                                </div>
-                                            </InlineMessage> :
-                                            <React.Fragment>
-                                                {endpointType.key === 'prototyped' ?
-                                                    <Typography>
-                                                        <FormattedMessage
-                                                            id={'Apis.Details.Endpoints.EndpointOverview.prototype' +
-                                                            '.endpoint.label'}
-                                                            defaultMessage='Prototype Endpoint'
-                                                        />
-                                                    </Typography> :
-                                                    <FormControlLabel
-                                                        control={
-                                                            <Checkbox
-                                                                checked={endpointCategory.prod}
-                                                                value='prod'
-                                                                color='primary'
-                                                                onChange={event =>
-                                                                    handleOnChangeEndpointCategoryChange('prod', event)}
-                                                            />
-                                                        }
-                                                        label={
-                                                            <Typography>
-                                                                <FormattedMessage
-                                                                    id={'Apis.Details.Endpoints.EndpointOverview' +
-                                                                    '.production.endpoint.label'}
-                                                                    defaultMessage='Production Endpoint'
-                                                                />
-                                                            </Typography>}
-                                                    />
-                                                }
-                                                <Collapse in={endpointCategory.prod && endpointType.key !== 'default'}>
-                                                    <GenericEndpoint
-                                                        autoFocus
-                                                        name={endpointType.key === 'prototyped' ?
-                                                            <FormattedMessage
-                                                                id={'Apis.Details.Endpoints.EndpointOverview' +
-                                                                '.prototype.endpoint.header'}
-                                                                defaultMessage='Prototype Endpoint'
-                                                            /> : <FormattedMessage
-                                                                id={'Apis.Details.Endpoints.EndpointOverview' +
-                                                                '.production.endpoint.header'}
-                                                                defaultMessage='Production Endpoint'
-                                                            />}
-                                                        className={classes.defaultEndpointWrapper}
-                                                        endpointURL={getEndpoints('production_endpoints')}
-                                                        type=''
-                                                        index={0}
-                                                        category='production_endpoints'
-                                                        editEndpoint={editEndpoint}
-                                                        setAdvancedConfigOpen={toggleAdvanceConfig}
-                                                        apiId={api.id}
-                                                    />
-                                                </Collapse>
-                                            </React.Fragment>}
-                                        {endpointType.key === 'prototyped' || endpointType.key === 'default' ?
-                                            <div /> :
-                                            <React.Fragment>
-                                                <FormControlLabel
-                                                    control={
-                                                        <Checkbox
-                                                            disabled={endpointType.key === 'default'}
-                                                            checked={endpointCategory.sandbox}
-                                                            value='sandbox'
-                                                            color='primary'
-                                                            onChange={event =>
-                                                                handleOnChangeEndpointCategoryChange('sandbox', event)}
-                                                        />
-                                                    }
-                                                    label={
-                                                        <FormattedMessage
-                                                            id={'Apis.Details.Endpoints.EndpointOverview.sandbox' +
-                                                            '.endpoint'}
-                                                            defaultMessage='Sandbox Endpoint'
-                                                        />
-                                                    }
                                                 />
-                                                <Collapse in={
-                                                    endpointCategory.sandbox &&
-                                                    endpointType.key !== 'default'
-                                                }
-                                                >
-                                                    <GenericEndpoint
-                                                        autoFocus
-                                                        name='Sandbox Endpoint'
-                                                        className={classes.defaultEndpointWrapper}
-                                                        endpointURL={getEndpoints('sandbox_endpoints')}
-                                                        type=''
-                                                        index={0}
-                                                        category='sandbox_endpoints'
-                                                        editEndpoint={editEndpoint}
-                                                        setAdvancedConfigOpen={toggleAdvanceConfig}
-                                                        apiId={api.id}
+                                            );
+                                        } else if (api.lifeCycleStatus === 'PROTOTYPED') {
+                                            if (endpoint.key === 'prototyped' || endpoint.key === 'INLINE') {
+                                                return (
+                                                    <FormControlLabel
+                                                        value={endpoint.key}
+                                                        control={(
+                                                            <Radio
+                                                                disabled={(isRestricted(['apim:api_create'], api))}
+                                                                color='primary'
+                                                            />
+                                                        )}
+                                                        label={endpoint.value}
                                                     />
-                                                </Collapse>
+                                                );
+                                            }
+                                        } else if (endpoint.key !== 'prototyped' && endpoint.key !== 'INLINE') {
+                                            return (
+                                                <FormControlLabel
+                                                    value={endpoint.key}
+                                                    control={(
+                                                        <Radio
+                                                            disabled={(isRestricted(['apim:api_create'], api))}
+                                                            color='primary'
+                                                        />
+                                                    )}
+                                                    label={endpoint.value}
+                                                />
+                                            );
+                                        }
+                                        return <div />;
+                                    })}
+                                </RadioGroup>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12}>
+                            {endpointType.key === 'INLINE'
+                                ? <InlineEndpoints paths={swaggerDef.paths} updatePaths={updatePaths} />
+                                : (
+                                    <Paper className={classes.endpointContainer}>
+                                        {endpointType.key === 'awslambda' ?
+                                            <Credentials
+                                                apiId={api.id}
+                                                endpointConfig={endpointConfig}
+                                                endpointsDispatcher={endpointsDispatcher}
+                                                awsAccessMethod={awsAccessMethod}
+                                                setAwsAccessMethod={setAwsAccessMethod}
+                                            />
+                                            :
+                                            <React.Fragment>
+                                                {endpointType.key === 'default'
+                                                    ? (
+                                                        <InlineMessage>
+                                                            <div className={classes.contentWrapper}>
+                                                                <Typography component='p' className={classes.content}>
+                                                                    <FormattedMessage
+                                                                        id={'Apis.Details.Endpoints.EndpointOverview.upload'
+                                                            + '.mediation.message'}
+                                                                        defaultMessage={
+                                                                            'Please upload a mediation sequence file to '
+                                                            + 'Message Mediation Policies, which sets the endpoints.'
+                                                                        }
+                                                                    />
+                                                                    <IconButton
+                                                                        onClick={saveAndRedirect}
+                                                                    >
+                                                                        <LaunchIcon
+                                                                            style={{ marginLeft: '2px' }}
+                                                                            fontSize='small'
+                                                                            color='primary'
+                                                                        />
+                                                                    </IconButton>
+                                                                </Typography>
+                                                            </div>
+                                                        </InlineMessage>
+                                                    )
+                                                    : (
+                                                        <>
+                                                            {endpointType.key === 'prototyped'
+                                                                ? (
+                                                                    <Typography>
+                                                                        <FormattedMessage
+                                                                            id={'Apis.Details.Endpoints.'
+                                                                            + 'EndpointOverview.prototype.endpoint'
+                                                                            + '.label'}
+                                                                            defaultMessage='Prototype Endpoint'
+                                                                        />
+                                                                    </Typography>
+                                                                )
+                                                                : (
+                                                                    <FormControlLabel
+                                                                        control={(
+                                                                            <Checkbox
+                                                                                checked={endpointCategory.prod}
+                                                                                value='prod'
+                                                                                color='primary'
+                                                                                onChange={epCategoryOnChangeHandler}
+                                                                            />
+                                                                        )}
+                                                                        label={(
+                                                                            <Typography>
+                                                                                <FormattedMessage
+                                                                                    id={'Apis.Details.'
+                                                                                    + 'Endpoints.EndpointOverview'
+                                                                                    + '.production.endpoint.label'}
+                                                                                    defaultMessage='Production Endpoint'
+                                                                                />
+                                                                            </Typography>
+                                                                        )}
+                                                                    />
+                                                                )}
+                                                            <Collapse in={endpointCategory.prod
+                                                                && endpointType.key !== 'default'}
+                                                            >
+                                                                <GenericEndpoint
+                                                                    autoFocus
+                                                                    name={endpointType.key === 'prototyped'
+                                                                        ? (
+                                                                            <FormattedMessage
+                                                                                id={'Apis.Details.Endpoints.'
+                                                                                + 'EndpointOverview.prototype'
+                                                                                + '.endpoint.header'}
+                                                                                defaultMessage='Prototype Endpoint'
+                                                                            />
+                                                                        ) : (
+                                                                            <FormattedMessage
+                                                                                id={'Apis.Details.Endpoints.'
+                                                                                + 'EndpointOverview.production'
+                                                                                + '.endpoint.header'}
+                                                                                defaultMessage='Production Endpoint'
+                                                                            />
+                                                                        )}
+                                                                    className={classes.defaultEndpointWrapper}
+                                                                    endpointURL={getEndpoints('production_endpoints')}
+                                                                    type=''
+                                                                    index={0}
+                                                                    category='production_endpoints'
+                                                                    editEndpoint={editEndpoint}
+                                                                    setAdvancedConfigOpen={toggleAdvanceConfig}
+                                                                    apiId={api.id}
+                                                                />
+                                                            </Collapse>
+                                                        </>
+                                                    )}
+                                                {endpointType.key === 'prototyped' || endpointType.key === 'default'
+                                                    ? <div />
+                                                    : (
+                                                        <>
+                                                            <FormControlLabel
+                                                                control={(
+                                                                    <Checkbox
+                                                                        disabled={endpointType.key === 'default'}
+                                                                        checked={endpointCategory.sandbox}
+                                                                        value='sandbox'
+                                                                        color='primary'
+                                                                        onChange={(event) => (
+                                                                            handleOnChangeEndpointCategoryChange(
+                                                                                'sandbox', event,
+                                                                            ))}
+                                                                    />
+                                                                )}
+                                                                label={(
+                                                                    <FormattedMessage
+                                                                        id={'Apis.Details.Endpoints.'
+                                                                        + 'EndpointOverview.sandbox.endpoint'}
+                                                                        defaultMessage='Sandbox Endpoint'
+                                                                    />
+                                                                )}
+                                                            />
+                                                            <Collapse in={endpointCategory.sandbox
+                                                                && endpointType.key !== 'default'}
+                                                            >
+                                                                <GenericEndpoint
+                                                                    autoFocus
+                                                                    name='Sandbox Endpoint'
+                                                                    className={classes.defaultEndpointWrapper}
+                                                                    endpointURL={getEndpoints('sandbox_endpoints')}
+                                                                    type=''
+                                                                    index={0}
+                                                                    category='sandbox_endpoints'
+                                                                    editEndpoint={editEndpoint}
+                                                                    setAdvancedConfigOpen={toggleAdvanceConfig}
+                                                                    apiId={api.id}
+                                                                />
+                                                            </Collapse>
+                                                        </>
+                                                    )}
                                             </React.Fragment>
                                         }
-                                    </div>
-                                }
-                            </Paper>
+                                    </Paper>
+                                )}
+                        </Grid>
+                        {endpointType.key === 'INLINE' || endpointType.key === 'prototyped' || endpointType.key === 'awslambda'
+                            ? <div />
+                            : (
+                                <Grid item xs={12}>
+                                    <Typography variant='h4' align='left' className={classes.titleWrapper} gutterBottom>
+                                        <FormattedMessage
+                                            id='Apis.Details.Endpoints.EndpointOverview.general.config.header'
+                                            defaultMessage='General Endpoint Configurations'
+                                        />
+                                    </Typography>
+                                    <GeneralConfiguration
+                                        epConfig={(cloneDeep(epConfig))}
+                                        endpointSecurityInfo={endpointSecurityInfo}
+                                        handleToggleEndpointSecurity={handleToggleEndpointSecurity}
+                                        handleEndpointSecurityChange={handleEndpointSecurityChange}
+                                        endpointType={endpointType}
+                                    />
+                                </Grid>
+                            )}
+                        {
+                            endpointType.key === 'INLINE'
+                        || endpointType.key === 'default'
+                        || endpointType.key === 'prototyped'
+                        || endpointType.key === 'awslambda'
+                                ? <div />
+                                : (
+                                    <Grid item xs={12}>
+                                        <Typography
+                                            variant='h4'
+                                            align='left'
+                                            className={classes.titleWrapper}
+                                            gutterBottom
+                                        >
+                                            <FormattedMessage
+                                                id={'Apis.Details.Endpoints.'
+                                                + 'EndpointOverview.lb.failover.endpoints.header'}
+                                                defaultMessage='Load balance and Failover Configurations'
+                                            />
+                                        </Typography>
+                                        <LoadbalanceFailoverConfig
+                                            handleEndpointCategorySelect={handleEndpointCategorySelect}
+                                            toggleAdvanceConfig={toggleAdvanceConfig}
+                                            endpointsDispatcher={endpointsDispatcher}
+                                            epConfig={(cloneDeep(epConfig))}
+                                            endpointSecurityInfo={endpointSecurityInfo}
+                                            handleEndpointTypeSelect={handleEndpointTypeSelect}
+                                            globalEpType={endpointType}
+                                            apiType={api.type}
+                                        />
+                                    </Grid>
+                                )
                         }
                     </Grid>
-                    {
-                        endpointType.key === 'INLINE' ||
-                        endpointType.key === 'prototyped' ||
-                        endpointType.key === 'awslambda' ?
-                            <div /> :
-                            <Grid item xs={12}>
-                                <Typography variant='h4' align='left' className={classes.titleWrapper} gutterBottom>
-                                    <FormattedMessage
-                                        id='Apis.Details.Endpoints.EndpointOverview.general.config.header'
-                                        defaultMessage='General Endpoint Configurations'
-                                    />
-                                </Typography>
-                                <GeneralConfiguration
-                                    epConfig={(cloneDeep(epConfig))}
-                                    endpointSecurityInfo={endpointSecurityInfo}
-                                    handleToggleEndpointSecurity={handleToggleEndpointSecurity}
-                                    handleEndpointSecurityChange={handleEndpointSecurityChange}
-                                    endpointType={endpointType}
-                                />
-                            </Grid>
-                    }
-                    {
-                        endpointType.key === 'INLINE' ||
-                        endpointType.key === 'default' ||
-                        endpointType.key === 'prototyped' ||
-                        endpointType.key === 'awslambda' ?
-                            <div />
-                            :
-                            <Grid item xs={12}>
-                                <Typography variant='h4' align='left' className={classes.titleWrapper} gutterBottom>
-                                    <FormattedMessage
-                                        id='Apis.Details.Endpoints.EndpointOverview.lb.failover.endpoints.header'
-                                        defaultMessage='Load balance and Failover Configurations'
-                                    />
-                                </Typography>
-                                <LoadbalanceFailoverConfig
-                                    handleEndpointCategorySelect={handleEndpointCategorySelect}
-                                    toggleAdvanceConfig={toggleAdvanceConfig}
-                                    endpointsDispatcher={endpointsDispatcher}
-                                    epConfig={(cloneDeep(epConfig))}
-                                    endpointSecurityInfo={endpointSecurityInfo}
-                                    handleEndpointTypeSelect={handleEndpointTypeSelect}
-                                    globalEpType={endpointType}
-                                    apiType={api.type}
-                                />
-                            </Grid>
-                    }
-                </Grid>
-            }
+                )}
             <Dialog open={advanceConfigOptions.open}>
                 <DialogTitle>
                     <Typography className={classes.configDialogHeader}>

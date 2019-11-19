@@ -70,7 +70,7 @@ function GenericResource(props) {
                 ...theme.typography.button,
             },
             resourcePathContainer: {
-                paddingTop: theme.spacing(),
+                paddingTop: theme.spacing(1),
             },
             prototypeResourceHeader: {
                 borderBottom: `${chipColor} 1px solid`,
@@ -118,7 +118,7 @@ function GenericResource(props) {
                                         readOnly: `${isRestricted(['apim:api_create'], api)}`,
                                     }}
                                     language='javascript'
-                                    onChange={content => onChange(content, resourcePath, resourceMethod)}
+                                    onChange={(content) => onChange(content, resourcePath, resourceMethod)}
                                 />
                             </Suspense>
                         </Grid>

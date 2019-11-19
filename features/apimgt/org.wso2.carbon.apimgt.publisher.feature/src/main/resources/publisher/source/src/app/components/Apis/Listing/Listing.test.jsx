@@ -26,10 +26,10 @@ import Configurations from 'Config';
 import { MemoryRouter } from 'react-router-dom';
 import ScopeValidation from 'AppData/ScopeValidation';
 import AuthManager from 'AppData/AuthManager';
+import User from 'AppData/User';
 import SampleAPI from './SampleAPI/SampleAPI';
 import Listing from './Listing';
 import TableView from './TableView/TableView';
-import User from 'AppData/User';
 
 
 const mockedGetUser = jest.fn();
@@ -59,7 +59,7 @@ describe('APIs <Listing/> component tests', () => {
         ScopeValidation.hasScopes = mockedHasScopes.bind(ScopeValidation);
         const mockedUser = new User('DEFAULT', 'admin');
         const allScopes = await getAllScopes();
-        mockedUser.scopes = allScopes.filter(policy => policy !== 'apim:api_publish');
+        mockedUser.scopes = allScopes.filter((policy) => policy !== 'apim:api_publish');
         mockedGetUser.mockReturnValue(mockedUser);
     });
 

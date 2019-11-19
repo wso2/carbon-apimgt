@@ -48,7 +48,7 @@ function Endpoints(props) {
     const { parentClasses, api } = props;
 
     return (
-        <React.Fragment>
+        <>
             <div>
                 <Typography variant='h5' component='h3' className={parentClasses.title}>
                     <FormattedMessage
@@ -76,23 +76,23 @@ function Endpoints(props) {
                                 tooltip: parentClasses.htmlTooltip,
                             }}
                             title={
-                                showEndpoint(api, 'prod') &&
-                                <React.Fragment>{showEndpoint(api, 'prod')}</React.Fragment>
+                                showEndpoint(api, 'prod')
+                                && <>{showEndpoint(api, 'prod')}</>
                             }
                         >
                             <Typography component='p' variant='body1' className={parentClasses.url}>
-                                {showEndpoint(api, 'prod') &&
-                                    <React.Fragment>{showEndpoint(api, 'prod')}</React.Fragment>}
+                                {showEndpoint(api, 'prod')
+                                    && <>{showEndpoint(api, 'prod')}</>}
                             </Typography>
                         </Tooltip>
                         <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
                             {!showEndpoint(api, 'prod') && (
-                                <React.Fragment>
+                                <>
                                     <FormattedMessage
                                         id='Apis.Details.NewOverview.Endpoints.production.not.set'
                                         defaultMessage='-'
                                     />
-                                </React.Fragment>
+                                </>
                             )}
                         </Typography>
                     </Grid>
@@ -113,23 +113,23 @@ function Endpoints(props) {
                                 tooltip: parentClasses.htmlTooltip,
                             }}
                             title={
-                                showEndpoint(api, 'sand') &&
-                                <React.Fragment>{showEndpoint(api, 'sand')}</React.Fragment>
+                                showEndpoint(api, 'sand')
+                                && <>{showEndpoint(api, 'sand')}</>
                             }
                         >
                             <Typography component='p' variant='body1' className={parentClasses.url}>
-                                {showEndpoint(api, 'sand') &&
-                                    <React.Fragment>{showEndpoint(api, 'sand')}</React.Fragment>}
+                                {showEndpoint(api, 'sand')
+                                    && <>{showEndpoint(api, 'sand')}</>}
                             </Typography>
                         </Tooltip>
                         <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
                             {!showEndpoint(api, 'sand') && (
-                                <React.Fragment>
+                                <>
                                     <FormattedMessage
                                         id='Apis.Details.NewOverview.Endpoints.sandbox.not.set'
                                         defaultMessage='-'
                                     />
-                                </React.Fragment>
+                                </>
                             )}
                         </Typography>
                     </Grid>
@@ -145,21 +145,23 @@ function Endpoints(props) {
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
-                            {api.endpointSecurity && <React.Fragment>{api.endpointSecurity.type}</React.Fragment>}
+                            {api.endpointSecurity && <>{api.endpointSecurity.type}</>}
                         </Typography>
                         <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
-                            {!api.endpointSecurity &&
-                            <React.Fragment>
-                                <FormattedMessage
-                                    id='Apis.Details.NewOverview.Endpoints.security.not.set'
-                                    defaultMessage='-'
-                                />
-                            </React.Fragment>}
+                            {!api.endpointSecurity
+                            && (
+                                <>
+                                    <FormattedMessage
+                                        id='Apis.Details.NewOverview.Endpoints.security.not.set'
+                                        defaultMessage='-'
+                                    />
+                                </>
+                            )}
                         </Typography>
                     </Grid>
                 </Grid>
             </Box>
-        </React.Fragment>
+        </>
     );
 }
 

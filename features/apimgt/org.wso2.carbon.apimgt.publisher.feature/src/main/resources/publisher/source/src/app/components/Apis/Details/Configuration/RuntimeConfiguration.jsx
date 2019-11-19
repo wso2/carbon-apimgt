@@ -48,9 +48,9 @@ import APISecurity, {
     API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY,
     API_SECURITY_MUTUAL_SSL_MANDATORY,
     API_SECURITY_MUTUAL_SSL,
-} from './components/APISecurity/APISecurity';
+} from './components/APISecurity/components/apiSecurityConstants';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         padding: theme.spacing(3, 2),
     },
@@ -194,7 +194,7 @@ export default function RuntimeConfiguration() {
                     if (event.value === 'optional') {
                         return {
                             ...copyAPIConfig(state),
-                            [action]: state[action].filter(schema => schema !== event.name),
+                            [action]: state[action].filter((schema) => schema !== event.name),
                         };
                     } else if (state[action].includes(event.name)) {
                         return state; // Add for completeness, Ideally there couldn't exist this state
@@ -213,24 +213,24 @@ export default function RuntimeConfiguration() {
                     // User has unchecked a security schema type
                     const newState = {
                         ...copyAPIConfig(state),
-                        [action]: state[action].filter(schema => schema !== event.value),
+                        [action]: state[action].filter((schema) => schema !== event.value),
                     };
                     if (
                         !(
-                            newState[action].includes(DEFAULT_API_SECURITY_OAUTH2) ||
-                            newState[action].includes(API_SECURITY_BASIC_AUTH) ||
-                            newState[action].includes(API_SECURITY_API_KEY)
+                            newState[action].includes(DEFAULT_API_SECURITY_OAUTH2)
+                            || newState[action].includes(API_SECURITY_BASIC_AUTH)
+                            || newState[action].includes(API_SECURITY_API_KEY)
                         )
                     ) {
                         const noMandatoryOAuthBasicAuth = newState[action]
-                            .filter(schema => schema !== API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
+                            .filter((schema) => schema !== API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
                         return {
                             ...newState,
                             [action]: noMandatoryOAuthBasicAuth,
                         };
                     } else if (!newState[action].includes(API_SECURITY_MUTUAL_SSL)) {
                         const noMandatoryMutualSSL = newState[action]
-                            .filter(schema => schema !== API_SECURITY_MUTUAL_SSL_MANDATORY);
+                            .filter((schema) => schema !== API_SECURITY_MUTUAL_SSL_MANDATORY);
                         return {
                             ...newState,
                             [action]: noMandatoryMutualSSL,
@@ -247,7 +247,7 @@ export default function RuntimeConfiguration() {
                 } else {
                     return {
                         ...copyAPIConfig(state),
-                        transport: state.transport.filter(transport => transport !== event.value),
+                        transport: state.transport.filter((transport) => transport !== event.value),
                     };
                 }
             case 'accessControlAllowHeaders':
@@ -272,9 +272,9 @@ export default function RuntimeConfiguration() {
     const [apiConfig, configDispatcher] = useReducer(configReducer, copyAPIConfig(api));
     const classes = useStyles();
     const mediationPolicies = cloneDeep(api.mediationPolicies || []);
-    const [inPolicy, setInPolicy] = useState(mediationPolicies.filter(seq => seq.type === 'IN')[0]);
-    const [outPolicy, setOutPolicy] = useState(mediationPolicies.filter(seq => seq.type === 'OUT')[0]);
-    const [faultPolicy, setFaultPolicy] = useState(mediationPolicies.filter(seq => seq.type === 'FAULT')[0]);
+    const [inPolicy, setInPolicy] = useState(mediationPolicies.filter((seq) => seq.type === 'IN')[0]);
+    const [outPolicy, setOutPolicy] = useState(mediationPolicies.filter((seq) => seq.type === 'OUT')[0]);
+    const [faultPolicy, setFaultPolicy] = useState(mediationPolicies.filter((seq) => seq.type === 'FAULT')[0]);
     const getMediationPoliciesToSave = () => {
         const NONE = 'none';
         const newMediationPolicies = [];
@@ -318,7 +318,7 @@ export default function RuntimeConfiguration() {
     }
 
     return (
-        <React.Fragment>
+        <>
             <Box pb={3}>
                 <Typography variant='h5'>
                     <FormattedMessage
@@ -346,18 +346,17 @@ export default function RuntimeConfiguration() {
                                 <Paper className={classes.paper} elevation={0}>
                                     <APISecurity api={apiConfig} configDispatcher={configDispatcher} />
                                     <CORSConfiguration api={apiConfig} configDispatcher={configDispatcher} />
-                                    {api.type !== 'GRAPHQL' &&
-                                        <SchemaValidation api={apiConfig} configDispatcher={configDispatcher} />
-                                    }
+                                    {api.type !== 'GRAPHQL'
+                                        && <SchemaValidation api={apiConfig} configDispatcher={configDispatcher} />}
                                     {!api.isAPIProduct() && (
-                                        <React.Fragment>
+                                        <>
                                             <Flow
                                                 api={apiConfig}
                                                 type='IN'
                                                 updateMediationPolicy={updateInMediationPolicy}
                                                 selectedMediationPolicy={inPolicy}
                                             />
-                                        </React.Fragment>
+                                        </>
                                     )}
                                 </Paper>
                                 <ArrowForwardIcon className={classes.arrowForwardIcon} />
@@ -372,7 +371,7 @@ export default function RuntimeConfiguration() {
                                 <Box mb={3}>
                                     <Paper className={classes.paper} elevation={0}>
                                         {!api.isAPIProduct() && (
-                                            <React.Fragment>
+                                            <>
                                                 <Box mb={3}>
                                                     <Flow
                                                         api={apiConfig}
@@ -381,7 +380,7 @@ export default function RuntimeConfiguration() {
                                                         selectedMediationPolicy={outPolicy}
                                                     />
                                                 </Box>
-                                            </React.Fragment>
+                                            </>
                                         )}
                                         <ResponseCaching api={apiConfig} configDispatcher={configDispatcher} />
                                     </Paper>
@@ -389,7 +388,7 @@ export default function RuntimeConfiguration() {
                                 </Box>
                             </Grid>
                             {!api.isAPIProduct() && (
-                                <React.Fragment>
+                                <>
                                     <Typography className={classes.heading} variant='h6'>
                                         <FormattedMessage
                                             id='Apis.Details.Configuration.RuntimeConfiguration.section.fault'
@@ -406,7 +405,7 @@ export default function RuntimeConfiguration() {
                                             />
                                         </Paper>
                                     </Grid>
-                                </React.Fragment>
+                                </>
                             )}
                         </Grid>
                     </Grid>
@@ -419,10 +418,10 @@ export default function RuntimeConfiguration() {
                         </Typography>
                         <Paper className={classes.paper} style={{ height: 'calc(100% - 75px)' }} elevation={0}>
                             {!api.isAPIProduct() && (
-                                <React.Fragment>
+                                <>
                                     <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
                                     <Endpoints api={api} />
-                                </React.Fragment>
+                                </>
                             )}
                             {api.isAPIProduct() && (
                                 <Box alignItems='center' justifyContent='center' className={classes.info}>
@@ -442,8 +441,8 @@ export default function RuntimeConfiguration() {
                     <Grid container direction='row' alignItems='center' spacing={1} style={{ marginTop: 20 }}>
                         <Grid item>
                             <Button
-                                disabled={isUpdating ||
-                                ((apiConfig.visibility === 'RESTRICTED' && apiConfig.visibleRoles.length === 0))}
+                                disabled={isUpdating
+                                || ((apiConfig.visibility === 'RESTRICTED' && apiConfig.visibleRoles.length === 0))}
                                 type='submit'
                                 variant='contained'
                                 color='primary'
@@ -472,8 +471,8 @@ export default function RuntimeConfiguration() {
                                     <FormattedMessage
                                         id='Apis.Details.Configuration.Configuration.update.not.allowed'
                                         defaultMessage={
-                                            '* You are not authorized to update particular fields of' +
-                                            ' the API due to insufficient permissions'
+                                            '* You are not authorized to update particular fields of'
+                                            + ' the API due to insufficient permissions'
                                         }
                                     />
                                 </Typography>
@@ -482,6 +481,6 @@ export default function RuntimeConfiguration() {
                     </Grid>
                 </Grid>
             </div>
-        </React.Fragment>
+        </>
     );
 }

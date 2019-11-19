@@ -6,11 +6,11 @@ import Icon from '@material-ui/core/Icon';
 import { amber } from '@material-ui/core/colors';
 import VerticalDivider from './VerticalDivider';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         display: 'flex',
         alignItems: 'center',
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
         borderRadius: theme.shape.borderRadius,
         border: 'solid 1px ' + theme.palette.secondary.main,
         '& span.material-icons.info': {
@@ -23,28 +23,45 @@ const styles = theme => ({
         },
     },
     button: {
-        marginTop: theme.spacing.unit,
-        marginBottom: theme.spacing.unit,
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(1),
     },
     content: {
-        paddingTop: theme.spacing.unit,
-        paddingBottom: theme.spacing.unit,
-        paddingRight: theme.spacing.unit,
+        paddingTop: theme.spacing(1),
+        paddingBottom: theme.spacing(1),
+        paddingRight: theme.spacing(1),
     },
 });
 
+
+/**
+ *
+ *
+ * @class InlineMessage
+ * @extends {React.Component}
+ */
 class InlineMessage extends React.Component {
     handleExpandClick = () => {
-        this.setState(state => ({ expanded: !state.expanded }));
+        this.setState((state) => ({ expanded: !state.expanded }));
     };
 
+
+    /**
+     *
+     *
+     * @returns
+     * @memberof InlineMessage
+     * @inheritdoc
+     */
     render() {
-        const { classes, height, type } = this.props;
+        const {
+            classes, height, type, children,
+        } = this.props;
         return (
             <Paper className={classes.root} {...this.props}>
                 <Icon className={type}>{type}</Icon>
                 <VerticalDivider height={height} />
-                <div className={classes.content}>{this.props.children}</div>
+                <div className={classes.content}>{children}</div>
             </Paper>
         );
     }

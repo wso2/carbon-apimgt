@@ -62,16 +62,14 @@ function getEndpointTemplateByType(endpointType, isAddressEndpoint, currentEndpo
     const tmpEndpointConfig = {};
     if (endpointType === 'failover') {
         tmpEndpointConfig.endpoint_type = endpointType;
-        tmpEndpointConfig.production_failovers =
-            currentEndpointConfig.production_failovers ? currentEndpointConfig.production_failovers : [];
-        tmpEndpointConfig.sandbox_failovers =
-            currentEndpointConfig.sandbox_failovers ? currentEndpointConfig.sandbox_failovers : [];
-        tmpEndpointConfig.production_endpoints =
-            Array.isArray(currentEndpointConfig.production_endpoints) ?
-                currentEndpointConfig.production_endpoints[0] : currentEndpointConfig.production_endpoints;
-        tmpEndpointConfig.sandbox_endpoints =
-            Array.isArray(currentEndpointConfig.sandbox_endpoints) ?
-                currentEndpointConfig.sandbox_endpoints[0] : currentEndpointConfig.sandbox_endpoints;
+        tmpEndpointConfig.production_failovers = currentEndpointConfig.production_failovers
+            ? currentEndpointConfig.production_failovers : [];
+        tmpEndpointConfig.sandbox_failovers = currentEndpointConfig.sandbox_failovers
+            ? currentEndpointConfig.sandbox_failovers : [];
+        tmpEndpointConfig.production_endpoints = Array.isArray(currentEndpointConfig.production_endpoints)
+            ? currentEndpointConfig.production_endpoints[0] : currentEndpointConfig.production_endpoints;
+        tmpEndpointConfig.sandbox_endpoints = Array.isArray(currentEndpointConfig.sandbox_endpoints)
+            ? currentEndpointConfig.sandbox_endpoints[0] : currentEndpointConfig.sandbox_endpoints;
         tmpEndpointConfig.failOver = 'True';
     } else if (endpointType === 'load_balance') {
         tmpEndpointConfig.endpoint_type = endpointType;
@@ -80,22 +78,20 @@ function getEndpointTemplateByType(endpointType, isAddressEndpoint, currentEndpo
         tmpEndpointConfig.sessionManagement = '';
         tmpEndpointConfig.sessionTimeOut = '';
         if (currentEndpointConfig.production_endpoints) {
-            tmpEndpointConfig.production_endpoints = Array.isArray(currentEndpointConfig.production_endpoints) ?
-                currentEndpointConfig.production_endpoints : [currentEndpointConfig.production_endpoints];
+            tmpEndpointConfig.production_endpoints = Array.isArray(currentEndpointConfig.production_endpoints)
+                ? currentEndpointConfig.production_endpoints : [currentEndpointConfig.production_endpoints];
         }
         if (currentEndpointConfig.sandbox_endpoints) {
-            tmpEndpointConfig.sandbox_endpoints =
-                Array.isArray(currentEndpointConfig.sandbox_endpoints) ?
-                    currentEndpointConfig.sandbox_endpoints : [currentEndpointConfig.sandbox_endpoints];
+            tmpEndpointConfig.sandbox_endpoints = Array.isArray(currentEndpointConfig.sandbox_endpoints)
+                ? currentEndpointConfig.sandbox_endpoints : [currentEndpointConfig.sandbox_endpoints];
         }
         tmpEndpointConfig.failOver = 'False';
     } else {
         tmpEndpointConfig.endpoint_type = isAddressEndpoint === true ? 'address' : 'http';
-        tmpEndpointConfig.production_endpoints = Array.isArray(currentEndpointConfig.production_endpoints) ?
-            currentEndpointConfig.production_endpoints[0] : currentEndpointConfig.production_endpoints;
-        tmpEndpointConfig.sandbox_endpoints =
-            Array.isArray(currentEndpointConfig.sandbox_endpoints) ?
-                currentEndpointConfig.sandbox_endpoints[0] : currentEndpointConfig.sandbox_endpoints;
+        tmpEndpointConfig.production_endpoints = Array.isArray(currentEndpointConfig.production_endpoints)
+            ? currentEndpointConfig.production_endpoints[0] : currentEndpointConfig.production_endpoints;
+        tmpEndpointConfig.sandbox_endpoints = Array.isArray(currentEndpointConfig.sandbox_endpoints)
+            ? currentEndpointConfig.sandbox_endpoints[0] : currentEndpointConfig.sandbox_endpoints;
         tmpEndpointConfig.failOver = 'False';
     }
     return tmpEndpointConfig;

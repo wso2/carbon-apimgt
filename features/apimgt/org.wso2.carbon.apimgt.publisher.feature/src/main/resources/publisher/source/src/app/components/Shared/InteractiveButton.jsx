@@ -24,9 +24,9 @@ import { Button } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-const styles = theme => ({
+const styles = (theme) => ({
     wrapper: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
         position: 'relative',
     },
     buttonSuccess: {
