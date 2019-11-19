@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import classNames from 'classnames';
 import CustomIcon from '../../../Shared/CustomIcon';
 
-const styles = theme => ({
+const styles = (theme) => ({
     leftLInkText: {
         color: theme.palette.getContrastText(theme.palette.background.leftMenu),
     },

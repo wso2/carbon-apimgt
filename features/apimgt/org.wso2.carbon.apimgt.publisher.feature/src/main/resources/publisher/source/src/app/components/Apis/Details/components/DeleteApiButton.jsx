@@ -1,6 +1,8 @@
 import React from 'react';
 
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core/';
+import {
+    Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
+} from '@material-ui/core/';
 import Typography from '@material-ui/core/Typography';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Slide from '@material-ui/core/Slide';
@@ -14,7 +16,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import { FormattedMessage } from 'react-intl';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         height: 70,
         background: theme.palette.background.paper,
@@ -158,7 +160,7 @@ class DeleteApiButton extends React.Component {
         }
 
         return (
-            <React.Fragment>
+            <>
                 {/* allowing delete based on scopes */}
                 <ScopeValidation resourceMethod={resourceMethod.DELETE} resourcePath={path}>
                     <div className={classes.deleteWrapper}>
@@ -195,7 +197,7 @@ class DeleteApiButton extends React.Component {
                                 id='Apis.Details.components.DeleteApiButton.text.description'
                                 defaultMessage='{type} <b> {name} {version} </b> will be deleted permanently.'
                                 values={{
-                                    b: msg => <b>{msg}</b>,
+                                    b: (msg) => <b>{msg}</b>,
                                     type,
                                     name: api.name,
                                     version,
@@ -224,7 +226,7 @@ class DeleteApiButton extends React.Component {
                         </Button>
                     </DialogActions>
                 </Dialog>
-            </React.Fragment>
+            </>
         );
     }
 }

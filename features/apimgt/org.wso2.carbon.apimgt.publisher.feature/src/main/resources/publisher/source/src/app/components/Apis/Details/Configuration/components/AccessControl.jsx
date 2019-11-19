@@ -36,7 +36,7 @@ import { red } from '@material-ui/core/colors/';
 import Alert from 'AppComponents/Shared/Alert';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     tooltip: {
         position: 'absolute',
         right: theme.spacing(-4),
@@ -98,10 +98,10 @@ export default function AccessControl(props) {
     };
 
     const handleRoleDeletion = (role) => {
-        setInvalidRoles(invalidRoles.filter(existingRole => existingRole !== role));
+        setInvalidRoles(invalidRoles.filter((existingRole) => existingRole !== role));
         configDispatcher({
             action: 'accessControlRoles',
-            value: api.accessControlRoles.filter(existingRole => existingRole !== role),
+            value: api.accessControlRoles.filter((existingRole) => existingRole !== role),
         });
     };
 
@@ -131,18 +131,18 @@ export default function AccessControl(props) {
     };
 
     return (
-        <React.Fragment>
-            <Box style={{ position: 'relative', marginBottom: -12 }} >
+        <>
+            <Box style={{ position: 'relative', marginBottom: -12 }}>
                 <TextField
                     fullWidth
                     id='accessControl-selector'
                     select
-                    label={
+                    label={(
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.AccessControl.head.topic'
                             defaultMessage='Publisher Access Control'
                         />
-                    }
+                    )}
                     value={api.accessControl}
                     name='accessControl'
                     onChange={({ target: { value } }) => configDispatcher({ action: 'accessControl', value })}
@@ -151,12 +151,12 @@ export default function AccessControl(props) {
                             className: classes.menu,
                         },
                     }}
-                    helperText={
+                    helperText={(
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.AccessControl.form.helper.text'
                             defaultMessage='There are no access restrictions by default'
                         />
-                    }
+                    )}
                     margin='normal'
                     variant='outlined'
                     disabled={isRestricted(['apim:api_create'], apiFromContext)}
@@ -176,7 +176,7 @@ export default function AccessControl(props) {
                 </TextField>
                 <Tooltip
                     title={(
-                        <React.Fragment>
+                        <>
                             <p>
                                 <strong>
                                     <FormattedMessage
@@ -201,11 +201,11 @@ export default function AccessControl(props) {
                                 <FormattedMessage
                                     id='Apis.Details.Configuration.components.AccessControl.tooltip.restrict.
                                     desc'
-                                    defaultMessage={'The API can be viewed and modified only by specific' +
-                                    ' publishers and creators with the roles that you specify'}
+                                    defaultMessage={'The API can be viewed and modified only by specific'
+                                    + ' publishers and creators with the roles that you specify'}
                                 />
                             </p>
-                        </React.Fragment>
+                        </>
                     )}
                     aria-label='Publisher Access Control'
                     placement='right-end'
@@ -220,12 +220,12 @@ export default function AccessControl(props) {
                     <ChipInput
                         fullWidth
                         variant='outlined'
-                        label={
+                        label={(
                             <FormattedMessage
                                 id='Apis.Details.Configuration.components.AccessControl.roles'
                                 defaultMessage='Roles'
                             />
-                        }
+                        )}
                         disabled={isRestricted(['apim:api_create'], apiFromContext)}
                         value={api.accessControlRoles.concat(invalidRoles)}
                         alwaysShowPlaceholder={false}
@@ -259,7 +259,7 @@ export default function AccessControl(props) {
                     />
                 </Box>
             )}
-        </React.Fragment>
+        </>
     );
 }
 

@@ -34,7 +34,7 @@ import DeleteApiButton from 'AppComponents/Apis/Details/components/DeleteApiButt
 
 import ThumbnailView from './ThumbnailView';
 
-const styles = theme => ({
+const styles = (theme) => ({
     card: {
         margin: theme.spacing(3 / 2),
         maxWidth: theme.spacing(32),
@@ -147,7 +147,7 @@ class APIThumb extends Component {
      * @memberof Listing
      */
     handleApiDelete() {
-        const { id, name } = this.props.api;
+        const { api: { id, name } } = this.props;
         this.setState({ loading: true });
         const { updateData, isAPIProduct } = this.props;
         if (isAPIProduct) {
@@ -204,6 +204,7 @@ class APIThumb extends Component {
     toggleMouseOver(event) {
         this.setState({ isHover: event.type === 'mouseover' });
     }
+
     /**
      * @inheritdoc
      * @returns {React.Component} @inheritdoc
@@ -290,8 +291,8 @@ class APIThumb extends Component {
                     {(api.type === 'GRAPHQL' || api.transportType === 'GRAPHQL') && (
                         <Chip
                             className={classes.thumbRightBy}
-                            label={api.transportType === undefined ?
-                                api.type : api.transportType}
+                            label={api.transportType === undefined
+                                ? api.type : api.transportType}
                             color='primary'
                         />
                     )}

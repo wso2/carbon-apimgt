@@ -16,7 +16,7 @@ import { isRestricted } from 'AppData/AuthManager';
 
 import BusinessPlans from './BusinessPlans';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         flexGrow: 1,
     },
@@ -44,6 +44,12 @@ const styles = theme => ({
     },
 });
 
+/**
+ *
+ *
+ * @class Monetization
+ * @extends {Component}
+ */
 class Monetization extends Component {
     constructor(props) {
         super(props);
@@ -85,6 +91,19 @@ class Monetization extends Component {
         }
     }
 
+    handleChange = (event) => {
+        this.setState({ monStatus: event.target.checked });
+    };
+
+    handleInputChange = (event) => {
+        const { name, value } = event.target;
+        this.setState((oldState) => {
+            const { property } = oldState;
+            property[name] = value;
+            return { property };
+        });
+    };
+
     /**
      * Handles the submit action for configuring monetization
      */
@@ -112,7 +131,7 @@ class Monetization extends Component {
                         defaultMessage: 'Monetization Disabled Successfully',
                     }));
                 }
-                this.setState({ monStatus: !this.state.monStatus });
+                this.setState((cState) => ({ monStatus: !cState.monStatus }));
             }).catch((error) => {
                 console.error(error);
                 if (error.response) {
@@ -145,7 +164,7 @@ class Monetization extends Component {
                         defaultMessage: 'Monetization Disabled Successfully',
                     }));
                 }
-                this.setState({ monStatus: !this.state.monStatus });
+                this.setState((cState) => ({ monStatus: !cState.monStatus }));
             }).catch((error) => {
                 console.error(error);
                 if (error.response) {
@@ -159,18 +178,6 @@ class Monetization extends Component {
             });
         }
     }
-    handleChange = (event) => {
-        this.setState({ monStatus: event.target.checked });
-    };
-
-    handleInputChange = (event) => {
-        const { name, value } = event.target;
-        this.setState((oldState) => {
-            const { property } = oldState;
-            property[name] = value;
-            return { property };
-        });
-    };
 
     render() {
         const { api, classes } = this.props;
@@ -206,7 +213,7 @@ class Monetization extends Component {
                 </Typography>
                 <form method='post' onSubmit={this.handleSubmit}>
                     <FormControlLabel
-                        control={
+                        control={(
                             <Checkbox
                                 disabled={isRestricted(['apim:api_publish'], api)}
                                 id='monStatus'
@@ -216,7 +223,7 @@ class Monetization extends Component {
                                 value={monStatus}
                                 color='primary'
                             />
-                        }
+                        )}
                         label='Enable Monetization'
                     />
                     <Grid>
@@ -229,8 +236,8 @@ class Monetization extends Component {
                                     />
                                 </Typography>
                                 {
-                                    (monetizationAttributes.length > 0) ?
-                                        (monetizationAttributes.map((monetizationAttribute, i) => (
+                                    (monetizationAttributes.length > 0)
+                                        ? (monetizationAttributes.map((monetizationAttribute, i) => (
                                             <TextField
                                                 disabled={isRestricted(['apim:api_publish'], api)}
                                                 fullWidth
@@ -247,8 +254,8 @@ class Monetization extends Component {
                                         : (
                                             <Typography gutterBottom>
                                                 <FormattedMessage
-                                                    id={'Apis.Details.Monetization.Index.there.are.no' +
-                                                        ' .monetization.properties.configured'}
+                                                    id={'Apis.Details.Monetization.Index.there.are.no'
+                                                        + ' .monetization.properties.configured'}
                                                     defaultMessage='There are no monetization properties configured'
                                                 />
                                             </Typography>
@@ -260,11 +267,11 @@ class Monetization extends Component {
                     <Grid>
                         <Paper className={classes.paper}>
                             <Grid item xs={12} className={classes.grid}>
-                                {<BusinessPlans api={api} monStatus={monStatus} />}
+                                <BusinessPlans api={api} monStatus={monStatus} />
                             </Grid>
                         </Paper>
                     </Grid>
-                    <Button onClick={this.handleSubmit} color='primary' variant='contained' className={classes.button} >
+                    <Button onClick={this.handleSubmit} color='primary' variant='contained' className={classes.button}>
                         <FormattedMessage
                             id='Apis.Details.Monetization.Index.save'
                             defaultMessage='Save'

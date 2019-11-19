@@ -36,7 +36,7 @@ import Typography from '@material-ui/core/Typography';
 import TopMenu from 'AppComponents/Apis/Listing/components/TopMenu';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 
-const styles = theme => ({
+const styles = (theme) => ({
     contentInside: {
         padding: theme.spacing(3),
         paddingTop: theme.spacing(2),
@@ -89,6 +89,7 @@ class TableView extends React.Component {
             this.getData();
         }
     }
+
     componentWillUnmount() {
         // The foollowing is resetting the styles for the mui-datatables
         const { theme } = this.props;
@@ -109,6 +110,7 @@ class TableView extends React.Component {
         };
         Object.assign(theme, themeAdditions);
     }
+
     getMuiTheme = () => {
         const { listType } = this.state;
         const { theme } = this.props;
@@ -199,6 +201,7 @@ class TableView extends React.Component {
     setListType = (value) => {
         this.setState({ listType: value });
     };
+
     setLocalStorage = () => {
         // Set the page to the localstorage
         const { isAPIProduct } = this.props;
@@ -206,6 +209,7 @@ class TableView extends React.Component {
         const pagination = { page: this.page, count: this.count, rowsPerPage: this.rowsPerPage };
         window.localStorage.setItem('pagination-' + paginationSufix, JSON.stringify(pagination));
     };
+
     changePage = (page) => {
         this.page = page;
         this.xhrRequest().then((data) => {
@@ -219,19 +223,7 @@ class TableView extends React.Component {
             this.setLocalStorage();
         });
     };
-    /**
-     *
-     * Update APIs list if an API get deleted in card or table view
-     * @param {String} apiUUID UUID(ID) of the deleted API
-     * @memberof Listing
-     */
-    updateData() {
-        const { page, rowsPerPage, count } = this;
-        if (count - 1 === rowsPerPage * page && page !== 0) {
-            this.page = page - 1;
-        }
-        this.getData();
-    }
+
     xhrRequest = () => {
         const { page, rowsPerPage } = this;
         const { isAPIProduct, query } = this.props;
@@ -247,6 +239,20 @@ class TableView extends React.Component {
             return API.all({ limit: this.rowsPerPage, offset: page * rowsPerPage });
         }
     };
+
+    /**
+     *
+     * Update APIs list if an API get deleted in card or table view
+     * @param {String} apiUUID UUID(ID) of the deleted API
+     * @memberof Listing
+     */
+    updateData() {
+        const { page, rowsPerPage, count } = this;
+        if (count - 1 === rowsPerPage * page && page !== 0) {
+            this.page = page - 1;
+        }
+        this.getData();
+    }
 
     /**
      *
@@ -420,7 +426,7 @@ class TableView extends React.Component {
         }
         if (apisAndApiProducts.length === 0 && !query) {
             return (
-                <React.Fragment>
+                <>
                     <TopMenu
                         data={apisAndApiProducts}
                         count={displayCount}
@@ -442,9 +448,9 @@ class TableView extends React.Component {
                                         <FormattedMessage
                                             id='Apis.Listing.SampleAPIProduct.description'
                                             defaultMessage={
-                                                'The API resources in an API product can come from' +
-                                                ' one or more APIs, so you can mix and match resources from multiple ' +
-                                                ' API resources to create specialized feature sets.'
+                                                'The API resources in an API product can come from'
+                                                + ' one or more APIs, so you can mix and match resources from multiple '
+                                                + ' API resources to create specialized feature sets.'
                                             }
                                         />
                                     </Typography>
@@ -454,12 +460,12 @@ class TableView extends React.Component {
                             <SampleAPI />
                         )}
                     </div>
-                </React.Fragment>
+                </>
             );
         }
 
         return (
-            <React.Fragment>
+            <>
                 <TopMenu
                     data={apisAndApiProducts}
                     count={displayCount}
@@ -473,7 +479,7 @@ class TableView extends React.Component {
                         <MUIDataTable title='' data={apisAndApiProducts} columns={columns} options={options} />
                     </MuiThemeProvider>
                 </div>
-            </React.Fragment>
+            </>
         );
     }
 }
@@ -482,7 +488,7 @@ export default injectIntl(withStyles(styles, { withTheme: true })(TableView));
 
 TableView.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func.isRequired }).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
     theme: PropTypes.shape({
         custom: PropTypes.string,

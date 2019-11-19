@@ -14,7 +14,7 @@ import GoTo from 'AppComponents/Apis/Details/GoTo/GoTo';
 import DeleteApiButton from './DeleteApiButton';
 import CreateNewVersionButton from './CreateNewVersionButton';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         height: 70,
         background: theme.palette.background.paper,
@@ -95,10 +95,14 @@ const APIDetailsTopMenu = (props) => {
             <ThumbnailView api={api} width={70} height={50} imageUpdate={imageUpdate} />
             <div style={{ marginLeft: theme.spacing(1), maxWidth: 500 }}>
                 <Typography variant='h4' className={classes.apiName}>
-                    {api.name} {isAPIProduct ? '' : ':' + api.version}
+                    {api.name}
+                    {' '}
+                    {isAPIProduct ? '' : ':' + api.version}
                 </Typography>
                 <Typography variant='caption' gutterBottom align='left'>
-                    Created by: {api.provider}
+                    Created by:
+                    {' '}
+                    {api.provider}
                 </Typography>
             </div>
             <VerticalDivider height={70} />

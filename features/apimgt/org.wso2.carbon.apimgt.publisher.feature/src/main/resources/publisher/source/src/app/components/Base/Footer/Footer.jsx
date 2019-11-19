@@ -26,7 +26,7 @@ import Configurations from 'Config';
 
 import FeedbackForm from './FeedbackForm';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     footer: {
         backgroundColor: theme.palette.grey.A100,
         paddingLeft: theme.spacing(3),

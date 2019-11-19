@@ -1,8 +1,8 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 
-const styles = theme => ({
+const styles = (theme) => ({
     LeftMenu: {
         backgroundColor: theme.palette.background.leftMenu,
         width: theme.custom.leftMenuWidth,
@@ -36,13 +36,13 @@ const Container = (props) => {
         classes, pageNav, children, pageTopMenu,
     } = props;
     return (
-        <Fragment>
+        <>
             <div className={classes.LeftMenu}>{pageNav}</div>
             <div className={classes.content}>
-                {pageTopMenu && <Fragment>{pageTopMenu}</Fragment>}
+                {pageTopMenu && <>{pageTopMenu}</>}
                 {children}
             </div>
-        </Fragment>
+        </>
     );
 };
 Container.defaultProps = {

@@ -11,7 +11,7 @@ import { Progress } from 'AppComponents/Shared';
 import { classes } from 'istanbul-lib-coverage';
 import { isRestricted } from 'AppData/AuthManager';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         flexGrow: 1,
         paddingBottom: '10px',
@@ -59,7 +59,7 @@ class BusinessPlans extends Component {
     componentDidMount() {
         const { api } = this.props;
         api.getSubscriptionPolicies(api.id).then((policies) => {
-            const filteredPolicies = policies.filter(policy => policy.tierPlan === 'COMMERCIAL');
+            const filteredPolicies = policies.filter((policy) => policy.tierPlan === 'COMMERCIAL');
             this.setState({ policies: filteredPolicies });
         });
         api.getMonetization(api.id).then((status) => {
@@ -84,7 +84,7 @@ class BusinessPlans extends Component {
         if (monetizedPolices === null) {
             return <Progress />;
         }
-        const policiesList = policies.map(policy => (
+        const policiesList = policies.map((policy) => (
             <Grid item xs={6} spacing={2}>
                 <FormControlLabel
                     control={(
@@ -106,7 +106,10 @@ class BusinessPlans extends Component {
                                         <FormattedMessage
                                             id='Apis.Details.Monetization.BusinessPlans.currencyType'
                                             defaultMessage='Currency Type'
-                                        /> : {policy.monetizationAttributes[key]}
+                                        />
+                                        {' '}
+:
+                                        {policy.monetizationAttributes[key]}
                                     </Typography>
                                 );
                             } else if (key === 'billingCycle') {
@@ -115,7 +118,10 @@ class BusinessPlans extends Component {
                                         <FormattedMessage
                                             id='Apis.Details.Monetization.BusinessPlans.billingCycle'
                                             defaultMessage='Billing Cycle'
-                                        /> : {policy.monetizationAttributes[key]}
+                                        />
+                                        {' '}
+:
+                                        {policy.monetizationAttributes[key]}
                                     </Typography>
                                 );
                             } else if (key === 'fixedPrice') {
@@ -124,7 +130,10 @@ class BusinessPlans extends Component {
                                         <FormattedMessage
                                             id='Apis.Details.Monetization.BusinessPlans.fixedPrice'
                                             defaultMessage='Fixed Price'
-                                        /> : {policy.monetizationAttributes[key]}
+                                        />
+                                        {' '}
+:
+                                        {policy.monetizationAttributes[key]}
                                     </Typography>
                                 );
                             } else if (key === 'pricePerRequest') {
@@ -133,13 +142,19 @@ class BusinessPlans extends Component {
                                         <FormattedMessage
                                             id='Apis.Details.Monetization.BusinessPlans.pricePerRequest'
                                             defaultMessage='Price per Request'
-                                        /> : {policy.monetizationAttributes[key]}
+                                        />
+                                        {' '}
+:
+                                        {policy.monetizationAttributes[key]}
                                     </Typography>
                                 );
                             } else {
                                 return (
                                     <Typography component='p' variant='body1'>
-                                        { key } : {policy.monetizationAttributes[key]}
+                                        { key }
+                                        {' '}
+:
+                                        {policy.monetizationAttributes[key]}
                                     </Typography>
                                 );
                             }

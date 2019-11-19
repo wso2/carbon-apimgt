@@ -17,7 +17,9 @@
  */
 
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
+import {
+    BrowserRouter as Router, Redirect, Route, Switch,
+} from 'react-router-dom';
 import AuthManager from 'AppData/AuthManager';
 import CONSTS from 'AppData/Constants';
 import qs from 'qs';
@@ -129,8 +131,8 @@ class Publisher extends React.Component {
      */
     loadLocale(locale) {
         fetch(`${Configurations.app.context}/site/public/locales/${locale}.json`)
-            .then(resp => resp.json())
-            .then(messages => this.setState({ messages }));
+            .then((resp) => resp.json())
+            .then((messages) => this.setState({ messages }));
     }
 
     /**

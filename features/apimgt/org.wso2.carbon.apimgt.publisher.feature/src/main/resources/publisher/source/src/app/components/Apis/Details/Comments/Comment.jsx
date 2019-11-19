@@ -29,7 +29,7 @@ import CommentEdit from './CommentEdit';
 import CommentOptions from './CommentOptions';
 import CommentReply from './CommentReply';
 
-const styles = theme => ({
+const styles = (theme) => ({
     link: {
         color: theme.palette.getContrastText(theme.palette.background.default),
         cursor: 'pointer',
@@ -235,8 +235,8 @@ class Comment extends React.Component {
         const { editIndex, replyIndex, openDialog } = this.state;
         const props = { api, allComments, commentsUpdate };
         return [
-            comments &&
-                comments
+            comments
+                && comments
                     .slice(0)
                     .reverse()
                     .map((comment, index) => (

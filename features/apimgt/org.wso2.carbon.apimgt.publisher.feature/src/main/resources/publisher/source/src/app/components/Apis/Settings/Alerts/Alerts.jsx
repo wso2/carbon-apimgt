@@ -45,7 +45,7 @@ import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 
 
-const styles = theme => ({
+const styles = (theme) => ({
     alertsWrapper: {
         padding: theme.spacing(2),
     },
@@ -87,50 +87,49 @@ const Alerts = (props) => {
     const [isInProgress, setInProgress] = useState({ subscribing: false, unSubscribing: false });
     const [unsubscribeAll, setUnsubscribeAll] = useState(false);
 
-    const alertIdMapping =
-        {
-            1: {
-                name: intl.formatMessage({
-                    id: 'Apis.Settings.Alerts.Alerts.abnormal.response.time',
-                    defaultMessage: 'Abnormal Response Time',
-                }),
-                displayName: 'AbnormalResponseTime',
-                description: intl.formatMessage({
-                    id: 'Apis.Settings.Alerts.Alerts.abnormal.request.time.description',
-                    defaultMessage: 'This alert gets triggered if the backend time' +
-                        ' corresponding to a particular API is higher than the predefined value. ' +
-                        'These alerts could be treated as an indication of a slow ' +
-                        'backend. In technical terms, if the backend time of a particular API of a tenant lies ' +
-                        'outside the predefined value, an alert will be sent out.',
-                }),
-            },
-            2: {
-                name: intl.formatMessage({
-                    id: 'Apis.Settings.Alerts.Alerts.abnormal.backend.time',
-                    defaultMessage: 'Abnormal Backend Time',
-                }),
-                displayName: 'AbnormalBackendTime',
-                description: intl.formatMessage({
-                    id: 'Apis.Settings.Alerts.Alerts.abnormal.backend.time.description',
-                    defaultMessage: 'This alert gets triggered if the response time of a particular API is higher ' +
-                        'than the predefined value. These alerts could be treated as an indication of a slow ' +
-                        'WSO2 API Manager runtime or a slow backend.',
-                }),
-            },
-            7: {
-                name: intl.formatMessage({
-                    id: 'Apis.Settings.Alerts.Alerts.api.health.monitor',
-                    defaultMessage: 'API Health Monitor',
-                }),
-                displayName: 'APIHealthMonitor',
-                description: intl.formatMessage({
-                    id: 'Apis.Settings.Alerts.Alerts.api.health.monitor.description',
-                    defaultMessage: 'This alert gets triggered if at least one of the two cases below are satisfied; ' +
-                    'Response time of an API > Threshold response time value defined for that particular API or ' +
-                    'Response status code >= 500 (By Default) AND Response status code < 600 (By Default)',
-                }),
-            },
-        };
+    const alertIdMapping = {
+        1: {
+            name: intl.formatMessage({
+                id: 'Apis.Settings.Alerts.Alerts.abnormal.response.time',
+                defaultMessage: 'Abnormal Response Time',
+            }),
+            displayName: 'AbnormalResponseTime',
+            description: intl.formatMessage({
+                id: 'Apis.Settings.Alerts.Alerts.abnormal.request.time.description',
+                defaultMessage: 'This alert gets triggered if the backend time'
+                    + ' corresponding to a particular API is higher than the predefined value. '
+                    + 'These alerts could be treated as an indication of a slow '
+                    + 'backend. In technical terms, if the backend time of a particular API of a tenant lies '
+                    + 'outside the predefined value, an alert will be sent out.',
+            }),
+        },
+        2: {
+            name: intl.formatMessage({
+                id: 'Apis.Settings.Alerts.Alerts.abnormal.backend.time',
+                defaultMessage: 'Abnormal Backend Time',
+            }),
+            displayName: 'AbnormalBackendTime',
+            description: intl.formatMessage({
+                id: 'Apis.Settings.Alerts.Alerts.abnormal.backend.time.description',
+                defaultMessage: 'This alert gets triggered if the response time of a particular API is higher '
+                    + 'than the predefined value. These alerts could be treated as an indication of a slow '
+                    + 'WSO2 API Manager runtime or a slow backend.',
+            }),
+        },
+        7: {
+            name: intl.formatMessage({
+                id: 'Apis.Settings.Alerts.Alerts.api.health.monitor',
+                defaultMessage: 'API Health Monitor',
+            }),
+            displayName: 'APIHealthMonitor',
+            description: intl.formatMessage({
+                id: 'Apis.Settings.Alerts.Alerts.api.health.monitor.description',
+                defaultMessage: 'This alert gets triggered if at least one of the two cases below are satisfied; '
+                    + 'Response time of an API > Threshold response time value defined for that particular API or '
+                    + 'Response status code >= 500 (By Default) AND Response status code < 600 (By Default)',
+            }),
+        },
+    };
     /**
      * Set the configuration dialog open property for provided alert type.
      *
@@ -165,7 +164,7 @@ const Alerts = (props) => {
             if (data.length === 0) {
                 setOpenDialog({ open: true, alertType: selectedType.displayName, name: selectedType.name });
             }
-        }).catch(err => console.log(err));
+        }).catch((err) => console.log(err));
     };
 
     /**
@@ -279,115 +278,125 @@ const Alerts = (props) => {
     //     return <CircularProgress />;
     // }
     return (
-        <React.Fragment>
+        <>
             <Paper className={classes.alertsWrapper}>
-                {!isAnalyticsEnabled ?
-                    <React.Fragment>
-                        <InlineMessage type='info' height={100}>
-                            <div className={classes.contentWrapper}>
-                                <Typography>
-                                    <FormattedMessage
-                                        id='Apis.Settings.Alerts.Alerts.enable.analytics.message'
-                                        defaultMessage='Enable Analytics to Configure Alerts'
-                                    />
-                                </Typography>
-                            </div>
-                        </InlineMessage>
-                    </React.Fragment> :
-                    <React.Fragment>
-                        {!supportedAlerts ?
-                            <CircularProgress /> :
-                            <React.Fragment>
-                                <Typography variant='h6' className={classes.manageAlertHeading}>
-                                    <FormattedMessage
-                                        id='Apis.Settings.Alerts.Alerts.subscribe.to.alerts.heading'
-                                        defaultMessage='Manage Alert Subscriptions'
-                                    />
-                                </Typography>
-                                <Typography variant='caption'>
-                                    <FormattedMessage
-                                        id='Apis.Settings.Alerts.Alerts.subscribe.to.alerts.subheading'
-                                        defaultMessage={'Select the Alert types to subscribe/ unsubscribe and click' +
-                                        ' Save.'}
-                                    />
-                                </Typography>
-                                <List>
-                                    {supportedAlerts && supportedAlerts.map((alert) => {
-                                        return (
-                                            <ListItem key={alert.id} divider>
-                                                <ListItemIcon>
-                                                    <Checkbox
-                                                        edge='start'
-                                                        tabIndex={-1}
-                                                        value={alert.id}
-                                                        checked={isAlertSubscribed(alert.id)}
-                                                        onChange={() => handleCheckAlert(alert)}
-                                                        inputProps={{ 'aria-labelledby': alert.name }}
-                                                        color='primary'
-                                                    />
-                                                </ListItemIcon>
-                                                <ListItemText
-                                                    id={alert.id}
-                                                    primary={alertIdMapping[alert.id].name}
-                                                    secondary={alertIdMapping[alert.id].description}
-                                                />
-                                                {alert.requireConfiguration === true ?
-                                                    <ListItemSecondaryAction>
-                                                        <IconButton
-                                                            onClick={() => setConfigOpen(alert.id)}
-                                                        >
-                                                            <Icon>
-                                                                settings
-                                                            </Icon>
-                                                        </IconButton>
-                                                    </ListItemSecondaryAction> :
-                                                    <div />}
-                                            </ListItem>
-                                        );
-                                    })}
-                                </List>
-                                <ChipInput
-                                    label='Emails'
-                                    variant='outlined'
-                                    className={classes.chipInput}
-                                    value={emails}
-                                    placeholder='Enter email address and press Enter'
-                                    required
-                                    helperText={'Email address to receive alerts of selected Alert types. Type email' +
-                                    ' address and press Enter to add'}
-                                    onChange={(chip) => {
-                                        handleAddEmail(chip);
-                                    }}
-                                    onDelete={(chip) => {
-                                        handleEmailDeletion(chip);
-                                    }}
-                                />
-                                <Grid container direction='row' spacing={2} className={classes.btnContainer}>
-                                    <Grid item>
-                                        <Button
-                                            disabled={emails.length === 0 || subscribedAlerts.length === 0}
-                                            onClick={handleSubscribe}
-                                            variant='contained'
-                                            color='primary'
-                                        >
-                                            {isInProgress.subscribing && <CircularProgress size={15} />}
-                                            Save
-                                        </Button>
-                                    </Grid>
-                                    <Grid item>
-                                        <Button
-                                            disabled={isInProgress.subscribing}
-                                            variant='contained'
-                                            color='primary'
-                                            onClick={() => setUnsubscribeAll(true)}
-                                        >
-                                            {isInProgress.unSubscribing && <CircularProgress size={15} />}
-                                            Unsubscribe All
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </React.Fragment>}
-                    </React.Fragment>}
+                {!isAnalyticsEnabled
+                    ? (
+                        <>
+                            <InlineMessage type='info' height={100}>
+                                <div className={classes.contentWrapper}>
+                                    <Typography>
+                                        <FormattedMessage
+                                            id='Apis.Settings.Alerts.Alerts.enable.analytics.message'
+                                            defaultMessage='Enable Analytics to Configure Alerts'
+                                        />
+                                    </Typography>
+                                </div>
+                            </InlineMessage>
+                        </>
+                    )
+                    : (
+                        <>
+                            {!supportedAlerts
+                                ? <CircularProgress />
+                                : (
+                                    <>
+                                        <Typography variant='h6' className={classes.manageAlertHeading}>
+                                            <FormattedMessage
+                                                id='Apis.Settings.Alerts.Alerts.subscribe.to.alerts.heading'
+                                                defaultMessage='Manage Alert Subscriptions'
+                                            />
+                                        </Typography>
+                                        <Typography variant='caption'>
+                                            <FormattedMessage
+                                                id='Apis.Settings.Alerts.Alerts.subscribe.to.alerts.subheading'
+                                                defaultMessage={'Select the Alert types to'
+                                                    + ' subscribe/ unsubscribe and click'
+                                                    + ' Save.'}
+                                            />
+                                        </Typography>
+                                        <List>
+                                            {supportedAlerts && supportedAlerts.map((alert) => {
+                                                return (
+                                                    <ListItem key={alert.id} divider>
+                                                        <ListItemIcon>
+                                                            <Checkbox
+                                                                edge='start'
+                                                                tabIndex={-1}
+                                                                value={alert.id}
+                                                                checked={isAlertSubscribed(alert.id)}
+                                                                onChange={() => handleCheckAlert(alert)}
+                                                                inputProps={{ 'aria-labelledby': alert.name }}
+                                                                color='primary'
+                                                            />
+                                                        </ListItemIcon>
+                                                        <ListItemText
+                                                            id={alert.id}
+                                                            primary={alertIdMapping[alert.id].name}
+                                                            secondary={alertIdMapping[alert.id].description}
+                                                        />
+                                                        {alert.requireConfiguration === true
+                                                            ? (
+                                                                <ListItemSecondaryAction>
+                                                                    <IconButton
+                                                                        onClick={() => setConfigOpen(alert.id)}
+                                                                    >
+                                                                        <Icon>
+                                                                            settings
+                                                                        </Icon>
+                                                                    </IconButton>
+                                                                </ListItemSecondaryAction>
+                                                            )
+                                                            : <div />}
+                                                    </ListItem>
+                                                );
+                                            })}
+                                        </List>
+                                        <ChipInput
+                                            label='Emails'
+                                            variant='outlined'
+                                            className={classes.chipInput}
+                                            value={emails}
+                                            placeholder='Enter email address and press Enter'
+                                            required
+                                            helperText={'Email address to receive alerts of selected'
+                                                + ' Alert types. Type email'
+                                                + ' address and press Enter to add'}
+                                            onChange={(chip) => {
+                                                handleAddEmail(chip);
+                                            }}
+                                            onDelete={(chip) => {
+                                                handleEmailDeletion(chip);
+                                            }}
+                                        />
+                                        <Grid container direction='row' spacing={2} className={classes.btnContainer}>
+                                            <Grid item>
+                                                <Button
+                                                    disabled={emails.length === 0 || subscribedAlerts.length === 0}
+                                                    onClick={handleSubscribe}
+                                                    variant='contained'
+                                                    color='primary'
+                                                >
+                                                    {isInProgress.subscribing && <CircularProgress size={15} />}
+                                                    Save
+                                                </Button>
+                                            </Grid>
+                                            <Grid item>
+                                                <Button
+                                                    disabled={isInProgress.subscribing}
+                                                    variant='contained'
+                                                    color='primary'
+                                                    onClick={() => setUnsubscribeAll(true)}
+                                                >
+                                                    {isInProgress.unSubscribing && <CircularProgress size={15} />}
+                                                    Unsubscribe All
+                                                </Button>
+                                            </Grid>
+                                        </Grid>
+                                    </>
+                                )}
+                        </>
+                    )}
             </Paper>
             <Dialog open={openDialog.open}>
                 <DialogTitle>
@@ -426,8 +435,8 @@ const Alerts = (props) => {
                     <Typography>
                         <FormattedMessage
                             id='Apis.Settings.Alerts.Alerts.unsubscribe.confirm.dialog.message'
-                            defaultMessage={'This will remove all the existing alert subscriptions and emails. This' +
-                            ' action cannot be undone.'}
+                            defaultMessage={'This will remove all the existing alert subscriptions and emails. This'
+                                + ' action cannot be undone.'}
                         />
                     </Typography>
                 </DialogContent>
@@ -458,13 +467,13 @@ const Alerts = (props) => {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </React.Fragment>
+        </>
     );
 };
 
 Alerts.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func.isRequired }).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Alerts));

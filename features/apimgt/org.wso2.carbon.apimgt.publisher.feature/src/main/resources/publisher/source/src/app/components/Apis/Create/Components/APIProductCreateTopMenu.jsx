@@ -26,7 +26,7 @@ import { FormattedMessage } from 'react-intl';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 
-const styles = theme => ({
+const styles = (theme) => ({
     rightIcon: {
         marginLeft: theme.spacing(1),
     },
@@ -92,7 +92,9 @@ const APIProductDetailsTopMenu = ({ classes, theme }) => {
                 <Link to='/api-products' className={classes.backLink}>
                     <KeyboardArrowLeft className={classes.backIcon} />
                     <div className={classes.backText}>
-                        BACK TO <br />
+                        BACK TO
+                        {' '}
+                        <br />
                         LISTING
                     </div>
                 </Link>
@@ -111,8 +113,8 @@ const APIProductDetailsTopMenu = ({ classes, theme }) => {
                         <FormattedMessage
                             id='fill.the.mandatory.fields.product'
                             defaultMessage={
-                                'Fill the mandatory fields (Name, Context)' +
-                                ' and create the API Product. Configure advanced the configurations later.'
+                                'Fill the mandatory fields (Name, Context)'
+                                + ' and create the API Product. Configure advanced the configurations later.'
                             }
                         />
                     </Typography>

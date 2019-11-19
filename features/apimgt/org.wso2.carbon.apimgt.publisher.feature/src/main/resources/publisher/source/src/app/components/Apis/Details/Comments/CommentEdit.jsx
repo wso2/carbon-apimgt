@@ -26,7 +26,7 @@ import Grid from '@material-ui/core/Grid';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
 
-const styles = theme => ({
+const styles = (theme) => ({
     textField: {
         marginTop: 0,
         width: '87.5%',

@@ -32,7 +32,7 @@ import { isRestricted } from 'AppData/AuthManager';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 import API from 'AppData/api';
 
-const styles = theme => ({
+const styles = (theme) => ({
     endpointInputWrapper: {
         width: '100%',
         display: 'flex',
@@ -135,14 +135,16 @@ function GenericEndpoint(props) {
                 className={classes.textField}
                 value={serviceUrl}
                 placeholder={!serviceUrl ? 'http://appserver/resource' : ''}
-                onChange={event => setServiceUrl(event.target.value)}
+                onChange={(event) => setServiceUrl(event.target.value)}
                 onBlur={() => editEndpoint(index, category, serviceUrl)}
                 error={!serviceUrl}
-                helperText={!serviceUrl ?
-                    <FormattedMessage
-                        id='Apis.Details.Endpoints.GenericEndpoint.no.ep.error'
-                        defaultMessage='Endpoint URL should not be empty'
-                    /> : ''}
+                helperText={!serviceUrl
+                    ? (
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.GenericEndpoint.no.ep.error'
+                            defaultMessage='Endpoint URL should not be empty'
+                        />
+                    ) : ''}
                 variant='outlined'
                 margin='normal'
                 required
@@ -151,14 +153,16 @@ function GenericEndpoint(props) {
                     autoFocus,
                     endAdornment: (
                         <InputAdornment position='end'>
-                            {statusCode && <Chip
-                                label={statusCode}
-                                className={isEndpointValid ? classes.endpointValidChip : iff(
-                                    isErrorCode,
-                                    classes.endpointErrorChip, classes.endpointInvalidChip,
-                                )}
-                                variant='outlined'
-                            />}
+                            {statusCode && (
+                                <Chip
+                                    label={statusCode}
+                                    className={isEndpointValid ? classes.endpointValidChip : iff(
+                                        isErrorCode,
+                                        classes.endpointErrorChip, classes.endpointInvalidChip,
+                                    )}
+                                    variant='outlined'
+                                />
+                            )}
                             {!api.isWebSocket() && (
                                 <IconButton
                                     className={isEndpointValid ? classes.iconButtonValid : classes.iconButton}
@@ -166,27 +170,29 @@ function GenericEndpoint(props) {
                                     onClick={() => testEndpoint(serviceUrl, apiId)}
                                     disabled={(isRestricted(['apim:api_create'], api)) || isUpdating}
                                 >
-                                    {isUpdating ?
-                                        <CircularProgress size={20} /> :
-                                        <Icon>
+                                    {isUpdating
+                                        ? <CircularProgress size={20} />
+                                        : (
+                                            <Icon>
                                         check_circle
-                                        </Icon>
-                                    }
+                                            </Icon>
+                                        )}
                                 </IconButton>
                             )}
-                            {type === 'prototyped' ?
-                                <div /> :
-                                <IconButton
-                                    className={classes.iconButton}
-                                    aria-label='Settings'
-                                    onClick={() => setAdvancedConfigOpen(index, type, category)}
-                                    disabled={(isRestricted(['apim:api_create'], api))}
-                                >
-                                    <Icon>
+                            {type === 'prototyped'
+                                ? <div />
+                                : (
+                                    <IconButton
+                                        className={classes.iconButton}
+                                        aria-label='Settings'
+                                        onClick={() => setAdvancedConfigOpen(index, type, category)}
+                                        disabled={(isRestricted(['apim:api_create'], api))}
+                                    >
+                                        <Icon>
                                         settings
-                                    </Icon>
-                                </IconButton>
-                            }
+                                        </Icon>
+                                    </IconButton>
+                                )}
                             {(index > 0) ? <Divider className={classes.divider} /> : <div />}
                             {(type === 'load_balance' || type === 'failover') ? (
                                 <IconButton
@@ -205,7 +211,8 @@ function GenericEndpoint(props) {
                     ),
                 }}
             />
-        </div>);
+        </div>
+    );
 }
 
 GenericEndpoint.defaultProps = {

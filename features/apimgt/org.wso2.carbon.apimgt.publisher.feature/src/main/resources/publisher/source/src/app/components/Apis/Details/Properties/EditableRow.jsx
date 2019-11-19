@@ -134,7 +134,7 @@ function EditableRow(props) {
             )}
             <TableCell align='right'>
                 {editMode ? (
-                    <React.Fragment>
+                    <>
                         <IconButton
                             className={classes.link}
                             aria-label='save'
@@ -145,7 +145,7 @@ function EditableRow(props) {
                         >
                             <SaveIcon className={classes.buttonIcon} />
                         </IconButton>
-                    </React.Fragment>
+                    </>
                 ) : (
                     <IconButton
                         className={classes.link}

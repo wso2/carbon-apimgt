@@ -46,7 +46,7 @@ import APIValidation from 'AppData/APIValidation';
 import API from 'AppData/api';
 import DropZoneLocal, { humanFileSize } from 'AppComponents/Shared/DropZoneLocal';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     mandatoryStar: {
         color: theme.palette.error.main,
     },
@@ -172,23 +172,24 @@ export default function ProvideOpenAPI(props) {
     }
 
     return (
-        <React.Fragment>
+        <>
             <Grid container spacing={5}>
                 <Grid item xs={12} md={12}>
                     <FormControl component='fieldset'>
                         <FormLabel component='legend'>
-                            <React.Fragment>
-                                <sup className={classes.mandatoryStar}>*</sup>{' '}
+                            <>
+                                <sup className={classes.mandatoryStar}>*</sup>
+                                {' '}
                                 <FormattedMessage
                                     id='Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.type'
                                     defaultMessage='Input Type'
                                 />
-                            </React.Fragment>
+                            </>
                         </FormLabel>
                         <RadioGroup
                             aria-label='Input type'
                             value={apiInputs.inputType}
-                            onChange={event => inputsDispatcher({ action: 'inputType', value: event.target.value })}
+                            onChange={(event) => inputsDispatcher({ action: 'inputType', value: event.target.value })}
                         >
                             <FormControlLabel
                                 value={ProvideOpenAPI.INPUT_TYPES.URL}
@@ -203,8 +204,8 @@ export default function ProvideOpenAPI(props) {
                         </RadioGroup>
                     </FormControl>
                 </Grid>
-                {isValid.file &&
-                    (
+                {isValid.file
+                    && (
                         <Grid item md={11}>
                             <Banner
                                 onClose={() => setValidity({ file: null })}
@@ -215,11 +216,10 @@ export default function ProvideOpenAPI(props) {
                                 message={isValid.file.message}
                             />
                         </Grid>
-                    )
-                }
+                    )}
                 <Grid item xs={10} md={11}>
                     {isFileInput ? (
-                        <React.Fragment>
+                        <>
                             {apiInputs.inputValue ? (
                                 <List>
                                     <ListItem key={apiInputs.inputValue.path}>
@@ -270,11 +270,10 @@ export default function ProvideOpenAPI(props) {
                                                 />
                                             </Button>,
                                         ]
-                                        )
-                                    }
+                                        )}
                                 </DropZoneLocal>
                             )}
-                        </React.Fragment>
+                        </>
                     ) : (
                         <TextField
                             autoFocus
@@ -304,7 +303,7 @@ export default function ProvideOpenAPI(props) {
                 </Grid>
                 <Grid item xs={2} md={5} />
             </Grid>
-        </React.Fragment>
+        </>
     );
 }
 

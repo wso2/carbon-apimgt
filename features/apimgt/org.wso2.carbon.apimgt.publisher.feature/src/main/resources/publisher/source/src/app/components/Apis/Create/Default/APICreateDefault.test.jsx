@@ -65,7 +65,7 @@ describe('<APICreateForm/> tests', () => {
 
         const mockedUser = new User('DEFAULT', 'admin');
         const allScopes = await getAllScopes();
-        mockedUser.scopes = allScopes.filter(policy => policy !== 'apim:api_publish');
+        mockedUser.scopes = allScopes.filter((policy) => policy !== 'apim:api_publish');
         mockedGetUser.mockReturnValue(mockedUser);
         const originalAuthManager = require.requireActual('AppData/AuthManager');
 
@@ -76,14 +76,16 @@ describe('<APICreateForm/> tests', () => {
                 hasScopes: originalAuthManagers.default.hasScopes,
             };
         });
-        const wrapper = await mountWithIntl(<MuiThemeProvider theme={theme}><APICreateDefault
-            api={new API('mockAPI', '1.1.1', '/sample')}
-            handleSubmit={() => {}}
-            inputChange={() => {}}
-            isAPIProduct={false}
-            valid={{ name: '', version: '', context: '' }}
-        /></MuiThemeProvider>);
-        await new Promise(resolve => setImmediate(resolve));
+        const wrapper = await mountWithIntl(<MuiThemeProvider theme={theme}>
+            <APICreateDefault
+                api={new API('mockAPI', '1.1.1', '/sample')}
+                handleSubmit={() => {}}
+                inputChange={() => {}}
+                isAPIProduct={false}
+                valid={{ name: '', version: '', context: '' }}
+            />
+        </MuiThemeProvider>);
+        await new Promise((resolve) => setImmediate(resolve));
         await wrapper.update();
         const policiesDropDown = await wrapper.find(Policies);
         expect(policiesDropDown.length).toBe(0);
@@ -129,14 +131,16 @@ describe('<APICreateForm/> tests', () => {
         mockedGetUser.mockReturnValueOnce(mockedUser);
 
         // The moment we wait for :) , Mounting the testing component
-        const wrapper = mountWithIntl(<MuiThemeProvider theme={theme}><APICreateDefault
-            api={new API(sampleAPIData)}
-            handleSubmit={() => {}}
-            inputChange={() => {}}
-            isAPIProduct={false}
-            valid={{ name: '', version: '', context: '' }}
-            history={history}
-        /></MuiThemeProvider>);
+        const wrapper = mountWithIntl(<MuiThemeProvider theme={theme}>
+            <APICreateDefault
+                api={new API(sampleAPIData)}
+                handleSubmit={() => {}}
+                inputChange={() => {}}
+                isAPIProduct={false}
+                valid={{ name: '', version: '', context: '' }}
+                history={history}
+            />
+        </MuiThemeProvider>);
 
         // Simulate typing values into input fields, Entering API name, version , context , endpoint
         // and selecting a policy
@@ -168,7 +172,7 @@ describe('<APICreateForm/> tests', () => {
         // Wait till all the above changes get effected
         await wrapper.update();
         // Wait till all the mocked Promises get resource, Or in other words , wait till Promise queue get exhausted
-        await new Promise(resolve => setImmediate(resolve));
+        await new Promise((resolve) => setImmediate(resolve));
 
         // Simulate form submission
         await wrapper.find("button[type='submit']").simulate('submit');

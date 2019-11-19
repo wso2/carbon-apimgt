@@ -40,7 +40,7 @@ function withAPI(WrappedComponent) {
      * @returns
      */
     function HOCWithAPI(props) {
-        return <APIContext.Consumer>{context => <WrappedComponent {...context} {...props} />}</APIContext.Consumer>;
+        return <APIContext.Consumer>{(context) => <WrappedComponent {...context} {...props} />}</APIContext.Consumer>;
     }
     HOCWithAPI.displayName = `withAPI(${WrappedComponent.displayName})`;
     return HOCWithAPI;
@@ -59,4 +59,6 @@ function useAPI() {
 
 export default APIContext;
 
-export { withAPI, APIProvider, APIContext, useAPI };
+export {
+    withAPI, APIProvider, APIContext, useAPI,
+};

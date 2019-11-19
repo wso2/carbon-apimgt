@@ -88,7 +88,7 @@ function EndpointSecurity(props) {
                         id: 'auth-type-select',
                     }}
                 >
-                    {authTypes.map(type => (
+                    {authTypes.map((type) => (
                         <MenuItem value={type.key}>{type.value}</MenuItem>
                     ))}
                 </TextField>
@@ -116,15 +116,15 @@ function EndpointSecurity(props) {
                     }
                     variant='outlined'
                     id='auth-userName'
-                    label={
+                    label={(
                         <FormattedMessage
                             id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.user.name.input'
                             defaultMessage='Username'
                         />
-                    }
-                    onChange={event =>
-                        setEndpointSecurityInfo({ ...endpointSecurityInfo, username: event.target.value })
-                    }
+                    )}
+                    onChange={(event) => setEndpointSecurityInfo(
+                        { ...endpointSecurityInfo, username: event.target.value },
+                    )}
                     value={endpointSecurityInfo.username}
                     onBlur={() => validateAndUpdateSecurityInfo('username')}
                 />
@@ -152,16 +152,16 @@ function EndpointSecurity(props) {
                     variant='outlined'
                     type='password'
                     id='auth-password'
-                    label={
+                    label={(
                         <FormattedMessage
                             id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.password.input'
                             defaultMessage='Password'
                         />
-                    }
+                    )}
                     value={endpointSecurityInfo.password}
-                    onChange={event =>
-                        setEndpointSecurityInfo({ ...endpointSecurityInfo, password: event.target.value })
-                    }
+                    onChange={(event) => setEndpointSecurityInfo(
+                        { ...endpointSecurityInfo, password: event.target.value },
+                    )}
                     onBlur={() => validateAndUpdateSecurityInfo('password')}
                 />
             </Grid>

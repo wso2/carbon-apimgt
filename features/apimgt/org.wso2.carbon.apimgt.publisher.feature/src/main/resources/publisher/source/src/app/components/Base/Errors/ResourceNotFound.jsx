@@ -30,13 +30,13 @@ import Image404 from './Custom404Image';
 
 const ResourceNotFound = (props) => {
     const { response } = props;
-    const message = props.message || {};
+    const { message = {} } = props;
 
     return (
-        <React.Fragment>
+        <>
             <Container maxWidth='md'>
                 <Box padding={4}>
-                    <Paper elevation={0} >
+                    <Paper elevation={0}>
                         <Box padding={4}>
                             <Grid container alignItems='center' justify='center' style={{ height: '100%' }}>
                                 <Grid item xs={12} md={6}>
@@ -45,7 +45,11 @@ const ResourceNotFound = (props) => {
                                     </Typography>
                                     <Typography variant='subtitle1' gutterBottom>
                                         {message.body}
-                                        <span style={{ color: 'green' }}> {response ? response.statusText : ''} </span>
+                                        <span style={{ color: 'green' }}>
+                                            {' '}
+                                            {response ? response.statusText : ''}
+                                            {' '}
+                                        </span>
                                     </Typography>
                                     {message.more}
                                     <Box py={5}>
@@ -84,7 +88,7 @@ const ResourceNotFound = (props) => {
                     </Paper>
                 </Box>
             </Container>
-        </React.Fragment>
+        </>
     );
 };
 

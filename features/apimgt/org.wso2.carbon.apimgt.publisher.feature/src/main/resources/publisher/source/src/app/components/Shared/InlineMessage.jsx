@@ -6,7 +6,7 @@ import Icon from '@material-ui/core/Icon';
 import { amber } from '@material-ui/core/colors';
 import VerticalDivider from './VerticalDivider';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         display: 'flex',
         alignItems: 'center',
@@ -33,18 +33,35 @@ const styles = theme => ({
     },
 });
 
+
+/**
+ *
+ *
+ * @class InlineMessage
+ * @extends {React.Component}
+ */
 class InlineMessage extends React.Component {
     handleExpandClick = () => {
-        this.setState(state => ({ expanded: !state.expanded }));
+        this.setState((state) => ({ expanded: !state.expanded }));
     };
 
+
+    /**
+     *
+     *
+     * @returns
+     * @memberof InlineMessage
+     * @inheritdoc
+     */
     render() {
-        const { classes, height, type } = this.props;
+        const {
+            classes, height, type, children,
+        } = this.props;
         return (
             <Paper className={classes.root} {...this.props}>
                 <Icon className={type}>{type}</Icon>
                 <VerticalDivider height={height} />
-                <div className={classes.content}>{this.props.children}</div>
+                <div className={classes.content}>{children}</div>
             </Paper>
         );
     }

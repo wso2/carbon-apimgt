@@ -37,7 +37,7 @@ import base64url from 'base64url';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Error from '@material-ui/core/SvgIcon/SvgIcon';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         flexGrow: 1,
         marginTop: 10,
@@ -128,6 +128,42 @@ class EditScope extends React.Component {
         this.validateScopeDescription = this.validateScopeDescription.bind(this);
     }
 
+
+    handleRoleDeletion = (role) => {
+        const { validRoles, invalidRoles } = this.state;
+        if (invalidRoles.includes(role)) {
+            const invalidRolesArray = invalidRoles.filter((existingRole) => existingRole !== role);
+            this.setState({ invalidRoles: invalidRolesArray });
+            if (invalidRolesArray.length === 0) {
+                this.setState({ roleValidity: true });
+            }
+        } else {
+            this.setState({ validRoles: validRoles.filter((existingRole) => existingRole !== role) });
+        }
+    };
+
+    /**
+     * Handle api scope addition event
+     * @param {any} event Button Click event
+     * @memberof Scopes
+     */
+    handleInputs(event) {
+        if (Array.isArray(event)) {
+            const { apiScope } = this.state;
+            apiScope.bindings.values = event;
+            this.setState({
+                apiScope,
+            });
+        } else {
+            const input = event.target;
+            const { apiScope } = this.state;
+            apiScope[input.id] = input.value;
+            this.setState({
+                apiScope,
+            });
+        }
+    }
+
     /**
      * Add new scope
      * @memberof Scopes
@@ -167,41 +203,6 @@ class EditScope extends React.Component {
             }
         });
     }
-
-    /**
-     * Handle api scope addition event
-     * @param {any} event Button Click event
-     * @memberof Scopes
-     */
-    handleInputs(event) {
-        if (Array.isArray(event)) {
-            const { apiScope } = this.state;
-            apiScope.bindings.values = event;
-            this.setState({
-                apiScope,
-            });
-        } else {
-            const input = event.target;
-            const { apiScope } = this.state;
-            apiScope[input.id] = input.value;
-            this.setState({
-                apiScope,
-            });
-        }
-    }
-
-    handleRoleDeletion = (role) => {
-        const { validRoles, invalidRoles } = this.state;
-        if (invalidRoles.includes(role)) {
-            const invalidRolesArray = invalidRoles.filter(existingRole => existingRole !== role);
-            this.setState({ invalidRoles: invalidRolesArray });
-            if (invalidRolesArray.length === 0) {
-                this.setState({ roleValidity: true });
-            }
-        } else {
-            this.setState({ validRoles: validRoles.filter(existingRole => existingRole !== role) });
-        }
-    };
 
     handleRoleAddition(role) {
         const { validRoles, invalidRoles } = this.state;
@@ -293,12 +294,12 @@ class EditScope extends React.Component {
                                         label='Description'
                                         variant='outlined'
                                         placeholder='Short description about the scope'
-                                        helperText={
+                                        helperText={(
                                             <FormattedMessage
                                                 id='Apis.Details.Scopes.EditScope.short.description.about.the.scope'
                                                 defaultMessage='Short description about the scope'
                                             />
-                                        }
+                                        )}
                                         margin='normal'
                                         InputLabelProps={{
                                             shrink: true,

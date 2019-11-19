@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
@@ -41,7 +41,7 @@ export default function Parameters(props) {
     }
     const haveParameters = (operation.parameters && operation.parameters.length !== 0) || operation.requestBody;
     return (
-        <Fragment>
+        <>
             <Grid item xs={12} md={12}>
                 <Typography variant='subtitle1'>
                     Parameters
@@ -72,7 +72,7 @@ export default function Parameters(props) {
                     />
                 )}
             </Grid>
-        </Fragment>
+        </>
     );
 }
 

@@ -88,7 +88,7 @@ class AuthManager {
         const introspectUrl = Configurations.app.context + Utils.CONST.INTROSPECT;
         const promisedResponse = fetch(introspectUrl, { credentials: 'same-origin' });
         return promisedResponse
-            .then(response => response.json())
+            .then((response) => response.json())
             .then((data) => {
                 let user = null;
                 if (data.active) {
@@ -166,14 +166,14 @@ class AuthManager {
 
         // determines whether the user is a publisher or creator (based on what is passed from the element)
         // if (scopesAllowedToEdit.filter(element => AuthManager.getUser().scopes.includes(element)).length > 0) {
-        if (scopesAllowedToEdit.find(element => AuthManager.getUser().scopes.includes(element))) {
+        if (scopesAllowedToEdit.find((element) => AuthManager.getUser().scopes.includes(element))) {
             // if the user has publisher role, no need to consider the api LifeCycleStatus
             if (AuthManager.getUser().scopes.includes('apim:api_publish')) {
                 return false;
             } else if (
                 // if the user has creator role, but not the publisher role
-                api.lifeCycleStatus === 'CREATED' ||
-                api.lifeCycleStatus === 'PROTOTYPED'
+                api.lifeCycleStatus === 'CREATED'
+                || api.lifeCycleStatus === 'PROTOTYPED'
             ) {
                 return false;
             } else {
@@ -232,8 +232,8 @@ class AuthManager {
 // TODO: derive this from swagger definitions ~tmkb
 AuthManager.CONST = {
     USER_SCOPES:
-        'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage ' +
-        'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
+        'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
+        + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
 };
 const { isRestricted } = AuthManager;
 

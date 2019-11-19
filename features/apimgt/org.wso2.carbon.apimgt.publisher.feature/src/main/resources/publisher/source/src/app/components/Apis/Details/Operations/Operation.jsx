@@ -28,7 +28,7 @@ import { injectIntl } from 'react-intl';
 import { Typography } from '@material-ui/core';
 import Switch from '@material-ui/core/Switch';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         flexGrow: 1,
         marginTop: 10,
@@ -160,6 +160,7 @@ class Operation extends React.Component {
         newoperation.scopes = [scope];
         this.props.handleUpdateList(newoperation);
     }
+
     /**
      *
      * @param {*} e event triggered for handle  policy Change
@@ -199,16 +200,17 @@ class Operation extends React.Component {
         const noneScope = { name: 'none', description: '', bindings: null };
         const dropdownScopes = [...scopes, noneScope];
         const { isSecurity } = this.state;
-        let chipColor = theme.custom.operationChipColor ?
-            theme.custom.operationChipColor[operation.verb.toLowerCase()]
+        let chipColor = theme.custom.operationChipColor
+            ? theme.custom.operationChipColor[operation.verb.toLowerCase()]
             : null;
         let chipTextColor = '#000000';
         if (!chipColor) {
             console.log('Check the theme settings. The resourceChipColors is not populated properlly');
             chipColor = '#cccccc';
         } else {
-            chipTextColor =
-            theme.palette.getContrastText(theme.custom.operationChipColor[operation.verb.toLowerCase()]);
+            chipTextColor = theme.palette.getContrastText(
+                theme.custom.operationChipColor[operation.verb.toLowerCase()],
+            );
         }
         return (
             <TableRow style={{ borderStyle: 'hidden' }}>
@@ -234,7 +236,7 @@ class Operation extends React.Component {
                         onChange={this.handlePolicyChange}
                         fieldName='Throttling Policy'
                     >
-                        {apiPolicies.map(policy => (
+                        {apiPolicies.map((policy) => (
                             <MenuItem
                                 key={policy.name}
                                 value={policy.name}
@@ -254,7 +256,7 @@ class Operation extends React.Component {
                             id: 'age-simple',
                         }}
                     >
-                        {dropdownScopes.map(tempScope => (
+                        {dropdownScopes.map((tempScope) => (
                             <MenuItem
                                 key={tempScope.name}
                                 value={tempScope.name}

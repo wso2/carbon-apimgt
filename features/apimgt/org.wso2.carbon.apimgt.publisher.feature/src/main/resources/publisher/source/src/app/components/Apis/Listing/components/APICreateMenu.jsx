@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { List, ListItem, ListItemText, Divider } from '@material-ui/core/';
+import {
+    List, ListItem, ListItemText, Divider,
+} from '@material-ui/core/';
 import { makeStyles } from '@material-ui/styles';
 import { Link } from 'react-router-dom';
 
@@ -8,7 +10,7 @@ import MenuButton from 'AppComponents/Shared/MenuButton';
 import { FormattedMessage } from 'react-intl';
 import AuthManager from 'AppData/AuthManager';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     links: {
         textDecoration: 'none',
         color: theme.palette.getContrastText(theme.palette.background.paper),
@@ -23,18 +25,18 @@ const APICreateMenu = (props) => {
             <ListItem>
                 <Link id='itest-id-createdefault' to='/apis/create/rest' className={classes.links}>
                     <ListItemText
-                        primary={
+                        primary={(
                             <FormattedMessage
                                 id='Apis.Listing.components.APICreateMenu.primary.rest'
                                 defaultMessage='Design a New REST API'
                             />
-                        }
-                        secondary={
+                        )}
+                        secondary={(
                             <FormattedMessage
                                 id='Apis.Listing.components.APICreateMenu.secondary.rest'
                                 defaultMessage='Design and prototype a new REST API'
                             />
-                        }
+                        )}
                     />
                 </Link>
             </ListItem>
@@ -42,18 +44,18 @@ const APICreateMenu = (props) => {
             <ListItem>
                 <Link to='/apis/create/openapi' className={classes.links}>
                     <ListItemText
-                        primary={
+                        primary={(
                             <FormattedMessage
                                 id='Apis.Listing.components.APICreateMenu.primary.swagger'
                                 defaultMessage='I Have an Existing REST API'
                             />
-                        }
-                        secondary={
+                        )}
+                        secondary={(
                             <FormattedMessage
                                 id='Apis.Listing.components.APICreateMenu.secondary.swagger'
                                 defaultMessage='Use an existing REST endpoint or Swagger definition'
                             />
-                        }
+                        )}
                     />
                 </Link>
             </ListItem>
@@ -61,18 +63,18 @@ const APICreateMenu = (props) => {
             <ListItem>
                 <Link to='/apis/create/wsdl' className={classes.links}>
                     <ListItemText
-                        primary={
+                        primary={(
                             <FormattedMessage
                                 id='Apis.Listing.components.APICreateMenu.primary.soap'
                                 defaultMessage='I Have a SOAP Endpoint'
                             />
-                        }
-                        secondary={
+                        )}
+                        secondary={(
                             <FormattedMessage
                                 id='Apis.Listing.components.APICreateMenu.secondary.soap'
                                 defaultMessage='Use an existing SOAP or import the WSDL'
                             />
-                        }
+                        )}
                     />
                 </Link>
             </ListItem>
@@ -80,18 +82,18 @@ const APICreateMenu = (props) => {
             <ListItem>
                 <Link to='/apis/create/graphQL' className={classes.links}>
                     <ListItemText
-                        primary={
+                        primary={(
                             <FormattedMessage
                                 id='Apis.Listing.components.APICreateMenu.primary.graphql'
                                 defaultMessage='I Have a GraphQL SDL schema'
                             />
-                        }
-                        secondary={
+                        )}
+                        secondary={(
                             <FormattedMessage
                                 id='Apis.Listing.components.APICreateMenu.secondary.graphql'
                                 defaultMessage='Import a GraphQL SDL schema'
                             />
-                        }
+                        )}
                     />
                 </Link>
             </ListItem>
@@ -99,18 +101,18 @@ const APICreateMenu = (props) => {
             <ListItem>
                 <Link to='/apis/create/ws' className={classes.links}>
                     <ListItemText
-                        primary={
+                        primary={(
                             <FormattedMessage
                                 id='Apis.Listing.components.APICreateMenu.primary.ws'
                                 defaultMessage='Design New Websocket API'
                             />
-                        }
-                        secondary={
+                        )}
+                        secondary={(
                             <FormattedMessage
                                 id='Apis.Listing.components.APICreateMenu.secondary.ws'
                                 defaultMessage='Design and prototype a new WebSocket API'
                             />
-                        }
+                        )}
                     />
                 </Link>
             </ListItem>

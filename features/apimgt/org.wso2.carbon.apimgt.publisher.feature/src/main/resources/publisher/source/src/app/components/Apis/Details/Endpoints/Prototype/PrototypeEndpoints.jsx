@@ -34,7 +34,7 @@ import cloneDeep from 'lodash.clonedeep';
 
 const endpointImplementationTypes = [{ key: 'INLINE', value: 'Inline' }, { key: 'ENDPOINT', value: 'Endpoint' }];
 
-const styles = theme => ({
+const styles = (theme) => ({
     prototypeEndpointSelectorWrapper: {
         padding: theme.spacing(2),
     },
@@ -106,14 +106,14 @@ function PrototypeEndpoints(props) {
         updateSwagger({ ...swaggerDef, paths });
     };
     return (
-        <React.Fragment>
+        <>
             <Grid container direction='column'>
                 <Paper>
                     <Grid item className={classes.prototypeEndpointSelectorWrapper}>
                         <Typography className={classes.implementationMethodHeader}>
                             <FormattedMessage
-                                id={'Apis.Details.Endpoints.Prototype.PrototypeEndpoints' +
-                                '.endpoint.implementation.method'}
+                                id={'Apis.Details.Endpoints.Prototype.PrototypeEndpoints'
+                                + '.endpoint.implementation.method'}
                                 defaultMessage='Endpoint Implementation Method'
                             />
                         </Typography>
@@ -128,41 +128,47 @@ function PrototypeEndpoints(props) {
                                 <FormControlLabel
                                     value={endpointImplementationTypes[0].key}
                                     control={<Radio color='primary' />}
-                                    label={<FormattedMessage
-                                        id='Apis.Details.Endpoints.Prototype.PrototypeEndpoints.mock'
-                                        defaultMessage='Mock'
-                                    />}
+                                    label={(
+                                        <FormattedMessage
+                                            id='Apis.Details.Endpoints.Prototype.PrototypeEndpoints.mock'
+                                            defaultMessage='Mock'
+                                        />
+                                    )}
                                 />
                                 <FormControlLabel
                                     value={endpointImplementationTypes[1].key}
                                     control={<Radio color='primary' />}
-                                    label={<FormattedMessage
-                                        id='Apis.Details.Endpoints.Prototype.PrototypeEndpoints.endpoint'
-                                        defaultMessage='Endpoint'
-                                    />}
+                                    label={(
+                                        <FormattedMessage
+                                            id='Apis.Details.Endpoints.Prototype.PrototypeEndpoints.endpoint'
+                                            defaultMessage='Endpoint'
+                                        />
+                                    )}
                                 />
                             </RadioGroup>
                         </FormControl>
                     </Grid>
                 </Paper>
                 <Grid item className={classes.prototypeEndpointsWrapper}>
-                    {endpointImplementationType === endpointImplementationTypes[0].key ?
-                        <InlineEndpoints paths={swaggerDef.paths} updatePaths={updatePaths} /> :
-                        <Paper className={classes.genericEndpointWrapper}>
-                            <GenericEndpoint
-                                endpointURL={endpointUrl}
-                                type='prototyped'
-                                index={0}
-                                category='prototyped'
-                                editEndpoint={editPrototypeEndpoint}
-                                setAdvancedConfigOpen={null}
-                                apiId={api.id}
-                            />
-                        </Paper>
-                    }
+                    {endpointImplementationType === endpointImplementationTypes[0].key
+                        ? <InlineEndpoints paths={swaggerDef.paths} updatePaths={updatePaths} />
+                        : (
+                            <Paper className={classes.genericEndpointWrapper}>
+                                <GenericEndpoint
+                                    endpointURL={endpointUrl}
+                                    type='prototyped'
+                                    index={0}
+                                    category='prototyped'
+                                    editEndpoint={editPrototypeEndpoint}
+                                    setAdvancedConfigOpen={null}
+                                    apiId={api.id}
+                                />
+                            </Paper>
+                        )}
                 </Grid>
             </Grid>
-        </React.Fragment>);
+        </>
+    );
 }
 
 PrototypeEndpoints.propTypes = {

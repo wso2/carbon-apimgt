@@ -1,4 +1,4 @@
-const getSwagger = policyLevel => ({
+const getSwagger = (policyLevel) => ({
     paths: {
         '/order': {
             post: {
@@ -28,8 +28,8 @@ const getSwagger = policyLevel => ({
                         },
                         schema: { $ref: '#/definitions/Order' },
                         description:
-                            'Created. Successful response with the newly created object as entity in' +
-                            'the body. Location header contains URL of newly created entity.',
+                            'Created. Successful response with the newly created object as entity in'
+                            + 'the body. Location header contains URL of newly created entity.',
                     },
                     400: {
                         schema: { $ref: '#/definitions/Error' },
@@ -59,8 +59,8 @@ const getSwagger = policyLevel => ({
                     },
                     304: {
                         description:
-                            'Not Modified. Empty body because the client has already the latest' +
-                            ' version of the requested resource.',
+                            'Not Modified. Empty body because the client has already the latest'
+                            + ' version of the requested resource.',
                     },
                     406: {
                         schema: { $ref: '#/definitions/Error' },
@@ -117,8 +117,8 @@ const getSwagger = policyLevel => ({
                     412: {
                         schema: { $ref: '#/definitions/Error' },
                         description:
-                            'Precondition Failed. The request has not been performed because one ' +
-                            'of the preconditions is not met.',
+                            'Precondition Failed. The request has not been performed because one '
+                            + 'of the preconditions is not met.',
                     },
                 },
             },
@@ -144,8 +144,8 @@ const getSwagger = policyLevel => ({
                     },
                     304: {
                         description:
-                            'Not Modified. Empty body because the client has already the latest' +
-                            ' version of the requested resource.',
+                            'Not Modified. Empty body because the client has already the latest'
+                            + ' version of the requested resource.',
                     },
                     404: {
                         schema: { $ref: '#/definitions/Error' },
@@ -182,8 +182,8 @@ const getSwagger = policyLevel => ({
                     412: {
                         schema: { $ref: '#/definitions/Error' },
                         description:
-                            'Precondition Failed. The request has not been performed because one of the' +
-                            ' preconditions is not met.',
+                            'Precondition Failed. The request has not been performed because one of the'
+                            + ' preconditions is not met.',
                     },
                 },
             },

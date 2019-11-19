@@ -26,8 +26,6 @@ import 'swagger-editor/dist/swagger-editor.css';
  * https://github.com/wso2/product-apim/issues/5071
  * */
 class SwaggerEditorDrawer extends React.Component {
-    state = {};
-
     /**
      * @inheritDoc
      */

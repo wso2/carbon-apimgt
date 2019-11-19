@@ -16,12 +16,12 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Footer from './Footer/Footer';
 
-const styles = theme => ({
+const styles = (theme) => ({
     appBar: {
         position: 'relative',
         background: theme.palette.background.appBar,
@@ -82,7 +82,7 @@ const styles = theme => ({
  */
 const Base = ({ classes, children, header }) => {
     return (
-        <Fragment>
+        <>
             <div className={classes.wrapper}>
                 {header}
                 <div className={classes.contentWrapper}>{children}</div>
@@ -90,7 +90,7 @@ const Base = ({ classes, children, header }) => {
                 <div className={classes.push} />
             </div>
             <Footer />
-        </Fragment>
+        </>
     );
 };
 

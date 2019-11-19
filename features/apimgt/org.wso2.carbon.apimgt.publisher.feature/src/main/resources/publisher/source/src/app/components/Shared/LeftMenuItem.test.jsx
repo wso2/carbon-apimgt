@@ -34,6 +34,6 @@ describe('<LeftMenuItem/> tests', () => {
                 <LeftMenuItem />
             </MuiThemeProvider>
         );
-        //mount(TestComponent);
+        // mount(TestComponent);
     });
 });

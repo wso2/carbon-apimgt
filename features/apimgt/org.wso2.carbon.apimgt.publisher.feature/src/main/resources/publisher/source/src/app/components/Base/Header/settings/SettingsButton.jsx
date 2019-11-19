@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 
-const styles = theme => ({
+const styles = (theme) => ({
     settingsIconbtn: {
         color: theme.palette.getContrastText(theme.palette.background.appBar),
         fontSize: theme.typography.fontSize,
@@ -36,7 +36,7 @@ const styles = theme => ({
 const SettingsButton = (props) => {
     const { classes } = props;
     return (
-        <React.Fragment>
+        <>
             <Link to='/settings'>
                 <IconButton
                     id='settings-btn'
@@ -54,7 +54,7 @@ const SettingsButton = (props) => {
                     />
                 </IconButton>
             </Link>
-        </React.Fragment>
+        </>
     );
 };
 

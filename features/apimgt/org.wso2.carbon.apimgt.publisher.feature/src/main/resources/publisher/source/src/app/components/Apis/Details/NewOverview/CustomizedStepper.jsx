@@ -40,7 +40,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import AuthManager from 'AppData/AuthManager';
 
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         width: '90%',
     },
@@ -125,8 +125,8 @@ export default function CustomizedSteppers() {
     const { settings, user } = useAppContext();
     const isEndpointAvailable = api.endpointConfig !== null;
     const isTierAvailable = api.policies.length !== 0;
-    const isPrototypedAvailable =
-        api.endpointConfig !== null && api.endpointConfig.implementation_status === 'prototyped';
+    const isPrototypedAvailable = api.endpointConfig !== null
+        && api.endpointConfig.implementation_status === 'prototyped';
     const [lifecycleState, setlifecycleState] = useState([]);
     const [isUpdating, setUpdating] = useState(false);
     const { tenantList } = useContext(ApiContext);
@@ -266,8 +266,8 @@ export default function CustomizedSteppers() {
                                     variant='contained'
                                     color='primary'
                                     onClick={() => updateLCStateOfAPI(api.id, 'Publish')}
-                                    disabled={(!isEndpointAvailable || !isTierAvailable) ||
-                                        AuthManager.isNotPublisher() || api.workflowStatus === 'CREATED'}
+                                    disabled={(!isEndpointAvailable || !isTierAvailable)
+                                        || AuthManager.isNotPublisher() || api.workflowStatus === 'CREATED'}
                                 >
                                         Publish
                                     {isUpdating && <CircularProgress size={20} />}
@@ -316,8 +316,8 @@ export default function CustomizedSteppers() {
                     </StepLabel>
                 </Step>
                 <Step className={classes.label}>
-                    <StepLabel style={{ position: 'relative' }} >
-                        <Box p={2} bgcolor='white' borderLeft='0' borderRight='0' >
+                    <StepLabel style={{ position: 'relative' }}>
+                        <Box p={2} bgcolor='white' borderLeft='0' borderRight='0'>
                             <Tooltip
                                 title={isEndpointAvailable ? '' : 'You have to specify an endpoint for the API'}
                                 placement='top'
@@ -366,7 +366,7 @@ export default function CustomizedSteppers() {
                 </Step>
                 <Step className={classes.label}>
                     <StepLabel style={{ position: 'relative' }}>
-                        <Box className={classes.box} >
+                        <Box className={classes.box}>
                             {finalLifecycleState(lifecycleState)}
                         </Box>
                     </StepLabel>

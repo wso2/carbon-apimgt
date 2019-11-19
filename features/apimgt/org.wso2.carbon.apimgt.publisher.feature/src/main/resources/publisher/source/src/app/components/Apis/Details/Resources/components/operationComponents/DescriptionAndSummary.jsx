@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
@@ -35,10 +35,14 @@ export default function DescriptionAndSummary(props) {
         operation, operationsDispatcher, disableUpdate, target, verb,
     } = props;
     return (
-        <Fragment>
+        <>
             <Grid item xs={12} md={12}>
                 <Typography variant='subtitle1'>
-                    Summary {'&'} Description
+                    Summary
+                    {' '}
+                    {'&'}
+                    {' '}
+Description
                     <Divider variant='middle' />
                 </Typography>
             </Grid>
@@ -53,8 +57,10 @@ export default function DescriptionAndSummary(props) {
                     rows='4'
                     value={operation.description}
                     variant='outlined'
-                    onChange={({ target: { value } }) =>
-                        operationsDispatcher({ action: 'description', data: { target, verb, value } })
+                    onChange={
+                        ({ target: { value } }) => operationsDispatcher(
+                            { action: 'description', data: { target, verb, value } },
+                        )
                     }
                 />
             </Grid>
@@ -67,13 +73,13 @@ export default function DescriptionAndSummary(props) {
                     fullWidth
                     disabled={disableUpdate}
                     value={operation.summary}
-                    onChange={({ target: { value } }) =>
-                        operationsDispatcher({ action: 'summary', data: { target, verb, value } })
-                    }
+                    onChange={({ target: { value } }) => operationsDispatcher(
+                        { action: 'summary', data: { target, verb, value } },
+                    )}
                 />
             </Grid>
             <Grid item md={1} />
-        </Fragment>
+        </>
     );
 }
 

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import React, { useContext, useEffect, useState, useReducer } from 'react';
+import React, {
+    useContext, useEffect, useState, useReducer,
+} from 'react';
 import { Grid, CircularProgress } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -29,7 +31,7 @@ import { isRestricted } from 'AppData/AuthManager';
 import EndpointOverview from './EndpointOverview';
 import { createEndpointConfig, getEndpointTemplateByType } from './endpointUtils';
 
-const styles = theme => ({
+const styles = (theme) => ({
     endpointTypesWrapper: {
         display: 'flex',
         alignItems: 'center',
@@ -227,8 +229,9 @@ function Endpoints(props) {
              *  production/ sandbox endpoint [0] must be present.
              * */
             if (endpointConfig.production_endpoints && endpointConfig.production_endpoints.length > 0) {
-                if (!endpointConfig.production_endpoints[0].url ||
-                    (endpointConfig.production_endpoints[0].url && endpointConfig.production_endpoints[0].url === '')) {
+                if (!endpointConfig.production_endpoints[0].url
+                    || (endpointConfig.production_endpoints[0].url
+                        && endpointConfig.production_endpoints[0].url === '')) {
                     return {
                         isValid: false,
                         message: intl.formatMessage({
@@ -239,8 +242,8 @@ function Endpoints(props) {
                 }
             }
             if (endpointConfig.sandbox_endpoints && endpointConfig.sandbox_endpoints.length > 0) {
-                if (!endpointConfig.sandbox_endpoints[0].url ||
-                    (endpointConfig.sandbox_endpoints[0].url && endpointConfig.sandbox_endpoints[0].url === '')) {
+                if (!endpointConfig.sandbox_endpoints[0].url
+                    || (endpointConfig.sandbox_endpoints[0].url && endpointConfig.sandbox_endpoints[0].url === '')) {
                     return {
                         isValid: false,
                         message: intl.formatMessage({
@@ -272,8 +275,8 @@ function Endpoints(props) {
             } else if (!endpointConfig.sandbox_endpoints && !endpointConfig.production_endpoints) {
                 isValidEndpoint = false;
             } else {
-                isValidEndpoint = endpointConfig.sandbox_endpoints.url !== '' ||
-                        endpointConfig.production_endpoints.url !== '';
+                isValidEndpoint = endpointConfig.sandbox_endpoints.url !== ''
+                        || endpointConfig.production_endpoints.url !== '';
             }
             return !isValidEndpoint ? {
                 isValid: false,
@@ -326,90 +329,92 @@ function Endpoints(props) {
     };
 
     return (
-        <React.Fragment>
+        <>
             {/* Since the api is set to the state in component did mount, check both the api and the apiObject. */}
-            {(api.endpointConfig === null && apiObject.endpointConfig === null) ?
-                <NewEndpointCreate generateEndpointConfig={generateEndpointConfig} apiType={apiObject.type} /> :
-                <div className={classes.root}>
-                    <Typography variant='h4' align='left' gutterBottom>
-                        <FormattedMessage
-                            id='Apis.Details.Endpoints.Endpoints.endpoints.header'
-                            defaultMessage='Endpoints'
-                        />
-                    </Typography>
-                    <div>
-                        <Grid container>
-                            <Grid item xs={12} className={classes.endpointsContainer}>
-                                <EndpointOverview
-                                    swaggerDef={swagger}
-                                    updateSwagger={changeSwagger}
-                                    api={apiObject}
-                                    onChangeAPI={apiDispatcher}
-                                    endpointsDispatcher={apiDispatcher}
-                                    saveAndRedirect={saveAndRedirect}
-                                />
-                            </Grid>
-                        </Grid>
-                        {
-                            endpointValidity.isValid ?
-                                <div /> :
-                                <Grid item className={classes.errorMessageContainer}>
-                                    <Typography className={classes.endpointValidityMessage}>
-                                        {endpointValidity.message}
-                                    </Typography>
-                                </Grid>
-                        }
-                        <Grid
-                            container
-                            direction='row'
-                            alignItems='flex-start'
-                            spacing={1}
-                            className={classes.buttonSection}
-                        >
-                            <Grid item>
-                                <Button
-                                    disabled={isUpdating || !endpointValidity.isValid ||
-                                    isRestricted(['apim:api_create'], api)}
-                                    type='submit'
-                                    variant='contained'
-                                    color='primary'
-                                    onClick={() => saveAPI()}
-                                >
-                                    <FormattedMessage
-                                        id='Apis.Details.Endpoints.Endpoints.save'
-                                        defaultMessage='Save'
+            {(api.endpointConfig === null && apiObject.endpointConfig === null)
+                ? <NewEndpointCreate generateEndpointConfig={generateEndpointConfig} apiType={apiObject.type} />
+                : (
+                    <div className={classes.root}>
+                        <Typography variant='h4' align='left' gutterBottom>
+                            <FormattedMessage
+                                id='Apis.Details.Endpoints.Endpoints.endpoints.header'
+                                defaultMessage='Endpoints'
+                            />
+                        </Typography>
+                        <div>
+                            <Grid container>
+                                <Grid item xs={12} className={classes.endpointsContainer}>
+                                    <EndpointOverview
+                                        swaggerDef={swagger}
+                                        updateSwagger={changeSwagger}
+                                        api={apiObject}
+                                        onChangeAPI={apiDispatcher}
+                                        endpointsDispatcher={apiDispatcher}
+                                        saveAndRedirect={saveAndRedirect}
                                     />
-                                    {isUpdating && <CircularProgress size={24} />}
-                                </Button>
+                                </Grid>
                             </Grid>
-                            <Grid item>
-                                <Link to={'/apis/' + api.id + '/overview'}>
-                                    <Button>
+                            {
+                                endpointValidity.isValid
+                                    ? <div />
+                                    : (
+                                        <Grid item className={classes.errorMessageContainer}>
+                                            <Typography className={classes.endpointValidityMessage}>
+                                                {endpointValidity.message}
+                                            </Typography>
+                                        </Grid>
+                                    )
+                            }
+                            <Grid
+                                container
+                                direction='row'
+                                alignItems='flex-start'
+                                spacing={1}
+                                className={classes.buttonSection}
+                            >
+                                <Grid item>
+                                    <Button
+                                        disabled={isUpdating || !endpointValidity.isValid
+                                    || isRestricted(['apim:api_create'], api)}
+                                        type='submit'
+                                        variant='contained'
+                                        color='primary'
+                                        onClick={() => saveAPI()}
+                                    >
                                         <FormattedMessage
-                                            id='Apis.Details.Endpoints.Endpoints.cancel'
-                                            defaultMessage='Cancel'
+                                            id='Apis.Details.Endpoints.Endpoints.save'
+                                            defaultMessage='Save'
                                         />
+                                        {isUpdating && <CircularProgress size={24} />}
                                     </Button>
-                                </Link>
-                            </Grid>
-                            {isRestricted(['apim:api_create'], api)
+                                </Grid>
+                                <Grid item>
+                                    <Link to={'/apis/' + api.id + '/overview'}>
+                                        <Button>
+                                            <FormattedMessage
+                                                id='Apis.Details.Endpoints.Endpoints.cancel'
+                                                defaultMessage='Cancel'
+                                            />
+                                        </Button>
+                                    </Link>
+                                </Grid>
+                                {isRestricted(['apim:api_create'], api)
                                 && (
                                     <Grid item>
                                         <Typography variant='body2' color='primary'>
                                             <FormattedMessage
                                                 id='Apis.Details.Endpoints.Endpoints.update.not.allowed'
-                                                defaultMessage={'*You are not authorized to update endpoints of' +
-                                                ' the API due to insufficient permissions'}
+                                                defaultMessage={'*You are not authorized to update endpoints of'
+                                                + ' the API due to insufficient permissions'}
                                             />
                                         </Typography>
                                     </Grid>
-                                )
-                            }
-                        </Grid>
+                                )}
+                            </Grid>
+                        </div>
                     </div>
-                </div>
-            }
-        </React.Fragment>
+                )}
+        </>
 
     );
 }

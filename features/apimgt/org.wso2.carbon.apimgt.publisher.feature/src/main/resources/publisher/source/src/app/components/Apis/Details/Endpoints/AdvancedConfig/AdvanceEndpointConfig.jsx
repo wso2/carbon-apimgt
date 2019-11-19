@@ -42,7 +42,7 @@ const MenuProps = {
         },
     },
 };
-const styles = theme => ({
+const styles = (theme) => ({
     formControl: {
         width: '500px',
     },
@@ -85,24 +85,23 @@ function AdvanceEndpointConfig(props) {
         onSaveAdvanceConfig,
         onCancel,
     } = props;
-    const [advanceConfigObj, setAdvanceConfig] =
-        useState(() => {
-            const config = {};
-            if (isSOAPEndpoint) {
-                config.format = 'soap11';
-                config.optimize = 'SWA';
-            }
-            config.actionDuration = '300';
-            config.actionSelect = 'fault';
-            config.factor = '';
-            config.retryDelay = '';
-            config.retryErroCode = [];
-            config.retryTimeOut = '';
-            config.suspendDuration = '';
-            config.suspendErrorCode = [];
-            config.suspendMaxDuration = '';
-            return config;
-        });
+    const [advanceConfigObj, setAdvanceConfig] = useState(() => {
+        const config = {};
+        if (isSOAPEndpoint) {
+            config.format = 'soap11';
+            config.optimize = 'SWA';
+        }
+        config.actionDuration = '300';
+        config.actionSelect = 'fault';
+        config.factor = '';
+        config.retryDelay = '';
+        config.retryErroCode = [];
+        config.retryTimeOut = '';
+        config.suspendDuration = '';
+        config.suspendErrorCode = [];
+        config.suspendMaxDuration = '';
+        return config;
+    });
 
     /**
      * The error codes definition.
@@ -301,11 +300,11 @@ function AdvanceEndpointConfig(props) {
                         <Select
                             autoWidth={false}
                             value={advanceConfigObj.format}
-                            onChange={event => handleConfigFieldChange(event, 'format')}
+                            onChange={(event) => handleConfigFieldChange(event, 'format')}
                             input={<Input id='err-code-select' />}
                             MenuProps={MenuProps}
                         >
-                            {messageTypes.map(messageType => (
+                            {messageTypes.map((messageType) => (
                                 <MenuItem key={messageType.key} value={messageType.key}>
                                     {messageType.value}
                                 </MenuItem>
@@ -322,11 +321,11 @@ function AdvanceEndpointConfig(props) {
                         <Select
                             autoWidth={false}
                             value={advanceConfigObj.optimize}
-                            onChange={event => handleConfigFieldChange(event, 'optimize')}
+                            onChange={(event) => handleConfigFieldChange(event, 'optimize')}
                             input={<Input id='err-code-select' />}
                             MenuProps={MenuProps}
                         >
-                            {optimizeOptions.map(option => (
+                            {optimizeOptions.map((option) => (
                                 <MenuItem key={option.key} value={option.key}>
                                     {option.value}
                                 </MenuItem>
@@ -351,12 +350,12 @@ function AdvanceEndpointConfig(props) {
                         multiple
                         autoWidth={false}
                         value={advanceConfigObj.suspendErrorCode}
-                        onChange={event => handleConfigFieldChange(event, 'suspendErrorCode')}
+                        onChange={(event) => handleConfigFieldChange(event, 'suspendErrorCode')}
                         input={<Input id='err-code-select' />}
                         MenuProps={MenuProps}
                         variant='outlined'
                     >
-                        {errorCodes.map(code => (
+                        {errorCodes.map((code) => (
                             <MenuItem key={code.key} value={code.key}>
                                 {code.value}
                             </MenuItem>
@@ -367,13 +366,13 @@ function AdvanceEndpointConfig(props) {
                     className={classes.textField}
                     id='initial-duration-input'
                     value={advanceConfigObj.suspendDuration}
-                    onChange={event => handleConfigFieldChange(event, 'suspendDuration')}
-                    label={
+                    onChange={(event) => handleConfigFieldChange(event, 'suspendDuration')}
+                    label={(
                         <FormattedMessage
                             id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.initial.duration.ms'
                             defaultMessage='Initial Duration (ms)'
                         />
-                    }
+                    )}
                     margin='normal'
                     type='number'
                 />
@@ -381,27 +380,27 @@ function AdvanceEndpointConfig(props) {
                     className={classes.textField}
                     id='max-duration-input'
                     value={advanceConfigObj.suspendMaxDuration}
-                    onChange={event => handleConfigFieldChange(event, 'suspendMaxDuration')}
-                    label={
+                    onChange={(event) => handleConfigFieldChange(event, 'suspendMaxDuration')}
+                    label={(
                         <FormattedMessage
                             id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.max.duration.ms'
                             defaultMessage='Max Duration (ms)'
                         />
-                    }
+                    )}
                     margin='normal'
                     type='number'
                 />
                 <TextField
                     className={classes.textField}
                     value={advanceConfigObj.factor}
-                    onChange={event => handleConfigFieldChange(event, 'factor')}
+                    onChange={(event) => handleConfigFieldChange(event, 'factor')}
                     id='factor-input'
-                    label={
+                    label={(
                         <FormattedMessage
                             id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.factor'
                             defaultMessage='Factor'
                         />
-                    }
+                    )}
                     margin='normal'
                 />
             </Grid>
@@ -424,11 +423,11 @@ function AdvanceEndpointConfig(props) {
                         multiple
                         autoWidth={false}
                         value={advanceConfigObj.retryErroCode}
-                        onChange={event => handleConfigFieldChange(event, 'retryErroCode')}
+                        onChange={(event) => handleConfigFieldChange(event, 'retryErroCode')}
                         input={<Input id='err-code-select' />}
                         MenuProps={MenuProps}
                     >
-                        {errorCodes.map(code => (
+                        {errorCodes.map((code) => (
                             <MenuItem key={code.key} value={code.key}>
                                 {code.value}
                             </MenuItem>
@@ -439,12 +438,13 @@ function AdvanceEndpointConfig(props) {
                     className={classes.textField}
                     id='retries-input'
                     value={advanceConfigObj.retryTimeOut}
-                    onChange={event => handleConfigFieldChange(event, 'retryTimeOut')}
-                    label={<FormattedMessage
-                        id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.retries.before.suspension'
-                        defaultMessage='Retries Before Suspension'
-                    />
-                    }
+                    onChange={(event) => handleConfigFieldChange(event, 'retryTimeOut')}
+                    label={(
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.retries.before.suspension'
+                            defaultMessage='Retries Before Suspension'
+                        />
+                    )}
                     type='number'
                     margin='normal'
                 />
@@ -452,11 +452,13 @@ function AdvanceEndpointConfig(props) {
                     className={classes.textField}
                     id='retry-delay-input'
                     value={advanceConfigObj.retryDelay}
-                    onChange={event => handleConfigFieldChange(event, 'retryDelay')}
-                    label={<FormattedMessage
-                        id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.retry.delay.ms'
-                        defaultMessage='Retry Delay (ms)'
-                    />}
+                    onChange={(event) => handleConfigFieldChange(event, 'retryDelay')}
+                    label={(
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.retry.delay.ms'
+                            defaultMessage='Retry Delay (ms)'
+                        />
+                    )}
                     type='number'
                     margin='normal'
                 />
@@ -476,11 +478,11 @@ function AdvanceEndpointConfig(props) {
                     <Select
                         autoWidth={false}
                         value={advanceConfigObj.actionSelect}
-                        onChange={event => handleConfigFieldChange(event, 'actionSelect')}
+                        onChange={(event) => handleConfigFieldChange(event, 'actionSelect')}
                         input={<Input id='err-code-select' />}
                         MenuProps={MenuProps}
                     >
-                        {actionItems.map(item => (
+                        {actionItems.map((item) => (
                             <MenuItem key={item.key} value={item.key}>
                                 {item.value}
                             </MenuItem>
@@ -491,11 +493,13 @@ function AdvanceEndpointConfig(props) {
                     className={classes.textField}
                     id='duration-input'
                     value={advanceConfigObj.actionDuration}
-                    onChange={event => handleConfigFieldChange(event, 'actionDuration')}
-                    label={<FormattedMessage
-                        id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.duration.ms'
-                        defaultMessage='Duration (ms)'
-                    />}
+                    onChange={(event) => handleConfigFieldChange(event, 'actionDuration')}
+                    label={(
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.duration.ms'
+                            defaultMessage='Duration (ms)'
+                        />
+                    )}
                     type='number'
                     margin='normal'
                 />

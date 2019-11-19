@@ -118,7 +118,7 @@ function GenericResource(props) {
                                         readOnly: `${isRestricted(['apim:api_create'], api)}`,
                                     }}
                                     language='javascript'
-                                    onChange={content => onChange(content, resourcePath, resourceMethod)}
+                                    onChange={(content) => onChange(content, resourcePath, resourceMethod)}
                                 />
                             </Suspense>
                         </Grid>

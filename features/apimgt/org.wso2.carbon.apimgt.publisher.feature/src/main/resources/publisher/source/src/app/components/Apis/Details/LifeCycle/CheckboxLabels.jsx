@@ -28,7 +28,7 @@ import CheckIcon from '@material-ui/icons/Check';
 import green from '@material-ui/core/colors/green';
 import LaunchIcon from '@material-ui/icons/Launch';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     stateButton: {
         marginRight: theme.spacing(),
     },
@@ -73,8 +73,8 @@ export default function CheckboxLabels(props) {
     const { api } = props;
     const isEndpointAvailable = api.endpointConfig !== null && !api.endpointConfig.implementation_status;
     const isTierAvailable = api.policies.length !== 0;
-    const isPrototypedAvailable =
-        (api.endpointConfig !== null && api.endpointConfig.implementation_status === 'prototyped')
+    const isPrototypedAvailable = (api.endpointConfig !== null
+        && api.endpointConfig.implementation_status === 'prototyped')
         || api.endpointImplementationType === 'INLINE';
 
     return (
@@ -94,7 +94,7 @@ export default function CheckboxLabels(props) {
                 </Typography>
             </Grid>
             {(api.lifeCycleStatus === 'CREATED' || api.lifeCycleStatus === 'PROTOTYPED') && (
-                <React.Fragment>
+                <>
                     <Grid xs={12} className={classes.labelsGrid}>
                         <Typography variant='subtitle2'>
                             <FormattedMessage
@@ -138,7 +138,7 @@ export default function CheckboxLabels(props) {
                         </Grid>
                     </Grid>
                     { api.type !== 'GRAPHQL' && (
-                        <React.Fragment>
+                        <>
                             <Grid xs={12} className={classes.labelsGrid}>
                                 <Typography variant='subtitle2'>
                                     <FormattedMessage
@@ -165,14 +165,14 @@ export default function CheckboxLabels(props) {
                                     </Link>
                                 </Grid>
                             </Grid>
-                        </React.Fragment>
+                        </>
                     )}
-                </React.Fragment>
+                </>
             )}
             {api.lifeCycleStatus === 'PUBLISHED' && (
-                <React.Fragment>
+                <>
                     <Grid xs={12} className={classes.labelsGrid}>
-                        <Typography variant='subtitle2' >
+                        <Typography variant='subtitle2'>
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.prototype'
                                 defaultMessage='Deploy as a Prototype'
@@ -197,7 +197,7 @@ export default function CheckboxLabels(props) {
                             </Link>
                         </Grid>
                     </Grid>
-                </React.Fragment>
+                </>
             )}
         </Paper>
     );

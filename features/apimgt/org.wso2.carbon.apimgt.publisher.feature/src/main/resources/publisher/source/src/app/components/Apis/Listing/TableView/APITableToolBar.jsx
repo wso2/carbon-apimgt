@@ -12,7 +12,7 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import { lighten } from '@material-ui/core/styles/colorManipulator';
 import { FormattedMessage } from 'react-intl';
 
-const toolbarStyles = theme => ({
+const toolbarStyles = (theme) => ({
     root: {
         paddingRight: theme.spacing(1),
     },
@@ -67,18 +67,25 @@ const EnhancedTableToolbar = (props) => {
                         <FormattedMessage
                             id='Apis.Listing.TableView.APITableToolBar.apis.title'
                             defaultMessage='APIS'
-                        /> {' '} ({totalAPIsCount})
+                        />
+                        {' '}
+                        {' '}
+                        {' '}
+(
+                        {totalAPIsCount}
+)
                     </Typography>
                 )}
             </div>
             <div className={classes.spacer} />
             <div className={classes.actions}>
                 {numSelected > 0 ? (
-                    <Tooltip title={
+                    <Tooltip title={(
                         <FormattedMessage
                             id='Apis.Listing.TableView.APITableToolBar.delete'
                             defaultMessage='Delete'
-                        />}
+                        />
+                    )}
                     >
                         <IconButton disabled={loading} onClick={handleDeleteAPIs} aria-label='Delete'>
                             <DeleteIcon />
@@ -86,11 +93,12 @@ const EnhancedTableToolbar = (props) => {
                         </IconButton>
                     </Tooltip>
                 ) : (
-                    <Tooltip title={
+                    <Tooltip title={(
                         <FormattedMessage
                             id='Apis.Listing.TableView.APITableToolBar.filter.list'
                             defaultMessage='Filter List'
-                        />}
+                        />
+                    )}
                     >
                         <IconButton aria-label='Filter list'>
                             <FilterListIcon />

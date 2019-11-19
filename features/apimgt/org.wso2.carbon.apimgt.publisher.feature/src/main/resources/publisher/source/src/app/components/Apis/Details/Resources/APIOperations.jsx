@@ -31,7 +31,7 @@ import Resources from './Resources';
  */
 export default function APIOperations() {
     return (
-        <React.Fragment>
+        <>
             <Box mb={4}>
                 <Typography variant='h4' gutterBottom>
                     <FormattedMessage
@@ -41,6 +41,6 @@ export default function APIOperations() {
                 </Typography>
             </Box>
             <Resources />
-        </React.Fragment>
+        </>
     );
 }

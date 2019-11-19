@@ -51,7 +51,7 @@ import ImportDefinition from './ImportDefinition';
 const EditorDialog = lazy(() => import('./SwaggerEditorDrawer' /* webpackChunkName: "EditorDialog" */));
 const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "APIDefMonacoEditor" */));
 
-const styles = theme => ({
+const styles = (theme) => ({
     titleWrapper: {
         display: 'flex',
         flexDirection: 'row',
@@ -90,7 +90,6 @@ const styles = theme => ({
  * 'Import API Definition'.
  * */
 class APIDefinition extends React.Component {
-    static contextType = AppContext;
     /**
      * @inheritDoc
      */
@@ -191,6 +190,8 @@ class APIDefinition extends React.Component {
             this.setState({ graphQL });
         }
     };
+
+
     /**
      * Util function to get the format which the definition can be converted to.
      * @param {*} format : The current format of definition.
@@ -357,7 +358,7 @@ class APIDefinition extends React.Component {
         }
 
         return (
-            <React.Fragment>
+            <>
                 <div className={classes.topBar}>
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4'>
@@ -400,8 +401,8 @@ class APIDefinition extends React.Component {
                             </Button>
                         </a>
 
-                        {(securityAuditProperties.apiToken && securityAuditProperties.collectionId) &&
-                            (
+                        {(securityAuditProperties.apiToken && securityAuditProperties.collectionId)
+                            && (
                                 <Button size='small' className={classes.button} onClick={this.onAuditApiClick}>
                                     <LockRounded className={classes.buttonIcon} />
                                     <FormattedMessage
@@ -409,8 +410,7 @@ class APIDefinition extends React.Component {
                                         defaultMessage='Audit API'
                                     />
                                 </Button>
-                            )
-                        }
+                            )}
 
                         {isRestricted(['apim:api_create'], api) && (
                             <Typography variant='body2' color='primary'>
@@ -456,12 +456,12 @@ class APIDefinition extends React.Component {
                             className={classes.button}
                             color='inherit'
                             onClick={this.closeEditor}
-                            aria-label={
+                            aria-label={(
                                 <FormattedMessage
                                     id='Apis.Details.APIDefinition.APIDefinition.btn.close'
                                     defaultMessage='Close'
                                 />
-                            }
+                            )}
                         >
                             <Icon>close</Icon>
                         </IconButton>
@@ -479,7 +479,7 @@ class APIDefinition extends React.Component {
                         </Button>
                     </Paper>
                     <Suspense
-                        fallback={
+                        fallback={(
                             <div>
                                 (
                                 <FormattedMessage
@@ -488,7 +488,7 @@ class APIDefinition extends React.Component {
                                 />
                                 )
                             </div>
-                        }
+                        )}
                     >
                         <EditorDialog />
                     </Suspense>
@@ -512,8 +512,8 @@ class APIDefinition extends React.Component {
                             <FormattedMessage
                                 id='Apis.Details.APIDefinition.APIDefinition.api.definition.save.confirmation'
                                 defaultMessage={
-                                    'Are you sure you want to save the API Definition? This might affect the' +
-                                    ' existing resources.'
+                                    'Are you sure you want to save the API Definition? This might affect the'
+                                    + ' existing resources.'
                                 }
                             />
                         </DialogContentText>
@@ -533,11 +533,12 @@ class APIDefinition extends React.Component {
                         </Button>
                     </DialogActions>
                 </Dialog>
-            </React.Fragment>
+            </>
         );
     }
 }
 
+APIDefinition.contextType = AppContext;
 APIDefinition.propTypes = {
     classes: PropTypes.shape({
         button: PropTypes.shape({}),

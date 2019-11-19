@@ -56,7 +56,7 @@ export async function getAllScopes() {
  */
 export async function getExampleById(resource, verb, id) {
     const swagger = await apiDef;
-    return swagger.paths[resource][verb]['x-examples'].find(x => x.id === id);
+    return swagger.paths[resource][verb]['x-examples'].find((x) => x.id === id);
 }
 
 /**

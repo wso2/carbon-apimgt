@@ -30,7 +30,7 @@ import TenantAutocomplete from 'AppComponents/Apis/Details/Subscriptions/TenantA
 import { isRestricted } from 'AppData/AuthManager';
 
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         display: 'flex',
         flexWrap: 'wrap',
@@ -184,13 +184,13 @@ export default function SimpleSelect(props) {
                             </FormControl>
                         </Grid>
                         {isSpecificTenants ? (
-                            <Grid item xs={8} className={classes.tenantsList} >
+                            <Grid item xs={8} className={classes.tenantsList}>
                                 <TenantAutocomplete setTenantList={setTenantList} tenantList={tenantList} api={api} />
                             </Grid>
                         ) : <Grid item xs={8} />}
                     </Grid>
                 </form>
-            </Paper >
+            </Paper>
         </Grid>
     );
 }
@@ -202,4 +202,3 @@ SimpleSelect.propTypes = {
     setTenantList: PropTypes.func.isRequired,
     tenantList: PropTypes.shape([]).isRequired,
 };
-
