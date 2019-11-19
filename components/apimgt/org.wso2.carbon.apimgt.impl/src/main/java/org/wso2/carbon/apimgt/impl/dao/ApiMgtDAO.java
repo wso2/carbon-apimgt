@@ -1485,31 +1485,33 @@ public class ApiMgtDAO {
                 }
                 apiIdSet.add(apiId);
             }
-            String apiIdList = StringUtils.join(apiIdSet, ", ");
-            String sqlQuery = SQLConstants.GET_SCOPE_BY_SUBSCRIBED_API_PREFIX + apiIdList
-                    + SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_SUFFIX;
-
-            if (conn.getMetaData().getDriverName().contains("Oracle")) {
-                sqlQuery = SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_ORACLE_SQL + apiIdList
+            if (!apiIdSet.isEmpty()) {
+                String apiIdList = StringUtils.join(apiIdSet, ", ");
+                String sqlQuery = SQLConstants.GET_SCOPE_BY_SUBSCRIBED_API_PREFIX + apiIdList
                         + SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_SUFFIX;
-            }
-            try (PreparedStatement statement = conn.prepareStatement(sqlQuery)) {
-                try (ResultSet finalResultSet = statement.executeQuery()) {
-                    while (finalResultSet.next()) {
-                        Scope scope;
-                        String scopeKey = finalResultSet.getString(1);
-                        if (scopeHashMap.containsKey(scopeKey)) {
-                            // scope already exists append roles.
-                            scope = scopeHashMap.get(scopeKey);
-                            scope.setRoles(scope.getRoles().concat("," + finalResultSet.getString(4)).trim());
-                        } else {
-                            scope = new Scope();
-                            scope.setKey(scopeKey);
-                            scope.setName(finalResultSet.getString(2));
-                            scope.setDescription(finalResultSet.getString(3));
-                            scope.setRoles(finalResultSet.getString(4).trim());
+
+                if (conn.getMetaData().getDriverName().contains("Oracle")) {
+                    sqlQuery = SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_ORACLE_SQL + apiIdList
+                            + SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_SUFFIX;
+                }
+                try (PreparedStatement statement = conn.prepareStatement(sqlQuery)) {
+                    try (ResultSet finalResultSet = statement.executeQuery()) {
+                        while (finalResultSet.next()) {
+                            Scope scope;
+                            String scopeKey = finalResultSet.getString(1);
+                            if (scopeHashMap.containsKey(scopeKey)) {
+                                // scope already exists append roles.
+                                scope = scopeHashMap.get(scopeKey);
+                                scope.setRoles(scope.getRoles().concat("," + finalResultSet.getString(4)).trim());
+                            } else {
+                                scope = new Scope();
+                                scope.setKey(scopeKey);
+                                scope.setName(finalResultSet.getString(2));
+                                scope.setDescription(finalResultSet.getString(3));
+                                scope.setRoles(finalResultSet.getString(4).trim());
+                            }
+                            scopeHashMap.put(scopeKey, scope);
                         }
-                        scopeHashMap.put(scopeKey, scope);
                     }
                 }
             }
@@ -9409,23 +9411,26 @@ public class ApiMgtDAO {
                 }
                 apiIdSet.add(apiId);
             }
-            String apiIdList = StringUtils.join(apiIdSet, ", ");
-            String sqlQuery = SQLConstants.GET_SCOPE_ROLES_OF_APPLICATION_SQL + apiIdList + SQLConstants.CLOSING_BRACE;
-            if (conn.getMetaData().getDriverName().contains("Oracle")) {
-                sqlQuery =
-                        SQLConstants.GET_SCOPE_ROLES_OF_APPLICATION_ORACLE_SQL + apiIdList + SQLConstants.CLOSING_BRACE;
-            }
-            ps = conn.prepareStatement(sqlQuery);
-            resultSet = ps.executeQuery();
             Map<String, String> scopes = new HashMap<String, String>();
-            while (resultSet.next()) {
-                if (scopes.containsKey(resultSet.getString(1))) {
-                    // Role for the scope exists. Append the new role.
-                    String roles = scopes.get(resultSet.getString(1));
-                    roles += "," + resultSet.getString(2);
-                    scopes.put(resultSet.getString(1), roles);
-                } else {
-                    scopes.put(resultSet.getString(1), resultSet.getString(2));
+            if (!apiIdSet.isEmpty()) {
+                String apiIdList = StringUtils.join(apiIdSet, ", ");
+                String sqlQuery =
+                        SQLConstants.GET_SCOPE_ROLES_OF_APPLICATION_SQL + apiIdList + SQLConstants.CLOSING_BRACE;
+                if (conn.getMetaData().getDriverName().contains("Oracle")) {
+                    sqlQuery = SQLConstants.GET_SCOPE_ROLES_OF_APPLICATION_ORACLE_SQL + apiIdList
+                            + SQLConstants.CLOSING_BRACE;
+                }
+                ps = conn.prepareStatement(sqlQuery);
+                resultSet = ps.executeQuery();
+                while (resultSet.next()) {
+                    if (scopes.containsKey(resultSet.getString(1))) {
+                        // Role for the scope exists. Append the new role.
+                        String roles = scopes.get(resultSet.getString(1));
+                        roles += "," + resultSet.getString(2);
+                        scopes.put(resultSet.getString(1), roles);
+                    } else {
+                        scopes.put(resultSet.getString(1), resultSet.getString(2));
+                    }
                 }
             }
             return scopes;
