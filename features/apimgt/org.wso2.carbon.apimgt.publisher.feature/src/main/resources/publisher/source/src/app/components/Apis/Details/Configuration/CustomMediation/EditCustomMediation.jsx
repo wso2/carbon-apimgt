@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography'
 import Paper from '@material-ui/core/Paper';
@@ -20,7 +20,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import cloneDeep from 'lodash.clonedeep';
 import Icon from '@material-ui/core/Icon';
-import MediationPolicies from '../../NewOverview/MediationPolicies';
+
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -116,13 +116,16 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-function EditCustomMediation() {
+function EditCustomMediation(props) {
 
+    const {
+       intl
+    } = props;
     const classes = useStyles();
-    
     const [value, setValue] = React.useState(0);
     const [addedMediators, setAddedMediators] = useState([]);
-    const [validity, setValidity] = useState({});
+    const [name, setName] = useState(null);
+    const [errors, setErrors] = useState(null);
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -149,26 +152,33 @@ function EditCustomMediation() {
        
     }
 
-    // function nameValidation() {
-        
-    //         const nameValidity = mediation-name;
-    //         console.log(value)
-    //         if (nameValidity === null) {
-    //             APIValidation.apiParameter.validate(field + ':' + value).then((result) => {
-    //                 if (result.body.list.length > 0 && value.toLowerCase() === result.body.list[0]
-    //                     .name.toLowerCase()) {
-    //                     updateValidity({
-    //                         ...validity,
-    //                         name: { details: [{ message: 'Name ' + value + ' already exists' }] },
-    //                     });
-    //                 } else {
-    //                     updateValidity({ ...validity, name: nameValidity });
-    //                 }
-    //             });
-    //         } else {
-    //             updateValidity({ ...validity, name: nameValidity });
-    //         }
-    // }
+    const handleNameChange = (event) => {
+            
+            let seqNames = event.target.value;
+            
+            let error = '';
+            let formIsValid = true;
+
+            if(seqNames.length === 0){
+                formIsValid = false;
+                error = (intl.formatMessage({
+                    id: 'Apis.Details.Configuration.CustomMediation.EditCustomMediation.name.empty',
+                    defaultMessage: 'Mediation Sequence should not be empty.',
+                }))    
+             } else if(typeof seqNames !== "undefined"){
+                    if(!seqNames.match(/^[a-z_A-Z]+$/)){
+                    formIsValid = false;
+                    error = (intl.formatMessage({
+                        id: 'Apis.Details.Configuration.CustomMediation.EditCustomMediation.name.invalid',
+                        defaultMessage: 'field name is not valid.name should be without spaces and special charectors.',
+                    }))
+                    }        
+                }
+            setErrors( error );
+            setName(seqNames);
+            return formIsValid;
+            
+    }
 
     return (
        
@@ -188,7 +198,7 @@ function EditCustomMediation() {
                             variant='contained'   
                         >
                             <FormattedMessage
-                                id='Apis.Details.MediationPolicies.Edit.EditCustomMediation.upload.btn'
+                                id='Apis.Details.Configuration.CustomMediation.EditCustomMediation.upload.btn'
                                 defaultMessage='Upload Mediation Flow'
                             />
                         </Button>
@@ -199,29 +209,23 @@ function EditCustomMediation() {
                         className={classes.textField}
                         autoFocus
                         id='outlined-mediation-name'
+                        value={name}
+                        error={errors}
                         label={
                             <React.Fragment>
-                                <FormattedMessage id='Apis.Details.MediationPolicies.Edit.EditCustomMediation.name' defaultMessage='Name' />
+                                <FormattedMessage id='Apis.Details.Configuration.CustomMediation.EditCustomMediation.name' defaultMessage='Name' />
                                 <sup className={classes.mandatoryStar}>*</sup>
                             </React.Fragment>
                         }
+                        helperText =  { errors && `${errors}`}
                         name='mediation-name'
                         margin='normal'
                         variant='outlined'
+                        onChange={handleNameChange}
                         />
+                        
                     </form>
-                    {/* <Button
-                    color='primary'
-                    variant='contained'
-                    className={classes.save}
-                    onClick={nameValidation}
-                    value={MediationPolicies.name}
-                >
-                    <FormattedMessage
-                        id='Apis.Details.MediationPolicies.Edit.EditCustomMediation.save.btn'
-                        defaultMessage='Save'
-                    />
-                </Button> */}
+                    
                 </Paper>
                 <Grid container className={classes.wrapper}>
                     <Grid item xs={10}>
@@ -289,7 +293,7 @@ function EditCustomMediation() {
                     className={classes.save}
                 >
                     <FormattedMessage
-                        id='Apis.Details.MediationPolicies.Edit.EditCustomMediation.save.btn'
+                        id='Apis.Details.Configuration.CustomMediation.EditCustomMediation.save.btn'
                         defaultMessage='Save'
                     />
                 </Button>
@@ -298,4 +302,4 @@ function EditCustomMediation() {
     );
 }
 
-export default EditCustomMediation
+export default injectIntl((EditCustomMediation))
