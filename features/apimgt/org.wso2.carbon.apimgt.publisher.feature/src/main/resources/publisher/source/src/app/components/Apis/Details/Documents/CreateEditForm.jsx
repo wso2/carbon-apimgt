@@ -277,20 +277,6 @@ class CreateEditForm extends React.Component {
                 this.setState({ summeryEmpty: false });
             }
         }
-        const {
-            name, summary, nameNotDuplicate, sourceType, sourceUrl,
-        } = this.state;
-        const { setSaveDisabled } = this.props;
-        if (
-            name !== '' &&
-            summary !== '' &&
-            nameNotDuplicate &&
-            ((!invalidUrl && sourceUrl !== '') || sourceType !== 'URL')
-        ) {
-            setSaveDisabled(false);
-        } else {
-            setSaveDisabled(true);
-        }
     }
     componentDidMount() {
         this.getDocument();
@@ -366,7 +352,17 @@ class CreateEditForm extends React.Component {
             summeryEmpty,
             urlEmpty,
         } = this.state;
-        const { classes } = this.props;
+        const { classes, setSaveDisabled } = this.props;
+        if (
+            name !== '' &&
+            summary !== '' &&
+            nameNotDuplicate &&
+            ((!invalidUrl && sourceUrl !== '') || sourceType !== 'URL')
+        ) {
+            setSaveDisabled(false);
+        } else {
+            setSaveDisabled(true);
+        }
         return (
             <div className={classes.addNewOther}>
                 <FormControl margin='normal' className={classes.FormControlOdd}>
