@@ -550,46 +550,56 @@ public class SchemaValidator extends AbstractHandler {
         }
         if (value.contains(APIMgtGatewayConstants.SCHEMA_REFERENCE) &&
                 !nodeVal.contains(APIMgtGatewayConstants.DEFINITIONS)) {
-            StringBuilder extractRefPath = new StringBuilder();
-            extractRefPath.append(APIMgtGatewayConstants.JSON_PATH).append(
-                    APIMgtGatewayConstants.REQUESTBODY_SCHEMA).
-                    append(searchLastIndex).append(APIMgtGatewayConstants.JSON_SCHEMA);
-            String res = JsonPath.read(swagger, extractRefPath.toString()).toString();
-            if (res.contains(APIMgtGatewayConstants.ITEMS)) {
-                StringBuilder requestSchemaPath = new StringBuilder();
-                requestSchemaPath.append(APIMgtGatewayConstants.JSON_PATH).
-                        append(APIMgtGatewayConstants.REQUESTBODY_SCHEMA).append(
-                        searchLastIndex).append(APIMgtGatewayConstants.JSON_SCHEMA).
-                        append(APIMgtGatewayConstants.JSONPATH_SEPARATE).append(APIMgtGatewayConstants.ITEMS).
-                        append(APIMgtGatewayConstants.JSONPATH_SEPARATE).append(APIMgtGatewayConstants.SCHEMA_REFERENCE);
-                name = JsonPath.read(swagger, requestSchemaPath.toString()).toString();
-                extractReference(name);
-            } else {
-                StringBuilder jsonSchemaRef = new StringBuilder();
-                jsonSchemaRef.append(APIMgtGatewayConstants.JSON_PATH).append(
-                        APIMgtGatewayConstants.REQUESTBODY_SCHEMA).append(searchLastIndex).append(
-                        APIMgtGatewayConstants.CONTENT).append(APIMgtGatewayConstants.JSON_CONTENT);
-                name = JsonPath.read(swagger, jsonSchemaRef.toString()).toString();
-                if (name.contains(APIMgtGatewayConstants.COMPONENT_SCHEMA)) {
-                    Object componentSchema = JsonPath.read(swagger,
-                            APIMgtGatewayConstants.JSONPATH_SCHEMAS + searchLastIndex);
-                    mapper = new ObjectMapper();
-                    try {
-                        JsonNode jsonNode = mapper.convertValue(componentSchema, JsonNode.class);
-                        generateSchema(jsonNode);
-                        if (jsonNode.get(0) != null) {
-                            name = jsonNode.get(0).toString();
-                        } else {
-                            name = jsonNode.toString();
-                        }
-                    } catch (APIManagementException e) {
-                        logger.error("Error occurred while generating the schema content for " +
-                                "the particular request", e);
-                    }
-                    schemaContent = name;
-                } else {
+            if (nodeVal.contains(APIMgtGatewayConstants.REQUESTBODIES)) {
+                StringBuilder extractRefPath = new StringBuilder();
+                extractRefPath.append(APIMgtGatewayConstants.JSON_PATH).append(
+                        APIMgtGatewayConstants.REQUESTBODY_SCHEMA).
+                        append(searchLastIndex).append(APIMgtGatewayConstants.JSON_SCHEMA);
+                String res = JsonPath.read(swagger, extractRefPath.toString()).toString();
+                if (res.contains(APIMgtGatewayConstants.ITEMS)) {
+                    StringBuilder requestSchemaPath = new StringBuilder();
+                    requestSchemaPath.append(APIMgtGatewayConstants.JSON_PATH).
+                            append(APIMgtGatewayConstants.REQUESTBODY_SCHEMA).append(
+                            searchLastIndex).append(APIMgtGatewayConstants.JSON_SCHEMA).
+                            append(APIMgtGatewayConstants.JSONPATH_SEPARATE).append(APIMgtGatewayConstants.ITEMS).
+                            append(APIMgtGatewayConstants.JSONPATH_SEPARATE).append(APIMgtGatewayConstants.SCHEMA_REFERENCE);
+                    name = JsonPath.read(swagger, requestSchemaPath.toString()).toString();
                     extractReference(name);
+                } else {
+                    StringBuilder jsonSchemaRef = new StringBuilder();
+                    jsonSchemaRef.append(APIMgtGatewayConstants.JSON_PATH).append(
+                            APIMgtGatewayConstants.REQUESTBODY_SCHEMA).append(searchLastIndex).append(
+                            APIMgtGatewayConstants.CONTENT).append(APIMgtGatewayConstants.JSON_CONTENT);
+                    name = JsonPath.read(swagger, jsonSchemaRef.toString()).toString();
+                    if (name.contains(APIMgtGatewayConstants.COMPONENT_SCHEMA)) {
+                        Object componentSchema = JsonPath.read(swagger,
+                                APIMgtGatewayConstants.JSONPATH_SCHEMAS + searchLastIndex);
+                        mapper = new ObjectMapper();
+                        try {
+                            JsonNode jsonNode = mapper.convertValue(componentSchema, JsonNode.class);
+                            generateSchema(jsonNode);
+                            if (jsonNode.get(0) != null) {
+                                name = jsonNode.get(0).toString();
+                            } else {
+                                name = jsonNode.toString();
+                            }
+                        } catch (APIManagementException e) {
+                            logger.error("Error occurred while generating the schema content for " +
+                                    "the particular request", e);
+                        }
+                        schemaContent = name;
+                    } else {
+                        extractReference(name);
+                    }
                 }
+            } else if (nodeVal.contains(APIMgtGatewayConstants.SCHEMA)) {
+                StringBuilder extractRefPath = new StringBuilder();
+                extractRefPath.append(APIMgtGatewayConstants.JSON_PATH).append(APIMgtGatewayConstants.COMPONENTS_SCHEMAS).append(searchLastIndex);
+                    StringBuilder jsonSchemaRef = new StringBuilder();
+                    jsonSchemaRef.append(APIMgtGatewayConstants.JSON_PATH).append(
+                            APIMgtGatewayConstants.COMPONENTS_SCHEMAS).append(searchLastIndex);
+                    name = JsonPath.read(swagger, jsonSchemaRef.toString()).toString();
+                    extractReference(name);
             }
         } else if (nodeVal.contains(APIMgtGatewayConstants.DEFINITIONS)) {
             StringBuilder requestSchemaPath = new StringBuilder();
