@@ -668,7 +668,7 @@ class CreateEditForm extends React.Component {
                 {sourceType === 'FILE' && (
                     <Dropzone
                         multiple={false}
-                        accept='application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/pdf'
+                        accept='application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/pdf, text/plain'
                         className={classes.dropzone}
                         activeClassName={classes.acceptDrop}
                         rejectClassName={classes.rejectDrop}
