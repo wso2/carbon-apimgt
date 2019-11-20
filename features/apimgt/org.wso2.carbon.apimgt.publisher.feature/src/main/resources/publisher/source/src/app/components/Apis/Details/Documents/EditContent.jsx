@@ -20,6 +20,7 @@ import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { withRouter } from 'react-router-dom';
 import isEmpty from 'lodash.isempty';
 import MarkdownEditor from './MarkdownEditor';
+import { FormattedMessage } from 'react-intl';
 
 const TextEditor = lazy(() => import('./TextEditor' /* webpackChunkName: "EditContentTextEditor" */));
 
