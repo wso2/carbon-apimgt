@@ -4,6 +4,7 @@ import TextField from '@material-ui/core/TextField';
 import PropTypes from 'prop-types';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
@@ -207,52 +208,62 @@ class Monetization extends Component {
             return <Progress />;
         }
         return (
-            <Grid item xs={6}>
-                <Typography variant='h4' gutterBottom>
-                    <FormattedMessage id='Apis.Details.Monetization.Index.monetization' defaultMessage='Monetization' />
-                </Typography>
+            <Grid>
                 <form method='post' onSubmit={this.handleSubmit}>
-                    <FormControlLabel
-                        control={(
-                            <Checkbox
-                                disabled={isRestricted(['apim:api_publish'], api)}
-                                id='monStatus'
-                                name='monStatus'
-                                checked={monStatus}
-                                onChange={this.handleChange}
-                                value={monStatus}
-                                color='primary'
-                            />
-                        )}
-                        label='Enable Monetization'
-                    />
-                    <Grid>
-                        <Paper className={classes.paper}>
-                            <Grid item xs={5} className={classes.grid}>
-                                <Typography variant='subtitle' gutterBottom>
-                                    <FormattedMessage
-                                        id='Apis.Details.Monetization.Index.monetization.properties'
-                                        defaultMessage='Monetization Properties'
+                    <Grid container xs={6} spacing={2}>
+                        <Grid item xs={12}>
+                            <Typography variant='h4'>
+                                <FormattedMessage
+                                    id='Apis.Details.Monetization.Index.monetization'
+                                    defaultMessage='Monetization'
+                                />
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        disabled={isRestricted(['apim:api_publish'], api)}
+                                        id='monStatus'
+                                        name='monStatus'
+                                        checked={monStatus}
+                                        onChange={this.handleChange}
+                                        value={monStatus}
+                                        color='primary'
                                     />
-                                </Typography>
-                                {
-                                    (monetizationAttributes.length > 0)
-                                        ? (monetizationAttributes.map((monetizationAttribute, i) => (
-                                            <TextField
-                                                disabled={isRestricted(['apim:api_publish'], api)}
-                                                fullWidth
-                                                id={'attribute' + i}
-                                                label={monetizationAttribute.displayName}
-                                                name={monetizationAttribute.name}
-                                                type='text'
-                                                margin='normal'
-                                                required={monetizationAttribute.required}
-                                                onChange={this.handleInputChange}
-                                                autoFocus
-                                            />
-                                        )))
-                                        : (
-                                            <Typography gutterBottom>
+                                }
+                                label='Enable Monetization'
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Paper className={classes.root}>
+                                <Grid item xs={12} className={classes.grid}>
+                                    <Typography className={classes.heading} variant='h6'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Monetization.Index.monetization.properties'
+                                            defaultMessage='Monetization Properties'
+                                        />
+                                    </Typography>
+                                    {
+                                        (monetizationAttributes.length > 0) ? (
+                                            (monetizationAttributes.map((monetizationAttribute, i) => (
+                                                <TextField
+                                                    disabled={isRestricted(['apim:api_publish'], api)}
+                                                    fullWidth
+                                                    id={'attribute' + i}
+                                                    label={monetizationAttribute.displayName}
+                                                    placeholder={monetizationAttribute.displayName}
+                                                    name={monetizationAttribute.name}
+                                                    type='text'
+                                                    margin='normal'
+                                                    variant='outlined'
+                                                    required={monetizationAttribute.required}
+                                                    onChange={this.handleInputChange}
+                                                    autoFocus
+                                                />
+                                            )))
+                                        ) : (
+                                            <Typography>
                                                 <FormattedMessage
                                                     id={'Apis.Details.Monetization.Index.there.are.no'
                                                         + ' .monetization.properties.configured'}
@@ -260,23 +271,39 @@ class Monetization extends Component {
                                                 />
                                             </Typography>
                                         )
-                                }
-                            </Grid>
-                        </Paper>
+                                    }
+                                </Grid>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Paper className={classes.root}>
+                                <Grid item xs={12} className={classes.grid}>
+                                    {<BusinessPlans api={api} monStatus={monStatus} />}
+                                </Grid>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Button
+                                onClick={this.handleSubmit}
+                                color='primary'
+                                variant='contained'
+                                className={classes.button}
+                            >
+                                <FormattedMessage
+                                    id='Apis.Details.Monetization.Index.save'
+                                    defaultMessage='Save'
+                                />
+                            </Button>
+                            <Link to={'/apis/' + api.id + '/overview'}>
+                                <Button>
+                                    <FormattedMessage
+                                        id='Apis.Details.Monetization.Index.cancel'
+                                        defaultMessage='Cancel'
+                                    />
+                                </Button>
+                            </Link>
+                        </Grid>
                     </Grid>
-                    <Grid>
-                        <Paper className={classes.paper}>
-                            <Grid item xs={12} className={classes.grid}>
-                                <BusinessPlans api={api} monStatus={monStatus} />
-                            </Grid>
-                        </Paper>
-                    </Grid>
-                    <Button onClick={this.handleSubmit} color='primary' variant='contained' className={classes.button}>
-                        <FormattedMessage
-                            id='Apis.Details.Monetization.Index.save'
-                            defaultMessage='Save'
-                        />
-                    </Button>
                 </form>
             </Grid>
         );
