@@ -6,6 +6,8 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.utils.APICategoryUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.ApiCategoriesApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.APICategoryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.APICategoryListDTO;
@@ -23,9 +25,9 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
 
     public Response apiCategoriesGet(){
         try {
-            APIAdmin apiAdmin = new APIAdminImpl();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            List<APICategory> categoryList = apiAdmin.getAllCategories(tenantDomain);
+            int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+            List<APICategory> categoryList = APICategoryUtil.getAllAPICategoriesOfTenant(tenantID);
             APICategoryListDTO categoryListDTO =
                     APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);
             return Response.ok().entity(categoryListDTO).build();

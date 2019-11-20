@@ -134,14 +134,6 @@ public interface APIAdmin  {
     APICategory addCategory(String userName, APICategory category) throws APIManagementException;
 
     /**
-     * Get all available API categories of the tenant
-     *
-     * @param tenantDomain    tenant domain
-     * @throws APIManagementException if failed add category
-     */
-    List<APICategory> getAllCategories(String tenantDomain) throws APIManagementException;
-
-    /**
      * The method converts the date into timestamp
      *
      * @param date

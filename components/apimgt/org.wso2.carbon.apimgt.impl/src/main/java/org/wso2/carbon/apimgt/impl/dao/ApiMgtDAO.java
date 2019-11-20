@@ -14350,12 +14350,11 @@ public class ApiMgtDAO {
     /**
      * Get all available API categories of the tenant
      *
-     * @param tenantDomain
+     * @param tenantID
      * @return API Categories List
      */
-    public List<APICategory> getAllCategories(String tenantDomain) throws APIManagementException {
+    public List<APICategory> getAllCategories(int tenantID) throws APIManagementException {
         List<APICategory> categoriesList = new ArrayList<>();
-        int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         try (Connection connection = APIMgtDBUtil.getConnection();
             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_CATEGORIES_BY_TENANT_ID_SQL)) {
             statement.setInt(1, tenantID);
@@ -14374,7 +14373,7 @@ public class ApiMgtDAO {
                 categoriesList.add(category);
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve API categories of tenant : " + tenantDomain, e);
+            handleException("Failed to retrieve API categories for tenant " + tenantID, e);
         }
         return categoriesList;
     }

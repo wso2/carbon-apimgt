@@ -18,11 +18,18 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+
+import java.util.List;
 
 public class APICategoryUtil {
 
     public static boolean isCategoryNameExists(String categoryName, int tenantID) throws APIManagementException {
         return ApiMgtDAO.getInstance().isAPICategoryNameExists(categoryName, tenantID);
+    }
+
+    public static List<APICategory> getAllAPICategoriesOfTenant(int tenantID) throws APIManagementException {
+        return ApiMgtDAO.getInstance().getAllCategories(tenantID);
     }
 }

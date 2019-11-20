@@ -1422,6 +1422,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                         artifactPath, registry);
             }
+            APIUtil.attachAPICategoriesToAPIArtifact(artifact, api, tenantDomain);
             registry.commitTransaction();
             transactionCommitted = true;
             if (updatePermissions) {

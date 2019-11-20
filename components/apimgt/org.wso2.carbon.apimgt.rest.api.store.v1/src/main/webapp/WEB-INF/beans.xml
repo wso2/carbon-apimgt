@@ -28,6 +28,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ThrottlingPoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SwaggerYamlApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.TenantsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ApiCategoriesApi"/>
 
         </jaxrs:serviceBeans>
         <jaxrs:providers>

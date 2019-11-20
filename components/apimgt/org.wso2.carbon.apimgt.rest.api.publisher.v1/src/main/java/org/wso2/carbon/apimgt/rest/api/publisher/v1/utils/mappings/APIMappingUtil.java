@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -259,6 +260,10 @@ public class APIMappingUtil {
         setMaxTpsFromApiDTOToModel(dto, model);
         model.setAuthorizationHeader(dto.getAuthorizationHeader());
         model.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
+
+        //attach api categories to API model
+        setAPICategoriesToAPIModel(dto, model);
+
         return model;
     }
 
@@ -922,6 +927,16 @@ public class APIMappingUtil {
             dto.setCreatedTime(String.valueOf(timeStamp));
         }
         dto.setWorkflowStatus(model.getWorkflowStatus());
+
+        List<APICategory> apiCategories = model.getApiCategories();
+        List<String> categoryNameList = new ArrayList<>();
+        if (apiCategories != null && !apiCategories.isEmpty()) {
+            for (APICategory category : apiCategories) {
+                categoryNameList.add(category.getName());
+            }
+        }
+        dto.setCategories(categoryNameList);
+
         return dto;
     }
 
@@ -2378,5 +2393,21 @@ public class APIMappingUtil {
         }
 
         return null;
+    }
+
+    /**
+     *
+     * @param dto
+     * @param model
+     */
+    private static void setAPICategoriesToAPIModel(APIDTO dto, API model) {
+        List<String> apiCategoryNames = dto.getCategories();
+        List<APICategory> apiCategories = new ArrayList<>();
+        for (String categoryName : apiCategoryNames) {
+            APICategory category = new APICategory();
+            category.setName(categoryName);
+            apiCategories.add(category);
+        }
+        model.setApiCategories(apiCategories);
     }
 }

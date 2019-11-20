@@ -82,6 +82,7 @@ import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
 import org.wso2.carbon.apimgt.api.doc.model.Parameter;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -471,6 +472,7 @@ public final class APIUtil {
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
             api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
+            api.setApiCategories(getAPICategoriesFromAPIGovernanceArtifact(artifact, tenantId));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
@@ -696,7 +698,7 @@ public final class APIUtil {
                 api.setMonetizationProperties(jsonObj);
             }
             api.setGatewayLabels(getLabelsFromAPIGovernanceArtifact(artifact, api.getId().getProviderName()));
-
+            api.setApiCategories(getAPICategoriesFromAPIGovernanceArtifact(artifact, tenantId));
             //get endpoint config string from artifact, parse it as a json and set the environment list configured with
             //non empty URLs to API object
             try {
@@ -1245,6 +1247,9 @@ public final class APIUtil {
 
             //attaching micro-gateway labels to the API
             attachLabelsToAPIArtifact(artifact, api, tenantDomain);
+
+            //attaching api categories to the API
+            attachAPICategoriesToAPIArtifact(artifact, api, tenantDomain);
 
             //set monetization status (i.e - enabled or disabled)
             artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS, Boolean.toString(api.getMonetizationStatus()));
@@ -9833,6 +9838,79 @@ public final class APIUtil {
             return username += SUPER_TENANT_SUFFIX;
         }
         return username;
+    }
+
+     /** Validate the existence of the defined API categories and add to the API
+     *
+     * @param artifact
+     * @param api
+     * @param tenantDomain
+     * @throws APIManagementException
+     */
+    public static void attachAPICategoriesToAPIArtifact(GenericArtifact artifact, API api, String tenantDomain) throws APIManagementException {
+
+        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
+        List<APICategory> apiCategoryList = APICategoryUtil.getAllAPICategoriesOfTenant(tenantId);
+
+        if (!apiCategoryList.isEmpty()) {
+            List<String> availableCategoryNameList = new ArrayList<>();
+            for (APICategory category : apiCategoryList) {
+                availableCategoryNameList.add(category.getName());
+            }
+
+            List<APICategory> categoriesAttachedToAPI = api.getApiCategories();
+            try {
+                //remove existing categories in artifact
+                artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
+                for (APICategory category : categoriesAttachedToAPI) {
+                    String categoryName = category.getName();
+                    if (availableCategoryNameList.contains(categoryName)) {
+                        artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, categoryName);
+                    } else {
+                        log.warn("Category name : " + categoryName + " does not exist in the tenant : " +
+                                tenantDomain + ", hence skipping it.");
+                    }
+                }
+            } catch (GovernanceException e) {
+                String msg = "Failed to add categories for API : " + api.getId().getApiName();
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("No predefined categories in the tenant : " + tenantDomain + " . Skipped adding all categories");
+            }
+        }
+    }
+
+    /**
+     * This method returns the categories attached to the API
+     *
+     * @param artifact        API artifact
+     * @param tenantID        tenant ID of API Provider
+     * @return List<APICategory> list of categories
+     */
+    private static List<APICategory> getAPICategoriesFromAPIGovernanceArtifact(GovernanceArtifact artifact, int tenantID)
+            throws GovernanceException, APIManagementException {
+        String[] categoriesOfAPI = artifact.getAttributes(APIConstants.API_CATEGORIES_CATEGORY_NAME);
+        List<APICategory> categoryList = new ArrayList<>();
+
+        if (ArrayUtils.isNotEmpty(categoriesOfAPI)) {
+            //category array retrieved from artifact has only the category name, therefore we need to fetch categories
+            //and fill out missing attributes before attaching the list to the api
+            List<APICategory> allCategories = APICategoryUtil.getAllAPICategoriesOfTenant(tenantID);
+
+            //todo-category: optimize this loop with breaks
+            for (String categoryName : categoriesOfAPI) {
+                for (APICategory category : allCategories) {
+                    if (categoryName.equals(category.getName())) {
+                        categoryList.add(category);
+                        break;
+                    }
+                }
+            }
+        }
+        return categoryList;
     }
 }
 
