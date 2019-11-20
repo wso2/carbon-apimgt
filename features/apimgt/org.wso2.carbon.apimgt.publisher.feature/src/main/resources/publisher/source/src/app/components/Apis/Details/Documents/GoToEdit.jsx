@@ -40,7 +40,7 @@ function GoToEdit(props) {
     }
 
     let displayAddContent;
-    if(doc.body.sourceType === 'INLINE'  || doc.body.sourceType === 'MARKDOWN'){
+    if (doc.body.sourceType === 'INLINE'  || doc.body.sourceType === 'MARKDOWN') {
         displayAddContent = true;
     } else {
         displayAddContent= false;
