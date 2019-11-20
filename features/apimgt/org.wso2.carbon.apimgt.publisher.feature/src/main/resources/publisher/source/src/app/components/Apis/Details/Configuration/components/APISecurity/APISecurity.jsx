@@ -31,7 +31,7 @@ import {
     API_SECURITY_API_KEY,
     API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY,
     API_SECURITY_MUTUAL_SSL,
-} from './apiSecurityConstants';
+} from './components/apiSecurityConstants';
 import ApplicationLevel from './components/ApplicationLevel';
 import TransportLevel from './components/TransportLevel';
 

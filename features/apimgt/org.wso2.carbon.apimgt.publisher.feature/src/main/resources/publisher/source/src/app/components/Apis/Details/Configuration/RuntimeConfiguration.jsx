@@ -40,8 +40,9 @@ import SchemaValidation from './components/SchemaValidation';
 import MaxBackendTps from './components/MaxBackendTps';
 import Flow from './components/Flow';
 import Endpoints from './components/Endpoints';
+import APISecurity from './components/APISecurity/APISecurity';
 
-import APISecurity, {
+import {
     DEFAULT_API_SECURITY_OAUTH2,
     API_SECURITY_BASIC_AUTH,
     API_SECURITY_API_KEY,
@@ -349,14 +350,12 @@ export default function RuntimeConfiguration() {
                                     {api.type !== 'GRAPHQL'
                                         && <SchemaValidation api={apiConfig} configDispatcher={configDispatcher} />}
                                     {!api.isAPIProduct() && (
-                                        <>
-                                            <Flow
-                                                api={apiConfig}
-                                                type='IN'
-                                                updateMediationPolicy={updateInMediationPolicy}
-                                                selectedMediationPolicy={inPolicy}
-                                            />
-                                        </>
+                                        <Flow
+                                            api={apiConfig}
+                                            type='IN'
+                                            updateMediationPolicy={updateInMediationPolicy}
+                                            selectedMediationPolicy={inPolicy}
+                                        />
                                     )}
                                 </Paper>
                                 <ArrowForwardIcon className={classes.arrowForwardIcon} />
@@ -371,16 +370,14 @@ export default function RuntimeConfiguration() {
                                 <Box mb={3}>
                                     <Paper className={classes.paper} elevation={0}>
                                         {!api.isAPIProduct() && (
-                                            <>
-                                                <Box mb={3}>
-                                                    <Flow
-                                                        api={apiConfig}
-                                                        type='OUT'
-                                                        updateMediationPolicy={updateOutMediationPolicy}
-                                                        selectedMediationPolicy={outPolicy}
-                                                    />
-                                                </Box>
-                                            </>
+                                            <Box mb={3}>
+                                                <Flow
+                                                    api={apiConfig}
+                                                    type='OUT'
+                                                    updateMediationPolicy={updateOutMediationPolicy}
+                                                    selectedMediationPolicy={outPolicy}
+                                                />
+                                            </Box>
                                         )}
                                         <ResponseCaching api={apiConfig} configDispatcher={configDispatcher} />
                                     </Paper>
