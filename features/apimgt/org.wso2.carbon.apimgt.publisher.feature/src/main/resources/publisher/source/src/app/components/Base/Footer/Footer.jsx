@@ -22,9 +22,11 @@ import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import Grid from '@material-ui/core/Grid';
+import Configurations from 'Config';
+
 import FeedbackForm from './FeedbackForm';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     footer: {
         backgroundColor: theme.palette.grey.A100,
         paddingLeft: theme.spacing(3),
@@ -50,13 +52,15 @@ function Footer() {
                     <Typography noWrap>
                         <FormattedMessage
                             id='Base.Footer.Footer.product_details'
-                            defaultMessage='WSO2 APIM v3.0.0 | © 2019 WSO2 Inc'
+                            defaultMessage='WSO2 API-M v3.1.0 | © 2019 WSO2 Inc'
                         />
                     </Typography>
                 </Grid>
-                <Grid item>
-                    <FeedbackForm />
-                </Grid>
+                {Configurations.app.feedback.enable && (
+                    <Grid item>
+                        <FeedbackForm />
+                    </Grid>
+                )}
             </Grid>
         </footer>
     );

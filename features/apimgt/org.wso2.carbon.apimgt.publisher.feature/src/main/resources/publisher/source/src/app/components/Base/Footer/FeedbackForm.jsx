@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState, useReducer } from 'react';
+import React, { useState, useReducer } from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -37,6 +37,7 @@ import MoodIcon from '@material-ui/icons/Mood';
 import MoodBadIcon from '@material-ui/icons/MoodBad';
 import FaceIcon from '@material-ui/icons/Face';
 import Alert from 'AppComponents/Shared/Alert';
+import Configurations from 'Config';
 
 /**
  *
@@ -88,7 +89,7 @@ export default function FeedbackForm() {
         const check = Date.now();
         const { score = -1, message = '' } = feedback;
         const data = { check, score, message };
-        const response = fetch('https://dev1.knnect.com/apis/feedbacks', {
+        const response = fetch(Configurations.feedback.serviceURL, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -103,7 +104,7 @@ export default function FeedbackForm() {
         });
     }
     return (
-        <Fragment>
+        <>
             <Tooltip title='Send feedback'>
                 <Button onClick={() => setOpen(true)} size='small'>
                     <FeedbackIcon />
@@ -157,9 +158,9 @@ export default function FeedbackForm() {
                         <Grid item md={12}>
                             <TextField
                                 disabled={isSending}
-                                onChange={({ target: { value } }) =>
-                                    feedbackDispatcher({ type: 'message', data: value })
-                                }
+                                onChange={({ target: { value } }) => feedbackDispatcher(
+                                    { type: 'message', data: value },
+                                )}
                                 label='Message'
                                 variant='outlined'
                                 placeholder='Describe your issue or share your ideas'
@@ -186,6 +187,6 @@ export default function FeedbackForm() {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </Fragment>
+        </>
     );
 }

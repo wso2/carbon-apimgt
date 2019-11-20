@@ -32,27 +32,28 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import AuthManager from 'AppData/AuthManager';
 import APICreateMenu from '../components/APICreateMenu';
 import getSampleSwagger from './SamplePetStore.js';
 
-const styles = theme => ({
+const styles = (theme) => ({
     buttonProgress: {
         color: green[500],
         position: 'relative',
     },
     headline: {
-        paddingTop: theme.spacing.unit * 1.25,
-        paddingLeft: theme.spacing.unit * 2.5,
+        paddingTop: theme.spacing(1.25),
+        paddingLeft: theme.spacing(2.5),
     },
     head: {
-        paddingBottom: theme.spacing.unit * 2,
+        paddingBottom: theme.spacing(2),
         fontWeight: 200,
     },
     content: {
-        paddingBottom: theme.spacing.unit * 2,
+        paddingBottom: theme.spacing(2),
     },
     buttonLeft: {
-        marginRight: theme.spacing.unit,
+        marginRight: theme.spacing(1),
     },
 });
 
@@ -221,10 +222,10 @@ class SampleAPI extends Component {
                         <FormattedMessage
                             id='Apis.Listing.SampleAPI.SampleAPI.description'
                             defaultMessage={
-                                'WSO2 API Publisher enables API providers to ' +
-                                ' publish APIs, share documentation, provision API keys and gather feedback' +
-                                ' on features, quality and usage. To get started, Create an API ' +
-                                'or Publish a sample API.'
+                                'WSO2 API Publisher enables API providers to '
+                                + ' publish APIs, share documentation, provision API keys and gather feedback'
+                                + ' on features, quality and usage. To get started, Create an API '
+                                + 'or Publish a sample API.'
                             }
                         />
                     </Typography>
@@ -240,17 +241,20 @@ class SampleAPI extends Component {
                             <Create />
                             <FormattedMessage id='create.new.api' defaultMessage='Create New API' />
                         </APICreateMenu>
-                        <Button
-                            size='small'
-                            color='primary'
-                            disabled={deploying}
-                            variant='outlined'
-                            onClick={this.handleDeploySample}
-                        >
-                            <GetApp />
-                            <FormattedMessage id='deploy.sample.api' defaultMessage='Deploy Sample API' />
-                            {deploying && <CircularProgress size={24} className={classes.buttonProgress} />}
-                        </Button>
+                        {!AuthManager.isNotCreator()
+                            && (
+                                <Button
+                                    size='small'
+                                    color='primary'
+                                    disabled={deploying}
+                                    variant='outlined'
+                                    onClick={this.handleDeploySample}
+                                >
+                                    <GetApp />
+                                    <FormattedMessage id='deploy.sample.api' defaultMessage='Deploy Sample API' />
+                                    {deploying && <CircularProgress size={24} className={classes.buttonProgress} />}
+                                </Button>
+                            )}
                     </div>
                 </div>
             </InlineMessage>

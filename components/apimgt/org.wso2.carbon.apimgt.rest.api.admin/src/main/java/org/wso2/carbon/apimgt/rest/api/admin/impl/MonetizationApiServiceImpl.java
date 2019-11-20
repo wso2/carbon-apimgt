@@ -92,17 +92,15 @@ public class MonetizationApiServiceImpl extends MonetizationApiService {
                 executor = Executors.newSingleThreadExecutor();
                 MonetizationUsagePublishAgent agent = new MonetizationUsagePublishAgent(monetizationUsagePublishInfo);
                 executor.execute(agent);
-                String staus = "Request Accepted";
-                String msg = "Server is running the usage publisher";
-                return Response.accepted().entity(MonetizationAPIMappinUtil.fromStatusToDTO(staus, msg)).build();
+                return Response.accepted().entity(MonetizationAPIMappinUtil.fromStatusToDTO(
+                        "Request Accepted", "Server is running the usage publisher")).build();
             } else {
-                String staus = "Server could not accept the request";
-                String msg = "A job is already running";
-                return Response.serverError().entity(MonetizationAPIMappinUtil.fromStatusToDTO(staus, msg)).build();
+                return Response.serverError().entity(MonetizationAPIMappinUtil.fromStatusToDTO(
+                        "Server could not accept the request", "A job is already running")).build();
             }
         } catch (APIManagementException ex) {
-            String msg = "Could not add or derive monetization usage publish info";
-            RestApiUtil.handleInternalServerError(msg, ex, log);
+            RestApiUtil.handleInternalServerError("Could not add or derive monetization usage publish info",
+                    ex, log);
         }
         return null;
     }
@@ -121,8 +119,7 @@ public class MonetizationApiServiceImpl extends MonetizationApiService {
             return Response.ok().entity(MonetizationAPIMappinUtil.fromUsageStateToDTO(
                     monetizationUsagePublishInfo)).build();
         } catch (APIManagementException ex) {
-            String msg = "Could not derive monetization usage publish info";
-            RestApiUtil.handleInternalServerError(msg, ex, log);
+            RestApiUtil.handleInternalServerError("Could not derive monetization usage publish info", ex, log);
         }
         return null;
     }

@@ -81,6 +81,12 @@ class AuthManager {
     static getUser(environmentName = Utils.getCurrentEnvironment().label) {
         const userData = localStorage.getItem(`${User.CONST.LOCALSTORAGE_USER}_${environmentName}`);
         const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1, environmentName);
+        const isLoginCookie = Utils.getCookie('IS_LOGIN', 'DEFAULT');
+        if (isLoginCookie) {
+            Utils.deleteCookie('IS_LOGIN', Settings.app.context, 'DEFAULT');
+            localStorage.removeItem(`${User.CONST.LOCALSTORAGE_USER}_${environmentName}`);
+            return null;
+        }
         if (!(userData && partialToken)) {
             return null;
         }

@@ -19,21 +19,21 @@
 
 <html lang="en">
 <%
-var site = require("/site/public/theme/defaultTheme.js");
+    var app = require("/site/public/theme/settings.js").Settings.app;
 %>
 
 <head>
-    <base href="<%= site.Configurations.app.context %>/" />
+    <base href="<%= app.context %>/" />
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=1024, initial-scale=1"/>
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <title>WSO2 APIM Publisher</title>
 
-    <link href="<%= site.Configurations.app.context %>/site/public/css/main.css" type="text/css" rel="stylesheet" />
-    <link href="<%= site.Configurations.app.context %>/site/public/css/draftjs.css" type="text/css" rel="stylesheet" />
-    <link rel="shortcut icon" href="<%= site.Configurations.app.context %>/site/public/images/favicon.ico">
-    <link rel="icon" type="image/x-icon" href="<%= site.Configurations.app.context %>/site/public/images/_favicon.ico">
+    <link href="<%= app.context %>/site/public/css/main.css" type="text/css" rel="stylesheet" />
+    <link href="<%= app.context %>/site/public/css/draftjs.css" type="text/css" rel="stylesheet" />
+    <link rel="shortcut icon" href="<%= app.context %>/site/public/images/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="<%= app.context %>/site/public/images/_favicon.ico">
 </head>
 
 <body>
@@ -42,10 +42,11 @@ var site = require("/site/public/theme/defaultTheme.js");
         <div class="apim-dual-ring"></div>
     </div>
 
-    <script src="<%= site.Configurations.app.context %>/site/public/fonts/iconfont/MaterialIcons.js"></script>
-    <script src="<%= site.Configurations.app.context %>/site/public/theme/defaultTheme.js"></script>
-    <script src="<%= site.Configurations.app.context %>/site/public/dist/index.bundle.js"></script>
-    <link rel="stylesheet" href="<%= site.Configurations.app.context %>/site/public/fonts/iconfont/material-icons.css">
+    <script src="<%= app.context %>/site/public/fonts/iconfont/MaterialIcons.js"></script>
+    <script src="<%= app.context %>/site/public/theme/defaultTheme.js"></script>
+    <script src="<%= app.context %>/site/public/theme/settings.js"></script>
+    <script src="<%= app.context %>/site/public/dist/index.bundle.js"></script>
+    <link rel="stylesheet" href="<%= app.context %>/site/public/fonts/iconfont/material-icons.css">
 </body>
 
 </html>

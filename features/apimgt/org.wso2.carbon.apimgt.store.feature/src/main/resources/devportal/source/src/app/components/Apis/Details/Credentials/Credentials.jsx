@@ -27,6 +27,7 @@ import Api from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Application from 'AppData/Application';
 import AuthManager from 'AppData/AuthManager';
@@ -34,7 +35,6 @@ import SubscribeToApi from 'AppComponents/Shared/AppsAndKeys/SubscribeToApi';
 import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 import { ApiContext } from '../ApiContext';
 import SubscriptionTableRow from './SubscriptionTableRow';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
 
 /**
  * @inheritdoc
@@ -291,21 +291,21 @@ class Credentials extends React.Component {
                                 <FormattedMessage
                                     id={'Apis.Details.Credentials.Credentials.you.do.not.need'
                                         + '.credentials.to.access.prototyped.api'}
-                                    defaultMessage={'You do not need credentials to access Prototyped APIs'}
+                                    defaultMessage='You do not need credentials to access Prototyped APIs'
                                 />
                             </Typography>
                         </InlineMessage>
                     </React.Fragment>
-                )
+                );
             } else if (applicationsAvailable.length === 0 && subscribedApplications.length === 0) {
                 return (
                     <GenericDisplayDialog
                         classes={classes}
                         handleClick={this.goToWizard}
                         heading={user ? intl.formatMessage({
-                                defaultMessage: 'Generate Credentials',
-                                id: 'Apis.Details.Credentials.Credentials.generate.credentials',
-                            }) :
+                            defaultMessage: 'Generate Credentials',
+                            id: 'Apis.Details.Credentials.Credentials.generate.credentials',
+                        }) :
                             intl.formatMessage({
                                 defaultMessage: 'Sign In to Generate Credentials',
                                 id: 'Apis.Details.Credentials.Credentials.generate.credentials',
@@ -322,7 +322,7 @@ class Credentials extends React.Component {
                             id: 'Apis.Details.Credentials.Credentials.generate',
                         })}
                     />
-                )
+                );
             } else {
                 return (
                     <React.Fragment>
@@ -470,7 +470,7 @@ class Credentials extends React.Component {
                             </React.Fragment>
                         )}
                     </React.Fragment>
-                )
+                );
             }
         };
         return (
@@ -516,6 +516,7 @@ Credentials.propTypes = {
         credentialBoxWrapper: PropTypes.string,
         credentialBox: PropTypes.string,
         buttonElm: PropTypes.string,
+        dialogContainer: PropTypes.string,
     }).isRequired,
     history: PropTypes.shape({
         location: PropTypes.shape({

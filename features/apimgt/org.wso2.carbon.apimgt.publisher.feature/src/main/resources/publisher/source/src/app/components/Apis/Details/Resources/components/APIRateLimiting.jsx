@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, Fragment, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Radio from '@material-ui/core/Radio';
 import Button from '@material-ui/core/Button';
@@ -150,19 +150,23 @@ function APIRateLimiting(props) {
                         >
                             <FormControlLabel
                                 value={RateLimitingLevels.API}
-                                control={<Radio
-                                    color='primary'
-                                    disabled={isRestricted(['apim:api_create'], apiFromContext)}
-                                />}
+                                control={(
+                                    <Radio
+                                        color='primary'
+                                        disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                                    />
+                                )}
                                 label='API Level'
                                 labelPlacement='end'
                             />
                             <FormControlLabel
                                 value={RateLimitingLevels.RESOURCE}
-                                control={<Radio
-                                    color='primary'
-                                    disabled={isRestricted(['apim:api_create'], apiFromContext)}
-                                />}
+                                control={(
+                                    <Radio
+                                        color='primary'
+                                        disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                                    />
+                                )}
                                 label='Operation Level'
                                 labelPlacement='end'
                             />
@@ -180,14 +184,13 @@ function APIRateLimiting(props) {
                                 select
                                 label='Rate limiting policies'
                                 value={apiThrottlingPolicy}
-                                onChange={({ target: { value } }) =>
-                                    (onChange ? onChange(value) : setApiThrottlingPolicy(value))
-                                }
+                                onChange={({ target: { value } }) => (
+                                    onChange ? onChange(value) : setApiThrottlingPolicy(value))}
                                 helperText='Selected rate limiting policy will be applied to whole API'
                                 margin='dense'
                                 variant='outlined'
                             >
-                                {operationRateLimits.map(rateLimit => (
+                                {operationRateLimits.map((rateLimit) => (
                                     <MenuItem key={rateLimit.name} value={rateLimit.name}>
                                         {rateLimit.displayName}
                                     </MenuItem>
@@ -199,7 +202,7 @@ function APIRateLimiting(props) {
                 {/* If onChange handler is provided we assume that component is getting controlled by its parent
                 so that, hide the save cancel action */}
                 {!onChange && (
-                    <Fragment>
+                    <>
                         <Grid item md={12}>
                             <Divider />
                         </Grid>
@@ -222,7 +225,7 @@ function APIRateLimiting(props) {
                                 </Box>
                             </Box>
                         </Grid>
-                    </Fragment>
+                    </>
                 )}
             </Grid>
         </Paper>

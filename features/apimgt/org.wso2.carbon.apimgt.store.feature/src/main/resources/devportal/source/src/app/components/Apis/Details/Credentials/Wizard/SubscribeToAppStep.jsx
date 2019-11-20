@@ -20,6 +20,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import SubscribeToApi from 'AppComponents/Shared/AppsAndKeys/SubscribeToApi';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
+import cloneDeep from 'lodash.clonedeep';
 import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
 import { injectIntl } from 'react-intl';
 import ButtonPanel from './ButtonPanel';
@@ -35,13 +36,13 @@ const subscribeToAppStep = (props) => {
         apiId: '',
         throttlingPolicy: '',
     });
+    const { api: apiObject } = useContext(ApiContext);
     const [newApp, setNewApp] = useState(null);
+    const [throttlingPolicyList] = useState(apiObject.tiers);
     const {
         currentStep, createdApp, incrementStep, intl, setStepStatus,
         stepStatuses, classes,
     } = props;
-    const { api: apiObject } = useContext(ApiContext);
-    const { id, tiers: throttlingPolicyList } = { ...apiObject, tiers: [...apiObject.tiers] };
     const subscribeToApplication = () => {
         const api = new API();
         api.subscribe(
@@ -68,7 +69,7 @@ const subscribeToAppStep = (props) => {
     };
 
     useEffect(() => {
-        const newSubscriptionRequest = { ...subscriptionRequest, apiId: id };
+        const newSubscriptionRequest = { ...subscriptionRequest, apiId: apiObject.id };
         if (throttlingPolicyList) {
             const [tierData] = throttlingPolicyList;
             newSubscriptionRequest.throttlingPolicy = tierData.tierName;

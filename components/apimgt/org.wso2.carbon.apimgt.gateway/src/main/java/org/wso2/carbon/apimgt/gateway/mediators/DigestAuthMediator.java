@@ -18,17 +18,25 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators;
 
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMNamespace;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
 import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.DigestAuthConstants;
 
 import java.net.URI;
@@ -384,6 +392,15 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
             if (log.isDebugEnabled()) {
                 log.debug("WWW-Authentication header is :" + wwwHeader);
             }
+
+            if (StringUtils.isEmpty(wwwHeader)) {
+                String errorDesc = "Digest authentication is not supported by the backend";
+                log.error(HttpHeaders.WWW_AUTHENTICATE + " header is not found. " + errorDesc);
+                Utils.setFaultPayload(messageContext, getFaultPayload("Unauthenticated at backend level", errorDesc));
+                Utils.sendFault(messageContext, HttpStatus.SC_UNAUTHORIZED);
+                return false;
+            }
+
             //This step can throw a NullPointerException if a WWW-Authenticate header is not received.
             String[] wwwHeaderSplits = wwwHeader.split("Digest", 2);
 
@@ -481,9 +498,7 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                 //Here we receive a www-authenticate header but it is not for Digest authentication.
                 return true;
             }
-        } catch (NullPointerException ex) {
-            log.error("The endpoint does not support digest authentication : " + ex.getMessage(), ex);
-            return false;
+
         } catch (Exception e) {
             log.error("Exception has occurred while performing Digest Auth class mediation : " + e.getMessage(), e);
             return false;
@@ -498,6 +513,26 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
 
     public void destroy() {
         // ignore
+    }
+
+    /**
+     * Generates fault payload
+     * @param errorMessage
+     * @param errorDesc
+     * @return
+     */
+    protected OMElement getFaultPayload(String errorMessage, String errorDesc) {
+        OMFactory fac = OMAbstractFactory.getOMFactory();
+        OMNamespace ns = fac
+                .createOMNamespace(APISecurityConstants.API_SECURITY_NS, APISecurityConstants.API_SECURITY_NS_PREFIX);
+        OMElement payload = fac.createOMElement("fault", ns);
+        OMElement errorMessageElement = fac.createOMElement("message", ns);
+        errorMessageElement.setText(errorMessage);
+        OMElement errorDetail = fac.createOMElement("description", ns);
+        errorDetail.setText(errorDesc);
+        payload.addChild(errorMessageElement);
+        payload.addChild(errorDetail);
+        return payload;
     }
 
 }

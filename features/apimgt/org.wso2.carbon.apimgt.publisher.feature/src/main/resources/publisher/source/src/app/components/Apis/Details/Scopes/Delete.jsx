@@ -79,7 +79,7 @@ function Delete(props) {
             .then(() => {
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Details.Resources.Resources.api.scope.deleted.successfully',
-                    defaultMessage: 'API Scope Deleted successfully!',
+                    defaultMessage: 'API Scope deleted successfully!',
                 }));
                 setOpenLocal(!open);
             })
@@ -112,23 +112,31 @@ function Delete(props) {
             </Button>
             <ConfirmDialog
                 key='key-dialog'
-                labelCancel={<FormattedMessage
-                    id='Apis.Details.Documents.Delete.document.listing.label.cancel'
-                    defaultMessage='Cancel'
-                />}
-                title={<FormattedMessage
-                    id='Apis.Details.Documents.Delete.document.listing.delete.confirm'
-                    defaultMessage='Confirm Delete'
-                />}
-                message={<FormattedMessage
-                    id='Apis.Details.Documents.Delete.document.listing.label.ok.confirm'
-                    defaultMessage='Are you sure you want to delete scope {scope} ?'
-                    values={{ scope: scopeName }}
-                />}
-                labelOk={<FormattedMessage
-                    id='Apis.Details.Documents.Delete.document.listing.label.ok.yes'
-                    defaultMessage='Yes'
-                />}
+                labelCancel={(
+                    <FormattedMessage
+                        id='Apis.Details.Documents.Delete.document.listing.label.cancel'
+                        defaultMessage='Cancel'
+                    />
+                )}
+                title={(
+                    <FormattedMessage
+                        id='Apis.Details.Documents.Delete.document.listing.delete.confirm'
+                        defaultMessage='Confirm Delete'
+                    />
+                )}
+                message={(
+                    <FormattedMessage
+                        id='Apis.Details.Documents.Delete.document.listing.label.ok.confirm'
+                        defaultMessage='Are you sure you want to delete scope {scope} ?'
+                        values={{ scope: scopeName }}
+                    />
+                )}
+                labelOk={(
+                    <FormattedMessage
+                        id='Apis.Details.Documents.Delete.document.listing.label.ok.yes'
+                        defaultMessage='Yes'
+                    />
+                )}
                 callback={runAction}
                 open={open}
             />

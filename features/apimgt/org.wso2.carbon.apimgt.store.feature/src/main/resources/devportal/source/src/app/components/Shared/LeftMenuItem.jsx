@@ -90,6 +90,8 @@ function LeftMenuItem(props) {
         const test2 = new RegExp('/' + routeToCheck + '/', 'g');
         if (pathname.match(test1) || pathname.match(test2)) {
             setSelected(true);
+        } else if(pathname.split('/').length <= 3 && routeToCheck === 'overview'){
+            setSelected(true);
         } else {
             setSelected(false);
         }

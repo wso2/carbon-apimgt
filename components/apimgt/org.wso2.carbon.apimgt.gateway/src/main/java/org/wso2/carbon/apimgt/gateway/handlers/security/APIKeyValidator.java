@@ -489,9 +489,7 @@ public class APIKeyValidator {
                                 resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
                                         resourceString, httpMethod);
                                 verb.setRequestKey(resourceCacheKey);
-                                if (!verbInfoList.contains(verb)) {
-                                    verbInfoList.add(verb);
-                                }
+                                verbInfoList.add(verb);
                                 if (isGatewayAPIResourceValidationEnabled) {
                                     //Store verb in cache
                                     //Set cache key in the message c\ontext so that it can be used by the subsequent handlers.

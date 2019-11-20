@@ -18,22 +18,23 @@
  */
 
     var log = new Log("Services login DCR request");
-    var app = require("/site/public/theme/defaultTheme.js").Configurations.app;
+    var app = require("/site/public/theme/settings.js").Settings.app;
+    var appUtils = require("/services/utils.js");
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     include("/services/constants.jag");
-    include("/services/jagg.jag");
 
     var serverUrl = '';
-    if (app.reverseProxy.enabled === true) {
-        serverUrl = app.reverseProxy.origin;
+    var forwarded_for = request.getHeader(app.customUrl.forwardedHeader);
+    if (app.customUrl.enabled && forwarded_for) {
+        serverUrl = "https://" + forwarded_for;
     } else {
         serverUrl = utils.getServerURL();
     }
-    var settingsAPIUrl = utils.getServerURL() + SETTINGS_REST_API_URL_SUFFIX;
+    var settingsAPIUrl = appUtils.getLoopbackOrigin() + SETTINGS_REST_API_URL_SUFFIX;
     var settingsResponse = get(settingsAPIUrl, {}, "json");
 
-    var dcrUrl = utils.getServerURL() + DCR_URL_SUFFIX;
-    var authorizeEndpoint = utils.getServerURL() + AUTHORIZE_ENDPOINT_SUFFIX;
+    var dcrUrl = appUtils.getLoopbackOrigin() + DCR_URL_SUFFIX;
+    var authorizeEndpoint = serverUrl + AUTHORIZE_ENDPOINT_SUFFIX;
     var loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
     var logoutCallbackUrl = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
     var callbackUrl = "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";
@@ -53,7 +54,9 @@
     var systemApplicationDAO = new SystemApplicationDAO();
     var clientId;
     systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME);
-
+    if (systemApplicationDTO === null) {
+        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD);
+    }
     var lock = SystemApplicationDAO.getLock();
     if (systemApplicationDTO !== null) {
         clientId = systemApplicationDTO.getConsumerKey();
@@ -61,6 +64,9 @@
         try {
             lock.acquire();
             systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME);
+            if (systemApplicationDTO === null) {
+                systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD);
+            }
             if (systemApplicationDTO == null) {
                 var dcrRequestData = {
                     "callbackUrl": callbackUrl,

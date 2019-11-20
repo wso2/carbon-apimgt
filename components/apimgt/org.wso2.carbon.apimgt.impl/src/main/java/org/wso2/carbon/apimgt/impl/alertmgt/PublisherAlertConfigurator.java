@@ -28,7 +28,10 @@ import org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class PublisherAlertConfigurator extends AlertConfigurator {
 
@@ -89,8 +92,7 @@ public class PublisherAlertConfigurator extends AlertConfigurator {
             throws APIManagementException {
         String domainName = MultitenantUtils.getTenantDomain(userName);
         String configPropertyName = AlertMgtConstants.alertTypeConfigMap.get(alertName);
-        String query = "from ApiCreatorAlertConfiguration on apiCreator=='"
-                + userName + "' and apiCreatorTenantDomain=='" + domainName + "' and "
+        String query = "from ApiCreatorAlertConfiguration on apiCreatorTenantDomain=='" + domainName + "' and "
                 + configPropertyName + "!=0 select apiName,apiVersion,apiCreator,apiCreatorTenantDomain, "
                 + configPropertyName + "; ";
         JSONObject result = APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_ALERT_CONFIG_APP, query);
@@ -143,7 +145,9 @@ public class PublisherAlertConfigurator extends AlertConfigurator {
                 + thresholdResponseTime + "L as thresholdResponseTime,"
                 + thresholdBackendTime + "L as thresholdBackendTime update or insert into ApiCreatorAlertConfiguration "
                 + conditionQuery + "on ApiCreatorAlertConfiguration.apiName == apiName "
-                + "and ApiCreatorAlertConfiguration.apiVersion == apiVersion";
+                + "and ApiCreatorAlertConfiguration.apiVersion == apiVersion " 
+                + "and ApiCreatorAlertConfiguration.apiCreator == apiCreator " 
+                + "and ApiCreatorAlertConfiguration.apiCreatorTenantDomain == apiCreatorTenantDomain";
     }
 
     private String buildAlertConfigDeleteQuery(String apiName, String apiVersion, String userName, String alertType) {

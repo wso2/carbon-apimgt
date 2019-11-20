@@ -67,7 +67,9 @@ const styles = theme => ({
         textDecoration: 'underline',
     },
     genericMessageWrapper: {
-        margin: theme.spacing(2),
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2),
+        marginRight: theme.spacing(3),
     },
 });
 
@@ -279,7 +281,7 @@ class Comments extends Component {
                                 />
                             </Paper>
                         )}
-                        {totalComments === 0 && AuthManager.getUser() === null && !isOverview &&
+                        {totalComments === 0 && !isOverview &&
                             <div className={classes.genericMessageWrapper}>
                                 <InlineMessage type='info' className={classes.dialogContainer}>
                                     <Typography variant='h5' component='h3'>

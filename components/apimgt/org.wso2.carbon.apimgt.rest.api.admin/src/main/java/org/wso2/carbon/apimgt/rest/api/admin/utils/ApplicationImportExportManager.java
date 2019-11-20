@@ -227,7 +227,7 @@ public class ApplicationImportExportManager {
         String jsonParams = jsonParamObj.toString();
         String tokenScopes = apiKey.getTokenScope();
         apiConsumer.requestApprovalForApplicationRegistration(
-                application.getSubscriber().getName(), application.getName(), apiKey.getType(), apiKey.getCallbackUrl(),
+                username, application.getName(), apiKey.getType(), apiKey.getCallbackUrl(),
                 accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()), tokenScopes, application.getGroupId(),
                 jsonParams);
     }

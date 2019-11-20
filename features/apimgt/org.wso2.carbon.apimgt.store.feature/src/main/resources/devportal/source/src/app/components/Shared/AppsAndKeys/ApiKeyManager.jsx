@@ -160,7 +160,12 @@ class ApiKeyManager extends React.Component {
                             <Grid item xs={4}>
                             </Grid>
                             <Grid item xs={2} className={classes.gridWrapper}>
-                                <FormLabel className={classes.formLabel}>Generate Api Key</FormLabel>
+                                <Typography variant='h5' className={classes.formLabel}>
+                                    <FormattedMessage
+                                        id='Shared.AppsAndKeys.ApiKeyManager.generate.key'
+                                        defaultMessage='Generate API Key'
+                                    />
+                                </Typography>
                             </Grid>
                             <Grid item xs={3}>
                                 <Button

@@ -39,7 +39,7 @@ function MetaData(props) {
     const [api] = useAPI();
 
     return (
-        <React.Fragment>
+        <>
             <Typography variant='h5' component='h3' className={parentClasses.title}>
                 <FormattedMessage
                     id='Apis.Details.NewOverview.MetaData.metadata'
@@ -58,26 +58,29 @@ function MetaData(props) {
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
-                            {api.description &&
-                            <React.Fragment>
-                                {capitalizeFirstLetter(api.description)}
-                            </React.Fragment>}
+                            {api.description
+                            && (
+                                <>
+                                    {capitalizeFirstLetter(api.description)}
+                                </>
+                            )}
                         </Typography>
                         <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
-                            {!api.description &&
-                                <React.Fragment>
-                                    <Typography
-                                        component='p'
-                                        variant='body1'
-                                        className={parentClasses.notConfigured}
-                                    >
-                                        <FormattedMessage
-                                            id='Apis.Details.NewOverview.MetaData.description.not.set'
-                                            defaultMessage='-'
-                                        />
-                                    </Typography>
-                                </React.Fragment>
-                            }
+                            {!api.description
+                                && (
+                                    <>
+                                        <Typography
+                                            component='p'
+                                            variant='body1'
+                                            className={parentClasses.notConfigured}
+                                        >
+                                            <FormattedMessage
+                                                id='Apis.Details.NewOverview.MetaData.description.not.set'
+                                                defaultMessage='-'
+                                            />
+                                        </Typography>
+                                    </>
+                                )}
                         </Typography>
                     </Grid>
                     <Grid item xs={12} md={6} lg={4}>
@@ -91,7 +94,7 @@ function MetaData(props) {
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
-                            {api.provider && <React.Fragment>{api.provider}</React.Fragment>}
+                            {api.provider && <>{api.provider}</>}
                         </Typography>
                     </Grid>
                     <Grid item xs={12} md={6} lg={4}>
@@ -104,12 +107,12 @@ function MetaData(props) {
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
-                            {api.context && <React.Fragment>{api.context}</React.Fragment>}
+                            {api.context && <>{api.context}</>}
                         </Typography>
                     </Grid>
                     {/* Version */}
                     {api.apiType === API.CONSTS.API && (
-                        <React.Fragment>
+                        <>
                             <Grid item xs={12} md={6} lg={4}>
                                 <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                                     <FormattedMessage
@@ -120,16 +123,16 @@ function MetaData(props) {
                             </Grid>
                             <Grid item xs={12} md={6} lg={8}>
                                 <Typography component='p' variant='body1'>
-                                    {api.version && <React.Fragment>{api.version}</React.Fragment>}
+                                    {api.version && <>{api.version}</>}
                                 </Typography>
                             </Grid>
-                        </React.Fragment>
+                        </>
                     )}
                     {/* Type */}
                     {api.apiType === API.CONSTS.APIProduct ? null : (
-                        <React.Fragment>
+                        <>
                             <Grid item xs={12} md={6} lg={4}>
-                                <React.Fragment>
+                                <>
                                     <Typography
                                         component='p'
                                         variant='subtitle2'
@@ -140,28 +143,29 @@ function MetaData(props) {
                                             defaultMessage='Type:'
                                         />
                                     </Typography>
-                                </React.Fragment>
+                                </>
                             </Grid>
                             <Grid item xs={12} md={6} lg={8}>
                                 <Typography component='p' variant='body1'>
-                                    {api.type && <React.Fragment>{api.type}</React.Fragment>}
-                                    {!api.type &&
-                                        <React.Fragment>
-                                            <Typography
-                                                component='p'
-                                                variant='body1'
-                                                className={parentClasses.notConfigured}
-                                            >
-                                                <FormattedMessage
-                                                    id='Apis.Details.NewOverview.MetaData.type.not.set'
-                                                    defaultMessage='-'
-                                                />
-                                            </Typography>
-                                        </React.Fragment>
-                                    }
+                                    {api.type && <>{api.type}</>}
+                                    {!api.type
+                                        && (
+                                            <>
+                                                <Typography
+                                                    component='p'
+                                                    variant='body1'
+                                                    className={parentClasses.notConfigured}
+                                                >
+                                                    <FormattedMessage
+                                                        id='Apis.Details.NewOverview.MetaData.type.not.set'
+                                                        defaultMessage='-'
+                                                    />
+                                                </Typography>
+                                            </>
+                                        )}
                                 </Typography>
                             </Grid>
-                        </React.Fragment>
+                        </>
                     )}
                     <Grid item xs={12} md={6} lg={4}>
                         {/* Created Time */}
@@ -174,34 +178,37 @@ function MetaData(props) {
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
-                            {api.createdTime &&
-                            <React.Fragment>
-                                <Tooltip
-                                    title={moment(api.createdTime).calendar()}
-                                    aria-label='add'
-                                    interactive
-                                    placement='top-start'
-                                    tabIndex='-1'
-                                >
-                                    <Typography variant='body1' display='block'>
-                                        {capitalizeFirstLetter(moment(api.createdTime).fromNow())}
-                                    </Typography>
-                                </Tooltip>
-                            </React.Fragment>}
-                            {!api.createdTime &&
-                                <React.Fragment>
-                                    <Typography
-                                        component='p'
-                                        variant='body1'
-                                        className={parentClasses.notConfigured}
+                            {api.createdTime
+                            && (
+                                <>
+                                    <Tooltip
+                                        title={moment(api.createdTime).calendar()}
+                                        aria-label='add'
+                                        interactive
+                                        placement='top-start'
+                                        tabIndex='-1'
                                     >
-                                        <FormattedMessage
-                                            id='Apis.Details.NewOverview.MetaData.createdTime.not.set'
-                                            defaultMessage='-'
-                                        />
-                                    </Typography>
-                                </React.Fragment>
-                            }
+                                        <Typography variant='body1' display='block'>
+                                            {capitalizeFirstLetter(moment(api.createdTime).fromNow())}
+                                        </Typography>
+                                    </Tooltip>
+                                </>
+                            )}
+                            {!api.createdTime
+                                && (
+                                    <>
+                                        <Typography
+                                            component='p'
+                                            variant='body1'
+                                            className={parentClasses.notConfigured}
+                                        >
+                                            <FormattedMessage
+                                                id='Apis.Details.NewOverview.MetaData.createdTime.not.set'
+                                                defaultMessage='-'
+                                            />
+                                        </Typography>
+                                    </>
+                                )}
                         </Typography>
                     </Grid>
                     <Grid item xs={12} md={6} lg={4}>
@@ -215,40 +222,43 @@ function MetaData(props) {
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
                         <Typography component='p' variant='body1'>
-                            {api.lastUpdatedTime &&
-                            <React.Fragment>
-                                <Tooltip
-                                    title={moment(api.lastUpdatedTime).calendar()}
-                                    aria-label='add'
-                                    interactive
-                                    placement='top-start'
-                                    tabIndex='-1'
-                                >
-                                    <Typography variant='body1' display='block'>
-                                        {capitalizeFirstLetter(moment(api.lastUpdatedTime).fromNow())}
-                                    </Typography>
-                                </Tooltip>
-                            </React.Fragment>}
-                            {!api.lastUpdatedTime &&
-                                <React.Fragment>
-                                    <Typography
-                                        component='p'
-                                        variant='body1'
-                                        className={parentClasses.notConfigured}
+                            {api.lastUpdatedTime
+                            && (
+                                <>
+                                    <Tooltip
+                                        title={moment(api.lastUpdatedTime).calendar()}
+                                        aria-label='add'
+                                        interactive
+                                        placement='top-start'
+                                        tabIndex='-1'
                                     >
-                                        <FormattedMessage
-                                            id='Apis.Details.NewOverview.MetaData.lastUpdatedTime.not.set'
-                                            defaultMessage='-'
-                                        />
-                                    </Typography>
-                                </React.Fragment>
-                            }
+                                        <Typography variant='body1' display='block'>
+                                            {capitalizeFirstLetter(moment(api.lastUpdatedTime).fromNow())}
+                                        </Typography>
+                                    </Tooltip>
+                                </>
+                            )}
+                            {!api.lastUpdatedTime
+                                && (
+                                    <>
+                                        <Typography
+                                            component='p'
+                                            variant='body1'
+                                            className={parentClasses.notConfigured}
+                                        >
+                                            <FormattedMessage
+                                                id='Apis.Details.NewOverview.MetaData.lastUpdatedTime.not.set'
+                                                defaultMessage='-'
+                                            />
+                                        </Typography>
+                                    </>
+                                )}
                         </Typography>
                     </Grid>
                     <BusinessInformation parentClasses={parentClasses} />
                 </Grid>
             </Box>
-        </React.Fragment>
+        </>
     );
 }
 

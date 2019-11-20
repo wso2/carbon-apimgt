@@ -490,6 +490,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, body.getClientSecret());
                         }
                     }
+                    
+                    if (!StringUtils.isEmpty(body.getAdditionalProperties())) {
+                        jsonParamObj.put(APIConstants.JSON_ADDITIONAL_PROPERTIES, body.getAdditionalProperties());
+                    }
                     String jsonParams = jsonParamObj.toString();
                     String tokenScopes = StringUtils.join(body.getScopes(), " ");
 

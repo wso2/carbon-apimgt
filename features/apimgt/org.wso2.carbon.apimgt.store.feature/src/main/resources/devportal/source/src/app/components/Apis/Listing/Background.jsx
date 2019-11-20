@@ -27,6 +27,23 @@ const styles = {
     },
 };
 
+function aHexToOpacity(aHex) {
+    const alphaValue = '0x' + aHex.substring(7, 9);
+    return alphaValue / 256;
+}
+
+/**
+ *
+ * @param {*} aHex
+ */
+function getColorWithoutAlpha(aHex) {
+    return aHex.substring(0, 7);
+}
+
+/**
+ * Generate svg background.
+ * @param {*} props
+ */
 function Background(props) {
     const {
         classes, colorPair, width, height,
@@ -46,30 +63,32 @@ function Background(props) {
     const rects = [];
     for (let i = 0; i <= 4; i++) {
         for (let j = 0; j <= 4; j++) {
+            const color = '#' + (colorPair.sub - ((0x00000025 * i) - (j * 0x00000015))).toString(16);
             rects.push(<rect
                 key={i + '_' + j}
                 {...thumbnailBoxChild}
                 /* eslint no-mixed-operators: 0 */
-                fill={'#' + (colorPair.sub - ((0x00000025 * i) - (j * 0x00000015))).toString(16)}
+                fill={getColorWithoutAlpha(color)}
+                fillOpacity={aHexToOpacity(color)}
                 x={200 - i * 54}
                 y={54 * j}
             />);
         }
     }
-
+    const primeColor = '#' + colorPair.prime.toString(16);
     return (
         <svg width={width} height={height} className={classes.svgImage}>
-            <rect {...thumbnailBox} fill={'#' + colorPair.prime.toString(16)} />
+            <rect {...thumbnailBox} fill={getColorWithoutAlpha(primeColor)} fillOpacity={aHexToOpacity(primeColor)} />
             {rects}
         </svg>
     );
 }
 
 Background.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({ svgImage: PropTypes.string }).isRequired,
     width: PropTypes.shape({}).isRequired,
     height: PropTypes.shape({}).isRequired,
-    colorPair: PropTypes.shape({}).isRequired,
+    colorPair: PropTypes.shape({ sub: PropTypes.number, prime: PropTypes.number }).isRequired,
 };
 
 export default withStyles(styles)(Background);

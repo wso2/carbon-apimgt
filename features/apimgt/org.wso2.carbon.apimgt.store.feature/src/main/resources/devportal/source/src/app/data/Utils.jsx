@@ -54,7 +54,7 @@ class Utils {
      * @param {String} path : Path of the cookie which need to be deleted
      * @param {String} environmentName: label of the environment of the cookie
      */
-    static delete_cookie(name, path, environmentName) {
+    static deleteCookie(name, path, environmentName) {
         environmentName = environmentName || Utils.getEnvironment().label;
         document.cookie = `${name}_${environmentName}=; path=${path}; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
     }

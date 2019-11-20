@@ -803,23 +803,25 @@ public class OAS2Parser extends APIDefinition {
             for (Map.Entry<HttpMethod, Operation> entry : operationMap.entrySet()) {
                 Operation operation = entry.getValue();
                 Map<String, Object> extensions = operation.getVendorExtensions();
-                // remove mediation extension
-                if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
-                    extensions.remove(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
-                }
-                // set x-scope value to security definition if it not there.
-                if (extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SCOPES)) {
-                    String scope = (String) extensions.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
-                    List<Map<String, List<String>>> security = operation.getSecurity();
-                    if (security == null) {
-                        security = new ArrayList<>();
-                        operation.setSecurity(security);
+                if (extensions != null) {
+                    // remove mediation extension
+                    if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
+                        extensions.remove(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
                     }
-                    for (Map<String, List<String>> requirement : security) {
-                        if (requirement.get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY) == null || !requirement
-                                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY).contains(scope)) {
-                            requirement
-                                    .put(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, Collections.singletonList(scope));
+                    // set x-scope value to security definition if it not there.
+                    if (extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SCOPES)) {
+                        String scope = (String) extensions.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
+                        List<Map<String, List<String>>> security = operation.getSecurity();
+                        if (security == null) {
+                            security = new ArrayList<>();
+                            operation.setSecurity(security);
+                        }
+                        for (Map<String, List<String>> requirement : security) {
+                            if (requirement.get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY) == null || !requirement
+                                    .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY).contains(scope)) {
+                                requirement
+                                        .put(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, Collections.singletonList(scope));
+                            }
                         }
                     }
                 }

@@ -132,6 +132,20 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
         checkAccessControlPermission(identifier);
         return super.getAPI(identifier);
     }
+    
+    @Override
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
+            throws APIManagementException {
+        ApiTypeWrapper apiTypeWrapper = super.getAPIorAPIProductByUUID(uuid, requestedTenantDomain);
+        Identifier identifier;
+        if (apiTypeWrapper.isAPIProduct()) {
+            identifier = apiTypeWrapper.getApiProduct().getId();
+        } else {
+            identifier = apiTypeWrapper.getApi().getId();
+        }
+        checkAccessControlPermission(identifier);
+        return apiTypeWrapper;
+    }
 
     public void checkSubscribePermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_SUBSCRIBE);

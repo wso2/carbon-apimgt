@@ -23,17 +23,17 @@ import { withStyles } from '@material-ui/core/styles';
 import AuthManager from 'AppData/AuthManager';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 
-const styles = theme => ({
+const styles = (theme) => ({
     link: {
         color: theme.palette.getContrastText(theme.palette.background.default),
         cursor: 'pointer',
     },
     time: {
         color: theme.palette.getContrastText(theme.palette.background.default),
-        marginTop: theme.spacing.unit * 0.3,
+        marginTop: theme.spacing(0.3),
     },
     verticalSpace: {
-        marginTop: theme.spacing.unit * 0.2,
+        marginTop: theme.spacing(0.2),
     },
     disable: {
         color: theme.custom.disableColor,
@@ -49,11 +49,11 @@ const styles = theme => ({
         overflowWrap: 'break-word',
     },
     root: {
-        marginTop: theme.spacing.unit * 2.5,
+        marginTop: theme.spacing(2.5),
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
         paddingTop: theme.spacing.unig,
     },
 });
@@ -142,8 +142,8 @@ class CommentOptions extends React.Component {
         const {
             classes, comment, editIndex, index, theme,
         } = this.props;
-        const canDelete =
-            comment.createdBy === AuthManager.getUser().name || AuthManager.getUser().name === theme.custom.adminRole;
+        const canDelete = (comment.createdBy === AuthManager.getUser().name)
+            || (AuthManager.getUser().name === theme.custom.adminRole);
         const canModify = comment.createdBy === AuthManager.getUser().name && comment.entryPoint === 'APIPublisher';
         return (
             <Grid container spacing={2} className={classes.verticalSpace} key={comment.commentId}>

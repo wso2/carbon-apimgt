@@ -57,7 +57,7 @@ function nodeWithIntlProp(node) {
  */
 export function shallowWithIntl(node, { context, ...additionalOptions } = {}) {
     return shallow(nodeWithIntlProp(node), {
-        context: Object.assign({}, context, { intl }),
+        context: { ...context, intl },
         ...additionalOptions,
     });
 }

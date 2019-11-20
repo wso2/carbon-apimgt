@@ -883,22 +883,24 @@ public class OAS3Parser extends APIDefinition {
             for (Map.Entry<PathItem.HttpMethod, Operation> entry : pathItem.readOperationsMap().entrySet()) {
                 Operation operation = entry.getValue();
                 Map<String, Object> extensions = operation.getExtensions();
-                // remove mediation extension
-                if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
-                    extensions.remove(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
-                }
-                // set x-scope value to security definition if it not there.
-                if (extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SCOPES)) {
-                    String scope = (String) extensions.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
-                    List<SecurityRequirement> security = operation.getSecurity();
-                    if (security == null) {
-                        security = new ArrayList<>();
-                        operation.setSecurity(security);
+                if (extensions != null) {
+                    // remove mediation extension
+                    if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
+                        extensions.remove(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
                     }
-                    for (Map<String, List<String>> requirement : security) {
-                        if (requirement.get(OPENAPI_SECURITY_SCHEMA_KEY) == null || !requirement
-                                .get(OPENAPI_SECURITY_SCHEMA_KEY).contains(scope)) {
-                            requirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Collections.singletonList(scope));
+                    // set x-scope value to security definition if it not there.
+                    if (extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SCOPES)) {
+                        String scope = (String) extensions.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
+                        List<SecurityRequirement> security = operation.getSecurity();
+                        if (security == null) {
+                            security = new ArrayList<>();
+                            operation.setSecurity(security);
+                        }
+                        for (Map<String, List<String>> requirement : security) {
+                            if (requirement.get(OPENAPI_SECURITY_SCHEMA_KEY) == null || !requirement
+                                    .get(OPENAPI_SECURITY_SCHEMA_KEY).contains(scope)) {
+                                requirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Collections.singletonList(scope));
+                            }
                         }
                     }
                 }

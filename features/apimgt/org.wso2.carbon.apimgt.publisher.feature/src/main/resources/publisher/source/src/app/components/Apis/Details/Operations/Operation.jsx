@@ -28,7 +28,7 @@ import { injectIntl } from 'react-intl';
 import { Typography } from '@material-ui/core';
 import Switch from '@material-ui/core/Switch';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         flexGrow: 1,
         marginTop: 10,
@@ -38,8 +38,8 @@ const styles = theme => ({
         flexWrap: 'wrap',
     },
     textField: {
-        marginLeft: theme.spacing.unit,
-        marginRight: theme.spacing.unit,
+        marginLeft: theme.spacing(),
+        marginRight: theme.spacing(),
         width: 400,
     },
     mainTitle: {
@@ -49,19 +49,19 @@ const styles = theme => ({
         width: 400,
     },
     dropDown: {
-        width: theme.spacing.unit * 11.25,
+        width: theme.spacing(11.25),
     },
     divider: {
         marginTop: 20,
         marginBottom: 20,
     },
     chip: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(),
         color: theme.palette.text.secondary,
         minWidth: 100,
     },
     chipActive: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(),
         color: theme.palette.text.secondary,
         background: theme.palette.background.active,
         minWidth: 100,
@@ -84,21 +84,21 @@ const styles = theme => ({
     },
     resourceRoot: {
         background: theme.palette.grey['100'],
-        paddingLeft: theme.spacing.unit,
-        paddingRight: theme.spacing.unit,
+        paddingLeft: theme.spacing(),
+        paddingRight: theme.spacing(),
         borderRadius: theme.shape.borderRadius,
-        marginBottom: theme.spacing.unit,
+        marginBottom: theme.spacing(),
     },
     deleteButton: {
         marginLeft: 'auto',
     },
     pathDisplay: {
-        marginRight: theme.spacing.unit * 2,
-        marginLeft: theme.spacing.unit * 2,
+        marginRight: theme.spacing(2),
+        marginLeft: theme.spacing(2),
     },
     descriptionWrapper: {
-        paddingTop: theme.spacing.unit,
-        paddingBottom: theme.spacing.unit,
+        paddingTop: theme.spacing(),
+        paddingBottom: theme.spacing(),
     },
     scopeSelect: {
         width: '100%',
@@ -160,6 +160,7 @@ class Operation extends React.Component {
         newoperation.scopes = [scope];
         this.props.handleUpdateList(newoperation);
     }
+
     /**
      *
      * @param {*} e event triggered for handle  policy Change
@@ -199,16 +200,17 @@ class Operation extends React.Component {
         const noneScope = { name: 'none', description: '', bindings: null };
         const dropdownScopes = [...scopes, noneScope];
         const { isSecurity } = this.state;
-        let chipColor = theme.custom.operationChipColor ?
-            theme.custom.operationChipColor[operation.verb.toLowerCase()]
+        let chipColor = theme.custom.operationChipColor
+            ? theme.custom.operationChipColor[operation.verb.toLowerCase()]
             : null;
         let chipTextColor = '#000000';
         if (!chipColor) {
             console.log('Check the theme settings. The resourceChipColors is not populated properlly');
             chipColor = '#cccccc';
         } else {
-            chipTextColor =
-            theme.palette.getContrastText(theme.custom.operationChipColor[operation.verb.toLowerCase()]);
+            chipTextColor = theme.palette.getContrastText(
+                theme.custom.operationChipColor[operation.verb.toLowerCase()],
+            );
         }
         return (
             <TableRow style={{ borderStyle: 'hidden' }}>
@@ -234,7 +236,7 @@ class Operation extends React.Component {
                         onChange={this.handlePolicyChange}
                         fieldName='Throttling Policy'
                     >
-                        {apiPolicies.map(policy => (
+                        {apiPolicies.map((policy) => (
                             <MenuItem
                                 key={policy.name}
                                 value={policy.name}
@@ -254,7 +256,7 @@ class Operation extends React.Component {
                             id: 'age-simple',
                         }}
                     >
-                        {dropdownScopes.map(tempScope => (
+                        {dropdownScopes.map((tempScope) => (
                             <MenuItem
                                 key={tempScope.name}
                                 value={tempScope.name}

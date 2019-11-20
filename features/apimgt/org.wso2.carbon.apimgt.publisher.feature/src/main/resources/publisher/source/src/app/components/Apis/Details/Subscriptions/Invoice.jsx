@@ -109,7 +109,7 @@ function Invoice(props) {
     };
 
     return (
-        <React.Fragment>
+        <>
             <Button
                 variant='outlined'
                 size='small'
@@ -136,7 +136,7 @@ function Invoice(props) {
                 <DialogTitle>No Data Available</DialogTitle>
                 <DialogContent>
                     <DialogContentText id='invoice-dialog-description'>
-                        Pending invoice data not fund for this subscription.
+                        Pending invoice data not found for this subscription.
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -145,7 +145,7 @@ function Invoice(props) {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </React.Fragment>
+        </>
     );
 }
 

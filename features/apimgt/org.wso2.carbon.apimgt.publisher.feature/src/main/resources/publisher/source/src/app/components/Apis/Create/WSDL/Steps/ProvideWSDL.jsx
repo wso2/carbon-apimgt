@@ -29,14 +29,25 @@ import { makeStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import InputAdornment from '@material-ui/core/InputAdornment';
-
-import APIValidation from 'AppData/APIValidation';
-import Wsdl from 'AppData/Wsdl';
-import DropZoneLocal from 'AppComponents/Shared/DropZoneLocal';
+import Button from '@material-ui/core/Button';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import Avatar from '@material-ui/core/Avatar';
+import IconButton from '@material-ui/core/IconButton';
+import InsertDriveFile from '@material-ui/icons/InsertDriveFile';
+import DeleteIcon from '@material-ui/icons/Delete';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListItemText from '@material-ui/core/ListItemText';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import CheckIcon from '@material-ui/icons/Check';
 
-const useStyles = makeStyles(theme => ({
+import APIValidation from 'AppData/APIValidation';
+import Wsdl from 'AppData/Wsdl';
+import Banner from 'AppComponents/Shared/Banner';
+import DropZoneLocal, { humanFileSize } from 'AppComponents/Shared/DropZoneLocal';
+
+const useStyles = makeStyles((theme) => ({
     mandatoryStar: {
         color: theme.palette.error.main,
     },
@@ -156,6 +167,87 @@ export default function ProvideWSDL(props) {
         validateFileOrArchive(files[0]);
     }
 
+    /**
+     *  Render uploaded WSDL schema list
+     */
+    function renderUploadedList() {
+        return (
+            <List>
+                <ListItem key={apiInputs.inputValue.path}>
+                    <ListItemAvatar>
+                        <Avatar>
+                            <InsertDriveFile />
+                        </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                        primary={`${apiInputs.inputValue.path} - ${humanFileSize(apiInputs.inputValue.size)}`}
+                    />
+                    <ListItemSecondaryAction>
+                        <IconButton
+                            edge='end'
+                            aria-label='delete'
+                            onClick={() => {
+                                inputsDispatcher({ action: 'inputValue', value: null });
+                                inputsDispatcher({ action: 'isFormValid', value: false });
+                            }}
+                        >
+                            <DeleteIcon />
+                        </IconButton>
+                    </ListItemSecondaryAction>
+                </ListItem>
+            </List>
+        );
+    }
+
+    const dropBoxControlLabel = isGenerateRESTAPI ? (
+        <FormattedMessage
+            id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.file.dropzone'
+            defaultMessage='Drag & Drop WSDL file {break} -or-'
+            values={{ break: <br /> }}
+        />
+    ) : (
+        <FormattedMessage
+            id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.file.archive.dropzone'
+            defaultMessage='Drag & Drop WSDL file/archive {break} -or-'
+            values={{ break: <br /> }}
+        />
+    );
+
+    /**
+     * Render file upload UI.
+     *
+     */
+    function renderFileUpload() {
+        if (apiInputs.inputValue) {
+            return renderUploadedList();
+        }
+        // TODO: Pass message saying accepting only one file ~tmkb
+        return (
+            <DropZoneLocal
+                error={isError && isError.file}
+                onDrop={onDrop}
+                files={apiInputs.inputValue}
+                accept={isArchiveInput ? '.bz,.bz2,.gz,.rar,.tar,.zip,.7z,.wsdl' : '.wsdl'}
+            >
+                {isValidating ? (<CircularProgress />)
+                    : (
+                        <>
+                            { dropBoxControlLabel }
+                            <Button
+                                color='primary'
+                                variant='contained'
+                            >
+                                <FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.file.upload'
+                                    defaultMessage='Browse File to Upload'
+                                />
+                            </Button>
+                        </>
+                    )}
+            </DropZoneLocal>
+        );
+    }
+
     let urlStateEndAdornment = null;
     if (isValidating) {
         urlStateEndAdornment = (
@@ -177,134 +269,156 @@ export default function ProvideWSDL(props) {
         );
     }
 
-    const fileControlLabel = isGenerateRESTAPI ? (<FormattedMessage
-        id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label.wsdl.file'
-        defaultMessage='WSDL File'
-    />) : (<FormattedMessage
-        id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label.wsdl.file.archive'
-        defaultMessage='WSDL File/Archive'
-    />);
-
-    const dropBoxControlLabel = isGenerateRESTAPI ? (<FormattedMessage
-        id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.file.dropzone'
-        defaultMessage='Select a WSDL file'
-    />) : (<FormattedMessage
-        id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.file.archive.dropzone'
-        defaultMessage='Select a WSDL file/archive'
-    />);
+    const fileControlLabel = isGenerateRESTAPI ? (
+        <FormattedMessage
+            id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label.wsdl.file'
+            defaultMessage='WSDL File'
+        />
+    ) : (
+        <FormattedMessage
+            id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label.wsdl.file.archive'
+            defaultMessage='WSDL File/Archive'
+        />
+    );
 
     return (
-        <React.Fragment>
+        <>
             <Grid container spacing={5}>
                 <Grid item md={12}>
                     <FormControl component='fieldset'>
                         <FormLabel component='legend'>
-                            <React.Fragment>
-                                <sup className={classes.mandatoryStar}>*</sup>{' '}
+                            <>
+                                <sup className={classes.mandatoryStar}>*</sup>
+                                {' '}
                                 <FormattedMessage
                                     id='Apis.Create.WSDL.Steps.ProvideWSDL.implementation.type'
                                     defaultMessage='Implementation Type'
                                 />
-                            </React.Fragment>
+                            </>
                         </FormLabel>
                         <RadioGroup
                             aria-label='Implementation type'
                             value={apiInputs.type}
-                            onChange={event => inputsDispatcher({ action: 'type', value: event.target.value })}
+                            onChange={
+                                (event) => {
+                                    inputsDispatcher({ action: 'type', value: event.target.value });
+                                    inputsDispatcher({ action: 'isFormValid', value: false });
+                                    inputsDispatcher({ action: 'inputValue', value: null });
+                                    inputsDispatcher({ action: 'inputType', value: 'url' });
+                                }
+                            }
                         >
                             <FormControlLabel
                                 value='SOAP'
                                 control={<Radio color='primary' />}
-                                label={<FormattedMessage
-                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.passthrough.label'
-                                    defaultMessage='Pass Through'
-                                />}
+                                label={(
+                                    <FormattedMessage
+                                        id='Apis.Create.WSDL.Steps.ProvideWSDL.passthrough.label'
+                                        defaultMessage='Pass Through'
+                                    />
+                                )}
                             />
                             <FormControlLabel
                                 value='SOAPTOREST'
                                 control={<Radio color='primary' />}
-                                label={<FormattedMessage
-                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.SOAPtoREST.label'
-                                    defaultMessage='Generate REST APIs'
-                                />}
+                                label={(
+                                    <FormattedMessage
+                                        id='Apis.Create.WSDL.Steps.ProvideWSDL.SOAPtoREST.label'
+                                        defaultMessage='Generate REST APIs'
+                                    />
+                                )}
                             />
                         </RadioGroup>
                         <FormHelperText>
                             <sup>*</sup>
-                            <b>Generate REST APIs</b> option is only available for WSDL URL input type
+                            <b>Generate REST APIs</b>
+                            {' '}
+option is only available for WSDL URL input type
                         </FormHelperText>
                     </FormControl>
                 </Grid>
                 <Grid item md={12}>
                     <FormControl component='fieldset'>
                         <FormLabel component='legend'>
-                            <React.Fragment>
-                                <sup className={classes.mandatoryStar}>*</sup>{' '}
+                            <>
+                                <sup className={classes.mandatoryStar}>*</sup>
+                                {' '}
                                 <FormattedMessage
                                     id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.type'
                                     defaultMessage='Input Type'
                                 />
-                            </React.Fragment>
+                            </>
                         </FormLabel>
                         <RadioGroup
                             aria-label='Input type'
                             value={apiInputs.inputType}
-                            onChange={event => inputsDispatcher({ action: 'inputType', value: event.target.value })}
+                            onChange={(event) => inputsDispatcher({ action: 'inputType', value: event.target.value })}
                         >
                             <FormControlLabel
                                 value='url'
                                 control={<Radio color='primary' />}
-                                label={<FormattedMessage
-                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.url.label'
-                                    defaultMessage='WSDL URL'
-                                />}
+                                label={(
+                                    <FormattedMessage
+                                        id='Apis.Create.WSDL.Steps.ProvideWSDL.url.label'
+                                        defaultMessage='WSDL URL'
+                                    />
+                                )}
                             />
                             <FormControlLabel
-                                value='file'
+                                value={isGenerateRESTAPI ? 'file' : 'archive'}
+                                disabled={isGenerateRESTAPI}
                                 control={<Radio color='primary' />}
                                 label={fileControlLabel}
                             />
                         </RadioGroup>
                     </FormControl>
                 </Grid>
-                <Grid item md={7}>
-                    {(isFileInput || isArchiveInput) ? (
-                        // TODO: Pass message saying accepting only one file ~tmkb
-                        <DropZoneLocal onDrop={onDrop} files={apiInputs.inputValue} error={isError && isError.file}>
-                            {isValidating && <CircularProgress />}
-                            {isError && isError.file ? (
-                                isError.file.message
-                            ) : dropBoxControlLabel}
-                        </DropZoneLocal>
-                    ) : (
-                        <TextField
-                            autoFocus
-                            id='outlined-full-width'
-                            label='WSDL URL'
-                            placeholder='Enter WSDL URL'
-                            fullWidth
-                            margin='normal'
-                            variant='outlined'
-                            onChange={({ target: { value } }) => inputsDispatcher({ action: 'inputValue', value })}
-                            value={apiInputs.inputValue}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            InputProps={{
-                                onBlur: ({ target: { value } }) => {
-                                    validateUrl(APIValidation.url.required().validate(value).error);
-                                },
-                                endAdornment: urlStateEndAdornment,
-                            }}
-                            helperText={
-                                (isError && isError.url && isError.url.message) || 'Click away to validate the URL'}
-                            error={isError && Boolean(isError.url)}
-                            disabled={isValidating}
-                        />
+                {isError && isError.file
+                    && (
+                        <Grid item md={11}>
+                            <Banner
+                                onClose={() => setValidity({ file: null })}
+                                disableActions
+                                dense
+                                paperProps={{ elevation: 1 }}
+                                type='error'
+                                message={isError.file.message}
+                            />
+                        </Grid>
                     )}
+                <Grid item md={11}>
+                    {(isFileInput || isArchiveInput) ? renderFileUpload()
+                        : (
+                            <TextField
+                                autoFocus
+                                id='outlined-full-width'
+                                label='WSDL URL'
+                                placeholder='Enter WSDL URL'
+                                fullWidth
+                                margin='normal'
+                                variant='outlined'
+                                onChange={({ target: { value } }) => inputsDispatcher({ action: 'inputValue', value })}
+                                value={apiInputs.inputValue}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                InputProps={{
+                                    onBlur: ({ target: { value } }) => {
+                                        validateUrl(APIValidation.url.required().validate(value).error);
+                                    },
+                                    endAdornment: urlStateEndAdornment,
+                                }}
+                                helperText={
+                                    (isError && isError.url && isError.url.message) || 'Click away to validate the URL'
+                                }
+                                error={isError && Boolean(isError.url)}
+                                disabled={isValidating}
+                            />
+                        )}
+
                 </Grid>
             </Grid>
-        </React.Fragment>
+        </>
     );
 }
 

@@ -34,7 +34,7 @@ class BusinessPlans extends Component {
      * @memberof BusinessPlans
      */
     componentDidMount() {
-        this.props.api.getPolicies().then(policies => this.setState({ policies }));
+        this.props.api.getPolicies().then((policies) => this.setState({ policies }));
     }
 
     /**
@@ -48,7 +48,7 @@ class BusinessPlans extends Component {
         if (!policies) {
             return <Progress />;
         }
-        const policiesList = policies.map(policy => (
+        const policiesList = policies.map((policy) => (
             <ListItem key={policy.policyName}>
                 <ListItemText primary={policy.policyName} secondary={policy.description || policy.policyName} />
             </ListItem>

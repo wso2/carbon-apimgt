@@ -16,8 +16,10 @@
  * under the License.
  */
 
-import React from 'react';
-import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
+import React, { Suspense, lazy } from 'react';
+import {
+    BrowserRouter as Router, Redirect, Route, Switch,
+} from 'react-router-dom';
 import AuthManager from 'AppData/AuthManager';
 import CONSTS from 'AppData/Constants';
 import qs from 'qs';
@@ -27,10 +29,12 @@ import Progress from 'AppComponents/Shared/Progress';
 import PublisherRootErrorBoundary from 'AppComponents/Shared/PublisherRootErrorBoundary';
 import Configurations from 'Config';
 import { IntlProvider } from 'react-intl';
-import ProtectedApp from './app/ProtectedApp';
+import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 
 // Localization
 import LoginDenied from './app/LoginDenied';
+
+const ProtectedApp = lazy(() => import('./app/ProtectedApp' /* webpackChunkName: "ProtectedApps" */));
 
 /**
  * Language.
@@ -127,8 +131,8 @@ class Publisher extends React.Component {
      */
     loadLocale(locale) {
         fetch(`${Configurations.app.context}/site/public/locales/${locale}.json`)
-            .then(resp => resp.json())
-            .then(messages => this.setState({ messages }));
+            .then((resp) => resp.json())
+            .then((messages) => this.setState({ messages }));
     }
 
     /**
@@ -143,7 +147,7 @@ class Publisher extends React.Component {
         } = this.state;
         const locale = languageWithoutRegionCode || language;
         if (!userResolved) {
-            return <Progress />;
+            return <Progress message='Resolving user ...' />;
         }
         return (
             <IntlProvider locale={locale} messages={messages}>
@@ -156,8 +160,14 @@ class Publisher extends React.Component {
                                 render={() => {
                                     if (notEnoughPermission) {
                                         return <LoginDenied />;
+                                    } else if (!user) {
+                                        return <RedirectToLogin />;
                                     }
-                                    return <ProtectedApp user={user} />;
+                                    return (
+                                        <Suspense fallback={<Progress message='Loading app ...' />}>
+                                            <ProtectedApp user={user} />
+                                        </Suspense>
+                                    );
                                 }}
                             />
                         </Switch>

@@ -40,7 +40,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import Api from 'AppData/api';
 import { isRestricted } from 'AppData/AuthManager';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         flexGrow: 1,
         marginTop: 10,
@@ -76,19 +76,19 @@ const styles = theme => ({
         marginTop: 0,
     },
     FormControlLabel: {
-        marginBottom: theme.spacing.unit,
-        marginTop: theme.spacing.unit,
+        marginBottom: theme.spacing(1),
+        marginTop: theme.spacing(1),
         fontSize: theme.typography.caption.fontSize,
     },
     buttonSection: {
         paddingTop: theme.spacing(3),
     },
     saveButton: {
-        marginRight: theme.spacing(2),
+        marginRight: theme.spacing(1),
     },
     helpText: {
         color: theme.palette.text.hint,
-        marginTop: theme.spacing.unit,
+        marginTop: theme.spacing(1),
     },
     extraPadding: {
         paddingLeft: theme.spacing(2),
@@ -146,6 +146,115 @@ class CreateScope extends React.Component {
         this.handleRoleDeletion = this.handleRoleDeletion.bind(this);
     }
 
+
+    handleRoleDeletion = (role) => {
+        const { validRoles, invalidRoles } = this.state;
+        if (invalidRoles.includes(role)) {
+            const invalidRolesArray = invalidRoles.filter((existingRole) => existingRole !== role);
+            this.setState({ invalidRoles: invalidRolesArray });
+            if (invalidRolesArray.length === 0) {
+                this.setState({ roleValidity: true });
+            }
+        } else {
+            this.setState({ validRoles: validRoles.filter((existingRole) => existingRole !== role) });
+        }
+    };
+
+    handleRoleAddition(role) {
+        const { validRoles, invalidRoles } = this.state;
+        const promise = APIValidation.role.validate(base64url.encode(role));
+        promise
+            .then(() => {
+                this.setState({
+                    roleValidity: true,
+                    validRoles: [...validRoles, role],
+                });
+            })
+            .catch((error) => {
+                if (error.status === 404) {
+                    this.setState({
+                        roleValidity: false,
+                        invalidRoles: [...invalidRoles, role],
+                    });
+                } else {
+                    Alert.error('Error when validating role: ' + role);
+                    console.error('Error when validating role ' + error);
+                }
+            });
+    }
+
+    validateScopeDescription({ target: { id, value } }) {
+        const { valid, apiScope } = this.state;
+        apiScope[id] = value;
+        valid[id].invalid = false;
+        valid[id].error = '';
+        this.setState({
+            valid,
+            apiScope,
+        });
+    }
+
+    validateScopeName(id, value) {
+        const { valid, apiScope } = this.state;
+        const {
+            api: { scopes },
+        } = this.props;
+
+        apiScope[id] = value;
+        valid[id].invalid = !(value && value.length > 0);
+        if (valid[id].invalid) {
+            valid[id].error = 'Scope name cannot be empty';
+        }
+
+        if (/\s/.test(value)) {
+            valid[id].invalid = true;
+            valid[id].error = 'Scope name cannot have spaces';
+        }
+
+        const exist = scopes.find((scope) => {
+            return scope.name === value;
+        });
+        if (!valid[id].invalid && exist) {
+            valid[id].invalid = true;
+            valid[id].error = 'Scope name already exist';
+        }
+        if (!valid[id].invalid && /[!@#$%^&*(),?"{}[\]|<>\t\n]|(^apim:)/i.test(value)) {
+            valid[id].invalid = true;
+            valid[id].error = 'Field contains special characters';
+        }
+        if (!valid[id].invalid) {
+            const promise = APIValidation.scope.validate(base64url.encode(value));
+            promise
+                .then(() => {
+                    valid[id].invalid = true;
+                    valid[id].error = 'Scope name is already used by another API';
+                    this.setState({
+                        valid,
+                    });
+                })
+                .catch((error) => {
+                    if (error.status === 404) {
+                        valid[id].invalid = false;
+                        valid[id].error = '';
+                        this.setState({
+                            valid,
+                        });
+                    } else {
+                        Alert.error('Error when validating scope: ' + value);
+                        console.error('Error when validating scope ' + error);
+                    }
+                });
+        }
+        if (!valid[id].invalid) {
+            valid[id].error = '';
+        }
+        this.setState({
+            valid,
+            apiScope,
+        });
+        return valid[id].invalid;
+    }
+
     /**
      * Add new scope
      * @memberof Scopes
@@ -201,108 +310,6 @@ class CreateScope extends React.Component {
     handleScopeNameInput({ target: { id, value } }) {
         this.validateScopeName(id, value);
     }
-
-    validateScopeName(id, value) {
-        const { valid, apiScope } = this.state;
-        const {
-            api: { scopes },
-        } = this.props;
-
-        apiScope[id] = value;
-        valid[id].invalid = !(value && value.length > 0);
-        if (valid[id].invalid) {
-            valid[id].error = 'Scope name cannot be empty';
-        }
-        const exist = scopes.find((scope) => {
-            return scope.name === value;
-        });
-        if (!valid[id].invalid && exist) {
-            valid[id].invalid = true;
-            valid[id].error = 'Scope name already exist';
-        }
-        if (!valid[id].invalid && /[!@#$%^&*(),?"{}[\]|<>\t\n]|(^apim:)/i.test(value)) {
-            valid[id].invalid = true;
-            valid[id].error = 'Field contains special characters';
-        }
-        if (!valid[id].invalid) {
-            const promise = APIValidation.scope.validate(base64url.encode(value));
-            promise
-                .then(() => {
-                    valid[id].invalid = true;
-                    valid[id].error = 'Scope name is already used by another API';
-                    this.setState({
-                        valid,
-                    });
-                })
-                .catch((error) => {
-                    if (error.status === 404) {
-                        valid[id].invalid = false;
-                        valid[id].error = '';
-                        this.setState({
-                            valid,
-                        });
-                    } else {
-                        Alert.error('Error when validating scope: ' + value);
-                        console.error('Error when validating scope ' + error);
-                    }
-                });
-        }
-        if (!valid[id].invalid) {
-            valid[id].error = '';
-        }
-        this.setState({
-            valid,
-            apiScope,
-        });
-        return valid[id].invalid;
-    }
-
-    validateScopeDescription({ target: { id, value } }) {
-        const { valid, apiScope } = this.state;
-        apiScope[id] = value;
-        valid[id].invalid = false;
-        valid[id].error = '';
-        this.setState({
-            valid,
-            apiScope,
-        });
-    }
-
-    handleRoleAddition(role) {
-        const { validRoles, invalidRoles } = this.state;
-        const promise = APIValidation.role.validate(base64url.encode(role));
-        promise
-            .then(() => {
-                this.setState({
-                    roleValidity: true,
-                    validRoles: [...validRoles, role],
-                });
-            })
-            .catch((error) => {
-                if (error.status === 404) {
-                    this.setState({
-                        roleValidity: false,
-                        invalidRoles: [...invalidRoles, role],
-                    });
-                } else {
-                    Alert.error('Error when validating role: ' + role);
-                    console.error('Error when validating role ' + error);
-                }
-            });
-    }
-
-    handleRoleDeletion = (role) => {
-        const { validRoles, invalidRoles } = this.state;
-        if (invalidRoles.includes(role)) {
-            const invalidRolesArray = invalidRoles.filter(existingRole => existingRole !== role);
-            this.setState({ invalidRoles: invalidRolesArray });
-            if (invalidRolesArray.length === 0) {
-                this.setState({ roleValidity: true });
-            }
-        } else {
-            this.setState({ validRoles: validRoles.filter(existingRole => existingRole !== role) });
-        }
-    };
 
     /**
      *
@@ -381,12 +388,12 @@ class CreateScope extends React.Component {
                                         label='Description'
                                         variant='outlined'
                                         placeholder='Short description about the scope'
-                                        helperText={
+                                        helperText={(
                                             <FormattedMessage
                                                 id='Apis.Details.Scopes.CreateScope.short.description.about.the.scope'
                                                 defaultMessage='Short description about the scope'
                                             />
-                                        }
+                                        )}
                                         margin='normal'
                                         InputLabelProps={{
                                             shrink: true,
@@ -425,7 +432,7 @@ class CreateScope extends React.Component {
                                             ) : (
                                                 <FormattedMessage
                                                     id='Apis.Details.Scopes.CreateScope.roles.help'
-                                                    defaultMessage='Enter a valid role and press enter.'
+                                                    defaultMessage='Enter a valid role and press `Enter`.'
                                                 />
                                             )
                                         }
@@ -451,21 +458,21 @@ class CreateScope extends React.Component {
                                         color='primary'
                                         onClick={this.addScope}
                                         disabled={
-                                            isRestricted(['apim:api_create'], api) ||
-                                            this.state.valid.name.invalid ||
-                                            invalidRoles.length !== 0 ||
-                                            scopeAddDisabled
+                                            isRestricted(['apim:api_create'], api)
+                                            || this.state.valid.name.invalid
+                                            || invalidRoles.length !== 0
+                                            || scopeAddDisabled
                                         }
                                         className={classes.saveButton}
                                     >
                                         {scopeAddDisabled ? (
-                                            <React.Fragment>
+                                            <>
                                                 <FormattedMessage
                                                     id='Apis.Details.Scopes.CreateScope.saving'
                                                     defaultMessage='Saving'
                                                 />
                                                 <CircularProgress size={16} classes={{ root: classes.progress }} />
-                                            </React.Fragment>
+                                            </>
                                         ) : (
                                             <FormattedMessage
                                                 id='Apis.Details.Scopes.CreateScope.save'
@@ -474,7 +481,7 @@ class CreateScope extends React.Component {
                                         )}
                                     </Button>
                                     <Link to={url}>
-                                        <Button variant='contained'>
+                                        <Button>
                                             <FormattedMessage
                                                 id='Apis.Details.Scopes.CreateScope.cancel'
                                                 defaultMessage='Cancel'

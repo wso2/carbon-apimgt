@@ -453,6 +453,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     protected API getAPI(GenericArtifact apiArtifact) throws APIManagementException {
         API api = APIUtil.getAPI(apiArtifact, registry);
         if (api != null) {
+            APIUtil.updateAPIProductDependencies(api, registry);
             checkAccessControlPermission(api.getId());
         }
         return api;

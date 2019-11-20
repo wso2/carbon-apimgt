@@ -36,7 +36,7 @@ const variantIcon = {
     info: InfoIcon,
 };
 
-const useStyles1 = makeStyles(theme => ({
+const useStyles1 = makeStyles((theme) => ({
     root: {
         position: 'relative' /* Overriding the default Snackbar root properties to stack messages */,
         padding: '5px' /* To add some space between messages when stacking messages */,
@@ -77,12 +77,12 @@ function MySnackbarContentWrapper(props) {
         <SnackbarContent
             className={clsx(classes[variant], className)}
             aria-describedby='client-snackbar'
-            message={
+            message={(
                 <span id='client-snackbar' className={classes.message}>
                     <Icon className={clsx(classes.icon, classes.iconVariant)} />
                     {message}
                 </span>
-            }
+            )}
             action={[
                 <IconButton key='close' aria-label='close' color='inherit' onClick={onClose}>
                     <CloseIcon className={classes.icon} />

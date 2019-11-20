@@ -127,7 +127,7 @@ const AlertConfiguration = (props) => {
     const handleApiVersionSelect = (version) => {
         setSelectedAPIVersion(version);
         const existingAPI = apis.filter((tmpAPi) => {
-            return tmpAPi.name === selectedAPIName && tmpAPi.version === version ? tmpAPi.id : -1;
+            return tmpAPi.name === selectedAPIName && tmpAPi.version === version;
         });
         if (existingAPI.length > 0) {
             api.getSubscriptions(existingAPI[0].id).then((res) => {

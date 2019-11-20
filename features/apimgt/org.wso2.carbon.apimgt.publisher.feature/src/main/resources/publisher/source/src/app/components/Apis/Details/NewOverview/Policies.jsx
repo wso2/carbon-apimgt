@@ -32,7 +32,7 @@ import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 function Policies(props) {
     const { parentClasses, api } = props;
     return (
-        <React.Fragment>
+        <>
             <Grid item xs={12} md={6} lg={4}>
                 <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                     <FormattedMessage
@@ -44,17 +44,18 @@ function Policies(props) {
             <Grid item xs={12} md={6} lg={8}>
                 {/* Throttling Policies */}
                 <Typography component='p' variant='body1'>
-                    {api.policies &&
-                    api.policies.length !== 0 &&
-                    api.policies.map((item, index) => (
+                    {api.policies
+                    && api.policies.length !== 0
+                    && api.policies.map((item, index) => (
                         <span>
                             {item}
-                            {api.policies.length !== index + 1 && ', '}{' '}
+                            {api.policies.length !== index + 1 && ', '}
+                            {' '}
                         </span>
                     ))}
                 </Typography>
             </Grid>
-        </React.Fragment>
+        </>
     );
 }
 

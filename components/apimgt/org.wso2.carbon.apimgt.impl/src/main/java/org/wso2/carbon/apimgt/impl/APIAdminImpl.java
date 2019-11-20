@@ -123,7 +123,7 @@ public class APIAdminImpl implements APIAdmin {
                 break;
             }
         }
-        if (labelName != null && StringUtils.isEmpty(labelName)) {
+        if (labelName != null && !StringUtils.isEmpty(labelName)) {
             UserAwareAPIProvider userAwareAPIProvider = new UserAwareAPIProvider(user);
             for (API api : apiList) {
                 String uuid = api.getUUID();

@@ -145,15 +145,16 @@ class ViewToken extends React.Component {
                         }
                         {(!token.isOauth) && <FormattedMessage
                             id='Shared.AppsAndKeys.ViewToken.please.copy.apikey'
-                            defaultMessage='Please Copy the Api Key'
+                            defaultMessage='Please Copy the API Key'
                         />
                         }
                     </Typography>
                     <Typography component='p'>
                         <FormattedMessage
                             id='Shared.AppsAndKeys.ViewToken.please.copy.help'
-                            defaultMessage={`Please copy this generated token value as it will be displayed only for 
-                            the current browser session. ( After a page refresh, the token is not visible in the UI )`}
+                            defaultMessage={'Please copy this generated token value as it will be displayed only for'
+                            + ' the current browser session. '
+                            + '( The token will not be visible in the UI after the page is refreshed. )'}
                         />
                     </Typography>
                 </InlineMessage>

@@ -21,8 +21,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertConfigManager;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertConfigurator;
+import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtUtils;
 import org.wso2.carbon.apimgt.impl.alertmgt.exception.AlertManagementException;
 import org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.AlertSubscriptionsApiService;
@@ -36,6 +40,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +49,8 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
     private AlertConfigurator publisherAlertConfigurator = null;
     private static final Log log = LogFactory.getLog(AlertSubscriptionsApiServiceImpl.class);
     private static final String AGENT = "publisher";
+    private static final String API_NAME = "apiName";
+    private static final String API_VERSION = "apiVersion";
 
     @Override
     public Response getSubscribedAlertTypes(MessageContext messageContext) {
@@ -52,6 +59,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
         String tenantAwareUserName = PublisherAlertsAPIUtils.getTenantAwareUserName(userName);
 
         try {
+            Map<String, List<String>> allowedAPIVersionInfo = AlertsMappingUtil.getAllowedAPIInfo();
             publisherAlertConfigurator = AlertConfigManager.getInstance().getAlertConfigurator(AGENT);
             List<Integer> subscribedAlertTypes = publisherAlertConfigurator.getSubscribedAlerts(tenantAwareUserName, AGENT);
             List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> alertTypes = publisherAlertConfigurator
@@ -70,8 +78,17 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
                             List<Map<String, String>> configurationList = publisherAlertConfigurator
                                     .getAlertConfiguration(userName, alertTypeDTO.getName());
                             for (Map<String, String> properties : configurationList) {
-                                AlertConfigDTO alertConfigDTO = AlertsMappingUtil.toAlertConfigDTO(properties);
-                                alertConfigDTOList.add(alertConfigDTO);
+                                List<String> allowedVersions = allowedAPIVersionInfo.get(properties.get(API_NAME));
+                                if (allowedVersions != null) {
+                                    String configVersion = properties.get(API_VERSION);
+                                    for (String version : allowedVersions) {
+                                        if (configVersion.equals(version)) {
+                                            AlertConfigDTO alertConfigDTO =
+                                                    AlertsMappingUtil.toAlertConfigDTO(properties);
+                                            alertConfigDTOList.add(alertConfigDTO);
+                                        }
+                                    }
+                                }
                             }
                             alertDTO.setConfiguration(alertConfigDTOList);
                         }

@@ -18,10 +18,11 @@
 
 import qs from 'qs';
 import CONSTS from 'AppData/Constants';
+import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import Configurations from 'Config';
 import Utils from './Utils';
 import User from './User';
-import APIClient from './APIClient';
+
 /**
  * Class managing authentication
  */
@@ -87,18 +88,12 @@ class AuthManager {
         const introspectUrl = Configurations.app.context + Utils.CONST.INTROSPECT;
         const promisedResponse = fetch(introspectUrl, { credentials: 'same-origin' });
         return promisedResponse
-            .then(response => response.json())
+            .then((response) => response.json())
             .then((data) => {
                 let user = null;
-                let username;
                 if (data.active) {
                     const currentEnv = Utils.getCurrentEnvironment();
-                    if (data.username.endsWith('@carbon.super')) {
-                        username = data.username.replace('@carbon.super', '');
-                    } else {
-                        ({ username } = data);
-                    }
-                    user = new User(currentEnv.label, username);
+                    user = new User(currentEnv.label, data.username);
                     const scopes = data.scope.split(' ');
                     if (this.hasBasicLoginPermission(scopes)) {
                         user.scopes = scopes;
@@ -132,29 +127,19 @@ class AuthManager {
     }
 
     /**
-     *
-     * @param {String} environmentName - Name of the environment the user to be removed
+     * Clear all user records from the browser (opposite of `getUser`).
+     * partial token, Local storage user object etc
+     * consequent `getUser` user will fallback to `getUserFromToken`.
+     * @memberof User
+     * @returns {void}
      */
-    static dismissUser(environmentName) {
-        localStorage.removeItem(`${User.CONST.LOCAL_STORAGE_USER}_${environmentName}`);
-        User.destroyInMemoryUser(environmentName);
-    }
-
-    /**
-     *
-     * Get scope for resources
-     * @static
-     * @param {String} resourcePath
-     * @param {String} resourceMethod
-     * @returns Boolean
-     * @memberof AuthManager
-     */
-    static hasScopes(resourcePath, resourceMethod) {
-        const userscopes = AuthManager.getUser().scopes;
-        const validScope = APIClient.getScopeForResource(resourcePath, resourceMethod);
-        return validScope.then((scope) => {
-            return userscopes.includes(scope);
-        });
+    static discardUser() {
+        // Since we don't have multi environments currentEnv will always get `default`
+        const currentEnv = Utils.getCurrentEnvironment().label;
+        localStorage.removeItem(User.CONST.USER_EXPIRY_TIME);
+        localStorage.removeItem(`${User.CONST.LOCAL_STORAGE_USER}_${currentEnv}`);
+        Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1, currentEnv);
+        Utils.getCookie(User.CONST.WSO2_AM_REFRESH_TOKEN_1, currentEnv);
     }
 
     static isNotCreator() {
@@ -162,20 +147,33 @@ class AuthManager {
     }
 
     static isNotPublisher() {
-        return !AuthManager.getUser().scopes.includes('apim:api_publish');
+        if (AuthManager.getUser() === null) {
+            return doRedirectToLogin();
+        } else {
+            return !AuthManager.getUser().scopes.includes('apim:api_publish');
+        }
     }
 
     static isRestricted(scopesAllowedToEdit, api) {
+        // determines whether the apiType is API PRODUCT and user has publisher role, then allow access.
+        if (api.apiType === 'APIProduct') {
+            if (AuthManager.getUser().scopes.includes('apim:api_publish')) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
         // determines whether the user is a publisher or creator (based on what is passed from the element)
         // if (scopesAllowedToEdit.filter(element => AuthManager.getUser().scopes.includes(element)).length > 0) {
-        if (scopesAllowedToEdit.find(element => AuthManager.getUser().scopes.includes(element))) {
+        if (scopesAllowedToEdit.find((element) => AuthManager.getUser().scopes.includes(element))) {
             // if the user has publisher role, no need to consider the api LifeCycleStatus
             if (AuthManager.getUser().scopes.includes('apim:api_publish')) {
                 return false;
             } else if (
                 // if the user has creator role, but not the publisher role
-                api.lifeCycleStatus === 'CREATED' ||
-                api.lifeCycleStatus === 'PROTOTYPED'
+                api.lifeCycleStatus === 'CREATED'
+                || api.lifeCycleStatus === 'PROTOTYPED'
             ) {
                 return false;
             } else {
@@ -234,8 +232,8 @@ class AuthManager {
 // TODO: derive this from swagger definitions ~tmkb
 AuthManager.CONST = {
     USER_SCOPES:
-        'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage ' +
-        'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
+        'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
+        + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
 };
 const { isRestricted } = AuthManager;
 

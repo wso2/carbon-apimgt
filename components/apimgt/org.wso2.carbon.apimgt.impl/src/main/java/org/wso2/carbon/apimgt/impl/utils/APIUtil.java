@@ -448,14 +448,6 @@ public final class APIUtil {
                 uriTemplate.setScopes(scope);
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
-
-                Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
-                for (APIProductIdentifier usedByProduct : usedByProducts) {
-                    String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);
-                    Resource productResource = registry.get(apiProductPath);
-                    String artifactId = productResource.getUUID();
-                    usedByProduct.setUUID(artifactId);
-                }
             }
             api.setUriTemplates(uriTemplates);
             api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
@@ -484,6 +476,23 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return api;
+    }
+
+    /**
+     * This method used to retrieve the api resource dependencies
+     * @param api api object
+     * @param registry registry
+     * @throws APIManagementException
+     */
+    public static void updateAPIProductDependencies(API api, Registry registry) throws APIManagementException {
+        for (URITemplate uriTemplate : api.getUriTemplates()) {
+            Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
+            for (APIProductIdentifier usedByProduct : usedByProducts) {
+                //TODO : removed registry call until find a proper fix
+                String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);
+                usedByProduct.setUUID(apiProductPath);
+            }
+        }
     }
 
     /**
@@ -619,14 +628,6 @@ public final class APIUtil {
                 uriTemplate.setScopes(scope);
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
-
-                Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
-                for (APIProductIdentifier usedByProduct : usedByProducts) {
-                    String apiProductPath = APIUtil.getAPIProductPath(usedByProduct);
-                    Resource productResource = registry.get(apiProductPath);
-                    String artifactId = productResource.getUUID();
-                    usedByProduct.setUUID(artifactId);
-                }
             }
 
             if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
@@ -969,7 +970,7 @@ public final class APIUtil {
                         replaceEmailDomainBack(providerName));
                 List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
                 String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
-                if (policies != null && !"".equals(policies)) {
+                if (!StringUtils.isEmpty(policies)) {
                     String[] policyNames = policies.split("\\|\\|");
                     for (String policyName : policyNames) {
                         if (definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)) {
@@ -980,7 +981,6 @@ public final class APIUtil {
                         }
                     }
                 }
-
                 api.addAvailableTiers(availablePolicy);
                 String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
                 api.setMonetizationCategory(getAPIMonetizationCategory(availablePolicy, tenantDomainName));
@@ -994,26 +994,20 @@ public final class APIUtil {
                     for (String tierName : tierNames) {
                         Tier tier = new Tier(tierName);
                         availableTier.add(tier);
-
                     }
-
                     api.addAvailableTiers(availableTier);
                     api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
                 } else {
                     api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
                 }
             }
-
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
-
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
-
             api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
             api.setSubscriptionAvailableTenants(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
-
             api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
@@ -1030,16 +1024,14 @@ public final class APIUtil {
                         artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
             } catch (ParseException e) {
                 String msg = "Failed to parse endpoint config JSON of API: " + apiName + " " + apiVersion;
-                log.error(msg, e);
                 throw new APIManagementException(msg, e);
             } catch (ClassCastException e) {
                 String msg = "Invalid endpoint config JSON found in API: " + apiName + " " + apiVersion;
-                log.error(msg, e);
                 throw new APIManagementException(msg, e);
             }
 
         } catch (GovernanceException e) {
-            String msg = "Failed to get API from artifact ";
+            String msg = "Failed to get API from artifact";
             throw new APIManagementException(msg, e);
         }
         return api;
@@ -1972,7 +1964,7 @@ public final class APIUtil {
             // isWSDL2Document(api.getWsdlUrl()) method only understands http or file system urls.
             // Hence if this is a registry url, should not go in to the following if block
             if (!api.getWsdlUrl().matches(wsdRegistryPath) && (api.getWsdlUrl().startsWith("http:") || api.getWsdlUrl()
-                    .startsWith("https:") || api.getWsdlUrl().startsWith("file:"))) {
+                    .startsWith("https:") || api.getWsdlUrl().startsWith("file:") || api.getWsdlUrl().startsWith("/t"))) {
                 URL wsdlUrl;
                 try {
                     wsdlUrl = new URL(api.getWsdlUrl());
@@ -3655,6 +3647,9 @@ public final class APIUtil {
                         }
                     }
                 } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Store view roles for " + artifactPath + " : " + publisherAccessRoles.toString());
+                    }
                     authorizationManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
                     authorizationManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
                 }
@@ -5380,15 +5375,15 @@ public final class APIUtil {
 
             if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + "/" +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
             } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + "/" +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
             } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
-                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + "/" +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
             }
 
@@ -6052,7 +6047,7 @@ public final class APIUtil {
 
     /**
      * This method will check the validity of given url. WSDL url should be
-     * contain http, https or file system patch
+     * contain http, https, "/t" (for tenant APIs) or file system path
      * otherwise we will mark it as invalid wsdl url. How ever here we do not
      * validate wsdl content.
      *
@@ -6062,7 +6057,7 @@ public final class APIUtil {
     public static boolean isValidWSDLURL(String wsdlURL, boolean required) {
         if (wsdlURL != null && !"".equals(wsdlURL)) {
             if (wsdlURL.startsWith("http:") || wsdlURL.startsWith("https:") ||
-                    wsdlURL.startsWith("file:") || (wsdlURL.startsWith("/registry") && !wsdlURL.endsWith(".zip"))) {
+                    wsdlURL.startsWith("file:") || (wsdlURL.startsWith("/registry") || wsdlURL.startsWith("/t") && !wsdlURL.endsWith(".zip"))) {
                 return true;
             }
         } else if (!required) {
@@ -7113,6 +7108,9 @@ public final class APIUtil {
     }
 
     public static int getManagementTransportPort (String mgtTransport){
+        if (StringUtils.isEmpty(mgtTransport)) {
+            mgtTransport = APIConstants.HTTPS_PROTOCOL;
+        }
         AxisConfiguration axisConfiguration = ServiceReferenceHolder
                 .getContextService().getServerConfigContext().getAxisConfiguration();
         int mgtTransportPort = CarbonUtils.getTransportProxyPort(axisConfiguration, mgtTransport);
@@ -7120,6 +7118,30 @@ public final class APIUtil {
             mgtTransportPort = CarbonUtils.getTransportPort(axisConfiguration, mgtTransport);
         }
         return mgtTransportPort;
+    }
+
+    public static int getCarbonTransportPort(String mgtTransport) {
+
+        if (StringUtils.isEmpty(mgtTransport)) {
+            mgtTransport = APIConstants.HTTPS_PROTOCOL;
+        }
+        AxisConfiguration axisConfiguration = ServiceReferenceHolder
+                .getContextService().getServerConfigContext().getAxisConfiguration();
+        return CarbonUtils.getTransportPort(axisConfiguration, mgtTransport);
+
+    }
+
+    /*
+     * Checks whether the proxy port is configured.
+     * @param transport  The transport
+     * @return boolean proxyport is enabled
+     * */
+    public static boolean isProxyPortEnabled(String mgtTransport) {
+
+        AxisConfiguration axisConfiguration = ServiceReferenceHolder
+                .getContextService().getServerConfigContext().getAxisConfiguration();
+        int mgtTransportProxyPort = CarbonUtils.getTransportProxyPort(axisConfiguration, mgtTransport);
+        return mgtTransportProxyPort > 0;
     }
 
     public static String getServerURL() throws APIManagementException {
@@ -8689,6 +8711,37 @@ public final class APIUtil {
     }
 
     /**
+     * Get the Security Audit Attributes for tenant from the Registry
+     *
+     * @param tenantId tenant id
+     * @return JSONObject JSONObject containing the properties
+     * @throws APIManagementException Throw if a registry or parse exception arises
+     */
+    public static JSONObject getSecurityAuditAttributesFromRegistry(int tenantId) throws APIManagementException {
+        try {
+            Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
+            if (registryConfig.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                Resource resource = registryConfig.get(APIConstants.API_TENANT_CONF_LOCATION);
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                if (content != null) {
+                    JSONObject tenantConfigs = (JSONObject) new JSONParser().parse(content);
+                    String property = APIConstants.SECURITY_AUDIT_CONFIGURATION;
+                    if (tenantConfigs.keySet().contains(property)) {
+                        return (JSONObject) tenantConfigs.get(property);
+                    }
+                }
+            }
+        } catch (RegistryException exception) {
+            String msg = "Error while retrieving Security Audit attributes from tenant registry.";
+            throw new APIManagementException(msg, exception);
+        } catch (ParseException parseException) {
+            String msg = "Couldn't create json object from Swagger object for custom security audit attributes.";
+            throw new APIManagementException(msg, parseException);
+        }
+        return null;
+    }
+
+    /**
      * Validate the input file name for invalid path elements
      *
      * @param fileName
@@ -9027,7 +9080,22 @@ public final class APIUtil {
             for (APIProductResource resource : resources) {
                 String apiPath = APIUtil.getAPIPath(resource.getApiIdentifier());
 
-                Resource productResource = registry.get(apiPath);
+                Resource productResource = null;
+                try {
+                    // Handles store and publisher visibility issue when associated apis have different visibility
+                    // restrictions.
+                    productResource = registry.get(apiPath);
+                } catch (RegistryException e) {
+                    if (e.getClass().equals(AuthorizationFailedException.class)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("User is not authorized to access the resource " + apiPath);
+                        }
+                        continue;
+                    } else {
+                        String msg = "Failed to get product resource";
+                        throw new APIManagementException(msg, e);
+                    }
+                }
                 String artifactId = productResource.getUUID();
                 resource.setApiId(artifactId);
 
@@ -9328,7 +9396,7 @@ public final class APIUtil {
             subscribedApiDTO.setName(api.getApiName());
             subscribedApiDTO.setContext(api.getContext());
             subscribedApiDTO.setVersion(api.getVersion());
-            subscribedApiDTO.setPublisher(api.getProviderId());
+            subscribedApiDTO.setPublisher(APIUtil.replaceEmailDomainBack(api.getProviderId()));
             subscribedApiDTO.setSubscriptionTier(api.getSubscriptionTier());
             subscribedApiDTO.setSubscriberTenantDomain(tenantDomain);
             subscribedApiDTOList.add(subscribedApiDTO);
@@ -9547,5 +9615,16 @@ public final class APIUtil {
             String msg = "Unable to signing certificate alias in the token";
             throw new APIManagementException(msg, e);
         }
+    }
+
+    /**
+     * return skipRolesByRegex config
+     *
+     */
+    public static String getSkipRolesByRegex() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
+        return skipRolesByRegex;
     }
 }

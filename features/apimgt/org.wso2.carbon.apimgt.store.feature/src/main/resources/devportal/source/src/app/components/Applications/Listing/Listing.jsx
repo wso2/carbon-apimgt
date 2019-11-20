@@ -83,7 +83,8 @@ const styles = theme => ({
     },
     root: {
         height: 80,
-        background: theme.palette.background.paper,
+        background: theme.custom.infoBar.background,
+        color: theme.palette.getContrastText(theme.custom.infoBar.background),
         borderBottom: `solid 1px ${theme.palette.grey.A200}`,
         display: 'block',
     },
@@ -295,7 +296,7 @@ class Listing extends Component {
             return <Loading />;
         }
         const { classes, theme, intl } = this.props;
-        const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
+        const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
         return (
             <main className={classes.content}>
                 <div className={classes.root}>

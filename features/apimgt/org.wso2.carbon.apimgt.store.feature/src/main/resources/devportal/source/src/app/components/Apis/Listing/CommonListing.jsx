@@ -24,6 +24,7 @@ import Icon from '@material-ui/core/Icon';
 import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import Settings from 'AppComponents/Shared/SettingsContext';
 import API from 'AppData/api';
 import ApiBreadcrumbs from './ApiBreadcrumbs';
 import ApiTableView from './ApiTableView';
@@ -133,14 +134,14 @@ const styles = theme => ({
         cursor: 'pointer',
     },
     rotatedText: {
-        transform: 'rotate(90deg)',
+        transform: 'rotate(270deg)',
         transformOrigin: 'left bottom 0',
         position: 'absolute',
         whiteSpace: 'nowrap',
-        top: theme.custom.infoBar.height,
-        marginLeft: 4,
+        top: theme.custom.infoBar.height * 2,
+        marginLeft: 23,
         cursor: 'pointer',
-    }
+    },
 });
 
 /**
@@ -150,6 +151,8 @@ const styles = theme => ({
  * @extends {Component}
  */
 class CommonListing extends React.Component {
+    static contextType = Settings;
+
     /**
      * Constructor
      *
@@ -161,6 +164,7 @@ class CommonListing extends React.Component {
             listType: props.theme.custom.defaultApiView,
             allTags: null,
             showLeftMenu: false,
+            isMonetizationEnabled: false,
         };
     }
 
@@ -188,10 +192,21 @@ class CommonListing extends React.Component {
             .catch((error) => {
                 console.log(error);
             });
+        this.isMonetizationEnabled();
     }
     toggleLeftMenu = () => {
         this.setState(prevState => ({ showLeftMenu: !prevState.showLeftMenu }));
     };
+
+    /**
+     * retrieve Settings from the context and check the monetization enabled
+     */
+    isMonetizationEnabled = () => {
+        const settingsContext = this.context;
+        const enabled = settingsContext.settings.monetizationEnabled;
+        this.setState({ isMonetizationEnabled: enabled });
+    }
+
     /**
      *
      * @inheritdoctheme
@@ -212,8 +227,8 @@ class CommonListing extends React.Component {
                 tagCloud: { active: tagCloudActive },
             },
         } = theme;
-        const { listType, allTags, showLeftMenu } = this.state;
-        const strokeColorMain = theme.custom.tagCloud.leftMenu.background;
+        const { listType, allTags, showLeftMenu, isMonetizationEnabled } = this.state;
+        const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
         const searchParam = new URLSearchParams(search);
         const searchQuery = searchParam.get('query');
         let selectedTag = null;
@@ -249,11 +264,8 @@ class CommonListing extends React.Component {
                             <Icon>keyboard_arrow_right</Icon>
                         </div>
                         <div className={classes.rotatedText} onClick={this.toggleLeftMenu}>
-                                <FormattedMessage
-                                    defaultMessage='Tag Cloud'
-                                    id='Apis.Listing.Listing.ApiTagCloud.title'
-                                />
-                            </div>
+                            <FormattedMessage defaultMessage='Tag Cloud' id='Apis.Listing.Listing.ApiTagCloud.title' />
+                        </div>
                     </div>
                 )}
 
@@ -264,17 +276,18 @@ class CommonListing extends React.Component {
                         { [classes.contentWithTagsHidden]: tagPaneVisible && !showLeftMenu },
                         { [classes.contentWithTags]: tagPaneVisible && showLeftMenu },
                     )}
+                    id='commonListing'
                 >
-                    <div className={classes.appBar}>
+                    <div className={classes.appBar} id='commonListingAppBar'>
                         <div className={classes.mainIconWrapper}>
                             <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
                         </div>
-                        <div className={classes.mainTitleWrapper}>
+                        <div className={classes.mainTitleWrapper} id='mainTitleWrapper'>
                             <Typography variant='h4' className={classes.mainTitle}>
                                 <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.main' />
                             </Typography>
                             {apis && (
-                                <Typography variant='caption' gutterBottom align='left'>
+                                <Typography variant='caption' gutterBottom align='left' id='apiCountDisplay'>
                                     <FormattedMessage
                                         defaultMessage='Displaying'
                                         id='Apis.Listing.Listing.displaying'
@@ -284,7 +297,7 @@ class CommonListing extends React.Component {
                                 </Typography>
                             )}
                         </div>
-                        <div className={classes.buttonRight}>
+                        <div className={classes.buttonRight} id='listGridWrapper'>
                             <IconButton className={classes.button} onClick={() => this.setListType('list')}>
                                 <Icon
                                     className={classNames(
@@ -310,12 +323,12 @@ class CommonListing extends React.Component {
                     {active && allTags && allTags.length > 0 && <ApiBreadcrumbs selectedTag={selectedTag} />}
                     <div className={classes.listContentWrapper}>
                         {listType === 'grid' && (
-                            <ApiContext.Provider value={{ apiType }}>
+                            <ApiContext.Provider value={{ apiType, isMonetizationEnabled }}>
                                 <ApiTableView gridView query={search} />
                             </ApiContext.Provider>
                         )}
                         {listType === 'list' && (
-                            <ApiContext.Provider value={{ apiType }}>
+                            <ApiContext.Provider value={{ apiType, isMonetizationEnabled }}>
                                 <ApiTableView gridView={false} query={search} />
                             </ApiContext.Provider>
                         )}

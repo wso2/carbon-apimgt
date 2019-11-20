@@ -34,11 +34,12 @@ function LastUpdatedTime(props) {
                 title={moment(lastUpdatedTime).calendar()}
                 aria-label='add'
             >
-                <Typography variant='caption' display='block' >
+                <Typography variant='caption' display='block'>
                     <FormattedMessage
                         id='Apis.Details.components.APIDetailsTopMenu.last.updated.time'
                         defaultMessage='Last updated:'
-                    />{' '}
+                    />
+                    {' '}
                     {moment(lastUpdatedTime).fromNow()}
                 </Typography>
             </Tooltip>

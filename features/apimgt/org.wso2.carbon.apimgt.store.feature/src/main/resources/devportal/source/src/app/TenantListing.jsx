@@ -19,6 +19,7 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import Settings from 'AppComponents/Shared/SettingsContext';
+import { FormattedMessage } from 'react-intl';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -49,10 +50,14 @@ const styles = theme => ({
     list: {
         background: theme.palette.background.paper,
         display: 'block',
-        margin: 'auto',
-        'margin-top': '100px',
+        margin: '10px auto',
         padding: `${theme.spacing.unit * 3}px ${theme.spacing.unit * 2}px`,
         overflow: 'auto',
+    },
+    wrapper: {
+        margin: '100px auto',
+        padding: theme.spacing(2),
+        display: 'block',
     },
     listItem: {
         margin: 'auto',
@@ -63,35 +68,41 @@ const styles = theme => ({
 const tenantListing = (props) => {
     const settingContext = useContext(Settings);
     const { tenantList, classes, theme } = props;
+    const orderedList = tenantList.sort((a, b) => ((a.domain > b.domain) ? 1 : -1));
 
     return (
         <div className={classes.root}>
-            <Grid container md={4} justify='left' spacing={0} className={classes.list}>
-                {tenantList.map(({ domain }) => {
-                    return (
-                        <Grid item xs={12} md={12} className={classes.listItem}>
-                            <Link
-                                style={{
-                                    textDecoration: 'none',
-                                }}
-                                to={`/apis?tenant=${domain}`}
-                                onClick={() => settingContext.setTenantDomain(domain)}
-                            >
-                                <Paper elevation={0} square className={classes.paper}>
-                                    <Typography
-                                        noWrap
-                                        style={{
-                                            fontSize: theme.typography.h5.fontSize,
-                                            fontWeight: theme.typography.h1.fontWeight,
-                                        }}
-                                    >
-                                        {domain}
-                                    </Typography>
-                                </Paper>
-                            </Link>
-                        </Grid>
-                    );
-                })}
+            <Grid container md={4} justify='left' spacing={0} className={classes.wrapper}>
+                <Typography variant='h4'>
+                    <FormattedMessage id='TenantListing.title' defaultMessage='Tenant Developer Portals' />
+                </Typography>
+                <div className={classes.list}>
+                    {orderedList.map(({ domain }) => {
+                        return (
+                            <Grid item xs={12} md={12} className={classes.listItem}>
+                                <Link
+                                    style={{
+                                        textDecoration: 'none',
+                                    }}
+                                    to={`/apis?tenant=${domain}`}
+                                    onClick={() => settingContext.setTenantDomain(domain)}
+                                >
+                                    <Paper elevation={0} square className={classes.paper}>
+                                        <Typography
+                                            noWrap
+                                            style={{
+                                                fontSize: theme.typography.h5.fontSize,
+                                                fontWeight: theme.typography.h1.fontWeight,
+                                            }}
+                                        >
+                                            {domain}
+                                        </Typography>
+                                    </Paper>
+                                </Link>
+                            </Grid>
+                        );
+                    })}
+                </div>
             </Grid>
         </div>
     );

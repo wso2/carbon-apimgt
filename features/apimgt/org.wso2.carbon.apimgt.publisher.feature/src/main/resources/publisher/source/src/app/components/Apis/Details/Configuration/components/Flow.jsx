@@ -89,7 +89,7 @@ function InFlow(props) {
         setEditing(true);
     }
     return (
-        <React.Fragment>
+        <>
             <Paper className={classes.paper}>
                 <Grid container spacing={2} alignItems='flex-start'>
                     <Grid item md={12} style={{ position: 'relative', display: 'inline-flex' }}>
@@ -99,7 +99,7 @@ function InFlow(props) {
                                 defaultMessage='Message Mediation'
                             />
                         </Typography>
-                        <Typography className={classes.heading} >
+                        <Typography className={classes.heading}>
                             {selectedMediationPolicy && selectedMediationPolicy.name ? (
                                 <span>{selectedMediationPolicy.name}</span>
                             ) : (
@@ -119,7 +119,7 @@ function InFlow(props) {
                 selectedMediationPolicy={selectedMediationPolicy}
                 type={type}
             />
-        </React.Fragment>
+        </>
     );
 }
 

@@ -19,6 +19,7 @@
 import React from 'react';
 import Configurations from 'Config';
 import { FormattedMessage } from 'react-intl';
+import AuthManager from 'AppData/AuthManager';
 
 const page = Configurations.app.context + '/services/auth/login';
 
@@ -36,6 +37,7 @@ const page = Configurations.app.context + '/services/auth/login';
  * @export
  */
 export function doRedirectToLogin() {
+    AuthManager.discardUser();
     window.location = page;
 }
 

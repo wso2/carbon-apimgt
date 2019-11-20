@@ -49,8 +49,14 @@ const styles = theme => ({
         padding: 0,
         listStyleType: 'none',
     },
+    inputRoot: {
+        flexDirection: 'row',
+    },
+    searchBoxWrap: {
+        display: 'flex',
+    },
     input: {
-        width: '300px',
+        width: '280px',
         background: theme.palette.getContrastText(theme.custom.appBar.background),
         '-webkit-transition': 'all .35s ease-in-out',
         transition: 'all .35s ease-in-out',

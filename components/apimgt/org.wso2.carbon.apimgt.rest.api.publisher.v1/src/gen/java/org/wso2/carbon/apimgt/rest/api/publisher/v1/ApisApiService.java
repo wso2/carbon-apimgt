@@ -15,6 +15,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
@@ -46,6 +47,7 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApisApiService {
+      public Response apisApiIdAuditapiGet(String apiId, String accept, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdClientCertificatesAliasContentGet(String apiId, String alias, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdClientCertificatesAliasDelete(String alias, String apiId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdClientCertificatesAliasGet(String alias, String apiId, MessageContext messageContext) throws APIManagementException;

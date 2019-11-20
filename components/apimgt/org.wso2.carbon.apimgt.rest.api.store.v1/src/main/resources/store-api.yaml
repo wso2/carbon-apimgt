@@ -3755,6 +3755,9 @@ definitions:
       isSubscriptionAvailable:
         type: boolean
         example: false
+      monetizationLabel:
+        type: string
+        example: Free
 
 #-----------------------------------------------------
 # The Standard API resource
@@ -4662,6 +4665,10 @@ definitions:
         type: string
         description: Client secret for generating access token. This is given together with the client Id.
         example: ""
+      additionalProperties:
+        type: string
+        description: Additional properties needed.
+        example: ""
 
 #-----------------------------------------------------
 # The Application Key Mapping Request schema
@@ -5058,6 +5065,12 @@ definitions:
         default: false
       apiGatewayEndpoint:
         type: string
+      monetizationEnabled:
+        type: boolean
+        default: false
+      IsUnlimitedTierPaid:
+        type: boolean
+        default: false
 #-----------------------------------------------------
 # The Application Attribute resource
 #-----------------------------------------------------

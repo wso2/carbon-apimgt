@@ -43,7 +43,7 @@ const showEndpoint = function (api, type) {
     return null;
 };
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     subtitle: {
         marginTop: theme.spacing(0),
     },
@@ -79,8 +79,24 @@ function Endpoints(props) {
     const { api } = props;
     const classes = useStyles();
 
+    /**
+     * Check whether the endpoint configuration is dynamic
+     *
+     * @param {object} endpointConfig The endpoint configuration of the api.
+     * @return {boolean} True if the endpoint config is dynamic.
+     * */
+    const isDynamicEndpoints = (endpointConfig) => {
+        if (!endpointConfig) {
+            return false;
+        }
+        if (endpointConfig.production_endpoints && !Array.isArray(endpointConfig.production_endpoints)) {
+            return endpointConfig.production_endpoints.url === 'default';
+        }
+        return false;
+    };
+
     return (
-        <React.Fragment>
+        <>
             <ExpansionPanel className={classes.expansionPanel} defaultExpanded>
                 <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                     <Typography className={classes.subHeading} variant='h6'>
@@ -91,70 +107,89 @@ function Endpoints(props) {
                     </Typography>
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails className={classes.expansionPanelDetails}>
-                    <Box pb={2}>
-                        {/* Production Endpoint (TODO) fix the endpoint
-                                                    info when it's available with the api object */}
-                        <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.components.Endpoints.production'
-                                defaultMessage='Production'
-                            />
-                        </Typography>
-                        {showEndpoint(api, 'prod') &&
-                            <Tooltip
-                                title={showEndpoint(api, 'prod')}
-                                interactive
-                            >
-                                <Typography component='p' variant='body1' className={classes.textTrim}>
-                                    <React.Fragment>
-                                        {showEndpoint(api, 'prod')}
-                                    </React.Fragment>
+                    {isDynamicEndpoints(api.endpointConfig)
+                        ? (
+                            <Box pb={2}>
+                                <Typography component='p' variant='body1' className={classes.subtitle}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Configuration.components.Endpoints.dynamic'
+                                        defaultMessage='Dynamic'
+                                    />
                                 </Typography>
-                            </Tooltip>
-                        }
-                        <Typography component='p' variant='body1' className={classes.notConfigured}>
-                            {!showEndpoint(api, 'prod') && (
-                                <React.Fragment>
-                                    <FormattedMessage
-                                        id='Apis.Details.Configuration.components.Endpoints.production.not.set'
-                                        defaultMessage='-'
-                                    />
-                                </React.Fragment>
-                            )}
-                        </Typography>
-                    </Box>
-                    <Box pb={2}>
-                        {/* Sandbox Endpoint (TODO) fix the endpoint info when
+                            </Box>
+                        )
+                        : (
+                            <>
+                                <Box pb={2}>
+                                    {/* Production Endpoint (TODO) fix the endpoint
+                                                    info when it's available with the api object */}
+
+                                    <Typography component='p' variant='subtitle2' className={classes.subtitle}>
+                                        <FormattedMessage
+                                            id='Apis.Details.Configuration.components.Endpoints.production'
+                                            defaultMessage='Production'
+                                        />
+                                    </Typography>
+                                    {showEndpoint(api, 'prod')
+                                && (
+                                    <Tooltip
+                                        title={showEndpoint(api, 'prod')}
+                                        interactive
+                                    >
+                                        <Typography component='p' variant='body1' className={classes.textTrim}>
+                                            <>
+                                                {showEndpoint(api, 'prod')}
+                                            </>
+                                        </Typography>
+                                    </Tooltip>
+                                )}
+                                    <Typography component='p' variant='body1' className={classes.notConfigured}>
+                                        {!showEndpoint(api, 'prod') && (
+                                            <>
+                                                <FormattedMessage
+                                                    id={'Apis.Details.Configuration.'
+                                                    + 'components.Endpoints.production.not.set'}
+                                                    defaultMessage='-'
+                                                />
+                                            </>
+                                        )}
+                                    </Typography>
+                                </Box>
+                                <Box pb={2}>
+                                    {/* Sandbox Endpoint (TODO) fix the endpoint info when
                                                 it's available with the api object */}
-                        <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.components.Endpoints.sandbox'
-                                defaultMessage='Sandbox'
-                            />
-                        </Typography>
-                        {showEndpoint(api, 'sand') &&
-                        <Tooltip
-                            title={showEndpoint(api, 'sand')}
-                            interactive
-                        >
-                            <Typography component='p' variant='body1' className={classes.textTrim}>
-                                <React.Fragment>
-                                    {showEndpoint(api, 'prod')}
-                                </React.Fragment>
-                            </Typography>
-                        </Tooltip>
-                        }
-                        <Typography component='p' variant='body1' className={classes.notConfigured}>
-                            {!showEndpoint(api, 'sand') && (
-                                <React.Fragment>
-                                    <FormattedMessage
-                                        id='Apis.Details.Configuration.components.Endpoints.sandbox.not.set'
-                                        defaultMessage='-'
-                                    />
-                                </React.Fragment>
-                            )}
-                        </Typography>
-                    </Box>
+                                    <Typography component='p' variant='subtitle2' className={classes.subtitle}>
+                                        <FormattedMessage
+                                            id='Apis.Details.Configuration.components.Endpoints.sandbox'
+                                            defaultMessage='Sandbox'
+                                        />
+                                    </Typography>
+                                    {showEndpoint(api, 'sand')
+                                && (
+                                    <Tooltip
+                                        title={showEndpoint(api, 'sand')}
+                                        interactive
+                                    >
+                                        <Typography component='p' variant='body1' className={classes.textTrim}>
+                                            <>
+                                                {showEndpoint(api, 'sand')}
+                                            </>
+                                        </Typography>
+                                    </Tooltip>
+                                )}
+                                    <Typography component='p' variant='body1' className={classes.notConfigured}>
+                                        {!showEndpoint(api, 'sand') && (
+                                            <>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Configuration.components.Endpoints.sandbox.not.set'
+                                                    defaultMessage='-'
+                                                />
+                                            </>
+                                        )}
+                                    </Typography>
+                                </Box>
+                            </>
+                        )}
                     <Box width='100%' textAlign='right' m={1}>
                         <Link to={'/apis/' + api.id + '/endpoints'}>
                             <Typography style={{ marginLeft: '10px' }} color='primary' variant='caption'>
@@ -168,7 +203,7 @@ function Endpoints(props) {
                     </Box>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
-        </React.Fragment>
+        </>
     );
 }
 

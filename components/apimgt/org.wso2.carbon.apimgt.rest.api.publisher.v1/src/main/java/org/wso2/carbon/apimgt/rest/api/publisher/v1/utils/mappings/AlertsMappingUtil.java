@@ -19,12 +19,14 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AlertConfigDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AlertTypeDTO;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Utility class for alert config/ dto mappings.
@@ -91,5 +93,31 @@ public class AlertsMappingUtil {
         storeAlertTypeDTO.setName(alertTypeDTO.getName());
         storeAlertTypeDTO.setRequireConfiguration(alertTypeDTO.isConfigurable());
         return storeAlertTypeDTO;
+    }
+
+    /**
+     * Get a map of API name, version list. This is used to filter the retrieved alert configurations as there can be
+     * api visibility restrictions.
+     * @return A map with [api name, version list]
+     * */
+    public static Map<String, List<String>> getAllowedAPIInfo() throws APIManagementException {
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        List<API> allowedAPIs = apiProvider.getAllAPIs();
+        Map<String, List<String>> allowedAPINameVersionMap = new HashMap<>();
+
+        for (API api : allowedAPIs) {
+            List<String> versions;
+            APIIdentifier identifier = api.getId();
+            if (allowedAPINameVersionMap.containsKey(identifier.getApiName())) {
+                versions = allowedAPINameVersionMap.get(identifier.getApiName());
+                versions.add(identifier.getVersion());
+                allowedAPINameVersionMap.put(identifier.getApiName(), versions);
+            } else {
+                versions = new ArrayList<>();
+                versions.add(identifier.getVersion());
+                allowedAPINameVersionMap.put(identifier.getApiName(), versions);
+            }
+        }
+        return allowedAPINameVersionMap;
     }
 }
