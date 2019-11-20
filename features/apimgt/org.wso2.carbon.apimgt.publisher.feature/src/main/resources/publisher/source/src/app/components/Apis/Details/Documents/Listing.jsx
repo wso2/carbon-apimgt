@@ -244,6 +244,13 @@ class Listing extends React.Component {
                 ),
             },
             {
+                name: 'sourceUrl',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                },
+            },
+            {
                 name: 'action',
                 label: (
                     <FormattedMessage
@@ -258,6 +265,7 @@ class Listing extends React.Component {
                             const docName = tableMeta.rowData[1];
                             const docId = tableMeta.rowData[0];
                             const sourceType = tableMeta.rowData[2];
+                            const sourceUrl = tableMeta.rowData[4];
                             if (sourceType === 'MARKDOWN') {
                                 return (
                                     <table className={classes.actionTable}>
@@ -337,6 +345,7 @@ class Listing extends React.Component {
                                     <table className={classes.actionTable}>
                                         <tr>
                                             <td>
+                                                <a href={sourceUrl}>
                                                 <Button>
                                                     <Icon>open_in_new</Icon>
                                                     <FormattedMessage
@@ -344,6 +353,7 @@ class Listing extends React.Component {
                                                         defaultMessage='Open'
                                                     />
                                                 </Button>
+                                               </a>  
                                             </td>
                                             <td>
                                                 <Edit
