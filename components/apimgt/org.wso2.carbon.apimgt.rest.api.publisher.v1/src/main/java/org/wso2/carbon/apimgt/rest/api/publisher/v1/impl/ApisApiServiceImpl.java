@@ -459,7 +459,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         assignLabelsToDTO(body,apiToAdd);
 
         // set default API Level Policy
-        if (StringUtils.isBlank(apiToAdd.getApiLevelPolicy())) {
+        if (apiToAdd.getApiLevelPolicy() != null) {
             Policy[] apiPolicies = apiProvider.getPolicies(username, PolicyConstants.POLICY_LEVEL_API);
             if (apiPolicies.length > 0) {
                 for (Policy policy : apiPolicies) {
