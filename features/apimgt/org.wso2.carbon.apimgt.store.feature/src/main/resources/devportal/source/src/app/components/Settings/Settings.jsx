@@ -48,7 +48,7 @@ function Settings(props) {
 
 Settings.propTypes = {
     classes: PropTypes.shape({
-        settingsRoot: PropTypes.shape({}).isRequired,
+        settingsRoot: PropTypes.string.isRequired,
     }).isRequired,
 };
 

@@ -34,7 +34,7 @@ const styles = theme => ({
     bootstrapRoot: {
         padding: 0,
         'label + &': {
-            marginTop: theme.spacing.unit * 3,
+            marginTop: theme.spacing(3),
         },
     },
     bootstrapInput: {

@@ -276,10 +276,9 @@ subscribeToApi.propTypes = {
         value: PropTypes.string,
         label: PropTypes.string,
     })).isRequired,
-    throttlingPolicyList: PropTypes.arrayOf(PropTypes.string).isRequired,
+    throttlingPolicyList: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
     subscriptionRequest: PropTypes.shape({}).isRequired,
     updateSubscriptionRequest: PropTypes.func.isRequired,
-    rootClass: PropTypes.shape({}).isRequired,
     renderSmall: PropTypes.bool,
 };
 subscribeToApi.defaultProps = {

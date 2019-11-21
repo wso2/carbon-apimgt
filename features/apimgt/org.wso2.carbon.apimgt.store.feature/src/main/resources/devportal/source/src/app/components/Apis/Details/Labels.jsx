@@ -40,11 +40,11 @@ const styles = theme => ({
     },
     iconEven: {
         color: theme.palette.secondary.light,
-        width: theme.spacing.unit * 3,
+        width: theme.spacing(3),
     },
     iconOdd: {
         color: theme.palette.secondary.main,
-        width: theme.spacing.unit * 3,
+        width: theme.spacing(3),
     },
     iconTextWrapper: {
         display: 'inline-block',
@@ -53,7 +53,7 @@ const styles = theme => ({
     bootstrapRoot: {
         padding: 0,
         'label + &': {
-            marginTop: theme.spacing.unit * 3,
+            marginTop: theme.spacing(3),
         },
     },
     bootstrapInput: {
@@ -152,7 +152,7 @@ class Labels extends React.Component {
                                             />
                                         </Typography>
                                         {label.accessUrls.map(row => (
-                                            <Grid item xs={12}>
+                                            <Grid item xs={12} key={row}>
                                                 <TextField
                                                     defaultValue={row}
                                                     id='bootstrap-input'

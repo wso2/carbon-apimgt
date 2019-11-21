@@ -40,7 +40,7 @@ import { ScopeValidation, resourceMethods, resourcePaths } from '../ScopeValidat
 
 const styles = theme => ({
     root: {
-        padding: theme.spacing.unit * 3,
+        padding: theme.spacing(3),
     },
     button: {
         marginLeft: 0,
@@ -52,11 +52,11 @@ const styles = theme => ({
         padding: '10px 0px 10px 15px',
     },
     tokenSection: {
-        marginTop: theme.spacing.unit * 2,
-        marginBottom: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2),
     },
     margin: {
-        marginRight: theme.spacing.unit * 2,
+        marginRight: theme.spacing(2),
     },
     keyConfigWrapper: {
         flexDirection: 'column',
@@ -64,7 +64,7 @@ const styles = theme => ({
     },
     generateWrapper: {
         padding: '10px 0px',
-        marginLeft: theme.spacing.unit * 1.25,
+        marginLeft: theme.spacing(1.25),
     },
     paper: {
         background: 'none',
@@ -469,7 +469,6 @@ class TokenManager extends React.Component {
                                         className={classes.button}
                                         onClick={
                                             keys.size > 0 && keys.get(keyType) ? this.updateKeys : this.generateKeys}
-                                        noFound={notFound}
                                         disabled={!isUserOwner}
                                     >
                                         {keys.size > 0 && keys.get(keyType) ? 'Update keys' : 'Generate Keys'}
@@ -487,7 +486,6 @@ class TokenManager extends React.Component {
                                     color='primary'
                                     className={classes.button}
                                     onClick={keys.size > 0 && keys.get(keyType) ? this.updateKeys : this.generateKeys}
-                                    noFound={notFound}
                                 >
                                     {keys.size > 0 && keys.get(keyType) ? 'Update' : 'Generate Keys'}
                                 </Button>
@@ -528,7 +526,6 @@ class TokenManager extends React.Component {
                                                 color='primary'
                                                 className={classes.button}
                                                 onClick={this.provideOAuthKeySecret}
-                                                noFound={notFound}
                                                 disabled={!isUserOwner}
                                             >
                                                 {
@@ -562,7 +559,6 @@ class TokenManager extends React.Component {
                                             color='primary'
                                             className={classes.button}
                                             onClick={this.provideOAuthKeySecret}
-                                            noFound={notFound}
                                         >
                                             {
                                                 keys.size > 0 && keys.get(keyType)
@@ -592,7 +588,9 @@ class TokenManager extends React.Component {
         );
     }
 }
-
+TokenManager.defaultProps = {
+    updateSubscriptionData: () => {},   
+}
 TokenManager.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
     selectedApp: PropTypes.shape({
@@ -603,7 +601,7 @@ TokenManager.propTypes = {
         hashEnabled: PropTypes.bool,
     }).isRequired,
     keyType: PropTypes.string.isRequired,
-    updateSubscriptionData: PropTypes.func.isRequired,
+    updateSubscriptionData: PropTypes.func,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 

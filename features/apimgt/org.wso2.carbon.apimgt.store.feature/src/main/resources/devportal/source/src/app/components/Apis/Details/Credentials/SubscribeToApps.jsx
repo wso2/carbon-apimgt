@@ -40,18 +40,18 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.paper),
     },
     toolbar: {
-        marginLeft: theme.spacing.unit * 2,
+        marginLeft: theme.spacing(2),
     },
     subscribeTitle: {
         flex: 1,
     },
     plainContent: {
         paddingTop: 80,
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
     },
     button: {
-        marginTop: theme.spacing.unit * 2,
-        marginRight: theme.spacing.unit,
+        marginTop: theme.spacing(2),
+        marginRight: theme.spacing(1),
     },
 });
 

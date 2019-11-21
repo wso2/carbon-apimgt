@@ -14,31 +14,35 @@
  * limitations under the License.
  */
 
-import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
-import { withStyles } from '@material-ui/core';
-import TagCloudListing from 'AppComponents/Apis/Listing/TagCloudListing';
-import Apis from 'AppComponents/Apis/Apis';
-import Landing from 'AppComponents/LandingPage/Landing';
-import ApplicationFormHandler from 'AppComponents/Applications/ApplicationFormHandler';
-import { PageNotFound, ScopeNotFound } from 'AppComponents/Base/Errors';
-import RedirectToLogin from 'AppComponents/Login/RedirectToLogin';
-import SettingsBase from 'AppComponents/Settings/SettingsBase';
-import Listing from 'AppComponents/Applications/Listing/Listing';
-import Details from 'AppComponents/Applications/Details/index';
+import React from "react";
+import { Redirect, Route, Switch } from "react-router-dom";
+import { withStyles } from "@material-ui/core";
+import TagCloudListing from "AppComponents/Apis/Listing/TagCloudListing";
+import Apis from "AppComponents/Apis/Apis";
+import Landing from "AppComponents/LandingPage/Landing";
+import ApplicationFormHandler from "AppComponents/Applications/ApplicationFormHandler";
+import { PageNotFound, ScopeNotFound } from "AppComponents/Base/Errors";
+import RedirectToLogin from "AppComponents/Login/RedirectToLogin";
+import SettingsBase from "AppComponents/Settings/SettingsBase";
+import Listing from "AppComponents/Applications/Listing/Listing";
+import Details from "AppComponents/Applications/Details/index";
 /**
  * Handle redirection
  * @param {*} theme configuration
  * @returns {*}
  */
 function getRedirectingPath(theme) {
-    if (theme.custom.landingPage.active) {
-        return '/home';
-    } else if (theme.custom.landingPage.active === false && theme.custom.tagWise.active && theme.custom.tagWise.style === 'page') {
-        return '/api-groups';
-    } else {
-        return 'apis';
-    }
+  if (theme.custom.landingPage.active) {
+    return "/home";
+  } else if (
+    theme.custom.landingPage.active === false &&
+    theme.custom.tagWise.active &&
+    theme.custom.tagWise.style === "page"
+  ) {
+    return "/api-groups";
+  } else {
+    return "apis";
+  }
 }
 
 /**
@@ -47,43 +51,44 @@ function getRedirectingPath(theme) {
  * @returns {*}
  */
 function AppRouts(props) {
-    const {
-        isAuthenticated, isUserFound, theme,
-    } = props;
-    return (
-        <Switch>
-            <Redirect exact from='/' to={getRedirectingPath(theme)} />
-            <Route path='/home' component={Landing} />
-            <Route path='/api-groups' component={TagCloudListing} />
-            <Route path='/(apis|api-products)' component={Apis} />
-            {isAuthenticated ? (
-                [
-                    <Route path='/settings' component={SettingsBase} />,
-                    <Route exact path='/applications' component={Listing} />,
-                    <Route path='/applications/create' component={ApplicationFormHandler} />,
-                    <Route path='/applications/:application_id/edit' component={ApplicationFormHandler} />,
-                    <Route path='/applications/:application_uuid/' component={Details} />,
-                ]
-            ) : (
-                [
-                    isUserFound ? (
-                        [
-                            <Route path='/settings' component={RedirectToLogin} />,
-                            <Route path='/applications' component={ScopeNotFound} />,
-                            <Route path='/application/create' component={ScopeNotFound} />,
-
-                        ]
-                    ) : (
-                        [
-                            <Route path='/settings' component={RedirectToLogin} />,
-                            <Route path='/applications' component={RedirectToLogin} />,
-                        ]
-                    ),
-                ]
-            )}
-            <Route component={PageNotFound} />
-        </Switch>
-    );
+  const { isAuthenticated, isUserFound, theme } = props;
+  return (
+    <Switch>
+      <Redirect exact from="/" to={getRedirectingPath(theme)} />
+      <Route path="/home" component={Landing} />
+      <Route path="/api-groups" component={TagCloudListing} />
+      <Route path="/(apis|api-products)" component={Apis} />
+      {isAuthenticated && (
+        <React.Fragment>
+          <Route path="/settings" component={SettingsBase} />
+          <Route exact path="/applications" component={Listing} />
+          <Route
+            path="/applications/create"
+            component={ApplicationFormHandler}
+          />
+          <Route
+            path="/applications/:application_id/edit"
+            component={ApplicationFormHandler}
+          />
+          <Route path="/applications/:application_uuid/" component={Details} />
+        </React.Fragment>
+      )}
+      {!isAuthenticated && isUserFound && (
+        <React.Fragment>
+          <Route path="/settings" component={RedirectToLogin} />
+          <Route path="/applications" component={ScopeNotFound} />
+          <Route path="/application/create" component={ScopeNotFound} />
+        </React.Fragment>
+      )}
+      {!isAuthenticated && !isUserFound && (
+        <React.Fragment>
+          <Route path="/settings" component={RedirectToLogin} />
+          <Route path="/applications" component={RedirectToLogin} />
+        </React.Fragment>
+      )}
+      <Route component={PageNotFound} />
+    </Switch>
+  );
 }
 
 export default withStyles({}, { withTheme: true })(AppRouts);

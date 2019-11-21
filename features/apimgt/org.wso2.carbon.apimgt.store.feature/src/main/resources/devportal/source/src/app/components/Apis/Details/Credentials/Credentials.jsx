@@ -456,6 +456,7 @@ class Credentials extends React.Component {
                                     </tr>
                                     {subscribedApplications.map((app, index) => (
                                         <SubscriptionTableRow
+                                            key={index}
                                             loadInfo={this.loadInfo}
                                             handleSubscriptionDelete={this.handleSubscriptionDelete}
                                             selectedAppId={selectedAppId}
@@ -518,23 +519,8 @@ Credentials.propTypes = {
         buttonElm: PropTypes.string,
         dialogContainer: PropTypes.string,
     }).isRequired,
-    history: PropTypes.shape({
-        location: PropTypes.shape({
-            state: PropTypes.shape({
-                openWizard: PropTypes.bool.isRequired,
-            }).isRequired,
-            pathname: PropTypes.string.isRequired,
-        }).isRequired,
-        replace: PropTypes.func.isRequired,
-        push: PropTypes.func.isRequired,
-    }).isRequired,
-    location: PropTypes.shape({
-        state: PropTypes.shape({
-            openWizard: PropTypes.bool.isRequired,
-        }).isRequired,
-        pathname: PropTypes.string.isRequired,
-    }).isRequired,
-    intl: PropTypes.func.isRequired,
+    history: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 
 export default injectIntl(withStyles(styles, { withTheme: true })(Credentials));

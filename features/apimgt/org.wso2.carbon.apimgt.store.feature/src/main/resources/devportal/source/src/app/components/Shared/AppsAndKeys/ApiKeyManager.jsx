@@ -48,18 +48,18 @@ import Grid from '@material-ui/core/Grid';
 
 const styles = theme => ({
     root: {
-        padding: theme.spacing.unit * 3,
+        padding: theme.spacing(3),
     },
     button: {
-        marginLeft: theme.spacing.unit * 5,
+        marginLeft: theme.spacing(5),
         padding: '10px',
     },
     tokenSection: {
-        marginTop: theme.spacing.unit * 2,
-        marginBottom: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2),
     },
     margin: {
-        marginRight: theme.spacing.unit * 2,
+        marginRight: theme.spacing(2),
     },
     keyTitle: {
         textTransform: 'uppercase',
@@ -74,9 +74,9 @@ const styles = theme => ({
     },
     paper: {
         display: 'flex',
-        marginTop: theme.spacing.unit * 2,
-        marginBottom: theme.spacing.unit * 2,
-        marginLeft: theme.spacing.unit * 10,
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2),
+        marginLeft: theme.spacing(10),
     },
     formLabel: {
         'align-self': 'center',

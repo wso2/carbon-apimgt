@@ -35,7 +35,7 @@ const SelectAppPanel = (props) => {
                             variant='outlined'
                         >
                             {subscriptions.map(sub => (
-                                <MenuItem value={sub.applicationInfo.applicationId}>
+                                <MenuItem value={sub.applicationInfo.applicationId} key={sub.applicationInfo.applicationId}>
                                     {sub.applicationInfo.name}
                                 </MenuItem>
                             ))}

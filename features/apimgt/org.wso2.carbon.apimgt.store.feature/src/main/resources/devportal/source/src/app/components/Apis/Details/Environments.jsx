@@ -46,11 +46,11 @@ const styles = theme => ({
     },
     iconEven: {
         color: theme.palette.secondary.light,
-        width: theme.spacing.unit * 3,
+        width: theme.spacing(3),
     },
     iconOdd: {
         color: theme.palette.secondary.main,
-        width: theme.spacing.unit * 3,
+        width: theme.spacing(3),
     },
     iconTextWrapper: {
         display: 'inline-block',
@@ -59,7 +59,7 @@ const styles = theme => ({
     bootstrapRoot: {
         padding: 0,
         'label + &': {
-            marginTop: theme.spacing.unit * 3,
+            marginTop: theme.spacing(3),
         },
     },
     bootstrapInput: {
@@ -163,7 +163,7 @@ class Environments extends React.Component {
             <Grid container spacing={2} item xs={12}>
                 {api.endpointURLs.map((endpoint) => {
                     return (
-                        <Grid key={endpoint} item xs={12}>
+                        <Grid key={endpoint} item xs={12} key={endpoint.environmentName}>
                             <ExpansionPanel>
                                 <ExpansionPanelSummary
                                     expandIcon={<Icon>expand_more</Icon>}
@@ -589,7 +589,7 @@ class Environments extends React.Component {
 
 Environments.propTypes = {
     classes: PropTypes.object.isRequired,
-    intl: PropTypes.func.isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 Environments.contextType = ApiContext;
 

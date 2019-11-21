@@ -109,7 +109,7 @@ class APICardView extends React.Component {
                 title={<FormattedMessage defaultMessage='APIs' id='Apis.Listing.APIList.apis' />}
                 data={unsubscribedAPIList}
                 columns={columns}
-                options={{ selectableRows: false, print: false, download: false }}
+                options={{ selectableRows: 'none', print: false, download: false, responsive: 'stacked' }}
             />
         );
     }

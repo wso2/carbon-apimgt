@@ -31,15 +31,15 @@ import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 
 const styles = theme => ({
     FormControl: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         width: '100%',
     },
     FormControlOdd: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         width: '100%',
     },
     button: {
-        marginLeft: theme.spacing.unit * 1,
+        marginLeft: theme.spacing(1),
     },
     quotaHelp: {
         position: 'relative',
@@ -165,6 +165,7 @@ class KeyConfiguration extends React.Component {
                                             defaultMessage: value,
                                             id: 'Shared.AppsAndKeys.KeyConfiguration.' + value.replace(/ /g, '.'),
                                         })}
+                                        key={key}
                                     />
                                 );
                             })}
@@ -207,7 +208,9 @@ class KeyConfiguration extends React.Component {
         );
     }
 }
-
+KeyConfiguration.defaultProps = {
+    notFound: false,
+}
 KeyConfiguration.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
     keyRequest: PropTypes.shape({
@@ -216,7 +219,7 @@ KeyConfiguration.propTypes = {
         supportedGrantTypes: PropTypes.array,
     }).isRequired,
     isUserOwner: PropTypes.bool.isRequired,
-    notFound: PropTypes.bool.isRequired,
+    notFound: PropTypes.bool,
     updateKeyRequest: PropTypes.func.isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };

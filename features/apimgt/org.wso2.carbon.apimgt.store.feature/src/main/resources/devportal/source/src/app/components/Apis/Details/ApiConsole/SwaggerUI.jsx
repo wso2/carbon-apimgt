@@ -42,8 +42,4 @@ const SwaggerUI = (props) => {
     return <SwaggerUILib {...componentProps} />;
 };
 
-SwaggerUI.propTypes = {
-    spec: PropTypes.shape({}).isRequired,
-};
-
 export default SwaggerUI;

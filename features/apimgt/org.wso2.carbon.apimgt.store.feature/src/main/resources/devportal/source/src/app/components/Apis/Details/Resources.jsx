@@ -55,7 +55,8 @@ function RenderMethodBase(props) {
 }
 
 RenderMethodBase.propTypes = {
-    classes: PropTypes.object.isRequired,
+    theme: PropTypes.shape({}).isRequired,
+    method: PropTypes.string.isRequired,
 };
 
 const RenderMethod = withTheme(RenderMethodBase);
@@ -150,13 +151,13 @@ class Resources extends React.Component {
                     {Object.keys(paths).map((key) => {
                         const path = paths[key];
                         return (
-                            <div className={classes.root}>
+                            <div className={classes.root} key={key}>
                                 <Typography className={classes.heading} variant='body1'>
                                     {key}
                                 </Typography>
                                 {Object.keys(path).map((innerKey) => {
                                     return CONSTS.HTTP_METHODS.includes(innerKey) ? (
-                                        <RenderMethod method={innerKey} />
+                                        <RenderMethod method={innerKey} key={innerKey} />
                                     ) : null;
                                 })}
                             </div>
