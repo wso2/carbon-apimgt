@@ -106,7 +106,7 @@ public class AWSLambdaClassMediator extends AbstractMediator {
                 if (log.isDebugEnabled()) {
                     log.debug("Using user given stored credentials");
                 }
-                if (secretKey.length() == 48) {
+                if (secretKey.length() == APIConstants.AWS_ENCRYPTED_SECRET_KEY_LENGTH) {
                     CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
                     setSecretKey(new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
                             APIConstants.DigestAuthConstants.CHARSET));

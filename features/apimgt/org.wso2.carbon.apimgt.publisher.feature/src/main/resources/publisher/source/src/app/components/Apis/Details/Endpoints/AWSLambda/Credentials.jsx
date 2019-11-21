@@ -80,8 +80,8 @@ export default function Credentials(props) {
     };
     useEffect(() => {
         API.getAmznResourceNames(apiId)
-            .then((response) => {
-                setPageError(response.body.error);
+            .catch((error) => {
+                setPageError(error.response.body.error);
             });
     }, []);
     return (

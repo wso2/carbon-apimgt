@@ -768,7 +768,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             String endpointConfigString = api.getEndpointConfig();
-            if (!"".equals(endpointConfigString)) {
+            if (!StringUtils.isEmpty(endpointConfigString)) {
                 JSONParser jsonParser = new JSONParser();
                 JSONObject endpointConfig = (JSONObject) jsonParser.parse(endpointConfigString);
                 if (endpointConfig != null) {
@@ -780,7 +780,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
                             credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
                         } else {
-                            if (secretKey.length() == 48) {
+                            if (secretKey.length() == APIConstants.AWS_ENCRYPTED_SECRET_KEY_LENGTH) {
                                 CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
                                 secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
                                         APIConstants.DigestAuthConstants.CHARSET);
