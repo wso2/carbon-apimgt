@@ -104,7 +104,7 @@ const APICreateMenu = (props) => {
                         primary={(
                             <FormattedMessage
                                 id='Apis.Listing.components.APICreateMenu.primary.ws'
-                                defaultMessage='Design New Websocket API'
+                                defaultMessage='Design New WebSocket API'
                             />
                         )}
                         secondary={(

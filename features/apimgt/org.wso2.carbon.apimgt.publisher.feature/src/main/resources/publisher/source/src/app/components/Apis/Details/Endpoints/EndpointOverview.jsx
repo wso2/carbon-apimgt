@@ -804,7 +804,7 @@ function EndpointOverview(props) {
                     <Typography className={classes.configDialogHeader}>
                         <FormattedMessage
                             id='Apis.Details.Endpoints.EndpointOverview.advance.endpoint.configuration'
-                            defaultMessage='Advance Configuration'
+                            defaultMessage='Advanced Configurations'
                         />
                     </Typography>
                 </DialogTitle>
