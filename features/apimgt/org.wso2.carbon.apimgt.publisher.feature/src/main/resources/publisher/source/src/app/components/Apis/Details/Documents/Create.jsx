@@ -97,8 +97,8 @@ function Create(props) {
                                 id: 'Apis.Details.Documents.Create.successful.file.upload.message',
                                 defaultMessage: 'File uploaded successfully.',
                             })}`);
-                            props.getDocumentsList();
                             history.push(listingPath);
+                            props.getDocumentsList();
                         })
                         .catch((error) => {
                             if (process.env.NODE_ENV !== 'production') {
