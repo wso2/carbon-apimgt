@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import deburr from 'lodash/deburr';
 import Downshift from 'downshift';
@@ -108,10 +108,9 @@ function getSuggestions(value, { showEmpty = false } = {}, arns) {
     const inputValue = deburr(value.trim()).toLowerCase();
     const inputLength = inputValue.length;
     let count = 0;
-    return inputLength === 0 && !showEmpty ?
-        []
-        :
-        arns.filter((suggestion) => {
+    return inputLength === 0 && !showEmpty
+        ? []
+        : arns.filter((suggestion) => {
             const keep = count < 5 && suggestion.slice(0, inputLength).toLowerCase() === inputValue;
             if (keep) {
                 count += 1;
@@ -120,7 +119,7 @@ function getSuggestions(value, { showEmpty = false } = {}, arns) {
         });
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
     },
@@ -172,7 +171,7 @@ export default function IntegrationDownshift(props) {
             });
     }, []);
     return (
-        <Fragment>
+        <>
             <Grid item md={12} xs={12}>
                 <Typography variant='subtitle1'>
                     Amazon Resource Name (ARN)
@@ -248,14 +247,13 @@ export default function IntegrationDownshift(props) {
                                     {isOpen ? (
                                         <Paper className={classes.paper} square>
                                             {getSuggestions(inputValue, { showEmpty: true }, arns)
-                                                .map((suggestion, index) =>
-                                                    renderSuggestion({
-                                                        suggestion,
-                                                        index,
-                                                        itemProps: getItemProps({ item: suggestion }),
-                                                        highlightedIndex,
-                                                        selectedItem,
-                                                    }))}
+                                                .map((suggestion, index) => renderSuggestion({
+                                                    suggestion,
+                                                    index,
+                                                    itemProps: getItemProps({ item: suggestion }),
+                                                    highlightedIndex,
+                                                    selectedItem,
+                                                }))}
                                         </Paper>
                                     ) : null}
                                 </div>
@@ -264,7 +262,7 @@ export default function IntegrationDownshift(props) {
                     }}
                 </Downshift>
             </Grid>
-        </Fragment>
+        </>
     );
 }
 

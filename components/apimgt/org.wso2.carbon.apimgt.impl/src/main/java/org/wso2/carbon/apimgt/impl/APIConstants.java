@@ -1835,9 +1835,8 @@ public final class APIConstants {
 
     // AWS Lambda: Constants for aws lambda
     public static final String AWS_SECRET_KEY = "AWS_SECRET_KEY";
-    public static final String AMZN_SECRET_KEY_PREFIX = "aws:";
-    public static final int AMZN_SECRET_KEY_PREFIX_LENGTH = 4;
     public static final String AMZN_ACCESS_KEY = "amznAccessKey";
     public static final String AMZN_SECRET_KEY = "amznSecretKey";
+    public static final String NO_ENTITY_BODY = "NO_ENTITY_BODY";
 
 }

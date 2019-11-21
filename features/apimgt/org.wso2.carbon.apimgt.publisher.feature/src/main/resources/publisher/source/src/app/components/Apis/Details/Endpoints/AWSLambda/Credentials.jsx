@@ -35,7 +35,7 @@ import { Link } from 'react-router-dom';
 import API from 'AppData/api';
 import Banner from 'AppComponents/Shared/Banner';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     typography: {
         display: 'inline-block',
     },
@@ -85,11 +85,11 @@ export default function Credentials(props) {
             });
     }, []);
     return (
-        <React.Fragment>
+        <>
             <Typography className={classes.typography}>
                 <FormattedMessage
-                    id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
-                    '.endpoint.accessMethod'}
+                    id={'Apis.Details.Endpoints.EndpointOverview.awslambda'
+                    + '.endpoint.accessMethod'}
                     defaultMessage='Access Method'
                 />
             </Typography>
@@ -99,21 +99,25 @@ export default function Credentials(props) {
                         value='role-supplied'
                         control={<Radio color='primary' />}
                         label={
-                            <FormattedMessage
-                                id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
-                                '.endpoint.accessMethod.roleSupplied'}
-                                defaultMessage='Using IAM role-supplied temporary AWS credentials'
-                            />
+                            (
+                                <FormattedMessage
+                                    id={'Apis.Details.Endpoints.EndpointOverview.awslambda'
+                                    + '.endpoint.accessMethod.roleSupplied'}
+                                    defaultMessage='Using IAM role-supplied temporary AWS credentials'
+                                />
+                            )
                         }
                     />
                     <Tooltip
                         title={
-                            <FormattedMessage
-                                id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
-                                '.endpoint.tooltip'}
-                                defaultMessage={'You can and should use an IAM role to manage temporary credentials ' +
-                                'for applications that run on an EC2 instance'}
-                            />
+                            (
+                                <FormattedMessage
+                                    id={'Apis.Details.Endpoints.EndpointOverview.awslambda'
+                                    + '.endpoint.tooltip'}
+                                    defaultMessage={'You can and should use an IAM role to manage temporary '
+                                    + 'credentials for applications that run on an EC2 instance'}
+                                />
+                            )
                         }
                     >
                         <Icon className={classes.helpIcon}>help_outline</Icon>
@@ -124,11 +128,13 @@ export default function Credentials(props) {
                         value='stored'
                         control={<Radio color='primary' />}
                         label={
-                            <FormattedMessage
-                                id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
-                                '.endpoint.accessMethod.stored'}
-                                defaultMessage='Using stored AWS credentials'
-                            />
+                            (
+                                <FormattedMessage
+                                    id={'Apis.Details.Endpoints.EndpointOverview.awslambda'
+                                    + '.endpoint.accessMethod.stored'}
+                                    defaultMessage='Using stored AWS credentials'
+                                />
+                            )
                         }
                     />
                 </div>
@@ -139,11 +145,13 @@ export default function Credentials(props) {
                     disabled={awsAccessMethod === 'role-supplied'}
                     id='outlined-required'
                     label={
-                        <FormattedMessage
-                            id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
-                            '.endpoint.accessKey'}
-                            defaultMessage='Access Key'
-                        />
+                        (
+                            <FormattedMessage
+                                id={'Apis.Details.Endpoints.EndpointOverview.awslambda'
+                                + '.endpoint.accessKey'}
+                                defaultMessage='Access Key'
+                            />
+                        )
                     }
                     margin='normal'
                     variant='outlined'
@@ -160,11 +168,13 @@ export default function Credentials(props) {
                     disabled={awsAccessMethod === 'role-supplied'}
                     id='outlined-password-input-required'
                     label={
-                        <FormattedMessage
-                            id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
-                            '.endpoint.secretKey'}
-                            defaultMessage='Secret Key'
-                        />
+                        (
+                            <FormattedMessage
+                                id={'Apis.Details.Endpoints.EndpointOverview.awslambda'
+                                + '.endpoint.secretKey'}
+                                defaultMessage='Secret Key'
+                            />
+                        )
                     }
                     type='password'
                     margin='normal'
@@ -182,26 +192,27 @@ export default function Credentials(props) {
                 <Link to={`/apis/${apiId}/resources`}>
                     <Typography style={{ marginLeft: '10px' }} color='primary' display='inline' variant='caption'>
                         <FormattedMessage
-                            id={'Apis.Details.Endpoints.EndpointOverview.awslambda' +
-                            '.endpoint.linkToResources'}
+                            id={'Apis.Details.Endpoints.EndpointOverview.awslambda'
+                            + '.endpoint.linkToResources'}
                             defaultMessage='Goto Resources to map ARNs'
                         />
                         <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
                     </Typography>
                 </Link>
             </Grid>
-            {pageError &&
-                <Grid item className={classes.banner}>
-                    <Banner
-                        disableActions
-                        dense
-                        paperProps={{ elevation: 1 }}
-                        type='warning'
-                        message={pageError}
-                    />
-                </Grid>
-            }
-        </React.Fragment>
+            {pageError
+                && (
+                    <Grid item className={classes.banner}>
+                        <Banner
+                            disableActions
+                            dense
+                            paperProps={{ elevation: 1 }}
+                            type='warning'
+                            message={pageError}
+                        />
+                    </Grid>
+                )}
+        </>
     );
 }
 

@@ -38,7 +38,6 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
-
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 
@@ -71,14 +70,20 @@ public class AWSLambdaClassMediator extends AbstractMediator {
         InvokeResult invokeResult = invokeLambda(payload);
 
         if (invokeResult != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("AWS Lambda function: " + resourceName + " is invoked successfully.");
+            }
             JsonUtil.setJsonStream(axis2MessageContext, new ByteArrayInputStream(invokeResult.getPayload().array()));
             axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, invokeResult.getStatusCode());
-            axis2MessageContext.setProperty("messageType", APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            axis2MessageContext.setProperty("ContentType", APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            axis2MessageContext.removeProperty("NO_ENTITY_BODY");
+            axis2MessageContext.setProperty(APIMgtGatewayConstants.REST_MESSAGE_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            axis2MessageContext.setProperty(APIMgtGatewayConstants.REST_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            axis2MessageContext.removeProperty(APIConstants.NO_ENTITY_BODY);
         } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to invoke AWS Lambda function: " + resourceName);
+            }
             axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, APIMgtGatewayConstants.HTTP_SC_CODE);
-            axis2MessageContext.setProperty("NO_ENTITY_BODY", true);
+            axis2MessageContext.setProperty(APIConstants.NO_ENTITY_BODY, true);
         }
 
         return true;
@@ -93,12 +98,18 @@ public class AWSLambdaClassMediator extends AbstractMediator {
         try {
             AWSCredentialsProvider credentialsProvider;
             if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Using temporary credentials supplied by the IAM role attached to the EC2 instance");
+                }
                 credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
             } else {
-                if (secretKey.startsWith(APIConstants.AMZN_SECRET_KEY_PREFIX)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Using user given stored credentials");
+                }
+                if (secretKey.length() == 48) {
                     CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-                    setSecretKey(new String(cryptoUtil.base64DecodeAndDecrypt(secretKey.substring(
-                            APIConstants.AMZN_SECRET_KEY_PREFIX_LENGTH)), APIConstants.DigestAuthConstants.CHARSET));
+                    setSecretKey(new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
+                            APIConstants.DigestAuthConstants.CHARSET));
                 }
                 BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
                 credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);

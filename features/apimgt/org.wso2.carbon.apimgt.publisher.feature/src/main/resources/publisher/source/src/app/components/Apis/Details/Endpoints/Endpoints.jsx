@@ -321,8 +321,8 @@ function Endpoints(props) {
     useEffect(() => {
         const { endpointConfig } = api;
         if (endpointConfig && endpointConfig.endpoint_type && endpointConfig.endpoint_type === 'awslambda') {
-            setAwsAccessMethod(endpointConfig.amznAccessKey !== '' && endpointConfig.amznSecretKey !== '' ?
-                'stored' : 'role-supplied');
+            setAwsAccessMethod(endpointConfig.amznAccessKey !== '' && endpointConfig.amznSecretKey !== ''
+                ? 'stored' : 'role-supplied');
         }
     }, []);
 

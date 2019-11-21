@@ -261,9 +261,10 @@ API product(s)
                             />
                         )}
                         {
-                            api.endpointConfig &&
-                            api.endpointConfig.endpoint_type &&
-                            api.endpointConfig.endpoint_type === 'awslambda' &&
+                            api.endpointConfig
+                            && api.endpointConfig.endpoint_type
+                            && api.endpointConfig.endpoint_type === 'awslambda'
+                            && (
                                 <AmznResourceName
                                     api={api}
                                     operation={operation}
@@ -271,6 +272,7 @@ API product(s)
                                     target={target}
                                     verb={verb}
                                 />
+                            )
                         }
                     </Grid>
                 </ExpansionPanelDetails>

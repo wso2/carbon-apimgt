@@ -306,10 +306,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 LinkedHashMap endpointConfig = (LinkedHashMap) body.getEndpointConfig();
                 if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
                     String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
-                    if (!"".equals(secretKey)) {
+                    if (!StringUtils.isEmpty(secretKey)) {
                         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-                        String encryptedSecretKey = APIConstants.AMZN_SECRET_KEY_PREFIX +
-                                cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                        String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
                         endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
                         body.setEndpointConfig(endpointConfig);
                     }
@@ -349,8 +348,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                     body.getName() + "-" + body.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (CryptoException e) {
-            log.error("Error while encrypting the secret key of API : " + body.getProvider() + "-" +
-                    body.getName() + "-" + body.getVersion(), e);
+            String errorMessage = "Error while encrypting the secret key of API : " + body.getProvider() + "-" +
+                    body.getName() + "-" + body.getVersion() + " - " + e.getMessage();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -626,11 +626,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 LinkedHashMap endpointConfig = (LinkedHashMap) body.getEndpointConfig();
                 if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
                     String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
-                    if (!"".equals(secretKey)) {
+                    if (!StringUtils.isEmpty(secretKey)) {
                         if (!APIConstants.AWS_SECRET_KEY.equals(secretKey)) {
                             CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-                            String encryptedSecretKey = APIConstants.AMZN_SECRET_KEY_PREFIX +
-                                    cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                            String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
                             endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
                             body.setEndpointConfig(endpointConfig);
                         } else {
@@ -751,9 +750,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             String errorMessage = "Error while updating API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (CryptoException e) {
-            log.error("Error while encrypting the secret key of API : " + apiId, e);
+            String errorMessage = "Error while encrypting the secret key of API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (ParseException e) {
-            log.error("Error while parsing endpoint config of API : " + apiId, e);
+            String errorMessage = "Error while parsing endpoint config of API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -779,10 +780,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                         if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
                             credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
                         } else {
-                            if (secretKey.startsWith(APIConstants.AMZN_SECRET_KEY_PREFIX)) {
+                            if (secretKey.length() == 48) {
                                 CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-                                secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey.substring(
-                                        APIConstants.AMZN_SECRET_KEY_PREFIX_LENGTH)),
+                                secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
                                         APIConstants.DigestAuthConstants.CHARSET);
                             }
                             BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
@@ -807,18 +807,21 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (e.getCause() instanceof UnknownHostException) {
                 arns.put("error", "No internet connection to connect the given access method.");
                 log.error("No internet connection to connect the given access method of API : " + apiId, e);
-                return Response.ok().entity(arns.toString()).build();
+                return Response.serverError().entity(arns.toString()).build();
             } else {
                 arns.put("error", "Unable to access Lambda functions under the given access method.");
                 log.error("Unable to access Lambda functions under the given access method of API : " + apiId, e);
-                return Response.ok().entity(arns.toString()).build();
+                return Response.serverError().entity(arns.toString()).build();
             }
         } catch (ParseException e) {
-            log.error("Error while parsing endpoint config of API : " + apiId, e);
+            String errorMessage = "Error while parsing endpoint config of the API: " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (CryptoException | UnsupportedEncodingException e) {
-            log.error("Error while decrypting the secret key of API : " + apiId, e);
+            String errorMessage = "Error while decrypting the secret key of the API: " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (APIManagementException e) {
-            log.error("Error while retrieving the API : " + apiId, e);
+            String errorMessage = "Error while retrieving the API: " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
