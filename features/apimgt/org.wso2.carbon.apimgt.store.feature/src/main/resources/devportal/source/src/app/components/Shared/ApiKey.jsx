@@ -48,7 +48,7 @@ const tokens = (props) => {
     * @param {*} event event fired
     */
     const handleChange = (field, event) => {
-        const { accessTokenRequest, updateAccessTokenRequest} = props;
+        const { accessTokenRequest, updateAccessTokenRequest } = props;
         const newRequest = { ...accessTokenRequest };
 
         const { target: currentTarget } = event;
@@ -88,12 +88,12 @@ const tokens = (props) => {
                         value={accessTokenRequest.timeout}
                         color='primary'
                     />}
-                    label='Api Key with infinite validity period'
+                    label='API Key with infinite validity period'
                 />
                 {!infiniteValidity && <TextField
                     required
                     label={intl.formatMessage({
-                        defaultMessage: 'Api Key validity period',
+                        defaultMessage: 'API Key validity period',
                         id: 'Shared.AppsAndKeys.Tokens.apikey',
                     })}
                     InputLabelProps={{

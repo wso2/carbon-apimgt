@@ -167,7 +167,7 @@ class ViewToken extends React.Component {
                         }
                         {(!token.isOauth) && <FormattedMessage
                             id='Shared.AppsAndKeys.ViewToken.apikey'
-                            defaultMessage='Api Key'
+                            defaultMessage='API Key'
                         />
                         }
                     </Typography>
