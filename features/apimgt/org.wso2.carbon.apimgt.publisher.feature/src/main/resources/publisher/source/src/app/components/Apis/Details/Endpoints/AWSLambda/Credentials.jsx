@@ -65,17 +65,15 @@ export default function Credentials(props) {
         apiId,
         endpointConfig,
         endpointsDispatcher,
-        awsAccessMethod,
-        setAwsAccessMethod,
     } = props;
     const classes = useStyles();
     const [pageError, setPageError] = useState(null);
     const handleChange = (event) => {
         const newEndpointConfig = { ...endpointConfig };
+        newEndpointConfig.access_method = event.target.value;
         newEndpointConfig.amznAccessKey = '';
         newEndpointConfig.amznSecretKey = '';
         endpointsDispatcher({ action: 'set_awsCredentials', value: newEndpointConfig });
-        setAwsAccessMethod(event.target.value);
         setPageError(null);
     };
     useEffect(() => {
@@ -93,7 +91,12 @@ export default function Credentials(props) {
                     defaultMessage='Access Method'
                 />
             </Typography>
-            <RadioGroup aria-label='accessMethod' name='accessMethod' value={awsAccessMethod} onChange={handleChange}>
+            <RadioGroup
+                aria-label='accessMethod'
+                name='accessMethod'
+                value={endpointConfig.access_method}
+                onChange={handleChange}
+            >
                 <div>
                     <FormControlLabel
                         value='role-supplied'
@@ -142,7 +145,7 @@ export default function Credentials(props) {
             <Grid item>
                 <TextField
                     required
-                    disabled={awsAccessMethod === 'role-supplied'}
+                    disabled={endpointConfig.access_method === 'role-supplied'}
                     id='outlined-required'
                     label={
                         (
@@ -165,7 +168,7 @@ export default function Credentials(props) {
                 />
                 <TextField
                     required
-                    disabled={awsAccessMethod === 'role-supplied'}
+                    disabled={endpointConfig.access_method === 'role-supplied'}
                     id='outlined-password-input-required'
                     label={
                         (
@@ -220,6 +223,4 @@ Credentials.propTypes = {
     apiId: PropTypes.shape('').isRequired,
     endpointConfig: PropTypes.shape({}).isRequired,
     endpointsDispatcher: PropTypes.func.isRequired,
-    awsAccessMethod: PropTypes.shape('').isRequired,
-    setAwsAccessMethod: PropTypes.func.isRequired,
 };

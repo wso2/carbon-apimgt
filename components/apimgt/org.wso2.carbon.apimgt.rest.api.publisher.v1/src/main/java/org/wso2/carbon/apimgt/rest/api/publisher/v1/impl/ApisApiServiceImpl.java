@@ -779,7 +779,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         AWSCredentialsProvider credentialsProvider;
                         if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
                             credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
-                        } else {
+                        } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey)) {
                             if (secretKey.length() == APIConstants.AWS_ENCRYPTED_SECRET_KEY_LENGTH) {
                                 CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
                                 secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
@@ -787,6 +787,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                             }
                             BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
                             credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
+                        } else {
+                            throw new SdkClientException("Missing AWS Credentials");
                         }
                         AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
                                 .withCredentials(credentialsProvider)

@@ -353,8 +353,7 @@
                             !org.wso2.carbon.apimgt.gateway.internal,
                             !org.wso2.carbon.apimgt.gateway.stub.*,
                             org.wso2.carbon.apimgt.gateway.*;version="${carbon.apimgt.version}",
-                            org.wso2.throttle.*,
-                            com.amazonaws.*
+                            org.wso2.throttle.*
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.soap,
@@ -407,6 +406,7 @@
                             org.wso2.carbon.apimgt.tracing.*; version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.orbit.re2j.*; version="${re2j.version}",
                             graphql.*; version="${graphql.java.version}",
+                            com.amazonaws.*; version="${com.amazonaws.version}",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>

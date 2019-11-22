@@ -241,6 +241,9 @@
                                 </bundleDef>
                                 <bundleDef>org.wso2.orbit.graphQL:graphQL:${graphql.java.version}</bundleDef>
                                 <bundleDef>org.wso2.wsdl4j:wsdl4j.wso2:${wsdl4j.version}</bundleDef>
+                                <bundleDef>
+                                    org.wso2.orbit.com.amazonaws:awslambda:${org.wso2.orbit.com.amazonaws.version}
+                                </bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>

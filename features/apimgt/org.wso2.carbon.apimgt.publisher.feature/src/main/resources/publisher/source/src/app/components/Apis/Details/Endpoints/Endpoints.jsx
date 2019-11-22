@@ -74,7 +74,6 @@ function Endpoints(props) {
     const [swagger, setSwagger] = useState(defaultSwagger);
     const [endpointValidity, setAPIEndpointsValid] = useState({ isValid: true, message: '' });
     const [isUpdating, setUpdating] = useState(false);
-    const [awsAccessMethod, setAwsAccessMethod] = useState('role-supplied');
 
     const apiReducer = (initState, configAction) => {
         const tmpEndpointConfig = cloneDeep(initState.endpointConfig);
@@ -217,7 +216,7 @@ function Endpoints(props) {
         }
         const endpointType = endpointConfig.endpoint_type;
         if (endpointType === 'awslambda') {
-            if (awsAccessMethod === 'stored') {
+            if (endpointConfig.access_method === 'stored') {
                 if (endpointConfig.amznAccessKey === '' || endpointConfig.amznSecretKey === '') {
                     return {
                         isValid: false,
@@ -318,14 +317,6 @@ function Endpoints(props) {
         setAPIEndpointsValid(validate(apiObject.endpointImplementationType));
     }, [apiObject]);
 
-    useEffect(() => {
-        const { endpointConfig } = api;
-        if (endpointConfig && endpointConfig.endpoint_type && endpointConfig.endpoint_type === 'awslambda') {
-            setAwsAccessMethod(endpointConfig.amznAccessKey !== '' && endpointConfig.amznSecretKey !== ''
-                ? 'stored' : 'role-supplied');
-        }
-    }, []);
-
     const saveAndRedirect = () => {
         saveAPI(true);
     };
@@ -371,8 +362,6 @@ function Endpoints(props) {
                                         onChangeAPI={apiDispatcher}
                                         endpointsDispatcher={apiDispatcher}
                                         saveAndRedirect={saveAndRedirect}
-                                        awsAccessMethod={awsAccessMethod}
-                                        setAwsAccessMethod={setAwsAccessMethod}
                                     />
                                 </Grid>
                             </Grid>

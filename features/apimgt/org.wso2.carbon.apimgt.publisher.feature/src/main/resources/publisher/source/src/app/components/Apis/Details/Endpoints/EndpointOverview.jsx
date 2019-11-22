@@ -126,8 +126,6 @@ function EndpointOverview(props) {
         swaggerDef,
         updateSwagger,
         saveAndRedirect,
-        awsAccessMethod,
-        setAwsAccessMethod,
     } = props;
     const { endpointConfig, endpointSecurity } = api;
     const [endpointType, setEndpointType] = useState(endpointTypes[0]);
@@ -627,8 +625,6 @@ function EndpointOverview(props) {
                                                     apiId={api.id}
                                                     endpointConfig={endpointConfig}
                                                     endpointsDispatcher={endpointsDispatcher}
-                                                    awsAccessMethod={awsAccessMethod}
-                                                    setAwsAccessMethod={setAwsAccessMethod}
                                                 />
                                             )
                                             : (
@@ -909,8 +905,6 @@ EndpointOverview.propTypes = {
     swaggerDef: PropTypes.shape({}).isRequired,
     updateSwagger: PropTypes.func.isRequired,
     saveAndRedirect: PropTypes.func.isRequired,
-    awsAccessMethod: PropTypes.shape('').isRequired,
-    setAwsAccessMethod: PropTypes.func.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(EndpointOverview));

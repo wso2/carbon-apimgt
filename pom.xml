@@ -1564,7 +1564,7 @@
             <dependency>
                 <groupId>org.wso2.orbit.com.amazonaws</groupId>
                 <artifactId>awslambda</artifactId>
-                <version>1.11.253.wso2v1</version>
+                <version>${org.wso2.orbit.com.amazonaws.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -1796,6 +1796,7 @@
         <org.json.version.range>[3.0.0,4.0.0)</org.json.version.range>
         <pax.logging.api.version>1.11.2</pax.logging.api.version>
         <import.package.version.commons.logging>[1.2.0,2.0.0)</import.package.version.commons.logging>
-
+        <com.amazonaws.version>1.11.253</com.amazonaws.version>
+        <org.wso2.orbit.com.amazonaws.version>1.11.253.wso2v1</org.wso2.orbit.com.amazonaws.version>
     </properties>
 </project>

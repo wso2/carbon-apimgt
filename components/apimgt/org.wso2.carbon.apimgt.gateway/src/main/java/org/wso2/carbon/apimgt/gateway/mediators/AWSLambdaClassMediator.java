@@ -102,7 +102,7 @@ public class AWSLambdaClassMediator extends AbstractMediator {
                     log.debug("Using temporary credentials supplied by the IAM role attached to the EC2 instance");
                 }
                 credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
-            } else {
+            } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Using user given stored credentials");
                 }
@@ -113,6 +113,8 @@ public class AWSLambdaClassMediator extends AbstractMediator {
                 }
                 BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
                 credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
+            } else {
+                throw new SdkClientException("Missing AWS Credentials");
             }
             AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
                     .withCredentials(credentialsProvider)
