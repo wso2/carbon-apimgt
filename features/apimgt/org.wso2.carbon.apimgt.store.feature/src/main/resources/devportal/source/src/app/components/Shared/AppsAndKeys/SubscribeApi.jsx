@@ -455,7 +455,7 @@ class Subscribe extends Component {
                                 </InputLabel>
                                 <Select value={this.state.policyName} onChange={this.handleChange('policyName')}>
                                     {this.state.tiers.map(tier => (
-                                        <option value={tier.value}>{tier.label}</option>
+                                        <option value={tier.value} key={tier.value}>{tier.label}</option>
                                     ))}
                                 </Select>
                                 <FormattedMessage

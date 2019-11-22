@@ -38,7 +38,7 @@ import AccessControl from './components/AccessControl';
 import StoreVisibility from './components/StoreVisibility';
 import Tags from './components/Tags';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         padding: theme.spacing(3, 2),
     },
@@ -205,7 +205,7 @@ export default function DesignConfigurations() {
     }
 
     return (
-        <React.Fragment>
+        <>
             <Container maxWidth='md'>
                 <Grid container spacing={2}>
                     <Grid item md={12}>
@@ -227,7 +227,7 @@ export default function DesignConfigurations() {
                             <div>
                                 <Box px={8} py={5}>
                                     <Box py={1}>
-                                        <Grid container spacing={0} >
+                                        <Grid container spacing={0}>
                                             <Grid item xs={12} md={2}>
                                                 <ThumbnailView
                                                     api={api}
@@ -259,9 +259,9 @@ export default function DesignConfigurations() {
                                     <Box pt={2}>
                                         <Button
                                             disabled={
-                                                isUpdating || invalidTagsExist ||
-                                                (apiConfig.visibility === 'RESTRICTED' &&
-                                                    apiConfig.visibleRoles.length === 0)
+                                                isUpdating || invalidTagsExist
+                                                || (apiConfig.visibility === 'RESTRICTED'
+                                                    && apiConfig.visibleRoles.length === 0)
                                             }
                                             type='submit'
                                             variant='contained'
@@ -290,8 +290,8 @@ export default function DesignConfigurations() {
                                                 <FormattedMessage
                                                     id='Apis.Details.Configuration.Configuration.update.not.allowed'
                                                     defaultMessage={
-                                                        '* You are not authorized to update particular fields of' +
-                                                        ' the API due to insufficient permissions'
+                                                        '* You are not authorized to update particular fields of'
+                                                        + ' the API due to insufficient permissions'
                                                     }
                                                 />
                                             </Typography>
@@ -303,6 +303,6 @@ export default function DesignConfigurations() {
                     </Grid>
                 </Grid>
             </Container>
-        </React.Fragment>
+        </>
     );
 }

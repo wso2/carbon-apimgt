@@ -44,7 +44,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import EditableRow from './EditableRow';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         paddingTop: 0,
         paddingLeft: 0,
@@ -143,11 +143,22 @@ function Properties(props) {
     const [propertyValue, setPropertyValue] = useState(null);
     const [updating, setUpdating] = useState(false);
     const [editing, setEditing] = useState(false);
+    const [isAdditionalPropertiesStale, setIsAdditionalPropertiesStale] = useState(false);
+    const iff = (condition, then, otherwise) => (condition ? then : otherwise);
+
+    let isKeyWord = false;
+    const keywords = ['provider', 'version', 'context', 'status', 'description',
+        'subcontext', 'doc', 'lcState', 'name', 'tags'];
+    if (keywords.includes(propertyKey)) {
+        isKeyWord = true;
+    } else {
+        isKeyWord = false;
+    }
 
     const toggleAddProperty = () => {
         setShowAddProperty(!showAddProperty);
     };
-    const handleChange = name => (event) => {
+    const handleChange = (name) => (event) => {
         const { value } = event.target;
         if (name === 'propertyKey') {
             setPropertyKey(value);
@@ -211,6 +222,10 @@ function Properties(props) {
             delete additionalPropertiesCopy[oldKey];
         }
         setAdditionalProperties(additionalPropertiesCopy);
+
+        if (additionalPropertiesCopy !== additionalProperties) {
+            setIsAdditionalPropertiesStale(true);
+        }
     };
 
     /**
@@ -304,7 +319,7 @@ function Properties(props) {
     const classes = useStyles();
 
     return (
-        <React.Fragment>
+        <>
             <div className={classes.titleWrapper}>
                 <Typography variant='h4' align='left' className={classes.mainTitle}>
                     <FormattedMessage
@@ -327,7 +342,7 @@ function Properties(props) {
                     </Button>
                 )}
             </div>
-            {isEmpty(additionalProperties) && !showAddProperty && (
+            {isEmpty(additionalProperties) && !isAdditionalPropertiesStale && !showAddProperty && (
                 <div className={classes.messageBox}>
                     <InlineMessage type='info' height={140}>
                         <div className={classes.contentWrapper}>
@@ -341,8 +356,8 @@ function Properties(props) {
                                 <FormattedMessage
                                     id='Apis.Details.Properties.Properties.add.new.property.message.content'
                                     defaultMessage={
-                                        'Add specific custom properties to your ' +
-                                        'API here.'
+                                        'Add specific custom properties to your '
+                                        + 'API here.'
                                     }
                                 />
                             </Typography>
@@ -364,7 +379,7 @@ function Properties(props) {
                     </InlineMessage>
                 </div>
             )}
-            {(!isEmpty(additionalProperties) || showAddProperty) && (
+            {(!isEmpty(additionalProperties) || showAddProperty || isAdditionalPropertiesStale) && (
                 <Grid container spacing={7}>
                     <Grid item xs={12}>
                         <Paper className={classes.paperRoot}>
@@ -388,7 +403,7 @@ function Properties(props) {
                                 </TableHead>
                                 <TableBody>
                                     {showAddProperty && (
-                                        <React.Fragment>
+                                        <>
                                             <TableRow>
                                                 <TableCell>
                                                     <TextField
@@ -406,7 +421,9 @@ function Properties(props) {
                                                         value={propertyKey === null ? '' : propertyKey}
                                                         onChange={handleChange('propertyKey')}
                                                         onKeyDown={handleKeyDown('propertyKey')}
-                                                        error={validateEmpty(propertyKey)}
+                                                        helperText={validateEmpty(propertyKey) ? ''
+                                                            : iff(isKeyWord, 'Invalid property name', '')}
+                                                        error={validateEmpty(propertyKey) || isKeyWord}
                                                         disabled={isRestricted(
                                                             ['apim:api_create', 'apim:api_publish'],
                                                             api,
@@ -440,9 +457,12 @@ function Properties(props) {
                                                         variant='contained'
                                                         color='primary'
                                                         disabled={
-                                                            !propertyValue ||
-                                                            !propertyKey ||
-                                                            isRestricted(['apim:api_create', 'apim:api_publish'], api)
+                                                            !propertyValue
+                                                            || !propertyKey
+                                                            || isRestricted(
+                                                                ['apim:api_create', 'apim:api_publish'], api,
+                                                            )
+                                                            || isKeyWord
                                                         }
                                                         onClick={handleAddToList}
                                                         className={classes.marginRight}
@@ -467,17 +487,17 @@ function Properties(props) {
                                                         <FormattedMessage
                                                             id='Apis.Details.Properties.Properties.help'
                                                             defaultMessage={
-                                                                'Property name should be unique, should not contain ' +
-                                                                'spaces and cannot be any ' +
-                                                                'of the following reserved keywords : ' +
-                                                                'provider, version, context, status, description, ' +
-                                                                'subcontext, doc, lcState, name, tags.'
+                                                                'Property name should be unique, should not contain '
+                                                                + 'spaces and cannot be any '
+                                                                + 'of the following reserved keywords : '
+                                                                + 'provider, version, context, status, description, '
+                                                                + 'subcontext, doc, lcState, name, tags.'
                                                             }
                                                         />
                                                     </Typography>
                                                 </TableCell>
                                             </TableRow>
-                                        </React.Fragment>
+                                        </>
                                     )}
                                     {renderAdditionalProperties()}
                                 </TableBody>
@@ -498,18 +518,19 @@ function Properties(props) {
                                             color='primary'
                                             onClick={handleSubmit}
                                             disabled={
-                                                editing || updating || isEmpty(additionalProperties)
+                                                editing || updating || (isEmpty(additionalProperties)
+                                                && !isAdditionalPropertiesStale)
                                                 || isRestricted(['apim:api_create', 'apim:api_publish'], api)
                                             }
                                         >
                                             {updating && (
-                                                <React.Fragment>
+                                                <>
                                                     <CircularProgress size={20} />
                                                     <FormattedMessage
                                                         id='Apis.Details.Properties.Properties.updating'
                                                         defaultMessage='Updating ...'
                                                     />
-                                                </React.Fragment>
+                                                </>
                                             )}
                                             {!updating && (
                                                 <FormattedMessage
@@ -546,7 +567,7 @@ function Properties(props) {
                     </Grid>
                 </Grid>
             )}
-        </React.Fragment>
+        </>
     );
 }
 

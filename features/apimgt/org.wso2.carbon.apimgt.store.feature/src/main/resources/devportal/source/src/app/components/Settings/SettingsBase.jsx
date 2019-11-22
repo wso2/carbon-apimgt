@@ -58,9 +58,7 @@ function SettingsBase(props) {
 }
 
 SettingsBase.propTypes = {
-    classes: PropTypes.shape({
-        headingWrapper: PropTypes.shape({}).isRequired,
-    }).isRequired,
+    classes: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(SettingsBase);

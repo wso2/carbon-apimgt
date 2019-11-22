@@ -39,6 +39,13 @@ function GoToEdit(props) {
         docContentEditPath = `/${urlPrefix}/${api.id}/documents/${doc.body.documentId}/edit-content`;
     }
 
+    let displayAddContent;
+    if (doc.body.sourceType === 'INLINE'  || doc.body.sourceType === 'MARKDOWN') {
+        displayAddContent = true;
+    } else {
+        displayAddContent= false;
+    }
+
     console.info('printing doc', doc);
     function handleClose() {
         setOpen(false);
@@ -67,7 +74,7 @@ function GoToEdit(props) {
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
-                <Link
+                {displayAddContent && (<Link
                     to={{
                         pathname: docContentEditPath,
                         state: { doc: doc.body },
@@ -79,7 +86,7 @@ function GoToEdit(props) {
                             defaultMessage='Add Content'
                         />
                     </Button>
-                </Link>
+                </Link>)}
                 <Link to={listingPath}>
                     <Button color='primary' autoFocus>
                         <FormattedMessage

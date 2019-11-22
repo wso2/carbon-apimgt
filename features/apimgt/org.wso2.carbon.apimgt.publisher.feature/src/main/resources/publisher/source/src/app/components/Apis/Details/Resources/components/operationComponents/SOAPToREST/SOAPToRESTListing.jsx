@@ -16,7 +16,9 @@
  * under the License.
  */
 
-import React, { Fragment, useState, Suspense, lazy, useEffect } from 'react';
+import React, {
+    useState, Suspense, lazy, useEffect,
+} from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -81,7 +83,7 @@ export default function SOAPToRESTListing(props) {
         }
     }
     return (
-        <Fragment>
+        <>
             <Grid item xs={12} md={12}>
                 <Typography variant='subtitle1'>
                     Mediation
@@ -101,7 +103,9 @@ export default function SOAPToRESTListing(props) {
                 </Tabs>
                 <Box p={1}>
                     <Button onClick={() => setOpenEditor(true)} variant='outlined' size='small' color='primary'>
-                        Edit <EditIcon />
+                        Edit
+                        {' '}
+                        <EditIcon />
                     </Button>
                     {!openEditor && (
                         <Paper elevation={4}>
@@ -122,7 +126,7 @@ export default function SOAPToRESTListing(props) {
                 onClose={() => setOpenEditor(false)}
                 open={openEditor}
             />
-        </Fragment>
+        </>
     );
 }
 

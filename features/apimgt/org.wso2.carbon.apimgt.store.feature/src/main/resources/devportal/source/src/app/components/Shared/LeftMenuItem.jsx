@@ -48,10 +48,10 @@ const styles = theme => ({
         top: 0,
     },
     leftLInk: {
-        paddingTop: theme.spacing.unit,
-        paddingBottom: theme.spacing.unit,
-        paddingLeft: theme.spacing.unit,
-        paddingRight: theme.spacing.unit,
+        paddingTop: theme.spacing(1),
+        paddingBottom: theme.spacing(1),
+        paddingLeft: theme.spacing(1),
+        paddingRight: theme.spacing(1),
         fontSize: theme.typography.caption.fontSize,
         cursor: 'pointer',
         textDecoration: 'none',
@@ -165,17 +165,18 @@ function LeftMenuItem(props) {
 LeftMenuItem.defaultProps = {
     route: null,
     iconText: null,
+    Icon: null,
 };
 LeftMenuItem.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
-    Icon: PropTypes.element.isRequired,
-    text: PropTypes.string.isRequired,
+    Icon: PropTypes.element,
+    text: PropTypes.shape({}).isRequired,
     to: PropTypes.string.isRequired,
     route: PropTypes.string,
     iconText: PropTypes.string,
     history: PropTypes.shape({
-        location: PropTypes.string.isRequired,
+        location: PropTypes.shape({}).iisRequired,
     }).isRequired,
 };
 export default withRouter(withStyles(styles, { withTheme: true })(LeftMenuItem));

@@ -130,7 +130,7 @@ export default function ApiCreateWSDL(props) {
                 },
             };
         }
-        additionalProperties.gatewayEnvironments = settings.environment.map(env => env.name);
+        additionalProperties.gatewayEnvironments = settings.environment.map((env) => env.name);
         let promisedWSDLImport;
         if (apiInputs.inputType === 'url') {
             promisedWSDLImport = Wsdl.importByUrl(apiInputs.inputValue, additionalProperties, apiInputs.type);
@@ -155,8 +155,8 @@ export default function ApiCreateWSDL(props) {
 
     return (
         <APICreateBase
-            title={
-                <React.Fragment>
+            title={(
+                <>
                     <Typography variant='h5'>
                         <FormattedMessage
                             id='Apis.Create.WSDL.ApiCreateWSDL.heading'
@@ -167,13 +167,13 @@ export default function ApiCreateWSDL(props) {
                         <FormattedMessage
                             id='Apis.Create.WSDL.ApiCreateWSDL.sub.heading'
                             defaultMessage={
-                                'Expose an existing SOAP service as a REST API by importing the WSDL of the ' +
-                                'SOAP service.'
+                                'Expose an existing SOAP service as a REST API by importing the WSDL of the '
+                                + 'SOAP service.'
                             }
                         />
                     </Typography>
-                </React.Fragment>
-            }
+                </>
+            )}
         >
             <Box>
                 <Stepper alternativeLabel activeStep={wizardStep}>
@@ -221,12 +221,19 @@ export default function ApiCreateWSDL(props) {
                                     </Button>
                                 </Link>
                             )}
-                            {wizardStep === 1 && <Button onClick={() => setWizardStep(step => step - 1)}>Back</Button>}
+                            {wizardStep === 1 && (
+                                <Button onClick={
+                                    () => setWizardStep((step) => step - 1)
+                                }
+                                >
+                                    Back
+                                </Button>
+                            )}
                         </Grid>
                         <Grid item>
                             {wizardStep === 0 && (
                                 <Button
-                                    onClick={() => setWizardStep(step => step + 1)}
+                                    onClick={() => setWizardStep((step) => step + 1)}
                                     variant='contained'
                                     color='primary'
                                     disabled={!apiInputs.isFormValid}
@@ -241,7 +248,9 @@ export default function ApiCreateWSDL(props) {
                                     disabled={!apiInputs.isFormValid || isCreating}
                                     onClick={createAPI}
                                 >
-                                    Create {isCreating && <CircularProgress size={24} />}
+                                    Create
+                                    {' '}
+                                    {isCreating && <CircularProgress size={24} />}
                                 </Button>
                             )}
                         </Grid>

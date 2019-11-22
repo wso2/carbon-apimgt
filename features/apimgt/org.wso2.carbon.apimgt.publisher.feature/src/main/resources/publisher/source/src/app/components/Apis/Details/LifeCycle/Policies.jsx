@@ -24,18 +24,19 @@ import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
 import { FormattedMessage } from 'react-intl';
-import { withStyles} from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
+import Alert from 'AppComponents/Shared/Alert';
 
 import API from 'AppData/api';
 
-const styles = theme => ({
+const styles = () => ({
     FormControl: {
         padding: 0,
         width: '100%',
         marginTop: 0,
     },
-})
+});
 
 /**
  *
@@ -65,21 +66,21 @@ class Policies extends Component {
         }
     }
 
-    changeTiers(event) {
+    changeTiers() {
         this.setState({
             loading: true,
         });
-        const api_uuid = this.props.api.id;
-        const promisedApi = this.api.get(api_uuid);
+        const { api: { id: apiUUID } } = this.props;
+        const promisedApi = this.api.get(apiUUID);
         promisedApi.then((response) => {
-            const api_data = JSON.parse(response.data);
-            api_data.policies = this.state.selectedPolicies;
-            const promised_update = this.api.update(api_data);
-            promised_update.then((response) => {
+            const apiData = JSON.parse(response.data);
+            apiData.policies = this.state.selectedPolicies;
+            const promisedUpdate = this.api.update(apiData);
+            promisedUpdate.then(() => {
                 this.setState({
                     loading: false,
                 });
-                message.info('Lifecycle state updated successfully');
+                Alert.info('Lifecycle state updated successfully');
             });
         });
     }
@@ -91,13 +92,21 @@ class Policies extends Component {
      * @memberof Policies
      */
     render() {
-        const { handleInputChange, api, policies, isAPIProduct } = this.props;
-        const { classes } = this.props;
+        const {
+            handleInputChange, api, policies, isAPIProduct, classes,
+        } = this.props;
+        const { loading } = this.state;
+        if (loading) {
+            return 'Loading . . .';
+        }
         return (
-            <React.Fragment>
+            <>
                 <FormControl className={classes.FormControl}>
                     <InputLabel htmlFor='policy-selector'>
-                        <FormattedMessage id="Apis.Details.LifeCycle.Policies.business.plans" defaultMessage="Business Plans" />
+                        <FormattedMessage
+                            id='Apis.Details.LifeCycle.Policies.business.plans'
+                            defaultMessage='Business Plans'
+                        />
                     </InputLabel>
                     <Select
                         error={api.policies && api.policies.length === 0}
@@ -116,7 +125,7 @@ class Policies extends Component {
                             },
                         }}
                     >
-                        {policies.map(policy => (
+                        {policies.map((policy) => (
                             <MenuItem
                                 key={policy.name}
                                 value={policy.name}
@@ -129,18 +138,22 @@ class Policies extends Component {
                         ))}
                     </Select>
                     <FormHelperText>
-                        {isAPIProduct ?
-                            <FormattedMessage id='Apis.Details.LifeCycle.Policies.select.plan.api.product'
-                                defaultMessage='Select a plan for the API product.'
-                             />
-                            :
-                            <FormattedMessage id='Apis.Details.LifeCycle.Policies.select.plan.api'
-                                defaultMessage='Select a plan for the API and enable API level throttling.'
-                            />
-                        }
+                        {isAPIProduct
+                            ? (
+                                <FormattedMessage
+                                    id='Apis.Details.LifeCycle.Policies.select.plan.api.product'
+                                    defaultMessage='Select a plan for the API product.'
+                                />
+                            )
+                            : (
+                                <FormattedMessage
+                                    id='Apis.Details.LifeCycle.Policies.select.plan.api'
+                                    defaultMessage='Select a plan for the API and enable API level throttling.'
+                                />
+                            )}
                     </FormHelperText>
                 </FormControl>
-            </React.Fragment>
+            </>
         );
     }
 }

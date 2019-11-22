@@ -34,12 +34,12 @@ import {
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 
-const styles = theme => ({
+const styles = (theme) => ({
     inlineMessageContainer: {
-        marginBottom: theme.spacing(),
+        marginBottom: theme.spacing(1),
     },
     endpointTypeCard: {
-        margin: theme.spacing(),
+        margin: theme.spacing(1),
         maxWidth: theme.spacing(32),
         transition: 'box-shadow 0.3s ease-in-out',
         height: theme.spacing(40),
@@ -50,7 +50,7 @@ const styles = theme => ({
         height: theme.spacing(40),
     },
     content: {
-        marginTop: theme.spacing(),
+        marginTop: theme.spacing(1),
     },
     cardActions: {
         justifyContent: 'flex-end',
@@ -114,8 +114,8 @@ function NewEndpointCreate(props) {
             }),
             description: intl.formatMessage({
                 id: 'Apis.Details.Endpoints.NewEndpointCreate.create.prototype.endpoint.description',
-                defaultMessage: 'Use the inbuilt JavaScript engine to prototype the API or provide an endpoint' +
-                    ' to a prototype API. The inbuilt JavaScript engine does support prototype SOAP APIs',
+                defaultMessage: 'Use the inbuilt JavaScript engine to prototype the API or provide an endpoint'
+                    + ' to a prototype API. The inbuilt JavaScript engine does support prototype SOAP APIs',
             }),
             options: [
                 {
@@ -124,6 +124,7 @@ function NewEndpointCreate(props) {
                         id: 'Apis.Details.Endpoints.NewEndpointCreate.prototype.implementation',
                         defaultMessage: 'Prototype Implementation',
                     }),
+                    disabled: ['SOAP', 'SOAPTOREST'],
                 },
                 {
                     type: 'prototyped',
@@ -131,6 +132,7 @@ function NewEndpointCreate(props) {
                         id: 'Apis.Details.Endpoints.NewEndpointCreate.default.prototype.endpoints',
                         defaultMessage: 'Prototype Endpoint',
                     }),
+                    disabled: [],
                 },
             ],
             disabled: ['GRAPHQL'],
@@ -151,7 +153,7 @@ function NewEndpointCreate(props) {
     ];
 
     return (
-        <React.Fragment>
+        <>
             <Typography variant='h4' align='left' className={classes.titleWrapper}>
                 <FormattedMessage
                     id='Apis.Details.Endpoints.NewEndpointCreate.add.endpoints.header'
@@ -159,7 +161,7 @@ function NewEndpointCreate(props) {
                 />
             </Typography>
             <Grid container justify='flex-start' spacing={2}>
-                {endpointTypes.filter(type => !type.disabled.includes(apiType)).map(((type) => {
+                {endpointTypes.filter((type) => !type.disabled.includes(apiType)).map(((type) => {
                     return (
                         <Grid item className={classes.inlineMessageContainer}>
                             <Card className={classes.endpointTypeCard}>
@@ -171,29 +173,32 @@ function NewEndpointCreate(props) {
                                     <Typography component='p' className={classes.content}>
                                         {type.description}
                                     </Typography>
-                                    {type.options ?
-                                        <div>
-                                            <FormControl component='fieldset' className={classes.formControl}>
-                                                <RadioGroup
-                                                    aria-label='EndpointType'
-                                                    name='endpointType'
-                                                    className={classes.radioGroup}
-                                                    value={endpointImplType}
-                                                    onChange={(event) => { setImplType(event.target.value); }}
-                                                >
-                                                    {type.options.map((option) => {
-                                                        return (
-                                                            <FormControlLabel
-                                                                value={option.type}
-                                                                control={<Radio color='primary' />}
-                                                                label={option.name}
-                                                            />
-                                                        );
-                                                    })}
-                                                </RadioGroup>
-                                            </FormControl>
-                                        </div> :
-                                        <div /> }
+                                    {type.options
+                                        ? (
+                                            <div>
+                                                <FormControl component='fieldset' className={classes.formControl}>
+                                                    <RadioGroup
+                                                        aria-label='EndpointType'
+                                                        name='endpointType'
+                                                        className={classes.radioGroup}
+                                                        value={endpointImplType}
+                                                        onChange={(event) => { setImplType(event.target.value); }}
+                                                    >
+                                                        {type.options.filter((types) => !types.disabled
+                                                            .includes(apiType)).map(((option) => {
+                                                            return (
+                                                                <FormControlLabel
+                                                                    value={option.type}
+                                                                    control={<Radio color='primary' />}
+                                                                    label={option.name}
+                                                                />
+                                                            );
+                                                        }))}
+                                                    </RadioGroup>
+                                                </FormControl>
+                                            </div>
+                                        )
+                                        : <div /> }
                                 </CardContent>
                                 <CardActions className={classes.cardActions}>
                                     <Button
@@ -212,7 +217,7 @@ function NewEndpointCreate(props) {
                     );
                 }))}
             </Grid>
-        </React.Fragment>
+        </>
     );
 }
 

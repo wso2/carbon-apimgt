@@ -48,7 +48,7 @@ const useStyles = makeStyles(theme => ({
         flexGrow: 1,
     },
     listContentWrapper: {
-        padding: `0 ${theme.spacing.unit * 3}px`,
+        padding: `0 ${theme.spacing(3)}px`,
     },
     iconDefault: {
         color: theme.palette.getContrastText(theme.custom.infoBar.background),

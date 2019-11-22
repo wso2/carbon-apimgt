@@ -105,12 +105,14 @@ function getIcon(type) {
         case 'API':
             return <Icon style={{ fontSize: 30 }}>settings_applications</Icon>;
         case 'APIPRODUCT':
-            return (<ProductIcon
-                width={16}
-                height={16}
-                icon='api-product'
-                strokeColor='#000000'
-            />);
+            return (
+                <ProductIcon
+                    width={16}
+                    height={16}
+                    icon='api-product'
+                    strokeColor='#000000'
+                />
+            );
         default:
             return <Icon style={{ fontSize: 30 }}>library_books</Icon>;
     }
@@ -130,7 +132,7 @@ function renderSuggestion(suggestion, { query, isHighlighted }) {
     // TODO: Style the version ( and apiName if docs) apearing in the menu item
 
     return (
-        <React.Fragment>
+        <>
             <Link to={path} style={{ color: 'black' }}>
                 <MenuItem selected={isHighlighted}>
                     <ListItemIcon>
@@ -154,7 +156,7 @@ function renderSuggestion(suggestion, { query, isHighlighted }) {
                 </MenuItem>
             </Link>
             <Divider />
-        </React.Fragment>
+        </>
     );
 }
 
@@ -189,10 +191,12 @@ function getSuggestions(value) {
     const modifiedSearchQuery = buildSearchQuery(value);
 
     if (value.trim().length === 0 || !modifiedSearchQuery) {
-        return new Promise(resolve => resolve({ obj: { list: [] } }));
+        return new Promise((resolve) => resolve({ obj: { list: [] } }));
     } else {
         return API.search({ query: modifiedSearchQuery, limit: 8 });
     }
 }
 
-export { renderInput, renderSuggestion, getSuggestions, getSuggestionValue, buildSearchQuery };
+export {
+    renderInput, renderSuggestion, getSuggestions, getSuggestionValue, buildSearchQuery,
+};

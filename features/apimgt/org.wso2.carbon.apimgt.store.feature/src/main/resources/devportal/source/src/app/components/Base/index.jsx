@@ -53,7 +53,7 @@ const styles = (theme) => {
             background: theme.custom.appBar.background,
         },
         icon: {
-            marginRight: theme.spacing.unit * 2,
+            marginRight: theme.spacing(2),
         },
         menuIcon: {
             color: theme.palette.getContrastText(theme.custom.appBar.background),
@@ -87,7 +87,7 @@ const styles = (theme) => {
         footer: {
             background: theme.custom.footer.background,
             color: theme.custom.footer.color,
-            paddingLeft: theme.spacing.unit * 3,
+            paddingLeft: theme.spacing(3),
             height: 50,
             alignItems: 'center',
             display: 'flex',
@@ -253,7 +253,7 @@ class Layout extends React.Component {
                 },
                 footer: {
                     active: footerActive, text: footerText,
-                }
+                },
             },
         } = theme;
         const { openNavBar } = this.state;
@@ -434,16 +434,16 @@ class Layout extends React.Component {
                             </Toolbar>
                         </AppBar>
                         <div className={classes.contentWrapper}>{this.props.children}</div>
-                        {footerActive &&<div className={classes.push} />}
+                        {footerActive && <div className={classes.push} />}
                     </div>
                     {footerActive && <footer className={classes.footer} id='footer'>
                         <Typography noWrap>
-                            {footerText && footerText !== '' ? <span>{footerText}</span> :<FormattedMessage
+                            {footerText && footerText !== '' ? <span>{footerText}</span> : <FormattedMessage
                                 id='Base.index.copyright.text'
-                                defaultMessage='WSO2 API-M v3.0.0 | © 2019 WSO2 Inc'
+                                defaultMessage='WSO2 API-M v3.1.0 | © 2019 WSO2 Inc'
                             />}
                         </Typography>
-                    </footer>}
+                                     </footer>}
                 </div>
             </React.Fragment>
         );

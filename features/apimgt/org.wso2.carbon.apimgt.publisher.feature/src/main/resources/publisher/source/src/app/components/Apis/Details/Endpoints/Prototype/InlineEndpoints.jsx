@@ -23,9 +23,9 @@ import GenericResource from 'AppComponents/Apis/Details/Endpoints/Prototype/Gene
 
 const xMediationScriptProperty = 'x-mediation-script';
 
-const defaultScript = '/* mc.setProperty(\'CONTENT_TYPE\', \'application/json\');\n\t' +
-    'mc.setPayloadJSON(\'{ "data" : "sample JSON"}\');*/\n' +
-    '/*Uncomment the above comment block to send a sample response.*/';
+const defaultScript = '/* mc.setProperty(\'CONTENT_TYPE\', \'application/json\');\n\t'
+    + 'mc.setPayloadJSON(\'{ "data" : "sample JSON"}\');*/\n'
+    + '/*Uncomment the above comment block to send a sample response.*/';
 
 /**
  * The inline endpoints component.
@@ -50,24 +50,27 @@ function InlineEndpoints(props) {
         updatePaths(tmpPaths);
     };
     return (
-        <React.Fragment>
+        <>
             <Grid container spacing={1} direction='column'>
                 {Object.keys(paths).map((path) => {
                     return (
                         Object.keys(paths[path]).map((method) => {
                             const mediationScript = paths[path][method][xMediationScriptProperty];
                             const script = mediationScript === undefined ? defaultScript : mediationScript;
-                            return (<GenericResource
-                                resourcePath={path}
-                                resourceMethod={method}
-                                onChange={onScriptChange}
-                                scriptContent={script}
-                            />);
+                            return (
+                                <GenericResource
+                                    resourcePath={path}
+                                    resourceMethod={method}
+                                    onChange={onScriptChange}
+                                    scriptContent={script}
+                                />
+                            );
                         })
                     );
                 })}
             </Grid>
-        </React.Fragment>);
+        </>
+    );
 }
 
 InlineEndpoints.propTypes = {
@@ -76,4 +79,3 @@ InlineEndpoints.propTypes = {
 };
 
 export default InlineEndpoints;
-

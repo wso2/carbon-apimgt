@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState, Fragment } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
@@ -47,7 +47,7 @@ export default function SaveOperations(props) {
         updateOpenAPI('save').finally(() => setIsSaving(false));
     }
     return (
-        <Fragment>
+        <>
             <Box>
                 <Button disabled={isSaving} onClick={saveChanges} variant='contained' color='primary'>
                     Save
@@ -84,7 +84,7 @@ export default function SaveOperations(props) {
                     </Box>
                 </DialogActions>
             </Dialog>
-        </Fragment>
+        </>
     );
 }
 SaveOperations.propTypes = {

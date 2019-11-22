@@ -46,11 +46,11 @@ import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeVali
 import AuthManager from 'AppData/AuthManager';
 import Invoice from './Invoice';
 
-const styles = theme => ({
+const styles = (theme) => ({
     button: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
     },
-    headline: { paddingTop: theme.spacing.unit * 1.25, paddingLeft: theme.spacing.unit * 2.5 },
+    headline: { paddingTop: theme.spacing(1.25), paddingLeft: theme.spacing(2.5) },
     popupHeadline: {
         alignItems: 'center',
         borderBottom: '2px solid #40E0D0',
@@ -66,25 +66,25 @@ const styles = theme => ({
     },
     searchDiv: {
         float: 'right',
-        paddingTop: theme.spacing.unit * 1.25,
-        paddingRight: theme.spacing.unit * 1.25,
+        paddingTop: theme.spacing(1.25),
+        paddingRight: theme.spacing(1.25),
     },
     searchRoot: {
-        paddingTop: theme.spacing.unit * 0.25,
-        paddingBottom: theme.spacing.unit * 0.25,
-        paddingRight: theme.spacing.unit * 0.5,
-        paddingLeft: theme.spacing.unit * 0.5,
+        paddingTop: theme.spacing(0.25),
+        paddingBottom: theme.spacing(0.25),
+        paddingRight: theme.spacing(0.5),
+        paddingLeft: theme.spacing(0.5),
         display: 'flex',
         alignItems: 'right',
-        width: theme.spacing.unit * 50,
+        width: theme.spacing(50),
         borderBottom: '1px solid #E8E8E8',
     },
     searchInput: {
-        marginLeft: theme.spacing.unit,
+        marginLeft: theme.spacing(1),
         flex: 1,
     },
     searchIconButton: {
-        padding: theme.spacing.unit * 1.25,
+        padding: theme.spacing(1.25),
     },
     noDataMessage: {
         display: 'flex',
@@ -349,7 +349,8 @@ class SubscriptionsTable extends Component {
                             defaultMessage='Unblock'
                         />
                     </Button>
-                </dev>);
+                </dev>
+            );
         } else if (state === subscriptionStatus.BLOCKED) {
             return (
                 <dev>
@@ -390,7 +391,8 @@ class SubscriptionsTable extends Component {
                             defaultMessage='Unblock'
                         />
                     </Button>
-                </dev>);
+                </dev>
+            );
         } else {
             return (
                 <dev>
@@ -431,7 +433,8 @@ class SubscriptionsTable extends Component {
                             defaultMessage='Unblock'
                         />
                     </Button>
-                </dev>);
+                </dev>
+            );
         }
     }
 
@@ -444,20 +447,26 @@ class SubscriptionsTable extends Component {
      */
     formatSubscriptionStateString(state) {
         if (state === subscriptionStatus.PROD_BLOCKED) {
-            return (<FormattedMessage
-                id='Apis.Details.Subscriptions.SubscriptionsTable.blocked.production.only.subs.state'
-                defaultMessage='Blocked Production Only'
-            />);
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Subscriptions.SubscriptionsTable.blocked.production.only.subs.state'
+                    defaultMessage='Blocked Production Only'
+                />
+            );
         } else if (state === subscriptionStatus.BLOCKED) {
-            return (<FormattedMessage
-                id='Apis.Details.Subscriptions.SubscriptionsTable.blocked.subs.state'
-                defaultMessage='Blocked'
-            />);
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Subscriptions.SubscriptionsTable.blocked.subs.state'
+                    defaultMessage='Blocked'
+                />
+            );
         } else {
-            return (<FormattedMessage
-                id='Apis.Details.Subscriptions.SubscriptionsTable.active.subs.state'
-                defaultMessage='Active'
-            />);
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Subscriptions.SubscriptionsTable.active.subs.state'
+                    defaultMessage='Active'
+                />
+            );
         }
     }
 
@@ -564,11 +573,10 @@ class SubscriptionsTable extends Component {
         const { page, rowsPerPage, searchQuery } = this.state;
         const promisedSubscriptions = api.subscriptions(this.api.id, page * rowsPerPage, rowsPerPage, searchQuery);
         promisedSubscriptions
-            .then(response =>
-                this.setState({
-                    subscriptions: response.body.list,
-                    totalSubscription: response.body.pagination.total,
-                }))
+            .then((response) => this.setState({
+                subscriptions: response.body.list,
+                totalSubscription: response.body.pagination.total,
+            }))
             .catch((errorMessage) => {
                 console.error(errorMessage);
                 Alert.error(JSON.stringify(errorMessage));
@@ -577,7 +585,7 @@ class SubscriptionsTable extends Component {
             this.setState({ monetizationStatus: status.enabled });
         });
         api.getSubscriptionPolicies(this.api.id).then((policies) => {
-            const filteredPolicies = policies.filter(policy => policy.tierPlan === 'COMMERCIAL');
+            const filteredPolicies = policies.filter((policy) => policy.tierPlan === 'COMMERCIAL');
             this.setState({ policies: filteredPolicies });
         });
     }
@@ -598,8 +606,9 @@ class SubscriptionsTable extends Component {
     isMonetizedPolicy(policyName) {
         const { policies, monetizationStatus } = this.state;
         if (policies.length > 0) {
-            const filteredPolicies = policies.filter(policy =>
-                policy.name === policyName && policy.monetizationAttributes.pricePerRequest != null);
+            const filteredPolicies = policies.filter(
+                (policy) => policy.name === policyName && policy.monetizationAttributes.pricePerRequest != null,
+            );
             return (filteredPolicies.length > 0 && monetizationStatus);
         } else {
             return false;
@@ -639,7 +648,7 @@ class SubscriptionsTable extends Component {
             );
         }
         return (
-            <React.Fragment>
+            <>
                 <Paper>
                     <Tooltip
                         title={intl.formatMessage({
@@ -657,7 +666,7 @@ class SubscriptionsTable extends Component {
                                         defaultMessage: 'Search',
                                     })}
                                     inputProps={{ 'aria-label': 'Search' }}
-                                    onChange={e => this.filterSubscriptions(e)}
+                                    onChange={(e) => this.filterSubscriptions(e)}
                                 />
                                 <IconButton className={classes.searchIconButton} aria-label='Search' disabled>
                                     <Search />
@@ -681,7 +690,7 @@ class SubscriptionsTable extends Component {
                                 </TableHead>
                                 <TableBody>
                                     {subscriptions
-                                        .map(sub => (
+                                        .map((sub) => (
                                             <TableRow key={sub.subscriptionId}>
                                                 <TableCell>{sub.applicationInfo.subscriber}</TableCell>
                                                 <TableCell>{sub.applicationInfo.name}</TableCell>
@@ -707,13 +716,13 @@ class SubscriptionsTable extends Component {
                                                         subscriptionId={sub.subscriptionId}
                                                         isNotAuthorized={this.isNotCreator && this.isNotPublisher}
                                                         isMonetizedUsagePolicy={
-                                                            this.isMonetizedPolicy(sub.throttlingPolicy)}
+                                                            this.isMonetizedPolicy(sub.throttlingPolicy)
+                                                        }
                                                         api={api}
                                                     />
                                                 </TableCell>
                                             </TableRow>
-                                        ))
-                                    }
+                                        ))}
                                 </TableBody>
                                 <TableFooter>
                                     <TableRow>
@@ -730,18 +739,18 @@ class SubscriptionsTable extends Component {
                                     </TableRow>
                                 </TableFooter>
                             </Table>
-                        </div>) :
-                        (
+                        </div>
+                    )
+                        : (
                             <div className={classes.noDataMessage} style={{ height: rowsPerPage * emptyColumnHeight }}>
                                 <FormattedMessage
                                     id='Apis.Details.Subscriptions.SubscriptionsTable.no.subscriptions'
                                     defaultMessage='No subscriptions data available'
                                 />
                             </div>
-                        )
-                    }
+                        )}
                 </Paper>
-            </React.Fragment>
+            </>
         );
     }
 }

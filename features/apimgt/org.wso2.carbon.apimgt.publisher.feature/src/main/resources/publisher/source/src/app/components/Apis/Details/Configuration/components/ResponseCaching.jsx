@@ -34,7 +34,7 @@ import { makeStyles } from '@material-ui/core';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import TextField from '@material-ui/core/TextField';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     expansionPanel: {
         marginBottom: theme.spacing(3),
     },
@@ -73,7 +73,7 @@ export default function ResponseCaching(props) {
     const isResponseCachingEnabled = api.responseCachingEnabled;
 
     return (
-        <React.Fragment>
+        <>
             <ExpansionPanel className={classes.expansionPanel}>
                 <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                     <Typography className={classes.subHeading} variant='h6'>
@@ -82,7 +82,7 @@ export default function ResponseCaching(props) {
                             defaultMessage='Response Caching'
                         />
                         <Tooltip
-                            title={
+                            title={(
                                 <FormattedMessage
                                     id='Apis.Details.Configuration.components.ResponseCaching.tooltip'
                                     defaultMessage={
@@ -90,7 +90,7 @@ export default function ResponseCaching(props) {
                                         + ' to improve the response time and minimize the backend load'
                                     }
                                 />
-                            }
+                            )}
                             aria-label='Response cache'
                             placement='right-end'
                             interactive
@@ -100,18 +100,17 @@ export default function ResponseCaching(props) {
                     </Typography>
                     <FormControlLabel
                         className={classes.actionSpace}
-                        control={
+                        control={(
                             <Switch
                                 disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                 checked={api.responseCachingEnabled}
                                 onChange={({ target: { checked } }) => configDispatcher({
                                     action: 'responseCachingEnabled',
                                     value: checked,
-                                })
-                                }
+                                })}
                                 color='primary'
                             />
-                        }
+                        )}
                     />
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails className={classes.expansionPanelDetails}>
@@ -120,26 +119,24 @@ export default function ResponseCaching(props) {
                             {isResponseCachingEnabled && (
                                 <TextField
                                     value={api.cacheTimeout}
-                                    onChange={({ target: { value } }) =>
-                                        configDispatcher({
-                                            action: 'cacheTimeout',
-                                            value,
-                                        })
-                                    }
+                                    onChange={({ target: { value } }) => configDispatcher({
+                                        action: 'cacheTimeout',
+                                        value,
+                                    })}
                                     margin='normal'
-                                    helperText={
+                                    helperText={(
                                         <FormattedMessage
                                             id='Apis.Details.Configuration.Configuration.cache.timeout'
                                             defaultMessage='Cache Timeout (seconds)'
                                         />
-                                    }
+                                    )}
                                 />
                             )}
                         </Grid>
                     </Grid>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
-        </React.Fragment>
+        </>
     );
 }
 

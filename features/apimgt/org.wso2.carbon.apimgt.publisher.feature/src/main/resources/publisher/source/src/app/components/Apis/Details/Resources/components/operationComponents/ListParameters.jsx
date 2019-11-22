@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -56,7 +56,7 @@ export default function ListParameters(props) {
     const [editingParameter, setEditingParameter] = useState(null);
 
     return (
-        <Fragment>
+        <>
             {editingParameter !== null && (
                 <EditParameter
                     operationsDispatcher={operationsDispatcher}
@@ -77,8 +77,8 @@ export default function ListParameters(props) {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {operation.parameters &&
-                        operation.parameters.map(parameter => (
+                    {operation.parameters
+                        && operation.parameters.map((parameter) => (
                             <TableRow key={parameter.name}>
                                 <TableCell>{parameter.name}</TableCell>
                                 <TableCell align='right'>{capitalizeFirstLetter(parameter.in)}</TableCell>
@@ -99,12 +99,10 @@ export default function ListParameters(props) {
                                         <Tooltip title='Delete'>
                                             <IconButton
                                                 disabled={disableUpdate}
-                                                onClick={() =>
-                                                    operationsDispatcher({
-                                                        action: 'deleteParameter',
-                                                        data: { target, verb, value: parameter },
-                                                    })
-                                                }
+                                                onClick={() => operationsDispatcher({
+                                                    action: 'deleteParameter',
+                                                    data: { target, verb, value: parameter },
+                                                })}
                                                 fontSize='small'
                                             >
                                                 <DeleteIcon fontSize='small' />
@@ -114,8 +112,8 @@ export default function ListParameters(props) {
                                 )}
                             </TableRow>
                         ))}
-                    {operation.requestBody &&
-                        Object.entries(operation.requestBody.content).map(([contentType, content]) => (
+                    {operation.requestBody
+                        && Object.entries(operation.requestBody.content).map(([contentType, content]) => (
                             <TableRow key={contentType}>
                                 <TableCell>{contentType}</TableCell>
                                 <TableCell align='right'>Body</TableCell>
@@ -158,7 +156,7 @@ export default function ListParameters(props) {
                         ))}
                 </TableBody>
             </Table>
-        </Fragment>
+        </>
     );
 }
 

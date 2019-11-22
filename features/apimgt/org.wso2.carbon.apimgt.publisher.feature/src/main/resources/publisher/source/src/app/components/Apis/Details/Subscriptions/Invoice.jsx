@@ -109,7 +109,7 @@ function Invoice(props) {
     };
 
     return (
-        <React.Fragment>
+        <>
             <Button
                 variant='outlined'
                 size='small'
@@ -145,7 +145,7 @@ function Invoice(props) {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </React.Fragment>
+        </>
     );
 }
 

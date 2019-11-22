@@ -37,7 +37,7 @@ import API from 'AppData/api';
 import DropZoneLocal, { humanFileSize } from 'AppComponents/Shared/DropZoneLocal';
 import Banner from 'AppComponents/Shared/Banner';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     mandatoryStar: {
         color: theme.palette.error.main,
     },
@@ -95,25 +95,26 @@ export default function ProvideGraphQL(props) {
     }
 
     return (
-        <React.Fragment>
+        <>
             <Grid container spacing={5}>
                 {!apiInputs.inputValue && (
                     <Grid item md={12}>
                         <FormControl component='fieldset'>
                             <FormLabel component='legend'>
-                                <React.Fragment>
-                                    <sup className={classes.mandatoryStar}>*</sup>{' '}
+                                <>
+                                    <sup className={classes.mandatoryStar}>*</sup>
+                                    {' '}
                                     <FormattedMessage
                                         id='Apis.Create.GraphQL.Steps.ProvideGraphQL.Input.type'
                                         defaultMessage='Provide GraphQL File'
                                     />
-                                </React.Fragment>
+                                </>
                             </FormLabel>
                         </FormControl>
                     </Grid>
                 )}
-                {isValid.file &&
-                    (
+                {isValid.file
+                    && (
                         <Grid item md={11}>
                             <Banner
                                 onClose={() => setValidity({ file: null })}
@@ -124,8 +125,7 @@ export default function ProvideGraphQL(props) {
                                 message={isValid.file.message}
                             />
                         </Grid>
-                    )
-                }
+                    )}
                 <Grid item md={11}>
                     {apiInputs.inputValue ? (
                         <List>
@@ -177,13 +177,12 @@ export default function ProvideGraphQL(props) {
                                         />
                                     </Button>,
                                 ]
-                                )
-                            }
+                                )}
                         </DropZoneLocal>
                     )}
                 </Grid>
             </Grid>
-        </React.Fragment>
+        </>
     );
 }
 

@@ -33,27 +33,29 @@ export default function SelectEndpoint(props) {
         <TextField
             autoFocus
             error={isEndpointEmpty || endpoints.length === 0}
-            helperText={endpoints.length === 0 ? <FormattedMessage
-                id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint.empty.error'
-                defaultMessage='Save endpoints before adding the Certificate'
-            /> : iff(isEndpointEmpty, <FormattedMessage
+            helperText={endpoints.length === 0 ? (
+                <FormattedMessage
+                    id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint.empty.error'
+                    defaultMessage='Save endpoints before adding the Certificate'
+                />
+            ) : iff(isEndpointEmpty, <FormattedMessage
                 id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint.error'
                 defaultMessage='Endpoint should not be empty'
             />, <FormattedMessage
                 id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint.helpertext'
                 defaultMessage='Endpoint for the Certificate'
-            />)
-            }
+            />)}
             required
             id='certificateEndpoint'
-            label={
+            label={(
                 <FormattedMessage
                     id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint'
                     defaultMessage='Endpoint'
-                />}
+                />
+            )}
             value={endpoint}
             placeholder='Endpoint'
-            onChange={event => onChange(event.target.value)}
+            onChange={(event) => onChange(event.target.value)}
             margin='normal'
             variant='outlined'
             fullWidth

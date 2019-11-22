@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import Configurations from 'Config';
 
-const styles = theme => ({
+const styles = (theme) => ({
     profileMenu: {
         zIndex: theme.zIndex.modal + 1,
         paddingTop: '5px',
@@ -46,6 +46,16 @@ class Avatar extends Component {
         this.handleClose = this.handleClose.bind(this);
     }
 
+
+    /**
+     * Do OIDC logout redirection
+     * @param {React.SyntheticEvent} e Click event of the submit button
+     */
+    doOIDCLogout = (e) => {
+        e.preventDefault();
+        window.location = `${Configurations.app.context}/services/logout`;
+    };
+
     /**
      *
      * Open Avatar dropdown menu
@@ -66,15 +76,6 @@ class Avatar extends Component {
     }
 
     /**
-     * Do OIDC logout redirection
-     * @param {React.SyntheticEvent} e Click event of the submit button
-     */
-    doOIDCLogout = (e) => {
-        e.preventDefault();
-        window.location = `${Configurations.app.context}/services/logout`;
-    };
-
-    /**
      *
      * @inheritdoc
      * @returns {React.Component} @inheritdoc
@@ -88,7 +89,7 @@ class Avatar extends Component {
         }
         const { anchorEl } = this.state;
         return (
-            <React.Fragment>
+            <>
                 <IconButton
                     id='profile-menu-btn'
                     aria-owns='profile-menu-appbar'
@@ -97,7 +98,9 @@ class Avatar extends Component {
                     onClick={this.handleClick}
                     className={classes.userLink}
                 >
-                    <AccountCircle className={classes.accountIcon} /> {username}
+                    <AccountCircle className={classes.accountIcon} />
+                    {' '}
+                    {username}
                 </IconButton>
                 <Menu
                     id='logout-menu'
@@ -125,7 +128,7 @@ class Avatar extends Component {
                         </MenuItem>
                     </Link>
                 </Menu>
-            </React.Fragment>
+            </>
         );
     }
 }

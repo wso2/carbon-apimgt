@@ -32,7 +32,7 @@ import { FormattedMessage } from 'react-intl';
  */
 const styles = theme => ({
     button: {
-        padding: theme.spacing.unit,
+        padding: theme.spacing(1),
         color: theme.palette.getContrastText(theme.palette.background.default),
         display: 'flex',
         alignItems: 'center',
@@ -52,7 +52,7 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.default),
         borderBottom: 'solid 1px ' + theme.palette.grey.A200,
         fontSize: '11px',
-        paddingLeft: theme.spacing.unit,
+        paddingLeft: theme.spacing(1),
         height: 35,
     },
     selectedWrapper: {

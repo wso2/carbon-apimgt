@@ -38,7 +38,7 @@ import APIRateLimiting from '../Resources/components/APIRateLimiting';
 import Operation from './Operation';
 
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         flexGrow: 1,
         marginTop: 10,
@@ -48,8 +48,8 @@ const styles = theme => ({
         flexWrap: 'wrap',
     },
     textField: {
-        marginLeft: theme.spacing.unit,
-        marginRight: theme.spacing.unit,
+        marginLeft: theme.spacing(1),
+        marginRight: theme.spacing(1),
         width: 400,
     },
     mainTitle: {
@@ -64,7 +64,7 @@ const styles = theme => ({
         alignItems: 'center',
     },
     button: {
-        marginLeft: theme.spacing.unit * 2,
+        marginLeft: theme.spacing(2),
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
     buttonMain: {
@@ -76,20 +76,20 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.paper),
         border: 'solid 1px ' + theme.palette.grey['300'],
         borderRadius: theme.shape.borderRadius,
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
     },
     addNewHeader: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         backgroundColor: theme.palette.grey['300'],
         fontSize: theme.typography.h6.fontSize,
         color: theme.typography.h6.color,
         fontWeight: theme.typography.h6.fontWeight,
     },
     addNewOther: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
     },
     radioGroup: {
         display: 'flex',
@@ -104,7 +104,7 @@ const styles = theme => ({
         marginRight: 10,
     },
     expansionPanel: {
-        marginBottom: theme.spacing.unit,
+        marginBottom: theme.spacing(1),
     },
     expansionPanelDetails: {
         flexDirection: 'column',
@@ -176,15 +176,17 @@ class Operations extends React.Component {
     handleApiThrottlePolicy(apiThrottlingPolicy) {
         this.setState({ apiThrottlingPolicy });
     }
+
     /**
      *
      * @param {*} newOperation
      */
     handleUpdateList(newOperation) {
         const { operations } = this.state;
-        const updatedList = operations.map(operation =>
-            ((operation.target === newOperation.target && operation.verb === newOperation.verb)
-                ? newOperation : operation));
+        const updatedList = operations.map(
+            (operation) => ((operation.target === newOperation.target && operation.verb === newOperation.verb)
+                ? newOperation : operation),
+        );
         this.setState({ operations: updatedList });
     }
 
@@ -202,19 +204,19 @@ class Operations extends React.Component {
      * @inheritdoc
      */
     render() {
-        const { api } = this.props;
+        const { api, resourceNotFoundMessage } = this.props;
         const {
-            operations, apiPolicies, apiThrottlingPolicy, isSaving, filterKeyWord,
+            operations, apiPolicies, apiThrottlingPolicy, isSaving, filterKeyWord, notFound,
         } = this.state;
-        if (this.state.notFound) {
-            return <ResourceNotFound message={this.props.resourceNotFoundMessage} />;
+        if (notFound) {
+            return <ResourceNotFound message={resourceNotFoundMessage} />;
         }
         if (!operations && apiPolicies.length === 0) {
             return <Progress />;
         }
         const { classes } = this.props;
         return (
-            <React.Fragment>
+            <>
                 <Box pb={3}>
                     <Typography variant='h5'>
                         <FormattedMessage
@@ -240,7 +242,7 @@ class Operations extends React.Component {
                                     id='outlined-full-width'
                                     label='Operation'
                                     placeholder='Filter Operations'
-                                    onChange={e => this.setFilterByKeyWord(e, api.operations)}
+                                    onChange={(e) => this.setFilterByKeyWord(e, api.operations)}
                                     fullWidth
                                     variant='outlined'
                                     InputLabelProps={{
@@ -294,13 +296,14 @@ class Operations extends React.Component {
                                     </Typography>
                                 </TableCell>
                             </TableRow>
-                            {operations.filter(operation =>
-                                operation.target.toLowerCase().includes(filterKeyWord)).map((item) => {
+                            {operations.filter(
+                                (operation) => operation.target.toLowerCase().includes(filterKeyWord),
+                            ).map((item) => {
                                 return (
                                     <Operation
                                         operation={item}
                                         handleUpdateList={this.handleUpdateList}
-                                        scopes={this.props.api.scopes}
+                                        scopes={api.scopes}
                                         isOperationRateLimiting={!apiThrottlingPolicy}
                                         apiPolicies={apiPolicies}
                                     />
@@ -332,7 +335,7 @@ class Operations extends React.Component {
                         </Link>
                     </Grid>
                 </Grid>
-            </React.Fragment>
+            </>
         );
     }
 }

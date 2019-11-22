@@ -1592,7 +1592,6 @@ class API extends Resource {
             });
             params.query = query;
         }
-        console.log(params);
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         const promisedAPIs = apiClient.then(client => {
             return client.apis['APIs'].get_apis(params, Resource._requestMetaData());

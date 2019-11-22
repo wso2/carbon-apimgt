@@ -45,17 +45,17 @@ import Alert from '../Shared/Alert';
  */
 const styles = theme => ({
     buttonsWrapper: {
-        marginTop: theme.spacing.unit,
-        marginLeft: theme.spacing.unit,
+        marginTop: theme.spacing(1),
+        marginLeft: theme.spacing(1),
     },
     buttonAlignment: {
-        marginLeft: theme.spacing.unit * 3,
+        marginLeft: theme.spacing(3),
     },
     linkDisplay: {
         textDecoration: 'none',
     },
     gridAlignment: {
-        height: theme.spacing.unit * 150,
+        height: theme.spacing(150),
     },
 });
 /**

@@ -34,12 +34,12 @@ import SubscriptionsTable from './SubscriptionsTable';
 import SubscriptionPoliciesManage from './SubscriptionPoliciesManage';
 import SubscriptionAvailability from './SubscriptionAvailability';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     buttonSection: {
         marginTop: theme.spacing(2),
     },
     emptyBox: {
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
     },
     heading: {
         marginTop: theme.spacing(3),
@@ -110,7 +110,7 @@ function Subscriptions(props) {
         );
     }
     return (
-        <React.Fragment>
+        <>
             <SubscriptionPoliciesManage api={api} policies={policies} setPolices={setPolices} />
             {tenants !== 0 && (
                 <SubscriptionAvailability
@@ -160,7 +160,7 @@ function Subscriptions(props) {
                         defaultMessage='Manage Subscriptions'
                     />
                 </Typography>
-                <Typography variant='caption' gutterBottom >
+                <Typography variant='caption' gutterBottom>
                     <FormattedMessage
                         id='Apis.Details.Subscriptions.SubscriptionsTable.sub.heading'
                         defaultMessage='Manage subscriptions of the API'
@@ -181,7 +181,7 @@ function Subscriptions(props) {
                     </div>
                 </InlineMessage>
             )}
-        </React.Fragment>
+        </>
     );
 }
 

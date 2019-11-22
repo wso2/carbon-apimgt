@@ -22,10 +22,9 @@ import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import Configurations from 'Config';
 import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import APIs from './Apis';
 import APICreateRoutes from './Create/APICreateRoutes';
-
-import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 
 
 jest.mock('./Listing/Listing', () => () => {
@@ -79,6 +78,13 @@ describe('Test APIs main routing component', () => {
 
     test.todo('should return API Details component when request path match with /apis/:apiUUID/');
     test.skip('should return PageNotFound component if there is no matching path', () => {
+        /**
+         * This test case cause to render components that use <Suspense/> for deferred rendering, Which is not very well
+         * Supported by enzyme or jest, Hence skipped the testcase for more info please refer following issues
+         * https://github.com/facebook/react/issues/14577#issuecomment-553959878
+         * https://github.com/airbnb/enzyme/issues/1460
+         * https://github.com/airbnb/enzyme/issues/2125
+         */
         const url = '/apis/chuck/norris';
         const noneExistingPath = (
             <MemoryRouter initialEntries={[url]}>

@@ -40,15 +40,15 @@ import classNames from 'classnames';
  */
 const styles = theme => ({
     card: {
-        margin: theme.spacing.unit * (3 / 2),
+        margin: theme.spacing(3 / 2),
         maxWidth: theme.custom.thumbnail.width,
         transition: 'box-shadow 0.3s ease-in-out',
         position: 'relative',
     },
     apiDetails: {
-        padding: theme.spacing.unit,
+        padding: theme.spacing(1),
         background: theme.custom.thumbnail.contentBackgroundColor,
-        padding: theme.spacing.unit,
+        padding: theme.spacing(1),
         color: theme.palette.getContrastText(theme.custom.thumbnail.contentBackgroundColor),
         '& a': {
             color: theme.palette.getContrastText(theme.custom.thumbnail.contentBackgroundColor),
@@ -85,7 +85,7 @@ const styles = theme => ({
         display: 'flex',
     },
     thumbHeader: {
-        width: theme.custom.thumbnail.width - theme.spacing.unit,
+        width: theme.custom.thumbnail.width - theme.spacing(1),
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -94,7 +94,7 @@ const styles = theme => ({
         'padding-left': '5px',
     },
     contextBox: {
-        width: parseInt((theme.custom.thumbnail.width - theme.spacing.unit) / 2, 10),
+        width: parseInt((theme.custom.thumbnail.width - theme.spacing(1)) / 2, 10),
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -110,7 +110,7 @@ const styles = theme => ({
     thumbWrapper: {
         position: 'relative',
         paddingTop: 20,
-        marginRight: theme.spacing.unit * 2,
+        marginRight: theme.spacing(2),
     },
     deleteIcon: {
         fill: 'red',

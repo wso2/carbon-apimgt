@@ -3233,6 +3233,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), visibility, authorizedRoles, filePath,
                         registry);
+                registry.addAssociation(artifact.getPath(), filePath, APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
             }
 
         } catch (RegistryException e) {

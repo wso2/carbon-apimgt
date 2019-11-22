@@ -43,12 +43,12 @@ export default function Tags(props) {
             <ChipInput
                 fullWidth
                 variant='outlined'
-                label={
+                label={(
                     <FormattedMessage
                         id='Apis.Details.Configuration.components.Tags.title'
                         defaultMessage='Tags'
                     />
-                }
+                )}
                 disabled={isRestricted(['apim:api_create', 'apim:api_publish'], apiFromContext)}
                 value={api.tags}
                 error={!isTagValid}
@@ -61,12 +61,11 @@ export default function Tags(props) {
                     <FormattedMessage
                         id='Apis.Details.Configuration.components.Tags.error'
                         defaultMessage={
-                            'The tag contains one or more illegal characters ' +
-                            '( ~ ! @ # ; % ^ & * + = { } | < > , \' " \\\\ / ) .'
+                            'The tag contains one or more illegal characters '
+                            + '( ~ ! @ # ; % ^ & * + = { } | < > , \' " \\\\ / ) .'
                         }
                     />
-                )
-                }
+                )}
                 onAdd={(tag) => {
                     if (regexPattern.test(tag)) {
                         setIsTagValid(false);
@@ -84,13 +83,13 @@ export default function Tags(props) {
                         label={value}
                         onDelete={() => {
                             if (invalidTags.includes(value)) {
-                                const currentInvalidTags = invalidTags.filter(existingTag => existingTag !== value);
+                                const currentInvalidTags = invalidTags.filter((existingTag) => existingTag !== value);
                                 setInvalidTags(currentInvalidTags);
                                 if (currentInvalidTags.length === 0) {
                                     setIsTagValid(true);
                                 }
                             }
-                            configDispatcher({ action: 'tags', value: api.tags.filter(oldTag => oldTag !== value) });
+                            configDispatcher({ action: 'tags', value: api.tags.filter((oldTag) => oldTag !== value) });
                         }}
                         style={{
                             backgroundColor: regexPattern.test(value) ? red[300] : null,

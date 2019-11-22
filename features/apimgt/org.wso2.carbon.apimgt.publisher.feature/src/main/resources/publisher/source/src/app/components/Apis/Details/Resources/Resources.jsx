@@ -16,12 +16,13 @@
  * under the License.
  */
 
-import React, { useReducer, useEffect, useState, useCallback, useMemo } from 'react';
+import React, {
+    useReducer, useEffect, useState, useCallback, useMemo,
+} from 'react';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import cloneDeep from 'lodash.clonedeep';
-import Swagger from 'swagger-client';
 import isEmpty from 'lodash/isEmpty';
 import Alert from 'AppComponents/Shared/Alert';
 import Banner from 'AppComponents/Shared/Banner';
@@ -59,7 +60,7 @@ export default function Resources(props) {
     const [api, updateAPI] = useAPI();
     const [pageError, setPageError] = useState(false);
     const [operationRateLimits, setOperationRateLimits] = useState([]);
-    const [specErrors, setSpecErrors] = useState([]);
+    const [specErrors] = useState([]);
     const [markedOperations, setSelectedOperation] = useState({});
     const [openAPISpec, setOpenAPISpec] = useState({});
     const [apiThrottlingPolicy, setApiThrottlingPolicy] = useState(api.apiThrottlingPolicy);
@@ -138,10 +139,10 @@ export default function Resources(props) {
             case 'scopes':
                 if (!updatedOperation.security) {
                     updatedOperation.security = [{ default: [] }];
-                } else if (!updatedOperation.security.find(item => item.default)) {
+                } else if (!updatedOperation.security.find((item) => item.default)) {
                     updatedOperation.security.push({ default: [] });
                 }
-                updatedOperation.security.find(item => item.default).default = value;
+                updatedOperation.security.find((item) => item.default).default = value;
                 break;
             case 'add': {
                 const parameters = extractPathParameters(data.target, openAPISpec);
@@ -223,13 +224,15 @@ export default function Resources(props) {
      * @returns
      */
     function resolveAndUpdateSpec(rawSpec) {
-        return Swagger.resolve({ spec: rawSpec, allowMetaPatches: false }).then(({ spec, errors }) => {
-            const value = spec;
-            delete value.$$normalized;
-            operationsDispatcher({ action: 'init', data: value.paths });
-            setOpenAPISpec(value);
-            setSpecErrors(errors);
-        });
+        // return Swagger.resolve({ spec: rawSpec, allowMetaPatches: false }).then(({ spec, errors }) => {
+        //     const value = spec;
+        //     delete value.$$normalized;
+        //     operationsDispatcher({ action: 'init', data: value.paths });
+        //     setOpenAPISpec(value);
+        //     setSpecErrors(errors);
+        // });
+        operationsDispatcher({ action: 'init', data: rawSpec.paths });
+        setOpenAPISpec(rawSpec);
     }
 
     /**
@@ -241,7 +244,7 @@ export default function Resources(props) {
     function updateSwagger(spec) {
         return api
             .updateSwagger(spec)
-            .then(response => resolveAndUpdateSpec(response.body))
+            .then((response) => resolveAndUpdateSpec(response.body))
             .then(updateAPI)
             .catch((error) => {
                 console.error(error);
@@ -390,7 +393,7 @@ export default function Resources(props) {
                 </Grid>
             )}
             {!isRestricted(['apim:api_create'], api) && !disableAddOperation && (
-                <Grid item md={12}>
+                <Grid item md={12} xs={12}>
                     <AddOperation operationsDispatcher={operationsDispatcher} />
                 </Grid>
             )}
@@ -423,9 +426,9 @@ export default function Resources(props) {
                                                     highlight
                                                     resourcePoliciesDispatcher={resourcePoliciesDispatcher}
                                                     resourcePolicy={
-                                                        resourcePolicies &&
-                                                        resourcePolicies[target.slice(1)] &&
-                                                        resourcePolicies[target.slice(1)][verb]
+                                                        resourcePolicies
+                                                        && resourcePolicies[target.slice(1)]
+                                                        && resourcePolicies[target.slice(1)][verb]
                                                     }
                                                     operationsDispatcher={operationsDispatcher}
                                                     spec={openAPISpec}

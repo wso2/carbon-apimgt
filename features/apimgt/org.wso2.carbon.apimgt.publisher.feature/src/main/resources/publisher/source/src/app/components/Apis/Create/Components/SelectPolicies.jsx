@@ -9,7 +9,7 @@ import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
 import { makeStyles } from '@material-ui/core/styles';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     mandatoryStar: {
         color: theme.palette.error.main,
         marginLeft: theme.spacing(0.1),
@@ -29,7 +29,7 @@ export default function SelectPolicies(props) {
     const [policies, setPolicies] = useState({});
     const classes = useStyles();
     useEffect(() => {
-        API.policies('subscription').then(response => setPolicies(response.body));
+        API.policies('subscription').then((response) => setPolicies(response.body));
     }, []);
     const handleValidateAndChange = ({ target: { value, name } }) => {
         validate('policies', value);
@@ -42,21 +42,21 @@ export default function SelectPolicies(props) {
             <TextField
                 fullWidth
                 select
-                label={
-                    <React.Fragment>
+                label={(
+                    <>
                         <FormattedMessage
                             id='Apis.Create.Components.SelectPolicies.business.plans'
                             defaultMessage='Business plan(s)'
                         />
                         {isAPIProduct && (<sup className={classes.mandatoryStar}>*</sup>)}
-                    </React.Fragment>
-                }
+                    </>
+                )}
                 value={selectedPolicies}
                 name='policies'
                 onChange={handleValidateAndChange}
                 SelectProps={{
                     multiple,
-                    renderValue: selected => (Array.isArray(selected) ? selected.join(', ') : selected),
+                    renderValue: (selected) => (Array.isArray(selected) ? selected.join(', ') : selected),
                 }}
                 helperText={isAPIProduct ? helperText + 'API Product' : helperText + 'API'}
                 margin='normal'
@@ -65,7 +65,7 @@ export default function SelectPolicies(props) {
                     id: 'itest-id-apipolicies-input',
                 }}
             >
-                {policies.list.map(policy => (
+                {policies.list.map((policy) => (
                     <MenuItem
                         dense
                         disableGutters={multiple}

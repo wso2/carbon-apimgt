@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
@@ -50,12 +50,12 @@ export default function OperationGovernance(props) {
     const isOperationRateLimiting = api.apiThrottlingPolicy === null;
 
     return (
-        <Fragment>
+        <>
             <Grid item xs={12} md={12}>
                 <Typography gutterBottom variant='subtitle1'>
                     Operation Governance
                     <Typography style={{ marginLeft: '10px' }} gutterBottom variant='caption'>
-                        {'(Security, Rate Limiting & Scopes)'}
+                        (Security, Rate Limiting & Scopes)
                     </Typography>
                     <Divider variant='middle' />
                 </Typography>
@@ -64,19 +64,17 @@ export default function OperationGovernance(props) {
             <Grid item xs={11}>
                 <FormControl disabled={disableUpdate} component='fieldset'>
                     <FormControlLabel
-                        control={
+                        control={(
                             <Switch
                                 checked={operation['x-auth-type'] && operation['x-auth-type'].toLowerCase() !== 'none'}
-                                onChange={({ target: { checked } }) =>
-                                    operationsDispatcher({
-                                        action: 'authType',
-                                        data: { target, verb, value: checked },
-                                    })
-                                }
+                                onChange={({ target: { checked } }) => operationsDispatcher({
+                                    action: 'authType',
+                                    data: { target, verb, value: checked },
+                                })}
                                 size='small'
                                 color='primary'
                             />
-                        }
+                        )}
                         label='Security'
                         labelPlacement='start'
                     />
@@ -109,7 +107,8 @@ export default function OperationGovernance(props) {
                             'Rate limiting policy'
                         ) : (
                             <div>
-                                Rate limiting is governed by{' '}
+                                Rate limiting is governed by
+                                {' '}
                                 <Box fontWeight='fontWeightBold' display='inline' color='primary.main'>
                                     API Level
                                 </Box>
@@ -119,29 +118,33 @@ export default function OperationGovernance(props) {
                     value={
                         isOperationRateLimiting && operation['x-throttling-tier'] ? operation['x-throttling-tier'] : ''
                     }
-                    onChange={({ target: { value } }) =>
-                        operationsDispatcher({
-                            action: 'throttlingPolicy',
-                            data: { target, verb, value },
-                        })
-                    }
+                    onChange={({ target: { value } }) => operationsDispatcher({
+                        action: 'throttlingPolicy',
+                        data: { target, verb, value },
+                    })}
                     helperText={
                         isOperationRateLimiting ? (
                             'Select a rate limit policy for this operation'
                         ) : (
                             <span>
-                                Use{' '}
+                                Use
+                                {' '}
                                 <Box fontWeight='fontWeightBold' display='inline' color='primary.main'>
                                     Operation Level
-                                </Box>{' '}
-                                rate limiting to <b>enable</b> rate limiting per operation
+                                </Box>
+                                {' '}
+                                rate limiting to
+                                {' '}
+                                <b>enable</b>
+                                {' '}
+rate limiting per operation
                             </span>
                         )
                     }
                     margin='dense'
                     variant='outlined'
                 >
-                    {operationRateLimits.map(rateLimit => (
+                    {operationRateLimits.map((rateLimit) => (
                         <MenuItem key={rateLimit.name} value={rateLimit.name}>
                             {rateLimit.displayName}
                         </MenuItem>
@@ -158,24 +161,22 @@ export default function OperationGovernance(props) {
                     fullWidth
                     label='Operation scope'
                     value={getOperationScopes(operation, spec)[0]}
-                    onChange={({ target: { value } }) =>
-                        operationsDispatcher({
-                            action: 'scopes',
-                            data: { target, verb, value: [value] },
-                        })
-                    }
+                    onChange={({ target: { value } }) => operationsDispatcher({
+                        action: 'scopes',
+                        data: { target, verb, value: [value] },
+                    })}
                     helperText='Select a scope to control permissions to this operation'
                     margin='dense'
                     variant='outlined'
                 >
-                    {api.scopes.map(scope => (
+                    {api.scopes.map((scope) => (
                         <MenuItem key={scope.name} value={scope.name}>
                             {scope.name}
                         </MenuItem>
                     ))}
                 </TextField>
             </Grid>
-            <Grid item md={5} >
+            <Grid item md={5}>
                 <Tooltip title='Remove scope'>
                     <IconButton
                         disabled={disableUpdate}
@@ -195,7 +196,7 @@ export default function OperationGovernance(props) {
                 )}
             </Grid>
             <Grid item md={1} />
-        </Fragment>
+        </>
     );
 }
 

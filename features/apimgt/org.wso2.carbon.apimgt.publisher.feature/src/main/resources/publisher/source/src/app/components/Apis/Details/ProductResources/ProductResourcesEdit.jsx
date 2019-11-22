@@ -30,7 +30,7 @@ import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import ProductResourcesEditWorkspace from './ProductResourcesEditWorkspace';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
         marginTop: 10,
@@ -46,6 +46,12 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
+
+/**
+ *
+ *
+ * @returns
+ */
 function ProductResourcesEdit() {
     const classes = useStyles();
 
