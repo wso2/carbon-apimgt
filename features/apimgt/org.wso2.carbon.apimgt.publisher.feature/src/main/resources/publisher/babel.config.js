@@ -37,7 +37,9 @@ module.exports = {
                     {
                         targets: {
                             chrome: '58',
-                            edge: '16',
+                            edge: '20',
+                            firefox: '56',
+                            safari: '11',
                         },
                     },
                 ],
