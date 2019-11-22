@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
@@ -29,6 +29,22 @@ function Download(props) {
     const { intl } = props;
 
     const { docId, apiId } = props;
+    const [isFileAvailable, setIsFileAvailable] = useState(false);
+    const [isSuccessful, setIsSuccessful] = useState(false);
+
+    useEffect(() => {
+        const api = new Api();
+        const promised_get_content = api.getFileForDocument(apiId, docId);
+        promised_get_content
+            .then((done) => {
+                setIsSuccessful(true);
+                setIsFileAvailable(true);
+            })
+            .catch((error) => {
+                setIsSuccessful(true);
+                setIsFileAvailable(false);
+            });
+    }, []);
     const handleDownload = () => {
         const api = new Api();
         const promised_get_content = api.getFileForDocument(apiId, docId);
@@ -48,7 +64,8 @@ function Download(props) {
     };
 
     return (
-        <Button onClick={handleDownload}>
+        isSuccessful &&
+        <Button onClick={handleDownload} disabled={!isFileAvailable}>
             <Icon>arrow_downward</Icon>
             <FormattedMessage
                 id='Apis.Details.Documents.Download.documents.listing.download'
