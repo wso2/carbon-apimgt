@@ -34,7 +34,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import Alert from 'AppComponents/Shared/Alert';
-import Download from 'AppComponents/Shared/Download.js';
+import Utils from 'AppData/Utils';
 import API from 'AppData/api.js';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 
@@ -184,7 +184,7 @@ function EditMediationPolicy(props) {
                 }));
             })
             .catch((errorResponse) => {
-                console.log(errorResponse);
+                console.error(errorResponse);
                 if (errorResponse.response.body.description !== null) {
                     Alert.error(errorResponse.response.body.description);
                 } else {
@@ -224,12 +224,12 @@ function EditMediationPolicy(props) {
     function downloadGlobalMediationPolicyContent(policyToDownload) {
         const promisedGetContent = API.getGlobalMediationPolicyContent(policyToDownload);
         promisedGetContent
-            .then((done) => {
-                Download.downloadFile(done, document);
+            .then((response) => {
+                Utils.forceDownload(response);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
+                    console.error(error);
                     Alert.error(<FormattedMessage
                         id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.download.error'
                         defaultMessage='Error downloading the file'
@@ -246,7 +246,7 @@ function EditMediationPolicy(props) {
         const promisedGetContent = API.getMediationPolicyContent(policyToDownload, apiId);
         promisedGetContent
             .then((done) => {
-                Download.downloadFile(done, document);
+                Utils.forceDownload(done, document);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
