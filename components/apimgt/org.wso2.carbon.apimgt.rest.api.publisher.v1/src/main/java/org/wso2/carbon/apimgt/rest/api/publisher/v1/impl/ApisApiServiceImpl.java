@@ -103,6 +103,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -2177,6 +2178,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         String fileName = "";
         String mediationPolicyUrl = "";
+        String mediationResourcePath = "";
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
@@ -2196,17 +2198,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
             //Getting registry Api base path out of apiResourcePath
             apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
-            fileName = fileDetail.getDataHandler().getName();
-
-            //Constructing mediation resource path
-            String mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR +
-                    type + RegistryConstants.PATH_SEPARATOR + fileName;
-            if (apiProvider.checkIfResourceExists(mediationResourcePath)) {
-                RestApiUtil.handleConflict("Mediation policy already " +
-                        "exists in the given resource path, cannot create a new.", log);
-            }
 
             if (fileInputStream != null) {
+                fileName = fileDetail.getDataHandler().getName();
+                //Constructing mediation resource path
+                mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR +
+                        type + RegistryConstants.PATH_SEPARATOR + fileName;
                 String fileContentType = URLConnection.guessContentTypeFromName(fileName);
 
                 if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
@@ -2228,7 +2225,20 @@ public class ApisApiServiceImpl implements ApisApiService {
                     throw new APIManagementException("Sequence is malformed");
                 }
             } else if (inlineContent != null) {
-                //todo
+                //Extracting the file name specified in the config
+                fileName = this.getMediationNameFromConfig(inlineContent);
+                //Constructing mediation resource path
+                mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR + type +
+                        RegistryConstants.PATH_SEPARATOR + fileName;
+                InputStream contentStream = new ByteArrayInputStream(inlineContent.getBytes(StandardCharsets.UTF_8));
+                String contentType = URLConnection.guessContentTypeFromName(fileName);
+                ResourceFile contentFile = new ResourceFile(contentStream, contentType);
+                //Adding api specific mediation policy
+                mediationPolicyUrl = apiProvider.addResourceFile(apiIdentifier, mediationResourcePath, contentFile);
+            }
+            if (apiProvider.checkIfResourceExists(mediationResourcePath)) {
+                RestApiUtil.handleConflict("Mediation policy already " +
+                        "exists in the given resource path, cannot create a new.", log);
             }
 
             if (StringUtils.isNotBlank(mediationPolicyUrl)) {
@@ -2267,6 +2277,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return null;
     }
+
 
     /**
      * Get API monetization status and monetized tier to billing plan mapping
