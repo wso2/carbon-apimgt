@@ -96,7 +96,7 @@ const styles = (theme) => {
             fontSize: 18,
             color: theme.palette.grey[500],
             textDecoration: 'none',
-            paddingLeft: theme.spacing.unit * 2,
+            paddingLeft: theme.spacing(2),
         },
         detailsContent: {
             display: 'flex',
@@ -108,7 +108,7 @@ const styles = (theme) => {
             flexDirection: 'column',
             marginLeft: shiftToLeft,
             marginRight: shiftToRight,
-            paddingBottom: theme.spacing.unit * 3,
+            paddingBottom: theme.spacing(3),
         },
         contentLoader: {
             paddingTop: theme.spacing(3),

@@ -422,7 +422,7 @@ const AlertConfiguration = (props) => {
                         <TableBody>
                             {alertConfiguration.map((configuration) => {
                                 return (
-                                    <TableRow id={configuration.configurationId}>
+                                    <TableRow id={configuration.configurationId} key={configuration.configurationId}>
                                         <TableCell>{configuration.configuration.apiName}</TableCell>
                                         <TableCell>{configuration.configuration.apiVersion}</TableCell>
                                         <TableCell>{configuration.configuration.applicationName}</TableCell>

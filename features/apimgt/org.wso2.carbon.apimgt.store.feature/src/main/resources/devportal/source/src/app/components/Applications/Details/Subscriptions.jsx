@@ -46,17 +46,17 @@ import SubscriptionTableData from './SubscriptionTableData';
  */
 const styles = theme => ({
     root: {
-        padding: theme.spacing.unit * 3,
+        padding: theme.spacing(3),
     },
     keyTitle: {
         textTransform: 'uppercase',
-        marginBottom: theme.spacing.unit * 2,
+        marginBottom: theme.spacing(2),
     },
     firstCell: {
         paddingLeft: 0,
     },
     cardTitle: {
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
     },
     cardContent: {
         minHeight: 200,
@@ -399,10 +399,10 @@ Subscriptions.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     match: PropTypes.shape({
         params: PropTypes.shape({
-            application_uuid: PropTypes.string.isRequired,
+            applicationId: PropTypes.string,
         }).isRequired,
     }).isRequired,
-    intl: PropTypes.func.isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Subscriptions));

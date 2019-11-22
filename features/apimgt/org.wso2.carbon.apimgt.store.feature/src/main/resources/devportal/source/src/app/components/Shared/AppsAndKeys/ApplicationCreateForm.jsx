@@ -30,11 +30,11 @@ import ChipInput from 'material-ui-chip-input';
  */
 const styles = theme => ({
     FormControl: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         width: '100%',
     },
     FormControlOdd: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         backgroundColor: theme.palette.background.paper,
         width: '100%',
     },
@@ -233,7 +233,8 @@ const ApplicationCreate = (props) => {
                             variant='outlined'
                             required={isRequiredAttribute(item[1].attribute)}
                             label={item[1].attribute}
-                            value={getAttributeValue(item[1].attribute)}
+                            id={configuration.configurationId}
+                            key={configuration.configurationId}
                             helperText={item[1].description}
                             fullWidth
                             name={item[1].attribute}

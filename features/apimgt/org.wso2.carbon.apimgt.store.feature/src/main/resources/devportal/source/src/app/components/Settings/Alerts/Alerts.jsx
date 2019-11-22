@@ -300,7 +300,7 @@ const Alerts = (props) => {
                 {!isAnalyticsEnabled ?
                     <React.Fragment>
                         <InlineMessage type='info' height={100}>
-                            <div className={classes.contentWrapper}>
+                            <div>
                                 <Typography>
                                     <FormattedMessage
                                         id='Settings.Alerts.Alerts.enable.analytics.message'
@@ -480,12 +480,11 @@ const Alerts = (props) => {
 
 Alerts.propTypes = {
     classes: PropTypes.shape({
-        configDialogHeading: PropTypes.shape({}).isRequired,
-        chipInput: PropTypes.shape({}).isRequired,
-        btnContainer: PropTypes.shape({}).isRequired,
-        alertsWrapper: PropTypes.shape({}).isRequired,
-        contentWrapper: PropTypes.shape({}).isRequired,
-        manageAlertHeading: PropTypes.shape({}).isRequired,
+        configDialogHeading: PropTypes.string.isRequired,
+        chipInput: PropTypes.string.isRequired,
+        btnContainer: PropTypes.string.isRequired,
+        alertsWrapper: PropTypes.string.isRequired,
+        manageAlertHeading: PropTypes.string.isRequired,
     }).isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func.isRequired,

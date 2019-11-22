@@ -46,7 +46,7 @@ const useStyles = makeStyles(theme => ({
         width: '100%',
     },
     viewWrapper: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         marginTop: 50,
     },
 }));

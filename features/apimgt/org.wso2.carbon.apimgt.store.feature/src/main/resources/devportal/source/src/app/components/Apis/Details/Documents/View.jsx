@@ -191,11 +191,11 @@ function View(props) {
 View.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     doc: PropTypes.shape({}).isRequired,
-    apiId: PropTypes.shape({}).isRequired,
+    apiId: PropTypes.string.isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,
-    fullScreen: PropTypes.shape({}).isRequired,
+    fullScreen: PropTypes.bool.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(View));

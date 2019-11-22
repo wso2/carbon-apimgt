@@ -112,7 +112,7 @@ class HeaderSearch extends React.Component {
         super(props);
         this.state = {
             searchText: '',
-            lcState: '',
+            lcstate: '',
             suggestions: [],
             isLoading: false,
         };
@@ -148,8 +148,8 @@ class HeaderSearch extends React.Component {
     onKeyDown(event) {
         if (event.key === 'Enter' && !this.suggestionSelected) {
             const { history } = this.props;
-            const { lcState } = this.state;
-            history.push('/apis/search?query=' + buildSearchQuery(event.target.value, lcState));
+            const { lcstate } = this.state;
+            history.push('/apis/search?query=' + buildSearchQuery(event.target.value, lcstate));
         }
         this.suggestionSelected = false;
     }
@@ -163,9 +163,9 @@ class HeaderSearch extends React.Component {
      * @memberof HeaderSearch
      */
     handleSuggestionsFetchRequested({ value }) {
-        const { lcState } = this.state;
+        const { lcstate } = this.state;
         this.setState({ isLoading: true });
-        getSuggestions(value, lcState).then((body) => {
+        getSuggestions(value, lcstate).then((body) => {
             this.setState({ isLoading: false, suggestions: body.obj.list });
         });
     }
@@ -196,7 +196,7 @@ class HeaderSearch extends React.Component {
     }
 
     /**
-     * On change of lcState drop down
+     * On change of lcstate drop down
      *
      * @param {React.SyntheticEvent} event ReactDOM event
      * @param {String} { newValue } Changed value
@@ -205,7 +205,7 @@ class HeaderSearch extends React.Component {
     handleDropDownChange(event) {
         const { searchText } = this.state;
         this.setState({
-            lcState: event.target.value,
+            lcstate: event.target.value,
         });
         const { history } = this.props;
         if (event.target.value) {
@@ -226,7 +226,7 @@ class HeaderSearch extends React.Component {
         if (smSearch) {
             toggleSmSearch();
         } else {
-            this.setState({ lcState: '', searchText: '' });
+            this.setState({ lcstate: '', searchText: '' });
         }
     }
 
@@ -259,7 +259,7 @@ class HeaderSearch extends React.Component {
     render() {
         const { intl, classes, smSearch } = this.props;
         const {
-            searchText, lcState, isLoading, suggestions,
+            searchText, lcstate, isLoading, suggestions,
         } = this.state;
         let autoFocus = false;
         let responsiveContainer = classes.container;
@@ -292,7 +292,7 @@ class HeaderSearch extends React.Component {
                             defaultMessage: 'Search APIs',
                         }),
                         value: searchText,
-                        lcState,
+                        lcstate,
                         onChange: this.handleChange,
                         onDropDownChange: this.handleDropDownChange,
                         onKeyDown: this.onKeyDown,

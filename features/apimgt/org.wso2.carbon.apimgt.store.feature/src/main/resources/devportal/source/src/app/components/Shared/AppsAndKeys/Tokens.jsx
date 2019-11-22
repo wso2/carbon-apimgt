@@ -31,11 +31,11 @@ import Select from '@material-ui/core/Select';
 // Styles for Grid and Paper elements
 const styles = theme => ({
     FormControl: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         width: '100%',
     },
     FormControlOdd: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         backgroundColor: theme.palette.background.paper,
         width: '100%',
     },
@@ -47,7 +47,7 @@ const styles = theme => ({
         flexWrap: 'wrap',
     },
     chip: {
-        margin: theme.spacing.unit / 4,
+        margin: theme.spacing(0.25),
     },
 });
 

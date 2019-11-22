@@ -14,7 +14,7 @@ const styles = theme => ({
         display: 'flex',
         height: 100,
         alignItems: 'center',
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
         borderRadius: theme.shape.borderRadius,
         border: 'solid 1px ' + theme.palette.secondary.main,
         '& span.material-icons': {
@@ -23,16 +23,16 @@ const styles = theme => ({
         }
     },
     iconItem: {
-        paddingRight: theme.spacing.unit * 2,
+        paddingRight: theme.spacing(2),
         fontSize: 60,
     },
     button: {
-        marginTop: theme.spacing.unit,
-        marginBottom: theme.spacing.unit,
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(1),
     },
     content: {
-        paddingTop: theme.spacing.unit,
-        paddingBottom: theme.spacing.unit,
+        paddingTop: theme.spacing(1),
+        paddingBottom: theme.spacing(1),
     },
 });
 /**
@@ -54,7 +54,7 @@ class InlineMessage extends React.Component {
         const { classes, type } = this.props;
         const messgeType = type || 'info';
         return (
-            <Paper className={classes.root} elevation={1} {...this.props}>
+            <Paper className={classes.root} elevation={1}>
                 {messgeType === 'info' && <Icon className={classes.iconItem}>info</Icon>}
                 {messgeType === 'warn' && <Icon className={classes.iconItem}>warning</Icon>}
                 <VerticalDivider height={100} />
@@ -63,10 +63,9 @@ class InlineMessage extends React.Component {
         );
     }
 }
-
 InlineMessage.propTypes = {
-    classes: PropTypes.instanceOf(Object).isRequired,
-    type: PropTypes.instanceOf(Object).isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    type: PropTypes.string.isRequired,
 };
 
 export default withStyles(styles)(InlineMessage);

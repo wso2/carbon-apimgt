@@ -51,7 +51,7 @@ import OverviewDocuments from './OverviewDocuments';
  */
 const styles = theme => ({
     root: {
-        padding: theme.spacing.unit * 3,
+        padding: theme.spacing(3),
         color: theme.palette.getContrastText(theme.palette.background.paper),
         margin: -1 * theme.spacing(0, 2),
     },
@@ -61,14 +61,14 @@ const styles = theme => ({
     boxBadge: {
         background: theme.palette.grey.A400,
         fontSize: theme.typography.h5.fontSize,
-        padding: theme.spacing.unit,
+        padding: theme.spacing(1),
         width: 30,
         height: 30,
         marginRight: 20,
         textAlign: 'center',
     },
     subscriptionBox: {
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
     },
     linkStyle: {
         color: theme.palette.getContrastText(theme.palette.background.default),
@@ -93,10 +93,10 @@ const styles = theme => ({
         textDecoration: 'none',
     },
     verticalSpace: {
-        marginLeft: theme.spacing.unit * 60,
+        marginLeft: theme.spacing(60),
     },
     subheading: {
-        marginLeft: theme.spacing.unit * 2,
+        marginLeft: theme.spacing(2),
     },
     marginTop: {
         marginTop: theme.spacing(8),

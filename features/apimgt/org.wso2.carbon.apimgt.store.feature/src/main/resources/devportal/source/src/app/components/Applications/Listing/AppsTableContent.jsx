@@ -174,7 +174,7 @@ class AppsTableContent extends Component {
                                         >
                                             <IconButton
                                                 disabled={app.deleting}
-                                                data-appId={app.applicationId}
+                                                data-appid={app.applicationId}
                                                 onClick={toggleDeleteConfirmation}
                                                 color='default'
                                                 aria-label={(
