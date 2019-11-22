@@ -627,7 +627,7 @@ public final class APIUtil {
             JSONObject paths = null;
             if (resourceConfigsString != null) {
                 JSONObject resourceConfigsJSON = (JSONObject) jsonParser.parse(resourceConfigsString);
-                paths = (JSONObject) resourceConfigsJSON.get("paths");
+                paths = (JSONObject) resourceConfigsJSON.get(APIConstants.SWAGGER_PATHS);
             }
 
             for (URITemplate uriTemplate : uriTemplates) {
