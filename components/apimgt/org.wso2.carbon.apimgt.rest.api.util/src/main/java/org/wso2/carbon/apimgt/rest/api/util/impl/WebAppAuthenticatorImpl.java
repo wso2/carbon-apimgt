@@ -117,9 +117,16 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                 try {
                     String username = tokenInfo.getEndUserName();
                     if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                        if (username.endsWith(SUPER_TENANT_SUFFIX)) {
+                        //when the username is an email in supertenat it has atleast 2 occurrences of '@'
+                        long count = username.chars().filter(ch -> ch == '@').count();
+                        //in the case of email, there will be more than one '@'
+                        if (MultitenantUtils.isEmailUserName() ||
+                                (username.endsWith(SUPER_TENANT_SUFFIX) && count <= 1)) {
                             username = username.substring(0, username.length() - SUPER_TENANT_SUFFIX.length());
                         }
+                    }
+                    if (log.isDebugEnabled()) {
+                        log.debug("username = " + username);
                     }
                     tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
                     carbonContext.setTenantDomain(tenantDomain);

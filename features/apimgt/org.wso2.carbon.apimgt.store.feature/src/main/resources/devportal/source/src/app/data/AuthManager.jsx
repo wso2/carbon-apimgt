@@ -126,7 +126,8 @@ class AuthManager {
                 let username;
                 if (data.active) {
                     const currentEnv = Utils.getCurrentEnvironment();
-                    if (data.username.endsWith('@carbon.super')) {
+                    const count = (data.username.match(/@/g) || []).length;
+                    if (data.username.endsWith('@carbon.super') && count <= 1) {
                         username = data.username.replace('@carbon.super', '');
                     } else {
                         ({ username } = data);

@@ -157,6 +157,7 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
+import org.wso2.carbon.governance.registry.extensions.utils.APIUtils;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -9626,5 +9627,20 @@ public final class APIUtil {
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
         return skipRolesByRegex;
+    }
+    /**
+     * append the tenant domain to the username when an email is used as the username and EmailUserName is not enabled
+     * in the super tenant
+     * @param username
+     * @return usernam is an email
+     */
+    public static String appendTenantDomainForEmailUsernames(String username, String tenantDomain) {
+        if (APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenantDomain) &&
+                !username.endsWith("@carbon.super") &&
+                !MultitenantUtils.isEmailUserName() &&
+                username.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR) > 0) {
+            return username += "@carbon.super";
+        }
+        return username;
     }
 }

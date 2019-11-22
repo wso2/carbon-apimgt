@@ -1756,10 +1756,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             Map<String, Tag> tagsData = new HashMap<String, Tag>();
             try {
-            	PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
+                String username = ((UserRegistry)userRegistry).getUserName();
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+                //add the tenant domain to the username if it is not present in the case of email as the username
+                username = APIUtil.appendTenantDomainForEmailUsernames(username, tenantDomain);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
+
                 if (requestedTenant != null ) {
                     isTenantFlowStarted = startTenantFlowForTenantDomain(requestedTenant);
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
+                    username = ((UserRegistry)userRegistry).getUserName();
+                    //add the tenant domain to the username if it is not present in the case of email as the username
+                    username = APIUtil.appendTenantDomainForEmailUsernames(username, tenantDomain);
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
                 }
 
                 Map <String, List<String>> criteriaPublished = new HashMap<String, List<String>>();
@@ -2802,8 +2810,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         API api = null;
         APIProduct product = null;
         Identifier identifier = null;
-        String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
-        String tenantDomain = MultitenantUtils.getTenantDomain(tenantAwareUsername);
+        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
         final boolean isApiProduct = apiTypeWrapper.isAPIProduct();
         String state;
         String apiContext;

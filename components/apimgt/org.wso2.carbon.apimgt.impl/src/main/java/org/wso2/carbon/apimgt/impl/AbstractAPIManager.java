@@ -172,7 +172,14 @@ public abstract class AbstractAPIManager implements APIManager {
                 int tenantId = getTenantManager().getTenantId(tenantDomainName);
                 this.tenantId = tenantId;
                 this.tenantDomain = tenantDomainName;
-                this.username = tenantUserName;
+                if (APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenantDomainName) &&
+                        !tenantUserName.endsWith(APIConstants.SUPER_TENANT_DOMAIN) &&
+                        !MultitenantUtils.isEmailUserName() &&
+                        tenantUserName.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR) > 0) {
+                    this.username = username;
+                } else {
+                    this.username = tenantUserName;
+                }
 
                 loadTenantRegistry(tenantId);
 

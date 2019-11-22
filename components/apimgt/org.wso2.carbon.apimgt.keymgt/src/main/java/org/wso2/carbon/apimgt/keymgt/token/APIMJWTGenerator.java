@@ -55,8 +55,10 @@ public class APIMJWTGenerator extends JWTGenerator {
 
     public String generateJWT(JwtTokenInfoDTO jwtTokenInfoDTO) throws APIManagementException {
 
-        String jwtHeader = buildHeader(MultitenantUtils.getTenantAwareUsername(jwtTokenInfoDTO.getEndUserName()));
-
+        String jwtHeader = buildHeader(jwtTokenInfoDTO.getEndUserName());
+        if (log.isDebugEnabled()) {
+            log.debug("jwtHeader value : " + jwtHeader);
+        }
         String base64UrlEncodedHeader = "";
         if (jwtHeader != null) {
             base64UrlEncodedHeader = encoder.encodeToString(jwtHeader.getBytes(Charset.defaultCharset()));
@@ -72,8 +74,7 @@ public class APIMJWTGenerator extends JWTGenerator {
             String assertion = base64UrlEncodedHeader + '.' + base64UrlEncodedBody;
 
             //get the assertion signed
-            byte[] signedAssertion = signJWT(assertion,
-                    MultitenantUtils.getTenantAwareUsername(jwtTokenInfoDTO.getEndUserName()));
+            byte[] signedAssertion = signJWT(assertion, jwtTokenInfoDTO.getEndUserName());
 
             if (log.isDebugEnabled()) {
                 log.debug("signed assertion value : " + new String(signedAssertion, Charset.defaultCharset()));
