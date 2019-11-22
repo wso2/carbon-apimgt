@@ -2278,7 +2278,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-
     /**
      * Get API monetization status and monetized tier to billing plan mapping
      *
