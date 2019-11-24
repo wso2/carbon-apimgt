@@ -442,6 +442,10 @@
                             <value>${basedir}/src/test/resources</value>
                         </property>
                         <property>
+                            <name>carbon.config.dir.path</name>
+                            <value>${basedir}/src/test/resources/repository/conf</value>
+                        </property>
+                        <property>
                             <name>axis2.xml</name>
                             <value>${basedir}/src/test/resources/axis2_client.xml</value>
                         </property>
