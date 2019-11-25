@@ -14,31 +14,35 @@
  * limitations under the License.
  */
 
-import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
-import { withStyles } from '@material-ui/core';
-import TagCloudListing from 'AppComponents/Apis/Listing/TagCloudListing';
-import Apis from 'AppComponents/Apis/Apis';
-import Landing from 'AppComponents/LandingPage/Landing';
-import ApplicationFormHandler from 'AppComponents/Applications/ApplicationFormHandler';
-import { PageNotFound, ScopeNotFound } from 'AppComponents/Base/Errors';
-import RedirectToLogin from 'AppComponents/Login/RedirectToLogin';
-import SettingsBase from 'AppComponents/Settings/SettingsBase';
-import Listing from 'AppComponents/Applications/Listing/Listing';
-import Details from 'AppComponents/Applications/Details/index';
+import React from "react";
+import { Redirect, Route, Switch } from "react-router-dom";
+import { withStyles } from "@material-ui/core";
+import TagCloudListing from "AppComponents/Apis/Listing/TagCloudListing";
+import Apis from "AppComponents/Apis/Apis";
+import Landing from "AppComponents/LandingPage/Landing";
+import ApplicationFormHandler from "AppComponents/Applications/ApplicationFormHandler";
+import { PageNotFound, ScopeNotFound } from "AppComponents/Base/Errors";
+import RedirectToLogin from "AppComponents/Login/RedirectToLogin";
+import SettingsBase from "AppComponents/Settings/SettingsBase";
+import Listing from "AppComponents/Applications/Listing/Listing";
+import Details from "AppComponents/Applications/Details/index";
 /**
  * Handle redirection
  * @param {*} theme configuration
  * @returns {*}
  */
 function getRedirectingPath(theme) {
-    if (theme.custom.landingPage.active) {
-        return '/home';
-    } else if (theme.custom.landingPage.active === false && theme.custom.tagWise.active && theme.custom.tagWise.style === 'page') {
-        return '/api-groups';
-    } else {
-        return 'apis';
-    }
+  if (theme.custom.landingPage.active) {
+    return "/home";
+  } else if (
+    theme.custom.landingPage.active === false &&
+    theme.custom.tagWise.active &&
+    theme.custom.tagWise.style === "page"
+  ) {
+    return "/api-groups";
+  } else {
+    return "apis";
+  }
 }
 
 /**
@@ -47,61 +51,75 @@ function getRedirectingPath(theme) {
  * @returns {*}
  */
 function AppRouts(props) {
-    const {
-        isAuthenticated, isUserFound, theme,
-    } = props;
-    return (
-        <Switch>
-            <Redirect exact from='/' to={getRedirectingPath(theme)} />
-            <Route path='/home' component={Landing} />
-            <Route path='/api-groups' component={TagCloudListing} />
-            <Route path='/(apis|api-products)' component={Apis} />
-            <Route path='/settings' render={(props) => {
-                if(isAuthenticated){
-                    return <SettingsBase {...props} />
-                } else {
-                    return <RedirectToLogin {...props} />   
-                }
-            }} />
-            <Route path='/applications' exact render={(props) => {
-                if(isAuthenticated){
-                    return <Listing {...props} />
-                } else if (isUserFound) {
-                    return <ScopeNotFound {...props} />
-                } else {
-                    return <RedirectToLogin {...props} />   
-                }
-            }} />
-             <Route path='/applications/create' render={(props) => {
-                if(isAuthenticated){
-                    return <ApplicationFormHandler {...props} />
-                } else if (isUserFound) {
-                    return <ScopeNotFound {...props} />
-                } else {
-                    return <RedirectToLogin {...props} />   
-                }
-            }} />
-             <Route path='/applications/:application_id/edit' render={(props) => {
-                if(isAuthenticated){
-                    return <ApplicationFormHandler {...props} />
-                } else if (isUserFound) {
-                    return <ScopeNotFound {...props} />
-                } else {
-                    return <RedirectToLogin {...props} />   
-                }
-            }} />
-            <Route path='/applications/:application_uuid/' render={(props) => {
-                if(isAuthenticated){
-                    return <Details {...props} />
-                } else if (isUserFound) {
-                    return <ScopeNotFound {...props} />
-                } else {
-                    return <RedirectToLogin {...props} />   
-                }
-            }} />
-            <Route component={PageNotFound} />
-        </Switch>
-    );
+  const { isAuthenticated, isUserFound, theme } = props;
+  return (
+    <Switch>
+      <Redirect exact from="/" to={getRedirectingPath(theme)} />
+      <Route path="/home" component={Landing} />
+      <Route path="/api-groups" component={TagCloudListing} />
+      <Route path="/(apis|api-products)" component={Apis} />
+      <Route
+        path="/settings"
+        render={props => {
+          if (isAuthenticated) {
+            return <SettingsBase {...props} />;
+          } else {
+            return <RedirectToLogin {...props} />;
+          }
+        }}
+      />
+      <Route
+        path="/applications"
+        exact
+        render={props => {
+          if (isAuthenticated) {
+            return <Listing {...props} />;
+          } else if (isUserFound) {
+            return <ScopeNotFound {...props} />;
+          } else {
+            return <RedirectToLogin {...props} />;
+          }
+        }}
+      />
+      <Route
+        path="/applications/create"
+        render={props => {
+          if (isAuthenticated) {
+            return <ApplicationFormHandler {...props} />;
+          } else if (isUserFound) {
+            return <ScopeNotFound {...props} />;
+          } else {
+            return <RedirectToLogin {...props} />;
+          }
+        }}
+      />
+      <Route
+        path="/applications/:application_id/edit"
+        render={props => {
+          if (isAuthenticated) {
+            return <ApplicationFormHandler {...props} />;
+          } else if (isUserFound) {
+            return <ScopeNotFound {...props} />;
+          } else {
+            return <RedirectToLogin {...props} />;
+          }
+        }}
+      />
+      <Route
+        path="/applications/:application_uuid/"
+        render={props => {
+          if (isAuthenticated) {
+            return <Details {...props} />;
+          } else if (isUserFound) {
+            return <ScopeNotFound {...props} />;
+          } else {
+            return <RedirectToLogin {...props} />;
+          }
+        }}
+      />
+      <Route component={PageNotFound} />
+    </Switch>
+  );
 }
 
 export default withStyles({}, { withTheme: true })(AppRouts);
