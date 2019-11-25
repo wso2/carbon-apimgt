@@ -301,6 +301,8 @@ public final class APIUtil {
 
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
     private static final String NONE = "NONE";
+    private static final String SUPER_TENANT_SUFFIX =
+            APIConstants.EMAIL_DOMAIN_SEPARATOR + APIConstants.SUPER_TENANT_DOMAIN;
 
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
     static {
@@ -9637,10 +9639,10 @@ public final class APIUtil {
      */
     public static String appendTenantDomainForEmailUsernames(String username, String tenantDomain) {
         if (APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenantDomain) &&
-                !username.endsWith("@carbon.super") &&
+                !username.endsWith(SUPER_TENANT_SUFFIX) &&
                 !MultitenantUtils.isEmailUserName() &&
                 username.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR) > 0) {
-            return username += "@carbon.super";
+            return username += SUPER_TENANT_SUFFIX;
         }
         return username;
     }
