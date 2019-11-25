@@ -48,7 +48,7 @@ function SettingsBase(props) {
                 <Typography variant='caption'>
                     <FormattedMessage
                         id='Apis.Settings.SettingsBase.sub.header'
-                        defaultMessage='View and Configure API Publisher Settings'
+                        defaultMessage='View and Configure Developer Portal Settings'
                     />
                 </Typography>
             </div>
