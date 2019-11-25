@@ -2216,7 +2216,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
                 OMElement seqElement = APIUtil.buildOMElement(new ByteArrayInputStream(sequenceBytes));
                 String localName = seqElement.getLocalName();
-
+                checkMediationPolicy(apiProvider,mediationResourcePath);
                 if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
                     ResourceFile contentFile = new ResourceFile(inSequenceStream, fileContentType);
                     //Adding api specific mediation policy
@@ -2224,21 +2224,19 @@ public class ApisApiServiceImpl implements ApisApiService {
                 } else {
                     throw new APIManagementException("Sequence is malformed");
                 }
-            } else if (inlineContent != null) {
+            }
+            if (inlineContent != null) {
                 //Extracting the file name specified in the config
                 fileName = this.getMediationNameFromConfig(inlineContent);
                 //Constructing mediation resource path
                 mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR + type +
                         RegistryConstants.PATH_SEPARATOR + fileName;
+                checkMediationPolicy(apiProvider,mediationResourcePath);
                 InputStream contentStream = new ByteArrayInputStream(inlineContent.getBytes(StandardCharsets.UTF_8));
                 String contentType = URLConnection.guessContentTypeFromName(fileName);
                 ResourceFile contentFile = new ResourceFile(contentStream, contentType);
                 //Adding api specific mediation policy
                 mediationPolicyUrl = apiProvider.addResourceFile(apiIdentifier, mediationResourcePath, contentFile);
-            }
-            if (apiProvider.checkIfResourceExists(mediationResourcePath)) {
-                RestApiUtil.handleConflict("Mediation policy already " +
-                        "exists in the given resource path, cannot create a new.", log);
             }
 
             if (StringUtils.isNotBlank(mediationPolicyUrl)) {
@@ -3862,6 +3860,17 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    /**
+     * Check the existence of the mediation policy
+     * @param mediationResourcePath mediation config content
+     *
+     */
+    public void checkMediationPolicy(APIProvider apiProvider,String mediationResourcePath) throws APIManagementException {
+        if (apiProvider.checkIfResourceExists(mediationResourcePath)) {
+            RestApiUtil.handleConflict("Mediation policy already " +
+                    "exists in the given resource path, cannot create new", log);
+        }
+    }
     /**
      * validate user inout scopes
      *
