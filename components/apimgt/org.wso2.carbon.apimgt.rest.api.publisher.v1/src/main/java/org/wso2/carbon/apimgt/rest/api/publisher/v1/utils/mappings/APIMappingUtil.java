@@ -262,7 +262,7 @@ public class APIMappingUtil {
         model.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
 
         //attach api categories to API model
-        setAPICategoriesToAPIModel(dto, model);
+        setAPICategoriesToAPIModel(dto, model, provider);
 
         return model;
     }
@@ -2400,12 +2400,15 @@ public class APIMappingUtil {
      * @param dto
      * @param model
      */
-    private static void setAPICategoriesToAPIModel(APIDTO dto, API model) {
+    private static void setAPICategoriesToAPIModel(APIDTO dto, API model, String provider) {
         List<String> apiCategoryNames = dto.getCategories();
+        String tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         List<APICategory> apiCategories = new ArrayList<>();
         for (String categoryName : apiCategoryNames) {
             APICategory category = new APICategory();
             category.setName(categoryName);
+            category.setTenantID(tenantId);
             apiCategories.add(category);
         }
         model.setApiCategories(apiCategories);

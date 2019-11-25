@@ -34,6 +34,7 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -9848,27 +9849,24 @@ public final class APIUtil {
      * @throws APIManagementException
      */
     public static void attachAPICategoriesToAPIArtifact(GenericArtifact artifact, API api, String tenantDomain) throws APIManagementException {
+        //get categories attached to API, this may not contain category IDs
+        List<APICategory> attachedApiCategories = api.getApiCategories();
 
-        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
-        List<APICategory> apiCategoryList = APICategoryUtil.getAllAPICategoriesOfTenant(tenantId);
+        //get all categories available in tenant
+        int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        List<APICategory> availableAPICategories = APICategoryUtil.getAllAPICategoriesOfTenant(tenantID);
 
-        if (!apiCategoryList.isEmpty()) {
-            List<String> availableCategoryNameList = new ArrayList<>();
-            for (APICategory category : apiCategoryList) {
-                availableCategoryNameList.add(category.getName());
-            }
-
-            List<APICategory> categoriesAttachedToAPI = api.getApiCategories();
+        if (!availableAPICategories.isEmpty()) {
             try {
-                //remove existing categories in artifact
-                artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
-                for (APICategory category : categoriesAttachedToAPI) {
-                    String categoryName = category.getName();
-                    if (availableCategoryNameList.contains(categoryName)) {
-                        artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, categoryName);
+                artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_ID);
+                for (APICategory category : attachedApiCategories) {
+                    int index = availableAPICategories.indexOf(category);
+                    if (index != -1) {
+                        APICategory candidateCategory = availableAPICategories.get(index);
+                        artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_ID, candidateCategory.getId());
                     } else {
-                        log.warn("Category name : " + categoryName + " does not exist in the tenant : " +
-                                tenantDomain + ", hence skipping it.");
+                        log.warn("Category name : " + category.getName() + " does not exist in the tenant : " + tenantDomain
+                                + ", hence skipping it.");
                     }
                 }
             } catch (GovernanceException e) {
@@ -9878,7 +9876,8 @@ public final class APIUtil {
             }
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("No predefined categories in the tenant : " + tenantDomain + " . Skipped adding all categories");
+                log.debug("Categories are not yet defined in the tenant : " + tenantDomain
+                        + " . Hence skipped adding all categories");
             }
         }
     }
@@ -9892,18 +9891,19 @@ public final class APIUtil {
      */
     private static List<APICategory> getAPICategoriesFromAPIGovernanceArtifact(GovernanceArtifact artifact, int tenantID)
             throws GovernanceException, APIManagementException {
-        String[] categoriesOfAPI = artifact.getAttributes(APIConstants.API_CATEGORIES_CATEGORY_NAME);
+        String[] categoriesOfAPI = artifact.getAttributes(APIConstants.API_CATEGORIES_CATEGORY_ID);
+
         List<APICategory> categoryList = new ArrayList<>();
 
         if (ArrayUtils.isNotEmpty(categoriesOfAPI)) {
-            //category array retrieved from artifact has only the category name, therefore we need to fetch categories
+            //category array retrieved from artifact has only the category ID, therefore we need to fetch categories
             //and fill out missing attributes before attaching the list to the api
             List<APICategory> allCategories = APICategoryUtil.getAllAPICategoriesOfTenant(tenantID);
 
             //todo-category: optimize this loop with breaks
-            for (String categoryName : categoriesOfAPI) {
+            for (String categoryID : categoriesOfAPI) {
                 for (APICategory category : allCategories) {
-                    if (categoryName.equals(category.getName())) {
+                    if (categoryID.equals(category.getId())) {
                         categoryList.add(category);
                         break;
                     }

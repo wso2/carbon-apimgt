@@ -2160,7 +2160,7 @@ public abstract class AbstractAPIManager implements APIManager {
                         searchKeys[0] = APIConstants.API_LABELS_GATEWAY_LABELS;
                         searchKeys[1] = searchKeys[1].replace("*", "");
                     } else if (searchKeys[0].equals(APIConstants.CATEGORY_SEARCH_TYPE_PREFIX)) {
-                        searchKeys[0] = APIConstants.API_CATEGORIES_CATEGORY_NAME;
+                       // searchKeys[0] = APIConstants.API_CATEGORIES_CATEGORY_NAME;
                         searchKeys[1] = searchKeys[1].replace("*", "");
                     }
 

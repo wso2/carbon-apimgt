@@ -57,4 +57,15 @@ public class APICategory {
     public int getTenantID() {
         return tenantID;
     }
+
+    /**
+     * Name,TenantID combination is unique and cannot be duplicated. Hence two API category objects t1 and t2 are
+     * considered equal if both have the same name and same tenant id
+     *
+     * @param obj
+     * @return
+     */
+    public boolean equals(Object obj) {
+        return this.tenantID == ((APICategory)obj).getTenantID() && this.getName().equals(((APICategory) obj).getName());
+    }
 }
