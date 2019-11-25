@@ -14340,11 +14340,28 @@ public class ApiMgtDAO {
             statement.setString(3, category.getDescription());
             statement.setInt(4, tenantID);
             statement.executeUpdate();
-
         } catch (SQLException e) {
             handleException("Failed to add Category: " + uuid, e);
         }
         return category;
+    }
+
+    /**
+     * Update API Category
+     *
+     * @param apiCategory API category object with updated details
+     * @throws APIManagementException
+     */
+    public void updateCategory(APICategory apiCategory) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_CATEGORY)) {
+            statement.setString(1, apiCategory.getDescription());
+            statement.setString(2, apiCategory.getId());
+            statement.execute();
+        } catch (SQLException e) {
+            handleException("Failed to update API Category : " + apiCategory.getName() + " of tenant " +
+                    APIUtil.getTenantDomainFromTenantId(apiCategory.getTenantID()), e);
+        }
     }
 
     /**
@@ -14361,7 +14378,7 @@ public class ApiMgtDAO {
 
             ResultSet rs = statement.executeQuery();
             while(rs.next()) {
-                String id = rs.getString("CATEGORY_ID");
+                String id = rs.getString("UUID");
                 String name = rs.getString("NAME");
                 String description = rs.getString("DESCRIPTION");
 
@@ -14387,7 +14404,7 @@ public class ApiMgtDAO {
      */
     public boolean isAPICategoryNameExists(String categoryName, int tenantID) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(SQLConstants.IS_API_CATEGORY_NAME_EXISTS)) {
+            PreparedStatement statement = connection.prepareStatement(SQLConstants.IS_API_CATEGORY_NAME_EXISTS)) {
             statement.setString(1, categoryName);
             statement.setInt(2, tenantID);
 
@@ -14402,6 +14419,26 @@ public class ApiMgtDAO {
             handleException("Failed to check whether API category name : " + categoryName + " exists", e);
         }
         return false;
+    }
+
+    public APICategory getAPICategoryByID(String apiCategoryID) throws APIManagementException {
+        APICategory apiCategory = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_CATEGORY_BY_ID)) {
+            statement.setString(1, apiCategoryID);
+
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                apiCategory = new APICategory();
+                apiCategory.setName(rs.getString("NAME"));
+                apiCategory.setDescription(rs.getString("DESCRIPTION"));
+                apiCategory.setTenantID(rs.getInt("TENANT_ID"));
+                apiCategory.setId(apiCategoryID);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to fetch API category : " + apiCategoryID, e);
+        }
+        return apiCategory;
     }
 
 }

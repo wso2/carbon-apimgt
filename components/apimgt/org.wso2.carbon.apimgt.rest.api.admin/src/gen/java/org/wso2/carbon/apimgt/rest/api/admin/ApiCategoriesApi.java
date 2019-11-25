@@ -6,9 +6,9 @@ import org.wso2.carbon.apimgt.rest.api.admin.factories.ApiCategoriesApiServiceFa
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.admin.dto.APICategoryListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.APICategoryDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.APICategoryListDTO;
 
 import java.util.List;
 
@@ -27,6 +27,39 @@ public class ApiCategoriesApi  {
 
    private final ApiCategoriesApiService delegate = ApiCategoriesApiServiceFactory.getApiCategoriesApi();
 
+    @DELETE
+    @Path("/{apiCategoryId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Delete an API Category", notes = "Delete an API Category by API Category Id\n", response = void.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nAPI Category successfully deleted.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nAPI Category to be deleted does not exist.\n") })
+
+    public Response apiCategoriesApiCategoryIdDelete(@ApiParam(value = "API Category UUID\n",required=true ) @PathParam("apiCategoryId")  String apiCategoryId,
+    @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future).\n"  )@HeaderParam("If-Match") String ifMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    {
+    return delegate.apiCategoriesApiCategoryIdDelete(apiCategoryId,ifMatch,ifUnmodifiedSince);
+    }
+    @PUT
+    @Path("/{apiCategoryId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Update an API Category", notes = "Update an API Category by category Id\n", response = APICategoryDTO.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nLabel updated.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nThe resource to be updated does not exist.\n") })
+
+    public Response apiCategoriesApiCategoryIdPut(@ApiParam(value = "API Category UUID\n",required=true ) @PathParam("apiCategoryId")  String apiCategoryId,
+    @ApiParam(value = "API Category object with updated information\n" ,required=true ) APICategoryDTO body)
+    {
+    return delegate.apiCategoriesApiCategoryIdPut(apiCategoryId,body);
+    }
     @GET
     
     @Consumes({ "application/json" })

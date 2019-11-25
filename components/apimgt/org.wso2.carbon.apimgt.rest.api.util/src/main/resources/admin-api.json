@@ -2719,6 +2719,84 @@
           }
         }
       }
+    },
+    "/api-categories/{apiCategoryId}": {
+      "put": {
+        "x-scope": "apim:api_category",
+        "x-wso2-curl": "curl -k -X PUT -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.15/api-categories/d7cf8523-9180-4255-84fa-6cb171c1f779 -d @data.json",
+        "x-wso2-request": "PUT https://localhost:9443/api/am/admin/v0.15/api-categories/d7cf8523-9180-4255-84fa-6cb171c1f779\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n   {\r\n       \"name\":\"update_internal\",\r\n  \"description\":\"Updated label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n     }",
+        "x-wso2-response": "HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\":1,\r\n   \"list\":[\r\n      {\r\n         \"id\":\"463e2c9f-5e99-43c3-a66e-de7e0f367373\",\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n      }\r\n   ]\r\n}",
+        "summary": "Update an API Category",
+        "description": "Update an API Category by category Id\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiCategoryId"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "API Category object with updated information\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/APICategory"
+            }
+          }
+        ],
+        "tags": [
+          "API Category (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nLabel updated.\n",
+            "schema": {
+              "$ref": "#/definitions/APICategory"
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nThe resource to be updated does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "x-scope": "apim:api_category",
+        "x-wso2-response": "HTTP/1.1 200 OK",
+        "summary": "Delete an API Category",
+        "description": "Delete an API Category by API Category Id\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiCategoryId"
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "API Category (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nAPI Category successfully deleted.\n"
+          },
+          "404": {
+            "description": "Not Found.\nAPI Category to be deleted does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "parameters": {
@@ -2830,6 +2908,13 @@
       "description": "Workflow reference id\n",
       "required": true,
       "type": "string"
+    },
+    "apiCategoryId": {
+      "name": "apiCategoryId",
+      "in": "path",
+      "description": "API Category UUID\n",
+      "type": "string",
+      "required": true
     }
   },
   "definitions": {

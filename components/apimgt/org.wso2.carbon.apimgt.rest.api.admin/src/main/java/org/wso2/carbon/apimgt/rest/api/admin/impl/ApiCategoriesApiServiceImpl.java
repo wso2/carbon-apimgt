@@ -54,4 +54,36 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
         }
         return null;
     }
+
+    public Response apiCategoriesApiCategoryIdPut(String apiCategoryId, APICategoryDTO body) {
+        try {
+            APIAdmin apiAdmin = new APIAdminImpl();
+            APICategory apiCategoryToUpdate = APICategoryMappingUtil.fromCategoryDTOToCategory(body);
+            APICategory apiCategoryOriginal = APICategoryUtil.getAPICategoryByID(apiCategoryId);
+            if (apiCategoryOriginal == null) {
+                String errorMsg = "No api category with the given category ID exists :" + apiCategoryId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg);
+            }
+
+            //Override several properties as they are not allowed to be updated
+            apiCategoryToUpdate.setName(apiCategoryOriginal.getName());
+            apiCategoryToUpdate.setId(apiCategoryOriginal.getId());
+            apiCategoryToUpdate.setTenantID(apiCategoryOriginal.getTenantID());
+
+            apiAdmin.updateCategory(apiCategoryToUpdate);
+            APICategory updatedAPICategory = APICategoryUtil.getAPICategoryByID(apiCategoryId);
+            APICategoryDTO updatedAPICategoryDTO = APICategoryMappingUtil.fromCategoryToCategoryDTO(updatedAPICategory);
+            return Response.ok().entity(updatedAPICategoryDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while updating API Category '" + body.getName() + "' - " + e.getMessage() ;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    public Response apiCategoriesApiCategoryIdDelete(String apiCategoryId, String ifMatch,
+            String ifUnmodifiedSince) {
+        return null;
+    }
 }

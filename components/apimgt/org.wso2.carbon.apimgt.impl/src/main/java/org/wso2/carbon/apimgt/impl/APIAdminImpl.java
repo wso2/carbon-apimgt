@@ -291,4 +291,8 @@ public class APIAdminImpl implements APIAdmin {
         //todo-category: check whether user has admin permissions to add category
         return apiMgtDAO.addCategory(tenantID, category);
     }
+
+    public void updateCategory(APICategory apiCategory) throws APIManagementException {
+        apiMgtDAO.updateCategory(apiCategory);
+    }
 }

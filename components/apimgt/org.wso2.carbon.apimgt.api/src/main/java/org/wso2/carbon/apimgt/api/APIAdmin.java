@@ -134,6 +134,15 @@ public interface APIAdmin  {
     APICategory addCategory(String userName, APICategory category) throws APIManagementException;
 
     /**
+     * Updates an API Category
+     *
+     * @param apiCategory
+     * @return
+     * @throws APIManagementException
+     */
+    void updateCategory(APICategory apiCategory) throws APIManagementException;
+
+    /**
      * The method converts the date into timestamp
      *
      * @param date
