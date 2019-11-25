@@ -34,11 +34,12 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import Alert from 'AppComponents/Shared/Alert';
-import Download from 'AppComponents/Shared/Download.js';
+import  Download from 'AppComponents/Shared/Download.js';
 import API from 'AppData/api.js';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 import EditCustomMediation from '../Configuration/CustomMediation/EditCustomMediation';
+import UploadCustomMediation from '../Configuration/CustomMediation/UploadCustomMediation'
 
 const dropzoneStyles = {
     border: '1px dashed ',
@@ -90,7 +91,7 @@ const styles = theme => ({
  */
 function EditMediationPolicy(props) {
     const {
-        classes, updateMediationPolicy, selectedMediationPolicy, setEditing, editing, type, intl,
+        classes, updateMediationPolicy, selectedMediationPolicy, setEditing, editing, type, intl
     } = props;
     const { api } = useContext(ApiContext);
 
@@ -99,6 +100,8 @@ function EditMediationPolicy(props) {
     const [seqCustom, setSeqCustom] = useState(null);
     const [provideBy, setProvideBy] = useState();
     const [dialogWidth, setDialogWidth] = useState('sm');
+    const [isUploadPreviewShown, setUploadPreviewShown] = useState(false);
+    const [isDesignPreviewShown, setDesignPreviewShown] = useState(false);
     const { id: apiId } = api;
     const NONE = 'none';
     const [localSelectedPolicyFile, setLocalSelectedPolicyFile] = useState(selectedMediationPolicy);
@@ -110,6 +113,7 @@ function EditMediationPolicy(props) {
                 setGlobalMediationPolicies([...values[0].obj.list.filter(seq => seq.type === type)]);
                 setSeqCustom([...values[1].obj.list.filter(seq => seq.type === type)]);
             })
+            
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
@@ -167,9 +171,10 @@ function EditMediationPolicy(props) {
     //     }
     // }, [globalInMediationPolicies, inSeqCustom]);
     const saveMediationPolicy = (newPolicy) => {
+        //console.log(newPolicy);
         const promisedApi = API.addMediationPolicy(newPolicy, apiId, type);
         promisedApi
-            .then((response) => {
+            .then((response) => { 
                 const {
                     body: { id, type: policyType, name },
                 } = response;
@@ -306,6 +311,20 @@ function EditMediationPolicy(props) {
             deleteCustomMediationPolicy(policyToDelete);
         }
     };
+
+    const handleUpload = (event) => {
+        event.preventDefault();
+        setUploadPreviewShown(true);
+        setDesignPreviewShown(false);
+        setDialogWidth('sm');
+    }
+    const handleDesignClick = (event) => {
+        event.preventDefault();
+        setDesignPreviewShown(true);
+        setUploadPreviewShown(false);
+        setDialogWidth('m')
+    }
+
     function cancelEditing() {
         setEditing(false);
     }
@@ -317,11 +336,11 @@ function EditMediationPolicy(props) {
         const inputValue = event.target.value;
         setProvideBy(inputValue);
         setActivePolicy({});
-        if (inputValue === 'custom') {
-            setDialogWidth('m');
-        } else {
-            setDialogWidth('sm');
-        }
+        // if (inputValue === 'custom') {
+        //     setDialogWidth('sm');
+        // } else {
+        //     setDialogWidth('sm');
+        // }
     }
     return (
         <Dialog
@@ -374,6 +393,32 @@ function EditMediationPolicy(props) {
                     </RadioGroup>
                     {provideBy === 'custom' && (
                         <React.Fragment>
+                            <label htmlFor="upload-button-file">
+                        <Button 
+                            component="span"
+                            variant='contained'
+                            onClick={handleUpload}
+                            style={{ marginRight:20, marginTop:10, marginBottom:10 }}
+                        >
+                            <FormattedMessage
+                                id='Apis.Details.MediationPolicies.EditMediationPolicy.upload.btn'
+                                defaultMessage='Upload Mediation Flow'
+                            />
+                        </Button>
+                    </label>
+                    <label htmlFor="design-button-file">
+                        <Button 
+                            component="span"
+                            variant='contained'
+                            onClick={handleDesignClick}
+                            style={{ marginTop: 10, marginBottom:10 }}  
+                        >
+                            <FormattedMessage
+                                id='Apis.Details.MediationPolicies.EditMediationPolicy.design.btn'
+                                defaultMessage='Create New Mediation Flow'
+                            />
+                        </Button>
+                    </label>
                             {/* <Dropzone
                                 multiple={false}
                                 className={classes.dropzone}
@@ -401,8 +446,24 @@ function EditMediationPolicy(props) {
                                     </div>
                                 )}
                             </Dropzone> */}
-                            <EditCustomMediation/>
-                            <RadioGroup
+                           
+                            {isUploadPreviewShown
+                            && <UploadCustomMediation 
+                                    classes={classes}
+                                    selectedMediationPolicy={selectedMediationPolicy}
+                                    intl={intl}
+                                    type={type}
+                                />
+                            }
+
+                           {isDesignPreviewShown 
+                            && <EditCustomMediation
+                            intl={intl}
+                            selectedMediationPolicy={selectedMediationPolicy}
+                            type={type}
+                            />}
+                           
+                            {/* <RadioGroup
                                 aria-label='inflow'
                                 name='inflow'
                                 className={classes.radioGroup}
@@ -443,7 +504,7 @@ function EditMediationPolicy(props) {
                                         />
                                     </div>
                                 ))}
-                            </RadioGroup>
+                            </RadioGroup> */}
                         </React.Fragment>
                     )}
                     {provideBy === 'global' && (

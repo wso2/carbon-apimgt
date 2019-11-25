@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography'
@@ -20,6 +20,14 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import cloneDeep from 'lodash.clonedeep';
 import Icon from '@material-ui/core/Icon';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormLabel from '@material-ui/core/FormLabel';
+import API from 'AppData/api.js';
+import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
+import Alert from 'AppComponents/Shared/Alert';
+
 
 
 function TabPanel(props) {
@@ -69,7 +77,6 @@ const useStyles = makeStyles(theme => ({
     paper: {
         padding: theme.spacing(1, 0),   
     },
-    
     textField: {
         width: 600,
     },
@@ -119,13 +126,19 @@ const useStyles = makeStyles(theme => ({
 function EditCustomMediation(props) {
 
     const {
-       intl
+       intl,selectedMediationPolicy,type
     } = props;
+    const { api } = useContext(ApiContext);
+
     const classes = useStyles();
     const [value, setValue] = React.useState(0);
     const [addedMediators, setAddedMediators] = useState([]);
-    const [name, setName] = useState(null);
+    const [mediationName, setMediationName] = useState(null);
     const [errors, setErrors] = useState(null);
+    const { id: apiId } = api;
+    const [seqCustom, setSeqCustom] = useState(null);
+    const [localSelectedPolicyFile, setLocalSelectedPolicyFile] = useState(selectedMediationPolicy);
+    //const NONE = 'none';
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -139,8 +152,7 @@ function EditCustomMediation(props) {
         const newAddedMediators = cloneDeep(addedMediators);
         newAddedMediators.push(mediatorObj); 
         setAddedMediators(newAddedMediators);
-        addedMediators.forEach((src, index) => mediatorObj.id = index + 1);
-            
+        addedMediators.forEach((src, index) => mediatorObj.id = index + 1);        
     }
 
     const deleteMediator = ( id ) => {
@@ -148,14 +160,12 @@ function EditCustomMediation(props) {
         let updatedMediators = cloneDeep(addedMediators);
         setAddedMediators(updatedMediators.filter((mediatorObj) => {
             return mediatorObj.id !== id;
-        }));
-       
+        }));   
     }
 
     const handleNameChange = (event) => {
             
             let seqNames = event.target.value;
-            
             let error = '';
             let formIsValid = true;
 
@@ -165,7 +175,7 @@ function EditCustomMediation(props) {
                     id: 'Apis.Details.Configuration.CustomMediation.EditCustomMediation.name.empty',
                     defaultMessage: 'Mediation Sequence should not be empty.',
                 }))    
-             } else if(typeof seqNames !== "undefined"){
+            } else if(typeof seqNames !== "undefined"){
                     if(!seqNames.match(/^[a-z_A-Z]+$/)){
                     formIsValid = false;
                     error = (intl.formatMessage({
@@ -175,9 +185,79 @@ function EditCustomMediation(props) {
                     }        
                 }
             setErrors( error );
-            setName(seqNames);
-            return formIsValid;
-            
+            setMediationName(seqNames);
+            return formIsValid;        
+    }
+
+    // function updatePoliciesFromBE() {
+    //     //const globalPromise = API.getGlobalMediationPolicies();
+    //     const customPromise = API.getMediationPolicies(apiId);
+    //     Promise.all([customPromise])
+    //         .then((values) => {
+    //             //setGlobalMediationPolicies([...values[0].obj.list.filter(seq => seq.type === type)]);
+    //             setSeqCustom([...values[1].obj.list.filter(seq => seq.type === type)]);
+    //         })
+    //         .catch((error) => {
+    //             if (process.env.NODE_ENV !== 'production') {
+    //                 console.log(error);
+    //                 Alert.error(intl.formatMessage({
+    //                     id: 'Apis.Details.MediationPolicies.Edit.EditMediationPolicy.error',
+    //                     defaultMessage: 'Error retrieving mediation policies',
+    //                 }));
+    //             }
+    //         });
+    // }
+
+    // useEffect(() => {
+    //     updatePoliciesFromBE();
+    // }, []);
+
+    const saveMediationPolicy = (newPolicy) => {
+        const promisedApi = API.addMediationPolicy(newPolicy, apiId, type);
+        promisedApi
+            .then((response) => {
+                const {
+                    body: { id, type: policyType, name},
+                } = response;
+                //updatePoliciesFromBE();
+                setLocalSelectedPolicyFile({
+                    id,
+                    type: policyType,
+                    name,
+                    shared: false,
+                    content: '',
+                });
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Details.Configuration.CustomMediation.EditCustomMediation.success',
+                    defaultMessage: 'Mediation policy added successfully',
+                }));
+            })
+            .catch((errorResponse) => {
+                console.log(errorResponse);
+                if (errorResponse.response.body.description !== null) {
+                    Alert.error(errorResponse.response.body.description);
+                } else {
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Configuration.CustomMediation.EditCustomMediation.error',
+                        defaultMessage: 'Error while adding mediation policy',
+                    }));
+                }
+            });
+    };
+
+    const handleClick = (policy) => {
+        const policyFile = policy[0];
+        if (policyFile) {
+            saveMediationPolicy(policyFile);
+        }
+    };
+
+    const handleDelete = (id) => {
+        console.log('seq deleted')
+    }
+
+    const handleDownload = (id) => {
+        console.log('seq downloaded')
     }
 
     return (
@@ -185,7 +265,7 @@ function EditCustomMediation(props) {
         <React.Fragment>
                 <Paper className={classes.paper} elevation={0}>   
                     
-                <input
+                {/* <input
                     accept='application/xml,text/xml'
                     className={classes.input}
                     id="upload-button-file"
@@ -202,14 +282,14 @@ function EditCustomMediation(props) {
                                 defaultMessage='Upload Mediation Flow'
                             />
                         </Button>
-                    </label>
+                    </label> */}
 
                     <form noValidate autoComplete="off">
                         <TextField
                         className={classes.textField}
                         autoFocus
                         id='outlined-mediation-name'
-                        value={name}
+                        value={mediationName}
                         error={errors}
                         label={
                             <React.Fragment>
@@ -287,19 +367,73 @@ function EditCustomMediation(props) {
                     </Grid>
                 </Grid>    
                 <div className={classes.save}>
+                
                 <Button
                     color='primary'
                     variant='contained'
                     className={classes.save}
+                    onClick= {() => handleClick()}
                 >
                     <FormattedMessage
                         id='Apis.Details.Configuration.CustomMediation.EditCustomMediation.save.btn'
                         defaultMessage='Save'
                     />
                 </Button>
-                </div>                           
+                </div>
+                <RadioGroup
+                    aria-label='inflow'
+                    name='inflow'
+                    className={classes.radioGroup}
+                    //value={localSelectedPolicyFile.name}
+                    onChange={handleNameChange}
+                >
+                    <FormLabel component='customPolicies'>
+                        <FormattedMessage
+                            id={
+                                'Apis.Details.Configuration.CustomMediation.' +
+                                'EditCustomMediation.custom.mediation.policies'
+                            }
+                            defaultMessage='Custom Mediation Policies'
+                        />
+                    </FormLabel>
+                        {/* {seqCustom.map(seq => (
+                            <div>
+                                <IconButton onClick={() => handleDelete(seq.id)}>
+                                    <Icon>delete</Icon>
+                                </IconButton>
+                                    <Button onClick={() => handleDownload(seq.id)}>
+                                    <Icon>arrow_downward</Icon>
+                                </Button>
+                                <FormControlLabel
+                                    control={
+                                        <Radio
+                                            inputProps={{
+                                            seq_id: seq.id,
+                                            seq_name: seq.name,
+                                            seq_type: seq.type,
+                                            }}
+                                            color='primary'
+                                        />
+                                    }
+                                    label={seq.name}
+                                    value={seq.name}
+                                    checked={localSelectedPolicyFile.name === seq.name}
+                                />
+                            </div>
+                        ))} */}
+                </RadioGroup>                          
         </React.Fragment>
     );
 }
+
+EditCustomMediation.propTypes = {
+    //classes: PropTypes.shape({}).isRequired,
+    selectedMediationPolicy: PropTypes.shape({}).isRequired,
+    type: PropTypes.string.isRequired,
+    //updateMediationPolicy: PropTypes.func.isRequired,
+    //setEditing: PropTypes.func.isRequired,
+    //editing: PropTypes.bool.isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
+};
 
 export default injectIntl((EditCustomMediation))
