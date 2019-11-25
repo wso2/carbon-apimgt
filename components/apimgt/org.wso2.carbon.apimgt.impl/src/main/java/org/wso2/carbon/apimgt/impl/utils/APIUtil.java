@@ -9632,7 +9632,8 @@ public final class APIUtil {
      * append the tenant domain to the username when an email is used as the username and EmailUserName is not enabled
      * in the super tenant
      * @param username
-     * @return usernam is an email
+     * @param tenantDomain
+     * @return username is an email
      */
     public static String appendTenantDomainForEmailUsernames(String username, String tenantDomain) {
         if (APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenantDomain) &&
