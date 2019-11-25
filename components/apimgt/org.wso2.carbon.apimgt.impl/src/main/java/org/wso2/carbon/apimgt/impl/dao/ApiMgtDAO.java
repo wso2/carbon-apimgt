@@ -14442,4 +14442,14 @@ public class ApiMgtDAO {
         return apiCategory;
     }
 
+    public void deleteCategory(String categoryID) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_API_CATEGORY)) {
+            statement.setString(1, categoryID);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to delete API category : " + categoryID, e);
+        }
+    }
+
 }

@@ -299,4 +299,8 @@ public class APIAdminImpl implements APIAdmin {
         }
         apiMgtDAO.updateCategory(apiCategory);
     }
+
+    public void deleteCategory(String categoryID) throws APIManagementException {
+        apiMgtDAO.deleteCategory(categoryID);
+    }
 }

@@ -143,6 +143,14 @@ public interface APIAdmin  {
     void updateCategory(APICategory apiCategory, String userName) throws APIManagementException;
 
     /**
+     * Delete an API Category
+     *
+     * @param categoryID
+     * @throws APIManagementException
+     */
+    void deleteCategory(String categoryID) throws APIManagementException ;
+
+    /**
      * The method converts the date into timestamp
      *
      * @param date

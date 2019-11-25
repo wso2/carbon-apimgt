@@ -3112,6 +3112,8 @@ public class SQLConstants {
 
     public static final String UPDATE_API_CATEGORY = "UPDATE AM_API_CATEGORIES SET DESCRIPTION = ?, NAME = ? WHERE UUID = ?";
 
+    public static final String DELETE_API_CATEGORY = "DELETE FROM AM_API_CATEGORIES WHERE UUID = ?";
+
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{

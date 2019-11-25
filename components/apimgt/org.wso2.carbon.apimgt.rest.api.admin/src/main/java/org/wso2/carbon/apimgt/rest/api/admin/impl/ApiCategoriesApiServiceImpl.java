@@ -84,6 +84,14 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
 
     public Response apiCategoriesApiCategoryIdDelete(String apiCategoryId, String ifMatch,
             String ifUnmodifiedSince) {
+        try {
+            APIAdmin apiAdmin = new APIAdminImpl();
+            apiAdmin.deleteCategory(apiCategoryId);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while deleting API Category '" + apiCategoryId + "' - " + e.getMessage() ;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
         return null;
     }
 }
