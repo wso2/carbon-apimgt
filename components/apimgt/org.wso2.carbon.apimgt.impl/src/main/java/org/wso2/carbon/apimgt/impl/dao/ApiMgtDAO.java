@@ -14356,7 +14356,8 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_CATEGORY)) {
             statement.setString(1, apiCategory.getDescription());
-            statement.setString(2, apiCategory.getId());
+            statement.setString(2, apiCategory.getName());
+            statement.setString(3, apiCategory.getId());
             statement.execute();
         } catch (SQLException e) {
             handleException("Failed to update API Category : " + apiCategory.getName() + " of tenant " +

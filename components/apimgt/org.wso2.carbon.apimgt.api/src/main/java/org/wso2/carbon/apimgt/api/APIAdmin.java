@@ -140,7 +140,7 @@ public interface APIAdmin  {
      * @return
      * @throws APIManagementException
      */
-    void updateCategory(APICategory apiCategory) throws APIManagementException;
+    void updateCategory(APICategory apiCategory, String userName) throws APIManagementException;
 
     /**
      * The method converts the date into timestamp

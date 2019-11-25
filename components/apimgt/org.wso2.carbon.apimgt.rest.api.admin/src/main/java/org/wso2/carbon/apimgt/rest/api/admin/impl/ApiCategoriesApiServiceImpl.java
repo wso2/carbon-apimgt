@@ -58,6 +58,7 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
     public Response apiCategoriesApiCategoryIdPut(String apiCategoryId, APICategoryDTO body) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
+            String userName = RestApiUtil.getLoggedInUsername();
             APICategory apiCategoryToUpdate = APICategoryMappingUtil.fromCategoryDTOToCategory(body);
             APICategory apiCategoryOriginal = APICategoryUtil.getAPICategoryByID(apiCategoryId);
             if (apiCategoryOriginal == null) {
@@ -67,11 +68,10 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
             }
 
             //Override several properties as they are not allowed to be updated
-            apiCategoryToUpdate.setName(apiCategoryOriginal.getName());
             apiCategoryToUpdate.setId(apiCategoryOriginal.getId());
             apiCategoryToUpdate.setTenantID(apiCategoryOriginal.getTenantID());
 
-            apiAdmin.updateCategory(apiCategoryToUpdate);
+            apiAdmin.updateCategory(apiCategoryToUpdate, userName);
             APICategory updatedAPICategory = APICategoryUtil.getAPICategoryByID(apiCategoryId);
             APICategoryDTO updatedAPICategoryDTO = APICategoryMappingUtil.fromCategoryToCategoryDTO(updatedAPICategory);
             return Response.ok().entity(updatedAPICategoryDTO).build();

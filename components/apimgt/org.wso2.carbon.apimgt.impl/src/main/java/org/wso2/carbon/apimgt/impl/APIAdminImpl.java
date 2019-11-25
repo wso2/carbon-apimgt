@@ -292,7 +292,11 @@ public class APIAdminImpl implements APIAdmin {
         return apiMgtDAO.addCategory(tenantID, category);
     }
 
-    public void updateCategory(APICategory apiCategory) throws APIManagementException {
+    public void updateCategory(APICategory apiCategory, String userName) throws APIManagementException {
+        int tenantID = APIUtil.getTenantId(userName);
+        if (APICategoryUtil.isCategoryNameExists(apiCategory.getName(), tenantID)) {
+            APIUtil.handleException("Category with name '" + apiCategory.getName() + "' already exists, hence cannot update.");
+        }
         apiMgtDAO.updateCategory(apiCategory);
     }
 }
