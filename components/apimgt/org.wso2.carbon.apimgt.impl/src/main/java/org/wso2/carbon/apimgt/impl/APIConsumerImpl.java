@@ -1756,18 +1756,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             Map<String, Tag> tagsData = new HashMap<String, Tag>();
             try {
-                String username = ((UserRegistry)userRegistry).getUserName();
-                String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-                //add the tenant domain to the username if it is not present in the case of email as the username
-                username = APIUtil.appendTenantDomainForEmailUsernames(username, tenantDomain);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
-
+            	PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
                 if (requestedTenant != null ) {
                     isTenantFlowStarted = startTenantFlowForTenantDomain(requestedTenant);
-                    username = ((UserRegistry)userRegistry).getUserName();
-                    //add the tenant domain to the username if it is not present in the case of email as the username
-                    username = APIUtil.appendTenantDomainForEmailUsernames(username, tenantDomain);
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
                 }
 
                 Map <String, List<String>> criteriaPublished = new HashMap<String, List<String>>();
