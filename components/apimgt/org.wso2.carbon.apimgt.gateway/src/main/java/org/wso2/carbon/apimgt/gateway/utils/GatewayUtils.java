@@ -18,6 +18,7 @@
 */
 package org.wso2.carbon.apimgt.gateway.utils;
 
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.codec.binary.Base64;
@@ -203,28 +204,29 @@ public class GatewayUtils {
      * @param propertyName property name
      * @param path         resource path
      * @param tenantDomain
-     * @throws APIManagementException
+     * @throws AxisFault
      */
     public static void deleteRegistryProperty(String propertyName, String path, String tenantDomain)
-            throws APIManagementException {
-        UserRegistry registry = getRegistry(tenantDomain);
-        PrivilegedCarbonContext.startTenantFlow();
-        if (tenantDomain != null && StringUtils.isNotEmpty(tenantDomain)) {
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        } else {
-            PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-        }
+            throws AxisFault {
+
         try {
+            UserRegistry registry = getRegistry(tenantDomain);
+            PrivilegedCarbonContext.startTenantFlow();
+            if (tenantDomain != null && StringUtils.isNotEmpty(tenantDomain)) {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            } else {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                        .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            }
             Resource resource = registry.get(path);
             if (resource != null && resource.getProperty(propertyName) != null) {
                 resource.removeProperty(propertyName);
                 registry.put(resource.getPath(), resource);
                 resource.discard();
             }
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while reading registry resource " + path + " for tenant " +
-                    tenantDomain);
+        } catch (RegistryException | APIManagementException e) {
+            String msg = "Failed to delete secure endpoint password alias " + e.getMessage();
+            throw new AxisFault(msg, e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }

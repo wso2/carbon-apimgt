@@ -878,6 +878,11 @@
 
             <dependency>
                 <groupId>org.wso2.carbon.mediation</groupId>
+                <artifactId>org.wso2.carbon.rest.api</artifactId>
+                <version>${carbon.mediation.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.mediation</groupId>
                 <artifactId>org.wso2.carbon.rest.api.stub</artifactId>
                 <version>${carbon.mediation.version}</version>
             </dependency>
@@ -886,7 +891,6 @@
                 <artifactId>org.wso2.carbon.mediation.dependency.mgt</artifactId>
                 <version>${carbon.mediation.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.wso2.carbon.mediation</groupId>
                 <artifactId>org.wso2.carbon.sequences.stub</artifactId>
@@ -896,6 +900,17 @@
             <dependency>
                 <groupId>org.wso2.carbon.mediation</groupId>
                 <artifactId>org.wso2.carbon.endpoint.stub</artifactId>
+                <version>${carbon.mediation.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.mediation</groupId>
+                <artifactId>org.wso2.carbon.sequences</artifactId>
+                <version>${carbon.mediation.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.mediation</groupId>
+                <artifactId>org.wso2.carbon.endpoint</artifactId>
                 <version>${carbon.mediation.version}</version>
             </dependency>
 
@@ -910,10 +925,14 @@
                 <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
                 <version>${carbon.mediation.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.wso2.carbon.mediation</groupId>
                 <artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
+                <version>${carbon.mediation.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.mediation</groupId>
+                <artifactId>org.wso2.carbon.mediation.security</artifactId>
                 <version>${carbon.mediation.version}</version>
             </dependency>
 
@@ -1502,6 +1521,11 @@
             <dependency>
                 <groupId>org.wso2.carbon.mediation</groupId>
                 <artifactId>org.wso2.carbon.localentry.stub</artifactId>
+                <version>${carbon.mediation.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.mediation</groupId>
+                <artifactId>org.wso2.carbon.localentry</artifactId>
                 <version>${carbon.mediation.version}</version>
             </dependency>
             <dependency>

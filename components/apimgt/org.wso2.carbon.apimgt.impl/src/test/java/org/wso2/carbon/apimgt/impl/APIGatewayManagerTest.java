@@ -176,8 +176,6 @@ public class APIGatewayManagerTest {
         api.setEnvironments(environments);
         Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(apiData);
         Mockito.when(apiGatewayAdminClient.getDefaultApi(tenantDomain, apiIdentifier)).thenReturn(defaultAPIdata);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(true);
         Map<String, String> failedEnvironmentsMap = gatewayManager.removeFromGateway(api, tenantDomain);
         Assert.assertEquals(failedEnvironmentsMap.size(), 0);
     }
@@ -196,8 +194,6 @@ public class APIGatewayManagerTest {
         api.setEnvironments(environments);
         Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(apiData);
         Mockito.when(apiGatewayAdminClient.getDefaultApi(tenantDomain, apiIdentifier)).thenReturn(defaultAPIdata);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(true);
         Map<String, String> failedEnvironmentsMap = gatewayManager.removeFromGateway(api, tenantDomain);
         Assert.assertEquals(failedEnvironmentsMap.size(), 0);
     }
@@ -216,8 +212,6 @@ public class APIGatewayManagerTest {
         api.setEnvironments(environments);
         Mockito.when(apiGatewayAdminClient.getApi(null, apiIdentifier)).thenReturn(apiData);
         Mockito.when(apiGatewayAdminClient.getDefaultApi(tenantDomain, apiIdentifier)).thenReturn(defaultAPIdata);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(true);
 
         //Set tenant domain = null, so that 'carbon.super' tenant will be loaded
         Map<String, String> failedEnvironmentsMap = gatewayManager.removeFromGateway(api, null);
@@ -238,33 +232,10 @@ public class APIGatewayManagerTest {
         environments.add(null);
         api.setEnvironments(environments);
         Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(apiData);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(true);
         Map<String, String> failedEnvironmentsMap = gatewayManager.removeFromGateway(api, tenantDomain);
         Assert.assertEquals(failedEnvironmentsMap.size(), 0);
     }
 
-    @Test public void testFailureToRemoveRESTAPIWhenClientFailedToDeleteAPIFromGW() throws AxisFault {
-        String errorMessage = "Error while deleting API from Gateway";
-        API api = new API(apiIdentifier);
-        api.setType("HTTP");
-        api.setContext(apiContext);
-        api.setInSequence(inSequenceName);
-        api.setOutSequence(outSequenceName);
-        api.setFaultSequence(faultSequenceName);
-        Set<String> environments = new HashSet<String>();
-        environments.add(prodEnvironmentName);
-        api.setEnvironments(environments);
-        Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(apiData);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(true);
-        Mockito.doThrow(new AxisFault(errorMessage)).when(apiGatewayAdminClient).deleteApi(tenantDomain, apiIdentifier);
-        Map<String, String> failedEnvironmentsMap = gatewayManager.removeFromGateway(api, tenantDomain);
-
-        Assert.assertEquals(failedEnvironmentsMap.size(), 1);
-        Assert.assertTrue(failedEnvironmentsMap.keySet().contains(prodEnvironmentName));
-        Assert.assertEquals(failedEnvironmentsMap.get(prodEnvironmentName), errorMessage);
-    }
 
     @Test public void testCreatingNewWebSocketAPIWithProductionEndpoint() throws GovernanceException, AxisFault {
         API api = new API(apiIdentifier);
@@ -274,8 +245,6 @@ public class APIGatewayManagerTest {
         Mockito.when(genericArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT)).thenReturn(apiContext);
         Mockito.when(genericArtifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG))
                 .thenReturn(prodEndpointConfig);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(true);
         gatewayManager.createNewWebsocketApiVersion(genericArtifact, api);
     }
 
@@ -287,8 +256,6 @@ public class APIGatewayManagerTest {
         Mockito.when(genericArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT)).thenReturn(apiContext);
         Mockito.when(genericArtifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG))
                 .thenReturn(sandBoxEndpointConfig);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(true);
         gatewayManager.createNewWebsocketApiVersion(genericArtifact, api);
     }
 
@@ -302,8 +269,6 @@ public class APIGatewayManagerTest {
         Mockito.when(genericArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT)).thenReturn(apiContext);
         Mockito.when(genericArtifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG))
                 .thenReturn(prodEndpointConfig);
-        Mockito.doThrow(new AxisFault("Error while deploying sequence")).when(apiGatewayAdminClient)
-                .addSequence((OMElement) Mockito.anyObject(), Mockito.anyString());
         gatewayManager.createNewWebsocketApiVersion(genericArtifact, api);
 
         //Test throwing APIManagerException while invalid endpoint configuration is provided
@@ -424,8 +389,6 @@ public class APIGatewayManagerTest {
         environments.add(prodEnvironmentName);
         environments.add(null);
         Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(null);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(true);
 
         //Test when environments are not defined for API
         Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
@@ -480,8 +443,6 @@ public class APIGatewayManagerTest {
         environments.add(null);
         api.setEnvironments(environments);
         Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(null);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(true);
         PowerMockito.when(APIUtil.getCustomSequence(faultSequenceName, tenantID, "fault", api.getId()))
                 .thenReturn(AXIOMUtil.stringToOM(testSequenceDefinition));
 
@@ -493,8 +454,6 @@ public class APIGatewayManagerTest {
         //Test deploying newly defined global sequence with API
         PowerMockito.when(APIUtil.isPerAPISequence(faultSequenceName, tenantID, apiIdentifier, "fault"))
                 .thenReturn(false);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(true);
         Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
 
         //If fault sequence has not been defined for the API, omit deploying/updating and remove if already exists
@@ -519,8 +478,6 @@ public class APIGatewayManagerTest {
         environments.add(null);
         api.setEnvironments(environments);
         Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(null);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(true);
         PowerMockito.when(APIUtil.getCustomSequence(inSequenceName, tenantID, "in", api.getId()))
                 .thenReturn(AXIOMUtil.stringToOM(testSequenceDefinition));
         Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
@@ -543,8 +500,6 @@ public class APIGatewayManagerTest {
         environments.add(null);
         api.setEnvironments(environments);
         Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(null);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(true);
         PowerMockito.when(APIUtil.getCustomSequence(outSequenceName, tenantID, "out", api.getId()))
                 .thenReturn(AXIOMUtil.stringToOM(testSequenceDefinition));
         Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
@@ -565,8 +520,6 @@ public class APIGatewayManagerTest {
         environments.add(null);
         api.setEnvironments(environments);
         Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(apiData);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(true);
         Mockito.when(apiGatewayAdminClient.getDefaultApi(tenantDomain, apiIdentifier)).thenReturn(defaultAPIdata);
 
         //Test deleting existing API from production environment, if matching producntion endpoint configuration is
@@ -610,8 +563,6 @@ public class APIGatewayManagerTest {
         environments.add(null);
         api.setEnvironments(environments);
         Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(apiData);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(true);
         PowerMockito.when(APIUtil.getCustomSequence(inSequenceName, tenantID, "in", api.getId()))
                 .thenReturn(AXIOMUtil.stringToOM(testSequenceDefinition));
         Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
@@ -634,8 +585,6 @@ public class APIGatewayManagerTest {
         environments.add(null);
         api.setEnvironments(environments);
         Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(apiData);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(true);
         PowerMockito.when(APIUtil.getCustomSequence(outSequenceName, tenantID, "out", api.getId()))
                 .thenReturn(AXIOMUtil.stringToOM(testSequenceDefinition));
         Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
@@ -659,16 +608,11 @@ public class APIGatewayManagerTest {
         OMElement faultSequence = AXIOMUtil.stringToOM(testSequenceDefinition);
         api.setEnvironments(environments);
         Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(null);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(true);
         PowerMockito.when(APIUtil.getCustomSequence(inSequenceName, tenantID, "in", api.getId()))
                 .thenReturn(inSequence);
         PowerMockito.when(APIUtil.isProductionEndpointsExists(Mockito.anyString())).thenReturn(true);
         PowerMockito.when(APIUtil.isSequenceDefined(Mockito.anyString())).thenReturn(true);
 
-        //Test failure to deploy API when custom in/out sequence deployment failed
-        Mockito.doThrow(new AxisFault("Error occurred while deploying sequence")).when(apiGatewayAdminClient)
-                .addSequence(inSequence, tenantDomain);
         Map<String, String> failedEnvironmentsMap = gatewayManager
                 .publishToGateway(api, apiTemplateBuilder, tenantDomain);
         Assert.assertEquals(failedEnvironmentsMap.size(), 1);
@@ -689,8 +633,6 @@ public class APIGatewayManagerTest {
         api.setFaultSequence(faultSequenceName);
         PowerMockito.when(APIUtil.getCustomSequence(faultSequenceName, tenantID, "fault", api.getId()))
                 .thenReturn(faultSequence);
-        Mockito.doThrow(new AxisFault("Error occurred while deploying sequence")).when(apiGatewayAdminClient)
-                .addSequence(faultSequence, tenantDomain);
         Map<String, String> failedEnvironmentsMap3 = gatewayManager
                 .publishToGateway(api, apiTemplateBuilder, tenantDomain);
         Assert.assertEquals(failedEnvironmentsMap3.size(), 1);
@@ -722,15 +664,11 @@ public class APIGatewayManagerTest {
         OMElement inSequence = AXIOMUtil.stringToOM(testSequenceDefinition);
         api.setEnvironments(environments);
         Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(apiData);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(true);
         PowerMockito.when(APIUtil.getCustomSequence(inSequenceName, tenantID, "in", api.getId()))
                 .thenReturn(inSequence);
         PowerMockito.when(APIUtil.isProductionEndpointsExists(Mockito.anyString())).thenReturn(true);
         PowerMockito.when(APIUtil.isSequenceDefined(Mockito.anyString())).thenReturn(true);
         //Test API deployment failure when custom sequence update failed
-        Mockito.doThrow(new AxisFault("Error occurred while deploying sequence")).when(apiGatewayAdminClient)
-                .deleteSequence(Mockito.anyString(), Mockito.anyString());
         Map<String, String> failedEnvironmentsMap = gatewayManager
                 .publishToGateway(api, apiTemplateBuilder, tenantDomain);
         Assert.assertEquals(failedEnvironmentsMap.size(), 1);
