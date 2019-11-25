@@ -285,7 +285,7 @@ class Details extends Component {
                             { [classes.contentLoader]: position === 'horizontal' },
                             { [classes.contentLoaderRightMenu]: position === 'vertical-right' },
                         )}
-                    >
+                    >   
                         <Switch>
                             <Redirect exact from='/applications/:applicationId' to={redirectUrl} />
                             <Route

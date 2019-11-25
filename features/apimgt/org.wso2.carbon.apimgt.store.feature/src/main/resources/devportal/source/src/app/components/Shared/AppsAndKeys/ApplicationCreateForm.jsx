@@ -155,7 +155,6 @@ const ApplicationCreate = (props) => {
                 value={applicationRequest.throttlingPolicy}
                 name='throttlingPolicy'
                 onChange={handleChange}
-                SelectProps={throttlingPolicyList}
                 helperText={<FormattedMessage
                     defaultMessage={`Assign API request quota per access token.
                             Allocated quota will be shared among all
@@ -186,7 +185,6 @@ const ApplicationCreate = (props) => {
                 value={applicationRequest.tokenType}
                 name='tokenType'
                 onChange={handleChange}
-                SelectProps={throttlingPolicyList}
                 helperText={<FormattedMessage
                     defaultMessage='Select token type'
                     id='Shared.AppsAndKeys.ApplicationCreateForm.select.token.type'
@@ -269,19 +267,21 @@ const ApplicationCreate = (props) => {
         </form>
     );
 };
-
+ApplicationCreate.defaultProps ={
+    ApplicationCreate: null,
+}
 ApplicationCreate.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     applicationRequest: PropTypes.shape({}).isRequired,
-    intl: PropTypes.func.isRequired,
+    intl: PropTypes.shape({}).isRequired,
     isNameValid: PropTypes.bool.isRequired,
-    allAppAttributes: PropTypes.arrayOf(PropTypes.array).isRequired,
+    allAppAttributes: PropTypes.arrayOf(PropTypes.array),
     handleAttributesChange: PropTypes.func.isRequired,
     getAttributeValue: PropTypes.func.isRequired,
     validateName: PropTypes.func.isRequired,
     updateApplicationRequest: PropTypes.func.isRequired,
-    isRequiredAttribute: PropTypes.bool.isRequired,
-    isApplicationSharingEnabled: PropTypes.func.isRequired,
+    isRequiredAttribute: PropTypes.func.isRequired,
+    isApplicationSharingEnabled: PropTypes.bool.isRequired,
     handleAddChip: PropTypes.func.isRequired,
     handleDeleteChip: PropTypes.func.isRequired,
     throttlingPolicyList: PropTypes.arrayOf(PropTypes.string).isRequired,

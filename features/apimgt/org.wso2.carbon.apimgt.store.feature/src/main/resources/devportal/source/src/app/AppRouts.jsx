@@ -34,11 +34,7 @@ import Details from 'AppComponents/Applications/Details/index';
 function getRedirectingPath(theme) {
     if (theme.custom.landingPage.active) {
         return '/home';
-    } else if (
-        theme.custom.landingPage.active === false &&
-    theme.custom.tagWise.active &&
-    theme.custom.tagWise.style === 'page'
-    ) {
+    } else if (theme.custom.landingPage.active === false && theme.custom.tagWise.active && theme.custom.tagWise.style === 'page') {
         return '/api-groups';
     } else {
         return 'apis';
@@ -51,41 +47,58 @@ function getRedirectingPath(theme) {
  * @returns {*}
  */
 function AppRouts(props) {
-    const { isAuthenticated, isUserFound, theme } = props;
+    const {
+        isAuthenticated, isUserFound, theme,
+    } = props;
     return (
         <Switch>
             <Redirect exact from='/' to={getRedirectingPath(theme)} />
             <Route path='/home' component={Landing} />
             <Route path='/api-groups' component={TagCloudListing} />
             <Route path='/(apis|api-products)' component={Apis} />
-            {isAuthenticated && (
-                <React.Fragment>
-                    <Route path='/settings' component={SettingsBase} />
-                    <Route exact path='/applications' component={Listing} />
-                    <Route
-                        path='/applications/create'
-                        component={ApplicationFormHandler}
-                    />
-                    <Route
-                        path='/applications/:application_id/edit'
-                        component={ApplicationFormHandler}
-                    />
-                    <Route path='/applications/:application_uuid/' component={Details} />
-                </React.Fragment>
-            )}
-            {!isAuthenticated && isUserFound && (
-                <React.Fragment>
-                    <Route path='/settings' component={RedirectToLogin} />
-                    <Route path='/applications' component={ScopeNotFound} />
-                    <Route path='/application/create' component={ScopeNotFound} />
-                </React.Fragment>
-            )}
-            {!isAuthenticated && !isUserFound && (
-                <React.Fragment>
-                    <Route path='/settings' component={RedirectToLogin} />
-                    <Route path='/applications' component={RedirectToLogin} />
-                </React.Fragment>
-            )}
+            <Route path='/settings' render={(props) => {
+                if(isAuthenticated){
+                    return <SettingsBase {...props} />
+                } else {
+                    return <RedirectToLogin {...props} />   
+                }
+            }} />
+            <Route path='/applications' exact render={(props) => {
+                if(isAuthenticated){
+                    return <Listing {...props} />
+                } else if (isUserFound) {
+                    return <ScopeNotFound {...props} />
+                } else {
+                    return <RedirectToLogin {...props} />   
+                }
+            }} />
+             <Route path='/applications/create' render={(props) => {
+                if(isAuthenticated){
+                    return <ApplicationFormHandler {...props} />
+                } else if (isUserFound) {
+                    return <ScopeNotFound {...props} />
+                } else {
+                    return <RedirectToLogin {...props} />   
+                }
+            }} />
+             <Route path='/applications/:application_id/edit' render={(props) => {
+                if(isAuthenticated){
+                    return <ApplicationFormHandler {...props} />
+                } else if (isUserFound) {
+                    return <ScopeNotFound {...props} />
+                } else {
+                    return <RedirectToLogin {...props} />   
+                }
+            }} />
+            <Route path='/applications/:application_uuid/' render={(props) => {
+                if(isAuthenticated){
+                    return <Details {...props} />
+                } else if (isUserFound) {
+                    return <ScopeNotFound {...props} />
+                } else {
+                    return <RedirectToLogin {...props} />   
+                }
+            }} />
             <Route component={PageNotFound} />
         </Switch>
     );
