@@ -35,7 +35,7 @@ const styles = theme => ({
 
     },
     paper: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         textAlign: 'left',
         color: theme.palette.text.secondary,
         margin: 'auto',
@@ -51,7 +51,7 @@ const styles = theme => ({
         background: theme.palette.background.paper,
         display: 'block',
         margin: '10px auto',
-        padding: `${theme.spacing.unit * 3}px ${theme.spacing.unit * 2}px`,
+        padding: `${theme.spacing(3)}px ${theme.spacing(2)}px`,
         overflow: 'auto',
     },
     wrapper: {
@@ -79,7 +79,7 @@ const tenantListing = (props) => {
                 <div className={classes.list}>
                     {orderedList.map(({ domain }) => {
                         return (
-                            <Grid item xs={12} md={12} className={classes.listItem}>
+                            <Grid key={domain} item xs={12} md={12} className={classes.listItem}>
                                 <Link
                                     style={{
                                         textDecoration: 'none',

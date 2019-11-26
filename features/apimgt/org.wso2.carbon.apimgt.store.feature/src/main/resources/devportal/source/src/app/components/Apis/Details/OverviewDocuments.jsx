@@ -31,7 +31,7 @@ import API from '../../../data/api';
  */
 const styles = theme => ({
     root: {
-        padding: theme.spacing.unit * 3,
+        padding: theme.spacing(3),
         maxWidth: theme.custom.contentAreaWidth,
     },
     iconClass: {
@@ -42,14 +42,14 @@ const styles = theme => ({
         background: theme.palette.grey.A400,
         color: theme.palette.getContrastText(theme.palette.grey.A400),
         fontSize: theme.typography.h5.fontSize,
-        padding: theme.spacing.unit,
+        padding: theme.spacing(1),
         width: 30,
         height: 30,
         marginRight: 20,
         textAlign: 'center',
     },
     subscriptionBox: {
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
     },
     linkStyle: {
         color: theme.palette.getContrastText(theme.palette.background.default),

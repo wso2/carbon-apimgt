@@ -27,8 +27,8 @@ import Settings from 'AppComponents/Shared/SettingsContext';
 
 const useStyles = makeStyles(theme => ({
     code: {
-        padding: theme.spacing.unit,
-        marginBottom: theme.spacing.unit * 2,
+        padding: theme.spacing(1),
+        marginBottom: theme.spacing(2),
         background: theme.palette.grey[200],
         color: '#da2316',
         flex: 1,

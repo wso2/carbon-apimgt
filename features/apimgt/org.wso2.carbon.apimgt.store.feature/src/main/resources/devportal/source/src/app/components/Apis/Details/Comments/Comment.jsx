@@ -43,24 +43,24 @@ const styles = theme => ({
     },
     commentText: {
         color: theme.palette.getContrastText(theme.palette.background.default),
-        marginTop: theme.spacing.unit * 0.8,
+        marginTop: theme.spacing(0.8),
         width: '99%',
         whiteSpace: 'pre-wrap',
         overflowWrap: 'break-word',
     },
     root: {
-        marginTop: theme.spacing.unit * 2.5,
+        marginTop: theme.spacing(2.5),
     },
     contentWrapper: {
-        paddingLeft: theme.spacing.unit * 2,
-        paddingTop: theme.spacing.unit,
+        paddingLeft: theme.spacing(2),
+        paddingTop: theme.spacing(1),
     },
     contentWrapperOverview: {
         background: 'transparent',
         width: '100%',
     },
     divider: {
-        marginTop: theme.spacing.unit,
+        marginTop: theme.spacing(1),
     },
     paper: {
         margin: theme.spacing(3),
@@ -256,7 +256,7 @@ class Comment extends React.Component {
         } = this.props;
 
         const { editIndex, replyIndex, openDialog } = this.state;
-        return [
+        return <React.Fragment>
             <Paper className={classNames({ [classes.paper]: !isOverview && comments.length > 0 }, { [classes.cleanBack]: isOverview })}>
                 {comments &&
                     comments
@@ -295,7 +295,6 @@ class Comment extends React.Component {
                                         )}
 
                                         <CommentOptions
-                                            classes={classes}
                                             comment={comment}
                                             editIndex={editIndex}
                                             index={index}
@@ -326,7 +325,7 @@ class Comment extends React.Component {
                                 </Grid>
                             </div>
                         ))}
-            </Paper>,
+            </Paper>
             <ConfirmDialog
                 key='key-dialog'
                 labelCancel='Cancel'
@@ -335,18 +334,20 @@ class Comment extends React.Component {
                 labelOk='Yes'
                 callback={this.handleConfirmDialog}
                 open={openDialog}
-            />,
-        ];
+            />
+        </React.Fragment>
     }
 }
-
+Comment.defaultProps = {
+    isOverview: false,
+}
 Comment.propTypes = {
-    classes: PropTypes.instanceOf(Object).isRequired,
+    classes: PropTypes.shape({}).isRequired,
     apiId: PropTypes.string.isRequired,
     allComments: PropTypes.instanceOf(Array).isRequired,
     commentsUpdate: PropTypes.func.isRequired,
     comments: PropTypes.instanceOf(Array).isRequired,
-    isOverview: PropTypes.bool.isRequired,
+    isOverview: PropTypes.bool,
 };
 
 export default injectIntl(withStyles(styles)(Comment));

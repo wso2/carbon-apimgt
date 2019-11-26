@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class CertificateManagerImplTest {
 
     private static CertificateManager certificateManager;
     private static final String END_POINT = "TEST_ENDPOINT";
-    private static final String ALIAS = "TEST_ALIAS";
+    private static final String ALIAS = "TEST_ALIAS_-1234";
     private static final int TENANT_ID = MultitenantConstants.SUPER_TENANT_ID;
     private static final String TEST_PATH = CertificateManagerImplTest.class.getClassLoader().getResource
             ("security/sslprofiles.xml").getPath();
@@ -436,6 +437,9 @@ public class CertificateManagerImplTest {
      */
     @Test
     public void testAddClientCertificateToGateway() throws NoSuchFieldException, IllegalAccessException {
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
                 .toReturn(ResponseCode.SUCCESS);
         Field field = CertificateManagerImpl.class.getDeclaredField("listenerProfileFilePath");

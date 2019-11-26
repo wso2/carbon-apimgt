@@ -63,7 +63,11 @@ function APIRateLimiting(props) {
     // control this component, Then we accept the props as the valid input and update the current state value from props
     useEffect(() => {
         if (onChange) {
-            setApiThrottlingPolicy(currentApiThrottlingPolicy);
+            if (currentApiThrottlingPolicy === '' && apiFromContext.apiThrottlingPolicy) {
+                setApiThrottlingPolicy(apiFromContext.apiThrottlingPolicy);
+            } else {
+                setApiThrottlingPolicy(currentApiThrottlingPolicy);
+            }
         }
     }, [onChange, currentApiThrottlingPolicy]); // Do not expect to change the onChange during the runtime
 

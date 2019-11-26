@@ -54,13 +54,13 @@ const styles = theme => ({
         padding: theme.spacing(1),
     },
     grid: {
-        marginTop: theme.spacing.unit * 4,
-        marginBottom: theme.spacing.unit * 4,
-        paddingRight: theme.spacing.unit * 2,
+        marginTop: theme.spacing(4),
+        marginBottom: theme.spacing(4),
+        paddingRight: theme.spacing(2),
         justifyContent: 'center',
     },
     userNotificationPaper: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
     },
     titleSub: {
         marginLeft: theme.spacing(2),
@@ -354,7 +354,7 @@ class ApiConsole extends React.Component {
 
         const authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
         const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
-
+        
         return (
             <React.Fragment>
                 <Typography variant='h4' className={classes.titleSub}>
@@ -363,7 +363,7 @@ class ApiConsole extends React.Component {
                 <Paper className={classes.paper}>
                     <Grid container className={classes.grid}>
                         {!isPrototypedAPI && !user && (
-                            <Grid item md={6}>
+                            <Grid item md={6} item>
                                 <Paper className={classes.userNotificationPaper}>
                                     <Typography variant='h5' component='h3'>
                                         <Icon>warning</Icon>
@@ -382,7 +382,7 @@ class ApiConsole extends React.Component {
                             </Grid>
                         )}
                         {!isPrototypedAPI &&
-                        <Grid xs={12} md={12}>
+                        <Grid xs={12} md={12} item>
                             <Box display='block'>
                                 {user && subscriptions && subscriptions.length > 0 && (
                                     <SelectAppPanel
@@ -390,8 +390,8 @@ class ApiConsole extends React.Component {
                                         handleChanges={this.handleChanges}
                                         selectedApplication={selectedApplication}
                                         selectedKeyType={selectedKeyType}
-                                        selectedEnvironment={selectedEnvironment}
-                                        environments={environments}
+                                        // selectedEnvironment={selectedEnvironment}
+                                        // environments={environments}
                                     />
                                 )}
                                 {subscriptions && subscriptions.length === 0 && (
@@ -406,7 +406,7 @@ class ApiConsole extends React.Component {
 
                                 )}
                                 <Box display='flex' justifyContent='center'>
-                                    <Grid xs={12} md={6}>
+                                    <Grid xs={12} md={6} item>
                                         {((environments && environments.length > 0) || (labels && labels.length > 0))
                                         && (
                                             <TextField
@@ -419,7 +419,6 @@ class ApiConsole extends React.Component {
                                                 value={selectedEnvironment}
                                                 name='selectedEnvironment'
                                                 onChange={this.handleChanges}
-                                                SelectProps={environments}
                                                 helperText={<FormattedMessage
                                                     defaultMessage='Please select an environment'
                                                     id='Apis.Details.ApiConsole.SelectAppPanel.select.an.environment'
@@ -439,7 +438,7 @@ class ApiConsole extends React.Component {
                                                 )}
                                                 {environments && (
                                                     environments.map(env => (
-                                                        <MenuItem value={env}>
+                                                        <MenuItem value={env} key={env}>
                                                             {env}
                                                         </MenuItem>
                                                     )))}
@@ -455,7 +454,7 @@ class ApiConsole extends React.Component {
                                                 )}
                                                 {labels && (
                                                     labels.map(label => (
-                                                        <MenuItem value={label}>
+                                                        <MenuItem value={label} key={label}>
                                                             {label}
                                                         </MenuItem>
                                                     ))
@@ -465,7 +464,7 @@ class ApiConsole extends React.Component {
                                     </Grid>
                                 </Box>
                                 <Box display='flex' justifyContent='center'>
-                                    <Grid x={12} md={6}>
+                                    <Grid x={12} md={6} item>
                                         <TextField
                                             fullWidth
                                             margin='normal'
@@ -509,9 +508,9 @@ class ApiConsole extends React.Component {
                         </Grid>
                         }
 
-                        <Grid xs={12} container>
-                            <Grid xs={10} />
-                            <Grid xs={2}>
+                        <Grid container>
+                            <Grid xs={10} item />
+                            <Grid xs={2} item>
                                 <a href={downloadLink} download={fileName}>
                                     <Button size='small'>
                                         <CloudDownloadRounded className={classes.buttonIcon} />

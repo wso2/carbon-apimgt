@@ -34,10 +34,10 @@ import ApiTagCloud from './ApiTagCloud';
 
 const styles = theme => ({
     rightIcon: {
-        marginLeft: theme.spacing.unit,
+        marginLeft: theme.spacing(1),
     },
     button: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
         marginBottom: 0,
     },
     buttonRight: {
@@ -70,7 +70,7 @@ const styles = theme => ({
         flexGrow: 1,
     },
     listContentWrapper: {
-        padding: `0 ${theme.spacing.unit * 3}px`,
+        padding: `0 ${theme.spacing(3)}px`,
         display: 'flex',
     },
     iconDefault: {
@@ -84,7 +84,7 @@ const styles = theme => ({
         display: 'flex',
         flex: 1,
         flexDirection: 'column',
-        paddingBottom: theme.spacing.unit * 3,
+        paddingBottom: theme.spacing(3),
     },
     contentWithTags: {
         marginLeft: theme.custom.tagCloud.leftMenu.width,
@@ -215,7 +215,6 @@ class CommonListing extends React.Component {
      */
     render() {
         const {
-            apis,
             apiType,
             theme,
             classes,
@@ -286,16 +285,6 @@ class CommonListing extends React.Component {
                             <Typography variant='h4' className={classes.mainTitle}>
                                 <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.main' />
                             </Typography>
-                            {apis && (
-                                <Typography variant='caption' gutterBottom align='left' id='apiCountDisplay'>
-                                    <FormattedMessage
-                                        defaultMessage='Displaying'
-                                        id='Apis.Listing.Listing.displaying'
-                                    />
-                                    {apis.count}
-                                    <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.count' />
-                                </Typography>
-                            )}
                         </div>
                         <div className={classes.buttonRight} id='listGridWrapper'>
                             <IconButton className={classes.button} onClick={() => this.setListType('list')}>
@@ -343,7 +332,6 @@ CommonListing.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
     apiType: PropTypes.string.isRequired,
-    apis: PropTypes.shape({}).isRequired,
     location: PropTypes.shape({
         search: PropTypes.string,
     }),

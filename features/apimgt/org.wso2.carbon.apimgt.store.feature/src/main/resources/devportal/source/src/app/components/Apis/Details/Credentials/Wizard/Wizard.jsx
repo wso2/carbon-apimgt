@@ -156,7 +156,7 @@ class Wizard extends Component {
                                 <Stepper activeStep={currentStep}>
                                     {this.steps.map((label) => {
                                         return (
-                                            <Step key={label}>
+                                            <Step key={label} key={label}>
                                                 <StepLabel>{label}</StepLabel>
                                             </Step>
                                         );

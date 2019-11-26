@@ -191,7 +191,7 @@ class Sdk extends React.Component {
                     <React.Fragment>
                         {filteredLanguageList.map((language, index) =>
                             index < 3 && (
-                                <Grid item xs={4}>
+                                <Grid item xs={4} key={index}>
                                     <a
                                         onClick={event => this.handleClick(event, language)}
                                         style={{ cursor: 'pointer' }}
@@ -240,9 +240,9 @@ class Sdk extends React.Component {
                                     />
                                 </Grid>
                             )}
-                            <Grid container justify='flex-start' spacing={Number(24)}>
+                            <Grid container justify='flex-start' spacing={4}>
                                 {filteredLanguageList.map((language, index) => (
-                                    <Grid key={index} item>
+                                    <Grid key={index} item key={index}>
                                         <div style={{ width: 'auto', textAlign: 'center', margin: '10px' }}>
                                             <Card>
                                                 <div>{language.toString().toUpperCase()}</div>

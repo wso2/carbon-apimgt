@@ -37,7 +37,7 @@ const useStyles = makeStyles(theme => ({
         flexGrow: 1,
     },
     listContentWrapper: {
-        padding: `0 ${theme.spacing.unit * 3}px`,
+        padding: `0 ${theme.spacing(3)}px`,
     },
     textWrapper: {
         color: theme.custom.tagCloud.leftMenu.color,
@@ -107,7 +107,7 @@ function TagCloudListingTags(props) {
                 </Typography>
                 <List component='nav' aria-label='main mailbox folders'>
                     {Object.keys(apisTagCloudGroup).map((key) => {
-                        return <ApiTagThumb tag={apisTagCloudGroup[key]} path={tagWiseURL} style={style} />;
+                        return <ApiTagThumb key={key} tag={apisTagCloudGroup[key]} path={tagWiseURL} style={style} />;
                     })}
                     {showAllApis && (
                         <React.Fragment>
@@ -135,7 +135,7 @@ function TagCloudListingTags(props) {
         ) : (
             <div className={classes.tagWiseThumbWrapper}>
                 {Object.keys(apisTagCloudGroup).map((key) => {
-                    return <ApiTagThumb tag={apisTagCloudGroup[key]} path={tagWiseURL} style={style} />;
+                    return <ApiTagThumb key={key} tag={apisTagCloudGroup[key]} path={tagWiseURL} style={style} />;
                 })}
             </div>
         )

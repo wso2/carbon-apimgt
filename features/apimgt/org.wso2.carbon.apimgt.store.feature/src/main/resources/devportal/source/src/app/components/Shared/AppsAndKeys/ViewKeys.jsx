@@ -68,7 +68,7 @@ const styles = theme => ({
         alignItems: 'center',
     },
     gridWrapper: {
-        paddingTop: theme.spacing.unit * 2,
+        paddingTop: theme.spacing(2),
     },
     iconStyle: {
         cursor: 'grab',
@@ -78,7 +78,7 @@ const styles = theme => ({
         marginBottom: theme.spacing(0.5),
     },
     margin: {
-        marginRight: theme.spacing.unit * 2,
+        marginRight: theme.spacing(2),
     },
 });
 
@@ -437,7 +437,6 @@ class ViewKeys extends React.Component {
                                         color='primary'
                                         className={classes.button}
                                         onClick={() => this.handleSecretRegenerate(consumerKey, keyType)}
-                                        noFound={notFound}
                                         disabled={!isUserOwner}
                                     >
                                         <FormattedMessage
@@ -618,10 +617,12 @@ class ViewKeys extends React.Component {
         );
     }
 }
-
+ViewKeys.defaultProps = {
+    fullScreen: true,
+}
 ViewKeys.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    fullScreen: PropTypes.bool.isRequired,
+    fullScreen: PropTypes.bool,
     isKeyJWT: PropTypes.bool.isRequired,
     isUserOwner: PropTypes.bool.isRequired,
 };

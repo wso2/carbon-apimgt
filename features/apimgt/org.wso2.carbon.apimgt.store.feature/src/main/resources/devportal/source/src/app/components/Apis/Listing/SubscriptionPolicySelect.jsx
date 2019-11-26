@@ -91,7 +91,7 @@ class SubscriptionPolicySelect extends React.Component {
                         }}
                     >
                         {policies.map(policy => (
-                            <MenuItem value={policy}>
+                            <MenuItem value={policy} key={policy}>
                                 {policy}
                             </MenuItem>
                         ))}

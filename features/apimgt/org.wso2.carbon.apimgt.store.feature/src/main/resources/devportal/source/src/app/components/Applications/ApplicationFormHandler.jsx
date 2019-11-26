@@ -30,6 +30,7 @@ import Settings from 'AppComponents/Shared/SettingsContext';
 import Application from 'AppData/Application';
 import { Link } from 'react-router-dom';
 import ApplicationCreateBase from './Create/ApplicationCreateBase';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  * Component used to handle application creation
@@ -59,6 +60,7 @@ class ApplicationFormHandler extends React.Component {
             allAppAttributes: null,
             isApplicationSharingEnabled: true,
             isEdit: false,
+            applicationOwner: '',
         };
         this.handleAddChip = this.handleAddChip.bind(this);
         this.handleDeleteChip = this.handleDeleteChip.bind(this);
@@ -115,7 +117,11 @@ class ApplicationFormHandler extends React.Component {
                 newRequest.tokenType = application.tokenType;
                 newRequest.attributes = application.attributes;
                 this.setState({
-                    isEdit: true, applicationRequest: newRequest, throttlingPolicyList, allAppAttributes,
+                    isEdit: true,
+                    applicationRequest: newRequest,
+                    throttlingPolicyList,
+                    allAppAttributes,
+                    applicationOwner: response[0].owner,
                 });
             })
             .catch((error) => {
@@ -370,7 +376,7 @@ class ApplicationFormHandler extends React.Component {
     render() {
         const {
             throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes, isApplicationSharingEnabled,
-            isEdit,
+            isEdit, applicationOwner,
         } = this.state;
         const CreatePageTitle = (
             <React.Fragment>
@@ -434,6 +440,7 @@ class ApplicationFormHandler extends React.Component {
                                     variant='contained'
                                     color='primary'
                                     onClick={isEdit ? this.saveEdit : this.saveApplication}
+                                    disabled={isEdit && AuthManager.getUser().name !== applicationOwner}
                                 >
                                     <FormattedMessage
                                         id='Applications.Create.ApplicationFormHandler.save'
