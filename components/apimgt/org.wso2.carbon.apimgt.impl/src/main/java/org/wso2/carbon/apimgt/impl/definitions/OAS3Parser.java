@@ -425,11 +425,10 @@ public class OAS3Parser extends APIDefinition {
      * @param oasDefinition  OAS definition
      * @param hostsWithSchemes host addresses with protocol mapping
      * @return OAS definition
-     * @throws APIManagementException throws if an error occurred
      */
     @Override
-    public String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes)
-            throws APIManagementException {
+    public String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes) {
+
         OpenAPI openAPI = getOpenAPI(oasDefinition);
         updateOperations(openAPI);
         updateEndpoints(api, hostsWithSchemes, openAPI);
@@ -443,7 +442,6 @@ public class OAS3Parser extends APIDefinition {
      * @param oasDefinition  OAS definition
      * @param hostsWithSchemes host addresses with protocol mapping
      * @return OAS definition
-     * @throws APIManagementException throws if an error occurred
      */
     @Override
     public String getOASDefinitionForStore(APIProduct product, String oasDefinition,
@@ -818,7 +816,6 @@ public class OAS3Parser extends APIDefinition {
      * @param product           APIProduct
      * @param hostsWithSchemes  GW hosts with protocol mapping
      * @param openAPI           OpenAPI
-     * @throws APIManagementException
      */
     private void updateEndpoints(APIProduct product, Map<String, String> hostsWithSchemes, OpenAPI openAPI) {
 
@@ -833,7 +830,6 @@ public class OAS3Parser extends APIDefinition {
      * @param api               API
      * @param hostsWithSchemes  GW hosts with protocol mapping
      * @param openAPI           OpenAPI
-     * @throws APIManagementException
      */
     private void updateEndpoints(API api, Map<String, String> hostsWithSchemes, OpenAPI openAPI) {
 

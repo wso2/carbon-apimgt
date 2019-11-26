@@ -852,7 +852,6 @@ public class OAS2Parser extends APIDefinition {
      * @param product        APIProduct
      * @param hostsWithSchemes  GW hosts with protocol mapping
      * @param swagger        Swagger
-     * @throws APIManagementException
      */
     private void updateEndpoints(APIProduct product, Map<String,String> hostsWithSchemes, Swagger swagger) {
         String basePath = product.getContext();
@@ -866,7 +865,6 @@ public class OAS2Parser extends APIDefinition {
      * @param api            API
      * @param hostsWithSchemes  GW hosts with protocol mapping
      * @param swagger        Swagger
-     * @throws APIManagementException
      */
     private void updateEndpoints(API api, Map<String,String> hostsWithSchemes, Swagger swagger) {
         String basePath = api.getContext();
@@ -885,15 +883,22 @@ public class OAS2Parser extends APIDefinition {
     private void updateEndpoints(Swagger swagger, String basePath, String transports,
                                  Map<String, String> hostsWithSchemes) {
 
-        String host = hostsWithSchemes.get(APIConstants.HTTPS_PROTOCOL).trim()
-                .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
+        String host = StringUtils.EMPTY;
         String[] apiTransports = transports.split(",");
         List<Scheme> schemes = new ArrayList<>();
-        if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL)) {
+        if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL)
+                && hostsWithSchemes.get(APIConstants.HTTPS_PROTOCOL) != null) {
             schemes.add(Scheme.HTTPS);
+            host = hostsWithSchemes.get(APIConstants.HTTPS_PROTOCOL).trim()
+                    .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
         }
-        if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL)) {
+        if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL)
+                && hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL) != null) {
             schemes.add(Scheme.HTTP);
+            if (StringUtils.isEmpty(host)) {
+                host = hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL).trim()
+                        .replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "");
+            }
         }
         swagger.setSchemes(schemes);
         swagger.setBasePath(basePath);
