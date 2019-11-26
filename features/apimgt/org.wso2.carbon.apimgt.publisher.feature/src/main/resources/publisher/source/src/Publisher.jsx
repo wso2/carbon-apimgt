@@ -30,7 +30,6 @@ import PublisherRootErrorBoundary from 'AppComponents/Shared/PublisherRootErrorB
 import Configurations from 'Config';
 import { IntlProvider } from 'react-intl';
 import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
-
 // Localization
 import LoginDenied from './app/LoginDenied';
 

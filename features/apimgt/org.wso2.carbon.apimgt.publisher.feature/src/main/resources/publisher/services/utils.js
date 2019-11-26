@@ -17,11 +17,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-var app = require('/site/public/theme/settings.js').Settings.app;
+var app = require('/site/public/conf/settings.js').AppConfig.app;
 var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+/**
+ * Get the loopback (localhost) origin (scheme + hostname + port), This origin is used for making
+ * internal(within the web app node), API calls. For example DCR call, Token generation, User Info, Token Introspect,
+ * Revoke etc.
+ */
 var getLoopbackOrigin = function() {
-    var mgtTransportPort = utils.getCarbonTransportPort("https");
+    var mgtTransportPort = utils.getCarbonTransportPort("https"); // This is the actual server port (management) , Not the proxy port
     var origin = 'https://' + app.origin.host + ":" + mgtTransportPort;
-    return origin;
+    return origin; // Unless there is a port offset this is https://localhost:9443
 };

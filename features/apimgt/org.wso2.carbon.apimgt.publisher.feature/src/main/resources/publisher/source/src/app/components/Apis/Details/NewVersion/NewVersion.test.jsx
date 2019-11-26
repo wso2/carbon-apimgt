@@ -19,7 +19,7 @@
 import React from 'react';
 import { getExampleBodyById, getExampleResponseById } from 'AppTests/Utils/MockAPIModel.js';
 import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
-import Configurations from 'Config';
+import Themes from 'Themes';
 import { MemoryRouter, Redirect } from 'react-router-dom';
 import { resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
@@ -37,7 +37,7 @@ describe('Unit test for CreateNewVersion component', () => {
      * mountedNewVersion: mounted CreateNewVersion component
      */
     async function mountNewVersionComponent() {
-        const { light } = Configurations.themes;
+        const { light } = Themes;
         const api = await getExampleBodyById(resourcePath.SINGLE_API, resourceMethod.GET, 'getAPI');
         const newVersion = (
             <APIProvider value={{ api }}>

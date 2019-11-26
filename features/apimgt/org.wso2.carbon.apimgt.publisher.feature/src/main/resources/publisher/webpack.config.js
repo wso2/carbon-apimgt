@@ -74,9 +74,9 @@ const config = {
         ],
     },
     externals: {
-        Config: 'Configurations',
+        Themes: 'AppThemes', // More descriptive names has been used for preventing global scope JS variable conflicts
         MaterialIcons: 'MaterialIcons',
-        Settings: 'Settings',
+        Config: 'AppConfig',
     },
     plugins: [new MonacoWebpackPlugin({ languages: ['xml', 'json', 'yaml'], features: [] })],
 };
