@@ -79,6 +79,7 @@ const AlertConfiguration = (props) => {
         alertName,
         classes,
         intl,
+        setIsWorkerNodeDown,
     } = props;
     const [alertConfiguration, setAlertConfiguration] = useState([]);
     const [apis, setApis] = useState();
@@ -107,7 +108,10 @@ const AlertConfiguration = (props) => {
                 setApis(apisList);
                 setAlertConfiguration(response[0].body);
             })
-            .catch((err) => console.log(err));
+            .catch((err) => {
+                console.log(err);
+                setIsWorkerNodeDown(true);
+            });
     }, []);
 
     /**
@@ -153,6 +157,8 @@ const AlertConfiguration = (props) => {
                     id: 'Apis.Settings.Alert.AlertConfiguration.alert.config.add.success.msg',
                     defaultMessage: 'Alert Configuration added successfully',
                 }));
+                setSelectedAPIName('');
+                setSelectedAPIVersion('');
             })
             .catch(() => {
                 Alert.error(intl.formatMessage({
