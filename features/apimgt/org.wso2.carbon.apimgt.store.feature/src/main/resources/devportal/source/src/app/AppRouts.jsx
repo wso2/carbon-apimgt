@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 /**
  * Copyright (c) 2016, WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
@@ -35,9 +36,9 @@ function getRedirectingPath(theme) {
     if (theme.custom.landingPage.active) {
         return '/home';
     } else if (
-        theme.custom.landingPage.active === false &&
-    theme.custom.tagWise.active &&
-    theme.custom.tagWise.style === 'page'
+        theme.custom.landingPage.active === false
+    && theme.custom.tagWise.active
+    && theme.custom.tagWise.style === 'page'
     ) {
         return '/api-groups';
     } else {
@@ -58,34 +59,65 @@ function AppRouts(props) {
             <Route path='/home' component={Landing} />
             <Route path='/api-groups' component={TagCloudListing} />
             <Route path='/(apis|api-products)' component={Apis} />
-            {isAuthenticated && (
-                <React.Fragment>
-                    <Route path='/settings' component={SettingsBase} />
-                    <Route exact path='/applications' component={Listing} />
-                    <Route
-                        path='/applications/create'
-                        component={ApplicationFormHandler}
-                    />
-                    <Route
-                        path='/applications/:application_id/edit'
-                        component={ApplicationFormHandler}
-                    />
-                    <Route path='/applications/:application_uuid/' component={Details} />
-                </React.Fragment>
-            )}
-            {!isAuthenticated && isUserFound && (
-                <React.Fragment>
-                    <Route path='/settings' component={RedirectToLogin} />
-                    <Route path='/applications' component={ScopeNotFound} />
-                    <Route path='/application/create' component={ScopeNotFound} />
-                </React.Fragment>
-            )}
-            {!isAuthenticated && !isUserFound && (
-                <React.Fragment>
-                    <Route path='/settings' component={RedirectToLogin} />
-                    <Route path='/applications' component={RedirectToLogin} />
-                </React.Fragment>
-            )}
+            <Route
+                path='/settings'
+                render={(localProps) => {
+                    if (isAuthenticated) {
+                        return <SettingsBase {...localProps} />;
+                    } else {
+                        return <RedirectToLogin {...localProps} />;
+                    }
+                }}
+            />
+            <Route
+                path='/applications'
+                exact
+                render={(localProps) => {
+                    if (isAuthenticated) {
+                        return <Listing {...localProps} />;
+                    } else if (isUserFound) {
+                        return <ScopeNotFound {...localProps} />;
+                    } else {
+                        return <RedirectToLogin {...localProps} />;
+                    }
+                }}
+            />
+            <Route
+                path='/applications/create'
+                render={(localProps) => {
+                    if (isAuthenticated) {
+                        return <ApplicationFormHandler {...localProps} />;
+                    } else if (isUserFound) {
+                        return <ScopeNotFound {...localProps} />;
+                    } else {
+                        return <RedirectToLogin {...localProps} />;
+                    }
+                }}
+            />
+            <Route
+                path='/applications/:application_id/edit'
+                render={(localProps) => {
+                    if (isAuthenticated) {
+                        return <ApplicationFormHandler {...localProps} />;
+                    } else if (isUserFound) {
+                        return <ScopeNotFound {...localProps} />;
+                    } else {
+                        return <RedirectToLogin {...localProps} />;
+                    }
+                }}
+            />
+            <Route
+                path='/applications/:application_uuid/'
+                render={(localProps) => {
+                    if (isAuthenticated) {
+                        return <Details {...localProps} />;
+                    } else if (isUserFound) {
+                        return <ScopeNotFound {...localProps} />;
+                    } else {
+                        return <RedirectToLogin {...localProps} />;
+                    }
+                }}
+            />
             <Route component={PageNotFound} />
         </Switch>
     );
