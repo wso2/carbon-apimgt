@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
-import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth.common.GrantType;
 import org.wso2.carbon.identity.oauth2.grant.jwt.JWTConstants;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
