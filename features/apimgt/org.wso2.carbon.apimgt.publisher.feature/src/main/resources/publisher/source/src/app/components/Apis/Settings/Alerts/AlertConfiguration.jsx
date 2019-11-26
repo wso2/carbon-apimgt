@@ -157,6 +157,8 @@ const AlertConfiguration = (props) => {
                     id: 'Apis.Settings.Alert.AlertConfiguration.alert.config.add.success.msg',
                     defaultMessage: 'Alert Configuration added successfully',
                 }));
+                setSelectedAPIName('');
+                setSelectedAPIVersion('');
             })
             .catch(() => {
                 Alert.error(intl.formatMessage({

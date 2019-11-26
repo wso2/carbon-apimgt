@@ -41,6 +41,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import ChipInput from 'material-ui-chip-input';
 import Grid from '@material-ui/core/Grid';
+import { Link } from 'react-router-dom';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import AlertConfiguration from './AlertConfiguration';
@@ -66,6 +67,9 @@ const styles = theme => ({
     },
     btnContainer: {
         marginTop: theme.spacing(),
+    },
+    listItem: {
+        marginLeft: theme.spacing(1),
     },
 });
 
@@ -348,6 +352,7 @@ const Alerts = (props) => {
                                                     id={alert.id}
                                                     primary={alertIdMapping[alert.id].name}
                                                     secondary={alertIdMapping[alert.id].description}
+                                                    className={classes.listItem}
                                                 />
                                                 {alert.requireConfiguration === true ?
                                                     <ListItemSecondaryAction>
@@ -402,6 +407,18 @@ const Alerts = (props) => {
                                             {isInProgress.unSubscribing && <CircularProgress size={15} />}
                                             Unsubscribe All
                                         </Button>
+                                    </Grid>
+                                    <Grid item>
+                                        <Link to='/apis/'>
+                                            <Button
+                                                disabled={isInProgress.subscribing}
+                                                variant='contained'
+                                                color='default'
+                                            >
+                                                {isInProgress.unSubscribing && <CircularProgress size={15} />}
+                                                    Cancel
+                                            </Button>
+                                        </Link>
                                     </Grid>
                                 </Grid>
                             </React.Fragment>}
