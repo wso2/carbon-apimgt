@@ -1668,8 +1668,10 @@ public class APIMappingUtil {
             productDto.setState(org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO.StateEnum
                     .valueOf(apiProduct.getState()));
             productDto.setId(apiProduct.getUuid());
-            productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
-                    .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));
+            if (apiProduct.getApiSecurity() != null) {
+                productDto.setSecurityScheme(Arrays.asList(apiProduct.getApiSecurity().split(",")));
+            }
+
             list.add(productDto);
         }
 
@@ -1725,8 +1727,6 @@ public class APIMappingUtil {
         productDto.setCorsConfiguration(apiCorsConfigurationDTO);
 
         productDto.setState(StateEnum.valueOf(product.getState()));
-        productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
-                .replace(RestApiConstants.APIPRODUCTID_PARAM, product.getUuid()));
 
         //Aggregate API resources to each relevant API.
         Map<String, ProductAPIDTO> aggregatedAPIs = new HashMap<String, ProductAPIDTO>();
