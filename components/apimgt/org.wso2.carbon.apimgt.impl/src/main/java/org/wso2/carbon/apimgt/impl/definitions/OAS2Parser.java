@@ -464,18 +464,18 @@ public class OAS2Parser extends APIDefinition {
      *
      * @param api            API
      * @param oasDefinition  OAS definition
-     * @param hostWithScheme host address with protocol
+     * @param hostsWithSchemes host addresses with protocol mapping
      * @return OAS definition
      * @throws APIManagementException throws if an error occurred
      */
     @Override
-    public String getOASDefinitionForStore(API api, String oasDefinition, String hostWithScheme)
+    public String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes)
             throws APIManagementException {
 
         Swagger swagger = getSwagger(oasDefinition);
         updateOperations(swagger);
-        updateEndpoints(api, hostWithScheme, swagger);
-        return updateSwaggerSecurityDefinitionForStore(swagger, new SwaggerData(api), hostWithScheme);
+        updateEndpoints(api, hostsWithSchemes, swagger);
+        return updateSwaggerSecurityDefinitionForStore(swagger, new SwaggerData(api), hostsWithSchemes);
     }
 
     /**
@@ -483,17 +483,18 @@ public class OAS2Parser extends APIDefinition {
      *
      * @param product        APIProduct
      * @param oasDefinition  OAS definition
-     * @param hostWithScheme host address with protocol
+     * @param hostsWithSchemes host addresses with protocol mapping
      * @return OAS definition
      * @throws APIManagementException throws if an error occurred
      */
     @Override
-    public String getOASDefinitionForStore(APIProduct product, String oasDefinition, String hostWithScheme)
-            throws APIManagementException {
+    public String getOASDefinitionForStore(APIProduct product, String oasDefinition,
+                                           Map<String, String> hostsWithSchemes) throws APIManagementException {
+
         Swagger swagger = getSwagger(oasDefinition);
         updateOperations(swagger);
-        updateEndpoints(product, hostWithScheme, swagger);
-        return updateSwaggerSecurityDefinitionForStore(swagger, new SwaggerData(product), hostWithScheme);
+        updateEndpoints(product, hostsWithSchemes, swagger);
+        return updateSwaggerSecurityDefinitionForStore(swagger, new SwaggerData(product), hostsWithSchemes);
     }
 
     /**
@@ -849,28 +850,26 @@ public class OAS2Parser extends APIDefinition {
      * Update OAS definition with GW endpoints
      *
      * @param product        APIProduct
-     * @param hostWithScheme GW host with protocol
+     * @param hostsWithSchemes  GW hosts with protocol mapping
      * @param swagger        Swagger
-     * @throws APIManagementException
      */
-    private void updateEndpoints(APIProduct product, String hostWithScheme, Swagger swagger) {
+    private void updateEndpoints(APIProduct product, Map<String,String> hostsWithSchemes, Swagger swagger) {
         String basePath = product.getContext();
         String transports = product.getTransports();
-        updateEndpoints(swagger, basePath, transports, hostWithScheme);
+        updateEndpoints(swagger, basePath, transports, hostsWithSchemes);
     }
 
     /**
      * Update OAS definition with GW endpoints
      *
      * @param api            API
-     * @param hostWithScheme GW host with protocol
+     * @param hostsWithSchemes  GW hosts with protocol mapping
      * @param swagger        Swagger
-     * @throws APIManagementException
      */
-    private void updateEndpoints(API api, String hostWithScheme, Swagger swagger) {
+    private void updateEndpoints(API api, Map<String,String> hostsWithSchemes, Swagger swagger) {
         String basePath = api.getContext();
         String transports = api.getTransports();
-        updateEndpoints(swagger, basePath, transports, hostWithScheme);
+        updateEndpoints(swagger, basePath, transports, hostsWithSchemes);
     }
 
     /**
@@ -879,18 +878,27 @@ public class OAS2Parser extends APIDefinition {
      * @param swagger        Swagger
      * @param basePath       API context
      * @param transports     transports types
-     * @param hostWithScheme GW host with protocol
+     * @param hostsWithSchemes GW hosts with protocol mapping
      */
-    private void updateEndpoints(Swagger swagger, String basePath, String transports, String hostWithScheme) {
-        String host = hostWithScheme.trim().replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "")
-                .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
+    private void updateEndpoints(Swagger swagger, String basePath, String transports,
+                                 Map<String, String> hostsWithSchemes) {
+
+        String host = StringUtils.EMPTY;
         String[] apiTransports = transports.split(",");
         List<Scheme> schemes = new ArrayList<>();
-        if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL)) {
+        if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL)
+                && hostsWithSchemes.get(APIConstants.HTTPS_PROTOCOL) != null) {
             schemes.add(Scheme.HTTPS);
+            host = hostsWithSchemes.get(APIConstants.HTTPS_PROTOCOL).trim()
+                    .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
         }
-        if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL)) {
+        if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL)
+                && hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL) != null) {
             schemes.add(Scheme.HTTP);
+            if (StringUtils.isEmpty(host)) {
+                host = hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL).trim()
+                        .replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "");
+            }
         }
         swagger.setSchemes(schemes);
         swagger.setBasePath(basePath);
@@ -900,14 +908,22 @@ public class OAS2Parser extends APIDefinition {
     /**
      * Update OAS definition with authorization endpoints
      *
-     * @param swagger        Swagger
-     * @param swaggerData    SwaggerData
-     * @param hostWithScheme GW host with protocol
+     * @param swagger           Swagger
+     * @param swaggerData       SwaggerData
+     * @param hostsWithSchemes  GW hosts with protocols
      * @return updated OAS definition
      */
     private String updateSwaggerSecurityDefinitionForStore(Swagger swagger, SwaggerData swaggerData,
-            String hostWithScheme) throws APIManagementException {
-        String authUrl = hostWithScheme + "/authorize";
+                                                           Map<String,String> hostsWithSchemes)
+            throws APIManagementException {
+
+        String authUrl;
+        // By Default, add the GW host with HTTPS protocol if present.
+        if (hostsWithSchemes.containsKey(APIConstants.HTTPS_PROTOCOL)) {
+            authUrl = (hostsWithSchemes.get(APIConstants.HTTPS_PROTOCOL)).concat("/authorize");
+        } else {
+            authUrl = (hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL)).concat("/authorize");
+        }
         updateSwaggerSecurityDefinition(swagger, swaggerData, authUrl);
         return getSwaggerJsonString(swagger);
     }

@@ -423,17 +423,16 @@ public class OAS3Parser extends APIDefinition {
      *
      * @param api            API
      * @param oasDefinition  OAS definition
-     * @param hostWithScheme host address with protocol
+     * @param hostsWithSchemes host addresses with protocol mapping
      * @return OAS definition
-     * @throws APIManagementException throws if an error occurred
      */
     @Override
-    public String getOASDefinitionForStore(API api, String oasDefinition, String hostWithScheme)
-            throws APIManagementException {
+    public String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes) {
+
         OpenAPI openAPI = getOpenAPI(oasDefinition);
         updateOperations(openAPI);
-        updateEndpoints(api, hostWithScheme, openAPI);
-        return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(api), hostWithScheme);
+        updateEndpoints(api, hostsWithSchemes, openAPI);
+        return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(api), hostsWithSchemes);
     }
 
     /**
@@ -441,17 +440,17 @@ public class OAS3Parser extends APIDefinition {
      *
      * @param product        APIProduct
      * @param oasDefinition  OAS definition
-     * @param hostWithScheme host address with protocol
+     * @param hostsWithSchemes host addresses with protocol mapping
      * @return OAS definition
-     * @throws APIManagementException throws if an error occurred
      */
     @Override
-    public String getOASDefinitionForStore(APIProduct product, String oasDefinition, String hostWithScheme)
-            throws APIManagementException {
+    public String getOASDefinitionForStore(APIProduct product, String oasDefinition,
+                                           Map<String, String> hostsWithSchemes) {
+
         OpenAPI openAPI = getOpenAPI(oasDefinition);
         updateOperations(openAPI);
-        updateEndpoints(product, hostWithScheme, openAPI);
-        return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(product), hostWithScheme);
+        updateEndpoints(product, hostsWithSchemes, openAPI);
+        return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(product), hostsWithSchemes);
     }
 
     /**
@@ -790,80 +789,79 @@ public class OAS3Parser extends APIDefinition {
     }
 
     /**
-     * Update OAS definition with authorization endpoints
+     * Update OAS definition with authorization endpoints.
      *
      * @param openAPI        OpenAPI
      * @param swaggerData    SwaggerData
-     * @param hostWithScheme GW host with protocol
+     * @param hostsWithSchemes GW hosts with protocols
      * @return updated OAS definition
      */
     private String updateSwaggerSecurityDefinitionForStore(OpenAPI openAPI, SwaggerData swaggerData,
-            String hostWithScheme) {
-        String authUrl = hostWithScheme + "/authorize";
-        updateSwaggerSecurityDefinition(openAPI, swaggerData, authUrl);
+            Map<String,String> hostsWithSchemes) {
 
+        String authUrl;
+        // By Default, add the GW host with HTTPS protocol if present.
+        if (hostsWithSchemes.containsKey(APIConstants.HTTPS_PROTOCOL)) {
+            authUrl = (hostsWithSchemes.get(APIConstants.HTTPS_PROTOCOL)).concat("/authorize");
+        } else {
+            authUrl = (hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL)).concat("/authorize");
+        }
+        updateSwaggerSecurityDefinition(openAPI, swaggerData, authUrl);
         return Json.pretty(openAPI);
     }
 
     /**
      * Update OAS definition with GW endpoints
      *
-     * @param product        APIProduct
-     * @param hostWithScheme GW host with protocol
-     * @param openAPI        OpenAPI
-     * @throws APIManagementException
+     * @param product           APIProduct
+     * @param hostsWithSchemes  GW hosts with protocol mapping
+     * @param openAPI           OpenAPI
      */
-    private void updateEndpoints(APIProduct product, String hostWithScheme, OpenAPI openAPI)
-            throws APIManagementException {
+    private void updateEndpoints(APIProduct product, Map<String, String> hostsWithSchemes, OpenAPI openAPI) {
+
         String basePath = product.getContext();
         String transports = product.getTransports();
-        try {
-            updateEndpoints(openAPI, basePath, transports, hostWithScheme);
-        } catch (MalformedURLException e) {
-            throw new APIManagementException("Error occurred while setting server endpoints.", e);
-        }
+        updateEndpoints(openAPI, basePath, transports, hostsWithSchemes);
     }
 
     /**
      * Update OAS definition with GW endpoints
      *
-     * @param api            API
-     * @param hostWithScheme GW host with protocol
-     * @param openAPI        OpenAPI
-     * @throws APIManagementException
+     * @param api               API
+     * @param hostsWithSchemes  GW hosts with protocol mapping
+     * @param openAPI           OpenAPI
      */
-    private void updateEndpoints(API api, String hostWithScheme, OpenAPI openAPI) throws APIManagementException {
+    private void updateEndpoints(API api, Map<String, String> hostsWithSchemes, OpenAPI openAPI) {
+
         String basePath = api.getContext();
         String transports = api.getTransports();
-        try {
-            updateEndpoints(openAPI, basePath, transports, hostWithScheme);
-        } catch (MalformedURLException e) {
-            throw new APIManagementException("Error occurred while setting server endpoints.", e);
-        }
+        updateEndpoints(openAPI, basePath, transports, hostsWithSchemes);
     }
 
     /**
      * Update OAS definition with GW endpoints and API information
      *
-     * @param openAPI        OpenAPI
-     * @param basePath       API context
-     * @param transports     transports types
-     * @param hostWithScheme GW host with protocol
-     * @throws MalformedURLException
+     * @param openAPI          OpenAPI
+     * @param basePath         API context
+     * @param transports       transports types
+     * @param hostsWithSchemes GW hosts with protocol mapping
      */
-    private void updateEndpoints(OpenAPI openAPI, String basePath, String transports, String hostWithScheme)
-            throws MalformedURLException {
-        String host = hostWithScheme.trim().replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "")
-                .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
+    private void updateEndpoints(OpenAPI openAPI, String basePath, String transports,
+                                 Map<String, String> hostsWithSchemes) {
+
         String[] apiTransports = transports.split(",");
         List<Server> servers = new ArrayList<>();
         if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL)) {
+            String host = hostsWithSchemes.get(APIConstants.HTTPS_PROTOCOL).trim()
+                    .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
             String httpsURL = APIConstants.HTTPS_PROTOCOL + "://" + host + basePath;
             Server httpsServer = new Server();
             httpsServer.setUrl(httpsURL);
             servers.add(httpsServer);
         }
         if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL)) {
+            String host = hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL).trim()
+                    .replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "");
             String httpURL = APIConstants.HTTP_PROTOCOL + "://" + host + basePath;
             Server httpsServer = new Server();
             httpsServer.setUrl(httpURL);
