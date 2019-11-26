@@ -5425,7 +5425,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
         String apiTenantDomain;
         String updatedDefinition = null;
-        String hostWithScheme;
+        Map<String,String> hostsWithSchemes;
         String definition = super.getOpenAPIDefinition(apiId);
         APIDefinition oasParser = OASParserUtil.getOASParser(definition);
         if (apiId instanceof APIIdentifier) {
@@ -5434,15 +5434,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             api.setScopes(oasParser.getScopes(definition));
             api.setUriTemplates(oasParser.getURITemplates(definition));
             apiTenantDomain = MultitenantUtils.getTenantDomain(api.getId().getProviderName());
-            hostWithScheme = getHostWithSchemeForEnvironment(apiTenantDomain, environmentName);
+            hostsWithSchemes = getHostWithSchemeMappingForEnvironment(apiTenantDomain, environmentName);
             api.setContext(getBasePath(apiTenantDomain, api.getContext()));
-            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostWithScheme);
+            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
         } else if (apiId instanceof APIProductIdentifier) {
             APIProduct apiProduct = getAPIProduct((APIProductIdentifier) apiId);
             apiTenantDomain = MultitenantUtils.getTenantDomain(apiProduct.getId().getProviderName());
-            hostWithScheme = getHostWithSchemeForEnvironment(apiTenantDomain, environmentName);
+            hostsWithSchemes = getHostWithSchemeMappingForEnvironment(apiTenantDomain, environmentName);
             apiProduct.setContext(getBasePath(apiTenantDomain, apiProduct.getContext()));
-            updatedDefinition = oasParser.getOASDefinitionForStore(apiProduct, definition, hostWithScheme);
+            updatedDefinition = oasParser.getOASDefinitionForStore(apiProduct, definition, hostsWithSchemes);
         }
         return updatedDefinition;
     }
@@ -5451,19 +5451,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public String getOpenAPIDefinitionForLabel(Identifier apiId, String labelName) throws APIManagementException {
         List<Label> gatewayLabels;
         String updatedDefinition = null;
-        String hostWithScheme;
+        Map<String,String> hostsWithSchemes;
         String definition = super.getOpenAPIDefinition(apiId);
         APIDefinition oasParser = OASParserUtil.getOASParser(definition);
         if (apiId instanceof APIIdentifier) {
             API api = getLightweightAPI((APIIdentifier) apiId);
             gatewayLabels = api.getGatewayLabels();
-            hostWithScheme = getHostWithSchemeForLabel(gatewayLabels, labelName);
-            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostWithScheme);
+            hostsWithSchemes = getHostWithSchemeMappingForLabel(gatewayLabels, labelName);
+            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
         } else if (apiId instanceof APIProductIdentifier) {
             APIProduct apiProduct = getAPIProduct((APIProductIdentifier) apiId);
             gatewayLabels = apiProduct.getGatewayLabels();
-            hostWithScheme = getHostWithSchemeForLabel(gatewayLabels, labelName);
-            updatedDefinition = oasParser.getOASDefinitionForStore(apiProduct, definition, hostWithScheme);
+            hostsWithSchemes = getHostWithSchemeMappingForLabel(gatewayLabels, labelName);
+            updatedDefinition = oasParser.getOASDefinitionForStore(apiProduct, definition, hostsWithSchemes);
         }
         return updatedDefinition;
     }
@@ -5619,11 +5619,27 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return applicationAttributes;
     }
 
-    private String getHostWithSchemeForEnvironment(String apiTenantDomain, String environmentName) throws APIManagementException {
+    /**
+     * Get host names with transport scheme mapping from Gateway Environments in api-manager.xml or from the tenant
+     * custom url config in registry.
+     *
+     * @param apiTenantDomain Tenant domain
+     * @param environmentName Environment name
+     * @return Host name to transport scheme mapping
+     * @throws APIManagementException if an error occurs when getting host names with schemes
+     */
+    private Map<String, String> getHostWithSchemeMappingForEnvironment(String apiTenantDomain, String environmentName)
+            throws APIManagementException {
+
         Map<String, String> domains = getTenantDomainMappings(apiTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
-        String hostWithScheme = null;
+        Map<String, String> hostsWithSchemes = new HashMap<>();
         if (!domains.isEmpty()) {
-            hostWithScheme = domains.get(APIConstants.CUSTOM_URL);
+            String customUrl = domains.get(APIConstants.CUSTOM_URL);
+            if (customUrl.startsWith(APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
+                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, customUrl);
+            } else {
+                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, customUrl);
+            }
         } else {
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
                     .getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -5639,19 +5655,28 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             String[] hostsWithScheme = environment.getApiGatewayEndpoint().split(",");
             for (String url : hostsWithScheme) {
                 if (url.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
-                    hostWithScheme = url;
-                    break;
+                    hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, url);
+                }
+                if (url.startsWith(APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
+                    hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, url);
                 }
             }
-
-            if (hostWithScheme == null) {
-                hostWithScheme = hostsWithScheme[0];
-            }
         }
-        return hostWithScheme;
+        return hostsWithSchemes;
     }
 
-    private String getHostWithSchemeForLabel(List<Label> gatewayLabels, String labelName) throws APIManagementException {
+    /**
+     * Get gateway host names with transport scheme mapping.
+     *
+     * @param gatewayLabels gateway label list
+     * @param labelName     Label name
+     * @return Hostname with transport schemes
+     * @throws APIManagementException If an error occurs when getting gateway host names.
+     */
+    private Map<String, String> getHostWithSchemeMappingForLabel(List<Label> gatewayLabels, String labelName)
+            throws APIManagementException {
+
+        Map<String, String> hostsWithSchemes = new HashMap<>();
         Label labelObj = null;
         for (Label label : gatewayLabels) {
             if (label.getName().equals(labelName)) {
@@ -5664,18 +5689,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     "Could not find provided label '" + labelName);
             return null;
         }
-        String hostWithScheme = null;
+
         List<String> accessUrls = labelObj.getAccessUrls();
         for (String url : accessUrls) {
             if (url.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
-                hostWithScheme = url;
-                break;
+                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, url);
+            }
+            if (url.startsWith(APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
+                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, url);
             }
         }
-        if (hostWithScheme == null) {
-            hostWithScheme = accessUrls.get(0);
-        }
-        return hostWithScheme;
+        return hostsWithSchemes;
     }
 
     private String getBasePath(String apiTenantDomain, String basePath) throws APIManagementException {
