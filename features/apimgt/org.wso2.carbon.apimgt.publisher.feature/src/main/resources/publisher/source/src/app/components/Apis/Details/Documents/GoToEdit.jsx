@@ -67,10 +67,18 @@ function GoToEdit(props) {
             </DialogTitle>
             <DialogContent>
                 <DialogContentText id='alert-dialog-description'>
+                    {displayAddContent ? (
                     <FormattedMessage
-                        id='Apis.Details.Documents.GoToEdit.description'
-                        defaultMessage='You can add content to the document or go back to the document listing page.'
+                        id='Apis.Details.Documents.GoToEdit.description.content'
+                        defaultMessage= 'You can add content to the document or go back to the document listing page.'
                     />
+                    ) : (
+                    <FormattedMessage
+                        id='Apis.Details.Documents.GoToEdit.description.file'
+                        defaultMessage= {'You can go back to the document listing page and upload' + 
+                        ' the file by editing the document.'}
+                    />
+                    )}
                 </DialogContentText>
             </DialogContent>
             <DialogActions>

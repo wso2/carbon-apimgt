@@ -24,6 +24,11 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.base.api.ServerConfigurationService;
+import org.wso2.carbon.endpoint.service.EndpointAdmin;
+import org.wso2.carbon.localentry.service.LocalEntryAdmin;
+import org.wso2.carbon.mediation.security.vault.MediationSecurityAdminService;
+import org.wso2.carbon.rest.api.service.RestApiAdmin;
+import org.wso2.carbon.sequences.services.SequenceAdmin;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
@@ -40,6 +45,11 @@ public class ServiceReferenceHolder {
     private TracingService tracingService;
     private ServerConfigurationService serverConfigurationService;
     private RealmService realmService;
+    private RestApiAdmin restAPIAdmin;
+    private SequenceAdmin sequenceAdmin;
+    private LocalEntryAdmin localEntryAdmin;
+    private EndpointAdmin endpointAdmin;
+    private MediationSecurityAdminService mediationSecurityAdminService;
 
     public ThrottleDataHolder getThrottleDataHolder() {
         return throttleDataHolder;
@@ -128,5 +138,54 @@ public class ServiceReferenceHolder {
 
     public void setRealmService(RealmService realmService) {
         this.realmService = realmService;
+    }
+
+    public void setRestAPIAdmin(RestApiAdmin restAPIAdmin) {
+        this.restAPIAdmin = restAPIAdmin;
+
+    }
+
+    public RestApiAdmin getRestAPIAdmin() {
+
+        return restAPIAdmin;
+    }
+
+    public void setSequenceAdmin(SequenceAdmin sequenceAdmin) {
+        this.sequenceAdmin = sequenceAdmin;
+
+    }
+
+    public SequenceAdmin getSequenceAdmin() {
+
+        return sequenceAdmin;
+    }
+
+    public void setLocalEntryAdmin(LocalEntryAdmin localEntryAdmin) {
+        this.localEntryAdmin = localEntryAdmin;
+    }
+
+    public LocalEntryAdmin getLocalEntryAdmin() {
+
+        return localEntryAdmin;
+    }
+
+    public EndpointAdmin getEndpointAdmin() {
+
+        return endpointAdmin;
+    }
+
+    public void setEndpointAdmin(EndpointAdmin endpointAdmin) {
+
+        this.endpointAdmin = endpointAdmin;
+    }
+
+    public MediationSecurityAdminService getMediationSecurityAdminService() {
+
+        return mediationSecurityAdminService;
+    }
+
+    public void setMediationSecurityAdminService(MediationSecurityAdminService mediationSecurityAdminService) {
+
+        this.mediationSecurityAdminService = mediationSecurityAdminService;
     }
 }

@@ -124,6 +124,7 @@ function NewEndpointCreate(props) {
                         id: 'Apis.Details.Endpoints.NewEndpointCreate.prototype.implementation',
                         defaultMessage: 'Prototype Implementation',
                     }),
+                    disabled: ['SOAP', 'SOAPTOREST'],
                 },
                 {
                     type: 'prototyped',
@@ -131,6 +132,7 @@ function NewEndpointCreate(props) {
                         id: 'Apis.Details.Endpoints.NewEndpointCreate.default.prototype.endpoints',
                         defaultMessage: 'Prototype Endpoint',
                     }),
+                    disabled: [],
                 },
             ],
             disabled: ['GRAPHQL'],
@@ -182,7 +184,8 @@ function NewEndpointCreate(props) {
                                                         value={endpointImplType}
                                                         onChange={(event) => { setImplType(event.target.value); }}
                                                     >
-                                                        {type.options.map((option) => {
+                                                        {type.options.filter((types) => !types.disabled
+                                                            .includes(apiType)).map(((option) => {
                                                             return (
                                                                 <FormControlLabel
                                                                     value={option.type}
@@ -190,7 +193,7 @@ function NewEndpointCreate(props) {
                                                                     label={option.name}
                                                                 />
                                                             );
-                                                        })}
+                                                        }))}
                                                     </RadioGroup>
                                                 </FormControl>
                                             </div>

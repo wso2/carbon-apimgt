@@ -20,52 +20,51 @@ package org.wso2.carbon.apimgt.gateway.service;
 
 import org.apache.axis2.AxisFault;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceClient;
-import org.wso2.carbon.apimgt.gateway.utils.MediationSecurityAdminServiceClient;
-import org.wso2.carbon.apimgt.gateway.utils.RESTAPIAdminClient;
-import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceClient;
+import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
+import org.wso2.carbon.apimgt.gateway.utils.MediationSecurityAdminServiceProxy;
+import org.wso2.carbon.apimgt.gateway.utils.RESTAPIAdminServiceProxy;
+import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
 
 public class APIGatewayAdminWrapper extends APIGatewayAdmin {
-    private RESTAPIAdminClient restapiAdminClient;
-    private EndpointAdminServiceClient endpointAdminServiceClient;
-    private SequenceAdminServiceClient sequenceAdminServiceClient;
-    private MediationSecurityAdminServiceClient mediationSecurityAdminServiceClient;
-    public APIGatewayAdminWrapper(RESTAPIAdminClient restapiAdminClient, EndpointAdminServiceClient
-            endpointAdminServiceClient, SequenceAdminServiceClient sequenceAdminServiceClient) {
+    private RESTAPIAdminServiceProxy restapiAdminServiceProxy;
+    private EndpointAdminServiceProxy endpointAdminServiceProxy;
+    private SequenceAdminServiceProxy sequenceAdminServiceProxy;
 
-        this.restapiAdminClient = restapiAdminClient;
-        this.endpointAdminServiceClient = endpointAdminServiceClient;
-        this.sequenceAdminServiceClient = sequenceAdminServiceClient;
+    public APIGatewayAdminWrapper(RESTAPIAdminServiceProxy restapiAdminServiceProxy, EndpointAdminServiceProxy
+            endpointAdminServiceProxy, SequenceAdminServiceProxy sequenceAdminServiceProxy) {
+
+        this.restapiAdminServiceProxy = restapiAdminServiceProxy;
+        this.endpointAdminServiceProxy = endpointAdminServiceProxy;
+        this.sequenceAdminServiceProxy = sequenceAdminServiceProxy;
     }
 
-    public APIGatewayAdminWrapper(RESTAPIAdminClient restapiAdminClient, EndpointAdminServiceClient
-            endpointAdminServiceClient, SequenceAdminServiceClient sequenceAdminServiceClient,
-                                  MediationSecurityAdminServiceClient mediationSecurityAdminServiceClient) {
-        this.restapiAdminClient = restapiAdminClient;
-        this.sequenceAdminServiceClient = sequenceAdminServiceClient;
-        this.endpointAdminServiceClient = endpointAdminServiceClient;
-        this.mediationSecurityAdminServiceClient = mediationSecurityAdminServiceClient;
+    public APIGatewayAdminWrapper(RESTAPIAdminServiceProxy restapiAdminServiceProxy, EndpointAdminServiceProxy
+            endpointAdminServiceProxy, SequenceAdminServiceProxy sequenceAdminServiceProxy,
+                                  MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy) {
+        this.restapiAdminServiceProxy = restapiAdminServiceProxy;
+        this.sequenceAdminServiceProxy = sequenceAdminServiceProxy;
+        this.endpointAdminServiceProxy = endpointAdminServiceProxy;
     }
 
     @Override
-    protected RESTAPIAdminClient getRestapiAdminClient() throws
+    protected RESTAPIAdminServiceProxy getRestapiAdminClient(String tenantDomain) throws
             AxisFault {
-        return restapiAdminClient;
+        return restapiAdminServiceProxy;
     }
 
     @Override
-    protected EndpointAdminServiceClient getEndpointAdminServiceClient() throws AxisFault {
-        return endpointAdminServiceClient;
+    protected EndpointAdminServiceProxy getEndpointAdminServiceClient(String tenantDomain) throws AxisFault {
+        return endpointAdminServiceProxy;
     }
 
     @Override
-    protected SequenceAdminServiceClient getSequenceAdminServiceClient() throws AxisFault {
-        return sequenceAdminServiceClient;
+    protected SequenceAdminServiceProxy getSequenceAdminServiceClient(String tenantDomain) throws AxisFault {
+        return sequenceAdminServiceProxy;
     }
 
     @Override
     protected void deleteRegistryProperty(String apiProviderName, String apiName, String version, String
-            tenantDomain) throws APIManagementException {
+            tenantDomain) throws AxisFault {
     }
 
     @Override
@@ -73,8 +72,4 @@ public class APIGatewayAdminWrapper extends APIGatewayAdmin {
             APIManagementException {
     }
 
-    @Override
-    protected MediationSecurityAdminServiceClient getMediationSecurityAdminServiceClient() throws AxisFault {
-        return mediationSecurityAdminServiceClient;
-    }
 }
