@@ -21,7 +21,6 @@ import 'react-app-polyfill/stable';
 import ReactDOM from 'react-dom';
 import React from 'react';
 // import 'typeface./src/App.jsx
-import 'material-design-icons';
 import Store from './src/App';
 import './customPolyfill';
 
