@@ -74,7 +74,7 @@ const config = {
         ],
     },
     externals: {
-        Themes: 'AppThemes', // More descriptive names has been used for preventing global scope JS variable conflicts
+        Themes: 'AppThemes', // Should use long names for preventing global scope JS variable conflicts
         MaterialIcons: 'MaterialIcons',
         Config: 'AppConfig',
     },
