@@ -10,7 +10,8 @@ const AppConfig = {
             forwardedHeader: 'X-Forwarded-For',
         },
         origin: {
-            host: 'localhost', // Used to construct loopback origin, hostname is localhost in 99.99% case
+            host: 'localhost', // Used to construct the loopback origin, It's very unlike you need to change this hostname,
+            // It is `localhost` in 99.99% case, If you want to change server host name change it in deployment.toml
         },
         feedback: { // If enabled, Feedback form option(an icon) will be available in the footer LHS bottom
             enable: false,
