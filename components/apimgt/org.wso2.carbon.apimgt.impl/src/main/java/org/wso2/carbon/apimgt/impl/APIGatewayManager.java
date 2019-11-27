@@ -410,7 +410,8 @@ public class APIGatewayManager {
                         definition.replaceAll("&(?!amp;)", "&amp;").
                                 replaceAll("<", "&lt;").replaceAll(">", "&gt;")
                         + "</localEntry>");
-
+                productAPIDto.setLocalEntriesToBeAdd(addGatewayContentToList(productLocalEntry,
+                        productAPIDto.getLocalEntriesToBeAdd()));
                 // If the Gateway type is 'production' and a production url has
                 // not been specified
                 // Or if the Gateway type is 'sandbox' and a sandbox url has not
