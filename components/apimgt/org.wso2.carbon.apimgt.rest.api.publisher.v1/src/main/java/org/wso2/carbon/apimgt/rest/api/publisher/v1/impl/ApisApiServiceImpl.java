@@ -103,6 +103,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -2177,6 +2178,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         String fileName = "";
         String mediationPolicyUrl = "";
+        String mediationResourcePath = "";
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
@@ -2196,17 +2198,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
             //Getting registry Api base path out of apiResourcePath
             apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
-            fileName = fileDetail.getDataHandler().getName();
-
-            //Constructing mediation resource path
-            String mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR +
-                    type + RegistryConstants.PATH_SEPARATOR + fileName;
-            if (apiProvider.checkIfResourceExists(mediationResourcePath)) {
-                RestApiUtil.handleConflict("Mediation policy already " +
-                        "exists in the given resource path, cannot create a new.", log);
-            }
 
             if (fileInputStream != null) {
+                fileName = fileDetail.getDataHandler().getName();
+                //Constructing mediation resource path
+                mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR +
+                        type + RegistryConstants.PATH_SEPARATOR + fileName;
                 String fileContentType = URLConnection.guessContentTypeFromName(fileName);
 
                 if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
@@ -2219,7 +2216,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
                 OMElement seqElement = APIUtil.buildOMElement(new ByteArrayInputStream(sequenceBytes));
                 String localName = seqElement.getLocalName();
-
+                checkMediationPolicy(apiProvider,mediationResourcePath);
                 if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
                     ResourceFile contentFile = new ResourceFile(inSequenceStream, fileContentType);
                     //Adding api specific mediation policy
@@ -2227,8 +2224,19 @@ public class ApisApiServiceImpl implements ApisApiService {
                 } else {
                     throw new APIManagementException("Sequence is malformed");
                 }
-            } else if (inlineContent != null) {
-                //todo
+            }
+            if (inlineContent != null) {
+                //Extracting the file name specified in the config
+                fileName = this.getMediationNameFromConfig(inlineContent);
+                //Constructing mediation resource path
+                mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR + type +
+                        RegistryConstants.PATH_SEPARATOR + fileName;
+                checkMediationPolicy(apiProvider,mediationResourcePath);
+                InputStream contentStream = new ByteArrayInputStream(inlineContent.getBytes(StandardCharsets.UTF_8));
+                String contentType = URLConnection.guessContentTypeFromName(fileName);
+                ResourceFile contentFile = new ResourceFile(contentStream, contentType);
+                //Adding api specific mediation policy
+                mediationPolicyUrl = apiProvider.addResourceFile(apiIdentifier, mediationResourcePath, contentFile);
             }
 
             if (StringUtils.isNotBlank(mediationPolicyUrl)) {
@@ -3852,6 +3860,17 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    /**
+     * Check the existence of the mediation policy
+     * @param mediationResourcePath mediation config content
+     *
+     */
+    public void checkMediationPolicy(APIProvider apiProvider,String mediationResourcePath) throws APIManagementException {
+        if (apiProvider.checkIfResourceExists(mediationResourcePath)) {
+            RestApiUtil.handleConflict("Mediation policy already " +
+                    "exists in the given resource path, cannot create new", log);
+        }
+    }
     /**
      * validate user inout scopes
      *
