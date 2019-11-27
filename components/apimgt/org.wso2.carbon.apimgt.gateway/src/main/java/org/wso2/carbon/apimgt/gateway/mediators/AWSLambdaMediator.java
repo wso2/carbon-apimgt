@@ -41,13 +41,17 @@ import org.wso2.carbon.core.util.CryptoUtil;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 
-public class AWSLambdaClassMediator extends AbstractMediator {
-    private static final Log log = LogFactory.getLog(AWSLambdaClassMediator.class);
+/**
+ * This @AWSLambdaMediator mediator invokes AWS Lambda functions when
+ * calling resources in APIs with AWS Lambda endpoint type.
+ */
+public class AWSLambdaMediator extends AbstractMediator {
+    private static final Log log = LogFactory.getLog(AWSLambdaMediator.class);
     private String accessKey = "";
     private String secretKey = "";
     private String resourceName = "";
 
-    public AWSLambdaClassMediator() {
+    public AWSLambdaMediator() {
 
     }
 
@@ -114,7 +118,8 @@ public class AWSLambdaClassMediator extends AbstractMediator {
                 BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
                 credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
             } else {
-                throw new SdkClientException("Missing AWS Credentials");
+                log.error("Missing AWS Credentials");
+                return null;
             }
             AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
                     .withCredentials(credentialsProvider)
