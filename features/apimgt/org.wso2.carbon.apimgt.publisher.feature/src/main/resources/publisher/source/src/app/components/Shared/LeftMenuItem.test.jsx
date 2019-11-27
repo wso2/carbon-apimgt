@@ -20,7 +20,7 @@ import React from 'react';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 
-import Configurations from 'Config';
+import Themes from 'Themes';
 import LeftMenuItem from './LeftMenuItem';
 
 describe('<LeftMenuItem/> tests', () => {
@@ -28,7 +28,7 @@ describe('<LeftMenuItem/> tests', () => {
     test.todo('should render <LeftMenuItem/> component without themes (unwrapped)');
     test.todo('should render <LeftMenuItem/> contains the property text in wrapped instance');
     test('should render the <LeftMenuItem/> component with light theme styles', () => {
-        const { light } = Configurations.themes;
+        const { light } = Themes;
         const TestComponent = (
             <MuiThemeProvider theme={createMuiTheme(light)}>
                 <LeftMenuItem />

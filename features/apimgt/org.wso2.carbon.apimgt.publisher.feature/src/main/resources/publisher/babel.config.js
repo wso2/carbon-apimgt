@@ -38,6 +38,8 @@ module.exports = {
                         targets: {
                             chrome: '58',
                             edge: '16',
+                            firefox: '56',
+                            safari: '11',
                         },
                     },
                 ],

@@ -229,7 +229,7 @@ export default function ProvideOpenAPI(props) {
                                             </Avatar>
                                         </ListItemAvatar>
                                         <ListItemText
-                                            primary={`${apiInputs.inputValue.path} - 
+                                            primary={`${apiInputs.inputValue.path} -
                                     ${humanFileSize(apiInputs.inputValue.size)}`}
                                         />
                                         <ListItemSecondaryAction>
@@ -251,7 +251,7 @@ export default function ProvideOpenAPI(props) {
                                     error={isValid.file}
                                     onDrop={onDrop}
                                     files={apiInputs.inputValue}
-                                    accept='.json, application/json'
+                                    accept='.json,application/json,.yaml'
                                 >
                                     {isValidating ? (<CircularProgress />)
                                         : ([
@@ -318,6 +318,7 @@ ProvideOpenAPI.propTypes = {
     apiInputs: PropTypes.shape({
         type: PropTypes.string,
         inputType: PropTypes.string,
+        inputValue: PropTypes.string,
     }).isRequired,
     inputsDispatcher: PropTypes.func.isRequired,
     onValidate: PropTypes.func,

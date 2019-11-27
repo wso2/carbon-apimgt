@@ -21,7 +21,7 @@ import Autosuggest from 'react-autosuggest';
 import { MemoryRouter } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
-import Configurations from 'Config';
+import Themes from 'Themes';
 import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
 import API from 'AppData/api.js';
 import AuthManager from 'AppData/AuthManager';
@@ -38,7 +38,7 @@ jest.mock('history', () => {
     mockedPush.push = jest.fn();
     return {
         ...originalHistory,
-        createMemoryHistory: jest.fn((props) => mockedPush),
+        createMemoryHistory: jest.fn(() => mockedPush),
     };
 });
 
@@ -56,7 +56,7 @@ describe('Publisher <HeaderSearch> component tests', () => {
      * wrapper: mounted HeaderSearch component
      */
     async function mountHeaderSearchComponent() {
-        const { light } = Configurations.themes;
+        const { light } = Themes;
         const headerSearchComponent = (
             <MuiThemeProvider theme={createMuiTheme(light)}>
                 <MemoryRouter>
