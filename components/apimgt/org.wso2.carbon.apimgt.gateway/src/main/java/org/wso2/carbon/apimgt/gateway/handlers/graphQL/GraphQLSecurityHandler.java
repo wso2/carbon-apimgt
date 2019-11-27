@@ -4,6 +4,7 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
 import graphql.analysis.MaxQueryDepthInstrumentation;
+import graphql.analysis.QueryDepthInfo;
 import graphql.schema.GraphQLSchema;
 
 import org.apache.axiom.om.OMAbstractFactory;
@@ -19,7 +20,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.json.simple.JSONObject;
@@ -40,13 +40,13 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 
 public class GraphQLSecurityHandler extends AbstractHandler {
 
     private static final Log log = LogFactory.getLog(GraphQLSecurityHandler.class);
     private GraphQLSchema schema = null;
     private static int MAX_QUERY_DEPTH = -1;
-    private static String HTTP_METHOD = "HTTP_METHOD";
     private APIKeyMgtRemoteUserStoreMgtServiceStub apiKeyMgtRemoteUserStoreMgtServiceStub;
 
     public GraphQLSecurityHandler() throws APISecurityException {
@@ -76,14 +76,12 @@ public class GraphQLSecurityHandler extends AbstractHandler {
     public boolean handleRequest(MessageContext messageContext) {
         schema = (GraphQLSchema) messageContext.getProperty(APIConstants.GRAPHQL_SCHEMA);
         String payload = messageContext.getProperty(APIConstants.GRAPHQL_PAYLOAD).toString();
-        String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(HTTP_METHOD);
 
-        if (httpMethod=="QUERY") {
-            if (!analyseQuery(messageContext, payload)) {
-                log.error("Query is too complex");
-                return false;
+        if (!analyseQuery(messageContext, payload)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Query was blocked by the static query analyser");
             }
-            return true;
+            return false;
         }
         return true;
     }
@@ -173,10 +171,27 @@ public class GraphQLSecurityHandler extends AbstractHandler {
                     ExecutionResult executionResult = runtime.execute(payload);
                     List<GraphQLError> errors = executionResult.getErrors();
                     if (errors.size()>0) {
+                        List<String> errorList = new ArrayList<>();
                         for (GraphQLError error : errors) {
-                            log.error(error);
+                            //log.error(errorMessage);
+                            errorList.add(error.getMessage());
                         }
-                        handleFailure(messageContext, APISecurityConstants.QUERY_TOO_COMPLEX, errors.toString());
+
+                        ListIterator<String> iterator = errorList.listIterator();
+                        while (iterator.hasNext()) {
+                            if (iterator.next().contains("non-nullable")) {
+                                iterator.remove();
+                            }
+                        }
+
+                        if (errorList.size()==0) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Maximum query depth of " + MAX_QUERY_DEPTH + " was not exceeded");
+                            }
+                            return true;
+                        }
+
+                        handleFailure(messageContext, APISecurityConstants.QUERY_TOO_DEEP, errorList.toString());
                         return false;
                     }
                     if (log.isDebugEnabled()) {
@@ -198,9 +213,9 @@ public class GraphQLSecurityHandler extends AbstractHandler {
 
     /**
      * This method handle the failure
-     *
-     * @param messageContext message context of the request
+     *  @param messageContext message context of the request
      * @param errorMessage   error message of the failure
+     * @param errorDescription error description of the failure
      */
     private void handleFailure(MessageContext messageContext, String errorMessage, String errorDescription) {
         OMElement payload = getFaultPayload(errorMessage, errorDescription);
