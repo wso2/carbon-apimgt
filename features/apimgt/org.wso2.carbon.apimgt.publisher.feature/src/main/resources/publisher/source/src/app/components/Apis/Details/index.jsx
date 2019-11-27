@@ -25,6 +25,7 @@ import EndpointIcon from '@material-ui/icons/GamesOutlined';
 import PersonPinCircleOutlinedIcon from '@material-ui/icons/PersonPinCircleOutlined';
 import ResourcesIcon from '@material-ui/icons/VerticalSplit';
 import ScopesIcon from '@material-ui/icons/VpnKey';
+import QueryAnalysisIcon from '@material-ui/icons/Security';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
 import BusinessIcon from '@material-ui/icons/Business';
 import CodeIcon from '@material-ui/icons/Code';
@@ -63,6 +64,7 @@ import Environments from './Environments/Environments';
 import Subscriptions from './Subscriptions/Subscriptions';
 import Comments from './Comments/Comments';
 import Scope from './Scopes';
+import QueryAnalysis from './QueryAnalysis/QueryAnalysis';
 import Security from './Security';
 import APIDefinition from './APIDefinition/APIDefinition';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
@@ -552,6 +554,16 @@ class Details extends Component {
                                 Icon={<ScopesIcon />}
                             />
                         )}
+                        {api.type==='GRAPHQL' && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.query.analysis',
+                                    defaultMessage: 'query analysis',
+                                })}
+                                to={pathPrefix + 'query analysis'}
+                                Icon={<QueryAnalysisIcon />}
+                            />
+                        )}
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.business.info',
@@ -664,6 +676,7 @@ class Details extends Component {
                                 />
 
                                 <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
+                                <Route path={Details.subPaths.QUERY_ANALYSIS} component={() => <QueryAnalysis api={api} />} />
                                 <Route path={Details.subPaths.DOCUMENTS} component={() => <Documents api={api} />} />
                                 <Route
                                     path={Details.subPaths.DOCUMENTS_PRODUCT}
@@ -736,6 +749,7 @@ Details.subPaths = {
     RESOURCES_PRODUCT: '/api-products/:apiprod_uuid/resources',
     RESOURCES_PRODUCT_EDIT: '/api-products/:apiprod_uuid/resources/edit',
     SCOPES: '/apis/:api_uuid/scopes',
+    QUERY_ANALYSIS: '/apis/:api_uuid/query analysis',
     DOCUMENTS: '/apis/:api_uuid/documents',
     DOCUMENTS_PRODUCT: '/api-products/:apiprod_uuid/documents',
     SUBSCRIPTIONS_PRODUCT: '/api-products/:apiprod_uuid/subscriptions',
