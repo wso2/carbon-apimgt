@@ -181,6 +181,10 @@
             <artifactId>graphQL</artifactId>
             <version>${graphql.java.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.amazonaws</groupId>
+            <artifactId>awslambda</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

@@ -18,6 +18,14 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import com.amazonaws.SdkClientException;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.services.lambda.AWSLambda;
+import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
+import com.amazonaws.services.lambda.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import graphql.language.FieldDefinition;
@@ -47,6 +55,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.XML;
 import org.json.simple.JSONObject;
@@ -84,12 +93,15 @@ import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -107,6 +119,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -289,6 +302,20 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest("Endpoint URLs should be valid web socket URLs", log);
             }
 
+            // AWS Lambda: secret key encryption while creating the API
+            if (body.getEndpointConfig() != null) {
+                LinkedHashMap endpointConfig = (LinkedHashMap) body.getEndpointConfig();
+                if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                    String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                    if (!StringUtils.isEmpty(secretKey)) {
+                        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                        String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                        endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                        body.setEndpointConfig(endpointConfig);
+                    }
+                }
+            }
+
             API apiToAdd = prepareToCreateAPIByDTO(body);
             validateScopes(apiToAdd);
             //adding the api
@@ -320,6 +347,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
                     body.getName() + "-" + body.getVersion();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (CryptoException e) {
+            String errorMessage = "Error while encrypting the secret key of API : " + body.getProvider() + "-" +
+                    body.getName() + "-" + body.getVersion() + " - " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -591,6 +622,29 @@ public class ApisApiServiceImpl implements ApisApiService {
                     APIDTO.class.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
             boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
 
+            // AWS Lambda: secret key encryption while updating the API
+            if (body.getEndpointConfig() != null) {
+                LinkedHashMap endpointConfig = (LinkedHashMap) body.getEndpointConfig();
+                if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                    String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                    if (!StringUtils.isEmpty(secretKey)) {
+                        if (!APIConstants.AWS_SECRET_KEY.equals(secretKey)) {
+                            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                            String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                            endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                            body.setEndpointConfig(endpointConfig);
+                        } else {
+                            JSONParser jsonParser = new JSONParser();
+                            JSONObject originalEndpointConfig = (JSONObject)
+                                    jsonParser.parse(originalAPI.getEndpointConfig());
+                            String encryptedSecretKey = (String) originalEndpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                            endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                            body.setEndpointConfig(endpointConfig);
+                        }
+                    }
+                }
+            }
+
             if (!hasClassLevelScope) {
                 // Validate per-field scopes
                 body = getFieldOverriddenAPIDTO(body, originalAPI, tokenScopes);
@@ -695,6 +749,82 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (CryptoException e) {
+            String errorMessage = "Error while encrypting the secret key of API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (ParseException e) {
+            String errorMessage = "Error while parsing endpoint config of API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    // AWS Lambda: rest api operation to get ARNs
+    @Override
+    public Response apisApiIdAmznResourceNamesGet(String apiId, MessageContext messageContext) {
+        JSONObject arns = new JSONObject();
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            String endpointConfigString = api.getEndpointConfig();
+            if (!StringUtils.isEmpty(endpointConfigString)) {
+                JSONParser jsonParser = new JSONParser();
+                JSONObject endpointConfig = (JSONObject) jsonParser.parse(endpointConfigString);
+                if (endpointConfig != null) {
+                    if (endpointConfig.containsKey(APIConstants.AMZN_ACCESS_KEY) &&
+                            endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                        String accessKey = (String) endpointConfig.get(APIConstants.AMZN_ACCESS_KEY);
+                        String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                        AWSCredentialsProvider credentialsProvider;
+                        if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
+                            credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
+                        } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey)) {
+                            if (secretKey.length() == APIConstants.AWS_ENCRYPTED_SECRET_KEY_LENGTH) {
+                                CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                                secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
+                                        APIConstants.DigestAuthConstants.CHARSET);
+                            }
+                            BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
+                            credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
+                        } else {
+                            log.error("Missing AWS Credentials");
+                            return null;
+                        }
+                        AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
+                                .withCredentials(credentialsProvider)
+                                .build();
+                        ListFunctionsResult listFunctionsResult = awsLambda.listFunctions();
+                        List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
+                        arns.put("count", functionConfigurations.size());
+                        JSONArray list = new JSONArray();
+                        for (FunctionConfiguration functionConfiguration : functionConfigurations) {
+                            list.put(functionConfiguration.getFunctionArn());
+                        }
+                        arns.put("list", list);
+                        return Response.ok().entity(arns.toString()).build();
+                    }
+                }
+            }
+        } catch (SdkClientException e) {
+            if (e.getCause() instanceof UnknownHostException) {
+                arns.put("error", "No internet connection to connect the given access method.");
+                log.error("No internet connection to connect the given access method of API : " + apiId, e);
+                return Response.serverError().entity(arns.toString()).build();
+            } else {
+                arns.put("error", "Unable to access Lambda functions under the given access method.");
+                log.error("Unable to access Lambda functions under the given access method of API : " + apiId, e);
+                return Response.serverError().entity(arns.toString()).build();
+            }
+        } catch (ParseException e) {
+            String errorMessage = "Error while parsing endpoint config of the API: " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (CryptoException | UnsupportedEncodingException e) {
+            String errorMessage = "Error while decrypting the secret key of the API: " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving the API: " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
