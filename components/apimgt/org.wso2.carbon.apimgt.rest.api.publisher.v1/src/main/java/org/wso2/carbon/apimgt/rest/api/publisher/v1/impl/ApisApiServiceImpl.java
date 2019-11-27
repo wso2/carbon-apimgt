@@ -788,7 +788,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                             BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
                             credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
                         } else {
-                            throw new SdkClientException("Missing AWS Credentials");
+                            log.error("Missing AWS Credentials");
+                            return null;
                         }
                         AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
                                 .withCredentials(credentialsProvider)
