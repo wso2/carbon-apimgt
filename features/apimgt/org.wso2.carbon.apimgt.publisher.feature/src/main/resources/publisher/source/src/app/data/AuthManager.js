@@ -154,6 +154,11 @@ class AuthManager {
         }
     }
 
+    /**
+     *
+     * @param {*} scopesAllowedToEdit
+     * @param {*} api
+     */
     static isRestricted(scopesAllowedToEdit, api) {
         // determines whether the apiType is API PRODUCT and user has publisher role, then allow access.
         if (api.apiType === 'APIProduct') {

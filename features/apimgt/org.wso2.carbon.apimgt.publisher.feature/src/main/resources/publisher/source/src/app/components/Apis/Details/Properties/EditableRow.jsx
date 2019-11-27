@@ -42,7 +42,7 @@ const useStyles = makeStyles(() => ({
  */
 function EditableRow(props) {
     const {
-        oldKey, oldValue, handleUpdateList, handleDelete, apiAdditionalProperties, intl, setEditing,
+        oldKey, oldValue, handleUpdateList, handleDelete, apiAdditionalProperties, intl, setEditing, isRestricted, api,
     } = props;
     const [newKey, setKey] = useState(oldKey);
     const [newValue, setValue] = useState(oldValue);
@@ -153,6 +153,7 @@ function EditableRow(props) {
                         onClick={updateEditMode}
                         onKeyDown={() => {}}
                         color='inherit'
+                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                     >
                         <EditIcon className={classes.buttonIcon} />
                     </IconButton>
@@ -163,6 +164,7 @@ function EditableRow(props) {
                     onClick={deleteRow}
                     onKeyDown={() => {}}
                     color='inherit'
+                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                 >
                     <DeleteForeverIcon className={classes.buttonIcon} />
                 </IconButton>
