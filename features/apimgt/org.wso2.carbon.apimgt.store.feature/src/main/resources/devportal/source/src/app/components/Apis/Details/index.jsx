@@ -268,20 +268,20 @@ class Details extends React.Component {
     /**
      *
      *
-     * @param {*} api
      * @memberof Details
      */
-    setDetailsAPI(api) {
-        this.setState({ api });
+    componentDidMount() {
+        this.updateSubscriptionData();
     }
 
     /**
      *
      *
+     * @param {*} api
      * @memberof Details
      */
-    componentDidMount() {
-        this.updateSubscriptionData();
+    setDetailsAPI(api) {
+        this.setState({ api });
     }
 
     /**
@@ -385,12 +385,12 @@ class Details extends React.Component {
                         </>
                     )}
                     {showDocuments && (
-                                            <LeftMenuItem
+                        <LeftMenuItem
                             text={<FormattedMessage id='Apis.Details.index.documentation' defaultMessage='Documentation' />}
                             route='documents'
                             iconText='docs'
                             to={pathPrefix + 'documents'}
-/>
+                        />
                     )}
                     {!api.advertiseInfo.advertised && api.type !== 'WS' && showSdks && (
                         <LeftMenuItem
@@ -414,8 +414,8 @@ class Details extends React.Component {
                 </div>
             </ApiContext.Provider>
         ) : (
-            <div className='apim-dual-ring' />
-        );
+                <div className='apim-dual-ring' />
+            );
     }
 }
 

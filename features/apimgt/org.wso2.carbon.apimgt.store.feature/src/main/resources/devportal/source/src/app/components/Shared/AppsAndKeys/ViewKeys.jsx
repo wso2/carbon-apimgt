@@ -328,7 +328,7 @@ class ViewKeys extends React.Component {
         }
 
         return consumerKey ? (
-            <React.Fragment>
+            <>
                 <div className={classes.inputWrapper}>
                     <Grid container spacing={3} className={classes.gridWrapper}>
                         <Grid item xs={6}>
@@ -337,12 +337,12 @@ class ViewKeys extends React.Component {
                                     id='consumer-key'
                                     value={consumerKey}
                                     margin='normal'
-                                    label={
+                                    label={(
                                         <FormattedMessage
                                             id='Shared.AppsAndKeys.ViewKeys.consumer.key'
                                             defaultMessage='Consumer Key'
                                         />
-                                    }
+                                    )}
                                     fullWidth
                                     variant='outlined'
                                     InputProps={{
@@ -370,7 +370,8 @@ class ViewKeys extends React.Component {
                                                     >
                                                         <Icon
                                                             color='secondary'
-                                                        >description
+                                                        >
+                                                            description
                                                         </Icon>
                                                     </CopyToClipboard>
                                                 </Tooltip>
@@ -393,12 +394,12 @@ class ViewKeys extends React.Component {
                                 {!hashEnabled ? (
                                     <TextField
                                         id='consumer-secret'
-                                        label={
+                                        label={(
                                             <FormattedMessage
                                                 id='Shared.AppsAndKeys.ViewKeys.consumer.secret'
                                                 defaultMessage='Consumer Secret'
                                             />
-                                        }
+                                        )}
                                         type={showCS || !consumerSecret ? 'text' : 'password'}
                                         value={consumerSecret}
                                         margin='normal'
@@ -603,23 +604,23 @@ class ViewKeys extends React.Component {
                         </Grid>
                     </Grid>
                 </div>
-            </React.Fragment>
+            </>
         ) : (
-            <React.Fragment>
-                <Typography variant='caption' gutterBottom >
+            <>
+                <Typography variant='caption' gutterBottom>
                     {keyType === 'PRODUCTION' ? 'Production ' : 'Sandbox '}
                     <FormattedMessage
                         id='Shared.AppsAndKeys.ViewKeys.key.secret.title'
                         defaultMessage='Key and Secret is not generated for this application'
                     />
                 </Typography>
-            </React.Fragment>
+            </>
         );
     }
 }
 ViewKeys.defaultProps = {
-    fullScreen: true,
-}
+    fullScreen: false,
+};
 ViewKeys.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     fullScreen: PropTypes.bool,
