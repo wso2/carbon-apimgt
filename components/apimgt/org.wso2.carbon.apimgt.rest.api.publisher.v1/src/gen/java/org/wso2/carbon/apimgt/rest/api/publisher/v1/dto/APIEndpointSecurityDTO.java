@@ -20,7 +20,7 @@ public class APIEndpointSecurityDTO   {
 @XmlEnum(String.class)
 public enum TypeEnum {
 
-    @XmlEnumValue("basic") BASIC(String.valueOf("basic")), @XmlEnumValue("digest") DIGEST(String.valueOf("digest"));
+    @XmlEnumValue("BASIC") BASIC(String.valueOf("BASIC")), @XmlEnumValue("DIGEST") DIGEST(String.valueOf("DIGEST"));
 
 
     private String value;
