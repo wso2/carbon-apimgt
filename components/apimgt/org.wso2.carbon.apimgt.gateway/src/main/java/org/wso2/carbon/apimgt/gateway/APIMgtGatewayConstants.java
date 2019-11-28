@@ -176,6 +176,8 @@ public class APIMgtGatewayConstants {
     public static final String BACKWARD_SLASH = "\"";
     public static final char FORWARD_SLASH = '/';
     public static final String REQUESTBODY_SCHEMA = "components.requestBodies.";
+    public static final String COMPONENTS_SCHEMAS = "components.schemas.";
+    public static final String REQUESTBODIES = "requestBodies";
     public static final String JSONPATH_SCHEMAS = "$..components.schemas.";
     public static final String JSON_SCHEMA = ".content.application/json.schema";
 
