@@ -173,13 +173,13 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/sdks/{language}")
     @Consumes({ "application/json" })
     @Produces({ "application/zip" })
-    @ApiOperation(value = "Generate a SDK for an API ", notes = "This operation can be used to generate SDKs (System Development Kits), for the APIs available in the API Store, for a requested development language. ", response = Void.class, authorizations = {
+    @ApiOperation(value = "Generate a SDK for an API ", notes = "This operation can be used to generate SDKs (System Development Kits), for the APIs available in the API Store, for a requested development language. ", response = byte[].class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
     }, tags={ "SDKs",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. SDK generated successfully. ", response = Void.class),
+        @ApiResponse(code = 200, message = "OK. SDK generated successfully. ", response = byte[].class),
         @ApiResponse(code = 400, message = "Bad Request. Requested SDK Language is not supported. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not found. Requested API does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error. Error while generating SDK. ", response = ErrorDTO.class) })
