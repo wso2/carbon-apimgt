@@ -16,29 +16,18 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import Loadable from 'react-loadable';
 import Configurations from 'Config';
 import Settings from 'Settings';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import Login from './app/components/Login/Login';
 import Logout from './app/components/Logout';
-import SignUp from './app/components/AnonymousView/SignUp';
 import Progress from './app/components/Shared/Progress';
 import { SettingsProvider } from './app/components/Shared/SettingsContext';
 import API from './app/data/api';
 import BrowserRouter from './app/components/Base/CustomRouter/BrowserRouter';
 
-const LoadableProtectedApp = Loadable({
-    loader: () => import(// eslint-disable-line function-paren-newline
-        /* webpackChunkName: "ProtectedApp" */
-        /* webpackPrefetch: true */
-        // eslint-disable-next-line function-paren-newline
-        './app/ProtectedApp'),
-    loading: Progress,
-});
-
+const protectedApp = lazy(() => import('./app/ProtectedApp' /* webpackChunkName: "ProtectedApp" */));
 
 /**
  * Root Store component
@@ -54,7 +43,6 @@ class Store extends React.Component {
      */
     constructor(props) {
         super(props);
-        LoadableProtectedApp.preload();
         this.state = {
             settings: null,
             tenantDomain: null,
@@ -129,12 +117,12 @@ class Store extends React.Component {
                 <SettingsProvider value={{ settings, tenantDomain, setTenantDomain: this.setTenantDomain }}>
                     <MuiThemeProvider theme={createMuiTheme(theme)}>
                         <BrowserRouter basename={context}>
-                            <Switch>
-                                <Route path='/login' render={() => <Login appName='store' appLabel='STORE' />} />
-                                <Route path='/logout' component={Logout} />
-                                <Route path='/sign-up' component={SignUp} />
-                                <Route component={LoadableProtectedApp} />
-                            </Switch>
+                            <Suspense fallback={<Progress />}>
+                                <Switch>
+                                    <Route path='/logout' component={Logout} />
+                                    <Route component={protectedApp} />
+                                </Switch>
+                            </Suspense>
                         </BrowserRouter>
                     </MuiThemeProvider>
                 </SettingsProvider>

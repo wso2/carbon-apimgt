@@ -34,6 +34,7 @@ import {
     Button,
     DialogActions,
     CircularProgress,
+    DialogContentText,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
@@ -41,6 +42,7 @@ import AlertConfiguration from 'AppComponents/Apis/Settings/Alerts/AlertConfigur
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import ChipInput from 'material-ui-chip-input';
 import Grid from '@material-ui/core/Grid';
+import { Link } from 'react-router-dom';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 
@@ -66,6 +68,9 @@ const styles = (theme) => ({
     btnContainer: {
         marginTop: theme.spacing(1),
     },
+    listItem: {
+        marginLeft: theme.spacing(1),
+    },
 });
 
 /**
@@ -86,6 +91,7 @@ const Alerts = (props) => {
     const [isAnalyticsEnabled, setAnalyticsEnabled] = useState(false);
     const [isInProgress, setInProgress] = useState({ subscribing: false, unSubscribing: false });
     const [unsubscribeAll, setUnsubscribeAll] = useState(false);
+    const [isWorkerNodeDown, setIsWorkerNodeDown] = useState(false);
 
     const alertIdMapping = {
         1: {
@@ -334,6 +340,7 @@ const Alerts = (props) => {
                                                             id={alert.id}
                                                             primary={alertIdMapping[alert.id].name}
                                                             secondary={alertIdMapping[alert.id].description}
+                                                            className={classes.listItem}
                                                         />
                                                         {alert.requireConfiguration === true
                                                             ? (
@@ -392,6 +399,18 @@ const Alerts = (props) => {
                                                     Unsubscribe All
                                                 </Button>
                                             </Grid>
+                                            <Grid item>
+                                                <Link to='/apis/'>
+                                                    <Button
+                                                        disabled={isInProgress.subscribing}
+                                                        variant='contained'
+                                                        color='default'
+                                                    >
+                                                        {isInProgress.unSubscribing && <CircularProgress size={15} />}
+                                                    Cancel
+                                                    </Button>
+                                                </Link>
+                                            </Grid>
                                         </Grid>
                                     </>
                                 )}
@@ -400,16 +419,30 @@ const Alerts = (props) => {
             </Paper>
             <Dialog open={openDialog.open}>
                 <DialogTitle>
-                    <Typography className={classes.configDialogHeading}>
-                        <FormattedMessage
-                            id='Apis.Settings.Alerts.Alerts.configure.alert'
-                            defaultMessage='Configurations'
-                        />
-                    </Typography>
+                    <FormattedMessage
+                        id='Settings.Alerts.Alerts.configure.alert'
+                        defaultMessage='Configurations'
+                    />
                 </DialogTitle>
-                <DialogContent>
-                    <AlertConfiguration alertType={openDialog.alertType} alertName={openDialog.name} api={API} />
-                </DialogContent>
+                {isWorkerNodeDown ? (
+                    <DialogContent>
+                        <DialogContentText id='analytics-dialog-description'>
+                            <FormattedMessage
+                                id='Apis.Settings.Alerts.connection.error'
+                                defaultMessage='Could not connect to analytics server. Please check the connectivity.'
+                            />
+                        </DialogContentText>
+                    </DialogContent>
+                ) : (
+                    <DialogContent>
+                        <AlertConfiguration
+                            alertType={openDialog.alertType}
+                            alertName={openDialog.name}
+                            api={API}
+                            setIsWorkerNodeDown={setIsWorkerNodeDown}
+                        />
+                    </DialogContent>
+                )}
                 <DialogActions>
                     <Button
                         color='primary'

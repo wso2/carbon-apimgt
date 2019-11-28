@@ -700,6 +700,13 @@ public class APIMappingUtil {
             try {
                 JSONParser parser = new JSONParser();
                 JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfig);
+                // AWS Lambda: set constant secret key
+                if (endpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                        .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
+                    if (!StringUtils.isEmpty((String) endpointConfigJson.get(APIConstants.AMZN_SECRET_KEY))) {
+                        endpointConfigJson.put(APIConstants.AMZN_SECRET_KEY, APIConstants.AWS_SECRET_KEY);
+                    }
+                }
                 dto.setEndpointConfig(endpointConfigJson);
             } catch (ParseException e) {
                 //logs the error and continues as this is not a blocker
@@ -1136,6 +1143,11 @@ public class APIMappingUtil {
                     }
                 }
 
+            }
+            // AWS Lambda: set arn to URI template
+            String amznResourceName = operation.getAmznResourceName();
+            if (amznResourceName != null) {
+                template.setAmznResourceName(amznResourceName);
             }
             //Only continue for supported operations
             if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase()) ||

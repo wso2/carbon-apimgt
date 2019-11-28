@@ -46,6 +46,11 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.base.api.ServerConfigurationService;
+import org.wso2.carbon.endpoint.service.EndpointAdmin;
+import org.wso2.carbon.localentry.service.LocalEntryAdmin;
+import org.wso2.carbon.mediation.security.vault.MediationSecurityAdminService;
+import org.wso2.carbon.rest.api.service.RestApiAdmin;
+import org.wso2.carbon.sequences.services.SequenceAdmin;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -259,6 +264,85 @@ public class APIHandlerServiceComponent {
 
     protected void unsetRealmService(RealmService realmService) {
         ServiceReferenceHolder.getInstance().setRealmService(null);
+    }
+
+    @Reference(
+            name = "restapi.admin.service.component",
+            service = RestApiAdmin.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRestAPIAdmin")
+    protected void setRestAPIAdmin(RestApiAdmin restAPIAdmin) {
+
+        ServiceReferenceHolder.getInstance().setRestAPIAdmin(restAPIAdmin);
+    }
+
+    protected void unsetRestAPIAdmin(RestApiAdmin restAPIAdmin) {
+
+        ServiceReferenceHolder.getInstance().setRestAPIAdmin(null);
+    }
+
+
+    @Reference(
+            name = "sequence.admin.service.component",
+            service = SequenceAdmin.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetSequenceAdmin")
+    protected void setSequenceAdmin(SequenceAdmin sequenceAdmin) {
+
+        ServiceReferenceHolder.getInstance().setSequenceAdmin(sequenceAdmin);
+    }
+
+    protected void unsetSequenceAdmin(SequenceAdmin sequenceAdmin) {
+
+        ServiceReferenceHolder.getInstance().setSequenceAdmin(null);
+    }
+    @Reference(
+            name = "localentry.admin.service.component",
+            service = LocalEntryAdmin.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetLocalEntryAdmin")
+    protected void setLocalEntryAdmin(LocalEntryAdmin localEntryAdmin) {
+
+        ServiceReferenceHolder.getInstance().setLocalEntryAdmin(localEntryAdmin);
+    }
+
+    protected void unsetLocalEntryAdmin(LocalEntryAdmin localEntryAdmin) {
+
+        ServiceReferenceHolder.getInstance().setLocalEntryAdmin(null);
+    }
+    @Reference(
+            name = "endpoint.admin.service.component",
+            service = EndpointAdmin.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetEndpointAdmin")
+    protected void setEndpointAdmin(EndpointAdmin endpointAdmin) {
+
+        ServiceReferenceHolder.getInstance().setEndpointAdmin(endpointAdmin);
+    }
+
+    protected void unsetEndpointAdmin(EndpointAdmin endpointAdmin) {
+
+        ServiceReferenceHolder.getInstance().setEndpointAdmin(null);
+    }
+
+    @Reference(
+            name = "mediation.security.admin.service.component",
+            service = MediationSecurityAdminService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetMediationSecurityAdminService")
+    protected void setMediationSecurityAdminService(MediationSecurityAdminService mediationSecurityAdminService) {
+
+        ServiceReferenceHolder.getInstance().setMediationSecurityAdminService(mediationSecurityAdminService);
+    }
+
+    protected void unsetMediationSecurityAdminService(MediationSecurityAdminService mediationSecurityAdminService) {
+
+        ServiceReferenceHolder.getInstance().setMediationSecurityAdminService(null);
     }
 }
 

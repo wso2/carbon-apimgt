@@ -53,7 +53,7 @@ const APICreateMenu = (props) => {
                         secondary={(
                             <FormattedMessage
                                 id='Apis.Listing.components.APICreateMenu.secondary.swagger'
-                                defaultMessage='Use an existing REST endpoint or Swagger definition'
+                                defaultMessage='Use an existing OpenAPI definition (swagger) file or URL'
                             />
                         )}
                     />

@@ -2026,6 +2026,50 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ######################################################
+  # AWS Lambda
+  ######################################################
+  /apis/{apiId}/amznResourceNames:
+    #-----------------------------------------------------
+    # Retrieve the ARNs of AWS Lambda functions
+    #-----------------------------------------------------
+    get:
+      x-examples:
+        $ref: docs/examples/apis/apis_id_amznresourcenames_get.yaml
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/64eca60b-2e55-4c38-8603-e9e6bad7d809/amznResourceNames"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/64eca60b-2e55-4c38-8603-e9e6bad7d809/arns
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"count\": \"2\",\n   \"list\": [\n      \"arn:aws:lambda:us-west-2:123456789012:function:my-function1\",\n      \"arn:aws:lambda:us-west-2:123456789012:function:my-function2\"\n   ]\n}"
+      summary: Retrieve the ARNs of AWS Lambda functions
+      description: |
+        This operation can be use to retrieve ARNs of AWS Lambda function for a given AWS credentials.
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - AWS Lambda (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Requested ARN List of the API is returned
+          schema:
+            type: string
+            example: "{\n   \"count\": \"2\",\n   \"list\": [\n      \"arn:aws:lambda:us-west-2:123456789012:function:my-function1\",\n      \"arn:aws:lambda:us-west-2:123456789012:function:my-function2\"\n   ]\n}"
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        404:
+          description: |
+            Not Found.
+            Requested resource does not exist.
+          schema:
+            $ref: '#/definitions/Error'
 
   #########################################################
 # The "Configure Monetization" Processing Function resource API
@@ -8185,6 +8229,8 @@ definitions:
         type: array
         items:
           type: string
+      amznResourceName:
+        type: string
 
 
 #-----------------------------------------------------

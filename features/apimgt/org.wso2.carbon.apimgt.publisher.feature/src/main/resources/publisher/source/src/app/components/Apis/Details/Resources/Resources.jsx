@@ -136,6 +136,9 @@ export default function Resources(props) {
             case 'throttlingPolicy':
                 updatedOperation['x-throttling-tier'] = value;
                 break;
+            case 'amznResourceName':
+                updatedOperation['x-amzn-resource-name'] = value;
+                break;
             case 'scopes':
                 if (!updatedOperation.security) {
                     updatedOperation.security = [{ default: [] }];
@@ -214,6 +217,7 @@ export default function Resources(props) {
             apiThrottlingPolicy,
             scopes: api.scopes,
             operations: api.isAPIProduct() ? {} : mapAPIOperations(api.operations),
+            endpointConfig: api.endpointConfig,
         }),
         [api, apiThrottlingPolicy],
     );

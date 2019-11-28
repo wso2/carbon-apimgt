@@ -72,6 +72,8 @@ Description
                     variant='outlined'
                     fullWidth
                     disabled={disableUpdate}
+                    multiline
+                    rows='4'
                     value={operation.summary}
                     onChange={({ target: { value } }) => operationsDispatcher(
                         { action: 'summary', data: { target, verb, value } },

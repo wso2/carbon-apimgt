@@ -34,6 +34,8 @@ public final class ResourceConstants {
     public static final String ATTRIBUTE_VALUE_SEPARATOR = "AttributeValueSeparator";
     public static final String ROLE_ATTRIBUTE_NAME = "http://wso2.org/claims/role";
     public static final String ATTRIBUTE_VALUE_SEPERATER = ",";
+    public static final String RETRIEVE_ROLES_FROM_USERSTORE_FOR_SCOPE_VALIDATION = "retrieveRolesFromUserStoreForScopeValidation";
+    public static final String ROLE_CLAIM = "ROLE_CLAIM";
 
     public static final String RESOURCE_PARAMS = "keymgt_resource_params";
     public static final String INTROSPECTURI = "http://localhost:8080/openid-connect-server-webapp/introspect";

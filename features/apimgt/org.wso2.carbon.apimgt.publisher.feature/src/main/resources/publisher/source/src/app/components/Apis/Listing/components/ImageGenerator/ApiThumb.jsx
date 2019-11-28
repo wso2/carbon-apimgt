@@ -164,7 +164,7 @@ class APIThumb extends Component {
                 })
                 .catch((error) => {
                     if (error.status === 409) {
-                        Alert.error(error.response.body.description);
+                        Alert.error('[ ' + name + ' ] : ' + error.response.body.description);
                         this.setState({ loading: false });
                     } else {
                         Alert.error('Something went wrong while deleting the API Product!');
@@ -185,7 +185,7 @@ class APIThumb extends Component {
                 })
                 .catch((error) => {
                     if (error.status === 409) {
-                        Alert.error(error.response.body.description);
+                        Alert.error('[ ' + name + ' ] : ' + error.response.body.description);
                         this.setState({ loading: false });
                     } else {
                         Alert.error('Something went wrong while deleting the API!');
