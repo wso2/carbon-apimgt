@@ -60,9 +60,18 @@ export default function APISecurity(props) {
         api,
     } = props;
     const apiContext = useContext(ApiContext);
-    const isEndpointAvailable = apiContext.api.endpointConfig !== null;
-    const isPrototyped = apiContext.api.endpointConfig !== null
-         && apiContext.api.endpointConfig.implementation_status === 'prototyped';
+    const isAPIProduct = apiContext.api.apiType === 'APIProduct';
+    let isEndpointAvailable;
+    let isPrototyped;
+    if (isAPIProduct) {
+        isEndpointAvailable = false;
+        isPrototyped = false;
+    } else {
+        isEndpointAvailable = apiContext.api.endpointConfig !== null;
+        isPrototyped = apiContext.api.endpointConfig !== null
+             && apiContext.api.endpointConfig.implementation_status === 'prototyped';
+    }
+
     const haveMultiLevelSecurity = securityScheme.includes(API_SECURITY_MUTUAL_SSL)
         && (securityScheme.includes(API_SECURITY_BASIC_AUTH)
         || securityScheme.includes(
@@ -108,7 +117,7 @@ export default function APISecurity(props) {
     return (
         <>
             <Grid container spacing={2} alignItems='flex-start'>
-                {(!isEndpointAvailable || (isEndpointAvailable && !isPrototyped))
+                {(isAPIProduct || (!isEndpointAvailable || (isEndpointAvailable && !isPrototyped)))
                 && (
                     <>
                         <TransportLevel
