@@ -115,8 +115,8 @@ x-wso2-security:
         key: apim:tenantInfo
       - description: ""
         roles: admin
-        name: apim:api_category
-        key: apim:api_category
+        name: apim:admin_operations
+        key: apim:admin_operations
 
 ######################################################
 # The "API Collection" resource APIs
@@ -2635,7 +2635,7 @@ paths:
 # Retrieve all categories
 #-----------------------------------------------------
     get:
-      x-scope: apim:api_category
+      x-scope: apim:admin_operations
       x-wso2-request: |
               GET https://localhost:9443/api/am/admin/v0.15/api-categories
               Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -2658,7 +2658,7 @@ paths:
 # Add a Category
 #-----------------------------------------------------
     post:
-      x-scope: apim:api_category
+      x-scope: apim:admin_operations
       x-wso2-curl: "curl -k -X POST -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://apis.wso2.com/api/am/admin/v0.15/api-categories -d @data.json"
       x-wso2-request: "POST https://localhost:9443/api/am/admin/v0.15/api-categories\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n -d  {\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n }"
       x-wso2-response: "HTTP/1.1 201 Created\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\":1,\r\n   \"list\":[\r\n      {\r\n         \"id\":\"463e2c9f-5e99-43c3-a66e-de7e0f367373\",\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n      }\r\n   ]\r\n}"
@@ -2699,7 +2699,7 @@ paths:
   # Update a Category
   #-----------------------------------------------------
     put:
-      x-scope: apim:api_category
+      x-scope: apim:admin_operations
       x-wso2-curl: "curl -k -X PUT -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.15/api-categories/d7cf8523-9180-4255-84fa-6cb171c1f779 -d @data.json"
       x-wso2-request: "PUT https://localhost:9443/api/am/admin/v0.15/api-categories/d7cf8523-9180-4255-84fa-6cb171c1f779\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n   {\r\n       \"name\":\"update_internal\",\r\n	\"description\":\"Updated label used for internal purpose\",\r\n	\"accessUrls\":[\r\n	  \"https://localhost:9095\"\r\n         ]\r\n     }"
       x-wso2-response: "HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\":1,\r\n   \"list\":[\r\n      {\r\n         \"id\":\"463e2c9f-5e99-43c3-a66e-de7e0f367373\",\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n      }\r\n   ]\r\n}"
@@ -2740,7 +2740,7 @@ paths:
   # Delete an API Category
   #-----------------------------------------------------
     delete:
-      x-scope: apim:api_category
+      x-scope: apim:admin_operations
       x-wso2-response: "HTTP/1.1 200 OK"
       summary: Delete an API Category
       description: |

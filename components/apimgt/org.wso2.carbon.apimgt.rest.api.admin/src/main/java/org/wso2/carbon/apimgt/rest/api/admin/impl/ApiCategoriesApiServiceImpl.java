@@ -14,6 +14,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.dto.APICategoryListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.APICategoryMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -59,6 +60,8 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
             String userName = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+            int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
             APICategory apiCategoryToUpdate = APICategoryMappingUtil.fromCategoryDTOToCategory(body);
             APICategory apiCategoryOriginal = APICategoryUtil.getAPICategoryByID(apiCategoryId);
             if (apiCategoryOriginal == null) {
@@ -70,6 +73,15 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
             //Override several properties as they are not allowed to be updated
             apiCategoryToUpdate.setId(apiCategoryOriginal.getId());
             apiCategoryToUpdate.setTenantID(apiCategoryOriginal.getTenantID());
+
+            //We allow to update API Category name given that the new category name is not taken yet
+            String oldName = apiCategoryOriginal.getName();
+            String updatedName = apiCategoryToUpdate.getName();
+            if (!oldName.equals(updatedName) && APICategoryUtil.isCategoryNameExists(updatedName, tenantID)) {
+                String errorMsg = "An API category already exists by the new API category name :" + updatedName;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg);
+            }
 
             apiAdmin.updateCategory(apiCategoryToUpdate, userName);
             APICategory updatedAPICategory = APICategoryUtil.getAPICategoryByID(apiCategoryId);

@@ -293,14 +293,19 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     public void updateCategory(APICategory apiCategory, String userName) throws APIManagementException {
-        int tenantID = APIUtil.getTenantId(userName);
-        if (APICategoryUtil.isCategoryNameExists(apiCategory.getName(), tenantID)) {
-            APIUtil.handleException("Category with name '" + apiCategory.getName() + "' already exists, hence cannot update.");
-        }
         apiMgtDAO.updateCategory(apiCategory);
     }
 
     public void deleteCategory(String categoryID) throws APIManagementException {
         apiMgtDAO.deleteCategory(categoryID);
+    }
+
+    public List<APICategory> getAllAPICategories(String tenantDomain) throws APIManagementException {
+        int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        return apiMgtDAO.getAllCategories(tenantID);
+    }
+
+    public boolean isCategoryNameExists(String categoryName, String uuid, int tenantID) throws APIManagementException {
+        return ApiMgtDAO.getInstance().isAPICategoryNameExists(categoryName, uuid, tenantID);
     }
 }

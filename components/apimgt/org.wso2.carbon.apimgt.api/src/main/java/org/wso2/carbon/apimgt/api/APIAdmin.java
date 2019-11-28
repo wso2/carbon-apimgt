@@ -148,7 +148,17 @@ public interface APIAdmin  {
      * @param categoryID
      * @throws APIManagementException
      */
-    void deleteCategory(String categoryID) throws APIManagementException ;
+    void deleteCategory(String categoryID) throws APIManagementException;
+
+    /**
+     * Checks whether an api category exists by the given name
+     *
+     * @param categoryName
+     * @param tenantID
+     * @return true if an api category exists by the given category name
+     * @throws APIManagementException
+     */
+    boolean isCategoryNameExists(String categoryName, String uuid, int tenantID) throws APIManagementException;
 
     /**
      * The method converts the date into timestamp

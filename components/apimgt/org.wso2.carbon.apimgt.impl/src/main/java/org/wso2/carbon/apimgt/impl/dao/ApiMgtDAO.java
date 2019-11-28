@@ -14393,6 +14393,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to retrieve API categories for tenant " + tenantID, e);
         }
+
         return categoriesList;
     }
 
@@ -14421,6 +14422,41 @@ public class ApiMgtDAO {
         }
         return false;
     }
+
+    /**
+     * Checks whether the given category name is already available under given tenant domain with any UUID other than the given UUID
+     *
+     * @param categoryName
+     * @param uuid
+     * @param tenantID
+     * @return
+     */
+    public boolean isAPICategoryNameExists(String categoryName, String uuid, int tenantID) throws APIManagementException {
+        String sql = SQLConstants.IS_API_CATEGORY_NAME_EXISTS;
+        if (uuid != null) {
+            sql = SQLConstants.IS_API_CATEGORY_NAME_EXISTS_FOR_ANOTHER_UUID;
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, categoryName);
+            statement.setInt(2, tenantID);
+            if (uuid != null) {
+                statement.setString(3, uuid);
+            }
+
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt("API_CATEGORY_COUNT");
+                if (count > 0) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check whether API category name : " + categoryName + " exists", e);
+        }
+        return false;
+    }
+
 
     public APICategory getAPICategoryByID(String apiCategoryID) throws APIManagementException {
         APICategory apiCategory = null;

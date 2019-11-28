@@ -193,7 +193,7 @@
         "Roles": "admin"
       },
       {
-        "Name": "apim:api_category",
+        "Name": "apim:admin_operations",
         "Roles": "admin"
       }
     ]

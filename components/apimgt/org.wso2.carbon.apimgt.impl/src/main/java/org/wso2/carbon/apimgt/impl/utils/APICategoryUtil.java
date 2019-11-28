@@ -47,4 +47,8 @@ public class APICategoryUtil {
         APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(username);
         return null;
     }
+
+    public static List<APICategory> getAllAPICategories(int tenantID) throws APIManagementException {
+        return ApiMgtDAO.getInstance().getAllCategories(tenantID);
+    }
 }
