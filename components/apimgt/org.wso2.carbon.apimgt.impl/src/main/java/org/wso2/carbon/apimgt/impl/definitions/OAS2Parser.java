@@ -574,7 +574,10 @@ public class OAS2Parser extends APIDefinition {
         }
         operation.setVendorExtension(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
         operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
-
+        // AWS Lambda: set arn to swagger
+        if (resource.getAmznResourceName() != null) {
+            operation.setVendorExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME, resource.getAmznResourceName());
+        }
         updateLegacyScopesFromOperation(resource, operation);
         String oauth2SchemeKey = APIConstants.SWAGGER_APIM_DEFAULT_SECURITY;
         List<Map<String, List<String>>> security = operation.getSecurity();

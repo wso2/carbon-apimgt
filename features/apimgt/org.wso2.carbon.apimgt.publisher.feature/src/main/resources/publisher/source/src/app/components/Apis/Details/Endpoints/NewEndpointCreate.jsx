@@ -150,6 +150,19 @@ function NewEndpointCreate(props) {
             options: null,
             disabled: [],
         },
+        {
+            type: 'awslambda',
+            name: intl.formatMessage({
+                id: 'Apis.Details.Endpoints.NewEndpointCreate.create.awslambda.endpoint',
+                defaultMessage: 'AWS Lambda Endpoint',
+            }),
+            description: intl.formatMessage({
+                id: 'Apis.Details.Endpoints.NewEndpointCreate.create.awslambda.endpoint.description',
+                defaultMessage: 'If you need to invoke AWS Lambda functions through API gateway.',
+            }),
+            options: null,
+            disabled: ['SOAPTOREST', 'GRAPHQL'],
+        },
     ];
 
     return (
