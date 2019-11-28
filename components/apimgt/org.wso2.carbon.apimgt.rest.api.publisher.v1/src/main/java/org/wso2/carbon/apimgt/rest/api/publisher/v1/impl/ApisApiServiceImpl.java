@@ -3422,7 +3422,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //add the generated swagger definition to SOAP
             APIDefinition oasParser = new OAS2Parser();
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
-            String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
+            String apiDefinition = generateSOAPAPIDefinition(oasParser.generateAPIDefinition(swaggerData));
             apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition);
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
@@ -3432,6 +3432,26 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError("Error while importing WSDL to create a SOAP API", e, log);
         }
         return null;
+    }
+
+    /**
+     * Add soap parameters to the default soap api resource.
+     *
+     * @param apiDefinition The API definition string.
+     * @return Modified api definition.
+     * */
+    private String generateSOAPAPIDefinition(String apiDefinition) throws APIManagementException {
+        JSONParser jsonParser = new JSONParser();
+        JSONObject apiJson;
+        JSONObject paths;
+        try {
+            apiJson = (JSONObject) jsonParser.parse(apiDefinition);
+            paths = (JSONObject) jsonParser.parse(RestApiPublisherUtils.getSOAPOperation());
+            apiJson.replace("paths", paths);
+            return apiJson.toJSONString();
+        } catch (ParseException e) {
+            throw new APIManagementException("Error while parsing the api definition.", e);
+        }
     }
 
     /**
