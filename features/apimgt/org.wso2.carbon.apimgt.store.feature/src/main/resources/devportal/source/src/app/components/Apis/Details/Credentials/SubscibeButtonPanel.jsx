@@ -27,7 +27,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 const styles = theme => ({
     subscribeButtons: {
         display: 'flex',
-        paddingTop: theme.spacing.unit * 2,
+        paddingTop: theme.spacing(2),
     },
     buttonElm: {
         height: 28,

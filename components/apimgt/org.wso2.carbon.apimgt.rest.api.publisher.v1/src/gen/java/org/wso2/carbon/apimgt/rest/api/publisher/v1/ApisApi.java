@@ -63,6 +63,22 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
 
     @GET
+    @Path("/{apiId}/amznResourceNames")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve the ARNs of AWS Lambda functions", notes = "This operation can be use to retrieve ARNs of AWS Lambda function for a given AWS credentials. ", response = String.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "AWS Lambda (Individual)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Requested ARN List of the API is returned ", response = String.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested resource does not exist. ", response = ErrorDTO.class) })
+    public Response apisApiIdAmznResourceNamesGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.apisApiIdAmznResourceNamesGet(apiId, securityContext);
+    }
+
+    @GET
     @Path("/{apiId}/auditapi")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })

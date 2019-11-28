@@ -19,7 +19,7 @@
 
     var log = new Log("Logout Request Function");
     include("/services/constants.jag");
-    var app = require("/site/public/theme/settings.js").Settings.app;
+    var app = require("/site/public/conf/settings.js").AppConfig.app;
 
     var idTokenP1 = request.getCookie("AM_ID_TOKEN_DEFAULT_P1").value;
     var idTokenP2 = request.getCookie("AM_ID_TOKEN_DEFAULT_P2").value;

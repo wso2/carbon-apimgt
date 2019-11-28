@@ -20,7 +20,7 @@ import { unwrap } from '@material-ui/core/test-utils';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 
-import Configurations from 'Config';
+import Themes from 'Themes';
 import AppErrorBoundary from './AppErrorBoundary';
 
 const UnwrappedAppErrorBoundary = unwrap(AppErrorBoundary);
@@ -34,7 +34,7 @@ describe('AppErrorBoundary test', () => {
 
     test('should return error boundary HTML', () => {
         const message = 'Error boundary test error';
-        const { light } = Configurations.themes;
+        const { light } = Themes;
         const TestError = () => {
             throw new Error(message);
         };

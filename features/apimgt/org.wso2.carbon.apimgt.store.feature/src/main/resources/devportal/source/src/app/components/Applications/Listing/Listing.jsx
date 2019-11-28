@@ -279,7 +279,7 @@ class Listing extends Component {
     toggleDeleteConfirmation = (event) => {
         let id = '';
         if (event) {
-            id = event.currentTarget.getAttribute('data-appId');
+            id = event.currentTarget.getAttribute('data-appid');
         }
         this.setState(({ isDeleteOpen }) => ({ isDeleteOpen: !isDeleteOpen, deletingId: id }));
     }
@@ -381,7 +381,7 @@ class Listing extends Component {
                                         <TableFooter>
                                             <TableRow>
                                                 <TablePagination
-                                                    component='div'
+                                                    component='td'
                                                     count={totalApps}
                                                     rowsPerPage={rowsPerPage}
                                                     rowsPerPageOptions={[5, 10, 15]}
@@ -443,7 +443,7 @@ Listing.propTypes = {
         appContent: PropTypes.string,
     }).isRequired,
     theme: PropTypes.shape({}).isRequired,
-    intl: PropTypes.func.isRequired,
+    intl: PropTypes.shape({}).isRequired,
     history: PropTypes.shape({
         push: PropTypes.func,
     }).isRequired,

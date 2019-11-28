@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -39,6 +41,8 @@ import java.util.List;
  *
  */
 public class SubscriptionMappingUtil {
+
+    private static final Log log = LogFactory.getLog(SubscriptionMappingUtil.class);
 
     /** Converts a SubscribedAPI object into SubscriptionDTO
      *
@@ -97,7 +101,11 @@ public class SubscriptionMappingUtil {
         }
 
         for (SubscribedAPI subscription : subscriptions) {
-            subscriptionDTOs.add(fromSubscriptionToDTO(subscription));
+            try {
+                subscriptionDTOs.add(fromSubscriptionToDTO(subscription));
+            } catch (APIManagementException e) {
+                log.error("Error while obtaining api metadata", e);
+            }
         }
 
         subscriptionListDTO.setCount(subscriptionDTOs.size());

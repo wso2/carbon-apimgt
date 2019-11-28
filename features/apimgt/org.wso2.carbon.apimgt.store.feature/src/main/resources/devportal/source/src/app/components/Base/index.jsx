@@ -53,7 +53,7 @@ const styles = (theme) => {
             background: theme.custom.appBar.background,
         },
         icon: {
-            marginRight: theme.spacing.unit * 2,
+            marginRight: theme.spacing(2),
         },
         menuIcon: {
             color: theme.palette.getContrastText(theme.custom.appBar.background),
@@ -87,7 +87,7 @@ const styles = (theme) => {
         footer: {
             background: theme.custom.footer.background,
             color: theme.custom.footer.color,
-            paddingLeft: theme.spacing.unit * 3,
+            paddingLeft: theme.spacing(3),
             height: 50,
             alignItems: 'center',
             display: 'flex',

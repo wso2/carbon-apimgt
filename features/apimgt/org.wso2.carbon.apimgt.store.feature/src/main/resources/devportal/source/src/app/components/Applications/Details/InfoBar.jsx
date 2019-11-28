@@ -54,7 +54,7 @@ const styles = (theme) => {
             borderBottom: 'solid 1px ' + theme.palette.grey.A200,
             display: 'flex',
             alignItems: 'center',
-            paddingLeft: theme.spacing.unit * 2,
+            paddingLeft: theme.spacing(2),
         },
         backIcon: {
             color: theme.palette.primary.main,
@@ -80,12 +80,12 @@ const styles = (theme) => {
         },
         topBar: {
             display: 'flex',
-            paddingBottom: theme.spacing.unit * 2,
+            paddingBottom: theme.spacing(2),
         },
         infoContent: {
             color: theme.palette.getContrastText(mainBack),
             background: mainBack,
-            padding: theme.spacing.unit * 3,
+            padding: theme.spacing(3),
             '& td, & th': {
                 color: theme.palette.getContrastText(mainBack),
             },
@@ -98,7 +98,7 @@ const styles = (theme) => {
         bootstrapRoot: {
             padding: 0,
             'label + &': {
-                marginTop: theme.spacing.unit * 3,
+                marginTop: theme.spacing(3),
             },
         },
         bootstrapInput: {
@@ -163,8 +163,8 @@ const styles = (theme) => {
         verticalDividerStar: {
             borderLeft: 'solid 1px ' + theme.palette.grey.A200,
             height: 40,
-            marginRight: theme.spacing.unit,
-            marginLeft: theme.spacing.unit,
+            marginRight: theme.spacing(1),
+            marginLeft: theme.spacing(1),
         },
         backLink: {
             alignItems: 'center',
@@ -183,7 +183,7 @@ const styles = (theme) => {
             textAlign: 'left',
             justifyContent: 'left',
             display: 'flex',
-            paddingLeft: theme.spacing.unit * 2,
+            paddingLeft: theme.spacing(2),
             cursor: 'pointer',
         },
         buttonOverviewText: {
@@ -348,7 +348,7 @@ class InfoBar extends React.Component {
      */
     render() {
         const {
-            classes, theme, resourceNotFountMessage, applicationId,
+            classes, theme, applicationId,
         } = this.props;
         const {
             application, tierDescription, showOverview, notFound, isDeleteOpen, applicationOwner,
@@ -360,7 +360,16 @@ class InfoBar extends React.Component {
         } = theme;
 
         if (notFound) {
-            return <ResourceNotFound message={resourceNotFountMessage} />;
+            return (
+              <ResourceNotFound
+                message={
+                  <FormattedMessage
+                    id="Applications.Details.InfoBar.listing.resource.not.found"
+                    defaultMessage="Resource Not Fount"
+                  />
+                }
+              />
+            );
         }
 
         if (!application) {
@@ -380,8 +389,8 @@ class InfoBar extends React.Component {
                         </div>
                     </Link>
                     <VerticalDivider height={70} />
-                    <Grid xs={10}>
-                        <div style={{ marginLeft: theme.spacing.unit }}>
+                    <Grid item xs={10}>
+                        <div style={{ marginLeft: theme.spacing(1) }}>
                             <Hidden smUp>
                                 <Typography className={classes.appNameXSmall} variant='h4'>
                                     {application.name}
@@ -413,7 +422,7 @@ class InfoBar extends React.Component {
                         </div>
                     </Grid>
                     <VerticalDivider height={70} />
-                    <Grid xs={1} m={1} className={classes.editButton}>
+                    <Grid item xs={1} m={1} className={classes.editButton}>
                         {isUserOwner ? (
                             <Link to={`/applications/${applicationId}/edit/`} className={classes.editButton}>
                                 <IconButton
@@ -460,7 +469,7 @@ class InfoBar extends React.Component {
                             )}
                     </Grid>
                     <VerticalDivider height={70} />
-                    <Grid xs={1} m={1} className={classes.button}>
+                    <Grid item xs={1} m={1} className={classes.button}>
                         <IconButton
                             onClick={this.handleDeleteConfimation}
                             disabled={AuthManager.getUser().name !== applicationOwner}
@@ -547,11 +556,9 @@ class InfoBar extends React.Component {
         );
     }
 }
-
 InfoBar.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
-    resourceNotFountMessage: PropTypes.string.isRequired,
     applicationId: PropTypes.string.isRequired,
 };
 

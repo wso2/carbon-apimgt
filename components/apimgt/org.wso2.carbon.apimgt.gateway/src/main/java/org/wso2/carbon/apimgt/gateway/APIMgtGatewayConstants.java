@@ -152,6 +152,7 @@ public class APIMgtGatewayConstants {
     public static final String HTTP_REQUEST_METHOD = "HTTP_METHOD_OBJECT";
     public static final String APPLICATION_JSON = "application/json";
     public static final String REST_CONTENT_TYPE = "ContentType";
+    public static final String REST_MESSAGE_TYPE = "messageType";
     public static final String SCHEMA_REFERENCE = "$ref";
     public static final String PATHS = "$..paths..";
     public static final String BODY_CONTENT = "..requestBody.content.application/json.schema";

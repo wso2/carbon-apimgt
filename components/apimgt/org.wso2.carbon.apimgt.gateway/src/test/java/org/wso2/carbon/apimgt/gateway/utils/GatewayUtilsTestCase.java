@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.utils;
 
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.Member;
 import org.apache.axis2.context.ConfigurationContext;
@@ -118,34 +119,6 @@ public class GatewayUtilsTestCase {
         try {
             Mockito.when(resource.getProperty(propertyName)).thenReturn("oldValue");
             GatewayUtils.setRegistryProperty(propertyName, propertyValue, path, "");
-            fail("expected APIManagementException is not thrown when accessing registry");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().startsWith("Error while reading registry resource"));
-        }
-
-    }
-
-    @Test
-    public void testDeleteRegistryProperty() throws RegistryException {
-        Mockito.when(resource.getProperty(propertyName)).thenReturn("bhjb");
-        Mockito.doNothing().when(resource).removeProperty(propertyName);
-
-        try {
-            GatewayUtils.deleteRegistryProperty(propertyName, path, "");
-        } catch (APIManagementException e) {
-            fail("APIManagementException is thrown when accessing registry " + e.getStackTrace());
-        }
-
-        try {
-            GatewayUtils.deleteRegistryProperty(propertyName, path, tenantDomain);
-        } catch (APIManagementException e) {
-            fail("APIManagementException is thrown when accessing registry " + e.getStackTrace());
-        }
-
-        //test for APIManagementException
-        try {
-            Mockito.when(userRegistry.get(path)).thenThrow(new RegistryException(""));
-            GatewayUtils.deleteRegistryProperty(propertyName, path, tenantDomain);
             fail("expected APIManagementException is not thrown when accessing registry");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().startsWith("Error while reading registry resource"));

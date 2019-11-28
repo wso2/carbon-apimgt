@@ -86,8 +86,8 @@ function Background(props) {
 
 Background.propTypes = {
     classes: PropTypes.shape({ svgImage: PropTypes.string }).isRequired,
-    width: PropTypes.shape({}).isRequired,
-    height: PropTypes.shape({}).isRequired,
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
     colorPair: PropTypes.shape({ sub: PropTypes.number, prime: PropTypes.number }).isRequired,
 };
 

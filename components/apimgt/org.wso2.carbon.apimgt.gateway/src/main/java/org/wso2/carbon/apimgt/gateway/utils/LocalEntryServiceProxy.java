@@ -18,26 +18,28 @@
 
 package org.wso2.carbon.apimgt.gateway.utils;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
-import org.wso2.carbon.localentry.stub.types.LocalEntryAdminException;
-import org.wso2.carbon.localentry.stub.types.LocalEntryAdminServiceStub;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.localentry.LocalEntryAdminException;
+import org.wso2.carbon.localentry.service.LocalEntryAdmin;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.rmi.RemoteException;
+import java.util.Arrays;
 
 /**
- * This LocalEntryClient class for operating the synapse localEntries
+ * This LocalEntryServiceProxy class for operating the synapse localEntries
  */
-public class LocalEntryClient {
+public class LocalEntryServiceProxy {
 
-    private LocalEntryAdminServiceStub localEntryAdminServiceStub;
+    private LocalEntryAdmin localEntryAdmin;
 
-    static final String backendURLl = "local:///services/";
     private String tenantDomain;
 
-    public LocalEntryClient(String tenantDomain) throws AxisFault {
+    public LocalEntryServiceProxy(String tenantDomain) {
+
         this.tenantDomain = tenantDomain;
-        localEntryAdminServiceStub = new LocalEntryAdminServiceStub(backendURLl + "LocalEntryAdmin");
+        localEntryAdmin = ServiceReferenceHolder.getInstance().getLocalEntryAdmin();
     }
 
     /**
@@ -48,16 +50,15 @@ public class LocalEntryClient {
      * @throws AxisFault
      */
     public Boolean addLocalEntry(String content) throws AxisFault {
+
         Boolean value;
         try {
             if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                value = localEntryAdminServiceStub.addEntry(content);
+                value = localEntryAdmin.addEntry(content);
             } else {
-                value = localEntryAdminServiceStub.addEntryForTenant(content, tenantDomain);
+                value = localEntryAdmin.addEntryForTenant(content, tenantDomain);
             }
-        } catch (RemoteException e) {
-            throw new AxisFault("Error occurred while generating the response ", e);
-        } catch (LocalEntryAdminException e) {
+        } catch (org.wso2.carbon.localentry.LocalEntryAdminException e) {
             throw new AxisFault("Error occurred while adding the local entry", e);
         }
         return value;
@@ -71,15 +72,14 @@ public class LocalEntryClient {
      * @throws AxisFault
      */
     public Object getEntry(String key) throws AxisFault {
+
         Object localEntryObject;
         try {
             if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                localEntryObject = localEntryAdminServiceStub.getEntry(key);
+                localEntryObject = localEntryAdmin.getEntry(key);
             } else {
-                localEntryObject = localEntryAdminServiceStub.getEntryForTenant(key, tenantDomain);
+                localEntryObject = localEntryAdmin.getEntryForTenant(key, tenantDomain);
             }
-        } catch (RemoteException e) {
-            throw new AxisFault("Error occurred while retrieving the local entry", e);
         } catch (LocalEntryAdminException e) {
             throw new AxisFault("Error occurred while create the admin client", e);
         }
@@ -94,16 +94,46 @@ public class LocalEntryClient {
      * @throws AxisFault
      */
     public boolean deleteEntry(String key) throws AxisFault {
+
         try {
             if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                return localEntryAdminServiceStub.deleteEntry(key);
+                return localEntryAdmin.deleteEntry(key);
             } else {
-                return localEntryAdminServiceStub.deleteEntryForTenant(key, tenantDomain);
+                return localEntryAdmin.deleteEntryForTenant(key, tenantDomain);
             }
-        } catch (RemoteException e) {
-            throw new AxisFault("Error occurred while create the admin client", e);
         } catch (LocalEntryAdminException e) {
             throw new AxisFault("Error occurred while deleting the local entry", e);
         }
+    }
+
+    /**
+     * Check local Entry Existence
+     *
+     * @param key
+     * @return
+     * @throws AxisFault
+     */
+    public boolean isEntryExists(String key) throws AxisFault {
+
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            try {
+                OMElement entry = localEntryAdmin.getEntry(key);
+                if (entry != null) {
+                    return true;
+                }
+            } catch (LocalEntryAdminException e) {
+                return false;
+            }
+        } else {
+            try {
+                OMElement entryForTenant = localEntryAdmin.getEntryForTenant(key, tenantDomain);
+                if (entryForTenant != null) {
+                    return true;
+                }
+            } catch (LocalEntryAdminException e) {
+                return false;
+            }
+        }
+        return false;
     }
 }

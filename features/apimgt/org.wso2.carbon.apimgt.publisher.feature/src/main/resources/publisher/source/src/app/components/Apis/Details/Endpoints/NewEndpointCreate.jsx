@@ -124,6 +124,7 @@ function NewEndpointCreate(props) {
                         id: 'Apis.Details.Endpoints.NewEndpointCreate.prototype.implementation',
                         defaultMessage: 'Prototype Implementation',
                     }),
+                    disabled: ['SOAP', 'SOAPTOREST'],
                 },
                 {
                     type: 'prototyped',
@@ -131,6 +132,7 @@ function NewEndpointCreate(props) {
                         id: 'Apis.Details.Endpoints.NewEndpointCreate.default.prototype.endpoints',
                         defaultMessage: 'Prototype Endpoint',
                     }),
+                    disabled: [],
                 },
             ],
             disabled: ['GRAPHQL'],
@@ -147,6 +149,19 @@ function NewEndpointCreate(props) {
             }),
             options: null,
             disabled: [],
+        },
+        {
+            type: 'awslambda',
+            name: intl.formatMessage({
+                id: 'Apis.Details.Endpoints.NewEndpointCreate.create.awslambda.endpoint',
+                defaultMessage: 'AWS Lambda Endpoint',
+            }),
+            description: intl.formatMessage({
+                id: 'Apis.Details.Endpoints.NewEndpointCreate.create.awslambda.endpoint.description',
+                defaultMessage: 'If you need to invoke AWS Lambda functions through API gateway.',
+            }),
+            options: null,
+            disabled: ['SOAPTOREST', 'GRAPHQL'],
         },
     ];
 
@@ -182,7 +197,8 @@ function NewEndpointCreate(props) {
                                                         value={endpointImplType}
                                                         onChange={(event) => { setImplType(event.target.value); }}
                                                     >
-                                                        {type.options.map((option) => {
+                                                        {type.options.filter((types) => !types.disabled
+                                                            .includes(apiType)).map(((option) => {
                                                             return (
                                                                 <FormControlLabel
                                                                     value={option.type}
@@ -190,7 +206,7 @@ function NewEndpointCreate(props) {
                                                                     label={option.name}
                                                                 />
                                                             );
-                                                        })}
+                                                        }))}
                                                     </RadioGroup>
                                                 </FormControl>
                                             </div>

@@ -19,7 +19,7 @@
 
     include("/services/constants.jag");
     var appUtils = require("/services/utils.js");
-    var app = require("/site/public/theme/settings.js").Settings.app;
+    var app = require("/site/public/conf/settings.js").AppConfig.app;
 
     var log = new Log();
     var cookieToken = request.getCookie("AM_REF_TOKEN_DEFAULT_P2");

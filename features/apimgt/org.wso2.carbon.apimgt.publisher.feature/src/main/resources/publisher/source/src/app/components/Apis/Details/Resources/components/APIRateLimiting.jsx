@@ -63,7 +63,11 @@ function APIRateLimiting(props) {
     // control this component, Then we accept the props as the valid input and update the current state value from props
     useEffect(() => {
         if (onChange) {
-            setApiThrottlingPolicy(currentApiThrottlingPolicy);
+            if (currentApiThrottlingPolicy === '' && apiFromContext.apiThrottlingPolicy) {
+                setApiThrottlingPolicy(apiFromContext.apiThrottlingPolicy);
+            } else {
+                setApiThrottlingPolicy(currentApiThrottlingPolicy);
+            }
         }
     }, [onChange, currentApiThrottlingPolicy]); // Do not expect to change the onChange during the runtime
 
@@ -74,7 +78,8 @@ function APIRateLimiting(props) {
      */
     function updateRateLimitingPolicy(event) {
         // If the selected option is resource, we set the api level rate limiting to null
-        const userSelection = event.target.value === RateLimitingLevels.RESOURCE ? null : '';
+        const userSelection = event.target.value === RateLimitingLevels.RESOURCE
+            ? null : apiFromContext.apiThrottlingPolicy;
         if (onChange) {
             // Assumed controlled component
             onChange(userSelection);

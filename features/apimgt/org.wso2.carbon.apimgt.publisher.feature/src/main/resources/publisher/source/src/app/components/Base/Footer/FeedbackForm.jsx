@@ -89,7 +89,7 @@ export default function FeedbackForm() {
         const check = Date.now();
         const { score = -1, message = '' } = feedback;
         const data = { check, score, message };
-        const response = fetch(Configurations.feedback.serviceURL, {
+        const response = fetch(Configurations.app.feedback.serviceURL, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',

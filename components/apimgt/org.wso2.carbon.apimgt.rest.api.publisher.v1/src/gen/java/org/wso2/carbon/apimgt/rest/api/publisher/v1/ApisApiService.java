@@ -47,6 +47,7 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApisApiService {
+      public Response apisApiIdAmznResourceNamesGet(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdAuditapiGet(String apiId, String accept, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdClientCertificatesAliasContentGet(String apiId, String alias, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdClientCertificatesAliasDelete(String alias, String apiId, MessageContext messageContext) throws APIManagementException;

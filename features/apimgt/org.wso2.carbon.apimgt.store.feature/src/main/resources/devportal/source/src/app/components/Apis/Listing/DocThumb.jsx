@@ -26,7 +26,6 @@ import classNames from 'classnames';
 import { FormattedMessage } from 'react-intl';
 import MaterialIcons from 'MaterialIcons';
 import CONSTS from 'AppData/Constants';
-import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import ImageGenerator from './ImageGenerator';
 import Api from '../../../data/api';
 import { ApiContext } from '../Details/ApiContext';
@@ -38,9 +37,9 @@ import { ApiContext } from '../Details/ApiContext';
  */
 const styles = theme => ({
     thumbContent: {
-        width: theme.custom.thumbnail.width - theme.spacing.unit,
+        width: theme.custom.thumbnail.width - theme.spacing(1),
         backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing.unit,
+        padding: theme.spacing(1),
         minHeight: 130,
     },
     thumbLeft: {
@@ -54,7 +53,7 @@ const styles = theme => ({
         display: 'flex',
     },
     thumbHeader: {
-        width: theme.custom.thumbnail.width - theme.spacing.unit,
+        width: theme.custom.thumbnail.width - theme.spacing(1),
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -62,7 +61,7 @@ const styles = theme => ({
         margin: 0,
     },
     contextBox: {
-        width: parseInt((theme.custom.thumbnail.width - theme.spacing.unit) / 2),
+        width: parseInt((theme.custom.thumbnail.width - theme.spacing(1)) / 2),
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -74,7 +73,7 @@ const styles = theme => ({
     thumbWrapper: {
         position: 'relative',
         paddingTop: 20,
-        marginRight: theme.spacing.unit * 2,
+        marginRight: theme.spacing(2),
     },
     deleteIcon: {
         fill: 'red',
@@ -86,7 +85,7 @@ const styles = theme => ({
     imageWrapper: {
         color: theme.palette.text.secondary,
         backgroundColor: theme.palette.background.paper,
-        width: theme.custom.thumbnail.width + theme.spacing.unit,
+        width: theme.custom.thumbnail.width + theme.spacing(1),
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

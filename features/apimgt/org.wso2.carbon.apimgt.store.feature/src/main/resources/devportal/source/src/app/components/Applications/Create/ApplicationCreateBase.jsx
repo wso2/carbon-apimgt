@@ -20,7 +20,7 @@ export default function ApplicationCreateBase(props) {
             Following two grids control the placement of whole create page
             For centering the content better use `container` props, but instead used an empty grid item for flexibility
              */}
-                <Grid item sm={0} md={3} />
+                <Grid item sm={12} md={3} />
                 <Grid item sm={12} md={6}>
                     <Grid container spacing={5}>
                         <Grid item md={12}>

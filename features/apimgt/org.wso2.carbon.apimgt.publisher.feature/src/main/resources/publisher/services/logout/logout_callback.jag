@@ -18,7 +18,7 @@
  */
 
     var log = new Log("Logout Callback Function");
-    var app = require("/site/public/theme/settings.js").Settings.app;
+    var app = require("/site/public/conf/settings.js").AppConfig.app;
     include("/services/constants.jag");
 
     var cookie = {

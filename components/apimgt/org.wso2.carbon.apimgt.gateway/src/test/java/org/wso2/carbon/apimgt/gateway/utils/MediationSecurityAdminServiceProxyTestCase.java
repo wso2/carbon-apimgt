@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.gateway.utils;
 
-import org.apache.axis2.AxisFault;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -26,23 +25,19 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import static org.junit.Assert.fail;
 
 /**
- * Test class for MediationSecurityAdminServiceClient
+ * Test class for MediationSecurityAdminServiceProxy
  */
-public class MediationSecurityAdminServiceClientTestCase {
+public class MediationSecurityAdminServiceProxyTestCase {
 
     @Test
     public void testDoEncryption() {
-        MediationSecurityAdminServiceClient mediationSecurityAdminServiceClient = null;
+        MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy = null;
+        mediationSecurityAdminServiceProxy = new MediationSecurityAdminServiceProxy("abc.com");
         try {
-            mediationSecurityAdminServiceClient = new MediationSecurityAdminServiceClient();
-            try {
-                mediationSecurityAdminServiceClient.doEncryption("abc");
-            } catch (APIManagementException e) {
-                Assert.assertTrue(e.getMessage().startsWith("Failed to encrypt the secured endpoint password,"));
-            }
-
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
+            mediationSecurityAdminServiceProxy.doEncryption("abc");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().startsWith("Failed to encrypt the secured endpoint password,"));
         }
+
     }
 }

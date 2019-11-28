@@ -111,7 +111,6 @@ ImageGenerator.propTypes = {
     width: PropTypes.number,
     fixedIcon: PropTypes.shape({}),
     api: PropTypes.shape({}).isRequired,
-    iconSettings: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
 };
 

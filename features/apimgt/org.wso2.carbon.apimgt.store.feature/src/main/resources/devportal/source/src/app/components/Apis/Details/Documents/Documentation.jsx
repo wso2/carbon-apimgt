@@ -40,23 +40,23 @@ import { PageNotFound } from 'AppComponents/Base/Errors';
 
 const styles = theme => ({
     paper: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         color: theme.palette.text.secondary,
         minHeight: 400,
         position: 'relative',
     },
     paperMenu: {
         color: theme.palette.text.secondary,
-        minHeight: 400 + theme.spacing.unit * 4,
+        minHeight: 400 + theme.spacing(4),
         height: '100%',
     },
     contentWrapper: {
-        paddingLeft: theme.spacing.unit * 3,
-        paddingRight: theme.spacing.unit * 3,
-        paddingTop: theme.spacing.unit * 3,
+        paddingLeft: theme.spacing(3),
+        paddingRight: theme.spacing(3),
+        paddingTop: theme.spacing(3),
     },
     docContent: {
-        paddingTop: theme.spacing.unit,
+        paddingTop: theme.spacing(1),
     },
     parentListItem: {
         borderTop: 'solid 1px #ccc',
@@ -69,7 +69,7 @@ const styles = theme => ({
         paddingTop: 0,
     },
     nested: {
-        paddingLeft: theme.spacing.unit * 3,
+        paddingLeft: theme.spacing(3),
         paddingTop: 3,
         paddingBottom: 3,
     },
@@ -297,7 +297,7 @@ function FullWidthGrid(props) {
                             <Paper className={classes.paperMenu}>
                                 <List component='nav' className={classes.listRoot}>
                                     {documentList.map((type, indexA) => (
-                                        <React.Fragment>
+                                        <React.Fragment key={indexA}>
                                             <ListItem className={classes.parentListItem}>
                                                 <ListItemIcon classes={{ root: classes.listItemRoot }}>
                                                     <CustomIcon strokeColor='#444' width={24} height={24} icon='docs' />
@@ -322,16 +322,19 @@ function FullWidthGrid(props) {
                                                             onClick={event =>
                                                                 handleListItemClick(event, indexA, indexB, doc)
                                                             }
+                                                            key={indexB}
                                                         >
                                                             <ListItemIcon classes={{ root: classes.listItemRoot }}>
-                                                                {doc.sourceType === 'MARKDOWN' && <Icon>code</Icon>}
-                                                                {doc.sourceType === 'INLINE' && (
-                                                                    <Icon>description</Icon>
-                                                                )}
-                                                                {doc.sourceType === 'URL' && <Icon>open_in_new</Icon>}
-                                                                {doc.sourceType === 'FILE' && (
-                                                                    <Icon>arrow_downward</Icon>
-                                                                )}
+                                                                <React.Fragment>
+                                                                    {doc.sourceType === 'MARKDOWN' && <Icon>code</Icon>}
+                                                                    {doc.sourceType === 'INLINE' && (
+                                                                        <Icon>description</Icon>
+                                                                    )}
+                                                                    {doc.sourceType === 'URL' && <Icon>open_in_new</Icon>}
+                                                                    {doc.sourceType === 'FILE' && (
+                                                                        <Icon>arrow_downward</Icon>
+                                                                    )}
+                                                                </React.Fragment>
                                                             </ListItemIcon>
                                                             <ListItemText
                                                                 inset

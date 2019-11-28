@@ -98,7 +98,7 @@ SwaggerUI.defaultProps = {
 };
 
 SwaggerUI.propTypes = {
-    spec: PropTypes.oneOf([PropTypes.string, PropTypes.object]),
+    spec: PropTypes.shape({}),
     url: PropTypes.string,
     defaultModelsExpandDepth: PropTypes.number,
     requestInterceptor: PropTypes.func,
