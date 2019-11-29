@@ -47,12 +47,12 @@ public class CacheInvalidator {
 
     private static final Log log = LogFactory.getLog(CacheInvalidator.class);
 
-
     // Cached Thread pool was used, since removing/adding subscriptions is not a frequent operation,
     // and we don't want a fix number of threads running all the time.
     private Executor cacheInvalidationPool = Executors.newCachedThreadPool(new ThreadFactory() {
         @Override
         public Thread newThread(Runnable r) {
+
             Thread thread = new Thread(r);
             thread.setName("Store-CacheInvalidation");
             return thread;
@@ -60,13 +60,16 @@ public class CacheInvalidator {
     });
 
     private CacheInvalidator() {
+
     }
 
     private static class CacheInvalidationHolder {
+
         private static final CacheInvalidator INSTANCE = new CacheInvalidator();
     }
 
     public static CacheInvalidator getInstance() {
+
         return CacheInvalidationHolder.INSTANCE;
     }
 
@@ -76,6 +79,7 @@ public class CacheInvalidator {
      * @param appId
      */
     public void invalidateCacheForApp(int appId) {
+
         CacheInvalidationTask task = new CacheInvalidationTask();
         task.setAppId(appId);
         cacheInvalidationPool.execute(task);
@@ -86,6 +90,7 @@ public class CacheInvalidator {
         private int appId = -1;
 
         public void setAppId(int appId) {
+
             this.appId = appId;
         }
 
@@ -122,29 +127,10 @@ public class CacheInvalidator {
                 return;
             }
 
-            Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
-
-            for (Environment environment : gatewayEnvs.values()) {
-                try {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Started invalidation tokens for environment: " + environment.getName());
-                    }
-                    APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
-                    client.invalidateCachedTokens(activeTokens);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Successfully called AdminService for revoking tokens : " + environment.getName());
-                    }
-                } catch (AxisFault axisFault) {
-                    //log and ignore since we do not have to halt the user operation due to cache invalidation failures.
-                    log.error("Error occurred while invalidating Token Cache for environment " + environment.getName(),
-                              axisFault);
-                }
-            }
-
+            APIAuthenticationAdminClient client = new APIAuthenticationAdminClient();
+            client.invalidateCachedTokens(activeTokens);
             return;
 
         }
     }
-
-
 }

@@ -31,6 +31,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService;
+import org.wso2.carbon.apimgt.gateway.service.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.jms.listener.JMSListenerShutDownService;
@@ -143,6 +144,23 @@ public class JMSListenerComponent implements ServiceListener {
     protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService configurationService) {
         log.debug("Setting APIM Configuration Service");
         ServiceReferenceHolder.getInstance().setAPIMConfigurationService(null);
+    }
+    @Reference(
+            name = "api.manager.cache.invalidation.service",
+            service = org.wso2.carbon.apimgt.gateway.service.CacheInvalidationService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetCacheInvalidationService")
+
+    protected void setCacheInvalidationService(CacheInvalidationService cacheInvalidationService) {
+        log.debug("Setting Cache Invalidation Service");
+        ServiceReferenceHolder.getInstance().setCacheInvalidationService(cacheInvalidationService);
+
+    }
+    protected void unsetCacheInvalidationService(CacheInvalidationService cacheInvalidationService){
+        log.debug("Setting Cache Invalidation Service");
+        ServiceReferenceHolder.getInstance().setCacheInvalidationService(null);
+
     }
 
     @Deactivate
