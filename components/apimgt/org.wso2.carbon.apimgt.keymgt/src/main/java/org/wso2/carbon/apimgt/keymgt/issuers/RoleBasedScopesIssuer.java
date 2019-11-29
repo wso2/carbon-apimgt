@@ -120,12 +120,13 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
                 // If GrantType is SAML20_BEARER and CHECK_ROLES_FROM_SAML_ASSERTION is true,
                 // use user roles from assertion or from JWT otherwise use roles from userstore.
                 String isSAML2Enabled = System.getProperty(ResourceConstants.CHECK_ROLES_FROM_SAML_ASSERTION);
-                String isValidateScopeRolesFromUserStore = System.getProperty(ResourceConstants.VALIDATE_SCOPE_ROLES_FROM_USERSTORE);
+                String isRetrieveRolesFromUserStoreForScopeValidation = System
+                        .getProperty(ResourceConstants.RETRIEVE_ROLES_FROM_USERSTORE_FOR_SCOPE_VALIDATION);
                 if (GrantType.SAML20_BEARER.toString().equals(grantType) && Boolean.parseBoolean(isSAML2Enabled)) {
                     Assertion assertion = (Assertion) tokReqMsgCtx.getProperty(ResourceConstants.SAML2_ASSERTION);
                     userRoles = getRolesFromAssertion(assertion);
-                } else if (JWTConstants.OAUTH_JWT_BEARER_GRANT_TYPE.equals(grantType)
-                        && !(Boolean.parseBoolean(isValidateScopeRolesFromUserStore))) {
+                } else if (JWTConstants.OAUTH_JWT_BEARER_GRANT_TYPE.equals(grantType) && !(Boolean
+                        .parseBoolean(isRetrieveRolesFromUserStoreForScopeValidation))) {
                     AuthenticatedUser user = tokReqMsgCtx.getAuthorizedUser();
                     Map<ClaimMapping, String> userAttributes = user.getUserAttributes();
                     userRoles = getRolesFromUserAttribute(userAttributes,

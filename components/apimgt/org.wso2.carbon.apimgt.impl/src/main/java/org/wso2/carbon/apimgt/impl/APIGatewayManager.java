@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import io.swagger.annotations.Api;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -208,7 +209,11 @@ public class APIGatewayManager {
                             .equalsIgnoreCase(api.getImplementation())) {
                         String apiConfig = builder.getConfigStringForTemplate(environment);
                         gatewayAPIDTO.setApiDefinition(apiConfig);
-                        addEndpoints(api, builder, gatewayAPIDTO);
+                        JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
+                        if (!endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                                .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
+                            addEndpoints(api, builder, gatewayAPIDTO);
+                        }
                     }
 
                     if (api.isDefaultVersion()) {
@@ -410,7 +415,8 @@ public class APIGatewayManager {
                         definition.replaceAll("&(?!amp;)", "&amp;").
                                 replaceAll("<", "&lt;").replaceAll(">", "&gt;")
                         + "</localEntry>");
-
+                productAPIDto.setLocalEntriesToBeAdd(addGatewayContentToList(productLocalEntry,
+                        productAPIDto.getLocalEntriesToBeAdd()));
                 // If the Gateway type is 'production' and a production url has
                 // not been specified
                 // Or if the Gateway type is 'sandbox' and a sandbox url has not

@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -15,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import { Route, Switch, Redirect, Link, withRouter } from 'react-router-dom';
+import {
+    Route, Switch, Redirect, Link, withRouter,
+} from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
-import Loadable from 'react-loadable';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Api from 'AppData/api';
 import AuthManager from 'AppData/AuthManager';
@@ -35,65 +37,21 @@ import { ApiContext } from './ApiContext';
 import Progress from '../../Shared/Progress';
 import Wizard from './Credentials/Wizard/Wizard';
 
-const LoadableSwitch = withRouter(Loadable.Map({
-    loader: {
-        ApiConsole: () =>
-                import(
-                    // eslint-disable-line function-paren-newline
-                    /* webpackChunkName: "ApiConsole" */
-                    /* webpackPrefetch: true */
-                    // eslint-disable-next-line comma-dangle
-                    './ApiConsole/ApiConsole'),
-        Overview: () =>
-                import(
-                    // eslint-disable-line function-paren-newline
-                    /* webpackChunkName: "Overview" */
-                    /* webpackPrefetch: true */
-                    // eslint-disable-next-line comma-dangle
-                    './Overview'),
-        Documentation: () =>
-                import(
-                    // eslint-disable-line function-paren-newline
-                    /* webpackChunkName: "Documentation" */
-                    /* webpackPrefetch: true */
-                    // eslint-disable-next-line comma-dangle
-                    './Documents/Documentation'),
-        Credentials: () =>
-                import(
-                    // eslint-disable-line function-paren-newline
-                    /* webpackChunkName: "Credentials" */
-                    /* webpackPrefetch: true */
-                    // eslint-disable-next-line comma-dangle
-                    './Credentials/Credentials'),
-        Comments: () =>
-                import(
-                    // eslint-disable-line function-paren-newline
-                    /* webpackChunkName: "Comments" */
-                    /* webpackPrefetch: true */
-                    // eslint-disable-next-line comma-dangle
-                    './Comments/Comments'),
-        Sdk: () =>
-                import(
-                    // eslint-disable-line function-paren-newline
-                    /* webpackChunkName: "Sdk" */
-                    /* webpackPrefetch: true */
-                    // eslint-disable-next-line comma-dangle
-                    './Sdk'),
-    },
-    render(loaded, props) {
-        const { match, api } = props;
-        const ApiConsole = loaded.ApiConsole.default;
-        const Overview = loaded.Overview.default;
-        const Documentation = loaded.Documentation.default;
-        const Credentials = loaded.Credentials.default;
-        const Comments = loaded.Comments.default;
-        const Sdk = loaded.Sdk.default;
-        const apiUuid = match.params.api_uuid;
-        const path = '/apis/';
-        const { advertised } = api.advertiseInfo;
-        const redirectURL = path + apiUuid + '/overview';
+const ApiConsole = lazy(() => import('./ApiConsole/ApiConsole' /* webpackChunkName: "APIConsole" */));
+const Overview = lazy(() => import('./Overview' /* webpackChunkName: "APIOverview" */));
+const Documentation = lazy(() => import('./Documents/Documentation' /* webpackChunkName: "APIDocumentation" */));
+const Credentials = lazy(() => import('./Credentials/Credentials' /* webpackChunkName: "APICredentials" */));
+const Comments = lazy(() => import('./Comments/Comments' /* webpackChunkName: "APIComments" */));
+const Sdk = lazy(() => import('./Sdk' /* webpackChunkName: "APISdk" */));
 
-        return (
+const LoadableSwitch = withRouter((props) => {
+    const { match, api } = props;
+    const apiUuid = match.params.api_uuid;
+    const path = '/apis/';
+    const { advertised } = api.advertiseInfo;
+    const redirectURL = path + apiUuid + '/overview';
+    return (
+        <Suspense fallback={<Progress />}>
             <Switch>
                 <Redirect exact from={`/apis/${apiUuid}`} to={redirectURL} />
                 <Route path='/apis/:apiUuid/overview' render={() => <Overview {...props} />} />
@@ -105,16 +63,13 @@ const LoadableSwitch = withRouter(Loadable.Map({
                 {!advertised && <Route path='/apis/:apiUuid/sdk' component={Sdk} />}
                 <Route component={ResourceNotFound} />
             </Switch>
-        );
-    },
-    loading() {
-        return <Progress />;
-    },
-}));
+        </Suspense>
+    );
+});
 
 /**
  *
- *
+ * @returns style object
  * @param {*} theme
  */
 const styles = (theme) => {
@@ -250,7 +205,7 @@ class Details extends React.Component {
 
                 Promise.all([existingSubscriptions, promisedApplications])
                     .then((response) => {
-                        const [subscriptions, applications] = response.map(data => data.obj);
+                        const [subscriptions, applications] = response.map((data) => data.obj);
                         const appIdToNameMapping = applications.list.reduce((acc, cur) => {
                             acc[cur.applicationId] = cur.name;
                             return acc;
@@ -268,9 +223,9 @@ class Details extends React.Component {
 
                         // Removing subscribed applications from all the applications and get
                         // the available applications to subscribe
-                        const subscribedAppIds = subscribedApplications.map(sub => sub.value);
+                        const subscribedAppIds = subscribedApplications.map((sub) => sub.value);
                         const applicationsAvailable = applications.list
-                            .filter(app => !subscribedAppIds.includes(app.applicationId) && app.status === 'APPROVED')
+                            .filter((app) => !subscribedAppIds.includes(app.applicationId) && app.status === 'APPROVED')
                             .map((filteredApp) => {
                                 return {
                                     value: filteredApp.applicationId,
@@ -313,20 +268,20 @@ class Details extends React.Component {
     /**
      *
      *
-     * @param {*} api
      * @memberof Details
      */
-    setDetailsAPI(api) {
-        this.setState({ api });
+    componentDidMount() {
+        this.updateSubscriptionData();
     }
 
     /**
      *
      *
+     * @param {*} api
      * @memberof Details
      */
-    componentDidMount() {
-        this.updateSubscriptionData();
+    setDetailsAPI(api) {
+        this.setState({ api });
     }
 
     /**
@@ -393,9 +348,9 @@ class Details extends React.Component {
                         to={pathPrefix + 'overview'}
                     />
                     {!api.advertiseInfo.advertised && (
-                        <React.Fragment>
+                        <>
                             {user && showCredentials && (
-                                <React.Fragment>
+                                <>
                                     <LeftMenuItem
                                         text={
                                             <FormattedMessage
@@ -407,7 +362,7 @@ class Details extends React.Component {
                                         iconText='credentials'
                                         to={pathPrefix + 'credentials'}
                                     />
-                                </React.Fragment>
+                                </>
                             )}
                             {showComments && (
                                 <LeftMenuItem
@@ -427,14 +382,16 @@ class Details extends React.Component {
                                     to={pathPrefix + 'test'}
                                 />
                             )}
-                        </React.Fragment>
+                        </>
                     )}
-                    {showDocuments && <LeftMenuItem
-                        text={<FormattedMessage id='Apis.Details.index.documentation' defaultMessage='Documentation' />}
-                        route='documents'
-                        iconText='docs'
-                        to={pathPrefix + 'documents'}
-                    />}
+                    {showDocuments && (
+                        <LeftMenuItem
+                            text={<FormattedMessage id='Apis.Details.index.documentation' defaultMessage='Documentation' />}
+                            route='documents'
+                            iconText='docs'
+                            to={pathPrefix + 'documents'}
+                        />
+                    )}
                     {!api.advertiseInfo.advertised && api.type !== 'WS' && showSdks && (
                         <LeftMenuItem
                             text={<FormattedMessage id='Apis.Details.index.sdk' defaultMessage='SDKs' />}
@@ -445,7 +402,7 @@ class Details extends React.Component {
                     )}
                 </div>
                 <div className={classes.content}>
-                    <InfoBar apiId={apiUuid} innerRef={node => (this.infoBar = node)} intl={intl} {...this.props} />
+                    <InfoBar apiId={apiUuid} innerRef={(node) => (this.infoBar = node)} intl={intl} {...this.props} />
                     <div
                         className={classNames(
                             { [classes.contentLoader]: position === 'horizontal' },
@@ -457,8 +414,8 @@ class Details extends React.Component {
                 </div>
             </ApiContext.Provider>
         ) : (
-            <div className='apim-dual-ring' />
-        );
+                <div className='apim-dual-ring' />
+            );
     }
 }
 

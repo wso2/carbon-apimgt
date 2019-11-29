@@ -22,7 +22,7 @@ import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
 import getMockedModel, { getAllScopes } from 'AppTests/Utils/MockAPIModel.js';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
-import Configurations from 'Config';
+import Themes from 'Themes';
 import { MemoryRouter } from 'react-router-dom';
 import ScopeValidation from 'AppData/ScopeValidation';
 import AuthManager from 'AppData/AuthManager';
@@ -48,7 +48,7 @@ jest.mock('AppData/api.js', () => {
     Object.assign(mockedAPI, OriginalAPI.default);
     return mockedAPI;
 });
-const { light } = Configurations.themes;
+const { light } = Themes;
 
 const mockedHasScopes = jest.fn();
 const mockedAll = jest.fn();

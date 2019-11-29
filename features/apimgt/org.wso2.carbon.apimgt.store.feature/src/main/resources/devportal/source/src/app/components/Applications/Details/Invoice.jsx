@@ -16,12 +16,12 @@
  * under the License.
  */
 
-import React, { useState} from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
-import MUIDataTable from "mui-datatables";
+import MUIDataTable from 'mui-datatables';
 
 import { FormattedMessage } from 'react-intl';
 import Subscription from 'AppData/Subscription';
@@ -30,7 +30,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 
-const columns = ["Name", "Value"];
+const columns = ['Name', 'Value'];
 
 const options = {
     filterType: 'checkbox',
@@ -46,9 +46,9 @@ const options = {
 
 function Invoice(props) {
     const { subscriptionId, isMonetizedAPI, isDynamicUsagePolicy } = props;
-    const [ showPopup, setShowPopup] = useState(false);
-    const [ showErrorPopup, setShowErrorPopup] = useState(false);
-    const [ invoice, setInvoice ] = useState(null);
+    const [showPopup, setShowPopup] = useState(false);
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [invoice, setInvoice] = useState(null);
 
     /**
      * Handle the popup for invoice
@@ -57,14 +57,14 @@ function Invoice(props) {
         setShowPopup(true);
         setInvoice(null);
         const client = new Subscription();
-        const promiseInvoice = client.getMonetizationInvoice(subscriptionId); 
+        const promiseInvoice = client.getMonetizationInvoice(subscriptionId);
         promiseInvoice.then((response) => {
             if (response && response.obj) {
-                let invoiceData = [];
-                const {obj:{properties}} = response;
-                Object.keys(properties).map(invoiveItem => {
-                    let insideArray = [];
-                    insideArray.push (invoiveItem);
+                const invoiceData = [];
+                const { obj: { properties } } = response;
+                Object.keys(properties).map((invoiveItem) => {
+                    const insideArray = [];
+                    insideArray.push(invoiveItem);
                     insideArray.push(properties[invoiveItem]);
                     invoiceData.push(insideArray);
                 });
@@ -74,14 +74,14 @@ function Invoice(props) {
             console.error(error);
             setShowErrorPopup(true);
         });
-    }
+    };
 
     /**
      * Handle closing the popup for invoice
      */
     const handleClose = () => {
         setShowPopup(false);
-    }
+    };
 
     const handleAlertClose = () => {
         setShowErrorPopup(false);
@@ -90,44 +90,46 @@ function Invoice(props) {
     return (
         <React.Fragment>
             <Button
-                variant = 'outlined'
-                size = 'small'
-                color = 'primary'
+                variant='outlined'
+                size='small'
+                color='primary'
                 disabled={false}
-                onClick = {handlePopup}
+                onClick={handlePopup}
             >
                 <FormattedMessage
-                    id = 'Applications.Details.Invoice.view.btn'
-                    defaultMessage = 'View Invoice'
+                    id='Applications.Details.Invoice.view.btn'
+                    defaultMessage='View Invoice'
                 />
             </Button>
-            <Dialog open = {showPopup} onClose = {handleClose} fullWidth = 'true'>
-                {invoice && (<MUIDataTable
-                    title = {"Upcoming Invoice"}
-                    data = {invoice}
-                    columns = {columns}
-                    options = {options}
-                />) }
-            </Dialog>
-            <Dialog open = {showErrorPopup} onClose = {handleAlertClose} fullWidth = 'true'>
-                <DialogTitle>No Data Available</DialogTitle>
-                <DialogContent>
-                    <DialogContentText id="invoice-dialog-description">
+            {invoice ? (
+                <Dialog open={showPopup} onClose={handleClose} fullWidth='true'>
+                    {invoice && (<MUIDataTable
+                        title='Upcoming Invoice'
+                        data={invoice}
+                        columns={columns}
+                        options={options}
+                    />) }
+                </Dialog>
+            ) : (
+                <Dialog open={showErrorPopup} onClose={handleAlertClose} fullWidth='true'>
+                    <DialogTitle>No Data Available</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id='invoice-dialog-description'>
                         Pending invoice data not found for this subscription.
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleAlertClose} color="primary">
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleAlertClose} color='primary'>
                         Close
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                        </Button>
+                    </DialogActions>
+                </Dialog>)}
         </React.Fragment>
-        );
+    );
 }
 
-Invoice.propTypes  = {
+Invoice.propTypes = {
     subscriptionId: PropTypes.string.isRequired,
-}
+};
 
 export default Invoice;

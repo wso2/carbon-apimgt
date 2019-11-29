@@ -118,6 +118,7 @@ import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
@@ -623,6 +624,16 @@ public final class APIUtil {
 
             Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
 
+            // AWS Lambda: get paths
+            OASParserUtil oasParserUtil = new OASParserUtil();
+            String resourceConfigsString = oasParserUtil.getAPIDefinition(apiIdentifier, registry);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject paths = null;
+            if (resourceConfigsString != null) {
+                JSONObject resourceConfigsJSON = (JSONObject) jsonParser.parse(resourceConfigsString);
+                paths = (JSONObject) resourceConfigsJSON.get(APIConstants.SWAGGER_PATHS);
+            }
+
             for (URITemplate uriTemplate : uriTemplates) {
                 String uTemplate = uriTemplate.getUriTemplate();
                 String method = uriTemplate.getHTTPVerb();
@@ -632,6 +643,17 @@ public final class APIUtil {
                 uriTemplate.setScopes(scope);
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
+                // AWS Lambda: set arn to URI template
+                if (paths != null) {
+                    JSONObject path = (JSONObject) paths.get(uTemplate);
+                    if (path != null) {
+                        JSONObject operation = (JSONObject) path.get(method.toLowerCase());
+                        if (operation != null && operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
+                            uriTemplate.setAmznResourceName((String)
+                                    operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+                        }
+                    }
+                }
             }
 
             if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
@@ -9038,6 +9060,7 @@ public final class APIUtil {
             apiProduct.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             apiProduct.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
             apiProduct.setState(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
+            apiProduct.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             apiProduct.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
             apiProduct.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
             apiProduct.setVisibleTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS));

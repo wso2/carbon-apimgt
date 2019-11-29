@@ -20,7 +20,7 @@
     include("/services/constants.jag");
     var appUtils = require("/services/utils.js");
 
-    var app = require("/site/public/theme/settings.js").Settings.app;
+    var app = require("/site/public/conf/settings.js").AppConfig.app;
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var log = new Log("Login Callback Endpoint: ");
 

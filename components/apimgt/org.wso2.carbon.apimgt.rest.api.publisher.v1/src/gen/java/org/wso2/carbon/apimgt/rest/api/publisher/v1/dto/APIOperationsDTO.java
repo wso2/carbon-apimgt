@@ -24,6 +24,7 @@ public class APIOperationsDTO   {
     private String throttlingPolicy = null;
     private List<String> scopes = new ArrayList<>();
     private List<String> usedProductIds = new ArrayList<>();
+    private String amznResourceName = null;
 
   /**
    **/
@@ -144,6 +145,23 @@ public class APIOperationsDTO   {
     this.usedProductIds = usedProductIds;
   }
 
+  /**
+   **/
+  public APIOperationsDTO amznResourceName(String amznResourceName) {
+    this.amznResourceName = amznResourceName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("amznResourceName")
+  public String getAmznResourceName() {
+    return amznResourceName;
+  }
+  public void setAmznResourceName(String amznResourceName) {
+    this.amznResourceName = amznResourceName;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -160,12 +178,13 @@ public class APIOperationsDTO   {
         Objects.equals(authType, apIOperations.authType) &&
         Objects.equals(throttlingPolicy, apIOperations.throttlingPolicy) &&
         Objects.equals(scopes, apIOperations.scopes) &&
-        Objects.equals(usedProductIds, apIOperations.usedProductIds);
+        Objects.equals(usedProductIds, apIOperations.usedProductIds) &&
+        Objects.equals(amznResourceName, apIOperations.amznResourceName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds);
+    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds, amznResourceName);
   }
 
   @Override
@@ -180,6 +199,7 @@ public class APIOperationsDTO   {
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    usedProductIds: ").append(toIndentedString(usedProductIds)).append("\n");
+    sb.append("    amznResourceName: ").append(toIndentedString(amznResourceName)).append("\n");
     sb.append("}");
     return sb.toString();
   }

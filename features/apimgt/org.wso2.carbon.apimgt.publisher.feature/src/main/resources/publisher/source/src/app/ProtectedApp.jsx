@@ -28,7 +28,7 @@ import Base from 'AppComponents/Base';
 import AuthManager from 'AppData/AuthManager';
 import Header from 'AppComponents/Base/Header';
 import Avatar from 'AppComponents/Base/Header/avatar/Avatar';
-import Configurations from 'Config';
+import Themes from 'Themes';
 import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import { IntlProvider } from 'react-intl';
@@ -42,7 +42,7 @@ const DeferredAPIs = () => (
         <Apis />
     </Suspense>
 );
-const theme = createMuiTheme(Configurations.themes.light);
+const theme = createMuiTheme(Themes.light);
 
 /**
  * Language.

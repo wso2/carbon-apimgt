@@ -20,7 +20,7 @@ import React from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
-import Configurations from 'Config';
+import Themes from 'Themes';
 import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import APIs from './Apis';
@@ -31,7 +31,7 @@ jest.mock('./Listing/Listing', () => () => {
     return <div>Testing Listing page</div>;
 });
 
-const { light } = Configurations.themes;
+const { light } = Themes;
 
 describe('Test APIs main routing component', () => {
     test('Should render the APIs routing component in smoke test', () => {

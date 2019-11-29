@@ -133,7 +133,8 @@ public class SearchApiServiceImpl implements SearchApiService {
                 length = (Integer) totalLength;
             }
 
-            resultListDTO.setList(allmatchedResults);
+            List<Object> allmatchedObjectResults = new ArrayList<>(allmatchedResults);
+            resultListDTO.setList(allmatchedObjectResults);
             resultListDTO.setCount(allmatchedResults.size());
             SearchResultMappingUtil.setPaginationParams(resultListDTO, query, offset, limit, length);
 

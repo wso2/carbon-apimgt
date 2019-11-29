@@ -171,12 +171,15 @@ LeftMenuItem.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
     Icon: PropTypes.element,
-    text: PropTypes.shape({}).isRequired,
+    text: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.shape({})
+      ]).isRequired,
     to: PropTypes.string.isRequired,
     route: PropTypes.string,
     iconText: PropTypes.string,
     history: PropTypes.shape({
-        location: PropTypes.shape({}).iisRequired,
+        location: PropTypes.shape({}).isRequired,
     }).isRequired,
 };
 export default withRouter(withStyles(styles, { withTheme: true })(LeftMenuItem));

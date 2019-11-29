@@ -25,7 +25,7 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import SettingsButton from 'AppComponents/Base/Header/settings/SettingsButton';
-
+import Configurations from 'Config';
 import Avatar from './avatar/Avatar';
 import HeaderSearch from './headersearch/HeaderSearch';
 import GlobalNavBar from './navbar/GlobalNavBar';
@@ -119,7 +119,7 @@ class Header extends React.Component {
                         </Hidden>
                         <Link to='/'>
                             <img
-                                src={theme.custom.logo}
+                                src={Configurations.app.context + theme.custom.logo}
                                 alt={theme.custom.title}
                                 style={{ height: theme.custom.logoHeight, width: theme.custom.logoWidth }}
                             />

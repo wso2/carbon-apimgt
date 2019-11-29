@@ -30,7 +30,7 @@ const config = {
         publicPath: 'site/public/dist/',
     },
     watch: false,
-    devtool: 'inline-source-map',
+    devtool: 'source-map',
     resolve: {
         alias: {
             AppData: path.resolve(__dirname, 'source/src/app/data/'),
@@ -88,6 +88,7 @@ const config = {
         Settings: 'Settings',
         MaterialIcons: 'MaterialIcons',
     },
+    plugins: [],
 };
 
 if (process.env.NODE_ENV === 'development') {

@@ -465,7 +465,13 @@ class ApplicationFormHandler extends React.Component {
         );
     }
 }
-
+ApplicationFormHandler.defaultProps = {
+    match: {
+        params: {
+            application_id: null,
+        }
+    }
+}
 ApplicationFormHandler.propTypes = {
     intl: PropTypes.shape({
         formatMessage: PropTypes.func.isRequired,
@@ -475,7 +481,7 @@ ApplicationFormHandler.propTypes = {
     }).isRequired,
     match: PropTypes.shape({
         params: PropTypes.shape({
-            application_id: PropTypes.string.isRequired,
+            application_id: PropTypes.string,
         }).isRequired,
     }).isRequired,
 };

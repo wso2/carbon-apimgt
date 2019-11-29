@@ -16,12 +16,13 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 
 import {
@@ -58,6 +59,19 @@ export default function APISecurity(props) {
         configDispatcher,
         api,
     } = props;
+    const apiContext = useContext(ApiContext);
+    const isAPIProduct = apiContext.api.apiType === 'APIProduct';
+    let isEndpointAvailable;
+    let isPrototyped;
+    if (isAPIProduct) {
+        isEndpointAvailable = false;
+        isPrototyped = false;
+    } else {
+        isEndpointAvailable = apiContext.api.endpointConfig !== null;
+        isPrototyped = apiContext.api.endpointConfig !== null
+             && apiContext.api.endpointConfig.implementation_status === 'prototyped';
+    }
+
     const haveMultiLevelSecurity = securityScheme.includes(API_SECURITY_MUTUAL_SSL)
         && (securityScheme.includes(API_SECURITY_BASIC_AUTH)
         || securityScheme.includes(
@@ -103,25 +117,30 @@ export default function APISecurity(props) {
     return (
         <>
             <Grid container spacing={2} alignItems='flex-start'>
-                <TransportLevel
-                    haveMultiLevelSecurity={haveMultiLevelSecurity}
-                    securityScheme={securityScheme}
-                    configDispatcher={configDispatcher}
-                    api={api}
-                    id={id}
-                />
-                <ApplicationLevel
-                    haveMultiLevelSecurity={haveMultiLevelSecurity}
-                    securityScheme={securityScheme}
-                    api={api}
-                    configDispatcher={configDispatcher}
-                    id={id}
-                />
-                <Grid item>
-                    <span className={classes.error}>
-                        <Validate />
-                    </span>
-                </Grid>
+                {(isAPIProduct || (!isEndpointAvailable || (isEndpointAvailable && !isPrototyped)))
+                && (
+                    <>
+                        <TransportLevel
+                            haveMultiLevelSecurity={haveMultiLevelSecurity}
+                            securityScheme={securityScheme}
+                            configDispatcher={configDispatcher}
+                            api={api}
+                            id={id}
+                        />
+                        <ApplicationLevel
+                            haveMultiLevelSecurity={haveMultiLevelSecurity}
+                            securityScheme={securityScheme}
+                            api={api}
+                            configDispatcher={configDispatcher}
+                            id={id}
+                        />
+                        <Grid item>
+                            <span className={classes.error}>
+                                <Validate />
+                            </span>
+                        </Grid>
+                    </>
+                )}
             </Grid>
         </>
     );
