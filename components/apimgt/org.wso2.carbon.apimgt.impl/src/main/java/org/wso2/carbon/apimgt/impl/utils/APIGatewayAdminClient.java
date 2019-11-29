@@ -22,9 +22,9 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.dto.CredentialDto;
-import org.wso2.carbon.apimgt.api.dto.GatewayAPIDTO;
-import org.wso2.carbon.apimgt.api.dto.GatewayContentDTO;
+import org.wso2.carbon.apimgt.api.gateway.CredentialDto;
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.gateway.stub.APIGatewayAdminStub;
@@ -183,10 +183,10 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         }
     }
 
-    public org.wso2.carbon.apimgt.api.dto.xsd.GatewayAPIDTO convertDto(org.wso2.carbon.apimgt.api.dto.GatewayAPIDTO gatewayAPIDTO) {
+    public org.wso2.carbon.apimgt.api.gateway.xsd.GatewayAPIDTO convertDto(GatewayAPIDTO gatewayAPIDTO) {
 
-        org.wso2.carbon.apimgt.api.dto.xsd.GatewayAPIDTO gatewayAPIDTOStub =
-                new org.wso2.carbon.apimgt.api.dto.xsd.GatewayAPIDTO();
+        org.wso2.carbon.apimgt.api.gateway.xsd.GatewayAPIDTO gatewayAPIDTOStub =
+                new org.wso2.carbon.apimgt.api.gateway.xsd.GatewayAPIDTO();
         gatewayAPIDTOStub.setName(gatewayAPIDTO.getName());
         gatewayAPIDTOStub.setVersion(gatewayAPIDTO.getVersion());
         gatewayAPIDTOStub.setProvider(gatewayAPIDTO.getProvider());
@@ -196,8 +196,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         gatewayAPIDTOStub.setOverride(gatewayAPIDTO.isOverride());
         if (gatewayAPIDTO.getClientCertificatesToBeAdd() != null) {
             for (GatewayContentDTO clientCertificate : gatewayAPIDTO.getClientCertificatesToBeAdd()) {
-                org.wso2.carbon.apimgt.api.dto.xsd.GatewayContentDTO clientCertDto =
-                        new org.wso2.carbon.apimgt.api.dto.xsd.GatewayContentDTO();
+                org.wso2.carbon.apimgt.api.gateway.xsd.GatewayContentDTO clientCertDto =
+                        new org.wso2.carbon.apimgt.api.gateway.xsd.GatewayContentDTO();
                 clientCertDto.setName(clientCertificate.getName());
                 clientCertDto.setContent(clientCertificate.getContent());
                 gatewayAPIDTOStub.addClientCertificatesToBeAdd(clientCertDto);
@@ -210,8 +210,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         }
         if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null) {
             for (GatewayContentDTO endpointEntry : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
-                org.wso2.carbon.apimgt.api.dto.xsd.GatewayContentDTO endpointEntryDto =
-                        new org.wso2.carbon.apimgt.api.dto.xsd.GatewayContentDTO();
+                org.wso2.carbon.apimgt.api.gateway.xsd.GatewayContentDTO endpointEntryDto =
+                        new org.wso2.carbon.apimgt.api.gateway.xsd.GatewayContentDTO();
                 endpointEntryDto.setName(endpointEntry.getName());
                 endpointEntryDto.setContent(endpointEntry.getContent());
                 gatewayAPIDTOStub.addEndpointEntriesToBeAdd(endpointEntryDto);
@@ -224,8 +224,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         }
         if (gatewayAPIDTO.getSequenceToBeAdd() != null) {
             for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
-                org.wso2.carbon.apimgt.api.dto.xsd.GatewayContentDTO sequenceDto =
-                        new org.wso2.carbon.apimgt.api.dto.xsd.GatewayContentDTO();
+                org.wso2.carbon.apimgt.api.gateway.xsd.GatewayContentDTO sequenceDto =
+                        new org.wso2.carbon.apimgt.api.gateway.xsd.GatewayContentDTO();
                 sequenceDto.setName(sequence.getName());
                 sequenceDto.setContent(sequence.getContent());
                 gatewayAPIDTOStub.addSequenceToBeAdd(sequenceDto);
@@ -238,8 +238,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         }
         if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
             for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
-                org.wso2.carbon.apimgt.api.dto.xsd.GatewayContentDTO localEntryDto =
-                        new org.wso2.carbon.apimgt.api.dto.xsd.GatewayContentDTO();
+                org.wso2.carbon.apimgt.api.gateway.xsd.GatewayContentDTO localEntryDto =
+                        new org.wso2.carbon.apimgt.api.gateway.xsd.GatewayContentDTO();
                 localEntryDto.setName(localEntry.getName());
                 localEntryDto.setContent(localEntry.getContent());
                 gatewayAPIDTOStub.addLocalEntriesToBeAdd(localEntryDto);
@@ -253,8 +253,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
 
         if (gatewayAPIDTO.getCredentialsToBeAdd() != null) {
             for (CredentialDto credentialDto : gatewayAPIDTO.getCredentialsToBeAdd()) {
-                org.wso2.carbon.apimgt.api.dto.xsd.CredentialDto credential =
-                        new org.wso2.carbon.apimgt.api.dto.xsd.CredentialDto();
+                org.wso2.carbon.apimgt.api.gateway.xsd.CredentialDto credential =
+                        new org.wso2.carbon.apimgt.api.gateway.xsd.CredentialDto();
                 credential.setAlias(credentialDto.getAlias());
                 credential.setPassword(credentialDto.getPassword());
                 gatewayAPIDTOStub.addCredentialsToBeAdd(credential);
