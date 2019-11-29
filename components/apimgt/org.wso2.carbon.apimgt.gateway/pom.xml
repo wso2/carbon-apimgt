@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.5.397-SNAPSHOT</version>
+        <version>6.5.408-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -291,6 +291,10 @@
             <artifactId>log4j</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.amazonaws</groupId>
+            <artifactId>awslambda</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -422,6 +426,7 @@
                             org.wso2.carbon.apimgt.tracing.*; version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.orbit.re2j.*; version="${re2j.version}",
                             graphql.*; version="${graphql.java.version}",
+                            com.amazonaws.*; version="${com.amazonaws.version}",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>

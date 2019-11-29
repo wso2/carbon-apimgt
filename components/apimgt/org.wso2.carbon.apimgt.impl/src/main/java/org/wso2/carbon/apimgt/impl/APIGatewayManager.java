@@ -26,12 +26,11 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.dto.CredentialDto;
-import org.wso2.carbon.apimgt.api.dto.GatewayAPIDTO;
-import org.wso2.carbon.apimgt.api.dto.GatewayContentDTO;
+import org.wso2.carbon.apimgt.api.gateway.CredentialDto;
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -59,7 +58,6 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -208,7 +206,11 @@ public class APIGatewayManager {
                             .equalsIgnoreCase(api.getImplementation())) {
                         String apiConfig = builder.getConfigStringForTemplate(environment);
                         gatewayAPIDTO.setApiDefinition(apiConfig);
-                        addEndpoints(api, builder, gatewayAPIDTO);
+                        JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
+                        if (!endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                                .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
+                            addEndpoints(api, builder, gatewayAPIDTO);
+                        }
                     }
 
                     if (api.isDefaultVersion()) {
@@ -410,7 +412,8 @@ public class APIGatewayManager {
                         definition.replaceAll("&(?!amp;)", "&amp;").
                                 replaceAll("<", "&lt;").replaceAll(">", "&gt;")
                         + "</localEntry>");
-
+                productAPIDto.setLocalEntriesToBeAdd(addGatewayContentToList(productLocalEntry,
+                        productAPIDto.getLocalEntriesToBeAdd()));
                 // If the Gateway type is 'production' and a production url has
                 // not been specified
                 // Or if the Gateway type is 'sandbox' and a sandbox url has not

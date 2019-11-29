@@ -138,6 +138,9 @@ function Endpoints(props) {
                     endpointConfig,
                 };
             }
+            case 'set_awsCredentials': {
+                return { ...initState, endpointConfig: { ...value } };
+            }
             case 'select_endpoint_type': {
                 const { endpointImplementationType, endpointConfig } = value;
                 let { endpointSecurity } = initState;
@@ -213,13 +216,21 @@ function Endpoints(props) {
         }
         const endpointType = endpointConfig.endpoint_type;
         if (endpointType === 'awslambda') {
-            if (endpointConfig.accessKey === '' || endpointConfig.secretKey === '') {
+            if (endpointConfig.access_method === 'stored') {
+                if (endpointConfig.amznAccessKey === '' || endpointConfig.amznSecretKey === '') {
+                    return {
+                        isValid: false,
+                        message: intl.formatMessage({
+                            id: 'Apis.Details.Endpoints.Endpoints.missing.accessKey.secretKey.error',
+                            defaultMessage: 'Access Key and Secret Key should not be empty',
+                        }),
+                    };
+                }
+            }
+            if (endpointConfig.amznAccessKey !== '' && endpointConfig.amznSecretKey === 'AWS_SECRET_KEY') {
                 return {
                     isValid: false,
-                    message: intl.formatMessage({
-                        id: 'Apis.Details.Endpoints.Endpoints.missing.accessKey.secretKey.error',
-                        defaultMessage: 'Access Key and/ or Secret Key should not be empty',
-                    }),
+                    message: '',
                 };
             }
         } else if (endpointType === 'load_balance') {

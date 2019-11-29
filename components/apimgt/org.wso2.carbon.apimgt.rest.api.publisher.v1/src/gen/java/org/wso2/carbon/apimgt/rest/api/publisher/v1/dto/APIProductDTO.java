@@ -29,7 +29,7 @@ public class APIProductDTO   {
     private String context = null;
     private String description = null;
     private String provider = null;
-    private String thumbnailUri = null;
+    private Boolean hasThumbnail = null;
 
 @XmlType(name="StateEnum")
 @XmlEnum(String.class)
@@ -283,19 +283,19 @@ public enum SubscriptionAvailabilityEnum {
 
   /**
    **/
-  public APIProductDTO thumbnailUri(String thumbnailUri) {
-    this.thumbnailUri = thumbnailUri;
+  public APIProductDTO hasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
     return this;
   }
 
   
-  @ApiModelProperty(example = "/api-products/01234567-0123-0123-0123-012345678901/thumbnail", value = "")
-  @JsonProperty("thumbnailUri")
-  public String getThumbnailUri() {
-    return thumbnailUri;
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("hasThumbnail")
+  public Boolean isHasThumbnail() {
+    return hasThumbnail;
   }
-  public void setThumbnailUri(String thumbnailUri) {
-    this.thumbnailUri = thumbnailUri;
+  public void setHasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
   }
 
   /**
@@ -786,7 +786,7 @@ public enum SubscriptionAvailabilityEnum {
         Objects.equals(context, apIProduct.context) &&
         Objects.equals(description, apIProduct.description) &&
         Objects.equals(provider, apIProduct.provider) &&
-        Objects.equals(thumbnailUri, apIProduct.thumbnailUri) &&
+        Objects.equals(hasThumbnail, apIProduct.hasThumbnail) &&
         Objects.equals(state, apIProduct.state) &&
         Objects.equals(enableSchemaValidation, apIProduct.enableSchemaValidation) &&
         Objects.equals(responseCachingEnabled, apIProduct.responseCachingEnabled) &&
@@ -818,7 +818,7 @@ public enum SubscriptionAvailabilityEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, enableSchemaValidation, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes);
+    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes);
   }
 
   @Override
@@ -831,7 +831,7 @@ public enum SubscriptionAvailabilityEnum {
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
-    sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
+    sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
     sb.append("    responseCachingEnabled: ").append(toIndentedString(responseCachingEnabled)).append("\n");

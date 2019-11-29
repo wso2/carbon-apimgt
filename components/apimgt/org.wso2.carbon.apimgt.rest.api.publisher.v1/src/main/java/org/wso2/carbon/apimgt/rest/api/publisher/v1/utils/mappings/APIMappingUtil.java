@@ -700,6 +700,13 @@ public class APIMappingUtil {
             try {
                 JSONParser parser = new JSONParser();
                 JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfig);
+                // AWS Lambda: set constant secret key
+                if (endpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                        .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
+                    if (!StringUtils.isEmpty((String) endpointConfigJson.get(APIConstants.AMZN_SECRET_KEY))) {
+                        endpointConfigJson.put(APIConstants.AMZN_SECRET_KEY, APIConstants.AWS_SECRET_KEY);
+                    }
+                }
                 dto.setEndpointConfig(endpointConfigJson);
             } catch (ParseException e) {
                 //logs the error and continues as this is not a blocker
@@ -1136,6 +1143,11 @@ public class APIMappingUtil {
                     }
                 }
 
+            }
+            // AWS Lambda: set arn to URI template
+            String amznResourceName = operation.getAmznResourceName();
+            if (amznResourceName != null) {
+                template.setAmznResourceName(amznResourceName);
             }
             //Only continue for supported operations
             if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase()) ||
@@ -1668,8 +1680,10 @@ public class APIMappingUtil {
             productDto.setState(org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO.StateEnum
                     .valueOf(apiProduct.getState()));
             productDto.setId(apiProduct.getUuid());
-            productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
-                    .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));
+            if (apiProduct.getApiSecurity() != null) {
+                productDto.setSecurityScheme(Arrays.asList(apiProduct.getApiSecurity().split(",")));
+            }
+
             list.add(productDto);
         }
 
@@ -1725,8 +1739,6 @@ public class APIMappingUtil {
         productDto.setCorsConfiguration(apiCorsConfigurationDTO);
 
         productDto.setState(StateEnum.valueOf(product.getState()));
-        productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
-                .replace(RestApiConstants.APIPRODUCTID_PARAM, product.getUuid()));
 
         //Aggregate API resources to each relevant API.
         Map<String, ProductAPIDTO> aggregatedAPIs = new HashMap<String, ProductAPIDTO>();
