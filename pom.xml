@@ -1152,70 +1152,6 @@
             </dependency>
 
             <dependency>
-                <groupId>opensaml.wso2</groupId>
-                <artifactId>opensaml2</artifactId>
-                <version>${opensaml2.version}</version>
-            </dependency>
-
-            <!--OpenSAML3 dependencies-->
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-core</artifactId>
-                <version>${opensaml3.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-saml-api</artifactId>
-                <version>${opensaml3.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-saml-impl</artifactId>
-                <version>${opensaml3.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-storage-api</artifactId>
-                <version>${opensaml3.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-storage-impl</artifactId>
-                <version>${opensaml3.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-xmlsec-api</artifactId>
-                <version>${opensaml3.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-xmlsec-impl</artifactId>
-                <version>${opensaml3.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-security-api</artifactId>
-                <version>${opensaml3.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-security-impl</artifactId>
-                <version>${opensaml3.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-messaging-api</artifactId>
-                <version>${opensaml3.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-messaging-impl</artifactId>
-                <version>${opensaml3.version}</version>
-            </dependency>
-            <!--End of OpenSAML3 dependencies-->
-
-            <dependency>
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-core-asl</artifactId>
                 <version>${jackson.version}</version>
@@ -1639,11 +1575,6 @@
                 <version>${graphql.java.version}</version>
             </dependency>
             <dependency>
-                <groupId>net.shibboleth.utilities</groupId>
-                <artifactId>java-support</artifactId>
-                <version>${shibboleth.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.wso2.carbon.identity.saml.common</groupId>
                 <artifactId>org.wso2.carbon.identity.saml.common.util</artifactId>
                 <version>${saml.common.util.version}</version>
@@ -1817,7 +1748,6 @@
         <hibernate-validator.version>5.4.3.Final</hibernate-validator.version>
         <swagger-jaxrs.version>1.5.23</swagger-jaxrs.version>
         <junit.version>4.12</junit.version>
-        <opensaml2.version>2.4.1.wso2v1</opensaml2.version>
         <opensaml3.version>3.3.1</opensaml3.version>
         <openapi.generator.version>4.0.1.wso2v2</openapi.generator.version>
         <openapitools.swagger.parser.version>2.0.13.OpenAPITools.wso2v1</openapitools.swagger.parser.version>
