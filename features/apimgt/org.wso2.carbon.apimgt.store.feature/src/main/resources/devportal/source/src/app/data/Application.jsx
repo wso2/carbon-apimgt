@@ -123,12 +123,13 @@ export default class Application extends Resource {
      * @returns {promise} Set the generated token into current instance and return tokenObject
      * received as Promise object
      */
-    generateKeys(keyType, supportedGrantTypes, callbackUrl) {
+    generateKeys(keyType, supportedGrantTypes, callbackUrl, validityTime) {
         const promisedKeys = this.client.then((client) => {
             const requestContent = {
                 keyType, /* TODO: need to support dynamic key types ~tmkb */
                 grantTypesToBeSupported: supportedGrantTypes,
                 callbackUrl,
+                validityTime,
             };
             const payload = { applicationId: this.id, body: requestContent };
             return client.apis['Application Keys'].post_applications__applicationId__generate_keys(payload);
