@@ -254,45 +254,48 @@ public class GraphQLAPIHandler extends AbstractHandler {
         if (schema != null) {
             Set<GraphQLType> additionalTypes = schema.getAdditionalTypes();
             for (GraphQLType additionalType : additionalTypes) {
-                String additionalTypeName = additionalType.getName().split("_", 2)[1];
-                String base64DecodedAdditionalType = new String(Base64.getUrlDecoder().decode(additionalTypeName));
-                for (GraphQLType type : additionalType.getChildren()) {
-                    if (additionalType.getName().contains(APIConstants.SCOPE_ROLE_MAPPING)) {
-                        String base64DecodedURLRole = new String(Base64.getUrlDecoder().decode(type.getName()));
-                        roleArrayList = new ArrayList<>();
-                        roleArrayList.add(base64DecodedURLRole);
-                    } else if (additionalType.getName().contains(APIConstants.SCOPE_OPERATION_MAPPING)) {
-                        String base64DecodedURLScope = new String(Base64.getUrlDecoder().decode(type.getName()));
-                        operationScopeMappingList.put(base64DecodedAdditionalType, base64DecodedURLScope);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Added operation " + base64DecodedAdditionalType + "with scope "
-                                    + base64DecodedURLScope);
-                        }
-                    } else if (additionalType.getName().contains(APIConstants.OPERATION_THROTTLING_MAPPING)) {
-                        String base64DecodedURLThrottlingTier = new String(Base64.getUrlDecoder().decode(type.getName()));
-                        operationThrottlingMappingList.put(base64DecodedAdditionalType, base64DecodedURLThrottlingTier);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Added operation " + base64DecodedAdditionalType + "with throttling "
-                                    + base64DecodedURLThrottlingTier);
-                        }
+                String[] additionalTypeNameArray = additionalType.getName().split("_", 2);
+                if (additionalTypeNameArray.length > 1) {
+                    String additionalTypeName = additionalTypeNameArray[1];
+                    String base64DecodedAdditionalType = new String(Base64.getUrlDecoder().decode(additionalTypeName));
+                    for (GraphQLType type : additionalType.getChildren()) {
+                        if (additionalType.getName().contains(APIConstants.SCOPE_ROLE_MAPPING)) {
+                            String base64DecodedURLRole = new String(Base64.getUrlDecoder().decode(type.getName()));
+                            roleArrayList = new ArrayList<>();
+                            roleArrayList.add(base64DecodedURLRole);
+                        } else if (additionalType.getName().contains(APIConstants.SCOPE_OPERATION_MAPPING)) {
+                            String base64DecodedURLScope = new String(Base64.getUrlDecoder().decode(type.getName()));
+                            operationScopeMappingList.put(base64DecodedAdditionalType, base64DecodedURLScope);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Added operation " + base64DecodedAdditionalType + "with scope "
+                                        + base64DecodedURLScope);
+                            }
+                        } else if (additionalType.getName().contains(APIConstants.OPERATION_THROTTLING_MAPPING)) {
+                            String base64DecodedURLThrottlingTier = new String(Base64.getUrlDecoder().decode(type.getName()));
+                            operationThrottlingMappingList.put(base64DecodedAdditionalType, base64DecodedURLThrottlingTier);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Added operation " + base64DecodedAdditionalType + "with throttling "
+                                        + base64DecodedURLThrottlingTier);
+                            }
 
-                    } else if (additionalType.getName().contains(APIConstants.OPERATION_AUTH_SCHEME_MAPPING)) {
-                        boolean isSecurityEnabled = true;
-                        if (APIConstants.OPERATION_SECURITY_DISABLED.equalsIgnoreCase(type.getName())) {
-                            isSecurityEnabled = false;
-                        }
-                        operationAuthSchemeMappingList.put(base64DecodedAdditionalType, isSecurityEnabled);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Added operation " + base64DecodedAdditionalType + "with security "
-                                    + isSecurityEnabled);
+                        } else if (additionalType.getName().contains(APIConstants.OPERATION_AUTH_SCHEME_MAPPING)) {
+                            boolean isSecurityEnabled = true;
+                            if (APIConstants.OPERATION_SECURITY_DISABLED.equalsIgnoreCase(type.getName())) {
+                                isSecurityEnabled = false;
+                            }
+                            operationAuthSchemeMappingList.put(base64DecodedAdditionalType, isSecurityEnabled);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Added operation " + base64DecodedAdditionalType + "with security "
+                                        + isSecurityEnabled);
+                            }
                         }
                     }
-                }
-                if (!roleArrayList.isEmpty()) {
-                    scopeRoleMappingList.put(base64DecodedAdditionalType, roleArrayList);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Added scope " + base64DecodedAdditionalType + "with role list "
-                                + String.join(",", roleArrayList));
+                    if (!roleArrayList.isEmpty()) {
+                        scopeRoleMappingList.put(base64DecodedAdditionalType, roleArrayList);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Added scope " + base64DecodedAdditionalType + "with role list "
+                                    + String.join(",", roleArrayList));
+                        }
                     }
                 }
             }
