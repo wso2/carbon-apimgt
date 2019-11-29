@@ -26,6 +26,7 @@ import Progress from './app/components/Shared/Progress';
 import { SettingsProvider } from './app/components/Shared/SettingsContext';
 import API from './app/data/api';
 import BrowserRouter from './app/components/Base/CustomRouter/BrowserRouter';
+// import '../../site/public/tenant_themes/wso2.com/custom.css';
 
 const protectedApp = lazy(() => import('./app/ProtectedApp' /* webpackChunkName: "ProtectedApp" */));
 
@@ -105,6 +106,31 @@ class Store extends React.Component {
     }
 
     /**
+     * Add two numbers.
+     * @param {object} theme object.
+     * @returns {JSX} link dom tag.
+     */
+    loadCustomCSS(theme) {
+        const { custom: { tenantCustomCss } } = theme;
+        const { tenantDomain } = this.state;
+        let cssUrlWithTenant = tenantCustomCss;
+        if (tenantDomain && tenantCustomCss) {
+            cssUrlWithTenant = tenantCustomCss.replace('<tenant-domain>', tenantDomain);
+        }
+        if (cssUrlWithTenant) {
+            return (
+                <link
+                    rel='stylesheet'
+                    type='text/css'
+                    href={`${Settings.app.context}/${cssUrlWithTenant}`}
+                />
+            );
+        } else {
+            return '';
+        }
+    }
+
+    /**
      * Reners the Store component
      * @returns {JSX} this is the description
      * @memberof Store
@@ -116,6 +142,7 @@ class Store extends React.Component {
             settings && theme && (
                 <SettingsProvider value={{ settings, tenantDomain, setTenantDomain: this.setTenantDomain }}>
                     <MuiThemeProvider theme={createMuiTheme(theme)}>
+                        {this.loadCustomCSS(theme)}
                         <BrowserRouter basename={context}>
                             <Suspense fallback={<Progress />}>
                                 <Switch>
