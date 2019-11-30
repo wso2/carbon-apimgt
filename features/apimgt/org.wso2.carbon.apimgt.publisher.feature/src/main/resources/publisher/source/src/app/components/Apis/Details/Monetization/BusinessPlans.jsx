@@ -109,7 +109,7 @@ class BusinessPlans extends Component {
         if (monetizedPolices === null) {
             return <Progress />;
         }
-        const policiesList = policies.map(policy => (
+        const policiesList = policies.map((policy) => (
             <Grid item xs={12}>
                 <Table className={classes.table}>
                     <TableRow>

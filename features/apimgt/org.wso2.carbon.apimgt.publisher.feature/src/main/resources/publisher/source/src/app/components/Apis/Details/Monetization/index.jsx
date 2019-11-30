@@ -221,7 +221,7 @@ class Monetization extends Component {
                         </Grid>
                         <Grid item xs={12}>
                             <FormControlLabel
-                                control={
+                                control={(
                                     <Checkbox
                                         disabled={isRestricted(['apim:api_publish'], api)}
                                         id='monStatus'
@@ -231,7 +231,7 @@ class Monetization extends Component {
                                         value={monStatus}
                                         color='primary'
                                     />
-                                }
+                                )}
                                 label='Enable Monetization'
                             />
                         </Grid>
@@ -278,7 +278,7 @@ class Monetization extends Component {
                         <Grid item xs={12}>
                             <Paper className={classes.root}>
                                 <Grid item xs={12} className={classes.grid}>
-                                    {<BusinessPlans api={api} monStatus={monStatus} />}
+                                    <BusinessPlans api={api} monStatus={monStatus} />
                                 </Grid>
                             </Paper>
                         </Grid>
