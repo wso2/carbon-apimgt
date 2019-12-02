@@ -37,6 +37,7 @@ import Description from './components/Description';
 import AccessControl from './components/AccessControl';
 import StoreVisibility from './components/StoreVisibility';
 import Tags from './components/Tags';
+import APICategories from './components/APICategories';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -128,6 +129,7 @@ function copyAPIConfig(api) {
         transport: [...api.transport],
         wsdlUrl: api.wsdlUrl,
         securityScheme: [...api.securityScheme],
+        categories: [...api.categories],
         corsConfiguration: {
             corsConfigurationEnabled: api.corsConfiguration.corsConfigurationEnabled,
             accessControlAllowCredentials: api.corsConfiguration.accessControlAllowCredentials,
@@ -164,6 +166,7 @@ export default function DesignConfigurations() {
             case 'enableSchemaValidation':
             case 'visibility':
             case 'maxTps':
+            case 'categories':
             case 'tags':
                 nextState[action] = value;
                 return nextState;
@@ -251,6 +254,13 @@ export default function DesignConfigurations() {
                                     </Box>
                                     <Box py={1}>
                                         <Tags api={apiConfig} configDispatcher={configDispatcher} />
+                                    </Box>
+                                    <Box py={1}>
+                                        <APICategories
+                                            api={apiConfig}
+                                            configDispatcher={configDispatcher}
+                                            categories={api.categories}
+                                        />
                                     </Box>
                                     <Box py={1}>
                                         {api.apiType !== 'APIProduct' && (
