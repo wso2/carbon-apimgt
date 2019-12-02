@@ -73,6 +73,7 @@ const styles = theme => ({
  */
 const KeyConfiguration = (props) => {
     const [isValidityTimeError, setValidityTimeError] = useState(false);
+    const [isCalbackUrlError, setCallbackUrlError] = useState(false);
     /**
      * Get the display names for the server supported grant types
      * @param serverSupportedGrantTypes
@@ -96,13 +97,18 @@ const KeyConfiguration = (props) => {
      * @param {*} event event fired
      */
     const handleChange = (field, event) => {
-        const { keyRequest, updateKeyRequest } = props;
+        const { keyRequest, updateKeyRequest, setGenerateEnabled } = props;
         const newRequest = { ...keyRequest };
         const { target: currentTarget } = event;
         let newGrantTypes = [...newRequest.supportedGrantTypes];
 
         switch (field) {
             case 'callbackUrl':
+                if (Validation.url.validate(currentTarget.value).error) {
+                    setCallbackUrlError(true);
+                } else {
+                    setCallbackUrlError(false);
+                }
                 newRequest.callbackUrl = currentTarget.value;
                 break;
             case 'validityTime':
@@ -124,6 +130,7 @@ const KeyConfiguration = (props) => {
             default:
                 break;
         }
+        setGenerateEnabled(!(isValidityTimeError || isCalbackUrlError));
         updateKeyRequest(newRequest);
     };
 
@@ -216,18 +223,26 @@ const KeyConfiguration = (props) => {
                         name='callbackURL'
                         onChange={e => handleChange('callbackUrl', e)}
                         helperText={
-                            <Typography variant='caption'>
-                                <FormattedMessage
-                                    defaultMessage={`Callback URL is a redirection URI in the client
+                            isCalbackUrlError ?
+                                <Typography variant='caption'>
+                                    <FormattedMessage
+                                        defaultMessage='Invalid url. Please enter a valid url.'
+                                        id='Shared.AppsAndKeys.KeyConfCiguration.Invalid.callback.url.error.text'
+                                    />
+                                </Typography> :
+                                <Typography variant='caption'>
+                                    <FormattedMessage
+                                        defaultMessage={`Callback URL is a redirection URI in the client
                                     application which is used by the authorization server to send the
                                     client's user-agent (usually web browser) back after granting access.`}
-                                    id='Shared.AppsAndKeys.KeyConfCiguration.callback.url.helper.text'
-                                />
-                            </Typography>
+                                        id='Shared.AppsAndKeys.KeyConfCiguration.callback.url.helper.text'
+                                    />
+                                </Typography>
                         }
                         margin='normal'
                         variant='outlined'
                         disabled={!isUserOwner}
+                        error={isCalbackUrlError}
                         placeholder={intl.formatMessage({
                             defaultMessage: 'http://url-to-webapp',
                             id: 'Shared.AppsAndKeys.KeyConfiguration.url.to.webapp',

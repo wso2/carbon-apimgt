@@ -20,7 +20,7 @@ import Joi from '@hapi/joi';
 
 const definition = {
     number: Joi.number().integer(),
-    url: Joi.string().uri(),
+    url: Joi.string().uri().allow(''),
 };
 
 export default definition;
