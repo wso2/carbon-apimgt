@@ -153,12 +153,35 @@ public interface APIAdmin  {
     /**
      * Checks whether an api category exists by the given name
      *
+     * 1. in case uuid is null : checks whether the categoryName is already taken in the tenantDomain (this
+     *                           flow is used when adding a new api category)
+     * 2. in case uuid is not null: checks whether the categoryName is already taken by any category other than the one
+     *                              defined by the passed uuid in the given tenant
+     *
      * @param categoryName
      * @param tenantID
      * @return true if an api category exists by the given category name
      * @throws APIManagementException
      */
     boolean isCategoryNameExists(String categoryName, String uuid, int tenantID) throws APIManagementException;
+
+    /**
+     * Returns all api categories of the tenant
+     *
+     * @param tenantID
+     * @return
+     * @throws APIManagementException
+     */
+    List<APICategory> getAllAPICategoriesOfTenant(int tenantID) throws APIManagementException;
+
+    /**
+     * Get API Category identified by the given uuid
+     *
+     * @param apiCategoryId api category UUID
+     * @return
+     * @throws APIManagementException
+     */
+    APICategory getAPICategoryByID(String apiCategoryId) throws APIManagementException;
 
     /**
      * The method converts the date into timestamp

@@ -6,7 +6,6 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
-import org.wso2.carbon.apimgt.impl.utils.APICategoryUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.ApiCategoriesApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.APICategoryDTO;
@@ -26,9 +25,10 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
 
     public Response apiCategoriesGet(){
         try {
+            APIAdmin apiAdmin = new APIAdminImpl();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-            List<APICategory> categoryList = APICategoryUtil.getAllAPICategoriesOfTenant(tenantID);
+            List<APICategory> categoryList = apiAdmin.getAllAPICategoriesOfTenant(tenantID);
             APICategoryListDTO categoryListDTO =
                     APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);
             return Response.ok().entity(categoryListDTO).build();
@@ -63,7 +63,7 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
             String tenantDomain = MultitenantUtils.getTenantDomain(userName);
             int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
             APICategory apiCategoryToUpdate = APICategoryMappingUtil.fromCategoryDTOToCategory(body);
-            APICategory apiCategoryOriginal = APICategoryUtil.getAPICategoryByID(apiCategoryId);
+            APICategory apiCategoryOriginal = apiAdmin.getAPICategoryByID(apiCategoryId);
             if (apiCategoryOriginal == null) {
                 String errorMsg = "No api category with the given category ID exists :" + apiCategoryId;
                 log.error(errorMsg);
@@ -77,14 +77,14 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
             //We allow to update API Category name given that the new category name is not taken yet
             String oldName = apiCategoryOriginal.getName();
             String updatedName = apiCategoryToUpdate.getName();
-            if (!oldName.equals(updatedName) && APICategoryUtil.isCategoryNameExists(updatedName, tenantID)) {
+            if (!oldName.equals(updatedName) && apiAdmin.isCategoryNameExists(updatedName, apiCategoryId, tenantID)) {
                 String errorMsg = "An API category already exists by the new API category name :" + updatedName;
                 log.error(errorMsg);
                 throw new APIManagementException(errorMsg);
             }
 
             apiAdmin.updateCategory(apiCategoryToUpdate, userName);
-            APICategory updatedAPICategory = APICategoryUtil.getAPICategoryByID(apiCategoryId);
+            APICategory updatedAPICategory = apiAdmin.getAPICategoryByID(apiCategoryId);
             APICategoryDTO updatedAPICategoryDTO = APICategoryMappingUtil.fromCategoryToCategoryDTO(updatedAPICategory);
             return Response.ok().entity(updatedAPICategoryDTO).build();
         } catch (APIManagementException e) {

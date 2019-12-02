@@ -4,11 +4,13 @@ var log = new Log();
 var getAllAPICategories = function(){
     try{
         var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
         var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
+        var tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
         var apiAdmin = new APIAdminImpl();
 
-        var categoryList = apiAdmin.getAllAPICategories(tenantDomain);
+        var categoryList = apiAdmin.getAllAPICategoriesOfTenant(tenantId);
         return {
             error: false,
             categoryList:categoryList

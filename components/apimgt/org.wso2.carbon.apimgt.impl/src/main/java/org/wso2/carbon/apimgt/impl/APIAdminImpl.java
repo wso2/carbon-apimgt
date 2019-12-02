@@ -31,7 +31,6 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
-import org.wso2.carbon.apimgt.impl.utils.APICategoryUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -285,7 +284,7 @@ public class APIAdminImpl implements APIAdmin {
 
     public APICategory addCategory(String userName, APICategory category) throws APIManagementException {
         int tenantID = APIUtil.getTenantId(userName);
-        if (APICategoryUtil.isCategoryNameExists(category.getName(), tenantID)) {
+        if (isCategoryNameExists(category.getName(), null, tenantID)) {
             APIUtil.handleException("Category with name '" + category.getName() + "' already exists");
         }
         //todo-category: check whether user has admin permissions to add category
@@ -300,12 +299,15 @@ public class APIAdminImpl implements APIAdmin {
         apiMgtDAO.deleteCategory(categoryID);
     }
 
-    public List<APICategory> getAllAPICategories(String tenantDomain) throws APIManagementException {
-        int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        return apiMgtDAO.getAllCategories(tenantID);
+    public List<APICategory> getAllAPICategoriesOfTenant(int tenantId) throws APIManagementException {
+        return apiMgtDAO.getAllCategories(tenantId);
     }
 
     public boolean isCategoryNameExists(String categoryName, String uuid, int tenantID) throws APIManagementException {
         return ApiMgtDAO.getInstance().isAPICategoryNameExists(categoryName, uuid, tenantID);
+    }
+
+    public APICategory getAPICategoryByID(String apiCategoryId) throws APIManagementException {
+        return ApiMgtDAO.getInstance().getAPICategoryByID(apiCategoryId);
     }
 }

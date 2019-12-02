@@ -14398,32 +14398,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Checks whether the given category name is already available under given tenant domain
-     *
-     * @param categoryName
-     * @param tenantID
-     * @return
-     */
-    public boolean isAPICategoryNameExists(String categoryName, int tenantID) throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SQLConstants.IS_API_CATEGORY_NAME_EXISTS)) {
-            statement.setString(1, categoryName);
-            statement.setInt(2, tenantID);
-
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                int count = rs.getInt("API_CATEGORY_COUNT");
-                if (count > 0) {
-                    return true;
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to check whether API category name : " + categoryName + " exists", e);
-        }
-        return false;
-    }
-
-    /**
      * Checks whether the given category name is already available under given tenant domain with any UUID other than the given UUID
      *
      * @param categoryName
