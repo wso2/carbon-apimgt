@@ -184,6 +184,7 @@
         <dependency>
             <groupId>org.wso2.orbit.com.amazonaws</groupId>
             <artifactId>awslambda</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>
