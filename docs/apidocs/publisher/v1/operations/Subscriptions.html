@@ -2,7 +2,7 @@
     <h1><a name="Subscriptions"></a>Subscriptions</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="subscriptionsBlockSubscriptionPost"></a>Block a subscription</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/subscriptions/block-subscription</code>
+            <h4 class="operation-heading"><a name="subscriptionsBlockSubscriptionPost"></a>Block a subscription</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.1/subscriptions/block-subscription</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to block a subscription. Along with the request, &#x60;blockState&#x60; must be specified as a query parameter.
@@ -183,16 +183,16 @@
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="subscriptionsGet"></a>Get all Subscriptions</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/subscriptions</code>
+            <h4 class="operation-heading"><a name="subscriptionsGet"></a>Get all Subscriptions</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.1/subscriptions</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of
 
 1. Retrieving all subscriptions for the user&#39;s APIs.
-&#x60;GET https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions&#x60;
+&#x60;GET https://127.0.0.1:9443/api/am/publisher/v1.1/subscriptions&#x60;
 
 2. Retrieving subscriptions for a specific API.
-&#x60;GET https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions?apiId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed&#x60;
+&#x60;GET https://127.0.0.1:9443/api/am/publisher/v1.1/subscriptions?apiId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed&#x60;
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
@@ -411,7 +411,7 @@ variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="subscriptionsUnblockSubscriptionPost"></a>Unblock a Subscription</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/subscriptions/unblock-subscription</code>
+            <h4 class="operation-heading"><a name="subscriptionsUnblockSubscriptionPost"></a>Unblock a Subscription</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.1/subscriptions/unblock-subscription</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to unblock a subscription specifying the subscription Id. The subscription will be fully unblocked after performing this operation.

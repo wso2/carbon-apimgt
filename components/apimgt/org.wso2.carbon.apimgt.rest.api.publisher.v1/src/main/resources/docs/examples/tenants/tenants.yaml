@@ -2,7 +2,7 @@
   id: getTenants
   request:
     method: GET
-    url: https://localhost:9443/api/am/publisher/v1.0/tenants?state=active
+    url: https://localhost:9443/api/am/publisher/v1.1/tenants?state=active
     headers: |
       Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
   response:
@@ -41,7 +41,7 @@
   id: getTenantExistence
   request:
     method: HEAD
-    url: https://localhost:9443/api/am/publisher/v1.0/tenants/test.com
+    url: https://localhost:9443/api/am/publisher/v1.1/tenants/test.com
     headers: |
       Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
   response:

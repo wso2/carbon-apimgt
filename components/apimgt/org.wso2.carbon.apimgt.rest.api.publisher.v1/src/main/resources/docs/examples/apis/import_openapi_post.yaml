@@ -1,5 +1,5 @@
 - rawRequest: |
-    POST https://localhost:9443/api/am/publisher/v1.0/apis/import-openapi HTTP/1.1
+    POST https://localhost:9443/api/am/publisher/v1.1/apis/import-openapi HTTP/1.1
     Content-Type: multipart/form-data; boundary="----=_Part_4_2096758352.1563880508761"
     Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a
     Content-Length: 2972
@@ -127,10 +127,10 @@
 
 
   curl: |
-    curl -k -H "Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a" -F file=@petstore.v3.yaml -F additionalProperties='{ "name": "PetstoreAPI", "context" : "/petstore", "version" : "1.0.0"}' -X POST https://localhost:9443/api/am/publisher/v1.0/apis/import-openapi
+    curl -k -H "Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a" -F file=@petstore.v3.yaml -F additionalProperties='{ "name": "PetstoreAPI", "context" : "/petstore", "version" : "1.0.0"}' -X POST https://localhost:9443/api/am/publisher/v1.1/apis/import-openapi
   rawResponse: |
     HTTP/1.1 201 Created
-    Location: https://localhost:9443/api/am/publisher/v1.0/apis/ded1a2fd-1a56-4eab-ae5f-07f8df03b0bd
+    Location: https://localhost:9443/api/am/publisher/v1.1/apis/ded1a2fd-1a56-4eab-ae5f-07f8df03b0bd
     Content-Type: application/json
     Transfer-Encoding: chunked
 
@@ -239,7 +239,7 @@
 
 - title: Importing an API with a subset of operations
   rawRequest: |
-    POST https://localhost:9443/api/am/publisher/v1.0/apis/import-openapi HTTP/1.1
+    POST https://localhost:9443/api/am/publisher/v1.1/apis/import-openapi HTTP/1.1
     Accept-Encoding: gzip,deflate
     Content-Type: multipart/form-data; boundary="----=_Part_3_xxxx.xxxxxxx"
     MIME-Version: 1.0
@@ -385,10 +385,10 @@
       ------=_Part_3_xxxx.xxxxxx--
 
   curl: |
-    curl -k -H "Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a" -F file=@petstore.v3.yaml -F additionalProperties='{ "name": "PetstoreAPI", "context" : "/petstore", "version" : "1.0.0" , "operations": [{ "uritemplate": "/pets", "httpVerb": "POST", "authType": "Application & Application User", "throttlingPolicy": "Unlimited", "scopes": []}]}' -X POST https://localhost:9443/api/am/publisher/v1.0/apis/import-openapi
+    curl -k -H "Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a" -F file=@petstore.v3.yaml -F additionalProperties='{ "name": "PetstoreAPI", "context" : "/petstore", "version" : "1.0.0" , "operations": [{ "uritemplate": "/pets", "httpVerb": "POST", "authType": "Application & Application User", "throttlingPolicy": "Unlimited", "scopes": []}]}' -X POST https://localhost:9443/api/am/publisher/v1.1/apis/import-openapi
   rawResponse: |
     HTTP/1.1 201 Created
-    Location: https://localhost:9443/api/am/publisher/v1.0/apis/ded1a2fd-1a56-4eab-ae5f-07f8df03b0bd
+    Location: https://localhost:9443/api/am/publisher/v1.1/apis/ded1a2fd-1a56-4eab-ae5f-07f8df03b0bd
     Content-Type: application/json
     Transfer-Encoding: chunked
 

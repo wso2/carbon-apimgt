@@ -1,7 +1,7 @@
 - id: importWSDLUrlAndCreateSOAPAPI
   title: Create a SOAP API From a WSDL URL
   rawRequest: |
-    POST https://localhost:9443/api/am/publisher/v1.0/apis/import-wsdl HTTP/1.1
+    POST https://localhost:9443/api/am/publisher/v1.1/apis/import-wsdl HTTP/1.1
     Content-Type: multipart/form-data; boundary="----=_Part_31_1920670410.1568041157990"
     MIME-Version: 1.0
     Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -32,14 +32,14 @@
 
 
   curl: |
-    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F url='https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl' -F additionalProperties='{ "name" : "IP2GeoAPI", "context" : "/ip2Geo", "version" : "1.0.0", "endpointConfig": { "endpoint_type": "http", "sandbox_endpoints": { "url": "https://ws.cdyne.com/ip2geo/ip2geo.asmx"}, "production_endpoints": { "url": "https://ws.cdyne.com/ip2geo/ip2geo.asmx" } }, "policies": [ "Unlimited"] }' -F implementationType=SOAP  -X POST https://localhost:9443/api/am/publisher/v1.0/apis/import-wsdl
+    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F url='https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl' -F additionalProperties='{ "name" : "IP2GeoAPI", "context" : "/ip2Geo", "version" : "1.0.0", "endpointConfig": { "endpoint_type": "http", "sandbox_endpoints": { "url": "https://ws.cdyne.com/ip2geo/ip2geo.asmx"}, "production_endpoints": { "url": "https://ws.cdyne.com/ip2geo/ip2geo.asmx" } }, "policies": [ "Unlimited"] }' -F implementationType=SOAP  -X POST https://localhost:9443/api/am/publisher/v1.1/apis/import-wsdl
   response:
     status:
       code: 201
       msg: Created
     headers: |
       Content-Type: application/json
-      Location: https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4
+      Location: https://localhost:9443/api/am/publisher/v1.1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4
     body:
       {
         "id": "7369e7ba-ac2e-4492-9fa5-9d2cd6029db4",
@@ -132,7 +132,7 @@
 - id: importWSDLFileAndCreateSOAPAPI
   title: Create a SOAP API from a WSDL File
   rawRequest: |
-    POST https://localhost:9443/api/am/publisher/v1.0/apis/import-wsdl HTTP/1.1
+    POST https://localhost:9443/api/am/publisher/v1.1/apis/import-wsdl HTTP/1.1
     Content-Type: multipart/form-data; boundary="----=_Part_30_581164590.1568040945994"
     MIME-Version: 1.0
     Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -201,14 +201,14 @@
 
 
   curl: |
-    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F file=@stockquote.wsdl  -F additionalProperties='{ "name" : "StockQuoteAPI", "context" : "/stock-quote", "version" : "1.0.0", "endpointConfig": { "endpoint_type": "http", "sandbox_endpoints": { "url": "http://www.webservicex.net/stockquote.asmx"}, "production_endpoints": { "url": "http://www.webservicex.net/stockquote.asmx" } }, "policies": [ "Unlimited"] }' -F implementationType=SOAP -X POST https://localhost:9443/api/am/publisher/v1.0/apis/import-wsdl
+    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F file=@stockquote.wsdl  -F additionalProperties='{ "name" : "StockQuoteAPI", "context" : "/stock-quote", "version" : "1.0.0", "endpointConfig": { "endpoint_type": "http", "sandbox_endpoints": { "url": "http://www.webservicex.net/stockquote.asmx"}, "production_endpoints": { "url": "http://www.webservicex.net/stockquote.asmx" } }, "policies": [ "Unlimited"] }' -F implementationType=SOAP -X POST https://localhost:9443/api/am/publisher/v1.1/apis/import-wsdl
   response:
     status:
       code: 201
       msg: Created
     headers: |
       Content-Type: application/json
-      Location: https://localhost:9443/api/am/publisher/v1.0/apis/ac12ad69-7b81-4bf9-9846-84995f456823
+      Location: https://localhost:9443/api/am/publisher/v1.1/apis/ac12ad69-7b81-4bf9-9846-84995f456823
     body:
       {
         "id": "ac12ad69-7b81-4bf9-9846-84995f456823",
@@ -301,7 +301,7 @@
 - id: importWSDLArchive
   title: Create an API from a WSDL Archive
   rawRequest: |
-    POST https://localhost:9443/api/am/publisher/v1.0/apis/import-wsdl HTTP/1.1
+    POST https://localhost:9443/api/am/publisher/v1.1/apis/import-wsdl HTTP/1.1
     Content-Type: multipart/form-data; boundary="----=_Part_29_1617587938.1568040715278"
     MIME-Version: 1.0
     Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -335,13 +335,13 @@
 
 
   curl: |
-    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F file=@stockquote.zip -F additionalProperties='{ "name" : "StockQuoteArchiveAPI", "context" : "/stock-quote-archive-api", "version" : "1.0.0", "endpointConfig": { "endpoint_type": "http", "sandbox_endpoints": { "url": "http://www.webservicex.net/stockquote.asmx"}, "production_endpoints": { "url": "http://www.webservicex.net/stockquote.asmx" } }, "policies": [ "Unlimited"] }' -F implementationType=SOAP -X POST https://localhost:9443/api/am/publisher/v1.0/apis/import-wsdl
+    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F file=@stockquote.zip -F additionalProperties='{ "name" : "StockQuoteArchiveAPI", "context" : "/stock-quote-archive-api", "version" : "1.0.0", "endpointConfig": { "endpoint_type": "http", "sandbox_endpoints": { "url": "http://www.webservicex.net/stockquote.asmx"}, "production_endpoints": { "url": "http://www.webservicex.net/stockquote.asmx" } }, "policies": [ "Unlimited"] }' -F implementationType=SOAP -X POST https://localhost:9443/api/am/publisher/v1.1/apis/import-wsdl
   response:
     status:
       code: 201
       msg: Created
     headers: |
-      Location: https://localhost:9443/api/am/publisher/v1.0/apis/0a87c289-31b3-4263-b18b-d2a895b83735
+      Location: https://localhost:9443/api/am/publisher/v1.1/apis/0a87c289-31b3-4263-b18b-d2a895b83735
       Content-Type: application/json
     body:
       {

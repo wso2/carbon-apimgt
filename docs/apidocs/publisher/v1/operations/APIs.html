@@ -2,7 +2,7 @@
     <h1><a name="APIs"></a>APIs</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdDelete"></a>Delete an API</h4> <code>DELETE https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}</code>
+            <h4 class="operation-heading"><a name="apisApiIdDelete"></a>Delete an API</h4> <code>DELETE https://apis.wso2.com/api/am/publisher/v1.1/apis/{apiId}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to delete an existing API proving the Id of the API.
@@ -155,7 +155,7 @@
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdGet"></a>Get details of an API</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}</code>
+            <h4 class="operation-heading"><a name="apisApiIdGet"></a>Get details of an API</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.1/apis/{apiId}</code>
             <p class="marked"></p>
 
             <p class="marked">Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API to retrive it.
@@ -176,7 +176,7 @@
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-apisApiIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d HTTP 1/1
+                    <div id="request-apisApiIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.1/apis/a8f0fb89-edf9-484c-b937-036b088f287d HTTP 1/1
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -188,7 +188,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 </div>
                     <div id="response-apisApiIdGet" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
 Content-Type: application/json
-Location: https://localhost:9443/api/am/publisher/v1.0/apis/740a2695-74f3-4d8f-826b-356e39553912
+Location: https://localhost:9443/api/am/publisher/v1.1/apis/740a2695-74f3-4d8f-826b-356e39553912
 
 {
   &quot;id&quot; : &quot;a8f0fb89-edf9-484c-b937-036b088f287d&quot;,
@@ -295,7 +295,7 @@ Location: https://localhost:9443/api/am/publisher/v1.0/apis/740a2695-74f3-4d8f-8
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.1/apis/a8f0fb89-edf9-484c-b937-036b088f287d&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
 
             <h4 class="section-heading">
                 <u>When API does not exist with the given Id</u>
@@ -306,7 +306,7 @@ Location: https://localhost:9443/api/am/publisher/v1.0/apis/740a2695-74f3-4d8f-8
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-apisApiIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d HTTP 1/1
+                    <div id="request-apisApiIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.1/apis/a8f0fb89-edf9-484c-b937-036b088f287d HTTP 1/1
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -328,7 +328,7 @@ Content-Type: application/json
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.1/apis/a8f0fb89-edf9-484c-b937-036b088f287d&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
 
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
@@ -492,7 +492,7 @@ variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdPut"></a>Update an API</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}</code>
+            <h4 class="operation-heading"><a name="apisApiIdPut"></a>Update an API</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v1.1/apis/{apiId}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to update an existing API.
@@ -685,7 +685,7 @@ But the properties &#x60;name&#x60;, &#x60;version&#x60;, &#x60;context&#x60;, &
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdResourcePathsGet"></a>Get Resource Paths of an API</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/resource-paths</code>
+            <h4 class="operation-heading"><a name="apisApiIdResourcePathsGet"></a>Get Resource Paths of an API</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.1/apis/{apiId}/resource-paths</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve resource paths defined for a specific api.
@@ -887,7 +887,7 @@ variant of the resource.
             </table>
             <hr/>
             <h4 class="operation-heading"><a name="apisApiIdSubscriptionPoliciesGet"></a>Get details of the subscription throttling policies of an API
-</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/subscription-policies</code>
+</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.1/apis/{apiId}/subscription-policies</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve details of the subscription throttling policy of an API by specifying the API Id.
@@ -1063,7 +1063,7 @@ variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdSwaggerGet"></a>Get swagger definition</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/swagger</code>
+            <h4 class="operation-heading"><a name="apisApiIdSwaggerGet"></a>Get swagger definition</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.1/apis/{apiId}/swagger</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve the swagger definition of an API.
@@ -1208,7 +1208,7 @@ variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdSwaggerPut"></a>Update swagger definition</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/swagger</code>
+            <h4 class="operation-heading"><a name="apisApiIdSwaggerPut"></a>Update swagger definition</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v1.1/apis/{apiId}/swagger</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to update the swagger definition of an existing API. Swagger definition to be updated is passed as a form data parameter &#x60;apiDefinition&#x60;.
@@ -1442,7 +1442,7 @@ variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdThumbnailGet"></a>Get thumbnail image</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/thumbnail</code>
+            <h4 class="operation-heading"><a name="apisApiIdThumbnailGet"></a>Get thumbnail image</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.1/apis/{apiId}/thumbnail</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to download a thumbnail image of an API.
@@ -1587,7 +1587,7 @@ variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisCopyApiPost"></a>Create a new API version</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/copy-api</code>
+            <h4 class="operation-heading"><a name="apisCopyApiPost"></a>Create a new API version</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.1/apis/copy-api</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to create a new version of an existing API. The new version is specified as &#x60;newVersion&#x60; query parameter. New API will be in &#x60;CREATED&#x60; state.
@@ -1608,7 +1608,7 @@ variant of the resource.
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-apisCopyApiPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/copy-api?newVersion&#x3D;2.0.0&amp;apiId&#x3D;a8f0fb89-edf9-484c-b937-036b088f287d HTTP 1/1
+                    <div id="request-apisCopyApiPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.1/apis/copy-api?newVersion&#x3D;2.0.0&amp;apiId&#x3D;a8f0fb89-edf9-484c-b937-036b088f287d HTTP 1/1
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -1620,7 +1620,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 </div>
                     <div id="response-apisCopyApiPost" class="pre collapse in"><code class="json">HTTP 1/1 201 Created
 Content-Type: application/json
-Location: https://localhost:9443/api/am/publisher/v1.0/apis/740a2695-74f3-4d8f-826b-356e39553912
+Location: https://localhost:9443/api/am/publisher/v1.1/apis/740a2695-74f3-4d8f-826b-356e39553912
 
 {
   &quot;id&quot; : &quot;740a2695-74f3-4d8f-826b-356e39553912&quot;,
@@ -1727,7 +1727,7 @@ Location: https://localhost:9443/api/am/publisher/v1.0/apis/740a2695-74f3-4d8f-8
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -v -X POST &#39;https://localhost:9443/api/am/publisher/v1.0/apis/copy-api?newVersion&#x3D;2.0.0&amp;apiId&#x3D;a8f0fb89-edf9-484c-b937-036b088f287d&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
+                    <div class="pre"><code class="bash">curl -k -v -X POST &#39;https://localhost:9443/api/am/publisher/v1.1/apis/copy-api?newVersion&#x3D;2.0.0&amp;apiId&#x3D;a8f0fb89-edf9-484c-b937-036b088f287d&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
 
             <h4 class="section-heading">
                 <u>Creating a new API version as a default version API</u>
@@ -1738,7 +1738,7 @@ Location: https://localhost:9443/api/am/publisher/v1.0/apis/740a2695-74f3-4d8f-8
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-apisCopyApiPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/copy-api?newVersion&#x3D;2.0.0&amp;defaultVersion&#x3D;true&amp;apiId&#x3D;a8f0fb89-edf9-484c-b937-036b088f287d HTTP 1/1
+                    <div id="request-apisCopyApiPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.1/apis/copy-api?newVersion&#x3D;2.0.0&amp;defaultVersion&#x3D;true&amp;apiId&#x3D;a8f0fb89-edf9-484c-b937-036b088f287d HTTP 1/1
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -1750,7 +1750,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 </div>
                     <div id="response-apisCopyApiPost" class="pre collapse in"><code class="json">HTTP 1/1 201 Created
 Content-Type: application/json
-Location: https://localhost:9443/api/am/publisher/v1.0/apis/740a2695-74f3-4d8f-826b-356e39553912
+Location: https://localhost:9443/api/am/publisher/v1.1/apis/740a2695-74f3-4d8f-826b-356e39553912
 
 {
   &quot;id&quot; : &quot;740a2695-74f3-4d8f-826b-356e39553912&quot;,
@@ -1857,7 +1857,7 @@ Location: https://localhost:9443/api/am/publisher/v1.0/apis/740a2695-74f3-4d8f-8
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -v -X POST &#39;https://localhost:9443/api/am/publisher/v1.0/apis/copy-api?newVersion&#x3D;2.0.0&amp;defaultVersion&#x3D;true&amp;apiId&#x3D;a8f0fb89-edf9-484c-b937-036b088f287d&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
+                    <div class="pre"><code class="bash">curl -k -v -X POST &#39;https://localhost:9443/api/am/publisher/v1.1/apis/copy-api?newVersion&#x3D;2.0.0&amp;defaultVersion&#x3D;true&amp;apiId&#x3D;a8f0fb89-edf9-484c-b937-036b088f287d&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
 
             <h4 class="section-heading">
                 <u>Creating an API with existing version</u>
@@ -1868,7 +1868,7 @@ Location: https://localhost:9443/api/am/publisher/v1.0/apis/740a2695-74f3-4d8f-8
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-apisCopyApiPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/copy-api?newVersion&#x3D;2.0.0&amp;defaultVersion&#x3D;false&amp;apiId&#x3D;a8f0fb89-edf9-484c-b937-036b088f287d HTTP 1/1
+                    <div id="request-apisCopyApiPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.1/apis/copy-api?newVersion&#x3D;2.0.0&amp;defaultVersion&#x3D;false&amp;apiId&#x3D;a8f0fb89-edf9-484c-b937-036b088f287d HTTP 1/1
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -1890,7 +1890,7 @@ Content-Type: application/json
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -v -X POST &#39;https://localhost:9443/api/am/publisher/v1.0/apis/copy-api?newVersion&#x3D;2.0.0&amp;defaultVersion&#x3D;false&amp;apiId&#x3D;a8f0fb89-edf9-484c-b937-036b088f287d&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
+                    <div class="pre"><code class="bash">curl -k -v -X POST &#39;https://localhost:9443/api/am/publisher/v1.1/apis/copy-api?newVersion&#x3D;2.0.0&amp;defaultVersion&#x3D;false&amp;apiId&#x3D;a8f0fb89-edf9-484c-b937-036b088f287d&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
 
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
@@ -2044,7 +2044,7 @@ Should be formatted as **provider-name-version**.
             </table>
             <hr/>
             <h4 class="operation-heading"><a name="apisGet"></a>Retrieve/Search APIs
-</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis</code>
+</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.1/apis</code>
             <p class="marked"></p>
 
             <p class="marked">This operation provides you a list of available APIs qualifying under a given search condition.
@@ -2067,7 +2067,7 @@ Each retrieved API is represented with a minimal amount of attributes. If you wa
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis HTTP 1/1
+                    <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.1/apis HTTP 1/1
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -2104,7 +2104,7 @@ Content-Type: application/json
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.0/apis&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.1/apis&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
 
             <h4 class="section-heading">
                 <u></u>
@@ -2115,7 +2115,7 @@ Content-Type: application/json
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis HTTP/1.1
+                    <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.1/apis HTTP/1.1
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -2170,7 +2170,7 @@ Content-Type: application/json
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/publisher/v1.0/apis
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/publisher/v1.1/apis
 </code></div>
 
 
@@ -2458,7 +2458,7 @@ variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisImportGraphqlSchemaPost"></a>Import API Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/import-graphql-schema</code>
+            <h4 class="operation-heading"><a name="apisImportGraphqlSchemaPost"></a>Import API Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.1/apis/import-graphql-schema</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to create api from api definition.
@@ -2648,7 +2648,7 @@ API definition is GraphQL Schema
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisPost"></a>Create a new API</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis</code>
+            <h4 class="operation-heading"><a name="apisPost"></a>Create a new API</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.1/apis</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to create a new API specifying the details of the API in the payload. The new API will be in &#x60;CREATED&#x60; state.
@@ -2671,7 +2671,7 @@ There is a special capability for a user who has &#x60;APIM Admin&#x60; permissi
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-apisPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis HTTP 1/1
+                    <div id="request-apisPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.1/apis HTTP 1/1
 Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
 Content-Type: application/json
 
@@ -2730,7 +2730,7 @@ Content-Type: application/json
                 </div>
                     <div id="response-apisPost" class="pre collapse in"><code class="json">HTTP 1/1 201 Created
 Content-Type: application/json
-Location: https://localhost:9443/api/am/publisher/v1.0/apis/35ee8a2d-d9ef-4d6d-8626-377f9f9fc580
+Location: https://localhost:9443/api/am/publisher/v1.1/apis/35ee8a2d-d9ef-4d6d-8626-377f9f9fc580
 
 {
   &quot;id&quot; : &quot;35ee8a2d-d9ef-4d6d-8626-377f9f9fc580&quot;,
@@ -2815,7 +2815,7 @@ Location: https://localhost:9443/api/am/publisher/v1.0/apis/35ee8a2d-d9ef-4d6d-8
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -v -X POST &#39;https://localhost:9443/api/am/publisher/v1.0/apis&#39; -H &#39;Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2&#39; -H &#39;Content-Type: application/json&#39; -d @payload.json</code></div>
+                    <div class="pre"><code class="bash">curl -k -v -X POST &#39;https://localhost:9443/api/am/publisher/v1.1/apis&#39; -H &#39;Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2&#39; -H &#39;Content-Type: application/json&#39; -d @payload.json</code></div>
 
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
@@ -2946,7 +2946,7 @@ Location: https://localhost:9443/api/am/publisher/v1.0/apis/35ee8a2d-d9ef-4d6d-8
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="getWSDLOfAPI"></a>Get WSDL definition</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/wsdl</code>
+            <h4 class="operation-heading"><a name="getWSDLOfAPI"></a>Get WSDL definition</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.1/apis/{apiId}/wsdl</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve the WSDL definition of an API. It can be either a single WSDL file or a WSDL archive.
@@ -2969,7 +2969,7 @@ The type of the WSDL of the API is indicated at the &quot;wsdlInfo&quot; element
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-getWSDLOfAPI"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl HTTP 1/1
+                    <div id="request-getWSDLOfAPI"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl HTTP 1/1
 Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
 </code></div>
 
@@ -2999,7 +2999,7 @@ Content-Length: 7670
 </code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl&#39; -H &#39;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&#39; </code></div>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl&#39; -H &#39;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&#39; </code></div>
 
             <h4 class="section-heading">
                 <u>Retrieve the WSDL Archive of an API</u>
@@ -3010,7 +3010,7 @@ Content-Length: 7670
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-getWSDLOfAPI"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl HTTP 1/1
+                    <div id="request-getWSDLOfAPI"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl HTTP 1/1
 Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
 </code></div>
 
@@ -3027,7 +3027,7 @@ Content-Length: 1642
 &lt;binary-data&gt;</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl&#39; -H &#39;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&#39; </code></div>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl&#39; -H &#39;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&#39; </code></div>
 
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
@@ -3162,7 +3162,7 @@ variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="importOpenAPIDefinition"></a>Import an OpenAPI Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/import-openapi</code>
+            <h4 class="operation-heading"><a name="importOpenAPIDefinition"></a>Import an OpenAPI Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.1/apis/import-openapi</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to create an API from an OpenAPI definition. Provide either &#x60;url&#x60; or &#x60;file&#x60;
@@ -3186,7 +3186,7 @@ Specify additionalProperties with **at least** API&#39;s name, version, context 
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-importOpenAPIDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/import-openapi HTTP/1.1
+                    <div id="request-importOpenAPIDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.1/apis/import-openapi HTTP/1.1
 Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_4_2096758352.1563880508761&quot;
 Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a
 Content-Length: 2972
@@ -3320,7 +3320,7 @@ components:
                     </h5>
                 </div>
                     <div id="response-importOpenAPIDefinition" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
-Location: https://localhost:9443/api/am/publisher/v1.0/apis/ded1a2fd-1a56-4eab-ae5f-07f8df03b0bd
+Location: https://localhost:9443/api/am/publisher/v1.1/apis/ded1a2fd-1a56-4eab-ae5f-07f8df03b0bd
 Content-Type: application/json
 Transfer-Encoding: chunked
 
@@ -3428,7 +3428,7 @@ Transfer-Encoding: chunked
 </code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a&quot; -F file&#x3D;@petstore.v3.yaml -F additionalProperties&#x3D;&#39;{ &quot;name&quot;: &quot;PetstoreAPI&quot;, &quot;context&quot; : &quot;/petstore&quot;, &quot;version&quot; : &quot;1.0.0&quot;}&#39; -X POST https://localhost:9443/api/am/publisher/v1.0/apis/import-openapi
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a&quot; -F file&#x3D;@petstore.v3.yaml -F additionalProperties&#x3D;&#39;{ &quot;name&quot;: &quot;PetstoreAPI&quot;, &quot;context&quot; : &quot;/petstore&quot;, &quot;version&quot; : &quot;1.0.0&quot;}&#39; -X POST https://localhost:9443/api/am/publisher/v1.1/apis/import-openapi
 </code></div>
 
             <h4 class="section-heading">
@@ -3440,7 +3440,7 @@ Transfer-Encoding: chunked
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-importOpenAPIDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/import-openapi HTTP/1.1
+                    <div id="request-importOpenAPIDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.1/apis/import-openapi HTTP/1.1
 Accept-Encoding: gzip,deflate
 Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_3_xxxx.xxxxxxx&quot;
 MIME-Version: 1.0
@@ -3593,7 +3593,7 @@ components:
                     </h5>
                 </div>
                     <div id="response-importOpenAPIDefinition" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
-Location: https://localhost:9443/api/am/publisher/v1.0/apis/ded1a2fd-1a56-4eab-ae5f-07f8df03b0bd
+Location: https://localhost:9443/api/am/publisher/v1.1/apis/ded1a2fd-1a56-4eab-ae5f-07f8df03b0bd
 Content-Type: application/json
 Transfer-Encoding: chunked
 
@@ -3685,7 +3685,7 @@ Transfer-Encoding: chunked
 </code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a&quot; -F file&#x3D;@petstore.v3.yaml -F additionalProperties&#x3D;&#39;{ &quot;name&quot;: &quot;PetstoreAPI&quot;, &quot;context&quot; : &quot;/petstore&quot;, &quot;version&quot; : &quot;1.0.0&quot; , &quot;operations&quot;: [{ &quot;uritemplate&quot;: &quot;/pets&quot;, &quot;httpVerb&quot;: &quot;POST&quot;, &quot;authType&quot;: &quot;Application &amp; Application User&quot;, &quot;throttlingPolicy&quot;: &quot;Unlimited&quot;, &quot;scopes&quot;: []}]}&#39; -X POST https://localhost:9443/api/am/publisher/v1.0/apis/import-openapi
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a&quot; -F file&#x3D;@petstore.v3.yaml -F additionalProperties&#x3D;&#39;{ &quot;name&quot;: &quot;PetstoreAPI&quot;, &quot;context&quot; : &quot;/petstore&quot;, &quot;version&quot; : &quot;1.0.0&quot; , &quot;operations&quot;: [{ &quot;uritemplate&quot;: &quot;/pets&quot;, &quot;httpVerb&quot;: &quot;POST&quot;, &quot;authType&quot;: &quot;Application &amp; Application User&quot;, &quot;throttlingPolicy&quot;: &quot;Unlimited&quot;, &quot;scopes&quot;: []}]}&#39; -X POST https://localhost:9443/api/am/publisher/v1.1/apis/import-openapi
 </code></div>
 
 
@@ -3836,7 +3836,7 @@ Transfer-Encoding: chunked
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="importWSDLDefinition"></a>Import a WSDL Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/import-wsdl</code>
+            <h4 class="operation-heading"><a name="importWSDLDefinition"></a>Import a WSDL Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.1/apis/import-wsdl</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to create an API using a WSDL definition. Provide either &#x60;url&#x60; or &#x60;file&#x60;
@@ -3861,7 +3861,7 @@ Specify additionalProperties with **at least** API&#39;s name, version, context 
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-importWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/import-wsdl HTTP/1.1
+                    <div id="request-importWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.1/apis/import-wsdl HTTP/1.1
 Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_31_1920670410.1568041157990&quot;
 MIME-Version: 1.0
 Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -3897,7 +3897,7 @@ SOAP
                 </div>
                     <div id="response-importWSDLDefinition" class="pre collapse in"><code class="json">HTTP 1/1 201 Created
 Content-Type: application/json
-Location: https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4
+Location: https://localhost:9443/api/am/publisher/v1.1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4
 
 {
   &quot;id&quot; : &quot;7369e7ba-ac2e-4492-9fa5-9d2cd6029db4&quot;,
@@ -3962,7 +3962,7 @@ Location: https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F url&#x3D;&#39;https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl&#39; -F additionalProperties&#x3D;&#39;{ &quot;name&quot; : &quot;IP2GeoAPI&quot;, &quot;context&quot; : &quot;/ip2Geo&quot;, &quot;version&quot; : &quot;1.0.0&quot;, &quot;endpointConfig&quot;: { &quot;endpoint_type&quot;: &quot;http&quot;, &quot;sandbox_endpoints&quot;: { &quot;url&quot;: &quot;https://ws.cdyne.com/ip2geo/ip2geo.asmx&quot;}, &quot;production_endpoints&quot;: { &quot;url&quot;: &quot;https://ws.cdyne.com/ip2geo/ip2geo.asmx&quot; } }, &quot;policies&quot;: [ &quot;Unlimited&quot;] }&#39; -F implementationType&#x3D;SOAP  -X POST https://localhost:9443/api/am/publisher/v1.0/apis/import-wsdl
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F url&#x3D;&#39;https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl&#39; -F additionalProperties&#x3D;&#39;{ &quot;name&quot; : &quot;IP2GeoAPI&quot;, &quot;context&quot; : &quot;/ip2Geo&quot;, &quot;version&quot; : &quot;1.0.0&quot;, &quot;endpointConfig&quot;: { &quot;endpoint_type&quot;: &quot;http&quot;, &quot;sandbox_endpoints&quot;: { &quot;url&quot;: &quot;https://ws.cdyne.com/ip2geo/ip2geo.asmx&quot;}, &quot;production_endpoints&quot;: { &quot;url&quot;: &quot;https://ws.cdyne.com/ip2geo/ip2geo.asmx&quot; } }, &quot;policies&quot;: [ &quot;Unlimited&quot;] }&#39; -F implementationType&#x3D;SOAP  -X POST https://localhost:9443/api/am/publisher/v1.1/apis/import-wsdl
 </code></div>
 
             <h4 class="section-heading">
@@ -3974,7 +3974,7 @@ Location: https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-importWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/import-wsdl HTTP/1.1
+                    <div id="request-importWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.1/apis/import-wsdl HTTP/1.1
 Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_30_581164590.1568040945994&quot;
 MIME-Version: 1.0
 Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -4049,7 +4049,7 @@ Content-Disposition: form-data; name&#x3D;&quot;file&quot;; filename&#x3D;&quot;
                 </div>
                     <div id="response-importWSDLDefinition" class="pre collapse in"><code class="json">HTTP 1/1 201 Created
 Content-Type: application/json
-Location: https://localhost:9443/api/am/publisher/v1.0/apis/ac12ad69-7b81-4bf9-9846-84995f456823
+Location: https://localhost:9443/api/am/publisher/v1.1/apis/ac12ad69-7b81-4bf9-9846-84995f456823
 
 {
   &quot;id&quot; : &quot;ac12ad69-7b81-4bf9-9846-84995f456823&quot;,
@@ -4114,7 +4114,7 @@ Location: https://localhost:9443/api/am/publisher/v1.0/apis/ac12ad69-7b81-4bf9-9
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockquote.wsdl  -F additionalProperties&#x3D;&#39;{ &quot;name&quot; : &quot;StockQuoteAPI&quot;, &quot;context&quot; : &quot;/stock-quote&quot;, &quot;version&quot; : &quot;1.0.0&quot;, &quot;endpointConfig&quot;: { &quot;endpoint_type&quot;: &quot;http&quot;, &quot;sandbox_endpoints&quot;: { &quot;url&quot;: &quot;http://www.webservicex.net/stockquote.asmx&quot;}, &quot;production_endpoints&quot;: { &quot;url&quot;: &quot;http://www.webservicex.net/stockquote.asmx&quot; } }, &quot;policies&quot;: [ &quot;Unlimited&quot;] }&#39; -F implementationType&#x3D;SOAP -X POST https://localhost:9443/api/am/publisher/v1.0/apis/import-wsdl
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockquote.wsdl  -F additionalProperties&#x3D;&#39;{ &quot;name&quot; : &quot;StockQuoteAPI&quot;, &quot;context&quot; : &quot;/stock-quote&quot;, &quot;version&quot; : &quot;1.0.0&quot;, &quot;endpointConfig&quot;: { &quot;endpoint_type&quot;: &quot;http&quot;, &quot;sandbox_endpoints&quot;: { &quot;url&quot;: &quot;http://www.webservicex.net/stockquote.asmx&quot;}, &quot;production_endpoints&quot;: { &quot;url&quot;: &quot;http://www.webservicex.net/stockquote.asmx&quot; } }, &quot;policies&quot;: [ &quot;Unlimited&quot;] }&#39; -F implementationType&#x3D;SOAP -X POST https://localhost:9443/api/am/publisher/v1.1/apis/import-wsdl
 </code></div>
 
             <h4 class="section-heading">
@@ -4126,7 +4126,7 @@ Location: https://localhost:9443/api/am/publisher/v1.0/apis/ac12ad69-7b81-4bf9-9
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-importWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/import-wsdl HTTP/1.1
+                    <div id="request-importWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.1/apis/import-wsdl HTTP/1.1
 Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_29_1617587938.1568040715278&quot;
 MIME-Version: 1.0
 Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -4166,7 +4166,7 @@ Content-Disposition: form-data; name&#x3D;&quot;file&quot;; filename&#x3D;&quot;
                     </h5>
                 </div>
                     <div id="response-importWSDLDefinition" class="pre collapse in"><code class="json">HTTP 1/1 201 Created
-Location: https://localhost:9443/api/am/publisher/v1.0/apis/0a87c289-31b3-4263-b18b-d2a895b83735
+Location: https://localhost:9443/api/am/publisher/v1.1/apis/0a87c289-31b3-4263-b18b-d2a895b83735
 Content-Type: application/json
 
 {
@@ -4232,7 +4232,7 @@ Content-Type: application/json
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockquote.zip -F additionalProperties&#x3D;&#39;{ &quot;name&quot; : &quot;StockQuoteArchiveAPI&quot;, &quot;context&quot; : &quot;/stock-quote-archive-api&quot;, &quot;version&quot; : &quot;1.0.0&quot;, &quot;endpointConfig&quot;: { &quot;endpoint_type&quot;: &quot;http&quot;, &quot;sandbox_endpoints&quot;: { &quot;url&quot;: &quot;http://www.webservicex.net/stockquote.asmx&quot;}, &quot;production_endpoints&quot;: { &quot;url&quot;: &quot;http://www.webservicex.net/stockquote.asmx&quot; } }, &quot;policies&quot;: [ &quot;Unlimited&quot;] }&#39; -F implementationType&#x3D;SOAP -X POST https://localhost:9443/api/am/publisher/v1.0/apis/import-wsdl
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockquote.zip -F additionalProperties&#x3D;&#39;{ &quot;name&quot; : &quot;StockQuoteArchiveAPI&quot;, &quot;context&quot; : &quot;/stock-quote-archive-api&quot;, &quot;version&quot; : &quot;1.0.0&quot;, &quot;endpointConfig&quot;: { &quot;endpoint_type&quot;: &quot;http&quot;, &quot;sandbox_endpoints&quot;: { &quot;url&quot;: &quot;http://www.webservicex.net/stockquote.asmx&quot;}, &quot;production_endpoints&quot;: { &quot;url&quot;: &quot;http://www.webservicex.net/stockquote.asmx&quot; } }, &quot;policies&quot;: [ &quot;Unlimited&quot;] }&#39; -F implementationType&#x3D;SOAP -X POST https://localhost:9443/api/am/publisher/v1.1/apis/import-wsdl
 </code></div>
 
 
@@ -4421,7 +4421,7 @@ which are extracted from the WSDL.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="updateAPIThumbnail"></a>Upload a thumbnail image</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/thumbnail</code>
+            <h4 class="operation-heading"><a name="updateAPIThumbnail"></a>Upload a thumbnail image</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v1.1/apis/{apiId}/thumbnail</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to upload a thumbnail image of an API. The thumbnail to be uploaded should be given as a form data parameter &#x60;file&#x60;.
@@ -4593,7 +4593,7 @@ which are extracted from the WSDL.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="updateWSDLOfAPI"></a>Update WSDL definition</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/wsdl</code>
+            <h4 class="operation-heading"><a name="updateWSDLOfAPI"></a>Update WSDL definition</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v1.1/apis/{apiId}/wsdl</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to update the WSDL definition of an existing API. WSDL to be updated can be passed as either &quot;url&quot; or &quot;file&quot;.
@@ -4616,7 +4616,7 @@ and its dependencies (eg: XSDs)
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-updateWSDLOfAPI"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl HTTP/1.1
+                    <div id="request-updateWSDLOfAPI"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/publisher/v1.1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl HTTP/1.1
 Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_32_1344536553.1568106480012&quot;
 MIME-Version: 1.0
 Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -4649,7 +4649,7 @@ Content-Length: 0
 </code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F url&#x3D;&#39;https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl&#39; -F file&#x3D;&#39;&#39; -X PUT https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F url&#x3D;&#39;https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl&#39; -F file&#x3D;&#39;&#39; -X PUT https://localhost:9443/api/am/publisher/v1.1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl
 </code></div>
 
             <h4 class="section-heading">
@@ -4661,7 +4661,7 @@ Content-Length: 0
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-updateWSDLOfAPI"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl HTTP/1.1
+                    <div id="request-updateWSDLOfAPI"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/publisher/v1.1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl HTTP/1.1
 Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_34_1125730933.1568107415435&quot;
 MIME-Version: 1.0
 Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -4719,7 +4719,7 @@ Content-Disposition: form-data; name&#x3D;&quot;file&quot;; filename&#x3D;&quot;
 Content-Length: 0</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockQuote.wsdl -X PUT https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockQuote.wsdl -X PUT https://localhost:9443/api/am/publisher/v1.1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl
 </code></div>
 
 

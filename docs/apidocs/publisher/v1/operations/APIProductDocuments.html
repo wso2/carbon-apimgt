@@ -2,7 +2,7 @@
     <h1><a name="API Product Documents"></a>API Product Documents</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="apiProductsApiProductIdDocumentsDocumentIdContentGet"></a>Get the content of an API Product document</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/api-products/{apiProductId}/documents/{documentId}/content</code>
+            <h4 class="operation-heading"><a name="apiProductsApiProductIdDocumentsDocumentIdContentGet"></a>Get the content of an API Product document</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.1/api-products/{apiProductId}/documents/{documentId}/content</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrive the content of an API&#39;s document.
@@ -12,7 +12,7 @@ The document can be of 3 types. In each cases responses are different.
 1. **Inline type**:
    The content of the document will be retrieved in &#x60;text/plain&#x60; content type
 
-   _Sample cURL_ : &#x60;curl -k -H &quot;Authorization:Bearer 579f0af4-37be-35c7-81a4-f1f1e9ee7c51&quot; -F inlineContent&#x3D;@&quot;docs.txt&quot; -X POST &quot;https://localhost:9443/api/am/publisher/v1.0/apis/995a4972-3178-4b17-a374-756e0e19127c/documents/43c2bcce-60e7-405f-bc36-e39c0c5e189e/content&#x60;
+   _Sample cURL_ : &#x60;curl -k -H &quot;Authorization:Bearer 579f0af4-37be-35c7-81a4-f1f1e9ee7c51&quot; -F inlineContent&#x3D;@&quot;docs.txt&quot; -X POST &quot;https://localhost:9443/api/am/publisher/v1.1/apis/995a4972-3178-4b17-a374-756e0e19127c/documents/43c2bcce-60e7-405f-bc36-e39c0c5e189e/content&#x60;
 2. **FILE type**:
    The file will be downloaded with the related content type (eg. &#x60;application/pdf&#x60;)
 3. **URL type**:
@@ -223,7 +223,7 @@ variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apiProductsApiProductIdDocumentsDocumentIdContentPost"></a>Upload the content of an API Product document</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/api-products/{apiProductId}/documents/{documentId}/content</code>
+            <h4 class="operation-heading"><a name="apiProductsApiProductIdDocumentsDocumentIdContentPost"></a>Upload the content of an API Product document</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.1/api-products/{apiProductId}/documents/{documentId}/content</code>
             <p class="marked"></p>
 
             <p class="marked">Thid operation can be used to upload a file or add inline content to an API Product document.
@@ -454,7 +454,7 @@ variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apiProductsApiProductIdDocumentsDocumentIdDelete"></a>Delete a document of an API Product</h4> <code>DELETE https://apis.wso2.com/api/am/publisher/v1.0/api-products/{apiProductId}/documents/{documentId}</code>
+            <h4 class="operation-heading"><a name="apiProductsApiProductIdDocumentsDocumentIdDelete"></a>Delete a document of an API Product</h4> <code>DELETE https://apis.wso2.com/api/am/publisher/v1.1/api-products/{apiProductId}/documents/{documentId}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to delete a document associated with an API Product.
@@ -617,7 +617,7 @@ variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apiProductsApiProductIdDocumentsDocumentIdGet"></a>Get a document of an API</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/api-products/{apiProductId}/documents/{documentId}</code>
+            <h4 class="operation-heading"><a name="apiProductsApiProductIdDocumentsDocumentIdGet"></a>Get a document of an API</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.1/api-products/{apiProductId}/documents/{documentId}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve a particular document&#39;s metadata associated with an API.
@@ -818,7 +818,7 @@ variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apiProductsApiProductIdDocumentsDocumentIdPut"></a>Update a document of an API Product</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v1.0/api-products/{apiProductId}/documents/{documentId}</code>
+            <h4 class="operation-heading"><a name="apiProductsApiProductIdDocumentsDocumentIdPut"></a>Update a document of an API Product</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v1.1/api-products/{apiProductId}/documents/{documentId}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to update metadata of an API&#39;s document.
@@ -1019,7 +1019,7 @@ variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apiProductsApiProductIdDocumentsGet"></a>Get a list of documents of an API Product</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/api-products/{apiProductId}/documents</code>
+            <h4 class="operation-heading"><a name="apiProductsApiProductIdDocumentsGet"></a>Get a list of documents of an API Product</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.1/api-products/{apiProductId}/documents</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrive a list of documents belonging to an API Product by providing the id of the API Product.
@@ -1248,7 +1248,7 @@ variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apiProductsApiProductIdDocumentsPost"></a>Add a new document to an API Product</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/api-products/{apiProductId}/documents</code>
+            <h4 class="operation-heading"><a name="apiProductsApiProductIdDocumentsPost"></a>Add a new document to an API Product</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.1/api-products/{apiProductId}/documents</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to add a new documentation to an API Product. This operation only adds the metadata of a document. To add the actual content we need to use **Upload the content of an API Product document ** API once we obtain a document Id by this operation.

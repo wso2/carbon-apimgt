@@ -2,7 +2,7 @@ get:
   - id: GetSubscribedAlertTypes
     request:
       method: GET
-      curl: https://localhost:9443/api/am/publisher/v1.0/alert-subscriptions
+      curl: https://localhost:9443/api/am/publisher/v1.1/alert-subscriptions
       headers: |
           Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
     response:
@@ -38,7 +38,7 @@ put:
   - id: PostAlertTypeUser
     request:
       method: PUT
-      url: https://localhost:9443/api/am/publisher/v1.0/alert-subscriptions
+      url: https://localhost:9443/api/am/publisher/v1.1/alert-subscriptions
       headers: |
           Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
           Content-Type: application/json
@@ -108,7 +108,7 @@ delete:
   - id: UnsubscribeFromAlerts
     request:
       method: DELETE
-      url: https://localhost:9443/api/am/publisher/v1.0/alert-subscriptions
+      url: https://localhost:9443/api/am/publisher/v1.1/alert-subscriptions
       headers: |
         Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
         Content-Type: application/json

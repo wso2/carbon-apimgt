@@ -3,7 +3,7 @@
 
             <hr/>
             <h4 class="operation-heading"><a name="apisApiIdGet"></a>Get details of an API
-</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/apis/{apiId}</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v1.1/apis/{apiId}</code>
             <p class="marked"></p>
 
             <p class="marked">Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API to retrive it.
@@ -183,7 +183,7 @@ variant of the resourec.
             </table>
             <hr/>
             <h4 class="operation-heading"><a name="apisApiIdGraphqlSchemaGet"></a>Get graphQL definition
-</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/apis/{apiId}/graphql-schema</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v1.1/apis/{apiId}/graphql-schema</code>
             <p class="marked"></p>
 
             <p class="marked">You can use this operation to retrieve the swagger definition of an API.
@@ -363,7 +363,7 @@ variant of the resourec.
             </table>
             <hr/>
             <h4 class="operation-heading"><a name="apisApiIdSubscriptionPoliciesGet"></a>Get details of the subscription throttling policies of an API
-</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/apis/{apiId}/subscription-policies</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v1.1/apis/{apiId}/subscription-policies</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve details of the subscription throttling policy of an API by specifying the API Id.
@@ -540,7 +540,7 @@ variant of the resourec.
             </table>
             <hr/>
             <h4 class="operation-heading"><a name="apisApiIdSwaggerGet"></a>Get swagger definition
-</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/apis/{apiId}/swagger</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v1.1/apis/{apiId}/swagger</code>
             <p class="marked"></p>
 
             <p class="marked">You can use this operation to retrieve the swagger definition of an API.
@@ -775,7 +775,7 @@ variant of the resourec.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdThumbnailGet"></a>Get thumbnail image</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/apis/{apiId}/thumbnail</code>
+            <h4 class="operation-heading"><a name="apisApiIdThumbnailGet"></a>Get thumbnail image</h4> <code>GET https://apis.wso2.com/api/am/store/v1.1/apis/{apiId}/thumbnail</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to download a thumbnail image of an API.
@@ -955,7 +955,7 @@ variant of the resourec.
             </table>
             <hr/>
             <h4 class="operation-heading"><a name="apisGet"></a>Retrieve/Search APIs
-</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/apis</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v1.1/apis</code>
             <p class="marked"></p>
 
             <p class="marked">This operation provides you a list of available APIs qualifying under a given search condition.
@@ -984,7 +984,7 @@ This operation supports retriving APIs of other tenants. The required tenant dom
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.0/apis HTTP 1/1
+                    <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.1/apis HTTP 1/1
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -1021,7 +1021,7 @@ Content-Type: application/json
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.0/apis&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.1/apis&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
 
             <h4 class="section-heading">
                 <u></u>
@@ -1032,7 +1032,7 @@ Content-Type: application/json
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.0/apis HTTP/1.1
+                    <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.1/apis HTTP/1.1
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -1088,7 +1088,7 @@ Content-Type: application/json
 </code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/store/v1.0/apis
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/store/v1.1/apis
 </code></div>
 
 
@@ -1307,7 +1307,7 @@ variant of the resourec.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="getWSDLOfAPI"></a>Get API WSDL definition</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/apis/{apiId}/wsdl</code>
+            <h4 class="operation-heading"><a name="getWSDLOfAPI"></a>Get API WSDL definition</h4> <code>GET https://apis.wso2.com/api/am/store/v1.1/apis/{apiId}/wsdl</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve the swagger definition of an API.
@@ -1328,7 +1328,7 @@ variant of the resourec.
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-getWSDLOfAPI"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.0/apis/db8566ee-6260-47f1-a15f-e71bd2ecb68f/wsdl?environmentName&#x3D;Production%20and%20Sandbox HTTP 1/1
+                    <div id="request-getWSDLOfAPI"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.1/apis/db8566ee-6260-47f1-a15f-e71bd2ecb68f/wsdl?environmentName&#x3D;Production%20and%20Sandbox HTTP 1/1
 Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
 </code></div>
 
@@ -1359,7 +1359,7 @@ Content-Length: 7670
 </code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.0/apis/db8566ee-6260-47f1-a15f-e71bd2ecb68f/wsdl?environmentName&#x3D;Production%20and%20Sandbox&#39; -H &#39;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&#39; </code></div>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.1/apis/db8566ee-6260-47f1-a15f-e71bd2ecb68f/wsdl?environmentName&#x3D;Production%20and%20Sandbox&#39; -H &#39;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&#39; </code></div>
 
             <h4 class="section-heading">
                 <u>Retrieve the WSDL Archive of an API</u>
@@ -1370,7 +1370,7 @@ Content-Length: 7670
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-getWSDLOfAPI"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl?environmentName&#x3D;Production%20and%20Sandbox HTTP 1/1
+                    <div id="request-getWSDLOfAPI"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl?environmentName&#x3D;Production%20and%20Sandbox HTTP 1/1
 Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
 </code></div>
 
@@ -1389,7 +1389,7 @@ Content-Length: 1493
 </code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl?environmentName&#x3D;Production%20and%20Sandbox&#39; -H &#39;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&#39; </code></div>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl?environmentName&#x3D;Production%20and%20Sandbox&#39; -H &#39;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&#39; </code></div>
 
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>

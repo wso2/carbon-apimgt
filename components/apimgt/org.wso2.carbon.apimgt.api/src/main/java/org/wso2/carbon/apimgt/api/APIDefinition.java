@@ -183,4 +183,6 @@ public abstract class APIDefinition {
      */
     public abstract String getOASDefinitionForPublisher(API api, String oasDefinition)
             throws APIManagementException;
+
+    public abstract String getOASVersion(String oasDefinition) throws APIManagementException;
 }
