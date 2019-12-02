@@ -96,10 +96,10 @@ class TokenManager extends React.Component {
                 supportedGrantTypes: [],
                 callbackUrl: '',
                 validityTime: 3600,
-                generateEnabled: true,
             },
             providedConsumerKey: '',
             providedConsumerSecret: '',
+            generateEnabled: true,
         };
         this.keyStates = {
             COMPLETED: 'COMPLETED',
@@ -498,7 +498,7 @@ class TokenManager extends React.Component {
                                     color='primary'
                                     className={classes.button}
                                     onClick={keys.size > 0 && keys.get(keyType) ? this.updateKeys : this.generateKeys}
-                                    disabled={generateEnabled}
+                                    disabled={!generateEnabled}
                                 >
                                     {keys.size > 0 && keys.get(keyType) ? 'Update' : 'Generate Keys'}
                                 </Button>

@@ -109,6 +109,7 @@ const KeyConfiguration = (props) => {
                 } else {
                     setCallbackUrlError(false);
                 }
+                setGenerateEnabled(isValidityTimeError || isCalbackUrlError);
                 newRequest.callbackUrl = currentTarget.value;
                 break;
             case 'validityTime':
@@ -117,6 +118,7 @@ const KeyConfiguration = (props) => {
                 } else {
                     setValidityTimeError(false);
                 }
+                setGenerateEnabled(isValidityTimeError || isCalbackUrlError);
                 newRequest.validityTime = currentTarget.value;
                 break;
             case 'grantType':
@@ -130,7 +132,6 @@ const KeyConfiguration = (props) => {
             default:
                 break;
         }
-        setGenerateEnabled(!(isValidityTimeError || isCalbackUrlError));
         updateKeyRequest(newRequest);
     };
 
