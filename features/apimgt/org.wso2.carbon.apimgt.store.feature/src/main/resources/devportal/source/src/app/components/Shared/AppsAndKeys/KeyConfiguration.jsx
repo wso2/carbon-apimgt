@@ -127,6 +127,7 @@ const KeyConfiguration = (props) => {
                 } else {
                     newGrantTypes = newRequest.supportedGrantTypes.filter(item => item !== currentTarget.id);
                 }
+                setGenerateEnabled(newGrantTypes.includes('client_credentials'));
                 newRequest.supportedGrantTypes = newGrantTypes;
                 break;
             default:
