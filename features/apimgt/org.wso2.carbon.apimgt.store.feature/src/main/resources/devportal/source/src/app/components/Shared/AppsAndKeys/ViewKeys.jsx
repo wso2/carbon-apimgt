@@ -27,6 +27,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
 import CopyToClipboard from 'react-copy-to-clipboard';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Tooltip from '@material-ui/core/Tooltip';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -44,7 +45,7 @@ import ViewToken from './ViewToken';
 import ViewSecret from './ViewSecret';
 import ViewCurl from './ViewCurl';
 
-const styles = theme => ({
+const styles = (theme) => ({
     button: {
         margin: theme.spacing(3),
         color: theme.palette.getContrastText(theme.palette.background.default),
@@ -109,6 +110,7 @@ class ViewKeys extends React.Component {
                 keyType: '',
             },
             subscriptionScopes: [],
+            isUpdating: false,
         };
     }
 
@@ -211,7 +213,7 @@ class ViewKeys extends React.Component {
      * */
     handleSecretRegenerate = (consumerKey, keyType) => {
         this.applicationPromise
-            .then(application => application.regenerateSecret(consumerKey, keyType))
+            .then((application) => application.regenerateSecret(consumerKey, keyType))
             .then((response) => {
                 console.log('consumer secret regenerated successfully ' + response);
                 this.setState({
@@ -251,9 +253,10 @@ class ViewKeys extends React.Component {
      * Generate access token
      * */
     generateAccessToken = () => {
-        const { accessTokenRequest } = this.state;
+        const { accessTokenRequest, isUpdating } = this.state;
+        this.setState({ isUpdating: true });
         this.applicationPromise
-            .then(application => application.generateToken(
+            .then((application) => application.generateToken(
                 accessTokenRequest.keyType,
                 accessTokenRequest.timeout,
                 accessTokenRequest.scopesSelected,
@@ -267,6 +270,7 @@ class ViewKeys extends React.Component {
                     tokenScopes: response.tokenScopes,
                     tokenValidityTime: response.validityTime,
                 });
+                this.setState({ isUpdating: false });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -276,6 +280,7 @@ class ViewKeys extends React.Component {
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
+                this.setState({ isUpdating: false });
             });
     };
 
@@ -286,11 +291,10 @@ class ViewKeys extends React.Component {
         const {
             notFound, showCS, showToken, showCurl, showSecretGen, secretCopied, tokenCopied, keyCopied, open,
             token, tokenScopes, tokenValidityTime, accessTokenRequest, subscriptionScopes,
-            isKeyJWT, tokenResponse, secretGenResponse,
+            isKeyJWT, tokenResponse, secretGenResponse, isUpdating,
         } = this.state;
         const {
-            intl, keyType, classes, fullScreen, keys, selectedApp: { tokenType, hashEnabled },
-            selectedGrantTypes, isUserOwner,
+            intl, keyType, classes, fullScreen, keys, selectedApp: { tokenType, hashEnabled }, selectedGrantTypes, isUserOwner,
         } = this.props;
 
         if (notFound) {
@@ -445,8 +449,7 @@ class ViewKeys extends React.Component {
                                         id='Shared.AppsAndKeys.ViewKeys.consumer.secret.button.regenerate'
                                     />
                                 </Button>
-                            )
-                            }
+                            )}
                         </div>
                         {!hashEnabled && (
                             <FormControl>
@@ -547,8 +550,9 @@ class ViewKeys extends React.Component {
                                 )}
                             </DialogContent>
                             <DialogActions>
+                                {isUpdating && <CircularProgress size={24} />}
                                 {!showToken && !showCurl && !isKeyJWT && !showSecretGen && (
-                                    <Button onClick={this.generateAccessToken} color='primary'>
+                                    <Button onClick={this.generateAccessToken} color='primary' disabled={isUpdating}>
                                         <FormattedMessage
                                             id='Shared.AppsAndKeys.ViewKeys.consumer.generate.btn'
                                             defaultMessage='Generate'
@@ -593,11 +597,11 @@ class ViewKeys extends React.Component {
                             </div>
                         )}
                         {!selectedGrantTypes.includes('client_credentials') && !hashEnabled && (
-                            <Typography variant='caption' gutterBottom >
+                            <Typography variant='caption' gutterBottom>
                                 <FormattedMessage
                                     id='Shared.AppsAndKeys.ViewKeys.client.enable.client.credentials'
-                                    defaultMessage={'Enable Client Credentials grant ' +
-                                            'type to generate test access tokens'}
+                                    defaultMessage={'Enable Client Credentials grant '
+                                            + 'type to generate test access tokens'}
                                 />
                             </Typography>
                         )}
@@ -605,7 +609,6 @@ class ViewKeys extends React.Component {
                 </Grid>
             </div>
         ) : (
-
             <Typography variant='caption' gutterBottom>
                 {keyType === 'PRODUCTION' ? 'Production ' : 'Sandbox '}
                 <FormattedMessage
@@ -613,7 +616,6 @@ class ViewKeys extends React.Component {
                     defaultMessage='Key and Secret is not generated for this application'
                 />
             </Typography>
-
         );
     }
 }
