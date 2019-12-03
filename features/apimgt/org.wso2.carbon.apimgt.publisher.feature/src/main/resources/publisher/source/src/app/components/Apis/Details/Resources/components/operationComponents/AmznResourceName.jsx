@@ -144,6 +144,9 @@ const useStyles = makeStyles((theme) => ({
         width: 'auto',
         flexGrow: 1,
     },
+    timeout: {
+        width: 20,
+    },
 }));
 
 
@@ -162,6 +165,7 @@ export default function IntegrationDownshift(props) {
         verb,
     } = props;
     const [arns, setArns] = useState([]);
+    const [timeout, setTimeout] = useState(operation['x-amzn-resource-name']);
     useEffect(() => {
         API.getAmznResourceNames(api.id)
             .then((response) => {
@@ -170,6 +174,42 @@ export default function IntegrationDownshift(props) {
                 }
             });
     }, []);
+    const handleTimeoutMin = (event) => {
+        if (event.target.value !== '') {
+            const minutes = parseInt(event.target.value, 10);
+            const seconds = (timeout / 1000) % 60;
+            const milliSeconds = (minutes * 60 + seconds) * 1000;
+            if (milliSeconds > 900000) {
+                setTimeout(900000);
+            } else if (milliSeconds < 1000) {
+                setTimeout(1000);
+            } else {
+                setTimeout(milliSeconds);
+            }
+            operationsDispatcher({
+                action: 'amznResourceTimeout',
+                data: { target, verb, value: timeout },
+            });
+        }
+    };
+    const handleTimeoutSec = (event) => {
+        if (event.target.value !== '') {
+            const minutes = Math.floor((timeout / 1000) / 60);
+            const seconds = parseInt(event.target.value, 10);
+            const milliSeconds = (minutes * 60 + seconds) * 1000;
+            if (milliSeconds > 900000) {
+                setTimeout(900000);
+            } else if (milliSeconds < 0) {
+                setTimeout(1000);
+            } else {
+                setTimeout(milliSeconds);
+            }
+            operationsDispatcher({
+                action: 'amznResourceTimeout',
+                data: { target, verb, value: timeout },
+            });
+        }
+    };
     return (
         <>
             <Grid item md={12} xs={12}>
@@ -179,7 +219,7 @@ export default function IntegrationDownshift(props) {
                 </Typography>
             </Grid>
             <Grid item md={1} xs={1} />
-            <Grid item md={10} xs={11}>
+            <Grid item md={7} xs={7}>
                 <Downshift
                     id='downshift-options'
                     onSelect={(changes) => {
@@ -230,6 +270,8 @@ export default function IntegrationDownshift(props) {
                                     fullWidth: true,
                                     classes,
                                     InputLabelProps: getLabelProps({ shrink: true }),
+                                    label: 'Amazon Resource Name (ARN)',
+                                    helperText: 'Select or type an ARN',
                                     InputProps: {
                                         onBlur,
                                         onChange,
@@ -262,6 +304,43 @@ export default function IntegrationDownshift(props) {
                     }}
                 </Downshift>
             </Grid>
+            <Grid item md={1} xs={1} />
+            <Grid item md={1} xs={1}>
+                <TextField
+                    id='timeout-min'
+                    label='min'
+                    variant='outlined'
+                    helperText='Timeout'
+                    type='number'
+                    inputProps={{
+                        min: 0,
+                        max: 15,
+                        step: 1,
+                    }}
+                    value={Math.floor((timeout / 1000) / 60)}
+                    onChange={(event) => {
+                        handleTimeoutMin(event);
+                    }}
+                />
+            </Grid>
+            <Grid item md={1} xs={1}>
+                <TextField
+                    id='timeout-sec'
+                    label='sec'
+                    variant='outlined'
+                    type='number'
+                    inputProps={{
+                        min: 0,
+                        max: 59,
+                        step: 1,
+                    }}
+                    value={(timeout / 1000) % 60}
+                    onChange={(event) => {
+                        handleTimeoutSec(event);
+                    }}
+                />
+            </Grid>
+            <Grid item md={1} xs={1} />
         </>
     );
 }

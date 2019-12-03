@@ -50,6 +50,7 @@ public class AWSLambdaMediator extends AbstractMediator {
     private String accessKey = "";
     private String secretKey = "";
     private String resourceName = "";
+    private int resourceTimeout = APIConstants.AWS_DEFAULT_CONNECTION_TIMEOUT;
 
     public AWSLambdaMediator() {
 
@@ -127,7 +128,8 @@ public class AWSLambdaMediator extends AbstractMediator {
             InvokeRequest invokeRequest = new InvokeRequest()
                     .withFunctionName(resourceName)
                     .withPayload(payload)
-                    .withInvocationType(InvocationType.RequestResponse);
+                    .withInvocationType(InvocationType.RequestResponse)
+                    .withSdkClientExecutionTimeout(resourceTimeout);
             return awsLambda.invoke(invokeRequest);
         } catch (SdkClientException e) {
             log.error("Error while invoking the lambda function", e);
@@ -161,6 +163,10 @@ public class AWSLambdaMediator extends AbstractMediator {
         return resourceName;
     }
 
+    public int getResourceTimeout() {
+        return resourceTimeout;
+    }
+
     public void setAccessKey(String accessKey) {
         this.accessKey = accessKey;
     }
@@ -173,4 +179,7 @@ public class AWSLambdaMediator extends AbstractMediator {
         this.resourceName = resourceName;
     }
 
+    public void setResourceTimeout(int resourceTimeout) {
+        this.resourceTimeout = resourceTimeout;
+    }
 }
