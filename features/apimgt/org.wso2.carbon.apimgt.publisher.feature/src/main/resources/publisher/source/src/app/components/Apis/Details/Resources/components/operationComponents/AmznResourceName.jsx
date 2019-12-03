@@ -129,7 +129,7 @@ const useStyles = makeStyles((theme) => ({
     paper: {
         position: 'absolute',
         zIndex: 1000,
-        marginTop: theme.spacing(1),
+        marginTop: theme.spacing(-2),
         left: 0,
         right: 0,
     },
@@ -305,7 +305,7 @@ export default function IntegrationDownshift(props) {
                     id='timeout-min'
                     label='min'
                     variant='outlined'
-                    helperText='Timeout'
+                    helperText='Set Timeout'
                     type='number'
                     inputProps={{
                         min: 0,
