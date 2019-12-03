@@ -7426,6 +7426,13 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Scope'
+      categories:
+        description: |
+          API categories
+        type: array
+        items:
+          type: string
+          example: ["Finance"]
   #-----------------------------------------------------
   # The API and its resources in a API Product resource
   #-----------------------------------------------------

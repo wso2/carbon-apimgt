@@ -262,7 +262,7 @@ public class APIMappingUtil {
         model.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
 
         //attach api categories to API model
-        setAPICategoriesToAPIModel(dto, model, provider);
+        setAPICategoriesToModel(dto, model, provider);
 
         return model;
     }
@@ -1849,6 +1849,15 @@ public class APIMappingUtil {
             productDto.setSecurityScheme(Arrays.asList(product.getApiSecurity().split(",")));
         }
 
+        List<APICategory> apiCategories = product.getApiCategories();
+        List<String> categoryNameList = new ArrayList<>();
+        if (apiCategories != null && !apiCategories.isEmpty()) {
+            for (APICategory category : apiCategories) {
+                categoryNameList.add(category.getName());
+            }
+        }
+        productDto.setCategories(categoryNameList);
+
         if (null != product.getLastUpdated()) {
             Date lastUpdateDate = product.getLastUpdated();
             Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
@@ -2060,6 +2069,9 @@ public class APIMappingUtil {
         product.setProductResources(productResources);
         product.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
         product.setAuthorizationHeader(dto.getAuthorizationHeader());
+
+        //attach api categories to API model
+        setAPICategoriesToModel(dto, product, provider);
         return product;
     }
 
@@ -2396,12 +2408,19 @@ public class APIMappingUtil {
     }
 
     /**
-     *
-     * @param dto
-     * @param model
+     * Set API categories to API or APIProduct based on the instance type of the DTO object passes
+     * @param dto APIDTO or APIProductDTO
+     * @param model API or APIProduct
      */
-    private static void setAPICategoriesToAPIModel(APIDTO dto, API model, String provider) {
-        List<String> apiCategoryNames = dto.getCategories();
+    private static void setAPICategoriesToModel(Object dto, Object model, String provider) {
+        List<String> apiCategoryNames = new ArrayList<>();
+        if (dto instanceof APIDTO) {
+            APIDTO apiDTO = (APIDTO)dto;
+            apiCategoryNames = apiDTO.getCategories();
+        } else {
+            APIProductDTO apiProductDTO = (APIProductDTO)dto;
+            apiCategoryNames = apiProductDTO.getCategories();
+        }
         String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         List<APICategory> apiCategories = new ArrayList<>();
@@ -2411,6 +2430,10 @@ public class APIMappingUtil {
             category.setTenantID(tenantId);
             apiCategories.add(category);
         }
-        model.setApiCategories(apiCategories);
+        if (model instanceof API) {
+            ((API)model).setApiCategories(apiCategories);
+        } else {
+            ((APIProduct)model).setApiCategories(apiCategories);
+        }
     }
 }

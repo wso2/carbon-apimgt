@@ -1244,7 +1244,7 @@ public final class APIUtil {
             attachLabelsToAPIArtifact(artifact, api, tenantDomain);
 
             //attaching api categories to the API
-            attachAPICategoriesToAPIArtifact(artifact, api, tenantDomain);
+            attachAPICategoriesToArtifact(artifact, api, tenantDomain);
 
             //set monetization status (i.e - enabled or disabled)
             artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS, Boolean.toString(api.getMonetizationStatus()));
@@ -1355,6 +1355,9 @@ public final class APIUtil {
                 artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES,
                         apiProduct.getMonetizationProperties().toJSONString());
             }
+
+            //attaching api categories to the API
+            attachAPICategoriesToArtifact(artifact, apiProduct, tenantDomain);
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + apiProduct.getId().getName();
             log.error(msg, e);
@@ -9245,6 +9248,7 @@ public final class APIUtil {
                 JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
                 apiProduct.setMonetizationProperties(jsonObj);
             }
+            apiProduct.setApiCategories(getAPICategoriesFromAPIGovernanceArtifact(artifact, tenantId));
         } catch (GovernanceException e) {
             String msg = "Failed to get API Product for artifact ";
             throw new APIManagementException(msg, e);
@@ -9835,16 +9839,27 @@ public final class APIUtil {
         return username;
     }
 
-     /** Validate the existence of the defined API categories and add to the API
+     /** Validate the existence of the defined API categories and add to the API or API Product
      *
      * @param artifact
-     * @param api
+     * @param model API or APIProduct
      * @param tenantDomain
      * @throws APIManagementException
      */
-    public static void attachAPICategoriesToAPIArtifact(GenericArtifact artifact, API api, String tenantDomain) throws APIManagementException {
-        //get categories attached to API, this may not contain category IDs
-        List<APICategory> attachedApiCategories = api.getApiCategories();
+    public static void attachAPICategoriesToArtifact(GenericArtifact artifact, Object model, String tenantDomain) throws APIManagementException {
+        //Check whether the recieved model is an API or an APIProduct and get categories attached to API or Product,
+        // this may not contain category IDs
+        List<APICategory> attachedApiCategories = new ArrayList<>();
+        String modelName = "";
+        if (model instanceof API) {
+            API api = (API)model;
+            attachedApiCategories = api.getApiCategories();
+            modelName = api.getId().getApiName();
+        } else {
+            APIProduct apiProduct = (APIProduct)model;
+            attachedApiCategories = apiProduct.getApiCategories();
+            modelName = apiProduct.getId().getName();
+        }
 
         //get all categories available in tenant
         int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -9866,7 +9881,7 @@ public final class APIUtil {
                     }
                 }
             } catch (GovernanceException e) {
-                String msg = "Failed to add categories for API : " + api.getId().getApiName();
+                String msg = "Failed to add categories for API : " + modelName;
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
             }
