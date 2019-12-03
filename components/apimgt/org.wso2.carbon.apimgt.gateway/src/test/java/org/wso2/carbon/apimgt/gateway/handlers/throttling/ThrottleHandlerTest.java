@@ -31,7 +31,9 @@ import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.gateway.TestUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
+import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.metrics.manager.Timer;
 
@@ -161,7 +163,7 @@ public class ThrottleHandlerTest {
     @Test
     public void testMsgDoContinueWhenAllThrottlingLevelsAreNotThrolled() {
         ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
-
+        ServiceReferenceHolder.getInstance().setThrottleDataPublisher(new ThrottleDataPublisher());
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
         MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
         messageContext.setProperty(VERB_INFO_DTO, verbInfoDTO);
@@ -507,7 +509,7 @@ public class ThrottleHandlerTest {
     @Test
     public void testCheckForStaledThrottleData() {
         ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
-
+        ServiceReferenceHolder.getInstance().setThrottleDataPublisher(new ThrottleDataPublisher());
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator,
                 accessInformation);
         throttleHandler.setProductionMaxCount("100");

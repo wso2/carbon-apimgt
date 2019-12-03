@@ -39,6 +39,7 @@ public class JMSTransportHandler {
     private JMSConnectionFactory jmsConnectionFactory;
     private JMSListener jmsListenerForThrottleDataTopic;
     private JMSListener jmsListenerForTokenRevocationTopic;
+    private JMSListener jmsListenerForCacheInvalidationTopic;
     private boolean stopIssued = false;
     private static final Object lock = new Object();
 
@@ -110,6 +111,21 @@ public class JMSTransportHandler {
                 + "#" + JMSConstants.TOPIC_TOKEN_REVOCATION, jmsTaskManagerForTokenRevocationTopic);
         jmsListenerForTokenRevocationTopic.startListener();
         log.info("Starting jms topic consumer thread for the tokenRevocation topic...");
+
+        //Listening to tokenRevocation topic
+        messageConfig.put(JMSConstants.PARAM_DESTINATION, JMSConstants.TOPIC_CACHE_INVALIDATION);
+        JMSTaskManager jmsTaskManagerForCacheInvalidationTopic = JMSTaskManagerFactory.createTaskManagerForService(
+                jmsConnectionFactory,
+                ListenerConstants.CONNECTION_FACTORY_NAME,
+                new NativeWorkerPool(minThreadPoolSize, maxThreadPoolSize,
+                        keepAliveTimeInMillis, jobQueueSize, "JMS Threads",
+                        "JMSThreads" + UUID.randomUUID().toString()), messageConfig);
+        jmsTaskManagerForCacheInvalidationTopic.setJmsMessageListener(new JMSMessageListener());
+
+        jmsListenerForCacheInvalidationTopic = new JMSListener(ListenerConstants.CONNECTION_FACTORY_NAME
+                + "#" + JMSConstants.TOPIC_CACHE_INVALIDATION, jmsTaskManagerForCacheInvalidationTopic);
+        jmsListenerForCacheInvalidationTopic.startListener();
+        log.info("Starting jms topic consumer thread for the cacheInvalidation topic...");
     }
 
     public void unSubscribeFromEvents() {
@@ -129,6 +145,10 @@ public class JMSTransportHandler {
                     if (jmsListenerForThrottleDataTopic != null) {
                         jmsListenerForThrottleDataTopic.stopListener();
                     }
+                    if (jmsListenerForCacheInvalidationTopic != null) {
+                        jmsListenerForCacheInvalidationTopic.stopListener();
+                    }
+
                     log.debug("JMS Listeners Stopped");
                     jmsConnectionFactory.stop();
                     log.debug("JMS Connection Factory Stopped");

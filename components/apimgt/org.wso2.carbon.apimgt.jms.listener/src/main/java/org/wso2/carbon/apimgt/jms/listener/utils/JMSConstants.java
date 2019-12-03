@@ -323,4 +323,5 @@ public class JMSConstants {
     //APIM default topic names
     public static final String TOPIC_THROTTLE_DATA = "throttleData";
     public static final String TOPIC_TOKEN_REVOCATION = "tokenRevocation";
+    public static final String TOPIC_CACHE_INVALIDATION = "cacheInvalidation";
 }
