@@ -29,6 +29,7 @@ import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Icon from '@material-ui/core/Icon';
+import { FormattedMessage } from 'react-intl';
 
 /**
  * The renderInput function.
@@ -143,9 +144,6 @@ const useStyles = makeStyles((theme) => ({
         width: 'auto',
         flexGrow: 1,
     },
-    timeout: {
-        width: 20,
-    },
 }));
 
 
@@ -209,7 +207,10 @@ export default function IntegrationDownshift(props) {
         <>
             <Grid item md={12} xs={12}>
                 <Typography variant='subtitle1'>
-                    AWS Lambda Settings
+                    <FormattedMessage
+                        id='Apis.Details.Resources.components.operationComponents.AWSLambdaSettings.Title'
+                        defaultMessage='AWS Lambda Settings'
+                    />
                     <Divider variant='middle' />
                 </Typography>
             </Grid>

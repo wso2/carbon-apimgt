@@ -38,7 +38,7 @@ import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined'
 import API from 'AppData/api';
 import DescriptionAndSummary from './operationComponents/DescriptionAndSummary';
 import OperationGovernance from './operationComponents/OperationGovernance';
-import AmznResourceName from './operationComponents/AmznResourceName';
+import AWSLambdaSettings from './operationComponents/AWSLambdaSettings';
 import Parameters from './operationComponents/Parameters';
 import SOAPToRESTListing from './operationComponents/SOAPToREST/SOAPToRESTListing';
 
@@ -274,7 +274,7 @@ API product(s)
                             && api.endpointConfig.endpoint_type
                             && api.endpointConfig.endpoint_type === 'awslambda'
                             && (
-                                <AmznResourceName
+                                <AWSLambdaSettings
                                     operation={operation}
                                     operationsDispatcher={operationsDispatcher}
                                     target={target}
