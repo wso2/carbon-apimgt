@@ -139,6 +139,9 @@ export default function Resources(props) {
             case 'amznResourceName':
                 updatedOperation['x-amzn-resource-name'] = value;
                 break;
+            case 'amznResourceTimeout':
+                updatedOperation['x-amzn-resource-timeout'] = value;
+                break;
             case 'scopes':
                 if (!updatedOperation.security) {
                     updatedOperation.security = [{ default: [] }];

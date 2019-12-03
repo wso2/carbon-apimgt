@@ -29,7 +29,6 @@ import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Icon from '@material-ui/core/Icon';
-import API from 'AppData/api';
 
 /**
  * The renderInput function.
@@ -158,21 +157,17 @@ const useStyles = makeStyles((theme) => ({
 export default function IntegrationDownshift(props) {
     const classes = useStyles();
     const {
-        api,
         operation,
         operationsDispatcher,
         target,
         verb,
+        arns,
     } = props;
-    const [arns, setArns] = useState([]);
-    const [timeout, setTimeout] = useState(operation['x-amzn-resource-name']);
+    const [timeout, setTimeout] = useState(50000);
     useEffect(() => {
-        API.getAmznResourceNames(api.id)
-            .then((response) => {
-                if (response.body.list) {
-                    setArns(response.body.list);
-                }
-            });
+        if (operation['x-amzn-resource-timeout']) {
+            setTimeout(operation['x-amzn-resource-timeout']);
+        }
     }, []);
     const handleTimeoutMin = (event) => {
         if (event.target.value !== '') {
@@ -199,7 +194,7 @@ export default function IntegrationDownshift(props) {
             const milliSeconds = (minutes * 60 + seconds) * 1000;
             if (milliSeconds > 900000) {
                 setTimeout(900000);
-            } else if (milliSeconds < 0) {
+            } else if (milliSeconds < 1000) {
                 setTimeout(1000);
             } else {
                 setTimeout(milliSeconds);
@@ -214,7 +209,7 @@ export default function IntegrationDownshift(props) {
         <>
             <Grid item md={12} xs={12}>
                 <Typography variant='subtitle1'>
-                    Amazon Resource Name (ARN)
+                    AWS Lambda Settings
                     <Divider variant='middle' />
                 </Typography>
             </Grid>
@@ -346,9 +341,9 @@ export default function IntegrationDownshift(props) {
 }
 
 IntegrationDownshift.propTypes = {
-    api: PropTypes.isRequired,
     operation: PropTypes.isRequired,
     operationsDispatcher: PropTypes.func.isRequired,
     target: PropTypes.string.isRequired,
     verb: PropTypes.string.isRequired,
+    arns: PropTypes.shape([]).isRequired,
 };

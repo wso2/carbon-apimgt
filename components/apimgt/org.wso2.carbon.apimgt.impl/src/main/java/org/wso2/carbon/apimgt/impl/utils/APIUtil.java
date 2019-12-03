@@ -653,8 +653,8 @@ public final class APIUtil {
                                         operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
                             }
                             if (operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)) {
-                                uriTemplate.setAmznResourceTimeout((Integer)
-                                        operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT));
+                                uriTemplate.setAmznResourceTimeout(((Long)
+                                        operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
                             }
                         }
                     }

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import Grid from '@material-ui/core/Grid';
@@ -35,7 +35,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
 import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined';
 // spliced operation components
-
+import API from 'AppData/api';
 import DescriptionAndSummary from './operationComponents/DescriptionAndSummary';
 import OperationGovernance from './operationComponents/OperationGovernance';
 import AmznResourceName from './operationComponents/AmznResourceName';
@@ -68,6 +68,7 @@ function Operation(props) {
         verb,
     } = props;
     const [isExpanded, setIsExpanded] = useState(false);
+    const [arns, setArns] = useState([]);
     const useStyles = makeStyles((theme) => {
         const backgroundColor = theme.custom.resourceChipColors[verb];
         return {
@@ -103,6 +104,14 @@ function Operation(props) {
     const isUsedInAPIProduct = apiOperation && Array.isArray(
         apiOperation.usedProductIds,
     ) && apiOperation.usedProductIds.length;
+    useEffect(() => {
+        API.getAmznResourceNames(api.id)
+            .then((response) => {
+                if (response.body.list) {
+                    setArns(response.body.list);
+                }
+            });
+    }, []);
 
     /**
      *
@@ -266,11 +275,11 @@ API product(s)
                             && api.endpointConfig.endpoint_type === 'awslambda'
                             && (
                                 <AmznResourceName
-                                    api={api}
                                     operation={operation}
                                     operationsDispatcher={operationsDispatcher}
                                     target={target}
                                     verb={verb}
+                                    arns={arns}
                                 />
                             )
                         }
