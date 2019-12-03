@@ -106,19 +106,21 @@ const KeyConfiguration = (props) => {
             case 'callbackUrl':
                 if (Validation.url.validate(currentTarget.value).error) {
                     setCallbackUrlError(true);
+                    setGenerateEnabled(false);
                 } else {
                     setCallbackUrlError(false);
+                    setGenerateEnabled(true);
                 }
-                setGenerateEnabled(isValidityTimeError || isCalbackUrlError);
                 newRequest.callbackUrl = currentTarget.value;
                 break;
             case 'validityTime':
                 if (Validation.number.validate(currentTarget.value).error) {
                     setValidityTimeError(true);
+                    setGenerateEnabled(false);
                 } else {
                     setValidityTimeError(false);
+                    setGenerateEnabled(true);
                 }
-                setGenerateEnabled(isValidityTimeError || isCalbackUrlError);
                 newRequest.validityTime = currentTarget.value;
                 break;
             case 'grantType':
@@ -307,6 +309,7 @@ KeyConfiguration.propTypes = {
     isUserOwner: PropTypes.bool.isRequired,
     isKeysAvailable: PropTypes.bool.isRequired,
     notFound: PropTypes.bool,
+    setGenerateEnabled: PropTypes.func.isRequired,
     updateKeyRequest: PropTypes.func.isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
