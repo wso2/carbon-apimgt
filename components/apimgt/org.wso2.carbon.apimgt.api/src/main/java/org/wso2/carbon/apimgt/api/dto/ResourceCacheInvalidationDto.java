@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
@@ -11,16 +12,36 @@
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
+ * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
  */
 
-import Joi from '@hapi/joi';
+package org.wso2.carbon.apimgt.api.dto;
 
-const definition = {
-    number: Joi.number().integer(),
-    url: Joi.string().uri().allow(''),
-};
+public class ResourceCacheInvalidationDto {
 
-export default definition;
+    private String resourceURLContext;
+    private String httpVerb;
+
+    public String getResourceURLContext() {
+
+        return resourceURLContext;
+    }
+
+    public void setResourceURLContext(String resourceURLContext) {
+
+        this.resourceURLContext = resourceURLContext;
+    }
+
+    public String getHttpVerb() {
+
+        return httpVerb;
+    }
+
+    public void setHttpVerb(String httpVerb) {
+
+        this.httpVerb = httpVerb;
+    }
+}

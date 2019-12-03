@@ -64,6 +64,10 @@ const styles = theme => ({
     docSummary: {
         marginTop: theme.spacing(2),
     },
+    fileAvailability: {
+        marginTop: theme.spacing(1),
+        marginLeft: theme.spacing(0.8),
+    }
 });
 /**
  *
@@ -77,10 +81,21 @@ function View(props) {
     } = props;
     const { api } = useContext(ApiContext);
     const [code, setCode] = useState('');
+    const [isFileAvailable,setIsFileAvailable] = useState(false);
     const restAPI = new API();
 
     useEffect(() => {
         if (doc.sourceType === 'MARKDOWN' || doc.sourceType === 'INLINE') loadContentForDoc();
+        if (doc.sourceType === 'FILE') {
+            const promised_get_content = restAPI.getFileForDocument(apiId, doc.documentId);
+            promised_get_content
+                .then(() => {
+                    setIsFileAvailable(true);
+                })
+                .catch(() => {
+                    setIsFileAvailable(false);
+                });
+        } 
     }, [props.doc]);
 
     const loadContentForDoc = () => {
@@ -178,11 +193,20 @@ function View(props) {
                 </a>
             )}
             {doc.sourceType === 'FILE' && (
-                <Button variant='contained' color='default' className={classes.button} onClick={handleDownload}>
+                <Button variant='contained' color='default' className={classes.button} 
+                disabled={!isFileAvailable} onClick={handleDownload} >
                     <FormattedMessage id='Apis.Details.Documents.View.btn.download' defaultMessage='Download' />
 
                     <Icon>arrow_downward</Icon>
                 </Button>
+            )}
+            {doc.sourceType === 'FILE' && !isFileAvailable && (
+                <Typography className={classes.fileAvailability}>
+                    <FormattedMessage
+                        id='Apis.Details.Documents.View.file.availability'
+                        defaultMessage='No file available'
+                    />
+                </Typography>
             )}
         </React.Fragment>
     );

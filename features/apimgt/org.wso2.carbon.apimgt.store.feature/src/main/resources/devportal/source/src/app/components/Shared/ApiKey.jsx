@@ -63,7 +63,7 @@ const tokens = (props) => {
                 }
                 break;
             case 'timeout':
-                if (Validation.timeout.validate(currentTarget.value).error === undefined) {
+                if (Validation.number.validate(currentTarget.value).error === undefined) {
                     newRequest.timeout = currentTarget.value;
                     setInvaildTimeout(false);
                 } else {

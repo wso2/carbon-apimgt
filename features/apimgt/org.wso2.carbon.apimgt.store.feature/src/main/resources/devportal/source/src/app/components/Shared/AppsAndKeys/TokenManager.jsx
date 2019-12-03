@@ -95,10 +95,11 @@ class TokenManager extends React.Component {
                 serverSupportedGrantTypes: [],
                 supportedGrantTypes: [],
                 callbackUrl: '',
+                validityTime: 3600,
             },
             providedConsumerKey: '',
             providedConsumerSecret: '',
-            isUserOwner: false,
+            generateEnabled: true,
         };
         this.keyStates = {
             COMPLETED: 'COMPLETED',
@@ -127,7 +128,9 @@ class TokenManager extends React.Component {
         this.loadApplication();
     }
 
-
+    setGenerateEnabled = (state) => {
+        this.setState({ generateEnabled: state });
+    }
     /**
      * get supported grant types from the settings api
      */
@@ -206,7 +209,10 @@ class TokenManager extends React.Component {
         } = this.props;
         this.application
             .then((application) => {
-                return application.generateKeys(keyType, keyRequest.supportedGrantTypes, keyRequest.callbackUrl);
+                return application.generateKeys(
+                    keyType, keyRequest.supportedGrantTypes,
+                    keyRequest.callbackUrl, keyRequest.validityTime,
+                );
             })
             .then((response) => {
                 if (updateSubscriptionData) {
@@ -361,7 +367,8 @@ class TokenManager extends React.Component {
             classes, selectedApp, keyType,
         } = this.props;
         const {
-            keys, keyRequest, notFound, isKeyJWT, providedConsumerKey, providedConsumerSecret,
+            keys, keyRequest, notFound, isKeyJWT, providedConsumerKey,
+            providedConsumerSecret, generateEnabled,
         } = this.state;
         if (!keys) {
             return <Loading />;
@@ -373,6 +380,9 @@ class TokenManager extends React.Component {
             isUserOwner = true;
         }
         const key = keys.get(keyType);
+        if (key && key.token) {
+            keyRequest.validityTime = key.token.validityTime;
+        }
         if (keys.size > 0 && key && key.keyState === 'APPROVED' && !key.consumerKey) {
             return (
                 <Fragment>
@@ -453,6 +463,8 @@ class TokenManager extends React.Component {
                                 updateKeyRequest={this.updateKeyRequest}
                                 keyRequest={keyRequest}
                                 isUserOwner={isUserOwner}
+                                isKeysAvailable={keys.size > 0 && keys.get(keyType)}
+                                setGenerateEnabled={this.setGenerateEnabled}
                             />
                         </ExpansionPanelDetails>
                     </ExpansionPanel>
@@ -486,6 +498,7 @@ class TokenManager extends React.Component {
                                     color='primary'
                                     className={classes.button}
                                     onClick={keys.size > 0 && keys.get(keyType) ? this.updateKeys : this.generateKeys}
+                                    disabled={!generateEnabled}
                                 >
                                     {keys.size > 0 && keys.get(keyType) ? 'Update' : 'Generate Keys'}
                                 </Button>
@@ -589,8 +602,8 @@ class TokenManager extends React.Component {
     }
 }
 TokenManager.defaultProps = {
-    updateSubscriptionData: () => {},   
-}
+    updateSubscriptionData: () => {},
+};
 TokenManager.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
     selectedApp: PropTypes.shape({

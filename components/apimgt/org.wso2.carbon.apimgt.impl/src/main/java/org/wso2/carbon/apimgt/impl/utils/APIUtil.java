@@ -149,6 +149,8 @@ import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
+import org.wso2.carbon.databridge.commons.Event;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.endpoints.EndpointManager;
 import org.wso2.carbon.governance.api.endpoints.dataobjects.Endpoint;
@@ -9699,4 +9701,31 @@ public final class APIUtil {
         String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
         return skipRolesByRegex;
     }
+
+    public static void publishEventToStream(String streamId, String eventPublisherName, Object[] eventData) {
+
+        boolean tenantFlowStarted = false;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            tenantFlowStarted = true;
+            OutputEventAdapterService eventAdapterService =
+                    ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
+            Event blockingMessage = new Event(streamId, System.currentTimeMillis(),
+                    null, null, eventData);
+            ThrottleProperties throttleProperties =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration().getThrottleProperties();
+
+            if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
+                eventAdapterService.publish(eventPublisherName, Collections.EMPTY_MAP, blockingMessage);
+            }
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+    }
+
 }
