@@ -35,9 +35,10 @@ import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
 import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined';
 // spliced operation components
+
 import DescriptionAndSummary from './operationComponents/DescriptionAndSummary';
 import OperationGovernance from './operationComponents/OperationGovernance';
-import AWSLambdaSettings from './operationComponents/AWSLambdaSettings';
+import AmznResourceName from './operationComponents/AmznResourceName';
 import Parameters from './operationComponents/Parameters';
 import SOAPToRESTListing from './operationComponents/SOAPToREST/SOAPToRESTListing';
 
@@ -65,7 +66,6 @@ function Operation(props) {
         resourcePoliciesDispatcher,
         target,
         verb,
-        arns,
     } = props;
     const [isExpanded, setIsExpanded] = useState(false);
     const useStyles = makeStyles((theme) => {
@@ -265,12 +265,12 @@ API product(s)
                             && api.endpointConfig.endpoint_type
                             && api.endpointConfig.endpoint_type === 'awslambda'
                             && (
-                                <AWSLambdaSettings
+                                <AmznResourceName
+                                    api={api}
                                     operation={operation}
                                     operationsDispatcher={operationsDispatcher}
                                     target={target}
                                     verb={verb}
-                                    arns={arns}
                                 />
                             )
                         }
@@ -309,7 +309,6 @@ Operation.propTypes = {
     spec: PropTypes.shape({}).isRequired,
     highlight: PropTypes.bool,
     operationRateLimits: PropTypes.arrayOf(PropTypes.shape({})),
-    arns: PropTypes.shape([]).isRequired,
 };
 
 export default React.memo(Operation);

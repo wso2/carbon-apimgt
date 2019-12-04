@@ -50,7 +50,6 @@ public class AWSLambdaMediator extends AbstractMediator {
     private String accessKey = "";
     private String secretKey = "";
     private String resourceName = "";
-    private int resourceTimeout = APIConstants.AWS_DEFAULT_CONNECTION_TIMEOUT;
 
     public AWSLambdaMediator() {
 
@@ -101,7 +100,6 @@ public class AWSLambdaMediator extends AbstractMediator {
      */
     private InvokeResult invokeLambda(String payload) {
         try {
-            // set credential provider
             AWSCredentialsProvider credentialsProvider;
             if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
                 if (log.isDebugEnabled()) {
@@ -123,19 +121,13 @@ public class AWSLambdaMediator extends AbstractMediator {
                 log.error("Missing AWS Credentials");
                 return null;
             }
-            // set invoke request
-            if (resourceTimeout < 1000 || resourceTimeout > 900000) {
-                setResourceTimeout(APIConstants.AWS_DEFAULT_CONNECTION_TIMEOUT);
-            }
-            InvokeRequest invokeRequest = new InvokeRequest()
-                    .withFunctionName(resourceName)
-                    .withPayload(payload)
-                    .withInvocationType(InvocationType.RequestResponse)
-                    .withSdkClientExecutionTimeout(resourceTimeout);
-            // set aws lambda client
             AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
                     .withCredentials(credentialsProvider)
                     .build();
+            InvokeRequest invokeRequest = new InvokeRequest()
+                    .withFunctionName(resourceName)
+                    .withPayload(payload)
+                    .withInvocationType(InvocationType.RequestResponse);
             return awsLambda.invoke(invokeRequest);
         } catch (SdkClientException e) {
             log.error("Error while invoking the lambda function", e);
@@ -158,7 +150,7 @@ public class AWSLambdaMediator extends AbstractMediator {
     }
 
     public String getAccessKey() {
-        return accessKey;
+        return this.accessKey;
     }
 
     public String getSecretKey() {
@@ -167,10 +159,6 @@ public class AWSLambdaMediator extends AbstractMediator {
 
     public String getResourceNameName() {
         return resourceName;
-    }
-
-    public int getResourceTimeout() {
-        return resourceTimeout;
     }
 
     public void setAccessKey(String accessKey) {
@@ -185,7 +173,4 @@ public class AWSLambdaMediator extends AbstractMediator {
         this.resourceName = resourceName;
     }
 
-    public void setResourceTimeout(int resourceTimeout) {
-        this.resourceTimeout = resourceTimeout;
-    }
 }
