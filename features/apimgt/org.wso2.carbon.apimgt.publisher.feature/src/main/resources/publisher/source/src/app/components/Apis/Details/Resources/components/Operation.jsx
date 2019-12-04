@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import Grid from '@material-ui/core/Grid';
@@ -35,7 +35,6 @@ import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
 import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined';
 // spliced operation components
-import API from 'AppData/api';
 import DescriptionAndSummary from './operationComponents/DescriptionAndSummary';
 import OperationGovernance from './operationComponents/OperationGovernance';
 import AWSLambdaSettings from './operationComponents/AWSLambdaSettings';
@@ -66,9 +65,9 @@ function Operation(props) {
         resourcePoliciesDispatcher,
         target,
         verb,
+        arns,
     } = props;
     const [isExpanded, setIsExpanded] = useState(false);
-    const [arns, setArns] = useState([]);
     const useStyles = makeStyles((theme) => {
         const backgroundColor = theme.custom.resourceChipColors[verb];
         return {
@@ -104,14 +103,6 @@ function Operation(props) {
     const isUsedInAPIProduct = apiOperation && Array.isArray(
         apiOperation.usedProductIds,
     ) && apiOperation.usedProductIds.length;
-    useEffect(() => {
-        API.getAmznResourceNames(api.id)
-            .then((response) => {
-                if (response.body.list) {
-                    setArns(response.body.list);
-                }
-            });
-    }, []);
 
     /**
      *
@@ -318,6 +309,7 @@ Operation.propTypes = {
     spec: PropTypes.shape({}).isRequired,
     highlight: PropTypes.bool,
     operationRateLimits: PropTypes.arrayOf(PropTypes.shape({})),
+    arns: PropTypes.shape([]).isRequired,
 };
 
 export default React.memo(Operation);
