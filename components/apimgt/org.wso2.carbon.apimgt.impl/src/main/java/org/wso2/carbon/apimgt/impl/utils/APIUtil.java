@@ -983,9 +983,7 @@ public final class APIUtil {
                 //ignore
             }
             api.setCacheTimeout(cacheTimeout);
-
             boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
-
             if (isGlobalThrottlingEnabled) {
                 String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
                 api.setApiLevelPolicy(apiLevelTier);
@@ -1043,7 +1041,6 @@ public final class APIUtil {
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
-
             try {
                 api.setEnvironmentList(extractEnvironmentListForAPI(
                         artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
@@ -1054,7 +1051,6 @@ public final class APIUtil {
                 String msg = "Invalid endpoint config JSON found in API: " + apiName + " " + apiVersion;
                 throw new APIManagementException(msg, e);
             }
-
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact";
             throw new APIManagementException(msg, e);

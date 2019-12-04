@@ -428,19 +428,14 @@ public class SQLConstants {
             " VALUES (?,?,?,?,?,?,?)";
 
     public static final String ADD_MONETIZATION_USAGE_PUBLISH_INFO =
-            " INSERT" +
-                    " INTO AM_MONETIZATION_USAGE (ID, STATE, STATUS, STARTED_TIME, PUBLISHED_TIME) " +
-                    " VALUES (?,?,?,?,?)";
+            " INSERT INTO AM_MONETIZATION_USAGE (ID, STATE, STATUS, STARTED_TIME, PUBLISHED_TIME) VALUES (?,?,?,?,?)";
 
     public static final String UPDATE_MONETIZATION_USAGE_PUBLISH_INFO =
-            " UPDATE AM_MONETIZATION_USAGE SET" +
-                    " STATE = ?, STATUS = ?, STARTED_TIME = ?, PUBLISHED_TIME = ?" +
+            " UPDATE AM_MONETIZATION_USAGE SET STATE = ?, STATUS = ?, STARTED_TIME = ?, PUBLISHED_TIME = ?" +
                     " WHERE ID = ?";
 
     public static final String GET_MONETIZATION_USAGE_PUBLISH_INFO =
-            " SELECT " +
-                    "ID, STATE, STATUS, STARTED_TIME, PUBLISHED_TIME " +
-                    "FROM AM_MONETIZATION_USAGE";
+            " SELECT ID, STATE, STATUS, STARTED_TIME, PUBLISHED_TIME FROM AM_MONETIZATION_USAGE";
 
     public static final String UPDATE_SUBSCRIBER_SQL =
             " UPDATE AM_SUBSCRIBER " +
