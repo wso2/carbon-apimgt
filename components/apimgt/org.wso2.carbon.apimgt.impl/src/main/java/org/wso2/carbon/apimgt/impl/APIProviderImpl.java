@@ -7767,12 +7767,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String apiToken = configuration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_API_TOKEN);
         String collectionId = configuration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_CID);
+        String baseUrl = configuration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_BASE_URL);
         boolean isGlobal = Boolean.parseBoolean(configuration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_GLOBAL));
         JSONObject configProperties = new JSONObject();
 
         if (StringUtils.isNotEmpty(apiToken) && StringUtils.isNotEmpty(collectionId)) {
             configProperties.put(APIConstants.SECURITY_AUDIT_API_TOKEN, apiToken);
             configProperties.put(APIConstants.SECURITY_AUDIT_COLLECTION_ID, collectionId);
+            configProperties.put(APIConstants.SECURITY_AUDIT_BASE_URL, baseUrl);
             if (isGlobal || "carbon.super".equals(tenantDomain)) {
                 return configProperties;
             } else {
