@@ -7220,6 +7220,7 @@ public class ApiMgtDAO {
         String deleteExternalAPIStoresQuery = SQLConstants.REMOVE_FROM_EXTERNAL_STORES_SQL;
         String deleteAPIQuery = SQLConstants.REMOVE_FROM_API_SQL;
         String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
+        String deleteAuditAPIMapping = SQLConstants.REMOVE_SECURITY_AUDIT_MAP_SQL;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -7243,6 +7244,11 @@ public class ApiMgtDAO {
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
             prepStmt = connection.prepareStatement(deleteRatingsQuery);
+            prepStmt.setInt(1, id);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            prepStmt = connection.prepareStatement(deleteAuditAPIMapping);
             prepStmt.setInt(1, id);
             prepStmt.execute();
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
