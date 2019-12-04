@@ -64,6 +64,7 @@ export default function Resources(props) {
     const [markedOperations, setSelectedOperation] = useState({});
     const [openAPISpec, setOpenAPISpec] = useState({});
     const [apiThrottlingPolicy, setApiThrottlingPolicy] = useState(api.apiThrottlingPolicy);
+    const [arns, setArns] = useState([]);
 
     /**
      *
@@ -138,6 +139,9 @@ export default function Resources(props) {
                 break;
             case 'amznResourceName':
                 updatedOperation['x-amzn-resource-name'] = value;
+                break;
+            case 'amznResourceTimeout':
+                updatedOperation['x-amzn-resource-timeout'] = value;
                 break;
             case 'scopes':
                 if (!updatedOperation.security) {
@@ -312,6 +316,15 @@ export default function Resources(props) {
     }
 
     useEffect(() => {
+        API.getAmznResourceNames(api.id)
+            .then((response) => {
+                if (response.body.list) {
+                    setArns(response.body.list);
+                }
+            });
+    }, []);
+
+    useEffect(() => {
         // Update the Swagger spec object when API object gets changed
         api.getSwagger()
             .then((response) => {
@@ -446,6 +459,7 @@ export default function Resources(props) {
                                                         disableUpdate || isRestricted(['apim:api_create'], api)
                                                     }
                                                     disableMultiSelect={disableMultiSelect}
+                                                    arns={arns}
                                                     {...operationProps}
                                                 />
                                             </Grid>

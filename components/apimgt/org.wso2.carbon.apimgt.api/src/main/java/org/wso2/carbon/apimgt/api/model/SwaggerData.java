@@ -36,6 +36,7 @@ public class SwaggerData {
         private String policy;
         private Scope scope;
         private String amznResourceName;
+        private int amznResourceTimeout;
 
         public String getPath() {
             return path;
@@ -85,6 +86,13 @@ public class SwaggerData {
             this.amznResourceName = amznResourceName;
         }
 
+        public int getAmznResourceTimeout() {
+            return amznResourceTimeout;
+        }
+
+        public void setAmznResourceTimeout(int amznResourceTimeout) {
+            this.amznResourceTimeout = amznResourceTimeout;
+        }
     }
 
     private String title;
@@ -120,6 +128,7 @@ public class SwaggerData {
             resource.policy = uriTemplate.getThrottlingTier();
             resource.scope = uriTemplate.getScope();
             resource.amznResourceName = uriTemplate.getAmznResourceName();
+            resource.amznResourceTimeout = uriTemplate.getAmznResourceTimeout();
             resources.add(resource);
         }
 
@@ -156,6 +165,7 @@ public class SwaggerData {
             resource.policy = uriTemplate.getThrottlingTier();
             resource.scope = uriTemplate.getScope();
             resource.amznResourceName = uriTemplate.getAmznResourceName();
+            resource.amznResourceTimeout = uriTemplate.getAmznResourceTimeout();
             resources.add(resource);
         }
         Set<Scope> scopes = apiProduct.getScopes();
