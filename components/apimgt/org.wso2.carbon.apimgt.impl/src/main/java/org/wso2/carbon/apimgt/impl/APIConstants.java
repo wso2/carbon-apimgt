@@ -1184,7 +1184,6 @@ public final class APIConstants {
     //Swagger v2.0 constants
     public static final String SWAGGER_X_SCOPE = "x-scope";
     public static final String SWAGGER_X_AMZN_RESOURCE_NAME = "x-amzn-resource-name";
-    public static final String SWAGGER_X_AMZN_RESOURCE_TIMEOUT = "x-amzn-resource-timeout";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
     public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
     public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
@@ -1840,7 +1839,6 @@ public final class APIConstants {
     // AWS Lambda: Constants for aws lambda
     public static final String AWS_SECRET_KEY = "AWS_SECRET_KEY";
     public static final int AWS_ENCRYPTED_SECRET_KEY_LENGTH = 620;
-    public static final int AWS_DEFAULT_CONNECTION_TIMEOUT = 50000;
     public static final String AMZN_ACCESS_KEY = "amznAccessKey";
     public static final String AMZN_SECRET_KEY = "amznSecretKey";
     public static final String NO_ENTITY_BODY = "NO_ENTITY_BODY";

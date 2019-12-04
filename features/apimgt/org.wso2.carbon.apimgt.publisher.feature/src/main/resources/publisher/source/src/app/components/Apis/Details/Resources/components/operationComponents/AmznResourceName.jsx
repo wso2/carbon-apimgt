@@ -29,7 +29,7 @@ import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Icon from '@material-ui/core/Icon';
-import { FormattedMessage } from 'react-intl';
+import API from 'AppData/api';
 
 /**
  * The renderInput function.
@@ -130,7 +130,7 @@ const useStyles = makeStyles((theme) => ({
     paper: {
         position: 'absolute',
         zIndex: 1000,
-        marginTop: theme.spacing(-2),
+        marginTop: theme.spacing(1),
         left: 0,
         right: 0,
     },
@@ -155,71 +155,31 @@ const useStyles = makeStyles((theme) => ({
 export default function IntegrationDownshift(props) {
     const classes = useStyles();
     const {
+        api,
         operation,
         operationsDispatcher,
         target,
         verb,
-        arns,
     } = props;
-    const [timeout, setTimeout] = useState(50000);
+    const [arns, setArns] = useState([]);
     useEffect(() => {
-        if (operation['x-amzn-resource-timeout']) {
-            setTimeout(operation['x-amzn-resource-timeout']);
-        }
+        API.getAmznResourceNames(api.id)
+            .then((response) => {
+                if (response.body.list) {
+                    setArns(response.body.list);
+                }
+            });
     }, []);
-    const handleTimeoutMin = (event) => {
-        if (event.target.value !== '') {
-            const minutes = parseInt(event.target.value, 10);
-            const seconds = (timeout / 1000) % 60;
-            const milliSeconds = (minutes * 60 + seconds) * 1000;
-            let newTimeout = 0;
-            if (milliSeconds > 900000) {
-                newTimeout = 900000;
-            } else if (milliSeconds < 1000) {
-                newTimeout = 1000;
-            } else {
-                newTimeout = milliSeconds;
-            }
-            setTimeout(newTimeout);
-            operationsDispatcher({
-                action: 'amznResourceTimeout',
-                data: { target, verb, value: newTimeout },
-            });
-        }
-    };
-    const handleTimeoutSec = (event) => {
-        if (event.target.value !== '') {
-            const minutes = Math.floor((timeout / 1000) / 60);
-            const seconds = parseInt(event.target.value, 10);
-            const milliSeconds = (minutes * 60 + seconds) * 1000;
-            let newTimeout = 0;
-            if (milliSeconds > 900000) {
-                newTimeout = 900000;
-            } else if (milliSeconds < 1000) {
-                newTimeout = 1000;
-            } else {
-                newTimeout = milliSeconds;
-            }
-            setTimeout(newTimeout);
-            operationsDispatcher({
-                action: 'amznResourceTimeout',
-                data: { target, verb, value: newTimeout },
-            });
-        }
-    };
     return (
         <>
             <Grid item md={12} xs={12}>
                 <Typography variant='subtitle1'>
-                    <FormattedMessage
-                        id='Apis.Details.Resources.components.operationComponents.AWSLambdaSettings.Title'
-                        defaultMessage='AWS Lambda Settings'
-                    />
+                    Amazon Resource Name (ARN)
                     <Divider variant='middle' />
                 </Typography>
             </Grid>
             <Grid item md={1} xs={1} />
-            <Grid item md={7} xs={7}>
+            <Grid item md={10} xs={11}>
                 <Downshift
                     id='downshift-options'
                     onSelect={(changes) => {
@@ -270,8 +230,6 @@ export default function IntegrationDownshift(props) {
                                     fullWidth: true,
                                     classes,
                                     InputLabelProps: getLabelProps({ shrink: true }),
-                                    label: 'Amazon Resource Name (ARN)',
-                                    helperText: 'Select or type an ARN',
                                     InputProps: {
                                         onBlur,
                                         onChange,
@@ -304,51 +262,14 @@ export default function IntegrationDownshift(props) {
                     }}
                 </Downshift>
             </Grid>
-            <Grid item md={1} xs={1} />
-            <Grid item md={1} xs={1}>
-                <TextField
-                    id='timeout-min'
-                    label='min'
-                    variant='outlined'
-                    helperText='Set Timeout'
-                    type='number'
-                    inputProps={{
-                        min: 0,
-                        max: 15,
-                        step: 1,
-                    }}
-                    value={Math.floor((timeout / 1000) / 60)}
-                    onChange={(event) => {
-                        handleTimeoutMin(event);
-                    }}
-                />
-            </Grid>
-            <Grid item md={1} xs={1}>
-                <TextField
-                    id='timeout-sec'
-                    label='sec'
-                    variant='outlined'
-                    type='number'
-                    inputProps={{
-                        min: 0,
-                        max: 59,
-                        step: 1,
-                    }}
-                    value={(timeout / 1000) % 60}
-                    onChange={(event) => {
-                        handleTimeoutSec(event);
-                    }}
-                />
-            </Grid>
-            <Grid item md={1} xs={1} />
         </>
     );
 }
 
 IntegrationDownshift.propTypes = {
+    api: PropTypes.isRequired,
     operation: PropTypes.isRequired,
     operationsDispatcher: PropTypes.func.isRequired,
     target: PropTypes.string.isRequired,
     verb: PropTypes.string.isRequired,
-    arns: PropTypes.shape([]).isRequired,
 };
