@@ -172,16 +172,18 @@ export default function IntegrationDownshift(props) {
             const minutes = parseInt(event.target.value, 10);
             const seconds = (timeout / 1000) % 60;
             const milliSeconds = (minutes * 60 + seconds) * 1000;
+            let newTimeout = 0;
             if (milliSeconds > 900000) {
-                setTimeout(900000);
+                newTimeout = 900000;
             } else if (milliSeconds < 1000) {
-                setTimeout(1000);
+                newTimeout = 1000;
             } else {
-                setTimeout(milliSeconds);
+                newTimeout = milliSeconds;
             }
+            setTimeout(newTimeout);
             operationsDispatcher({
                 action: 'amznResourceTimeout',
-                data: { target, verb, value: timeout },
+                data: { target, verb, value: newTimeout },
             });
         }
     };
@@ -190,16 +192,18 @@ export default function IntegrationDownshift(props) {
             const minutes = Math.floor((timeout / 1000) / 60);
             const seconds = parseInt(event.target.value, 10);
             const milliSeconds = (minutes * 60 + seconds) * 1000;
+            let newTimeout = 0;
             if (milliSeconds > 900000) {
-                setTimeout(900000);
+                newTimeout = 900000;
             } else if (milliSeconds < 1000) {
-                setTimeout(1000);
+                newTimeout = 1000;
             } else {
-                setTimeout(milliSeconds);
+                newTimeout = milliSeconds;
             }
+            setTimeout(newTimeout);
             operationsDispatcher({
                 action: 'amznResourceTimeout',
-                data: { target, verb, value: timeout },
+                data: { target, verb, value: newTimeout },
             });
         }
     };
