@@ -80,6 +80,7 @@ function GenericEndpointAdd(props) {
                 disabled={isRestricted(['apim:api_create'], api)}
                 className={classes.textField}
                 value={serviceUrl}
+                fullWidth
                 onChange={(event) => setServiceUrl(event.target.value)}
                 variant='outlined'
                 margin='normal'
