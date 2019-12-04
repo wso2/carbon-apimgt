@@ -124,7 +124,7 @@ public class AWSLambdaMediator extends AbstractMediator {
                 return null;
             }
             // set invoke request
-            if (resourceTimeout < 1000 && resourceTimeout > 900000) {
+            if (resourceTimeout < 1000 || resourceTimeout > 900000) {
                 setResourceTimeout(APIConstants.AWS_DEFAULT_CONNECTION_TIMEOUT);
             }
             InvokeRequest invokeRequest = new InvokeRequest()
