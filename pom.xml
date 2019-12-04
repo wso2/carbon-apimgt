@@ -1616,12 +1616,12 @@
 
         <carbon.analytics.common.version>5.2.18</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.5.3</carbon.kernel.version>
-        <carbon.kernel.feature.version>4.5.3</carbon.kernel.feature.version>
+        <carbon.kernel.version>4.5.2</carbon.kernel.version>
+        <carbon.kernel.feature.version>4.5.2</carbon.kernel.feature.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
         <carbon.commons.version>4.7.18</carbon.commons.version>
-        <carbon.registry.version>4.7.19</carbon.registry.version>
+        <carbon.registry.version>4.7.24</carbon.registry.version>
         <carbon.mediation.version>4.7.26</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
@@ -1642,8 +1642,8 @@
 
         <graphql.java.version>13.0.wso2v1</graphql.java.version>
 
-        <carbon.governance.version>4.8.10</carbon.governance.version>
-        <carbon.deployment.version>4.9.14</carbon.deployment.version>
+        <carbon.governance.version>4.8.11</carbon.governance.version>
+        <carbon.deployment.version>4.9.13</carbon.deployment.version>
         <carbon.multitenancy.version>4.7.13</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
         <apimserver.version>1.10.0</apimserver.version>
