@@ -41,7 +41,7 @@ public class SettingsMappingUtil {
 
     private static final Log log = LogFactory.getLog(SettingsMappingUtil.class);
 
-    public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable, Boolean moneatizationEnabled) throws APIManagementException {
+    public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable, Boolean moneatizationEnabled, Boolean recommendationEnabled) throws APIManagementException {
         SettingsDTO settingsDTO = new SettingsDTO();
         if (isUserAvailable) {
             settingsDTO.setGrantTypes(APIUtil.getGrantTypes());
@@ -51,11 +51,13 @@ public class SettingsMappingUtil {
             Map<String, Environment> environments = APIUtil.getEnvironments();
             Environment environment = environments.get(RestApiConstants.DEFAULT_ENVIRONMENT);
             settingsDTO.apiGatewayEndpoint(environment.getApiGatewayEndpoint());
+            settingsDTO.setRecommendationEnabled(recommendationEnabled);
         } else {
             settingsDTO.setScopes(GetScopeList());
             settingsDTO.setApplicationSharingEnabled(APIUtil.isMultiGroupAppSharingEnabled());
             settingsDTO.setMapExistingAuthApps(APIUtil.isMapExistingAuthAppsEnabled());
             settingsDTO.setMonetizationEnabled(moneatizationEnabled);
+            settingsDTO.setRecommendationEnabled(recommendationEnabled);
         }
         return settingsDTO;
     }
