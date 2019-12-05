@@ -45,4 +45,5 @@ public class APISynchronizationConstants {
     public static final String PAGINATION_LIMIT_PREFIX = "limit=";
     public static final String PAGINATION_LIMIT = "500";
     public static final String CHARSET_UTF8 = "UTF-8";
+    public static final String SEQUENCE_NAME = "name";
 }

@@ -39,6 +39,13 @@ function GoToEdit(props) {
         docContentEditPath = `/${urlPrefix}/${api.id}/documents/${doc.body.documentId}/edit-content`;
     }
 
+    let displayAddContent;
+    if (doc.body.sourceType === 'INLINE'  || doc.body.sourceType === 'MARKDOWN') {
+        displayAddContent = true;
+    } else {
+        displayAddContent= false;
+    }
+
     console.info('printing doc', doc);
     function handleClose() {
         setOpen(false);
@@ -60,14 +67,22 @@ function GoToEdit(props) {
             </DialogTitle>
             <DialogContent>
                 <DialogContentText id='alert-dialog-description'>
+                    {displayAddContent ? (
                     <FormattedMessage
-                        id='Apis.Details.Documents.GoToEdit.description'
-                        defaultMessage='You can add content to the document or go back to the document listing page.'
+                        id='Apis.Details.Documents.GoToEdit.description.content'
+                        defaultMessage= 'You can add content to the document or go back to the document listing page.'
                     />
+                    ) : (
+                    <FormattedMessage
+                        id='Apis.Details.Documents.GoToEdit.description.file'
+                        defaultMessage= {'You can go back to the document listing page and upload' + 
+                        ' the file by editing the document.'}
+                    />
+                    )}
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
-                <Link
+                {displayAddContent && (<Link
                     to={{
                         pathname: docContentEditPath,
                         state: { doc: doc.body },
@@ -79,7 +94,7 @@ function GoToEdit(props) {
                             defaultMessage='Add Content'
                         />
                     </Button>
-                </Link>
+                </Link>)}
                 <Link to={listingPath}>
                     <Button color='primary' autoFocus>
                         <FormattedMessage

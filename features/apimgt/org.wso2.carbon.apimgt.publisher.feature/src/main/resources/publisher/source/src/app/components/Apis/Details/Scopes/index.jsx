@@ -33,12 +33,12 @@ const Scope = () => {
             <Route
                 exact
                 path={'/' + urlPrefix + '/:api_uuid/scopes/create'}
-                component={props => <CreateScope api={api} {...props} updateAPI={updateAPI} />}
+                component={(props) => <CreateScope api={api} {...props} updateAPI={updateAPI} />}
             />
             <Route
                 exact
                 path={'/' + urlPrefix + '/:api_uuid/scopes/edit'}
-                component={props => <EditScope api={api} {...props} updateAPI={updateAPI} />}
+                component={(props) => <EditScope api={api} {...props} updateAPI={updateAPI} />}
             />
             <Route component={ResourceNotFound} />
         </Switch>

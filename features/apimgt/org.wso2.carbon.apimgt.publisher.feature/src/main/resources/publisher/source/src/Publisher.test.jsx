@@ -17,6 +17,7 @@
  */
 
 import React from 'react';
+import 'isomorphic-fetch';
 import App from './Publisher';
 
 test('should render App component smoke test', () => {

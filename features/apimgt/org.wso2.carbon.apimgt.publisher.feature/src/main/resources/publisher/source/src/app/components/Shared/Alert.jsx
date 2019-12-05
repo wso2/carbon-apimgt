@@ -18,12 +18,12 @@
 
 import React from 'react';
 import Notification from 'rc-notification';
-import Configurations from 'Config';
+import Themes from 'Themes';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import Message from './Message';
 
-const theme = createMuiTheme(Configurations.themes.light);
+const theme = createMuiTheme(Themes.light);
 
 /**
  * Common alerting/message displaying component for Store application, Pre-set vertical: 'top',
@@ -73,7 +73,7 @@ class Alert {
                     ),
                 });
             })
-            .catch(error => console.error('Error while showing alert' + error));
+            .catch((error) => console.error('Error while showing alert' + error));
         /* TODO: Remove above console error with logging library error method */
     }
 

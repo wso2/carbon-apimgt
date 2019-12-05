@@ -15,7 +15,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useRef, useReducer, Fragment } from 'react';
+import React, {
+    useState, useRef, useReducer,
+} from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -144,8 +146,8 @@ function AddOperation(props) {
      */
     function addOperation() {
         if (
-            APIValidation.operationTarget.validate(newOperations.target).error !== null ||
-            APIValidation.operationVerbs.validate(newOperations.verbs).error !== null
+            APIValidation.operationTarget.validate(newOperations.target).error !== null
+            || APIValidation.operationVerbs.validate(newOperations.verbs).error !== null
         ) {
             Alert.warning("Operation target or operation verb(s) can't be empty");
             return;
@@ -156,8 +158,7 @@ function AddOperation(props) {
     return (
         <Paper style={{ marginTop: '12px' }}>
             <Grid container direction='row' spacing={0} justify='center' alignItems='center'>
-                <Grid item xs={1} />
-                <Grid item md={4} xs={11}>
+                <Grid item md={5} xs={12}>
                     <FormControl margin='dense' variant='outlined' className={classes.formControl}>
                         <InputLabel ref={inputLabel} htmlFor='outlined-age-simple'>
                             HTTP Verb
@@ -176,7 +177,7 @@ function AddOperation(props) {
                                 });
                                 const allSelected = verbs.length === SUPPORTED_VERBS.length;
                                 return (
-                                    <Fragment>
+                                    <>
                                         {verbElements}
                                         {remaining.length > 0 && (
                                             <Tooltip title={remaining.join(', ')} placement='top'>
@@ -185,7 +186,7 @@ function AddOperation(props) {
                                                 </Box>
                                             </Tooltip>
                                         )}
-                                    </Fragment>
+                                    </>
                                 );
                             }}
                             value={newOperations.verbs}
@@ -203,7 +204,7 @@ function AddOperation(props) {
                                 },
                             }}
                         >
-                            {SUPPORTED_VERBS.map(verb => (
+                            {SUPPORTED_VERBS.map((verb) => (
                                 <VerbElement
                                     checked={newOperations.verbs.includes(verb.toLowerCase())}
                                     value={verb.toLowerCase()}
@@ -217,9 +218,9 @@ function AddOperation(props) {
                                 // TODO: Add i18n to tooltip text ~tmkb
                                 <Tooltip
                                     title={
-                                        'Select the OPTION method to send OPTIONS calls to the backend.' +
-                                        ' If the OPTIONS method is not selected, OPTIONS calls will be returned ' +
-                                        'from the Gateway with allowed methods.'
+                                        'Select the OPTION method to send OPTIONS calls to the backend.'
+                                        + ' If the OPTIONS method is not selected, OPTIONS calls will be returned '
+                                        + 'from the Gateway with allowed methods.'
                                     }
                                     placement='bottom'
                                 >
@@ -231,8 +232,7 @@ function AddOperation(props) {
                         </FormHelperText>
                     </FormControl>
                 </Grid>
-                <Grid item md={0} xs={1} />
-                <Grid item md={5} xs={9}>
+                <Grid item md={5} xs={8}>
                     <TextField
                         id='operation-target'
                         label='URI Pattern'
@@ -240,9 +240,9 @@ function AddOperation(props) {
                         autoFocus
                         name='target'
                         value={newOperations.target}
-                        onChange={({ target: { name, value } }) =>
-                            newOperationsDispatcher({ type: name, value: value.startsWith('/') ? value : `/${value}` })
-                        }
+                        onChange={({ target: { name, value } }) => newOperationsDispatcher(
+                            { type: name, value: value.startsWith('/') ? value : `/${value}` },
+                        )}
                         placeholder='Enter the URI pattern'
                         helperText={newOperations.error || 'Enter URI pattern'}
                         fullWidth
@@ -260,14 +260,14 @@ function AddOperation(props) {
                         }}
                     />
                 </Grid>
-                <Grid item md={1} xs={2}>
+                <Grid item md={2} xs={4}>
                     <Tooltip
-                        title={
+                        title={(
                             <FormattedMessage
                                 id='Apis.Details.Resources.components.AddOperation.add.tooltip'
                                 defaultMessage='Add new operation'
                             />
-                        }
+                        )}
                         aria-label='AddOperation'
                         placement='bottom'
                         interactive
@@ -286,12 +286,12 @@ function AddOperation(props) {
                     </Tooltip>
                     <sup>
                         <Tooltip
-                            title={
+                            title={(
                                 <FormattedMessage
                                     id='Apis.Details.Resources.components.AddOperation.clear.inputs.tooltip'
                                     defaultMessage='Clear inputs'
                                 />
-                            }
+                            )}
                             aria-label='clear-inputs'
                             placement='bottom'
                             interactive

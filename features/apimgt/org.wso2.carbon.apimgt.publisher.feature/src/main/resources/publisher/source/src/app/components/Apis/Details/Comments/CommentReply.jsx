@@ -27,7 +27,7 @@ import API from 'AppData/api';
 import CommentEdit from './CommentEdit';
 import CommentOptions from './CommentOptions';
 
-const styles = theme => ({
+const styles = (theme) => ({
     link: {
         color: theme.palette.getContrastText(theme.palette.background.default),
         cursor: 'pointer',
@@ -37,18 +37,18 @@ const styles = theme => ({
     },
     commentText: {
         color: theme.palette.getContrastText(theme.palette.background.default),
-        marginTop: theme.spacing.unig,
+        marginTop: theme.spacing(1),
         width: '100%',
         whiteSpace: 'pre-wrap',
         overflowWrap: 'break-word',
     },
     root: {
-        marginTop: theme.spacing.unit * 2.5,
+        marginTop: theme.spacing(2.5),
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
-        paddingLeft: theme.spacing.unit * 2,
-        paddingTop: theme.spacing.unig,
+        paddingLeft: theme.spacing(2),
+        paddingTop: theme.spacing(1),
     },
 });
 
@@ -209,8 +209,8 @@ class CommentReply extends React.Component {
         const { editIndex, openDialog } = this.state;
         const props = { api, allComments, commentsUpdate };
         return [
-            comments &&
-                comments.map((comment, index) => (
+            comments
+                && comments.map((comment, index) => (
                     <div key={this.getKey()} className={classes.contentWrapper}>
                         <Grid container spacing={2} className={classes.root}>
                             <Grid item>

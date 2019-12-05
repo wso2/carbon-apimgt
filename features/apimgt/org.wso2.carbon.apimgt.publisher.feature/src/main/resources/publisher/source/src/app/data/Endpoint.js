@@ -96,6 +96,7 @@ export default class Endpoint extends Resource {
             return data;
         });
     }
+
     /**
      * Get a global endpoint by giving its UUID
      * @static
@@ -132,7 +133,7 @@ export default class Endpoint extends Resource {
             return client.apis['Endpoint (Collection)'].get_endpoints({}, this._requestMetaData());
         });
         return promisedEndpoints.then((response) => {
-            return response.body.list.map(endpointJSON => new Endpoint(endpointJSON));
+            return response.body.list.map((endpointJSON) => new Endpoint(endpointJSON));
         });
     }
 }

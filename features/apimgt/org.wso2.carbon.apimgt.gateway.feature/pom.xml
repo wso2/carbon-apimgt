@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.5.356-SNAPSHOT</version>
+        <version>6.5.424-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -52,6 +52,26 @@
         <dependency>
             <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.endpoint.stub</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.mediation</groupId>
+            <artifactId>org.wso2.carbon.rest.api.stub</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.mediation</groupId>
+            <artifactId>org.wso2.carbon.localentry.stub</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.mediation</groupId>
+            <artifactId>org.wso2.carbon.sequences</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.mediation</groupId>
+            <artifactId>org.wso2.carbon.mediation.security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.mediation</groupId>
+            <artifactId>org.wso2.carbon.endpoint</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -209,6 +229,12 @@
                                 <bundleDef>
                                     org.wso2.carbon.mediation:org.wso2.carbon.endpoint.stub:${carbon.mediation.version}
                                 </bundleDef>
+                                <importBundleDef>
+                                    org.wso2.carbon.mediation:org.wso2.carbon.rest.api.stub:${carbon.mediation.version}
+                                </importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.carbon.mediation:org.wso2.carbon.localentry.stub:${carbon.mediation.version}
+                                </importBundleDef>
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.registry.cache.stub:${carbon.apimgt.version}
                                 </bundleDef>
@@ -241,11 +267,17 @@
                                 </bundleDef>
                                 <bundleDef>org.wso2.orbit.graphQL:graphQL:${graphql.java.version}</bundleDef>
                                 <bundleDef>org.wso2.wsdl4j:wsdl4j.wso2:${wsdl4j.version}</bundleDef>
+                                <bundleDef>
+                                    org.wso2.orbit.com.amazonaws:awslambda:${org.wso2.orbit.com.amazonaws.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${fasterxml.jackson.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    software.amazon.ion:ion-java:${software.amazon.ion.version}
+                                </bundleDef>
                             </bundles>
                             <importBundles>
-                                <importBundleDef>
-                                    org.wso2.carbon.mediation:org.wso2.carbon.mediation.security.stub:${carbon.mediation.version}
-                                </importBundleDef>
                                 <importBundleDef>
                                     org.wso2.carbon.commons:org.wso2.carbon.ganalytics.publisher:${carbon.commons.version}
                                 </importBundleDef>

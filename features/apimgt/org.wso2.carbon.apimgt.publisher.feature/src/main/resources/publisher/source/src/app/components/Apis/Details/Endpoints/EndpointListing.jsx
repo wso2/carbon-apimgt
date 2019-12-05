@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import GenericEndpoint from './GenericEndpoint';
 import GenericEndpointAdd from './GenericEndpointAdd';
 
-const styles = theme => ({
+const styles = (theme) => ({
     endpointInputWrapper: {
         display: 'flex',
     },
@@ -117,10 +117,10 @@ function EndpointListing(props) {
 
     return (
         <div className={classes.listingWrapper} ref={selectedRef}>
-            <Grid container direction='column' xs={12}>
+            <Grid container xs={12}>
                 <Grid xs={12}>
-                    {(endpointType === 'failover' || endpointType === 'load_balance') ?
-                        <GenericEndpointAdd addEndpoint={addEndpoint} /> : <div />}
+                    {(endpointType === 'failover' || endpointType === 'load_balance')
+                        ? <GenericEndpointAdd addEndpoint={addEndpoint} /> : <div />}
                 </Grid>
                 <Grid xs={12}>
                     {

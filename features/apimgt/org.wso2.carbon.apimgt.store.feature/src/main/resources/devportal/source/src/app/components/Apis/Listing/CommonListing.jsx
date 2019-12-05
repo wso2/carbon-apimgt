@@ -24,6 +24,7 @@ import Icon from '@material-ui/core/Icon';
 import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import Settings from 'AppComponents/Shared/SettingsContext';
 import API from 'AppData/api';
 import ApiBreadcrumbs from './ApiBreadcrumbs';
 import ApiTableView from './ApiTableView';
@@ -33,10 +34,10 @@ import ApiTagCloud from './ApiTagCloud';
 
 const styles = theme => ({
     rightIcon: {
-        marginLeft: theme.spacing.unit,
+        marginLeft: theme.spacing(1),
     },
     button: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
         marginBottom: 0,
     },
     buttonRight: {
@@ -69,7 +70,7 @@ const styles = theme => ({
         flexGrow: 1,
     },
     listContentWrapper: {
-        padding: `0 ${theme.spacing.unit * 3}px`,
+        padding: `0 ${theme.spacing(3)}px`,
         display: 'flex',
     },
     iconDefault: {
@@ -83,7 +84,7 @@ const styles = theme => ({
         display: 'flex',
         flex: 1,
         flexDirection: 'column',
-        paddingBottom: theme.spacing.unit * 3,
+        paddingBottom: theme.spacing(3),
     },
     contentWithTags: {
         marginLeft: theme.custom.tagCloud.leftMenu.width,
@@ -150,6 +151,8 @@ const styles = theme => ({
  * @extends {Component}
  */
 class CommonListing extends React.Component {
+    static contextType = Settings;
+
     /**
      * Constructor
      *
@@ -161,6 +164,7 @@ class CommonListing extends React.Component {
             listType: props.theme.custom.defaultApiView,
             allTags: null,
             showLeftMenu: false,
+            isMonetizationEnabled: false,
         };
     }
 
@@ -188,10 +192,21 @@ class CommonListing extends React.Component {
             .catch((error) => {
                 console.log(error);
             });
+        this.isMonetizationEnabled();
     }
     toggleLeftMenu = () => {
         this.setState(prevState => ({ showLeftMenu: !prevState.showLeftMenu }));
     };
+
+    /**
+     * retrieve Settings from the context and check the monetization enabled
+     */
+    isMonetizationEnabled = () => {
+        const settingsContext = this.context;
+        const enabled = settingsContext.settings.monetizationEnabled;
+        this.setState({ isMonetizationEnabled: enabled });
+    }
+
     /**
      *
      * @inheritdoctheme
@@ -200,7 +215,6 @@ class CommonListing extends React.Component {
      */
     render() {
         const {
-            apis,
             apiType,
             theme,
             classes,
@@ -212,7 +226,7 @@ class CommonListing extends React.Component {
                 tagCloud: { active: tagCloudActive },
             },
         } = theme;
-        const { listType, allTags, showLeftMenu } = this.state;
+        const { listType, allTags, showLeftMenu, isMonetizationEnabled } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
         const searchParam = new URLSearchParams(search);
         const searchQuery = searchParam.get('query');
@@ -271,16 +285,6 @@ class CommonListing extends React.Component {
                             <Typography variant='h4' className={classes.mainTitle}>
                                 <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.main' />
                             </Typography>
-                            {apis && (
-                                <Typography variant='caption' gutterBottom align='left' id='apiCountDisplay'>
-                                    <FormattedMessage
-                                        defaultMessage='Displaying'
-                                        id='Apis.Listing.Listing.displaying'
-                                    />
-                                    {apis.count}
-                                    <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.count' />
-                                </Typography>
-                            )}
                         </div>
                         <div className={classes.buttonRight} id='listGridWrapper'>
                             <IconButton className={classes.button} onClick={() => this.setListType('list')}>
@@ -308,12 +312,12 @@ class CommonListing extends React.Component {
                     {active && allTags && allTags.length > 0 && <ApiBreadcrumbs selectedTag={selectedTag} />}
                     <div className={classes.listContentWrapper}>
                         {listType === 'grid' && (
-                            <ApiContext.Provider value={{ apiType }}>
+                            <ApiContext.Provider value={{ apiType, isMonetizationEnabled }}>
                                 <ApiTableView gridView query={search} />
                             </ApiContext.Provider>
                         )}
                         {listType === 'list' && (
-                            <ApiContext.Provider value={{ apiType }}>
+                            <ApiContext.Provider value={{ apiType, isMonetizationEnabled }}>
                                 <ApiTableView gridView={false} query={search} />
                             </ApiContext.Provider>
                         )}
@@ -328,7 +332,6 @@ CommonListing.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
     apiType: PropTypes.string.isRequired,
-    apis: PropTypes.shape({}).isRequired,
     location: PropTypes.shape({
         search: PropTypes.string,
     }),

@@ -38,7 +38,7 @@ import { isRestricted } from 'AppData/AuthManager';
 import { makeStyles } from '@material-ui/core/styles';
 import MicroGateway from 'AppComponents/Apis/Details/Environments/MicroGateway';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         display: 'flex',
         flexWrap: 'wrap',
@@ -85,7 +85,7 @@ export default function Environments() {
     }
 
     return (
-        <React.Fragment>
+        <>
             <Typography variant='h4' gutterBottom>
                 <FormattedMessage
                     id='Apis.Details.Environments.Environments.APIGateways'
@@ -93,7 +93,7 @@ export default function Environments() {
                 />
             </Typography>
             <Paper className={classes.saveButton}>
-                <Table >
+                <Table>
                     <TableHead>
                         <TableRow>
                             <TableCell />
@@ -101,20 +101,20 @@ export default function Environments() {
                             <TableCell align='left'>Type</TableCell>
                             <TableCell align='left'>Server URL</TableCell>
                             {api.isWebSocket() ? (
-                                <React.Fragment>
+                                <>
                                     <TableCell align='left'>WS Endpoint</TableCell>
                                     <TableCell align='left'>WSS Endpoint</TableCell>
-                                </React.Fragment>
+                                </>
                             ) : (
-                                <React.Fragment>
+                                <>
                                     <TableCell align='left'>HTTP Endpoint</TableCell>
                                     <TableCell align='left'>HTTPS Endpoint</TableCell>
-                                </React.Fragment>
+                                </>
                             )}
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {settings.environment.map(row => (
+                        {settings.environment.map((row) => (
                             <TableRow key={row.name}>
                                 <TableCell padding='checkbox'>
                                     <Checkbox
@@ -126,8 +126,9 @@ export default function Environments() {
                                                 if (checked) {
                                                     setGatewayEnvironments([...gatewayEnvironments, name]);
                                                 } else {
-                                                    setGatewayEnvironments(gatewayEnvironments.filter(env =>
-                                                        env !== name));
+                                                    setGatewayEnvironments(
+                                                        gatewayEnvironments.filter((env) => env !== name),
+                                                    );
                                                 }
                                             }
                                         }
@@ -142,15 +143,15 @@ export default function Environments() {
                                 <TableCell align='left'>{row.serverUrl}</TableCell>
 
                                 {api.isWebSocket() ? (
-                                    <React.Fragment>
+                                    <>
                                         <TableCell align='left'>{row.endpoints.ws}</TableCell>
                                         <TableCell align='left'>{row.endpoints.wss}</TableCell>
-                                    </React.Fragment>
+                                    </>
                                 ) : (
-                                    <React.Fragment>
+                                    <>
                                         <TableCell align='left'>{row.endpoints.http}</TableCell>
                                         <TableCell align='left'>{row.endpoints.https}</TableCell>
-                                    </React.Fragment>
+                                    </>
                                 )}
                             </TableRow>
                         ))}
@@ -158,13 +159,14 @@ export default function Environments() {
                 </Table>
             </Paper>
 
-            {!api.isWebSocket() &&
-                <MicroGateway
-                    selectedMgLabel={selectedMgLabel}
-                    setSelectedMgLabel={setSelectedMgLabel}
-                    api={api}
-                />
-            }
+            {!api.isWebSocket()
+                && (
+                    <MicroGateway
+                        selectedMgLabel={selectedMgLabel}
+                        setSelectedMgLabel={setSelectedMgLabel}
+                        api={api}
+                    />
+                )}
 
             <Grid
                 container
@@ -205,13 +207,13 @@ export default function Environments() {
                         <FormattedMessage
                             id='Apis.Details.Environments.Environments.update.not.allowed'
                             defaultMessage={
-                                '* You are not authorized to update particular fields of' +
-                                ' the API due to insufficient permissions'
+                                '* You are not authorized to update particular fields of'
+                                + ' the API due to insufficient permissions'
                             }
                         />
                     </Typography>
                 </Grid>
             )}
-        </React.Fragment>
+        </>
     );
 }

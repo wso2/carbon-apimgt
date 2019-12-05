@@ -17,7 +17,7 @@ const APIDetailsNavBar = (props) => {
     const locationPath = location.pathname;
     const apiID = match.params.apiUUID;
     const section = <NavItem name='APIs' NavIcon={<APIsIcon />} />;
-    const navItems = apiDetailPages.map(item => (
+    const navItems = apiDetailPages.map((item) => (
         <NavItem
             key={item.pathName}
             selected={isCurrentPage(item.pathName, locationPath, apiID)}

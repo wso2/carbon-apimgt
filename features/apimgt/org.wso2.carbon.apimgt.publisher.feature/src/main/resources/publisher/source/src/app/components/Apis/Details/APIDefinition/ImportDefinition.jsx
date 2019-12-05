@@ -102,9 +102,8 @@ export default function ImportDefinition(props) {
         } = apiInputs;
 
         const newAPI = new API();
-        const promisedResponse =
-            inputType === 'file' ? newAPI.updateAPIDefinitionByFile(api.id, inputValue) :
-                newAPI.updateAPIDefinitionByUrl(api.id, inputValue);
+        const promisedResponse = inputType === 'file' ? newAPI.updateAPIDefinitionByFile(api.id, inputValue)
+            : newAPI.updateAPIDefinitionByUrl(api.id, inputValue);
         promisedResponse
             .then(() => {
                 Alert.success(intl.formatMessage({
@@ -200,7 +199,7 @@ export default function ImportDefinition(props) {
     }
 
     return (
-        <React.Fragment>
+        <>
             <Button
                 size='small'
                 className={classes.button}
@@ -220,8 +219,9 @@ export default function ImportDefinition(props) {
                             <FormattedMessage
                                 id='Apis.Details.APIDefinition.APIDefinition.import.definition.graphql'
                                 defaultMessage='Import GraphQL Schema Definition'
-                            />) :
-                            (
+                            />
+                        )
+                            : (
                                 <FormattedMessage
                                     id='Apis.Details.APIDefinition.APIDefinition.import.definition.oas'
                                     defaultMessage='Import OpenAPI Definition'
@@ -266,7 +266,7 @@ export default function ImportDefinition(props) {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </React.Fragment>
+        </>
     );
 }
 

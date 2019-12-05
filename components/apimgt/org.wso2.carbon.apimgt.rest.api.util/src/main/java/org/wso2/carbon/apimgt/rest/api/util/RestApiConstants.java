@@ -217,6 +217,11 @@ public final class RestApiConstants {
     public static final String PUT = "PUT";
     public static final String DELETE = "DELETE";
 
+    public static final String FREE = "FREE";
+    public static final String COMMERCIAL = "COMMERCIAL";
+    public static final String PAID = "PAID";
+    public static final String FREEMIUM = "FREEMIUM";
+
     //System property set at server startup
     public static final String MIGRATION_MODE = "migrationMode";
 

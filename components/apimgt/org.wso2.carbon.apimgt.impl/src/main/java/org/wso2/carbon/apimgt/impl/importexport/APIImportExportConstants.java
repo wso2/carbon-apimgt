@@ -97,7 +97,13 @@ public final class APIImportExportConstants {
 
     public static final String JSON_ENDPOINTS_CERTIFICATE_FILE = File.separator
             + APIImportExportConstants.META_INFO_DIRECTORY + File.separator + "endpoint_certificates.json";
+    
+    public static final String YAML_CLIENT_CERTIFICATE_FILE = File.separator
+            + APIImportExportConstants.META_INFO_DIRECTORY + File.separator + "client_certificates.yaml";
 
+    public static final String JSON_CLIENT_CERTIFICATE_FILE = File.separator
+            + APIImportExportConstants.META_INFO_DIRECTORY + File.separator + "client_certificates.json";
+    
     public static final String HOSTNAME_JSON_KEY = "hostName";
 
     public static final String ALIAS_JSON_KEY = "alias";

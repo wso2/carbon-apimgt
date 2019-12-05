@@ -22,7 +22,7 @@ const NavBar = (props) => {
             NavIcon: <AlertsIcon />,
         },
     ];
-    const navItems = items.map(item => <NavItem key={item.name} {...item} />);
+    const navItems = items.map((item) => <NavItem key={item.name} {...item} />);
     const section = <NavItem name='APIs' linkTo='/apis' NavIcon={<APIsIcon />} />;
     return <PageNav section={section} navItems={navItems} />;
 };

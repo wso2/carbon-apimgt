@@ -24,6 +24,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -41,6 +43,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
@@ -59,6 +62,7 @@ import org.wso2.carbon.apimgt.impl.importexport.lifecycle.LifeCycle;
 import org.wso2.carbon.apimgt.impl.importexport.lifecycle.LifeCycleTransition;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -79,6 +83,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryIteratorException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -101,7 +112,7 @@ public final class APIImportUtil {
      * @throws APIImportExportException If getting lifecycle action failed
      */
     private static String getLifeCycleAction(String tenantDomain, String currentStatus, String targetStatus,
-                                             APIProvider provider) throws APIImportExportException {
+            APIProvider provider) throws APIImportExportException {
 
         LifeCycle lifeCycle = new LifeCycle();
         // Parse DOM of APILifeCycle
@@ -217,7 +228,7 @@ public final class APIImportUtil {
      * @throws APIImportExportException if there is an error in importing an API
      */
     public static void importAPI(String pathToArchive, String currentUser, boolean isDefaultProviderAllowed,
-                                 APIProvider apiProvider, Boolean overwrite)
+            APIProvider apiProvider, Boolean overwrite)
             throws APIImportExportException {
 
         String jsonContent = null;
@@ -295,8 +306,10 @@ public final class APIImportUtil {
             String apiName = importedApi.getId().getName();
             String apiVersion = importedApi.getId().getVersion();
             if (Boolean.TRUE.equals(overwrite)) {
-                String provider = APIUtil.getAPIProviderFromAPINameVersionTenant(apiName, apiVersion, currentTenantDomain);
-                APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), apiName, apiVersion);
+                String provider = APIUtil
+                        .getAPIProviderFromAPINameVersionTenant(apiName, apiVersion, currentTenantDomain);
+                APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), apiName,
+                        apiVersion);
                 // Checking whether the API exists
                 if (!apiProvider.isAPIAvailable(apiIdentifier)) {
                     String errorMessage = "Error occurred while updating. API: " + apiName + StringUtils.SPACE
@@ -329,8 +342,7 @@ public final class APIImportUtil {
 
             // check whether targetStatus is reachable from current status, if not throw an exception
             if (!currentStatus.equals(targetStatus)) {
-                lifecycleAction = getLifeCycleAction(currentTenantDomain, currentStatus, targetStatus,
-                        apiProvider);
+                lifecycleAction = getLifeCycleAction(currentTenantDomain, currentStatus, targetStatus, apiProvider);
                 if (lifecycleAction == null) {
                     String errMsg = "Error occurred while importing the API. " + targetStatus + " is not reachable from "
                             + currentStatus;
@@ -398,6 +410,14 @@ public final class APIImportUtil {
             addAPISpecificSequences(pathToArchive, importedApi, registry);
             addAPIWsdl(pathToArchive, importedApi, apiProvider, registry);
             addEndpointCertificates(pathToArchive, importedApi, apiProvider, tenantId);
+            addSOAPToREST(pathToArchive, importedApi, registry);
+
+            if (apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Mutual SSL enabled. Importing client certificates.");
+                }
+                addClientCertificates(pathToArchive, apiProvider);
+            }
 
             // Change API lifecycle if state transition is required
             if (StringUtils.isNotEmpty(lifecycleAction)) {
@@ -698,7 +718,7 @@ public final class APIImportUtil {
      * @param sequenceFileLocation location of the sequence file
      */
     private static void addSequenceToRegistry(Boolean isAPISpecific, Registry registry, String sequenceFileLocation,
-                                              String regResourcePath) {
+            String regResourcePath) {
 
         try {
             if (registry.resourceExists(regResourcePath) && !isAPISpecific) {
@@ -840,6 +860,54 @@ public final class APIImportUtil {
     }
 
     /**
+     * Import client certificates for Mutual SSL related configuration
+     *
+     * @param pathToArchive location of the extracted folder of the API
+     * @throws APIImportExportException
+     */
+    private static void addClientCertificates(String pathToArchive, APIProvider apiProvider)
+            throws APIImportExportException {
+        String jsonContent = null;
+        String pathToYamlFile = pathToArchive + APIImportExportConstants.YAML_CLIENT_CERTIFICATE_FILE;
+        String pathToJsonFile = pathToArchive + APIImportExportConstants.JSON_CLIENT_CERTIFICATE_FILE;
+
+        try {
+            // try loading file as YAML
+            if (CommonUtil.checkFileExistence(pathToYamlFile)) {
+                log.debug("Found client certificate file " + pathToYamlFile);
+                String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
+                jsonContent = CommonUtil.yamlToJson(yamlContent);
+            } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
+                // load as a json fallback
+                log.debug("Found client certificate file " + pathToJsonFile);
+                jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
+            }
+            if (jsonContent == null) {
+                log.debug("No client certificate file found to be added, skipping");
+                return;
+            }
+            Gson gson = new Gson();
+            List<ClientCertificateDTO> certificateMetadataDTOS = gson.fromJson(jsonContent,
+                    new TypeToken<ArrayList<ClientCertificateDTO>>(){}.getType());
+            for (ClientCertificateDTO certDTO : certificateMetadataDTOS) {
+                apiProvider.addClientCertificate(
+                        APIUtil.replaceEmailDomainBack(certDTO.getApiIdentifier().getProviderName()),
+                        certDTO.getApiIdentifier(), certDTO.getCertificate(), certDTO.getAlias(),
+                        certDTO.getTierName());
+            }
+        } catch (IOException e) {
+            String errorMessage = "Error in reading " + APIImportExportConstants.YAML_ENDPOINTS_CERTIFICATE_FILE
+                    + " file";
+            log.error(errorMessage, e);
+            throw new APIImportExportException(errorMessage, e);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while importing client certificate";
+            log.error(errorMessage, e);
+            throw new APIImportExportException(errorMessage, e);
+        }
+    }
+
+    /**
      * Update API with the certificate.
      * If certificate alias already exists for tenant in database, certificate content will be
      * updated in trust store. If cert alias does not exits in database for that tenant, add the certificate to
@@ -873,4 +941,84 @@ public final class APIImportUtil {
             log.error(errorMessage, e);
         }
     }
+
+    /**
+     * This method adds API sequences to the imported API. If the sequence is a newly defined one, it is added.
+     *
+     * @param pathToArchive location of the extracted folder of the API
+     */
+    private static void addSOAPToREST(String pathToArchive, API importedApi, Registry registry)
+            throws APIImportExportException {
+
+        String inFlowFileLocation = pathToArchive + File.separator + "SoapToRest" + File.separator + "in";
+        String outFlowFileLocation = pathToArchive + File.separator + "SoapToRest" + File.separator + "out";
+
+        //Adding in-sequence, if any
+        if (CommonUtil.checkFileExistence(inFlowFileLocation)) {
+            APIIdentifier apiId = importedApi.getId();
+            String soapToRestLocationIn =
+                    APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiId.getProviderName()
+                            + RegistryConstants.PATH_SEPARATOR + apiId.getApiName() + RegistryConstants.PATH_SEPARATOR
+                            + apiId.getVersion() + RegistryConstants.PATH_SEPARATOR
+                            + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_IN_RESOURCE;
+            String soapToRestLocationOut =
+                    APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiId.getProviderName()
+                            + RegistryConstants.PATH_SEPARATOR + apiId.getApiName() + RegistryConstants.PATH_SEPARATOR
+                            + apiId.getVersion() + RegistryConstants.PATH_SEPARATOR
+                            + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_OUT_RESOURCE;
+            try {
+                // Import inflow mediation logic
+                Path dir = Paths.get(inFlowFileLocation);
+                InputStream inFlowStream = null;
+                try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
+                    for (Path file : stream) {
+                        String fileName = file.getFileName().toString();
+                        String method = "";
+                        if (fileName.split(".xml").length != 0) {
+                            method = fileName.split(".xml")[0]
+                                    .substring(file.getFileName().toString().lastIndexOf("_") + 1);
+                        }
+                        inFlowStream = new FileInputStream(file.toFile());
+                        byte[] inSeqData = IOUtils.toByteArray(inFlowStream);
+                        Resource inSeqResource = (Resource) registry.newResource();
+                        inSeqResource.setContent(inSeqData);
+                        inSeqResource.addProperty(SOAPToRESTConstants.METHOD, method);
+                        inSeqResource.setMediaType("text/xml");
+                        registry.put(soapToRestLocationIn + RegistryConstants.PATH_SEPARATOR + file.getFileName(),
+                                inSeqResource);
+                    }
+                } finally {
+                    IOUtils.closeQuietly(inFlowStream);
+                }
+                // Import outflow mediation logic
+                dir = Paths.get(outFlowFileLocation);
+                InputStream outFlowStream = null;
+                try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
+                    for (Path file : stream) {
+                        String fileName = file.getFileName().toString();
+                        String method = "";
+                        if (fileName.split(".xml").length != 0) {
+                            method = fileName.split(".xml")[0]
+                                    .substring(file.getFileName().toString().lastIndexOf("_") + 1);
+                        }
+                        outFlowStream = new FileInputStream(file.toFile());
+                        byte[] inSeqData = IOUtils.toByteArray(outFlowStream);
+                        Resource inSeqResource = (Resource) registry.newResource();
+                        inSeqResource.setContent(inSeqData);
+                        inSeqResource.addProperty(SOAPToRESTConstants.METHOD, method);
+                        inSeqResource.setMediaType("text/xml");
+                        registry.put(soapToRestLocationOut + RegistryConstants.PATH_SEPARATOR + file.getFileName(),
+                                inSeqResource);
+                    }
+                } finally {
+                    IOUtils.closeQuietly(outFlowStream);
+                }
+            } catch (IOException | DirectoryIteratorException e) {
+                throw new APIImportExportException("Error in importing SOAP to REST mediation logic", e);
+            } catch (org.wso2.carbon.registry.api.RegistryException e) {
+                throw new APIImportExportException("Error in storing imported SOAP to REST mediation logic", e);
+            }
+        }
+    }
 }
+

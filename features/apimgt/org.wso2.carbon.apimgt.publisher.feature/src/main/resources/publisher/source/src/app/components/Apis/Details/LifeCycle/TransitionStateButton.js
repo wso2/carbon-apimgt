@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import Button from '@material-ui/core/Button';
 
 const TransitionStateButton = (props) => {
@@ -7,4 +7,4 @@ const TransitionStateButton = (props) => {
     );
 };
 
-export default TransitionStateButton
+export default TransitionStateButton;

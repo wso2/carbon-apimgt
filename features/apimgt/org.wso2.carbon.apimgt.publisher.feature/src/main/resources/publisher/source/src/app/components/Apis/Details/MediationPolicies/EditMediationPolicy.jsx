@@ -35,6 +35,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import Alert from 'AppComponents/Shared/Alert';
 import downloadFile from 'AppComponents/Shared/Download.js';
+import Utils from 'AppData/Utils';
 import API from 'AppData/api.js';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 
@@ -54,18 +55,18 @@ const dropzoneStyles = {
     width: '100%',
     margin: '10px 0',
 };
-const styles = theme => ({
+const styles = (theme) => ({
     formControl: {
         display: 'flex',
         flexDirection: 'row',
-        padding: `${theme.spacing.unit * 2}px 2px`,
+        padding: `${theme.spacing(2)}px 2px`,
     },
     dropzone: {
         border: '1px dashed ' + theme.palette.primary.main,
         borderRadius: '5px',
         cursor: 'pointer',
         height: 'calc(100vh - 50em)',
-        padding: `${theme.spacing.unit * 2}px ${theme.spacing.unit * 2}px`,
+        padding: `${theme.spacing(2)}px ${theme.spacing(2)}px`,
         position: 'relative',
         textAlign: 'center',
         width: '100%',
@@ -112,10 +113,10 @@ function EditMediationPolicy(props) {
         const customPromise = API.getMediationPolicies(apiId);
         Promise.all([globalPromise, customPromise])
             .then((values) => {
-                setGlobalMediationPolicies([...values[0].obj.list.filter(seq => seq.type === type)]);
-                setSeqCustom([...values[1].obj.list.filter(seq => seq.type === type)]);
+                setGlobalMediationPolicies([...values[0].obj.list.filter((seq) => seq.type === type)]);
+                setSeqCustom([...values[1].obj.list.filter((seq) => seq.type === type)]);
             })
-            
+
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
@@ -174,10 +175,10 @@ function EditMediationPolicy(props) {
     //     }
     // }, [globalInMediationPolicies, inSeqCustom]);
     const saveMediationPolicy = (newPolicy) => {
-        
+
         const promisedApi = API.addMediationPolicy(newPolicy, apiId, type);
         promisedApi
-            .then((response) => { 
+            .then((response) => {
                 const {
                     body: { id, type: policyType, name },
                 } = response;
@@ -195,7 +196,7 @@ function EditMediationPolicy(props) {
                 }));
             })
             .catch((errorResponse) => {
-                console.log(errorResponse);
+                console.error(errorResponse);
                 if (errorResponse.response.body.description !== null) {
                     Alert.error(errorResponse.response.body.description);
                 } else {
@@ -235,12 +236,12 @@ function EditMediationPolicy(props) {
     function downloadGlobalMediationPolicyContent(policyToDownload) {
         const promisedGetContent = API.getGlobalMediationPolicyContent(policyToDownload);
         promisedGetContent
-            .then((done) => {
-                downloadFile(done);
+            .then((response) => {
+                Utils.forceDownload(response);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
+                    console.error(error);
                     Alert.error(<FormattedMessage
                         id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.download.error'
                         defaultMessage='Error downloading the file'
@@ -254,11 +255,11 @@ function EditMediationPolicy(props) {
      * @param {any} policyToDownload policy file id that is to be downloaded.
      */
     function downloadCustomMediationPolicyContent(policyToDownload) {
-        
+
         const promisedGetContent = API.getMediationPolicyContent(policyToDownload, apiId);
         promisedGetContent
             .then((done) => {
-                downloadFile(done);
+                Utils.forceDownload(done, document);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -278,7 +279,7 @@ function EditMediationPolicy(props) {
         const promisedGetContent = API.deleteMediationPolicy(policyToDelete, api.id);
         promisedGetContent
             .then(() => {
-                setSeqCustom(seqCustom.filter(seq => seq.id !== policyToDelete));
+                setSeqCustom(seqCustom.filter((seq) => seq.id !== policyToDelete));
                 Alert.info(<FormattedMessage
                     id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.delete.success'
                     defaultMessage='Mediation policy deleted successfully.'
@@ -295,8 +296,9 @@ function EditMediationPolicy(props) {
             });
     }
     const handleDownload = (policyToDownload) => {
-        const isGlobalMediationPolicy =
-            globalMediationPolicies.filter(policy => policy.id === policyToDownload).length > 0;
+        const isGlobalMediationPolicy = globalMediationPolicies.filter(
+            (policy) => policy.id === policyToDownload,
+        ).length > 0;
         if (isGlobalMediationPolicy) {
             downloadGlobalMediationPolicyContent(policyToDownload);
         } else {
@@ -304,8 +306,9 @@ function EditMediationPolicy(props) {
         }
     };
     const handleDelete = (policyToDelete) => {
-        const isGlobalMediationPolicy =
-            globalMediationPolicies.filter(policy => policy.id === policyToDelete).length > 0;
+        const isGlobalMediationPolicy = globalMediationPolicies.filter(
+            (policy) => policy.id === policyToDelete,
+        ).length > 0;
         if (isGlobalMediationPolicy) {
             Alert.error(<FormattedMessage
                 id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.global.delete'
@@ -393,7 +396,7 @@ function EditMediationPolicy(props) {
                     {provideBy === 'custom' && (
                         <React.Fragment>
                             <label htmlFor="upload-button-file">
-                        <Button 
+                        <Button
                             component="span"
                             variant='contained'
                             onClick={handleUpload}
@@ -406,11 +409,11 @@ function EditMediationPolicy(props) {
                         </Button>
                     </label>
                     <label htmlFor="design-button-file">
-                        <Button 
+                        <Button
                             component="span"
                             variant='contained'
                             onClick={handleDesignClick}
-                            style={{ marginTop: 10, marginBottom:10 }}  
+                            style={{ marginTop: 10, marginBottom:10 }}
                         >
                             <FormattedMessage
                                 id='Apis.Details.MediationPolicies.EditMediationPolicy.design.btn'
@@ -435,8 +438,8 @@ function EditMediationPolicy(props) {
                                             <Typography>
                                                 <FormattedMessage
                                                     id={
-                                                        'Apis.Details.MediationPolicies.Edit.EditMediationPolicy.' +
-                                                        'click.or.drop.to.upload.file'
+                                                        'Apis.Details.MediationPolicies.Edit.EditMediationPolicy.'
+                                                        + 'click.or.drop.to.upload.file'
                                                     }
                                                     defaultMessage='Click or drag the mediation file to upload.'
                                                 />
@@ -445,9 +448,9 @@ function EditMediationPolicy(props) {
                                     </div>
                                 )}
                             </Dropzone> */}
-                           
+
                             {isUploadPreviewShown
-                            && <UploadCustomMediation 
+                            && <UploadCustomMediation
                                     classes={classes}
                                     selectedMediationPolicy={selectedMediationPolicy}
                                     intl={intl}
@@ -455,13 +458,13 @@ function EditMediationPolicy(props) {
                                 />
                             }
 
-                           {isDesignPreviewShown 
+                           {isDesignPreviewShown
                             && <EditCustomMediation
                             intl={intl}
                             type={type}
                             selectedMediationPolicy={selectedMediationPolicy}
                             />}
-                           
+
                             {/* <RadioGroup
                                 aria-label='inflow'
                                 name='inflow'
@@ -472,13 +475,13 @@ function EditMediationPolicy(props) {
                                 <FormLabel component='customPolicies'>
                                     <FormattedMessage
                                         id={
-                                            'Apis.Details.Edit.MediationPolicies.' +
-                                            'EditMediationPolicies.custom.mediation.policies'
+                                            'Apis.Details.Edit.MediationPolicies.'
+                                            + 'EditMediationPolicies.custom.mediation.policies'
                                         }
                                         defaultMessage='Custom Mediation Policies'
                                     />
                                 </FormLabel>
-                                {seqCustom.map(seq => (
+                                {seqCustom.map((seq) => (
                                     <div>
                                         <IconButton onClick={() => handleDelete(seq.id)}>
                                             <Icon>delete</Icon>
@@ -487,7 +490,7 @@ function EditMediationPolicy(props) {
                                             <Icon>arrow_downward</Icon>
                                         </Button>
                                         <FormControlLabel
-                                            control={
+                                            control={(
                                                 <Radio
                                                     inputProps={{
                                                         seq_id: seq.id,
@@ -496,7 +499,7 @@ function EditMediationPolicy(props) {
                                                     }}
                                                     color='primary'
                                                 />
-                                            }
+                                            )}
                                             label={seq.name}
                                             value={seq.name}
                                             checked={localSelectedPolicyFile.name === seq.name}
@@ -514,13 +517,13 @@ function EditMediationPolicy(props) {
                             value={localSelectedPolicyFile.name}
                             onChange={handleChange}
                         >
-                            {globalMediationPolicies.map(seq => (
+                            {globalMediationPolicies.map((seq) => (
                                 <div>
                                     <Button onClick={() => handleDownload(seq.id)}>
                                         <Icon>arrow_downward</Icon>
                                     </Button>
                                     <FormControlLabel
-                                        control={
+                                        control={(
                                             <Radio
                                                 inputProps={{
                                                     seq_id: seq.id,
@@ -529,7 +532,7 @@ function EditMediationPolicy(props) {
                                                 }}
                                                 color='primary'
                                             />
-                                        }
+                                        )}
                                         label={seq.name}
                                         value={seq.name}
                                         checked={localSelectedPolicyFile.name === seq.name}

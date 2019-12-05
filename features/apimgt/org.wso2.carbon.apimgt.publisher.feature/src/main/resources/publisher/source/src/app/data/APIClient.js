@@ -174,7 +174,7 @@ class APIClient {
                         release();
                         resolve(request);
                     } else {
-                        AuthManager.refresh(env).then(res => res.json())
+                        AuthManager.refresh(env).then((res) => res.json())
                             .then(() => {
                                 request.headers.authorization = 'Bearer '
                                 + AuthManager.getUser(env.label).getPartialToken();

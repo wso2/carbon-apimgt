@@ -4,6 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
 import { Box } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 const styles = {
     button: {
@@ -16,7 +17,9 @@ const styles = {
 };
 
 const ButtonPanel = (props) => {
-    const { currentStep, handleCurrentStep, handleReset } = props;
+    const {
+        currentStep, handleCurrentStep, handleReset, nextActive,
+    } = props;
     const stepsLength = 5;
     const { api, updateSubscriptionData } = useContext(ApiContext);
     const history = useHistory();
@@ -82,6 +85,7 @@ const ButtonPanel = (props) => {
                     variant='contained'
                     color='primary'
                     onClick={handleCurrentStep}
+                    disabled={!nextActive}
                 >
                     {currentStep === stepsLength - 1
                         ? (
@@ -100,6 +104,17 @@ const ButtonPanel = (props) => {
             </Box>
         </Box>
     );
+};
+
+ButtonPanel.defaultProps = {
+    nextActive: true,
+};
+
+ButtonPanel.propTypes = {
+    currentStep: PropTypes.func.isRequired,
+    handleCurrentStep: PropTypes.func.isRequired,
+    handleReset: PropTypes.func.isRequired,
+    nextActive: PropTypes.bool,
 };
 
 export default ButtonPanel;

@@ -1,16 +1,30 @@
 /**
  * This will parse the search query entered by the user into the expected format
  */
+const reg = /(\S+:'(?:[^'\\]|\\.)*')|(\S+:"(?:[^"\\]|\\.)*")|(-?"(?:[^"\\]|\\.)*")|(-?'(?:[^'\\]|\\.)*')|\S+|\S+:\S+/g;
+
+
+/**
+ *
+ *
+ * @class SearchParser
+ */
 class SearchParser {
+    /**
+     *
+     *
+     * @static
+     * @param {*} userQuery
+     * @returns
+     * @memberof SearchParser
+     */
     static parse(userQuery) {
         let modifiedSearchQuery = '';
         // Get a list of search terms respecting single and double quotes
-        const regex =
-            /(\S+:'(?:[^'\\]|\\.)*')|(\S+:"(?:[^"\\]|\\.)*")|(-?"(?:[^"\\]|\\.)*")|(-?'(?:[^'\\]|\\.)*')|\S+|\S+:\S+/g;
         let match;
         const contentArr = [];
         // eslint-disable-next-line no-cond-assign
-        while ((match = regex.exec(userQuery)) !== null) {
+        while ((match = reg.exec(userQuery)) !== null) {
             let term = match[0];
             const sepIndex = term.indexOf(':');
             if (sepIndex !== -1) {

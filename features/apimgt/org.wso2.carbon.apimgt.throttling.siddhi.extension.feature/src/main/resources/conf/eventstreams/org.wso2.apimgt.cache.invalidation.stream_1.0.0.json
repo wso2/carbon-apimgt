@@ -1,0 +1,16 @@
+{
+  "name": "org.wso2.apimgt.cache.invalidation.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "Cache Invalidation stream",
+  "payloadData": [
+    {
+      "name": "type",
+      "type": "STRING"
+    },
+    {
+      "name": "value",
+      "type": "STRING"
+    }
+  ]
+}

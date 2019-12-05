@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Stepper from '@material-ui/core/Stepper';
@@ -40,7 +40,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import AuthManager from 'AppData/AuthManager';
 
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         width: '90%',
     },
@@ -122,13 +122,20 @@ const useStyles = makeStyles(theme => ({
 export default function CustomizedSteppers() {
     const [api, updateAPI] = useAPI();
     const classes = useStyles();
-    const { settings } = useAppContext();
+    const { settings, user } = useAppContext();
     const isEndpointAvailable = api.endpointConfig !== null;
     const isTierAvailable = api.policies.length !== 0;
-    const isPrototypedAvailable =
-        api.endpointConfig !== null && api.endpointConfig.implementation_status === 'prototyped';
+    const isPrototypedAvailable = api.endpointConfig !== null
+        && api.endpointConfig.implementation_status === 'prototyped';
     const [lifecycleState, setlifecycleState] = useState([]);
     const [isUpdating, setUpdating] = useState(false);
+    const { tenantList } = useContext(ApiContext);
+    const userNameSplit = user.name.split('@');
+    const tenantDomain = userNameSplit[userNameSplit.length - 1];
+    let devportalUrl = `${settings.storeUrl}/apis/${api.id}/overview`;
+    if (tenantList && tenantList.length > 0) {
+        devportalUrl = `${settings.storeUrl}/apis/${api.id}/overview?tenant=${tenantDomain}`;
+    }
 
     useEffect(() => {
         api.getLcState(api.id)
@@ -186,11 +193,7 @@ export default function CustomizedSteppers() {
                             <a
                                 target='_blank'
                                 rel='noopener noreferrer'
-                                href={
-                                    `${settings.storeUrl}/apis/` +
-                                    api.id +
-                                    '/overview'
-                                }
+                                href={devportalUrl}
                                 className={classes.viewInStoreLauncher}
                             >
                                 <Typography
@@ -254,7 +257,7 @@ export default function CustomizedSteppers() {
                                     onClick={() => updateLCStateOfAPI(api.id, 'Deploy as a Prototype')}
                                     disabled={api.workflowStatus === 'CREATED' || AuthManager.isNotPublisher()}
                                 >
-                          Deploy as a prototype
+                                        Deploy as a prototype
                                     {isUpdating && <CircularProgress size={20} />}
                                 </Button>
 
@@ -263,10 +266,10 @@ export default function CustomizedSteppers() {
                                     variant='contained'
                                     color='primary'
                                     onClick={() => updateLCStateOfAPI(api.id, 'Publish')}
-                                    disabled={(!isEndpointAvailable || !isTierAvailable) ||
-                                        AuthManager.isNotPublisher() || api.workflowStatus === 'CREATED'}
+                                    disabled={(!isEndpointAvailable || !isTierAvailable)
+                                        || AuthManager.isNotPublisher() || api.workflowStatus === 'CREATED'}
                                 >
-                         Publish
+                                        Publish
                                     {isUpdating && <CircularProgress size={20} />}
                                 </Button>
                             )}
@@ -313,8 +316,8 @@ export default function CustomizedSteppers() {
                     </StepLabel>
                 </Step>
                 <Step className={classes.label}>
-                    <StepLabel style={{ position: 'relative' }} >
-                        <Box p={2} bgcolor='white' borderLeft='0' borderRight='0' >
+                    <StepLabel style={{ position: 'relative' }}>
+                        <Box p={2} bgcolor='white' borderLeft='0' borderRight='0'>
                             <Tooltip
                                 title={isEndpointAvailable ? '' : 'You have to specify an endpoint for the API'}
                                 placement='top'
@@ -363,7 +366,7 @@ export default function CustomizedSteppers() {
                 </Step>
                 <Step className={classes.label}>
                     <StepLabel style={{ position: 'relative' }}>
-                        <Box className={classes.box} >
+                        <Box className={classes.box}>
                             {finalLifecycleState(lifecycleState)}
                         </Box>
                     </StepLabel>

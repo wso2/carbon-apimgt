@@ -386,6 +386,9 @@ paths:
           description: |
             OK.
             SDK generated successfully.
+          schema:
+            type: string
+            format: byte
         400:
           description: |
             Bad Request.
@@ -3755,6 +3758,9 @@ definitions:
       isSubscriptionAvailable:
         type: boolean
         example: false
+      monetizationLabel:
+        type: string
+        example: Free
 
 #-----------------------------------------------------
 # The Standard API resource
@@ -4901,7 +4907,9 @@ definitions:
       list:
         type: array
         items:
-          $ref: '#/definitions/SearchResult'
+          anyOf:
+            - $ref: '#/definitions/APISearchResult'
+            - $ref: '#/definitions/DocumentSearchResult'
       pagination:
         $ref: '#/definitions/Pagination'
 
@@ -5062,6 +5070,12 @@ definitions:
         default: false
       apiGatewayEndpoint:
         type: string
+      monetizationEnabled:
+        type: boolean
+        default: false
+      IsUnlimitedTierPaid:
+        type: boolean
+        default: false
 #-----------------------------------------------------
 # The Application Attribute resource
 #-----------------------------------------------------

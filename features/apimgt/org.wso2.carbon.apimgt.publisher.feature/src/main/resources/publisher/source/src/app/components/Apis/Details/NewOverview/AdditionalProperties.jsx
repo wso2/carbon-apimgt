@@ -32,7 +32,9 @@ const renderAdditionalProperties = function (additionalProperties) {
         if (Object.prototype.hasOwnProperty.call(additionalProperties, key)) {
             const additionalPropertiesTypography = (
                 <Typography component='p' variant='body1'>
-                    <strong>{key}</strong>: {additionalProperties[key]}
+                    <strong>{key}</strong>
+:
+                    {additionalProperties[key]}
                 </Typography>
             );
             items.push(additionalPropertiesTypography);

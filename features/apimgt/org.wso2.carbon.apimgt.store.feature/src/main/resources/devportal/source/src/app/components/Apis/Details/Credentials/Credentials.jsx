@@ -40,7 +40,7 @@ import SubscriptionTableRow from './SubscriptionTableRow';
  * @inheritdoc
  * @param {*} theme theme object
  */
-const styles = theme => ({
+const styles = (theme) => ({
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
         paddingLeft: theme.spacing(3),
@@ -134,6 +134,7 @@ class Credentials extends React.Component {
         },
         throttlingPolicyList: [],
         applicationOwner: '',
+        hashEnabled: false,
     };
 
     /**
@@ -166,7 +167,7 @@ class Credentials extends React.Component {
      * @memberof Credentials
      */
     handleExpandClick = () => {
-        this.setState(state => ({ expanded: !state.expanded }));
+        this.setState((state) => ({ expanded: !state.expanded }));
     };
 
     /**
@@ -226,7 +227,7 @@ class Credentials extends React.Component {
 
         Application.get(selectedAppId)
             .then((result) => {
-                this.setState({ applicationOwner: result.owner });
+                this.setState({ applicationOwner: result.owner, hashEnabled: result.hashEnabled });
             });
     };
 
@@ -279,13 +280,14 @@ class Credentials extends React.Component {
             subscriptionRequest,
             throttlingPolicyList,
             applicationOwner,
+            hashEnabled,
         } = this.state;
         const user = AuthManager.getUser();
         const renderCredentialInfo = () => {
             const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
             if (isPrototypedAPI) {
                 return (
-                    <React.Fragment>
+                    <>
                         <InlineMessage type='info' className={classes.dialogContainer}>
                             <Typography component='p'>
                                 <FormattedMessage
@@ -295,7 +297,7 @@ class Credentials extends React.Component {
                                 />
                             </Typography>
                         </InlineMessage>
-                    </React.Fragment>
+                    </>
                 );
             } else if (applicationsAvailable.length === 0 && subscribedApplications.length === 0) {
                 return (
@@ -305,12 +307,11 @@ class Credentials extends React.Component {
                         heading={user ? intl.formatMessage({
                             defaultMessage: 'Generate Credentials',
                             id: 'Apis.Details.Credentials.Credentials.generate.credentials',
-                        }) :
-                            intl.formatMessage({
+                        })
+                            : intl.formatMessage({
                                 defaultMessage: 'Sign In to Generate Credentials',
                                 id: 'Apis.Details.Credentials.Credentials.generate.credentials',
-                            })
-                        }
+                            })}
                         caption={intl.formatMessage({
                             defaultMessage: 'You need to generate credentials to access this API',
                             id:
@@ -325,7 +326,7 @@ class Credentials extends React.Component {
                 );
             } else {
                 return (
-                    <React.Fragment>
+                    <>
                         <div className={classes.generateCredentialWrapper}>
                             <ScopeValidation
                                 resourcePath={resourcePaths.SUBSCRIPTIONS}
@@ -354,8 +355,8 @@ class Credentials extends React.Component {
                                         </Typography>
                                         <Link
                                             to={`/apis/${api.id}/credentials/wizard`}
-                                            style={!api.isSubscriptionAvailable ?
-                                                { pointerEvents: 'none' } : null}
+                                            style={!api.isSubscriptionAvailable
+                                                ? { pointerEvents: 'none' } : null}
                                         >
                                             <Button
                                                 variant='contained'
@@ -364,8 +365,8 @@ class Credentials extends React.Component {
                                                 disabled={!api.isSubscriptionAvailable}
                                             >
                                                 <FormattedMessage
-                                                    id={'Apis.Details.Credentials.' +
-                                                    'SubscibeButtonPanel.subscribe.wizard.with.new.app'}
+                                                    id={'Apis.Details.Credentials.'
+                                                    + 'SubscibeButtonPanel.subscribe.wizard.with.new.app'}
                                                     defaultMessage='Subscribe with a new application'
                                                 />
                                             </Button>
@@ -375,10 +376,10 @@ class Credentials extends React.Component {
                                         <div className={classes.credentialBox}>
                                             <Typography variant='body2'>
                                                 <FormattedMessage
-                                                    id={'Apis.Details.Credentials.Credentials' +
-                                                    '.api.credentials.with.subscribe.message'}
-                                                    defaultMessage={'Subscribe to an application' +
-                                                    ' and generate credentials'}
+                                                    id={'Apis.Details.Credentials.Credentials'
+                                                    + '.api.credentials.with.subscribe.message'}
+                                                    defaultMessage={'Subscribe to an application'
+                                                    + ' and generate credentials'}
                                                 />
                                             </Typography>
                                             <SubscribeToApi
@@ -414,18 +415,18 @@ class Credentials extends React.Component {
                                     ***************************
                                     */}
                         {subscribedApplications && subscribedApplications.length > 0 && (
-                            <React.Fragment>
+                            <>
                                 <Typography variant='h5'>
                                     <FormattedMessage
-                                        id={'Apis.Details.Credentials.Credentials.' +
-                                        'api.credentials.subscribed.apps.title'}
+                                        id={'Apis.Details.Credentials.Credentials.'
+                                        + 'api.credentials.subscribed.apps.title'}
                                         defaultMessage='View Credentials'
                                     />
                                 </Typography>
                                 <Typography variant='body2'>
                                     <FormattedMessage
-                                        id={'Apis.Details.Credentials.Credentials.' +
-                                        'api.credentials.subscribed.apps.description'}
+                                        id={'Apis.Details.Credentials.Credentials.'
+                                        + 'api.credentials.subscribed.apps.description'}
                                         defaultMessage='( Subscribed Applications )'
                                     />
                                 </Typography>
@@ -433,22 +434,22 @@ class Credentials extends React.Component {
                                     <tr>
                                         <th className={classes.th}>
                                             <FormattedMessage
-                                                id={'Apis.Details.Credentials.Credentials.' +
-                                                'api.credentials.subscribed.apps.name'}
+                                                id={'Apis.Details.Credentials.Credentials.'
+                                                + 'api.credentials.subscribed.apps.name'}
                                                 defaultMessage='Application Name'
                                             />
                                         </th>
                                         <th className={classes.th}>
                                             <FormattedMessage
-                                                id={'Apis.Details.Credentials.Credentials.api.' +
-                                                'credentials.subscribed.apps.tier'}
+                                                id={'Apis.Details.Credentials.Credentials.api.'
+                                                + 'credentials.subscribed.apps.tier'}
                                                 defaultMessage='Throttling Tier'
                                             />
                                         </th>
                                         <th className={classes.th}>
                                             <FormattedMessage
-                                                id={'Apis.Details.Credentials.Credentials.' +
-                                                'api.credentials.subscribed.apps.status'}
+                                                id={'Apis.Details.Credentials.Credentials.'
+                                                + 'api.credentials.subscribed.apps.status'}
                                                 defaultMessage='Application Status'
                                             />
                                         </th>
@@ -456,6 +457,7 @@ class Credentials extends React.Component {
                                     </tr>
                                     {subscribedApplications.map((app, index) => (
                                         <SubscriptionTableRow
+                                            key={index}
                                             loadInfo={this.loadInfo}
                                             handleSubscriptionDelete={this.handleSubscriptionDelete}
                                             selectedAppId={selectedAppId}
@@ -464,12 +466,13 @@ class Credentials extends React.Component {
                                             app={app}
                                             index={index}
                                             applicationOwner={applicationOwner}
+                                            hashEnabled={hashEnabled}
                                         />
                                     ))}
                                 </table>
-                            </React.Fragment>
+                            </>
                         )}
-                    </React.Fragment>
+                    </>
                 );
             }
         };
@@ -518,23 +521,8 @@ Credentials.propTypes = {
         buttonElm: PropTypes.string,
         dialogContainer: PropTypes.string,
     }).isRequired,
-    history: PropTypes.shape({
-        location: PropTypes.shape({
-            state: PropTypes.shape({
-                openWizard: PropTypes.bool.isRequired,
-            }).isRequired,
-            pathname: PropTypes.string.isRequired,
-        }).isRequired,
-        replace: PropTypes.func.isRequired,
-        push: PropTypes.func.isRequired,
-    }).isRequired,
-    location: PropTypes.shape({
-        state: PropTypes.shape({
-            openWizard: PropTypes.bool.isRequired,
-        }).isRequired,
-        pathname: PropTypes.string.isRequired,
-    }).isRequired,
-    intl: PropTypes.func.isRequired,
+    history: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 
 export default injectIntl(withStyles(styles, { withTheme: true })(Credentials));

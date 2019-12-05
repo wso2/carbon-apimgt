@@ -14,7 +14,7 @@
       },
       {
         "Name": "apim:api_view",
-        "Roles": "admin,Internal/publisher,Internal/creator"
+        "Roles": "admin,Internal/publisher,Internal/creator,Internal/analytics"
       },
       {
         "Name": "apim:api_delete",

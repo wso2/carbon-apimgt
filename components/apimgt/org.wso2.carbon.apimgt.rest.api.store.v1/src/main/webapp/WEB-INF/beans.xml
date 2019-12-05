@@ -51,6 +51,7 @@
             <list>
                 <value>Authorization</value>
                 <value>X-WSO2-Tenant</value>
+                <value>content-type</value>
             </list>
         </property>
         <property name="allowCredentials" value="true"/>
