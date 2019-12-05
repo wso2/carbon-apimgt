@@ -188,6 +188,10 @@ const suggestions = {
             route: 'environments',
         },
         {
+            label: 'Environments',
+            route: 'environments',
+        },
+        {
             label: 'Lifecycle',
             route: 'lifecycle',
         },
