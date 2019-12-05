@@ -60,7 +60,7 @@ export default function ApiBreadcrumbs(props) {
         <Paper elevation={0} className={classes.root}>
             <Breadcrumbs aria-label='breadcrumb'>
                 <RouterLink
-                    to={theme.custom.tagWise.active && theme.custom.tagWise.style === 'page' ? '/api-groups' : '/apis'}
+                    to={theme.custom.tagWise.active && theme.custom.tagWise.style === 'page' ? '/api-categories' : '/apis'}
                     className={classes.apiGroup}
                 >
                     <Link color='inherit' className={classes.link}>

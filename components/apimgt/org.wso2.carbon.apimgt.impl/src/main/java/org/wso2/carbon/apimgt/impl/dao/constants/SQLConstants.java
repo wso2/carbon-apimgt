@@ -3113,6 +3113,8 @@ public class SQLConstants {
 
     public static final String GET_API_CATEGORY_BY_ID = "SELECT * FROM AM_API_CATEGORIES WHERE UUID = ?";
 
+    public static final String GET_API_CATEGORY_BY_NAME = "SELECT * FROM AM_API_CATEGORIES WHERE NAME = ? AND TENANT_ID = ?";
+
     public static final String UPDATE_API_CATEGORY = "UPDATE AM_API_CATEGORIES SET DESCRIPTION = ?, NAME = ? WHERE UUID = ?";
 
     public static final String DELETE_API_CATEGORY = "DELETE FROM AM_API_CATEGORIES WHERE UUID = ?";

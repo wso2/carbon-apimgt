@@ -20,7 +20,7 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
-import TagCloudListingTags from './TagCloudListingTags';
+import CategoryListingCategories from './CategoryListingCategories';
 import CustomIcon from '../../Shared/CustomIcon';
 
 const useStyles = makeStyles(theme => ({
@@ -55,16 +55,16 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-export default function TagCloudListing() {
+export default function CategoryListing() {
     const classes = useStyles();
     const theme = useTheme();
-    const [allTags, setAllTags] = useState(null);
+    const [allCategories, setAllCategories] = useState(null);
     useEffect(() => {
         const restApiClient = new API();
-        const promisedTags = restApiClient.getAllTags();
-        promisedTags
+        const promisedCategories = restApiClient.apiCategories();
+        promisedCategories
             .then((response) => {
-                setAllTags(response.body.list);
+                setAllCategories(response.body.list);
             })
             .catch((error) => {
                 console.log(error);
@@ -81,14 +81,14 @@ export default function TagCloudListing() {
                 <div className={classes.mainTitleWrapper}>
                     <Typography variant='h4' className={classes.mainTitle}>
                         <FormattedMessage
-                            defaultMessage='API Groups'
-                            id='Apis.Listing.TagCloudListing.apigroups.main'
+                            defaultMessage='API Categories'
+                            id='Apis.Listing.CategoryListing.apigroups.main'
                         />
                     </Typography>
                 </div>
             </div>
             <div className={classes.listContentWrapper}>
-                {allTags && <TagCloudListingTags allTags={allTags} />}
+                {allCategories && <CategoryListingCategories allCategories={allCategories} />}
             </div>
         </main>
     );

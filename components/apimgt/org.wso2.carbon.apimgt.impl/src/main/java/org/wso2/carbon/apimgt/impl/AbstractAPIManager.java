@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -2160,8 +2161,11 @@ public abstract class AbstractAPIManager implements APIManager {
                         searchKeys[0] = APIConstants.API_LABELS_GATEWAY_LABELS;
                         searchKeys[1] = searchKeys[1].replace("*", "");
                     } else if (searchKeys[0].equals(APIConstants.CATEGORY_SEARCH_TYPE_PREFIX)) {
-                       // searchKeys[0] = APIConstants.API_CATEGORIES_CATEGORY_NAME;
-                        searchKeys[1] = searchKeys[1].replace("*", "");
+                        //convert category name to category id, since ID is the value stored in api registry artifact
+                        APICategory category = apiMgtDAO
+                                .getAPICategoryByName(searchKeys[1].replace("*", ""), tenantDomain);
+                        searchKeys[0] = APIConstants.API_CATEGORIES_CATEGORY_ID;
+                        searchKeys[1] = category.getId();
                     }
 
                     if (filteredQuery.length() == 0) {

@@ -20,7 +20,7 @@ import React from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
 import { withStyles } from '@material-ui/core';
 import CommonListing from './Listing/CommonListing';
-import TagCloudListing from './Listing/TagCloudListing';
+import CategoryListing from './Listing/CategoryListing';
 import Details from './Details/index';
 import { ResourceNotFound } from '../Base/Errors';
 
@@ -34,9 +34,9 @@ function Apis() {
         <Switch>
             <Route
                 exact
-                path='/api-groups'
-                render={(props) => (
-                    <TagCloudListing {...props} />)}
+                path='/api-categories'
+                render={props => (
+                    <CategoryListing {...props} apiType={CONSTS.API_TYPE} />)}
             />
             <Route
                 exact

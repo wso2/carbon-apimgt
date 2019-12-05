@@ -14452,6 +14452,28 @@ public class ApiMgtDAO {
         return apiCategory;
     }
 
+    public APICategory getAPICategoryByName(String apiCategoryName, String tenantDomain) throws APIManagementException {
+        APICategory apiCategory = null;
+        int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_CATEGORY_BY_NAME)) {
+            statement.setString(1, apiCategoryName);
+            statement.setInt(2, tenantID);
+
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                apiCategory = new APICategory();
+                apiCategory.setName(rs.getString("NAME"));
+                apiCategory.setDescription(rs.getString("DESCRIPTION"));
+                apiCategory.setTenantID(rs.getInt("TENANT_ID"));
+                apiCategory.setId(rs.getString("UUID"));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to fetch API category : " + apiCategoryName + " of tenant " + tenantDomain, e);
+        }
+        return apiCategory;
+    }
+
     public void deleteCategory(String categoryID) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_API_CATEGORY)) {

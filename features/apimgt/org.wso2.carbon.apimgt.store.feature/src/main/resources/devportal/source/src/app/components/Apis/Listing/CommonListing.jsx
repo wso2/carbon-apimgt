@@ -29,7 +29,7 @@ import API from 'AppData/api';
 import ApiBreadcrumbs from './ApiBreadcrumbs';
 import ApiTableView from './ApiTableView';
 import { ApiContext } from '../Details/ApiContext';
-import TagCloudListingTags from './TagCloudListingTags';
+import CategoryListingCategories from './CategoryListingCategories';
 import ApiTagCloud from './ApiTagCloud';
 
 const styles = (theme) => ({
@@ -193,6 +193,14 @@ class CommonListing extends React.Component {
             .catch((error) => {
                 console.log(error);
             });
+        const promisedCategories = restApiClient.apiCategories();
+        promisedCategories
+            .then((response) => {
+                this.setState({ allCategories: response.body.list });
+            })
+            .catch((error) => {
+                console.log(error);
+            });
         this.isMonetizationEnabled();
     }
 
@@ -228,7 +236,7 @@ class CommonListing extends React.Component {
             },
         } = theme;
         const {
-            listType, allTags, showLeftMenu, isMonetizationEnabled,
+            listType, allTags, showLeftMenu, isMonetizationEnabled, allCategories,
         } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
         const searchParam = new URLSearchParams(search);
@@ -256,7 +264,7 @@ class CommonListing extends React.Component {
                         <div className={classes.sliderButton} onClick={this.toggleLeftMenu}>
                             <Icon>keyboard_arrow_left</Icon>
                         </div>
-                        {active && <TagCloudListingTags allTags={allTags} />}
+                        {active && <CategoryListingCategories allCategories={allCategories} />}
                         {tagCloudActive && <ApiTagCloud allTags={allTags} />}
                     </div>
                 )}
