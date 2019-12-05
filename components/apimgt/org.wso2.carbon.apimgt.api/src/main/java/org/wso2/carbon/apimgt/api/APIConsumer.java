@@ -917,6 +917,12 @@ public interface APIConsumer extends APIManager {
     boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException;
 
     /**
+     * Checks whether the API recommendation feature is enabled.
+     * @throws APIManagementException if an error occurs while reading configs
+     */
+    boolean isRecommendationEnabled() throws APIManagementException;
+
+    /**
      * This methods loads the monetization implementation class
      *
      * @return monetization implementation class
@@ -964,4 +970,30 @@ public interface APIConsumer extends APIManager {
     Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException;
 
     void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Updates the details of the specified user application.
+     *
+     * @param query Search query typed by the user at the devportal
+     * @param username Name of the user typing the search query
+     * @throws APIManagementException If an error occurs while updating the application
+     */
+    void publishSearchQuery(String query, String username) throws APIManagementException;
+
+    /**
+     * Publish the clicked APIs for the use of API recommendation system.
+     *
+     * @param api API clicked by the user
+     * @param username Name of the user who clicked the API
+     * @throws APIManagementException If an error occurs while publishing clicked API
+     */
+    void publishClickedAPI(ApiTypeWrapper api, String username) throws APIManagementException;
+
+    /**
+     * Get API recommendations for a given user..
+     *
+     * @param userName API clicked by the user
+     * @throws APIManagementException If an error occurs while publishing clicked API
+     */
+    String getApiRecommendations(String userName) throws APIManagementException;
 }
