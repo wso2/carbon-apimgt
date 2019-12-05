@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
@@ -81,6 +82,8 @@ public class APIManagerConfiguration {
     private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
     private JSONArray applicationAttributes = new JSONArray();
     private JSONArray monetizationAttributes = new JSONArray();
+
+    private RecommendationEnvironment recommendationEnvironment = new RecommendationEnvironment();
 
     private SecretResolver secretResolver;
 
@@ -476,6 +479,22 @@ public class APIManagerConfiguration {
     
     public Map<String, Environment> getApiGatewayEnvironments() {
         return apiGatewayEnvironments;
+    }
+
+    public RecommendationEnvironment getApiRecommendationEnvironment() {
+        String url = getFirstProperty(APIConstants.RECOMMENDATION_ENDPOINT);
+
+        if (url != null) {
+            String username = getFirstProperty(APIConstants.RECOMMENDATION_USERNAME);
+            String password = getFirstProperty(APIConstants.RECOMMENDATION_PASSWORD);
+
+            recommendationEnvironment.setUrl(url);
+            recommendationEnvironment.setUsername(username);
+            recommendationEnvironment.setPassword(password);
+        } else {
+            return null;
+        }
+        return recommendationEnvironment;
     }
 
     public Set<APIStore> getExternalAPIStores() {  //Return set of APIStores
