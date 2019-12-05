@@ -8,6 +8,7 @@
                <xs:element minOccurs="0" name="HTTPVerb" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="aggregatedMediationScript" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="amznResourceName" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="amznResourceTimeout" type="xs:int"/>
                <xs:element minOccurs="0" name="applicableLevel" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="authType" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="authTypeAsString" nillable="true" type="xs:string"/>
