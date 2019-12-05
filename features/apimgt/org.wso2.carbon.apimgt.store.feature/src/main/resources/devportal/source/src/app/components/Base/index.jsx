@@ -23,6 +23,7 @@ import { Link } from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
+import AccountCircle from '@material-ui/icons/AccountCircle';
 import Button from '@material-ui/core/Button';
 import Hidden from '@material-ui/core/Hidden';
 import {
@@ -125,6 +126,7 @@ const styles = (theme) => {
         },
         icons: {
             marginRight: theme.spacing(),
+            fontSize: theme.spacing(3),
         },
         banner: {
             color: theme.custom.banner.color,
@@ -415,8 +417,11 @@ class Layout extends React.Component {
                                             className={classes.userLink}
                                             id='userToggleButton'
                                         >
-                                            <Icon className={classes.icons}>person</Icon>
+                                            <AccountCircle className={classes.icons} />
                                             {user.name}
+                                            <Icon style={{ fontSize: '22px', marginLeft: '1px' }}>
+                                                keyboard_arrow_down
+                                            </Icon>
                                         </Button>
                                         <Popper
                                             id='userPopup'
