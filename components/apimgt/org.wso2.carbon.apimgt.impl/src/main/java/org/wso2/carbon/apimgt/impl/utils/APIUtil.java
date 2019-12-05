@@ -642,14 +642,20 @@ public final class APIUtil {
                 uriTemplate.setScopes(scope);
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
-                // AWS Lambda: set arn to URI template
+                // AWS Lambda: set arn & timeout to URI template
                 if (paths != null) {
                     JSONObject path = (JSONObject) paths.get(uTemplate);
                     if (path != null) {
                         JSONObject operation = (JSONObject) path.get(method.toLowerCase());
-                        if (operation != null && operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
-                            uriTemplate.setAmznResourceName((String)
-                                    operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+                        if (operation != null) {
+                            if (operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
+                                uriTemplate.setAmznResourceName((String)
+                                        operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+                            }
+                            if (operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)) {
+                                uriTemplate.setAmznResourceTimeout(((Long)
+                                        operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
+                            }
                         }
                     }
                 }
