@@ -1,21 +1,21 @@
 /*
-*  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing,
-*  software distributed under the License is distributed on an
-*  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-*  KIND, either express or implied.  See the License for the
-*  specific language governing permissions and limitations
-*  under the License.
-*
-*/
+ *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
 package org.wso2.carbon.apimgt.gateway.utils;
 
 import org.apache.axis2.AxisFault;
@@ -74,6 +74,7 @@ public class GatewayUtils {
     private static final Log log = LogFactory.getLog(GatewayUtils.class);
 
     public static boolean isClusteringEnabled() {
+
         ClusteringAgent agent = ServiceReferenceHolder.getInstance().getServerConfigurationContext().
                 getAxisConfiguration().getClusteringAgent();
         if (agent != null) {
@@ -83,6 +84,7 @@ public class GatewayUtils {
     }
 
     public static <T> Map<String, T> generateMap(Collection<T> list) {
+
         Map<String, T> map = new HashMap<String, T>();
         for (T el : list) {
             map.put(el.toString(), el);
@@ -128,6 +130,7 @@ public class GatewayUtils {
      * @return A Map with Name Value pairs.
      */
     public static Map<String, String> getQueryParams(MessageContext messageContext) {
+
         String queryString = (String) messageContext.getProperty(NhttpConstants.REST_URL_POSTFIX);
         if (!StringUtils.isEmpty(queryString)) {
             if (queryString.indexOf("?") > -1) {
@@ -154,6 +157,7 @@ public class GatewayUtils {
     }
 
     public static Map getJWTClaims(AuthenticationContext authContext) {
+
         String[] jwtTokenArray = authContext.getCallerToken().split(Pattern.quote("."));
         // decoding JWT
         try {
@@ -177,6 +181,7 @@ public class GatewayUtils {
      * @throws APIManagementException
      */
     public static UserRegistry getRegistry(String tenantDomain) throws APIManagementException {
+
         PrivilegedCarbonContext.startTenantFlow();
         if (tenantDomain != null && StringUtils.isNotEmpty(tenantDomain)) {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -244,6 +249,7 @@ public class GatewayUtils {
      */
     public static void setRegistryProperty(String propertyName, String propertyValue, String path, String tenantDomain)
             throws APIManagementException {
+
         UserRegistry registry = getRegistry(tenantDomain);
         PrivilegedCarbonContext.startTenantFlow();
         if (tenantDomain != null && StringUtils.isNotEmpty(tenantDomain)) {
@@ -279,6 +285,7 @@ public class GatewayUtils {
      * @return
      */
     public static String getAPIEndpointSecretAlias(String apiProviderName, String apiName, String version) {
+
         String secureVaultAlias = apiProviderName + "--" + apiName + version;
         return secureVaultAlias;
     }
@@ -290,6 +297,7 @@ public class GatewayUtils {
      * @return correlation ID
      */
     public static String getAndSetCorrelationID(org.apache.synapse.MessageContext messageContext) {
+
         Object correlationObj = messageContext.getProperty(APIMgtGatewayConstants.AM_CORRELATION_ID);
         String correlationID;
         if (correlationObj != null) {
@@ -307,6 +315,7 @@ public class GatewayUtils {
     /**
      * This method handles threat violations. If the request propagates a threat, this method generates
      * an custom exception.
+     *
      * @param messageContext contains the message properties of the relevant API request which was
      *                       enabled the regexValidator message mediation in flow.
      * @param errorCode      It depends on status of the error message.
@@ -315,6 +324,7 @@ public class GatewayUtils {
      */
     public static boolean handleThreat(org.apache.synapse.MessageContext messageContext,
                                        String errorCode, String desc) {
+
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_FOUND, true);
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_CODE, errorCode);
         if (messageContext.isResponse()) {
@@ -335,13 +345,15 @@ public class GatewayUtils {
     /**
      * This method use to clone the InputStream from the the message context. Basically
      * clone the request body.
+     *
      * @param messageContext contains the message properties of the relevant API request which was
      *                       enabled the regexValidator message mediation in flow.
      * @return cloned InputStreams.
      * @throws IOException this exception might occurred while cloning the inputStream.
      */
-    public static Map<String,InputStream> cloneRequestMessage(org.apache.synapse.MessageContext messageContext)
+    public static Map<String, InputStream> cloneRequestMessage(org.apache.synapse.MessageContext messageContext)
             throws IOException {
+
         BufferedInputStream bufferedInputStream = null;
         Map<String, InputStream> inputStreamMap = null;
         InputStream inputStreamSchema;
@@ -380,16 +392,18 @@ public class GatewayUtils {
             inputStreamMap.put(ThreatProtectorConstants.ORIGINAL, inputStreamOriginal);
             inputStreamMap.put(ThreatProtectorConstants.JSON, inputStreamJSON);
         }
-        return  inputStreamMap;
+        return inputStreamMap;
     }
 
     /**
-     *  This method use to set the originInput stream to the message Context
+     * This method use to set the originInput stream to the message Context
+     *
      * @param inputStreams cloned InputStreams
-     * @param axis2MC axis2 message context
+     * @param axis2MC      axis2 message context
      */
-    public static void setOriginalInputStream(Map <String, InputStream> inputStreams,
+    public static void setOriginalInputStream(Map<String, InputStream> inputStreams,
                                               org.apache.axis2.context.MessageContext axis2MC) {
+
         InputStream inputStreamOriginal;
         if (inputStreams != null) {
             inputStreamOriginal = inputStreams.get(ThreatProtectorConstants.ORIGINAL);
@@ -399,9 +413,10 @@ public class GatewayUtils {
             }
         }
     }
-    
+
     /**
      * Build execution time related information using message context
+     *
      * @param messageContext
      * @return
      */
@@ -424,8 +439,9 @@ public class GatewayUtils {
         executionTime.setThrottlingLatency(throttleLatency == null ? 0 : ((Number) throttleLatency).longValue());
         return executionTime;
     }
-    
+
     public static String extractResource(org.apache.synapse.MessageContext mc) {
+
         Pattern resourcePattern = Pattern.compile("^/.+?/.+?([/?].+)$");
         String resource = "/";
         Matcher matcher = resourcePattern.matcher((String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH));
@@ -434,8 +450,9 @@ public class GatewayUtils {
         }
         return resource;
     }
-    
+
     public static String getHostName(org.apache.synapse.MessageContext messageContext) {
+
         String hostname = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getDatacenterId();
         if (hostname == null) {
             hostname = (String) messageContext.getProperty(APIMgtGatewayConstants.HOST_NAME);
@@ -444,19 +461,23 @@ public class GatewayUtils {
     }
 
     public static String getQualifiedApiName(String apiProviderName, String apiName, String version) {
+
         return apiProviderName + "--" + apiName + ":v" + version;
     }
 
     public static String getQualifiedDefaultApiName(String apiProviderName, String apiName) {
+
         return apiProviderName + "--" + apiName;
     }
 
     /**
      * This method extracts the endpoint address base path if query parameters are contained in endpoint
+     *
      * @param mc The message context
      * @return The endpoint address base path
      */
     public static String extractAddressBasePath(org.apache.synapse.MessageContext mc) {
+
         String endpointAddress = (String) mc.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
         if (endpointAddress == null) {
             endpointAddress = APIMgtGatewayConstants.DUMMY_ENDPOINT_ADDRESS;
@@ -467,8 +488,10 @@ public class GatewayUtils {
         return endpointAddress;
     }
 
-    public static AuthenticationContext generateAuthenticationContext(String tokenSignature, JSONObject payload, JSONObject api,
-                                                                String apiLevelPolicy, boolean isOauth) {
+    public static AuthenticationContext generateAuthenticationContext(String tokenSignature, JSONObject payload,
+                                                                      JSONObject api,
+                                                                      String apiLevelPolicy, boolean isOauth) {
+
         JSONObject applicationObj = payload.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION);
 
         AuthenticationContext authContext = new AuthenticationContext();
@@ -481,7 +504,8 @@ public class GatewayUtils {
         }
         authContext.setUsername(payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
         authContext.setApiTier(apiLevelPolicy);
-        authContext.setApplicationId(String.valueOf(applicationObj.getInt(APIConstants.JwtTokenConstants.APPLICATION_ID)));
+        authContext
+                .setApplicationId(String.valueOf(applicationObj.getInt(APIConstants.JwtTokenConstants.APPLICATION_ID)));
         authContext.setApplicationName(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
         authContext.setApplicationTier(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
         authContext.setSubscriber(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
@@ -531,8 +555,10 @@ public class GatewayUtils {
      * If the subscription information is not found, return a null object.
      * @throws APISecurityException if the user is not subscribed to the API
      */
-    public static JSONObject validateAPISubscription(String apiContext, String apiVersion, JSONObject payload, String[] splitToken, boolean isOauth)
+    public static JSONObject validateAPISubscription(String apiContext, String apiVersion, JSONObject payload,
+                                                     String[] splitToken, boolean isOauth)
             throws APISecurityException {
+
         JSONObject api = null;
 
         if (payload.has(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS)) {
@@ -542,7 +568,7 @@ public class GatewayUtils {
                 JSONObject subscribedAPIsJSONObject = subscribedAPIs.getJSONObject(i);
                 if (apiContext.equals(subscribedAPIsJSONObject.getString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
                         apiVersion.equals(subscribedAPIsJSONObject.getString(APIConstants.JwtTokenConstants.API_VERSION)
-                        )) {
+                                         )) {
                     api = subscribedAPIsJSONObject;
                     if (log.isDebugEnabled()) {
                         log.debug("User is subscribed to the API: " + apiContext + ", " +
@@ -554,7 +580,7 @@ public class GatewayUtils {
             if (api == null) {
                 if (log.isDebugEnabled()) {
                     log.debug("User is not subscribed to access the API: " + apiContext +
-                            ", version: " + apiVersion+ ". Token: " + getMaskedToken(splitToken));
+                            ", version: " + apiVersion + ". Token: " + getMaskedToken(splitToken));
                 }
                 log.error("User is not subscribed to access the API.");
                 throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
@@ -578,7 +604,7 @@ public class GatewayUtils {
      * Verify the JWT token signature.
      *
      * @param splitToken The JWT token which is split into [header, payload, signature]
-     * @param alias public certificate keystore alias
+     * @param alias      public certificate keystore alias
      * @return whether the signature is verified or or not
      * @throws APISecurityException in case of signature verification failure
      */
@@ -635,6 +661,7 @@ public class GatewayUtils {
     }
 
     public static String getMaskedToken(String[] splitToken) {
+
         String concatToken = String.join(".", splitToken);
         if (concatToken.length() >= 10) {
             return "XXXXX" + concatToken.substring(concatToken.length() - 10);
@@ -644,6 +671,7 @@ public class GatewayUtils {
     }
 
     public static boolean isGatewayTokenCacheEnabled() {
+
         try {
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
             String cacheEnabled = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
@@ -661,11 +689,13 @@ public class GatewayUtils {
      * @return tenant domain
      */
     public static String getTenantDomain() {
+
         return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
     }
 
     public static String getAccessTokenCacheKey(String accessToken, String apiContext, String apiVersion,
-                                          String resourceUri, String httpVerb) {
+                                                String resourceUri, String httpVerb) {
+
         return accessToken + ":" + apiContext + ":" + apiVersion + ":" + resourceUri + ":" + httpVerb;
     }
 }
