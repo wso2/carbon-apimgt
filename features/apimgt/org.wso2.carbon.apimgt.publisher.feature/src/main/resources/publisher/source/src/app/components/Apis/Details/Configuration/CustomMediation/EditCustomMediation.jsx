@@ -7,6 +7,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import PropTypes from 'prop-types';
 import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
@@ -27,8 +28,12 @@ import FormLabel from '@material-ui/core/FormLabel';
 import API from 'AppData/api.js';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import Alert from 'AppComponents/Shared/Alert';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Card from '@material-ui/core/Card';
+import CardActionArea from '@material-ui/core/CardActionArea';
+import CardActions from '@material-ui/core/CardActions';
 
-
+import MediatorProperties from './MediatorProperties'
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -49,8 +54,8 @@ function TabPanel(props) {
   
 TabPanel.propTypes = {
     children: PropTypes.node,
-    index: PropTypes.any.isRequired,
-    value: PropTypes.any.isRequired,
+    index: PropTypes.string.isRequired,
+    value: PropTypes.string.isRequired,
     
 };
   
@@ -120,13 +125,28 @@ const useStyles = makeStyles(theme => ({
     },
     save: {
        paddingBottom:10 
-    }
+    },
+    toolbar: {
+        flexGrow: 1,
+    },
+    title: {
+        flexGrow: 1,
+    },
+    deleteButtonOverride: {
+        borderRadius: 0,
+        height:5,
+        width:2,      
+    },
+    card: {
+        maxWidth: 150,
+        height:130
+      },      
 }));
 
 function EditCustomMediation(props) {
 
     const {
-       intl,selectedMediationPolicy,type
+       intl,type,selectedMediationPolicy
     } = props;
     const { api } = useContext(ApiContext);
 
@@ -134,33 +154,61 @@ function EditCustomMediation(props) {
     const [value, setValue] = React.useState(0);
     const [addedMediators, setAddedMediators] = useState([]);
     const [mediationName, setMediationName] = useState(null);
+    const [addedMediationNames, setAddedMediationNames] = useState([]);
     const [errors, setErrors] = useState(null);
-    const { id: apiId } = api;
     const [seqCustom, setSeqCustom] = useState(null);
     const [localSelectedPolicyFile, setLocalSelectedPolicyFile] = useState(selectedMediationPolicy);
-    //const NONE = 'none';
+    const { id: apiId } = api;
+    const [mediatorId, setMediatorId] = useState(null);
+    const [mediatorLogo, setMediatorLogo] = useState(null);
+    const [mediatorName, setMediatorName] = useState(null);
+    const [editing, setEditing] = useState(false);
 
+    function startEditing(obj) {
+        setMediatorId(obj.id);
+        setMediatorLogo(obj.src);
+        setMediatorName(obj.name);
+        setEditing(true);
+        setDialogWidth('sm');  
+    }
+    
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
     
     const { mediatorIcons } = Configurations;
 
-    const addMediator = (src) => {
+    function generateId() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+    }
+    const addMediator = (src, name) => {
        
-        const mediatorObj = { src:src, id:0 };
+        const mediatorObj = { src:src, id:'', name:name };
         const newAddedMediators = cloneDeep(addedMediators);
+        mediatorObj.id = generateId();
         newAddedMediators.push(mediatorObj); 
-        setAddedMediators(newAddedMediators);
-        addedMediators.forEach((src, index) => mediatorObj.id = index + 1);        
+        setAddedMediators(newAddedMediators);  
     }
 
-    const deleteMediator = ( id ) => {
+    // const addName = (name) => {
         
+    //     const nameObj = { name:name, id:0 };
+    //     const newAddedMediationNames = addedMediationNames;
+    //     newAddedMediationNames.push(nameObj);
+    //     setAddedMediationNames(newAddedMediationNames);
+    //     //addedMediationNames.forEach((mediationName, index) => nameObj.id = index + 1);      
+    // }
+
+    const deleteMediator = ( id ) => {
+        //setEditing(false);
         let updatedMediators = cloneDeep(addedMediators);
         setAddedMediators(updatedMediators.filter((mediatorObj) => {
             return mediatorObj.id !== id;
-        }));   
+        }));
+        
     }
 
     const handleNameChange = (event) => {
@@ -189,37 +237,42 @@ function EditCustomMediation(props) {
             return formIsValid;        
     }
 
-    // function updatePoliciesFromBE() {
-    //     //const globalPromise = API.getGlobalMediationPolicies();
-    //     const customPromise = API.getMediationPolicies(apiId);
-    //     Promise.all([customPromise])
-    //         .then((values) => {
-    //             //setGlobalMediationPolicies([...values[0].obj.list.filter(seq => seq.type === type)]);
-    //             setSeqCustom([...values[1].obj.list.filter(seq => seq.type === type)]);
-    //         })
-    //         .catch((error) => {
-    //             if (process.env.NODE_ENV !== 'production') {
-    //                 console.log(error);
-    //                 Alert.error(intl.formatMessage({
-    //                     id: 'Apis.Details.MediationPolicies.Edit.EditMediationPolicy.error',
-    //                     defaultMessage: 'Error retrieving mediation policies',
-    //                 }));
-    //             }
-    //         });
-    // }
+    function updatePoliciesFromBE() {
+       
+        const customPromise = API.getMediationPolicies(apiId); 
+        Promise.all([ customPromise])
+            .then((values) => {
+                
+                if(values.length > 0) {
+                    setSeqCustom([...values[0].obj.list.filter(seq => seq.type === type)]);
+                    
+                }   
+            })
+        .catch(error => {
+            if (process.env.NODE_ENV !== "production") {
+            console.log(error);
+            Alert.error(
+                intl.formatMessage({
+                id:
+                    "Apis.Details.MediationPolicies.Edit.EditMediationPolicy.error",
+                defaultMessage: "Error retrieving mediation policies"
+                })
+            );
+            }
+        });
+    }
 
-    // useEffect(() => {
-    //     updatePoliciesFromBE();
-    // }, []);
-
-    const saveMediationPolicy = (newPolicy) => {
+    const saveDesignedMediationPolicy = (newPolicy) => {
+        
         const promisedApi = API.addMediationPolicy(newPolicy, apiId, type);
+        //console.log(newPolicy,apiId,type);
         promisedApi
-            .then((response) => {
+            .then((response) => { 
                 const {
-                    body: { id, type: policyType, name},
+                    body: { id, type: policyType, name },
                 } = response;
-                //updatePoliciesFromBE();
+                console.log(response);
+                updatePoliciesFromBE();
                 setLocalSelectedPolicyFile({
                     id,
                     type: policyType,
@@ -228,7 +281,7 @@ function EditCustomMediation(props) {
                     content: '',
                 });
                 Alert.info(intl.formatMessage({
-                    id: 'Apis.Details.Configuration.CustomMediation.EditCustomMediation.success',
+                    id: 'Apis.Details.MediationPolicies.Edit.EditMediationPolicy.success',
                     defaultMessage: 'Mediation policy added successfully',
                 }));
             })
@@ -238,52 +291,23 @@ function EditCustomMediation(props) {
                     Alert.error(errorResponse.response.body.description);
                 } else {
                     Alert.error(intl.formatMessage({
-                        id: 'Apis.Details.Configuration.CustomMediation.EditCustomMediation.error',
+                        id: 'Apis.Details.MediationPolicies.Edit.AddMediationPolicy.error',
                         defaultMessage: 'Error while adding mediation policy',
                     }));
                 }
             });
     };
 
-    const handleClick = (policy) => {
-        const policyFile = policy[0];
-        if (policyFile) {
-            saveMediationPolicy(policyFile);
-        }
-    };
-
-    const handleDelete = (id) => {
-        console.log('seq deleted')
-    }
-
-    const handleDownload = (id) => {
-        console.log('seq downloaded')
-    }
-
-    return (
+  return (
        
         <React.Fragment>
-                <Paper className={classes.paper} elevation={0}>   
-                    
-                {/* <input
-                    accept='application/xml,text/xml'
-                    className={classes.input}
-                    id="upload-button-file"
-                    multiple
-                    type="file"
+            <FormLabel component="designNewClicked" style={{display: 'flex', marginTop:10}}>
+                <FormattedMessage
+                    id='Apis.Details.Configuration.CustomMediation.EditCustomMediation.button.select'
+                    defaultMessage="Create New Clicked"
                 />
-                    <label htmlFor="upload-button-file">
-                        <Button 
-                            component="span"
-                            variant='contained'   
-                        >
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.CustomMediation.EditCustomMediation.upload.btn'
-                                defaultMessage='Upload Mediation Flow'
-                            />
-                        </Button>
-                    </label> */}
-
+            </FormLabel>
+                <Paper className={classes.paper} elevation={0}>
                     <form noValidate autoComplete="off">
                         <TextField
                         className={classes.textField}
@@ -302,11 +326,18 @@ function EditCustomMediation(props) {
                         margin='normal'
                         variant='outlined'
                         onChange={handleNameChange}
-                        />
-                        
-                    </form>
-                    
+                        />    
+                    </form>    
                 </Paper>
+                <div>
+                <MediatorProperties
+                setEditing={setEditing}
+                editing={editing}
+                mediatorId={mediatorId}
+                mediatorLogo={mediatorLogo}
+                mediatorName={mediatorName}
+                />
+                </div>
                 <Grid container className={classes.wrapper}>
                     <Grid item xs={10}>
                         <Paper className={classes.tab}>
@@ -319,17 +350,26 @@ function EditCustomMediation(props) {
                                 <LinkTab label="Source" href="/trash" {...a11yProps(1)} />
                                 </Tabs>
                             </AppBar>
+                            
                             <TabPanel value={value} index={0}>
                                 <div className={classes.box} >
                                     {addedMediators.map((mediatorObj) => {
                                         return (addedMediators.length > 0 ) ?
                                             <div style={{ display: 'flex' }}>
-                                                <Button onClick={() => deleteMediator(mediatorObj.id)}>
-                                                    <img src = {mediatorObj.src} style={{ paddingRight: 10, height: 'fit-content' }}/>
-                                                           
-                                                </Button>
-                                                <Icon style={{ paddingRight: 10, fontSize: 60, height: 'fit-content'}}>arrow_right_alt</Icon>
-                                               </div>           
+                                                <Card className={classes.card}>
+                                                    <CardActionArea>
+                                                        <Button onClick={() => startEditing(mediatorObj)}>
+                                                            <img src = {mediatorObj.src} style={{ paddingRight: 10, height: 'fit-content' }}/>
+                                                        </Button>
+                                                    </CardActionArea>
+                                                    <CardActions style={{ justifyContent: 'center'}}>
+                                                        <IconButton onClick={() => deleteMediator(mediatorObj.id)} classes={{root :classes.deleteButtonOverride}}>
+                                                            <Icon style={{position:'absolute'}}>delete</Icon>
+                                                        </IconButton>
+                                                    </CardActions>
+                                                    </Card>
+                                                <Icon style={{ paddingRight: 10, fontSize: 60, height: 'fit-content'}}>arrow_right_alt</Icon> 
+                                            </div>           
                                             : {}        
                                     }
                                     )}
@@ -354,7 +394,7 @@ function EditCustomMediation(props) {
                                                 return (
                                                     <TableRow>
                                                         <TableCell component="th" align='left' style={{ padding: 0 }}>
-                                                            <IconButton classes={{root :classes.iconButtonOverride}} onClick={() => addMediator(mediator.src2)}>
+                                                            <IconButton classes={{root :classes.iconButtonOverride}} onClick={() => addMediator(mediator.src2, mediator.name)}>
                                                                 <img src={mediator.src1} style={{ paddingRight: 10 }}/>
                                                                 <Typography> { mediator.name} </Typography>
                                                             </IconButton>
@@ -367,12 +407,11 @@ function EditCustomMediation(props) {
                     </Grid>
                 </Grid>    
                 <div className={classes.save}>
-                
                 <Button
                     color='primary'
                     variant='contained'
                     className={classes.save}
-                    onClick= {() => handleClick()}
+                    //onClick={()=> addName(mediationName)}
                 >
                     <FormattedMessage
                         id='Apis.Details.Configuration.CustomMediation.EditCustomMediation.save.btn'
@@ -380,60 +419,71 @@ function EditCustomMediation(props) {
                     />
                 </Button>
                 </div>
+                <div>
+                    {addedMediationNames.map((nameObj) => {
+                        console.log(nameObj);
+                        return (
+                            <p>{nameObj.name}</p>
+                        )}
+                    )}
+                </div>
+                {/* {localSelectedPolicyFile
+                && 
+            
                 <RadioGroup
-                    aria-label='inflow'
-                    name='inflow'
+                    aria-label="inflow"
+                    name="inflow"
                     className={classes.radioGroup}
-                    //value={localSelectedPolicyFile.name}
-                    onChange={handleNameChange}
-                >
-                    <FormLabel component='customPolicies'>
-                        <FormattedMessage
-                            id={
-                                'Apis.Details.Configuration.CustomMediation.' +
-                                'EditCustomMediation.custom.mediation.policies'
-                            }
-                            defaultMessage='Custom Mediation Policies'
-                        />
+                    value={localSelectedPolicyFile.name}
+                    onChange={handleChange}
+                    >
+                    <FormLabel component="customPolicies">
+                    <FormattedMessage
+                        id={
+                        'Apis.Details.Configuration.CustomMediation.' +
+                        'UploadCustomMediation.custom.mediation.policies'
+                        }
+                        defaultMessage="Custom Mediation Policies"
+                    />
                     </FormLabel>
-                        {/* {seqCustom.map(seq => (
-                            <div>
-                                <IconButton onClick={() => handleDelete(seq.id)}>
-                                    <Icon>delete</Icon>
-                                </IconButton>
-                                    <Button onClick={() => handleDownload(seq.id)}>
-                                    <Icon>arrow_downward</Icon>
-                                </Button>
-                                <FormControlLabel
-                                    control={
-                                        <Radio
-                                            inputProps={{
-                                            seq_id: seq.id,
-                                            seq_name: seq.name,
-                                            seq_type: seq.type,
-                                            }}
-                                            color='primary'
-                                        />
-                                    }
-                                    label={seq.name}
-                                    value={seq.name}
-                                    checked={localSelectedPolicyFile.name === seq.name}
-                                />
-                            </div>
-                        ))} */}
-                </RadioGroup>                          
+                    
+                    {seqCustom && seqCustom.map(mediationName => (
+                        
+                    <div>
+                        
+                        <IconButton>
+                        <Icon>delete</Icon>
+                        </IconButton>
+                        <Button>
+                        <Icon>arrow_downward</Icon>
+                        </Button>
+                        <FormControlLabel
+                        control={
+                            <Radio
+                            inputProps={{
+                                seq_id: mediationName.id,
+                                seq_name: mediationName.name,
+                                seq_type: mediationName.type
+                            }}
+                            color="primary"
+                            />
+                        }
+                        label={mediationName}
+                        value={mediationName}
+                        checked={localSelectedPolicyFile.name === mediationName}
+                        />
+                    </div>
+                    
+                    ))}
+                </RadioGroup>}                          */}
         </React.Fragment>
     );
 }
 
 EditCustomMediation.propTypes = {
-    //classes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
     selectedMediationPolicy: PropTypes.shape({}).isRequired,
     type: PropTypes.string.isRequired,
-    //updateMediationPolicy: PropTypes.func.isRequired,
-    //setEditing: PropTypes.func.isRequired,
-    //editing: PropTypes.bool.isRequired,
-    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
 export default injectIntl((EditCustomMediation))

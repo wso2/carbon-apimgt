@@ -15,6 +15,8 @@ const mediatorIcons = [
     { key: 'propertygroupmediator', name: 'PropertyGroup', src1: APP_CONTEXT + '/site/public/images/mediatorIcons/PropertyGroupMediator.png', src2: APP_CONTEXT + '/site/public/images/mediatorIcons/propertyGroup-mediator.png' },
     { key: 'switchmediator', name: 'Switch', src1: APP_CONTEXT + '/site/public/images/mediatorIcons/SwitchMediator.png', src2: APP_CONTEXT + '/site/public/images/mediatorIcons/switch-mediator.png' },
     { key: 'validatemediator', name: 'Validate', src1: APP_CONTEXT + '/site/public/images/mediatorIcons/ValidateMediator.png', src2: APP_CONTEXT + '/site/public/images/mediatorIcons/validate-mediator.png' },
+    { key: 'scriptmediator', name: 'Script', src1: APP_CONTEXT + '/site/public/images/mediatorIcons/ScriptMediator.png', src2: APP_CONTEXT + '/site/public/images/mediatorIcons/script-mediator.png' },
+    { key: 'classmediator', name: 'Class', src1: APP_CONTEXT + '/site/public/images/mediatorIcons/ClassMediator.png', src2: APP_CONTEXT + '/site/public/images/mediatorIcons/class-mediator.png' },
 ];
 
 const Configurations = {

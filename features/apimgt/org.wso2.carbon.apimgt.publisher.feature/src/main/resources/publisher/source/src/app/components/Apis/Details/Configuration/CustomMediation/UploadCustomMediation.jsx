@@ -14,7 +14,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
-import Download from 'AppComponents/Shared/Download.js';
+import downloadFile from 'AppComponents/Shared/Download.js';
 
 const dropzoneStyles = {
   border: "1px dashed ",
@@ -69,19 +69,16 @@ function UploadCustomMediation(props) {
     const NONE = 'none';
 
     function updatePoliciesFromBE() {
-        //const globalPromise = API.getGlobalMediationPolicies();
        
-        const customPromise = API.getMediationPolicies(apiId);
-        
+        const customPromise = API.getMediationPolicies(apiId); 
         Promise.all([ customPromise])
             .then((values) => {
-                //setGlobalMediationPolicies([...values[0].obj.list.filter(seq => seq.type === type)]);]
                 
                 if(values.length > 0) {
                     setSeqCustom([...values[0].obj.list.filter(seq => seq.type === type)]);
                     
                 }
-                //console.log(seqCustom);
+               
             })
         .catch(error => {
             if (process.env.NODE_ENV !== "production") {
@@ -109,7 +106,7 @@ function UploadCustomMediation(props) {
         }
     }
 
-    const saveMediationPolicy = (newPolicy) => {
+    const saveUploadedMediationPolicy = (newPolicy) => {
        
         const promisedApi = API.addMediationPolicy(newPolicy, apiId, type);
         promisedApi
@@ -160,7 +157,7 @@ function UploadCustomMediation(props) {
     const onDrop = policy => {
         const policyFile = policy[0];
         if (policyFile) {
-        saveMediationPolicy(policyFile);
+        saveUploadedMediationPolicy(policyFile);
         }
     };
 
@@ -182,6 +179,7 @@ function UploadCustomMediation(props) {
      */
 
     const deleteUploadedCustomMediation = (policyToDelete) => {
+        
         const promisedGetContent = API.deleteMediationPolicy(policyToDelete, api.id);
         promisedGetContent
             .then(() => {
@@ -203,10 +201,12 @@ function UploadCustomMediation(props) {
     }
 
     const downloadUploadedCustomMediation = (policyToDownload) => {
+        
         const promisedGetContent = API.getMediationPolicyContent(policyToDownload, apiId);
+        console.log(promisedGetContent);
         promisedGetContent
             .then((done) => {
-                Download.downloadFile(done, document);
+                downloadFile(done);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -221,6 +221,12 @@ function UploadCustomMediation(props) {
 
     return (
         <React.Fragment>
+            <FormLabel component="uploadClicked" style={{display: 'flex', marginTop:10}}>
+                <FormattedMessage
+                    id='Apis.Details.Configuration.CustomMediation.EditCustomMediation.button.select'
+                    defaultMessage="Upload Clicked"
+                />
+            </FormLabel>
             <Dropzone
                 multiple={false}
                 className={classes.dropzone}
@@ -268,7 +274,7 @@ function UploadCustomMediation(props) {
                 />
                 </FormLabel>
                 
-                {seqCustom.map(seq => (
+                {seqCustom && seqCustom.map(seq => (
                     
                 <div>
                     

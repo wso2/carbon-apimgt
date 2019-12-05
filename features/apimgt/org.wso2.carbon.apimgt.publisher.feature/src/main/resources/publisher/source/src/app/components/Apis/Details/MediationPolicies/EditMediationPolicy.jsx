@@ -34,12 +34,14 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import Alert from 'AppComponents/Shared/Alert';
-import  Download from 'AppComponents/Shared/Download.js';
+import downloadFile from 'AppComponents/Shared/Download.js';
 import API from 'AppData/api.js';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 import EditCustomMediation from '../Configuration/CustomMediation/EditCustomMediation';
 import UploadCustomMediation from '../Configuration/CustomMediation/UploadCustomMediation'
+import isEmpty from 'lodash/isEmpty';
+
 
 const dropzoneStyles = {
     border: '1px dashed ',
@@ -128,11 +130,11 @@ function EditMediationPolicy(props) {
         if (policy.name !== NONE) {
             Object.assign(policy, { content: '' });
             setLocalSelectedPolicyFile(policy);
-            // updateMediationPolicy(policy);
+            //updateMediationPolicy(policy);
         } else {
             Object.assign(policy, { content: '', id: NONE });
             setLocalSelectedPolicyFile(policy);
-            // updateMediationPolicy(policy);
+            //updateMediationPolicy(policy);
         }
     }
     useEffect(() => {
@@ -149,9 +151,10 @@ function EditMediationPolicy(props) {
             setProvideBy('none');
         }
     }, [selectedMediationPolicy]);
+
     useEffect(() => {
         updatePoliciesFromBE();
-    }, []);
+    }, [updateMediationPolicy]);
 
     useEffect(() => {
         if (provideBy === 'custom' && seqCustom && seqCustom.length > 0) {
@@ -171,7 +174,7 @@ function EditMediationPolicy(props) {
     //     }
     // }, [globalInMediationPolicies, inSeqCustom]);
     const saveMediationPolicy = (newPolicy) => {
-        //console.log(newPolicy);
+        
         const promisedApi = API.addMediationPolicy(newPolicy, apiId, type);
         promisedApi
             .then((response) => { 
@@ -233,7 +236,7 @@ function EditMediationPolicy(props) {
         const promisedGetContent = API.getGlobalMediationPolicyContent(policyToDownload);
         promisedGetContent
             .then((done) => {
-                Download.downloadFile(done, document);
+                downloadFile(done);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -251,10 +254,11 @@ function EditMediationPolicy(props) {
      * @param {any} policyToDownload policy file id that is to be downloaded.
      */
     function downloadCustomMediationPolicyContent(policyToDownload) {
+        
         const promisedGetContent = API.getMediationPolicyContent(policyToDownload, apiId);
         promisedGetContent
             .then((done) => {
-                Download.downloadFile(done, document);
+                downloadFile(done);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -336,11 +340,6 @@ function EditMediationPolicy(props) {
         const inputValue = event.target.value;
         setProvideBy(inputValue);
         setActivePolicy({});
-        // if (inputValue === 'custom') {
-        //     setDialogWidth('sm');
-        // } else {
-        //     setDialogWidth('sm');
-        // }
     }
     return (
         <Dialog
@@ -459,8 +458,8 @@ function EditMediationPolicy(props) {
                            {isDesignPreviewShown 
                             && <EditCustomMediation
                             intl={intl}
-                            selectedMediationPolicy={selectedMediationPolicy}
                             type={type}
+                            selectedMediationPolicy={selectedMediationPolicy}
                             />}
                            
                             {/* <RadioGroup
