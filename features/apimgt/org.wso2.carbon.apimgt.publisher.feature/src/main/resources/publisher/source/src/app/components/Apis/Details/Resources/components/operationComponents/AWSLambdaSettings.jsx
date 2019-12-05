@@ -346,7 +346,6 @@ export default function IntegrationDownshift(props) {
 }
 
 IntegrationDownshift.propTypes = {
-    api: PropTypes.isRequired,
     operation: PropTypes.isRequired,
     operationsDispatcher: PropTypes.func.isRequired,
     target: PropTypes.string.isRequired,
