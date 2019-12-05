@@ -9730,6 +9730,10 @@ public class ApiMgtDAO {
                     } else {
                         return false;
                     }
+                } else {
+                    //If the API which is being saved is not available in the DB, but if the scope is key already
+                    //available in the DB, return true since this means the scope is already assigned to another API.
+                    return true;
                 }
             }
         } catch (SQLException e) {
