@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.jms.listener.internal;
 
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService;
+import org.wso2.carbon.apimgt.gateway.service.CacheInvalidationService;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -35,6 +36,7 @@ public class ServiceReferenceHolder {
     private APIThrottleDataService throttleDataService;
     private ThrottleDataHolder throttleDataHolder;
     private APIManagerConfiguration apimConfiguration;
+    private CacheInvalidationService cacheInvalidationService;
 
     public static ServiceReferenceHolder getInstance() {
         return instance;
@@ -72,5 +74,15 @@ public class ServiceReferenceHolder {
 
     public ThrottleDataHolder getThrottleDataHolder() {
         return throttleDataHolder;
+    }
+
+    public void setCacheInvalidationService(CacheInvalidationService cacheInvalidationService) {
+        this.cacheInvalidationService = cacheInvalidationService;
+
+    }
+
+    public CacheInvalidationService getCacheInvalidationService() {
+
+        return cacheInvalidationService;
     }
 }

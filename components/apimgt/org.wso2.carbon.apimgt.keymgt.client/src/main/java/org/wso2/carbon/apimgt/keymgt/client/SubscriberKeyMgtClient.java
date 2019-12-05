@@ -113,16 +113,5 @@ public class SubscriberKeyMgtClient {
         subscriberServiceStub.deleteOAuthApplication(consumerKey);
     }
 
-    public String regenerateApplicationAccessKey(String keyType, String oldAccessToken, String[] allowedDomains,
-                                                 String clientId, String clientSecret, String validityTime)
-            throws Exception {
-        return subscriberServiceStub.renewAccessToken(keyType, oldAccessToken, allowedDomains, clientId, clientSecret, validityTime);
-
-    }
-
-    public void revokeAccessToken(String token,String consumerKey,String authUser) throws Exception {
-       subscriberServiceStub.revokeAccessToken(token,consumerKey,authUser);
-
-    }
 
 }

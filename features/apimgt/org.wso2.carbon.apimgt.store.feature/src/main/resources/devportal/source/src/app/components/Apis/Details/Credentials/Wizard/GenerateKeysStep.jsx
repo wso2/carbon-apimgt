@@ -36,6 +36,7 @@ const generateKeysStep = (props) => {
     };
     const [tab, setTab] = useState(0);
     const [notFound, setNotFound] = useState(false);
+    const [nextActive, setNextActive] = useState(true);
     const [isUserOwner, setIsUserOwner] = useState(false);
 
     const [keyRequest, setKeyRequest] = useState({
@@ -146,6 +147,7 @@ const generateKeysStep = (props) => {
                         keyRequest={keyRequest}
                         keyType='PRODUCTION'
                         isUserOwner={isUserOwner}
+                        setGenerateEnabled={setNextActive}
                     />
                 </Grid>
             )}
@@ -156,6 +158,7 @@ const generateKeysStep = (props) => {
                         keyRequest={keyRequest}
                         keyType='SANDBOX'
                         isUserOwner={isUserOwner}
+                        setGenerateEnabled={setNextActive}
                     />
                 </div>
             )}
@@ -163,6 +166,7 @@ const generateKeysStep = (props) => {
                 classes={classes}
                 currentStep={currentStep}
                 handleCurrentStep={generateKeys}
+                nextActive={nextActive}
             />
         </React.Fragment>
     );

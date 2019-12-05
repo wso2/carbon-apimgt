@@ -83,6 +83,9 @@ const styles = (theme) => ({
     endpointName: {
         fontWeight: 600,
     },
+    wrapper: {
+        width: '100%',
+    },
 });
 
 const endpointTypes = [
@@ -245,8 +248,8 @@ function LoadbalanceFailoverConfig(props) {
                             </InlineMessage>
                         )
                         : (
-                            <Grid container item xs={12} direction='column'>
-                                <Grid xs className={classes.endpointsTypeSelectWrapper}>
+                            <Grid container item xs={12}>
+                                <Grid xs={12} className={classes.endpointsTypeSelectWrapper}>
                                     <TextField
                                         disabled={isRestricted(['apim:api_create'], api)}
                                         id='certificateEndpoint'
@@ -281,11 +284,11 @@ function LoadbalanceFailoverConfig(props) {
                                         </IconButton>
                                     </div>
                                 </Grid>
-                                <Grid xs container direction='column' spacing={2}>
-                                    <Collapse in={endpointType !== 'none'}>
+                                <Grid xs={12} container spacing={2}>
+                                    <Collapse className={classes.wrapper} in={endpointType !== 'none'}>
                                         {epConfig.production_endpoints
                                     && (
-                                        <Grid xs className={classes.endpointsWrapperLeft}>
+                                        <Grid xs={12} className={classes.endpointsWrapperLeft}>
                                             <Typography className={classes.endpointName}>
                                                 {epConfig.endpoint_type === 'failover'
                                                     ? (
@@ -319,7 +322,7 @@ function LoadbalanceFailoverConfig(props) {
                                     )}
                                         {epConfig.sandbox_endpoints
                                     && (
-                                        <Grid xs className={classes.endpointsWrapperRight}>
+                                        <Grid xs={12} className={classes.endpointsWrapperRight}>
                                             <Typography className={classes.endpointName}>
                                                 {epConfig.endpoint_type === 'failover'
                                                     ? (

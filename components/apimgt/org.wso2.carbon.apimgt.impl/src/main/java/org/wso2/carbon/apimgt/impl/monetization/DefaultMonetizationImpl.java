@@ -79,6 +79,13 @@ public class DefaultMonetizationImpl implements Monetization {
         return new HashMap<String, String>();
     }
 
+    /**
+     * Update info about monetization usage publish job
+     *
+     * @param monetizationUsagePublishInfo
+     * @return boolean always return true if there is no exception
+     * @throws MonetizationException
+     */
     @Override
     public boolean publishMonetizationUsageRecords(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
             throws MonetizationException {

@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.gateway.internal;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
+import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -50,6 +51,7 @@ public class ServiceReferenceHolder {
     private LocalEntryAdmin localEntryAdmin;
     private EndpointAdmin endpointAdmin;
     private MediationSecurityAdminService mediationSecurityAdminService;
+    private ThrottleDataPublisher throttleDataPublisher;
 
     public ThrottleDataHolder getThrottleDataHolder() {
         return throttleDataHolder;
@@ -187,5 +189,15 @@ public class ServiceReferenceHolder {
     public void setMediationSecurityAdminService(MediationSecurityAdminService mediationSecurityAdminService) {
 
         this.mediationSecurityAdminService = mediationSecurityAdminService;
+    }
+
+    public ThrottleDataPublisher getThrottleDataPublisher() {
+
+        return throttleDataPublisher;
+    }
+
+    public void setThrottleDataPublisher(ThrottleDataPublisher throttleDataPublisher) {
+
+        this.throttleDataPublisher = throttleDataPublisher;
     }
 }

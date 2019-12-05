@@ -97,7 +97,6 @@ function GlobalNavBar(props) {
         iconWidth = 16;
         strokeColor = theme.palette.getContrastText(theme.custom.appBar.background);
     }
-    const linkTextClasses = classNames({ [classes.small]: smallView });
     return (
         <List className={classes.listRoot}>
             {theme.custom.landingPage.active

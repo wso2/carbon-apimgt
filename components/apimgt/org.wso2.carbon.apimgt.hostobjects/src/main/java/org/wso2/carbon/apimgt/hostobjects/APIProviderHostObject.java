@@ -4640,54 +4640,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
     }
 
-    public static void jsFunction_revokeAccessToken(Context cx, Scriptable thisObj,
-                                                    Object[] args,
-                                                    Function funObj)
-            throws Exception {
-        if (args == null || !isStringValues(args)) {
-            handleException("Invalid input parameters.");
-        }
-        String accessToken = (String) args[0];
-        String consumerKey = (String) args[1];
-        String authUser = (String) args[2];
-        APIProvider apiProvider = getAPIProvider(thisObj);
-
-        try {
-            SubscriberKeyMgtClient keyMgtClient = HostObjectUtils.getKeyManagementClient();
-            if (keyMgtClient != null) {
-                keyMgtClient.revokeAccessToken(accessToken, consumerKey, authUser);
-            }
-
-            Set<APIIdentifier> apiIdentifierSet = apiProvider.getAPIByAccessToken(accessToken);
-            List<org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping> mappings = new ArrayList<org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping>();
-            for (APIIdentifier apiIdentifier : apiIdentifierSet) {
-                org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping mapping = new org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping();
-                API apiDefinition = apiProvider.getAPI(apiIdentifier);
-                if (apiDefinition != null) {
-                    mapping.setApiVersion(apiIdentifier.getVersion());
-                    mapping.setContext(apiDefinition.getContext());
-                    mapping.setKey(accessToken);
-                    mappings.add(mapping);
-                }
-            }
-            if (mappings.size() > 0) {
-                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                        getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
-                for (Environment environment : gatewayEnvs.values()) {
-                    APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
-                    client.invalidateKeys(mappings);
-                }
-
-
-            }
-        } catch (Exception e) {
-            handleException("Error while revoking the access token: " + accessToken, e);
-
-        }
-
-
-    }
 
     public static boolean jsFunction_validateRoles(Context cx,
                                                    Scriptable thisObj, Object[] args,
