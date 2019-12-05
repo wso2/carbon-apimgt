@@ -34,7 +34,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import Alert from 'AppComponents/Shared/Alert';
-import downloadFile from 'AppComponents/Shared/Download.js';
+//import downloadFile from 'AppComponents/Shared/Download.js';
 import Utils from 'AppData/Utils';
 import API from 'AppData/api.js';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';

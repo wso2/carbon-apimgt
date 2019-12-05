@@ -14,7 +14,8 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
-import downloadFile from 'AppComponents/Shared/Download.js';
+//import downloadFile from 'AppComponents/Shared/Download.js';
+import Utils from 'AppData/Utils';
 
 const dropzoneStyles = {
   border: "1px dashed ",
@@ -205,9 +206,9 @@ function UploadCustomMediation(props) {
         const promisedGetContent = API.getMediationPolicyContent(policyToDownload, apiId);
         console.log(promisedGetContent);
         promisedGetContent
-            .then((done) => {
-                downloadFile(done);
-            })
+        .then((response) => {
+            Utils.forceDownload(response);
+        })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
