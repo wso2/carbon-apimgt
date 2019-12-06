@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -65,7 +66,6 @@ import java.util.UUID;
  */
 public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 	private static final Log log = LogFactory.getLog(WebsocketInboundHandler.class);
-	private static volatile ThrottleDataPublisher throttleDataPublisher = null;
 	private String tenantDomain;
 	private static APIMgtUsageDataPublisher usageDataPublisher;
 	private String uri;
@@ -76,12 +76,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 	private String token;
 
 	public WebsocketInboundHandler() {
-        if (throttleDataPublisher == null) {
-            // The publisher initializes in the first request only
-            synchronized (this) {
-                throttleDataPublisher = new ThrottleDataPublisher();
-            }
-        }
         initializeDataPublisher();
     }
 
@@ -409,7 +403,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 new org.wso2.carbon.databridge.commons.Event(
                         "org.wso2.throttle.request.stream:1.0.0", System.currentTimeMillis(), null,
                         null, objects);
-        throttleDataPublisher.getDataPublisher().tryPublish(event);
+        ServiceReferenceHolder.getInstance().getThrottleDataPublisher().getDataPublisher().tryPublish(event);
         return true;
     }
 

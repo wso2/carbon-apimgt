@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -301,6 +302,17 @@ public class APIMappingUtil {
             }
         }
         dto.setTiers(tiersToReturn);
+
+        List<APIOperationsDTO> operationList = new ArrayList<>();
+        for (APIProductResource productResource : model.getProductResources()) {
+            URITemplate uriTemplate = productResource.getUriTemplate();
+            APIOperationsDTO operation = new APIOperationsDTO();
+            operation.setTarget(uriTemplate.getUriTemplate());
+            operation.setVerb(uriTemplate.getHTTPVerb());
+            operationList.add(operation);
+        }
+
+        dto.setOperations(operationList);
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
 
@@ -608,9 +620,9 @@ public class APIMappingUtil {
         //        if (api.getScopes() != null) {
         //            apiInfoDTO.setScopes(getScopeInfoDTO(api.getScopes()));
         //        }
-        //        if (!StringUtils.isBlank(api.getThumbnailUrl())) {
-        //            apiInfoDTO.setThumbnailUri(getThumbnailUri(api.getUUID()));
-        //        }
+        if (!StringUtils.isBlank(api.getThumbnailUrl())) {
+            apiInfoDTO.setThumbnailUri(api.getThumbnailUrl());
+        }
         apiInfoDTO.setAdvertiseInfo(extractAdvertiseInfo(api));
         String apiTenant = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
                 .getProviderName()));
@@ -668,6 +680,11 @@ public class APIMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwner(apiProduct.getTechnicalOwner());
         apiBusinessInformationDTO.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
         apiInfoDTO.setBusinessInformation(apiBusinessInformationDTO);
+
+        if (!StringUtils.isBlank(apiProduct.getThumbnailUrl())) {
+            apiInfoDTO.setThumbnailUri(apiProduct.getThumbnailUrl());
+        }
+
         //Since same APIInfoDTO is used for listing APIProducts in StoreUI set default AdvertisedInfo to the DTO
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(false);

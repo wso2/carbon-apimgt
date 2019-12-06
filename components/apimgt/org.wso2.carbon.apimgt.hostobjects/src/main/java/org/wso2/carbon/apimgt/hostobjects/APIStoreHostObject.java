@@ -1850,10 +1850,8 @@ public class APIStoreHostObject extends ScriptableObject {
         } else {
             tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-
         int start = Integer.parseInt((String) args[1]);
         int end = Integer.parseInt((String) args[2]);
-
         if (args.length > 3 && args[3] != null) {
             returnAPItags = Boolean.parseBoolean((String) args[3]);
         }
@@ -1866,7 +1864,7 @@ public class APIStoreHostObject extends ScriptableObject {
      * @param tenantDomain  Domain name of the tenant.
      * @param start         The number to start the API Listing
      * @param end           The number of end the API Listing
-     * @param status[]      Status of the API
+     * @param status        Status of the API
      * @param returnAPItags Optional parameter ,returns the tags of the API from registry if it is set to true
      * @return this will return list of APIs by status.
      */
@@ -1877,7 +1875,6 @@ public class APIStoreHostObject extends ScriptableObject {
         Map<String, Object> resultMap;
         NativeArray myn = new NativeArray(0);
         NativeObject result = new NativeObject();
-
         try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 PrivilegedCarbonContext.startTenantFlow();

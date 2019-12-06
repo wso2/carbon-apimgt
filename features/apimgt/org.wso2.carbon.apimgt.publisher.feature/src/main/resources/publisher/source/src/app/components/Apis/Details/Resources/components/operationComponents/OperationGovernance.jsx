@@ -169,11 +169,26 @@ rate limiting per operation
                     margin='dense'
                     variant='outlined'
                 >
-                    {api.scopes.map((scope) => (
-                        <MenuItem key={scope.name} value={scope.name}>
-                            {scope.name}
-                        </MenuItem>
-                    ))}
+                    {api.scopes.length !== 0
+                        ? api.scopes.map((scope) => (
+                            <MenuItem
+                                key={scope.name}
+                                value={scope.name}
+                                dense
+                            >
+                                {scope.name}
+                            </MenuItem>
+                        )) : (
+                            <Link to={`/apis/${api.id}/scopes/create`} target='_blank'>
+                                <MenuItem
+                                    key='Create New Scope'
+                                    value='Create New Scope'
+                                    dense
+                                >
+                                Create New Scope
+                                </MenuItem>
+                            </Link>
+                        )}
                 </TextField>
             </Grid>
             <Grid item md={5}>

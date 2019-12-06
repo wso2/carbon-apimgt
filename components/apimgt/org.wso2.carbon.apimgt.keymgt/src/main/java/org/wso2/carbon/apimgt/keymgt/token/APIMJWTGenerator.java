@@ -23,16 +23,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.nio.charset.Charset;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
@@ -52,13 +52,12 @@ public class APIMJWTGenerator extends JWTGenerator {
     private String signatureAlgorithm = SHA256_WITH_RSA;
     private static Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
     private String userAttributeSeparator = APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT;
+    private static final String NONE = "NONE";
 
     public String generateJWT(JwtTokenInfoDTO jwtTokenInfoDTO) throws APIManagementException {
 
-        String jwtHeader = buildHeader(jwtTokenInfoDTO.getEndUserName());
-        if (log.isDebugEnabled()) {
-            log.debug("jwtHeader value : " + jwtHeader);
-        }
+        String jwtHeader = buildHeader();
+
         String base64UrlEncodedHeader = "";
         if (jwtHeader != null) {
             base64UrlEncodedHeader = encoder.encodeToString(jwtHeader.getBytes(Charset.defaultCharset()));
@@ -74,7 +73,7 @@ public class APIMJWTGenerator extends JWTGenerator {
             String assertion = base64UrlEncodedHeader + '.' + base64UrlEncodedBody;
 
             //get the assertion signed
-            byte[] signedAssertion = signJWT(assertion, jwtTokenInfoDTO.getEndUserName());
+            byte[] signedAssertion = signJWT(assertion);
 
             if (log.isDebugEnabled()) {
                 log.debug("signed assertion value : " + new String(signedAssertion, Charset.defaultCharset()));
@@ -121,7 +120,8 @@ public class APIMJWTGenerator extends JWTGenerator {
                         }
                         jwtClaimsSetBuilder.claim(claimURI, claimList.toArray(new String[claimList.size()]));
                     } else if (APIConstants.EXP.equals(claimURI)) {
-                        jwtClaimsSetBuilder.claim(APIConstants.EXP, new Date(Long.valueOf((String) standardClaims.get(claimURI))));
+                        jwtClaimsSetBuilder
+                                .claim(APIConstants.EXP, new Date(Long.valueOf((String) standardClaims.get(claimURI))));
                     } else {
                         jwtClaimsSetBuilder.claim(claimURI, claimVal);
                     }
@@ -149,8 +149,6 @@ public class APIMJWTGenerator extends JWTGenerator {
         Map<String, Object> claims = new LinkedHashMap<String, Object>(20);
 
         String issuerIdentifier = OAuthServerConfiguration.getInstance().getOpenIDConnectIDTokenIssuerIdentifier();
-
-
         claims.put("sub", endUserName);
         claims.put("jti", UUID.randomUUID().toString());
         claims.put("iss", issuerIdentifier);
@@ -162,9 +160,62 @@ public class APIMJWTGenerator extends JWTGenerator {
         claims.put("tierInfo", jwtTokenInfoDTO.getSubscriptionPolicyDTOList());
         claims.put("application", jwtTokenInfoDTO.getApplication());
         claims.put("keytype", jwtTokenInfoDTO.getKeyType());
-        claims.put("consumerKey" , jwtTokenInfoDTO.getConsumerKey());
+        claims.put("consumerKey", jwtTokenInfoDTO.getConsumerKey());
         claims.put("backendJwt", jwtTokenInfoDTO.getBackendJwt());
 
         return claims;
+    }
+
+    public byte[] signJWT(String assertion) throws APIManagementException {
+
+        PrivateKey privateKey;
+        KeyStoreManager superTenantKSM = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
+        try {
+            privateKey = superTenantKSM.getDefaultPrivateKey();
+        } catch (Exception e) {
+            String msg = "Error while obtaining private key for super tenant";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return APIUtil.signJwt(assertion, privateKey, signatureAlgorithm);
+    }
+
+    public String buildHeader() throws APIManagementException {
+
+        String jwtHeader = null;
+
+        //if signature algo==NONE, header without cert
+        if (NONE.equals(signatureAlgorithm)) {
+
+            StringBuilder jwtHeaderBuilder = new StringBuilder();
+            jwtHeaderBuilder.append("{\"typ\":\"JWT\",");
+            jwtHeaderBuilder.append("\"alg\":\"");
+            jwtHeaderBuilder.append(APIUtil.getJWSCompliantAlgorithmCode(NONE));
+            jwtHeaderBuilder.append('\"');
+            jwtHeaderBuilder.append('}');
+
+            jwtHeader = jwtHeaderBuilder.toString();
+
+        } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
+            jwtHeader = addCertificateThumbPrintToHeader();
+        }
+        return jwtHeader;
+    }
+
+    /**
+     * Helper method to add public certificate thumbprint to JWT_HEADER to signature verification.
+     *
+     * @throws APIManagementException
+     */
+    protected String addCertificateThumbPrintToHeader() throws APIManagementException {
+
+        try {
+            KeyStoreManager superTenantKSM = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
+            Certificate publicCert = superTenantKSM.getDefaultPrimaryCertificate();
+            return APIUtil.generateHeader(publicCert, signatureAlgorithm);
+        } catch (Exception e) {
+            String error = "Error obtaining keystore";
+            throw new APIManagementException(error, e);
+        }
     }
 }

@@ -21,17 +21,24 @@ package org.wso2.carbon.hostobjects.sso.internal.builder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
-import org.opensaml.saml2.core.Issuer;
-import org.opensaml.saml2.core.LogoutRequest;
-import org.opensaml.saml2.core.SessionIndex;
-import org.opensaml.saml2.core.impl.IssuerBuilder;
-import org.opensaml.saml2.core.impl.SessionIndexBuilder;
-import org.opensaml.xml.io.Marshaller;
-import org.opensaml.xml.io.MarshallerFactory;
-import org.opensaml.xml.io.MarshallingException;
-import org.opensaml.xml.security.x509.X509Credential;
-import org.opensaml.xml.signature.*;
-import org.opensaml.xml.util.Base64;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.saml.saml2.core.Issuer;
+import org.opensaml.saml.saml2.core.LogoutRequest;
+import org.opensaml.saml.saml2.core.SessionIndex;
+import org.opensaml.saml.saml2.core.impl.IssuerBuilder;
+import org.opensaml.saml.saml2.core.impl.SessionIndexBuilder;
+import org.opensaml.core.xml.io.Marshaller;
+import org.opensaml.core.xml.io.MarshallerFactory;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.security.x509.X509Credential;
+import org.opensaml.xmlsec.signature.KeyInfo;
+import org.opensaml.xmlsec.signature.Signature;
+import org.opensaml.xmlsec.signature.X509Certificate;
+import net.shibboleth.utilities.java.support.codec.Base64Support;
+import org.opensaml.xmlsec.signature.X509Data;
+import org.opensaml.xmlsec.signature.support.SignatureConstants;
+import org.opensaml.xmlsec.signature.support.SignatureException;
+import org.opensaml.xmlsec.signature.support.Signer;
 import org.wso2.carbon.hostobjects.sso.exception.SSOHostObjectException;
 import org.wso2.carbon.hostobjects.sso.internal.util.*;
 import java.security.cert.CertificateEncodingException;
@@ -54,7 +61,7 @@ public class LogoutRequestBuilder {
     public LogoutRequest buildLogoutRequest(String subject,String sessionIndexId, String reason,
                                             String issuerId, String nameIdFormat) {
         Util.doBootstrap();
-        LogoutRequest logoutReq = new org.opensaml.saml2.core.impl.LogoutRequestBuilder().buildObject();
+        LogoutRequest logoutReq = new org.opensaml.saml.saml2.core.impl.LogoutRequestBuilder().buildObject();
         logoutReq.setID(Util.createID());
 
         DateTime issueInstant = new DateTime();
@@ -87,7 +94,7 @@ public class LogoutRequestBuilder {
             String issuerId, int tenantId, String tenantDomain, String destination, String nameIdFormat)
             throws SSOHostObjectException {
         Util.doBootstrap();
-        LogoutRequest logoutReq = new org.opensaml.saml2.core.impl.LogoutRequestBuilder().buildObject();
+        LogoutRequest logoutReq = new org.opensaml.saml.saml2.core.impl.LogoutRequestBuilder().buildObject();
         logoutReq.setID(Util.createID());
 
         DateTime issueInstant = new DateTime();
@@ -127,7 +134,7 @@ public class LogoutRequestBuilder {
     public LogoutRequest buildLogoutRequest(String subject, String reason,
                                             String issuerId, String nameIdFormat) {
         Util.doBootstrap();
-        LogoutRequest logoutReq = new org.opensaml.saml2.core.impl.LogoutRequestBuilder().buildObject();
+        LogoutRequest logoutReq = new org.opensaml.saml.saml2.core.impl.LogoutRequestBuilder().buildObject();
         logoutReq.setID(Util.createID());
 
         DateTime issueInstant = new DateTime();
@@ -158,7 +165,7 @@ public class LogoutRequestBuilder {
             String issuerId, int tenantId, String tenantDomain, String destination, String nameIdFormat)
             throws SSOHostObjectException {
         Util.doBootstrap();
-        LogoutRequest logoutReq = new org.opensaml.saml2.core.impl.LogoutRequestBuilder().buildObject();
+        LogoutRequest logoutReq = new org.opensaml.saml.saml2.core.impl.LogoutRequestBuilder().buildObject();
         logoutReq.setID(Util.createID());
 
         DateTime issueInstant = new DateTime();
@@ -201,10 +208,8 @@ public class LogoutRequestBuilder {
 
             KeyInfo keyInfo = (KeyInfo) Util.buildXMLObject(KeyInfo.DEFAULT_ELEMENT_NAME);
             X509Data data = (X509Data) Util.buildXMLObject(X509Data.DEFAULT_ELEMENT_NAME);
-            org.opensaml.xml.signature.X509Certificate cert =
-                    (org.opensaml.xml.signature.X509Certificate) Util.buildXMLObject(
-                            org.opensaml.xml.signature.X509Certificate.DEFAULT_ELEMENT_NAME);
-            String value = Base64.encodeBytes(cred.getEntityCertificate().getEncoded());
+            X509Certificate cert = (X509Certificate) Util.buildXMLObject(X509Certificate.DEFAULT_ELEMENT_NAME);
+            String value = Base64Support.encode(cred.getEntityCertificate().getEncoded(), Base64Support.UNCHUNKED);
             cert.setValue(value);
             data.getX509Certificates().add(cert);
             keyInfo.getX509Datas().add(data);
@@ -217,7 +222,7 @@ public class LogoutRequestBuilder {
 
             // Marshall and Sign
             MarshallerFactory marshallerFactory =
-                    org.opensaml.xml.Configuration.getMarshallerFactory();
+                    XMLObjectProviderRegistrySupport.getMarshallerFactory();
             Marshaller marshaller = marshallerFactory.getMarshaller(logoutRequest);
 
             marshaller.marshall(logoutRequest);

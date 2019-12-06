@@ -149,6 +149,8 @@ import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
+import org.wso2.carbon.databridge.commons.Event;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.endpoints.EndpointManager;
 import org.wso2.carbon.governance.api.endpoints.dataobjects.Endpoint;
@@ -984,9 +986,7 @@ public final class APIUtil {
                 //ignore
             }
             api.setCacheTimeout(cacheTimeout);
-
             boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
-
             if (isGlobalThrottlingEnabled) {
                 String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
                 api.setApiLevelPolicy(apiLevelTier);
@@ -1044,7 +1044,6 @@ public final class APIUtil {
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
-
             try {
                 api.setEnvironmentList(extractEnvironmentListForAPI(
                         artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
@@ -1055,7 +1054,6 @@ public final class APIUtil {
                 String msg = "Invalid endpoint config JSON found in API: " + apiName + " " + apiVersion;
                 throw new APIManagementException(msg, e);
             }
-
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact";
             throw new APIManagementException(msg, e);
@@ -9060,6 +9058,7 @@ public final class APIUtil {
             apiProduct.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             apiProduct.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
             apiProduct.setState(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
+            apiProduct.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             apiProduct.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
             apiProduct.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
             apiProduct.setVisibleTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS));
@@ -9700,6 +9699,32 @@ public final class APIUtil {
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
         return skipRolesByRegex;
+    }
+
+    public static void publishEventToStream(String streamId, String eventPublisherName, Object[] eventData) {
+
+        boolean tenantFlowStarted = false;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            tenantFlowStarted = true;
+            OutputEventAdapterService eventAdapterService =
+                    ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
+            Event blockingMessage = new Event(streamId, System.currentTimeMillis(),
+                    null, null, eventData);
+            ThrottleProperties throttleProperties =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration().getThrottleProperties();
+
+            if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
+                eventAdapterService.publish(eventPublisherName, Collections.EMPTY_MAP, blockingMessage);
+            }
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
     }
     /**
      * append the tenant domain to the username when an email is used as the username and EmailUserName is not enabled

@@ -23,19 +23,19 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Attribute;
-import org.opensaml.saml2.core.AttributeStatement;
-import org.opensaml.saml2.core.NameID;
-import org.opensaml.saml2.core.Response;
-import org.opensaml.saml2.core.Subject;
-import org.opensaml.ws.wssecurity.impl.AttributedStringImpl;
-import org.opensaml.xml.Configuration;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.io.Unmarshaller;
-import org.opensaml.xml.io.UnmarshallerFactory;
-import org.opensaml.xml.io.UnmarshallingException;
-import org.opensaml.xml.schema.impl.XSAnyImpl;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.Attribute;
+import org.opensaml.saml.saml2.core.AttributeStatement;
+import org.opensaml.saml.saml2.core.NameID;
+import org.opensaml.saml.saml2.core.Response;
+import org.opensaml.saml.saml2.core.Subject;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.io.Unmarshaller;
+import org.opensaml.core.xml.io.UnmarshallerFactory;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.core.xml.schema.impl.XSAnyImpl;
+import org.opensaml.soap.wssecurity.impl.AttributedStringImpl;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -65,7 +65,7 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ DocumentBuilderFactory.class, Configuration.class,
+@PrepareForTest({ DocumentBuilderFactory.class, XMLObjectProviderRegistrySupport.class,
         ServiceReferenceHolder.class, PrivilegedCarbonContext.class, AuthenticatorsConfiguration.class })
 public class SAMLGroupIDExtractorImplTest {
 
@@ -99,14 +99,14 @@ public class SAMLGroupIDExtractorImplTest {
                 thenReturn(document);
         Mockito.when(document.getDocumentElement()).thenReturn(element);
 
-        PowerMockito.mockStatic(Configuration.class);
+        PowerMockito.mockStatic(XMLObjectProviderRegistrySupport.class);
         Response response = Mockito.mock(Response.class);
         List<Assertion> assertion = new ArrayList();
         Subject subject = Mockito.mock(Subject.class);
         NameID nameID = Mockito.mock(NameID.class);
         Assertion assertion1 = Mockito.mock(Assertion.class);
         assertion.add(assertion1);
-        Mockito.when(Configuration.getUnmarshallerFactory()).thenReturn(unmarshallerFactory);
+        Mockito.when(XMLObjectProviderRegistrySupport.getUnmarshallerFactory()).thenReturn(unmarshallerFactory);
         Mockito.when(unmarshallerFactory.getUnmarshaller(element)).thenReturn(unmarshaller);
         Mockito.when(unmarshaller.unmarshall(element)).thenReturn(response);
         Mockito.when(response.getAssertions()).thenReturn(assertion);
@@ -156,14 +156,14 @@ public class SAMLGroupIDExtractorImplTest {
         Mockito.when(document.getDocumentElement()).thenReturn(element);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        PowerMockito.mockStatic(Configuration.class);
+        PowerMockito.mockStatic(XMLObjectProviderRegistrySupport.class);
         Response response = Mockito.mock(Response.class);
         List<Assertion> assertion = new ArrayList();
         Subject subject = Mockito.mock(Subject.class);
         NameID nameID = Mockito.mock(NameID.class);
         Assertion assertion1 = Mockito.mock(Assertion.class);
         assertion.add(assertion1);
-        Mockito.when(Configuration.getUnmarshallerFactory()).thenReturn(unmarshallerFactory);
+        Mockito.when(XMLObjectProviderRegistrySupport.getUnmarshallerFactory()).thenReturn(unmarshallerFactory);
         Mockito.when(unmarshallerFactory.getUnmarshaller(element)).thenReturn(unmarshaller);
         Mockito.when(unmarshaller.unmarshall(element)).thenReturn(response);
         Mockito.when(response.getAssertions()).thenReturn(assertion);

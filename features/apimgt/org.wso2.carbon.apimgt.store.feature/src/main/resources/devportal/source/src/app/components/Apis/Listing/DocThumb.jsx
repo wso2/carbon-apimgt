@@ -145,7 +145,7 @@ class DocThumb extends React.Component {
         const { doc: {
  name, sourceType, apiName, apiVersion, id, apiUUID 
 } } = this.props;
-        const details_link = '/apis/' + apiUUID + '/docs';
+        const details_link = '/apis/' + apiUUID + '/documents/' + id + '/details';
         const { thumbnail } = theme.custom;
         const imageWidth = thumbnail.width;
         const defaultImage = thumbnail.defaultApiImage;

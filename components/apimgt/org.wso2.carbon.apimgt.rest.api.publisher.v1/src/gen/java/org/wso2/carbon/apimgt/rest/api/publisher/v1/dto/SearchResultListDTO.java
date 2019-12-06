@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultDTO;
 import javax.validation.constraints.*;
 
 
@@ -20,7 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class SearchResultListDTO   {
   
     private Integer count = null;
-    private List<SearchResultDTO> list = new ArrayList<>();
+    private List<Object> list = new ArrayList<>();
     private PaginationDTO pagination = null;
 
   /**
@@ -43,7 +42,7 @@ public class SearchResultListDTO   {
 
   /**
    **/
-  public SearchResultListDTO list(List<SearchResultDTO> list) {
+  public SearchResultListDTO list(List<Object> list) {
     this.list = list;
     return this;
   }
@@ -51,10 +50,10 @@ public class SearchResultListDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<SearchResultDTO> getList() {
+  public List<Object> getList() {
     return list;
   }
-  public void setList(List<SearchResultDTO> list) {
+  public void setList(List<Object> list) {
     this.list = list;
   }
 

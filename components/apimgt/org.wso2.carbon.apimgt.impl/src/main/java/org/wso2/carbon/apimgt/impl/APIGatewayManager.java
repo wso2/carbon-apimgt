@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import io.swagger.annotations.Api;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -27,12 +26,11 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.dto.CredentialDto;
-import org.wso2.carbon.apimgt.api.dto.GatewayAPIDTO;
-import org.wso2.carbon.apimgt.api.dto.GatewayContentDTO;
+import org.wso2.carbon.apimgt.api.gateway.CredentialDto;
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -60,7 +58,6 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;

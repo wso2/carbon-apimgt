@@ -1087,6 +1087,8 @@ paths:
           description: |
             Created.
             Successful response with the newly created API as entity in the body. Location header contains URL of newly created API.
+          schema:
+            $ref: '#/definitions/API'
           headers:
             Location:
               description: |
@@ -7197,9 +7199,9 @@ definitions:
           If the provider value is not given, the user invoking the API will be used as the provider.
         type: string
         example: admin
-      thumbnailUri:
-        type: string
-        example: /api-products/01234567-0123-0123-0123-012345678901/thumbnail
+      hasThumbnail:
+        type: boolean
+        example: true
       state:
         type: string
         description: |
@@ -7244,9 +7246,9 @@ definitions:
           If the provider value is not given, the user invoking the API will be used as the provider.
         type: string
         example: admin
-      thumbnailUri:
-        type: string
-        example: /api-products/01234567-0123-0123-0123-012345678901/thumbnail
+      hasThumbnail:
+        type: boolean
+        example: true
       state:
         type: string
         description: |
@@ -8031,8 +8033,8 @@ definitions:
         example: basic
         description: Accepts one of the following, basic or digest.
         enum:
-          - basic
-          - digest
+          - BASIC
+          - DIGEST
       username:
         type: string
         example: admin
@@ -8746,7 +8748,10 @@ definitions:
       list:
         type: array
         items:
-          $ref: '#/definitions/SearchResult'
+          anyOf:
+            - $ref: '#/definitions/APISearchResult'
+            - $ref: '#/definitions/APIProductSearchResult'
+            - $ref: '#/definitions/DocumentSearchResult'
       pagination:
         $ref: '#/definitions/Pagination'
 

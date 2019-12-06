@@ -34,11 +34,11 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import StarRatingSummary from 'AppComponents/Apis/Details/StarRatingSummary';
+import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
 import VerticalDivider from '../../Shared/VerticalDivider';
 import ApiThumb from '../Listing/ApiThumb';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import AuthManager from '../../../data/AuthManager';
-import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
 import Environments from './Environments';
 import Labels from './Labels';
 
@@ -207,6 +207,7 @@ class InfoBar extends React.Component {
         this.getProvider = this.getProvider.bind(this);
         this.setRatingUpdate = this.setRatingUpdate.bind(this);
     }
+
     ditectCurrentMenu = (location) => {
         const routeToCheck = 'overview';
         const { pathname } = location;
@@ -218,6 +219,7 @@ class InfoBar extends React.Component {
             this.setState({ showOverview: false });
         }
     };
+
     componentDidMount() {
         const { history } = this.props;
         this.ditectCurrentMenu(history.location);
@@ -235,16 +237,16 @@ class InfoBar extends React.Component {
         if (typeof todo === 'boolean') {
             this.setState({ showOverview: todo });
         } else {
-            this.setState(state => ({ showOverview: !state.showOverview }));
+            this.setState((state) => ({ showOverview: !state.showOverview }));
         }
     };
 
     getProvider(api) {
         let { provider } = api;
         if (
-            api.businessInformation &&
-            api.businessInformation.businessOwner &&
-            api.businessInformation.businessOwner.trim() !== ''
+            api.businessInformation
+            && api.businessInformation.businessOwner
+            && api.businessInformation.businessOwner.trim() !== ''
         ) {
             provider = api.businessInformation.businessOwner;
         }
@@ -266,12 +268,14 @@ class InfoBar extends React.Component {
             windowUrl.revokeObjectURL(url);
         });
     }
+
     setRatingUpdate(ratings) {
-        if(ratings) {
-            const {avgRating, total, count} = ratings;
-            this.setState({avgRating, total, count});
-        }       
+        if (ratings) {
+            const { avgRating, total, count } = ratings;
+            this.setState({ avgRating, total, count });
+        }
     }
+
     /**
      *
      *
@@ -324,10 +328,10 @@ class InfoBar extends React.Component {
                         </div>
                     </Link>
                     {showThumbnail && (
-                        <React.Fragment>
+                        <>
                             <VerticalDivider height={height} />
                             <ApiThumb api={api} customWidth={70} customHeight={50} showInfo={false} />
-                        </React.Fragment>
+                        </>
                     )}
                     <div style={{ marginLeft: theme.spacing(1) }}>
                         <Typography variant='h4'>{api.name}</Typography>
@@ -338,10 +342,10 @@ class InfoBar extends React.Component {
                     <VerticalDivider height={70} />
                     {!api.advertiseInfo.advertised && user && showRating && (
                         <StarRatingSummary avgRating={avgRating} reviewCount={total} returnCount={count} />
-                        
+
                     )}
                     {api.advertiseInfo.advertised && (
-                        <React.Fragment>
+                        <>
                             <a
                                 target='_blank'
                                 rel='noopener noreferrer'
@@ -354,7 +358,7 @@ class InfoBar extends React.Component {
                                 <div className={classes.linkText}>Visit Publisher Dev Portal</div>
                             </a>
                             <VerticalDivider height={70} />
-                        </React.Fragment>
+                        </>
                     )}
                 </div>
                 {position === 'horizontal' && <div style={{ height: 60 }} />}
@@ -473,7 +477,7 @@ class InfoBar extends React.Component {
                                             </TableRow>
                                         )}
                                         {!api.advertiseInfo.advertised ? (
-                                            <React.Fragment>
+                                            <>
                                                 <TableRow>
                                                     <TableCell
                                                         component='th'
@@ -516,7 +520,7 @@ class InfoBar extends React.Component {
                                                         </TableCell>
                                                     </TableRow>
                                                 )}
-                                            </React.Fragment>
+                                            </>
                                         ) : (
                                             <TableRow>
                                                 <TableCell component='th' scope='row'>
@@ -547,7 +551,7 @@ class InfoBar extends React.Component {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    {apisTagsWithoutGroups.map(tag => (
+                                                    {apisTagsWithoutGroups.map((tag) => (
                                                         <Chip label={tag} className={classes.chip} key={tag} />
                                                     ))}
                                                 </TableCell>
@@ -591,8 +595,8 @@ InfoBar.defaultProps = {
         content: {},
         contentLoader: {},
         contentLoaderRightMenu: {},
-    }, 
-}
+    },
+};
 InfoBar.propTypes = {
     classes: PropTypes.shape({}),
     theme: PropTypes.object.isRequired,
