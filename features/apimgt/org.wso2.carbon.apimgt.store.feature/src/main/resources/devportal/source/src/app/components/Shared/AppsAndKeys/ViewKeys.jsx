@@ -125,7 +125,7 @@ class ViewKeys extends React.Component {
                 application.getKeys().then(() => {
                     const newRequest = { ...accessTokenRequest, keyType };
                     const subscriptionScopes = application.subscriptionScopes
-                        .map((scope) => { return scope.scopeKey; });
+                        .map((scope) => { return scope.key; });
                     this.setState({ accessTokenRequest: newRequest, subscriptionScopes });
                 });
             })
