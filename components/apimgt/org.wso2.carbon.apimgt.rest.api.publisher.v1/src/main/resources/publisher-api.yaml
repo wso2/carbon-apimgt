@@ -8233,6 +8233,8 @@ definitions:
           type: string
       amznResourceName:
         type: string
+      amznResourceTimeout:
+        type: integer
 
 
 #-----------------------------------------------------
