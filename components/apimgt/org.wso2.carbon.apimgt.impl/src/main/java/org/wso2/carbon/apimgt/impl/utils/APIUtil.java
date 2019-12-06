@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
@@ -3968,25 +3970,26 @@ public final class APIUtil {
             UserRegistry registry = registryService.getConfigSystemRegistry(tenantID);
             byte[] data = getLocalTenantConfFileData();
             if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                log.debug("Tenant conf already uploaded to the registry");
+                log.debug("tenant-conf of tenant " + tenantID + " is  already uploaded to the registry");
                 Optional<Byte[]> migratedTenantConf = migrateTenantConfScopes(tenantID);
                 if (migratedTenantConf.isPresent()) {
-                    log.debug("Detected new additions to tenant-conf");
+                    log.debug("Detected new additions to tenant-conf of tenant " + tenantID);
                     data = ArrayUtils.toPrimitive(migratedTenantConf.get());
                 } else {
-                    log.debug("No changes required in tenant-conf.json");
+                    log.debug("No changes required in tenant-conf.json of tenant " + tenantID);
                     return;
                 }
             }
-            log.debug("Adding tenant config to the registry");
+            log.debug("Adding/updating tenant-conf.json to the registry of tenant " + tenantID);
             Resource resource = registry.newResource();
             resource.setMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             resource.setContent(data);
             registry.put(APIConstants.API_TENANT_CONF_LOCATION, resource);
+            log.debug("Successfully added/updated tenant-conf.json of tenant  " + tenantID);
         } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving tenant conf to the registry", e);
+            throw new APIManagementException("Error while saving tenant conf to the registry of tenant " + tenantID, e);
         } catch (IOException e) {
-            throw new APIManagementException("Error while reading tenant conf file content", e);
+            throw new APIManagementException("Error while reading tenant conf file content of tenant " + tenantID, e);
         }
     }
 
@@ -4064,10 +4067,24 @@ public final class APIUtil {
                 JSONObject scopeJson = new JSONObject();
                 scopeJson.put(APIConstants.REST_API_SCOPE_NAME, scope);
                 scopeJson.put(APIConstants.REST_API_SCOPE_ROLE, scopesLocal.get(scope));
+                if (log.isDebugEnabled()) {
+                    log.debug("Found scope that is not added to tenant-conf.json in tenant " + tenantId +
+                            ": " + scopeJson);
+                }
                 tenantScopesArray.add(scopeJson);
             }
-            return Optional.of(ArrayUtils.toObject(tenantConf.toJSONString().getBytes()));
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                String formattedTenantConf = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(tenantConf);
+                if (log.isDebugEnabled()) {
+                    log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
+                }
+                return Optional.of(ArrayUtils.toObject(formattedTenantConf.getBytes()));
+            } catch (JsonProcessingException e) {
+                throw new APIManagementException("Error while formatting tenant-conf.json of tenant " + tenantId);
+            }
         } else {
+            log.debug("Scopes in tenant-conf.json in tenant " + tenantId + " are already migrated.");
             return Optional.empty();
         }
     }
