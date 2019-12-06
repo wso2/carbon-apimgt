@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
 import javax.validation.constraints.*;
@@ -25,6 +26,10 @@ public class SettingsDTO   {
     private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<>();
     private Object securityAuditProperties = null;
     private Boolean externalStoresEnabled = null;
+    private List<DeploymentsDTO> deployments = new ArrayList<>();
+
+
+
 
   /**
    * Store URL
@@ -145,12 +150,14 @@ public class SettingsDTO   {
         Objects.equals(scopes, settings.scopes) &&
         Objects.equals(monetizationAttributes, settings.monetizationAttributes) &&
         Objects.equals(securityAuditProperties, settings.securityAuditProperties) &&
-        Objects.equals(externalStoresEnabled, settings.externalStoresEnabled);
+            Objects.equals(externalStoresEnabled, settings.externalStoresEnabled) &&
+            Objects.equals(deployments, settings.deployments);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(storeUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled);
+    return Objects.hash(storeUrl, environment, scopes, monetizationAttributes, securityAuditProperties,
+            externalStoresEnabled, deployments);
   }
 
   @Override
@@ -164,6 +171,7 @@ public class SettingsDTO   {
     sb.append("    monetizationAttributes: ").append(toIndentedString(monetizationAttributes)).append("\n");
     sb.append("    securityAuditProperties: ").append(toIndentedString(securityAuditProperties)).append("\n");
     sb.append("    externalStoresEnabled: ").append(toIndentedString(externalStoresEnabled)).append("\n");
+    sb.append("    deployments: ").append(toIndentedString(deployments)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -177,6 +185,21 @@ public class SettingsDTO   {
       return "null";
     }
     return o.toString().replace("\n", "\n    ");
+  }
+
+  public SettingsDTO deployments(List<DeploymentsDTO> deployments) {
+    this.deployments = deployments;
+    return this;
+  }
+
+
+  @ApiModelProperty(value = "")
+  @JsonProperty("deployments")
+  public List<DeploymentsDTO> getDeployments() {
+    return deployments;
+  }
+  public void setDeployments(List<DeploymentsDTO> deployments) {
+    this.deployments = deployments;
   }
 }
 
