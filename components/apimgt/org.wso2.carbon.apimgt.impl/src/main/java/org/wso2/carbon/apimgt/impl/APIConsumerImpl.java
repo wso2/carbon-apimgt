@@ -2644,21 +2644,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPIs;
     }
 
-    public JSONArray getScopesForApplicationSubscription(String username, int applicationId)
+    public Set<Scope> getScopesForApplicationSubscription(String username, int applicationId)
             throws APIManagementException {
-        Set<Scope> scopeSet;
-        JSONArray scopeArray = new JSONArray();
-
         Subscriber subscriber = new Subscriber(username);
-        scopeSet = apiMgtDAO.getScopesForApplicationSubscription(subscriber, applicationId);
-
-        for (Scope scope : scopeSet) {
-            JSONObject scopeObj = new JSONObject();
-            scopeObj.put("scopeKey", scope.getKey());
-            scopeObj.put("scopeName", scope.getName());
-            scopeArray.add(scopeObj);
-        }
-        return scopeArray;
+        return apiMgtDAO.getScopesForApplicationSubscription(subscriber, applicationId);
     }
 
     /*
