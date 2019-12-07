@@ -4877,8 +4877,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-
-
     @Override
     public void saveSwaggerDefinition(APIProduct apiProduct, String jsonText) throws APIManagementException {
         try {
