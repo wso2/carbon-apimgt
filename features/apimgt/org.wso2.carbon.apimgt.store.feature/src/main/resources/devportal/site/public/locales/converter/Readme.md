@@ -21,5 +21,8 @@ translate.key = 'your-api-key';
 const lanuageCode = 'fr'; // lanuage code without region code
 ```
 4. Run the following command to convert the en.json to your language.
+```js
+node i18nconverter.js 
+```
 
 
