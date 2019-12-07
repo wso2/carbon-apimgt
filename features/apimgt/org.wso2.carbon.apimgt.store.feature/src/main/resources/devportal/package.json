@@ -11,7 +11,7 @@
         "build:dev": "rm -R site/public/dist/; NODE_ENV=development webpack -d --watch ",
         "analysis": "NODE_ENV=development webpack --env.analysis -p --progress",
         "lint": "eslint source/**/*.js source/**/*.jsx source/src/app/**/*.jsx",
-        "i18n": "extract-messages -l=en,fr -o site/public/locales/ -d en --extractFromFormatMessageCall --flat 'source/src/app/**/*.jsx'"
+        "i18n": "extract-messages -l=en -o site/public/locales/ -d en --extractFromFormatMessageCall --flat 'source/src/app/**/*.jsx'"
     },
     "repository": {
         "type": "git",
