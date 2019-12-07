@@ -103,14 +103,14 @@ const tokens = (props) => {
                         invalidTimeout ? (
                             intl.formatMessage({
                                 defaultMessage: 'Please use a valid number for API Key expiry time',
-                                id: 'Shared.AppsAndKeys.Tokens.apikey.set.validity',
+                                id: 'Shared.AppsAndKeys.Tokens.apikey.set.validity.error',
                             })
                         ) : (
                             intl.formatMessage({
                                 defaultMessage: 'You can set an expiration period to determine the validity period of '
                                 + 'the token after generation. Set this as -1 to ensure that the '
                                 + 'apikey never expires.',
-                                id: 'Shared.AppsAndKeys.Tokens.apikey.set.validity',
+                                id: 'Shared.AppsAndKeys.Tokens.apikey.set.validity.help',
                             })
                         )
                     }

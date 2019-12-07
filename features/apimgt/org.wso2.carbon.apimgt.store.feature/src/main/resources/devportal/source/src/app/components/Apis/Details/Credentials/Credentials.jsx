@@ -310,7 +310,7 @@ class Credentials extends React.Component {
                         })
                             : intl.formatMessage({
                                 defaultMessage: 'Sign In to Generate Credentials',
-                                id: 'Apis.Details.Credentials.Credentials.generate.credentials',
+                                id: 'Apis.Details.Credentials.Credentials.generate.credentials.sign.in',
                             })}
                         caption={intl.formatMessage({
                             defaultMessage: 'You need to generate credentials to access this API',
