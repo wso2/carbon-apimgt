@@ -65,14 +65,14 @@ export default function CloudClusters(props) {
 
     return (
         <>
-            <Typography variant='h4' align='left' className={classes.mainTitle}>
+            <Typography variant='h4' gutterBottom align='left' className={classes.mainTitle}>
                 <FormattedMessage
                     id='Apis.Details.Environments.Environments.CloudClusters'
                     defaultMessage={deployments.name}
                 />
             </Typography>
 
-            <Paper className={classes.saveButton}>
+            <Paper className={classes.gatewayPaper}>
                 <Table>
                     <TableHead>
                         <TableRow>
