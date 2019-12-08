@@ -195,7 +195,9 @@ public class SettingsMappingUtil {
                 deploymentClusterInfoDTO.setMasterURL(((JSONObject) clusterProperties).get("MasterURL").toString());
                 deploymentClusterInfoDTO.setNamespace(((JSONObject) clusterProperties).get("Namespace").toString());
 
-                deploymentClusterInfoDTOList.add(deploymentClusterInfoDTO);
+                if (!keyStr.toString().equals("")) {
+                    deploymentClusterInfoDTOList.add(deploymentClusterInfoDTO);
+                }
             });
 
             k8sClustersInfoDTO.setClusters(deploymentClusterInfoDTOList);
