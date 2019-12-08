@@ -168,13 +168,13 @@ export default function Environments() {
                         api={api}
                     />
                 )}
-             {(settings.deployments
+            {(settings.deployments
                  && (
-                    settings.deployments.map((cluster) => (
-                        <Kubernetes
-                            deployments={cluster}
-                        />
-                    ))
+                     settings.deployments.map((cluster) => (
+                         <Kubernetes
+                             deployments={cluster}
+                         />
+                     ))
                  )
 
             ) }
