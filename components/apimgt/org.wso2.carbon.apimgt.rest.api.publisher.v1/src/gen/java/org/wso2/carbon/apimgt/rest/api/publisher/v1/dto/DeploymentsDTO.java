@@ -17,9 +17,9 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 public class DeploymentsDTO   {
-
-  private String name = null;
-  private List<DeploymentClusterInfoDTO> clusters = new ArrayList<>();
+  
+    private String name = null;
+    private List<DeploymentClusterInfoDTO> clusters = new ArrayList<>();
 
   /**
    **/
@@ -28,7 +28,7 @@ public class DeploymentsDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "Kubernetes", required = true, value = "")
   @JsonProperty("name")
   @NotNull
@@ -46,7 +46,7 @@ public class DeploymentsDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("clusters")
   @NotNull
@@ -68,8 +68,9 @@ public class DeploymentsDTO   {
     }
     DeploymentsDTO deployments = (DeploymentsDTO) o;
     return Objects.equals(name, deployments.name) &&
-            Objects.equals(clusters, deployments.clusters);
+        Objects.equals(clusters, deployments.clusters);
   }
+
 
   @Override
   public int hashCode() {
@@ -80,7 +81,7 @@ public class DeploymentsDTO   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class DeploymentsDTO {\n");
-
+    
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    clusters: ").append(toIndentedString(clusters)).append("\n");
     sb.append("}");
@@ -98,3 +99,4 @@ public class DeploymentsDTO   {
     return o.toString().replace("\n", "\n    ");
   }
 }
+
