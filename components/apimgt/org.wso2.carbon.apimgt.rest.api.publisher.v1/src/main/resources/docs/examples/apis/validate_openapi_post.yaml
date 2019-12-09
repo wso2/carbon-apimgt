@@ -1,6 +1,6 @@
 - title: Using a Valid OpenAPI Definition
   rawRequest: |
-    POST https://localhost:9443/api/am/publisher/v1.1/apis/validate-openapi?returnContent=true HTTP/1.1
+    POST https://localhost:9443/api/am/publisher/v1/apis/validate-openapi?returnContent=true HTTP/1.1
     Content-Type: multipart/form-data; boundary="----=_Part_0_771605626.1563876237955"
     Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a
     Content-Length: 1504
@@ -58,7 +58,7 @@
     ------=_Part_0_771605626.1563876237955--
 
   curl: |
-    curl -k -H "Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a" -F file=@petstore.v3.yaml  -X POST https://localhost:9443/api/am/publisher/v1.1/apis/validate-openapi?returnContent=true
+    curl -k -H "Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a" -F file=@petstore.v3.yaml  -X POST https://localhost:9443/api/am/publisher/v1/apis/validate-openapi?returnContent=true
   rawResponse: |
     HTTP/1.1 200 OK
     Date: Tue, 23 Jul 2019 10:04:01 GMT
@@ -73,7 +73,7 @@
 
 - title: Using an Invalid OpenAPI Definition
   rawRequest: |
-    POST https://localhost:9443/api/am/publisher/v1.1/apis/validate-openapi HTTP/1.1
+    POST https://localhost:9443/api/am/publisher/v1/apis/validate-openapi HTTP/1.1
     Accept-Encoding: gzip,deflate
     Content-Type: multipart/form-data; boundary="----=_Part_7_1998017516.1563885449948"
     Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a
@@ -192,7 +192,7 @@
 
 
   curl: |
-      curl -k -H "Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a" -F file=@petstore.v3-invalid.yaml  -X POST https://localhost:9443/api/am/publisher/v1.1/apis/validate-openapi?returnContent=true
+      curl -k -H "Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a" -F file=@petstore.v3-invalid.yaml  -X POST https://localhost:9443/api/am/publisher/v1/apis/validate-openapi?returnContent=true
   rawResponse: |
       HTTP/1.1 200 OK
       Date: Tue, 23 Jul 2019 10:04:01 GMT

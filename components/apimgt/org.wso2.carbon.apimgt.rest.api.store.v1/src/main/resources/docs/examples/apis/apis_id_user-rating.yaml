@@ -2,7 +2,7 @@ get:
   - id: getAPIUserRating
     request:
       method: GET
-      url: https://localhost:9443/api/am/store/v1.1/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating
+      url: https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating
       headers: |
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
         X-WSO2-Tenant: test.com
@@ -24,7 +24,7 @@ put:
   - id: putAPIUserRating
     request:
       method: PUT
-      url: https://localhost:9443/api/am/store/v1.1/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating
+      url: https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating
       headers: |
         Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
         Content-Type: application/json
@@ -51,7 +51,7 @@ delete:
   - id: deleteAPIUserRating
     request:
       method: DELETE
-      url: https://localhost:9443/api/am/store/v1.1/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating
+      url: https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating
       headers: |
         Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
         X-WSO2-Tenant: test.com

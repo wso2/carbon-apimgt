@@ -1,6 +1,6 @@
 - request:
     method: GET
-    url: https://localhost:9443/api/am/publisher/v1.1/mediation-policies
+    url: https://localhost:9443/api/am/publisher/v1/mediation-policies
     headers: |
       Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
   response:
@@ -27,10 +27,10 @@
         "pagination":null
       }
 - rawRequest: |
-    GET https://localhost:9443/api/am/publisher/v1.1/mediation-policies HTTP/1.1
+    GET https://localhost:9443/api/am/publisher/v1/mediation-policies HTTP/1.1
     Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
   curl: |
-      curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/publisher/v1.1/mediation-policies
+      curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/publisher/v1/mediation-policies
   rawResponse: |
     HTTP/1.1 200 OK
     Content-Type: application/json

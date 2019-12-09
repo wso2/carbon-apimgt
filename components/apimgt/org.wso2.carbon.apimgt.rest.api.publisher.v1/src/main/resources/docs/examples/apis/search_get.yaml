@@ -1,7 +1,7 @@
 - id: searchApis
   request:
     method: GET
-    url: https://localhost:9443/api/am/publisher/v1.1/search?limit=25&offset=0&query=test
+    url: https://localhost:9443/api/am/publisher/v1/search?limit=25&offset=0&query=test
     headers: |
       Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
   response:

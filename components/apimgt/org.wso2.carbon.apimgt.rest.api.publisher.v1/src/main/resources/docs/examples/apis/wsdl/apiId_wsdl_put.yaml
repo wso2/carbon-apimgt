@@ -1,7 +1,7 @@
 - id: updateWSDLByURL
   title: Update the WSDL of an API by URL
   rawRequest: |
-    PUT https://localhost:9443/api/am/publisher/v1.1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl HTTP/1.1
+    PUT https://localhost:9443/api/am/publisher/v1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl HTTP/1.1
     Content-Type: multipart/form-data; boundary="----=_Part_32_1344536553.1568106480012"
     MIME-Version: 1.0
     Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -23,7 +23,7 @@
     ------=_Part_32_1344536553.1568106480012--
 
   curl: |
-    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F url='https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl' -F file='' -X PUT https://localhost:9443/api/am/publisher/v1.1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl
+    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F url='https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl' -F file='' -X PUT https://localhost:9443/api/am/publisher/v1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl
   response:
     status:
       code: 200
@@ -34,7 +34,7 @@
 - id: updateWSDLByFile
   title: Update the WSDL of an API by file or archive
   rawRequest: |
-    PUT https://localhost:9443/api/am/publisher/v1.1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl HTTP/1.1
+    PUT https://localhost:9443/api/am/publisher/v1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl HTTP/1.1
     Content-Type: multipart/form-data; boundary="----=_Part_34_1125730933.1568107415435"
     MIME-Version: 1.0
     Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -82,7 +82,7 @@
     ------=_Part_34_1125730933.1568107415435--
 
   curl: |
-    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F file=@stockQuote.wsdl -X PUT https://localhost:9443/api/am/publisher/v1.1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl
+    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F file=@stockQuote.wsdl -X PUT https://localhost:9443/api/am/publisher/v1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl
   response:
     status:
       code: 200

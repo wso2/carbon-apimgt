@@ -2,7 +2,7 @@
   title: Retrieve the WSDL of an API
   request:
     method: GET
-    url: https://localhost:9443/api/am/store/v1.1/apis/db8566ee-6260-47f1-a15f-e71bd2ecb68f/wsdl?environmentName=Production%20and%20Sandbox
+    url: https://localhost:9443/api/am/store/v1/apis/db8566ee-6260-47f1-a15f-e71bd2ecb68f/wsdl?environmentName=Production%20and%20Sandbox
     headers: |
       Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
   rawResponse: |
@@ -29,7 +29,7 @@
   title: Retrieve the WSDL Archive of an API
   request:
     method: GET
-    url: https://localhost:9443/api/am/store/v1.1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl?environmentName=Production%20and%20Sandbox
+    url: https://localhost:9443/api/am/store/v1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl?environmentName=Production%20and%20Sandbox
     headers: |
       Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
   rawResponse: |

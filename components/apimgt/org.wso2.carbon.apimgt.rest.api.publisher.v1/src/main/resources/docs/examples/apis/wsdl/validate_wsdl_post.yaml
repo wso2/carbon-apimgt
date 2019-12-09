@@ -1,7 +1,7 @@
 - id: validateWSDLUrl
   title: Validate a WSDL URL
   rawRequest: |
-    POST https://localhost:9443/api/am/publisher/v1.1/apis/validate-wsdl HTTP/1.1
+    POST https://localhost:9443/api/am/publisher/v1/apis/validate-wsdl HTTP/1.1
     Content-Type: multipart/form-data; boundary="----=_Part_3_453576421.1568033260795"
     MIME-Version: 1.0
     Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -16,7 +16,7 @@
       ------=_Part_3_453576421.1568033260795--
 
   curl: |
-    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F url='https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl' -X POST https://localhost:9443/api/am/publisher/v1.1/apis/validate-wsdl
+    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F url='https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl' -X POST https://localhost:9443/api/am/publisher/v1/apis/validate-wsdl
   response:
     status:
       code: 200
@@ -53,7 +53,7 @@
 - id: validateWSDLFile
   title: Validate a WSDL File
   rawRequest: |
-    POST https://localhost:9443/api/am/publisher/v1.1/apis/validate-wsdl HTTP/1.1
+    POST https://localhost:9443/api/am/publisher/v1/apis/validate-wsdl HTTP/1.1
     Content-Type: multipart/form-data; boundary="----=_Part_5_1281400982.1568033585941"
     MIME-Version: 1.0
     Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -109,7 +109,7 @@
 
 
   curl: |
-    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F file=@stockquote.wsdl -X POST https://localhost:9443/api/am/publisher/v1.1/apis/validate-wsdl
+    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F file=@stockquote.wsdl -X POST https://localhost:9443/api/am/publisher/v1/apis/validate-wsdl
   response:
     status:
       code: 200
@@ -145,7 +145,7 @@
 - id: validateWSDLArchive
   title: Validate a WSDL Archive
   rawRequest: |
-    POST https://localhost:9443/api/am/publisher/v1.1/apis/validate-wsdl HTTP/1.1
+    POST https://localhost:9443/api/am/publisher/v1/apis/validate-wsdl HTTP/1.1
     Content-Type: multipart/form-data; boundary="----=_Part_10_60710863.1568033977152"
     MIME-Version: 1.0
     Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -164,7 +164,7 @@
     ------=_Part_10_60710863.1568033977152--
 
   curl: |
-    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F file=@stockquote.zip -X POST https://localhost:9443/api/am/publisher/v1.1/apis/validate-wsdl
+    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F file=@stockquote.zip -X POST https://localhost:9443/api/am/publisher/v1/apis/validate-wsdl
   response:
     status:
       code: 200
@@ -200,7 +200,7 @@
 - id: validateWSDLInvalid
   title: Trying to validate an invalid WSDL
   rawRequest: |
-    POST https://localhost:9443/api/am/publisher/v1.1/apis/validate-wsdl HTTP/1.1
+    POST https://localhost:9443/api/am/publisher/v1/apis/validate-wsdl HTTP/1.1
     Content-Type: multipart/form-data; boundary="----=_Part_17_807981233.1568034538839"
     MIME-Version: 1.0
     Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -227,7 +227,7 @@
 
 
   curl: |
-    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F file=@stockQuote-invalid.wsdl -X POST https://localhost:9443/api/am/publisher/v1.1/apis/validate-wsdl
+    curl -k -H "Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7" -F file=@stockQuote-invalid.wsdl -X POST https://localhost:9443/api/am/publisher/v1/apis/validate-wsdl
   response:
     status:
       code: 200
