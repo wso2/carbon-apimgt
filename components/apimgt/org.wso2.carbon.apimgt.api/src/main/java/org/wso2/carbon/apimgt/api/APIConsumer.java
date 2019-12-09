@@ -879,7 +879,7 @@ public interface APIConsumer extends APIManager {
      * @return set of scopes.
      * @throws APIManagementException
      */
-    JSONArray getScopesForApplicationSubscription(String username, int applicationId)
+    Set<Scope> getScopesForApplicationSubscription(String username, int applicationId)
             throws APIManagementException;
 
     /**
