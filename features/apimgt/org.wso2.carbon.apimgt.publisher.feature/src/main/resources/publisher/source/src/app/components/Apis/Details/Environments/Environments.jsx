@@ -37,7 +37,6 @@ import Paper from '@material-ui/core/Paper';
 import { isRestricted } from 'AppData/AuthManager';
 import { makeStyles } from '@material-ui/core/styles';
 import MicroGateway from 'AppComponents/Apis/Details/Environments/MicroGateway';
-import Kubernetes from 'AppComponents/Apis/Details/Environments/Kubernetes';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -168,16 +167,6 @@ export default function Environments() {
                         api={api}
                     />
                 )}
-            {(settings.deployments
-                 && (
-                     settings.deployments.map((cluster) => (
-                         <Kubernetes
-                             deployments={cluster}
-                         />
-                     ))
-                 )
-
-            ) }
 
             <Grid
                 container
