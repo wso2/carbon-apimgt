@@ -48,6 +48,9 @@ public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
     @Override
     public void handleMessage(Message message) throws Fault {
         String path = (String) message.get(Message.PATH_INFO);
+        if (path.contains("/v0.15/")) {
+            path = path.replace("/v0.15/", "/");
+        }
         String httpMethod = (String) message.get(Message.HTTP_REQUEST_METHOD);
         Dictionary<URITemplate,List<String>> whiteListedResourcePathsMap;
 
