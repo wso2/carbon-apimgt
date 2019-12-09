@@ -1,6 +1,24 @@
 {
   "EnableMonetization" : false,
   "IsUnlimitedTierPaid" : false,
+  "ContainerMgtInfo": {
+    "Type": "Kubernetes",
+    "ClassName": "org.wso2.carbon.apimgt.impl.containermgt.K8sManager",
+    "ClusterInfo": [
+      {
+        "Name": "",
+        "Properties": {
+          "MasterURL": "",
+          "SAToken": "",
+          "Namespace": "default",
+          "Replicas": 1,
+          "BasicSecurityCustomResourceName": "",
+          "OauthSecurityCustomResourceName": "",
+          "JWTSecurityCustomResourceName": ""
+        }
+      }
+    ]
+  },
   "ExtensionHandlerPosition": "bottom",
   "RESTAPIScopes": {
     "Scope": [

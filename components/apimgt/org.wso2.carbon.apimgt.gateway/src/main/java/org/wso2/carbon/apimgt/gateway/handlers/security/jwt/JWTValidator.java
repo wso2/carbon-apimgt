@@ -41,10 +41,10 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
-import javax.cache.Cache;
-import javax.cache.Caching;
 import java.util.Base64;
 import java.util.HashMap;
+import javax.cache.Cache;
+import javax.cache.Caching;
 
 /**
  * A Validator class to validate JWT tokens in an API request.

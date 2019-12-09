@@ -32,7 +32,7 @@ const SwaggerUI = (props) => {
             if (authorizationHeader === 'apikey') {
                 req.headers[authorizationHeader] = accessTokenProvider();
             } else {
-                req.headers[authorizationHeader] = 'Bearer' + accessTokenProvider();
+                req.headers[authorizationHeader] = 'Bearer ' + accessTokenProvider();
             }
             if (url.endsWith(patternToCheck)) {
                 req.url = url.substring(0, url.length - 2);

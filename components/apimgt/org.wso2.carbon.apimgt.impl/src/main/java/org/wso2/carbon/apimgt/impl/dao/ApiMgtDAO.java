@@ -14098,7 +14098,6 @@ public class ApiMgtDAO {
                         APIProductResource resource = new APIProductResource();
                         APIIdentifier apiId = new APIIdentifier(rs.getString("API_PROVIDER"), rs.getString("API_NAME"),
                                 rs.getString("API_VERSION"));
-                        Set<Scope> scopes = getAPIScopes(apiId);
                         resource.setProductIdentifier(productIdentifier);
                         resource.setApiIdentifier(apiId);
                         resource.setApiName(rs.getString("API_NAME"));
@@ -14109,10 +14108,26 @@ public class ApiMgtDAO {
                         uriTemplate.setId(rs.getInt("URL_MAPPING_ID"));
                         uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
                         uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
-                        String resourceScopeKey = APIUtil.getResourceKey(rs.getString("CONTEXT"), apiId.getVersion(),
-                                uriTemplate.getUriTemplate(), uriTemplate.getHTTPVerb());
-                        HashMap<String, String> resourceScopes = getResourceToScopeMapping(apiId);
-                        uriTemplate.setScope(APIUtil.findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
+
+                        String resourceScopeKey = APIUtil.getResourceKey(rs.getString("CONTEXT"),
+                                rs.getString("API_VERSION"), uriTemplate.getUriTemplate(),
+                                uriTemplate.getHTTPVerb());
+                        try (PreparedStatement scopesStatement = connection.
+                                prepareStatement(SQLConstants.GET_SCOPES_BY_RESOURCE_PATHS)) {
+                            scopesStatement.setString(1, resourceScopeKey);
+                            try (ResultSet scopesResult = scopesStatement.executeQuery()) {
+                                while (scopesResult.next()) {
+                                    Scope scope = new Scope();
+                                    scope.setKey(scopesResult.getString("NAME"));
+                                    scope.setDescription(scopesResult.getString("DESCRIPTION"));
+                                    scope.setId(scopesResult.getInt("SCOPE_ID"));
+                                    scope.setName(scopesResult.getString("DISPLAY_NAME"));
+                                    scope.setRoles(scopesResult.getString("SCOPE_BINDING"));
+                                    uriTemplate.setScope(scope);
+                                }
+                            }
+                        }
+
                         resource.setUriTemplate(uriTemplate);
                         productResourceList.add(resource);
                     }
