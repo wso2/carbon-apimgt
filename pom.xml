@@ -1880,6 +1880,6 @@
         <io.fabric8.openshift.client.version>4.5.2</io.fabric8.openshift.client.version>
         <org.apache.commons.compress.version>1.18</org.apache.commons.compress.version>
         <com.squareup.okhttp3.okhttp.version>4.2.0</com.squareup.okhttp3.okhttp.version>
-        <com.squareup.okio.version>2.4.0</com.squareup.okio.version>
+        <com.squareup.okio.version>2.4.1</com.squareup.okio.version>
     </properties>
 </project>
