@@ -172,4 +172,58 @@ public class SettingsMappingUtil {
         }
         return properties;
     }
+
+    /**
+     * This method returns the deployments list from the tenant configurations
+     *
+     * @return DeploymentsDTO list. List of Deployments
+     * @throws APIManagementException
+     */
+    private List<DeploymentsDTO> getCloudClusterInfoFromTenantConf() throws APIManagementException {
+
+        List<DeploymentsDTO> deploymentsList = new ArrayList<DeploymentsDTO>();
+
+        //Get cloud environments from tenant-conf.json file
+        //Get tenant domain to access tenant conf
+        APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        //read tenant-conf.json and get details
+        try {
+            String getTenantDomainConfContent = apimRegistryService
+                    .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+            JSONParser jsonParser = new JSONParser();
+            Object tenantObject = jsonParser.parse(getTenantDomainConfContent);
+            JSONObject tenant_conf = (JSONObject) tenantObject;
+            //get kubernetes cluster info
+            JSONObject ContainerMgtInfo = (JSONObject) tenant_conf.get("ContainerMgtInfo");
+            DeploymentsDTO k8sClustersInfoDTO = new DeploymentsDTO();
+            k8sClustersInfoDTO.setName((String) ContainerMgtInfo.get("Type"));
+            //get clusters' properties
+            List<DeploymentClusterInfoDTO> deploymentClusterInfoDTOList = new ArrayList<>();
+            JSONObject clustersInfo = APIUtil.getClusterInfoFromConfig(ContainerMgtInfo.toString());
+            clustersInfo.keySet().forEach(keyStr ->
+            {
+                Object clusterProperties = clustersInfo.get(keyStr);
+                DeploymentClusterInfoDTO deploymentClusterInfoDTO = new DeploymentClusterInfoDTO();
+                deploymentClusterInfoDTO.setClusterName((String) keyStr);
+                deploymentClusterInfoDTO.setMasterURL(((JSONObject) clusterProperties).get("MasterURL").toString());
+                deploymentClusterInfoDTO.setNamespace(((JSONObject) clusterProperties).get("Namespace").toString());
+
+                if (!keyStr.toString().equals("")) {
+                    deploymentClusterInfoDTOList.add(deploymentClusterInfoDTO);
+                }
+            });
+
+            k8sClustersInfoDTO.setClusters(deploymentClusterInfoDTOList);
+            deploymentsList.add(k8sClustersInfoDTO);
+
+        } catch (RegistryException e) {
+            handleException("Couldn't read tenant configuration from tenant registry", e);
+        } catch (UserStoreException e) {
+            handleException("Couldn't read tenant configuration from tenant registry", e);
+        } catch (ParseException e) {
+            handleException("Couldn't parse tenant configuration for reading extension handler position", e);
+        }
+        return deploymentsList;
+    }
 }

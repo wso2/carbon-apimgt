@@ -134,7 +134,7 @@ public class SettingsDTO   {
   }
 
   /**
-   * Is Document Visibility configuration enabled 
+   * Is Document Visibility configuration enabled
    **/
   public SettingsDTO docVisibilityEnabled(Boolean docVisibilityEnabled) {
     this.docVisibilityEnabled = docVisibilityEnabled;
@@ -158,7 +158,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
   @JsonProperty("deployments")
   public List<DeploymentsDTO> getDeployments() {
