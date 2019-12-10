@@ -30,8 +30,6 @@
                             </item>
                             <item name="Requires re-subscription when publishing the API" forEvent="">
                             </item>
-<!--                            <item name="Publish In Private-Jet Mode" forEvent="">-->
-<!--                            </item>-->
                         </data>
 
                         <data name="transitionExecution">
@@ -54,6 +52,8 @@
                             <item name="Deprecate old versions after publishing the API" forEvent="">
                             </item>
                             <item name="Requires re-subscription when publishing the API" forEvent="">
+                            </item>
+                            <item name="Publish In Private-Jet Mode" forEvent="">
                             </item>
                         </data>
 
