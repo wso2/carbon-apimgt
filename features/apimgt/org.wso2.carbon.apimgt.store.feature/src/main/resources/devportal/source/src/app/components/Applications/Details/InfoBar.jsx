@@ -17,19 +17,24 @@
  */
 
 import React from 'react';
+import { withRouter, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import { Link } from 'react-router-dom';
 import Collapse from '@material-ui/core/Collapse';
 import Icon from '@material-ui/core/Icon';
 import Hidden from '@material-ui/core/Hidden';
-import { FormattedMessage } from 'react-intl';
+import IconButton from '@material-ui/core/IconButton';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
+import Grid from '@material-ui/core/Grid';
 import API from 'AppData/api';
+import Application from 'AppData/Application';
+import Alert from 'AppComponents/Shared/Alert';
+import DeleteConfirmation from '../Listing/DeleteConfirmation';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  * @param {*} theme theme details
@@ -49,7 +54,7 @@ const styles = (theme) => {
             borderBottom: 'solid 1px ' + theme.palette.grey.A200,
             display: 'flex',
             alignItems: 'center',
-            paddingLeft: theme.spacing.unit * 2,
+            paddingLeft: theme.spacing(2),
         },
         backIcon: {
             color: theme.palette.primary.main,
@@ -73,15 +78,14 @@ const styles = (theme) => {
             cursor: 'pointer',
             lineHeight: '70px',
         },
-
         topBar: {
             display: 'flex',
-            paddingBottom: theme.spacing.unit * 2,
+            paddingBottom: theme.spacing(2),
         },
         infoContent: {
             color: theme.palette.getContrastText(mainBack),
             background: mainBack,
-            padding: theme.spacing.unit * 3,
+            padding: theme.spacing(3),
             '& td, & th': {
                 color: theme.palette.getContrastText(mainBack),
             },
@@ -91,13 +95,10 @@ const styles = (theme) => {
             color: theme.palette.getContrastText(theme.custom.infoBar.sliderBackground),
             borderBottom: 'solid 1px ' + theme.palette.grey.A200,
         },
-        infoItem: {
-            marginRight: theme.spacing.unit * 4,
-        },
         bootstrapRoot: {
             padding: 0,
             'label + &': {
-                marginTop: theme.spacing.unit * 3,
+                marginTop: theme.spacing(3),
             },
         },
         bootstrapInput: {
@@ -162,8 +163,8 @@ const styles = (theme) => {
         verticalDividerStar: {
             borderLeft: 'solid 1px ' + theme.palette.grey.A200,
             height: 40,
-            marginRight: theme.spacing.unit,
-            marginLeft: theme.spacing.unit,
+            marginRight: theme.spacing(1),
+            marginLeft: theme.spacing(1),
         },
         backLink: {
             alignItems: 'center',
@@ -182,7 +183,7 @@ const styles = (theme) => {
             textAlign: 'left',
             justifyContent: 'left',
             display: 'flex',
-            paddingLeft: theme.spacing.unit * 2,
+            paddingLeft: theme.spacing(2),
             cursor: 'pointer',
         },
         buttonOverviewText: {
@@ -190,7 +191,18 @@ const styles = (theme) => {
             paddingTop: 3,
         },
         button: {
-            textDecoration: 'none',
+            display: 'inline-grid',
+            cursor: 'pointer',
+        },
+        editButton: {
+            display: 'inline-grid',
+            cursor: 'pointer',
+        },
+        iconButton: {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
         },
         appNameXSmall: {
             whiteSpace: 'nowrap',
@@ -237,8 +249,13 @@ class InfoBar extends React.Component {
         this.state = {
             notFound: false,
             showOverview: true,
+            isDeleteOpen: false,
+            applicationOwner: '',
         };
         this.toggleOverview = this.toggleOverview.bind(this);
+        this.handleAppDelete = this.handleAppDelete.bind(this);
+        this.handleDeleteConfimation = this.handleDeleteConfimation.bind(this);
+        this.toggleDeleteConfirmation = this.toggleDeleteConfirmation.bind(this);
     }
 
     /**
@@ -252,6 +269,7 @@ class InfoBar extends React.Component {
 
         promisedApplication
             .then((response) => {
+                this.setState({ applicationOwner: response.obj.owner });
                 const promisedPolicy = client.getTierByName(response.obj.throttlingPolicy, 'application');
                 return Promise.all([response, promisedPolicy]);
             })
@@ -284,15 +302,56 @@ class InfoBar extends React.Component {
     }
 
     /**
+     * Handles delete confimation
+     * @memberof InfoBar
+     */
+    handleDeleteConfimation() {
+        const { isDeleteOpen } = this.state;
+        this.setState({ isDeleteOpen: !isDeleteOpen });
+    }
+
+    /**
+     * Handles application deletion
+     * @memberof InfoBar
+     */
+    handleAppDelete() {
+        const { applicationId, intl } = this.props;
+        const promisedDelete = Application.deleteApp(applicationId);
+        let message = intl.formatMessage({
+            defaultMessage: 'Application deleted successfully!',
+            id: 'Applications.Listing.Listing.application.deleted.successfully',
+        });
+        promisedDelete.then((ok) => {
+            if (ok) {
+                Alert.info(message);
+                this.toggleDeleteConfirmation();
+            }
+            this.props.history.push('/applications');
+        }).catch((error) => {
+            console.log(error);
+            message = intl.formatMessage({
+                defaultMessage: 'Error while deleting application {name}',
+                id: 'Applications.Listing.Listing.application.deleting.error',
+            });
+            Alert.error(message);
+        });
+    }
+
+    toggleDeleteConfirmation = () => {
+        this.setState(({ isDeleteOpen }) => ({ isDeleteOpen: !isDeleteOpen }));
+    }
+
+
+    /**
      * @returns {div}
      * @memberof InfoBar
      */
     render() {
         const {
-            classes, theme, resourceNotFountMessage, applicationId,
+            classes, theme, applicationId,
         } = this.props;
         const {
-            application, tierDescription, showOverview, notFound,
+            application, tierDescription, showOverview, notFound, isDeleteOpen, applicationOwner,
         } = this.state;
         const {
             custom: {
@@ -301,12 +360,22 @@ class InfoBar extends React.Component {
         } = theme;
 
         if (notFound) {
-            return <ResourceNotFound message={resourceNotFountMessage} />;
+            return (
+              <ResourceNotFound
+                message={
+                  <FormattedMessage
+                    id="Applications.Details.InfoBar.listing.resource.not.found"
+                    defaultMessage="Resource Not Fount"
+                  />
+                }
+              />
+            );
         }
 
         if (!application) {
             return <Loading />;
         }
+        const isUserOwner = AuthManager.getUser().name === applicationOwner;
 
         return (
             <div className={classes.infoBarMain}>
@@ -320,36 +389,114 @@ class InfoBar extends React.Component {
                         </div>
                     </Link>
                     <VerticalDivider height={70} />
-                    <div style={{ marginLeft: theme.spacing.unit }}>
-                        <Hidden smUp>
-                            <Typography className={classes.appNameXSmall} variant='h4'>
-                                {application.name}
-                            </Typography>
-                        </Hidden>
+                    <Grid item xs={10}>
+                        <div style={{ marginLeft: theme.spacing(1) }}>
+                            <Hidden smUp>
+                                <Typography className={classes.appNameXSmall} variant='h4'>
+                                    {application.name}
+                                </Typography>
+                            </Hidden>
 
-                        <Hidden xsDown mdUp>
-                            <Typography className={classes.appNameSmall} variant='h4'>
-                                {application.name}
+                            <Hidden xsDown mdUp>
+                                <Typography className={classes.appNameSmall} variant='h4'>
+                                    {application.name}
+                                </Typography>
+                            </Hidden>
+                            <Hidden smDown lgUp>
+                                <Typography className={classes.appNameMid} variant='h4'>
+                                    {application.name}
+                                </Typography>
+                            </Hidden>
+                            <Hidden mdDown xlUp>
+                                <Typography className={classes.appNameBig} variant='h4'>
+                                    {application.name}
+                                </Typography>
+                            </Hidden>
+                            <Typography variant='caption' gutterBottom align='left'>
+                                {application.subscriptionCount}{' '}
+                                <FormattedMessage
+                                    id='Applications.Details.InfoBar.subscriptions'
+                                    defaultMessage='Subscriptions'
+                                />
                             </Typography>
-                        </Hidden>
-                        <Hidden smDown lgUp>
-                            <Typography className={classes.appNameMid} variant='h4'>
-                                {application.name}
+                        </div>
+                    </Grid>
+                    <VerticalDivider height={70} />
+                    <Grid item xs={1} m={1} className={classes.editButton}>
+                        {isUserOwner ? (
+                            <Link to={`/applications/${applicationId}/edit/`} className={classes.editButton}>
+                                <IconButton
+                                    style={{ padding: '4px' }}
+                                    color='default'
+                                    classes={{ label: classes.iconButton }}
+                                    aria-label={(
+                                        <FormattedMessage
+                                            id='Applications.Details.InfoBar.edit'
+                                            defaultMessage='Edit'
+                                        />
+                                    )}
+                                >
+                                    <Icon>edit</Icon>
+                                    <Typography variant='caption' style={{ marginTop: '2px' }} >
+                                        <FormattedMessage
+                                            id='Applications.Details.InfoBar.edit.text'
+                                            defaultMessage='Edit'
+                                        />
+                                    </Typography>
+                                </IconButton>
+                            </Link>) :
+                            (
+                                <IconButton
+                                    disabled
+                                    style={{ padding: '4px' }}
+                                    color='default'
+                                    classes={{ label: classes.iconButton }}
+                                    aria-label={(
+                                        <FormattedMessage
+                                            id='Applications.Details.InfoBar.edit'
+                                            defaultMessage='Edit'
+                                        />
+                                    )}
+                                >
+                                    <Icon>edit</Icon>
+                                    <Typography variant='caption' style={{ marginTop: '2px' }} >
+                                        <FormattedMessage
+                                            id='Applications.Details.InfoBar.edit.text'
+                                            defaultMessage='Edit'
+                                        />
+                                    </Typography>
+                                </IconButton>
+                            )}
+                    </Grid>
+                    <VerticalDivider height={70} />
+                    <Grid item xs={1} m={1} className={classes.button}>
+                        <IconButton
+                            onClick={this.handleDeleteConfimation}
+                            disabled={AuthManager.getUser().name !== applicationOwner}
+                            color='default'
+                            classes={{ label: classes.iconButton }}
+                            disableRipple
+                            aria-label={(
+                                <FormattedMessage
+                                    id='Applications.Details.InfoBar.delete'
+                                    defaultMessage='Delete'
+                                />
+                            )}
+                        >
+                            <Icon >delete</Icon>
+                            <Typography variant='caption' style={{ marginTop: '2px' }} >
+                                <FormattedMessage
+                                    id='Applications.Details.InfoBar.text'
+                                    defaultMessage='Delete'
+                                />
                             </Typography>
-                        </Hidden>
-                        <Hidden mdDown xlUp>
-                            <Typography className={classes.appNameBig} variant='h4'>
-                                {application.name}
-                            </Typography>
-                        </Hidden>
-                        <Typography variant='caption' gutterBottom align='left'>
-                            {application.subscriptionCount}{' '}
-                            <FormattedMessage
-                                id='Applications.Details.InfoBar.subscriptions'
-                                defaultMessage='Subscriptions'
-                            />
-                        </Typography>
-                    </div>
+                        </IconButton>
+                        <DeleteConfirmation
+                            handleAppDelete={this.handleAppDelete}
+                            isDeleteOpen={isDeleteOpen}
+                            toggleDeleteConfirmation={this.toggleDeleteConfirmation}
+                        />
+                    </Grid>
                 </div>
                 {position === 'horizontal' && <div style={{ height: 60 }} />}
                 {showOverview && (
@@ -379,16 +526,6 @@ class InfoBar extends React.Component {
                                                 </Typography>
                                             </div>
                                         ) : null))}
-                                    <div className={classes.infoItem}>
-                                        <Link to={`/applications/${applicationId}/edit/`} className={classes.button}>
-                                            <Button variant='contained' color='default'>
-                                                <FormattedMessage
-                                                    id='Applications.Details.InfoBar.edit'
-                                                    defaultMessage='Edit'
-                                                />
-                                            </Button>
-                                        </Link>
-                                    </div>
                                 </div>
                                 <Typography>{application.description}</Typography>
                             </div>
@@ -419,12 +556,10 @@ class InfoBar extends React.Component {
         );
     }
 }
-
 InfoBar.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
-    resourceNotFountMessage: PropTypes.string.isRequired,
     applicationId: PropTypes.string.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(InfoBar);
+export default injectIntl(withRouter(withStyles(styles, { withTheme: true })(InfoBar)));

@@ -27,8 +27,10 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -53,6 +55,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -82,6 +85,22 @@ public class APIMappingUtil {
         dto.setLifeCycleStatus(model.getStatus());
         dto.setType(model.getType());
         dto.setAvgRating(String.valueOf(model.getRating()));
+
+        Set<Scope> scopes = model.getScopes();
+        Map<String, ScopeInfoDTO> uniqueScope = new HashMap<>();
+
+        for (Scope scope : scopes) {
+            if (!uniqueScope.containsKey(scope.getKey())) {
+                ScopeInfoDTO scopeInfoDTO = new ScopeInfoDTO().
+                        key(scope.getKey()).
+                        name(scope.getName()).
+                        description(scope.getDescription()).
+                        roles(Arrays.asList(scope.getRoles().split(",")));
+                uniqueScope.put(scope.getKey(), scopeInfoDTO);
+            }
+        }
+
+        dto.setScopes(new ArrayList<>(uniqueScope.values()));
 
         /* todo: created and last updated times
         if (null != model.getLastUpdated()) {
@@ -301,6 +320,30 @@ public class APIMappingUtil {
             }
         }
         dto.setTiers(tiersToReturn);
+
+        List<APIOperationsDTO> operationList = new ArrayList<>();
+        Map<String, ScopeInfoDTO> uniqueScope = new HashMap<>();
+        for (APIProductResource productResource : model.getProductResources()) {
+            URITemplate uriTemplate = productResource.getUriTemplate();
+            APIOperationsDTO operation = new APIOperationsDTO();
+            operation.setTarget(uriTemplate.getUriTemplate());
+            operation.setVerb(uriTemplate.getHTTPVerb());
+            operationList.add(operation);
+
+            Scope scope = uriTemplate.getScope();
+            if (scope != null && !uniqueScope.containsKey(scope.getKey())) {
+                ScopeInfoDTO scopeInfoDTO = new ScopeInfoDTO().
+                        key(scope.getKey()).
+                        name(scope.getName()).
+                        description(scope.getDescription()).
+                        roles(Arrays.asList(scope.getRoles().split(",")));
+                uniqueScope.put(scope.getKey(), scopeInfoDTO);
+            }
+        }
+
+        dto.setOperations(operationList);
+
+        dto.setScopes(new ArrayList<>(uniqueScope.values()));
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
 
@@ -608,9 +651,9 @@ public class APIMappingUtil {
         //        if (api.getScopes() != null) {
         //            apiInfoDTO.setScopes(getScopeInfoDTO(api.getScopes()));
         //        }
-        //        if (!StringUtils.isBlank(api.getThumbnailUrl())) {
-        //            apiInfoDTO.setThumbnailUri(getThumbnailUri(api.getUUID()));
-        //        }
+        if (!StringUtils.isBlank(api.getThumbnailUrl())) {
+            apiInfoDTO.setThumbnailUri(api.getThumbnailUrl());
+        }
         apiInfoDTO.setAdvertiseInfo(extractAdvertiseInfo(api));
         String apiTenant = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
                 .getProviderName()));
@@ -668,6 +711,11 @@ public class APIMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwner(apiProduct.getTechnicalOwner());
         apiBusinessInformationDTO.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
         apiInfoDTO.setBusinessInformation(apiBusinessInformationDTO);
+
+        if (!StringUtils.isBlank(apiProduct.getThumbnailUrl())) {
+            apiInfoDTO.setThumbnailUri(apiProduct.getThumbnailUrl());
+        }
+
         //Since same APIInfoDTO is used for listing APIProducts in StoreUI set default AdvertisedInfo to the DTO
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(false);

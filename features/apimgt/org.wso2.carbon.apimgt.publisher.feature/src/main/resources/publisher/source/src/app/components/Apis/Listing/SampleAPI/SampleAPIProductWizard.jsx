@@ -33,7 +33,7 @@ import { PropTypes } from 'prop-types';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { FormattedMessage } from 'react-intl';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     chipHeadWrapperDefault: {
         background: theme.palette.grey[100],
         color: theme.palette.getContrastText(theme.palette.grey[100]),
@@ -109,7 +109,7 @@ function SampleAPIProductWizard(props) {
     }
 
     return (
-        <React.Fragment>
+        <>
             <Dialog
                 fullWidth
                 maxWidth='md'
@@ -154,13 +154,19 @@ function SampleAPIProductWizard(props) {
                         />
                     </Box>
                     <Box m={1} component='span'>
-                        <span>/add</span> <span className={classes.post}>post</span>
+                        <span>/add</span>
+                        {' '}
+                        <span className={classes.post}>post</span>
                     </Box>
                     <Box m={1} component='span'>
-                        <span>/divide</span> <span className={classes.post}>post</span>
+                        <span>/divide</span>
+                        {' '}
+                        <span className={classes.post}>post</span>
                     </Box>
                     <Box m={1} component='span'>
-                        <span>/multiply</span> <span className={classes.post}>post</span>
+                        <span>/multiply</span>
+                        {' '}
+                        <span className={classes.post}>post</span>
                     </Box>
 
                     {/* Math Api creation */}
@@ -193,13 +199,19 @@ function SampleAPIProductWizard(props) {
                         />
                     </Box>
                     <Box m={1} component='span'>
-                        <span>/area</span> <span className={classes.get}>get</span>
+                        <span>/area</span>
+                        {' '}
+                        <span className={classes.get}>get</span>
                     </Box>
                     <Box m={1} component='span'>
-                        <span>/volume</span> <span className={classes.get}>get</span>
+                        <span>/volume</span>
+                        {' '}
+                        <span className={classes.get}>get</span>
                     </Box>
                     <Box m={1} component='span'>
-                        <span>/multiply</span> <span className={classes.get}>get</span>
+                        <span>/multiply</span>
+                        {' '}
+                        <span className={classes.get}>get</span>
                     </Box>
                     {/* API Product creation */}
                     <div
@@ -220,8 +232,8 @@ function SampleAPIProductWizard(props) {
                             <FormattedMessage
                                 id='Apis.Listing.SampleAPI.SampleAPIProductWizard.product.title'
                                 defaultMessage={
-                                    'Creating CalculatorAPIProduct from the resources' +
-                                    'of Math API and Calculator API'
+                                    'Creating CalculatorAPIProduct from the resources'
+                                    + 'of Math API and Calculator API'
                                 }
                             />
                         </div>
@@ -234,16 +246,24 @@ function SampleAPIProductWizard(props) {
                         />
                     </Box>
                     <Box m={1} component='span'>
-                        <span>/add</span> <span className={classes.post}>post</span>
+                        <span>/add</span>
+                        {' '}
+                        <span className={classes.post}>post</span>
                     </Box>
                     <Box m={1} component='span'>
-                        <span>/divide</span> <span className={classes.post}>post</span>
+                        <span>/divide</span>
+                        {' '}
+                        <span className={classes.post}>post</span>
                     </Box>
                     <Box m={1} component='span'>
-                        <span>/area</span> <span className={classes.get}>get</span>
+                        <span>/area</span>
+                        {' '}
+                        <span className={classes.get}>get</span>
                     </Box>
                     <Box m={1} component='span'>
-                        <span>/volume</span> <span className={classes.get}>get</span>
+                        <span>/volume</span>
+                        {' '}
+                        <span className={classes.get}>get</span>
                     </Box>
                 </DialogContent>
                 <DialogActions className={classes.actions}>
@@ -265,7 +285,7 @@ function SampleAPIProductWizard(props) {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </React.Fragment>
+        </>
     );
 }
 SampleAPIProductWizard.propTypes = {

@@ -1,0 +1,431 @@
+<div class="main-content">
+    <h1><a name="API Audit"></a>API Audit</h1>
+
+            <hr/>
+            <h4 class="operation-heading"><a name="apisApiIdAuditapiGet"></a>Retrieve the Security Audit Report of the Audit API</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/auditapi</code>
+            <p class="marked"></p>
+
+            <p class="marked">Retrieve the Security Audit Report of the Audit API
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_view</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+            <h4 class="section-heading">
+                <u></u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdAuditapiGet">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-apisApiIdAuditapiGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d/auditapi HTTP 1/1
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdAuditapiGet">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-apisApiIdAuditapiGet" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
+Content-Type: application/json
+
+{
+  &quot;report&quot; : {
+    &quot;index&quot; : [ &quot;&quot;, &quot;/components/schemas/Error&quot;, &quot;/components/schemas/Error/properties/code&quot;, &quot;/components/schemas/Error/properties/message&quot;, &quot;/components/schemas/Pet&quot;, &quot;/components/schemas/Pet/properties/id&quot;, &quot;/components/schemas/Pet/properties/name&quot;, &quot;/components/schemas/Pet/properties/tag&quot;, &quot;/components/schemas/Pets&quot;, &quot;/components/schemas/Pets/items&quot;, &quot;/paths/~1pets/get&quot;, &quot;/paths/~1pets/get/parameters/0&quot;, &quot;/paths/~1pets/get/parameters/0/schema&quot;, &quot;/paths/~1pets/get/parameters/1&quot;, &quot;/paths/~1pets/get/parameters/1/schema&quot;, &quot;/paths/~1pets/get/responses/200/content/application~1json/schema&quot;, &quot;/paths/~1pets/get/responses/200/headers/x-next/schema&quot;, &quot;/paths/~1pets/get/responses/default/content/application~1json/schema&quot;, &quot;/paths/~1pets/get/security/0/default&quot;, &quot;/paths/~1pets/post&quot;, &quot;/paths/~1pets/post/responses/201&quot;, &quot;/paths/~1pets/post/responses/default/content/application~1json/schema&quot;, &quot;/paths/~1pets/post/security/0/default&quot;, &quot;/paths/~1pets~1{petId}/get&quot;, &quot;/paths/~1pets~1{petId}/get/parameters/0/schema&quot;, &quot;/paths/~1pets~1{petId}/get/responses/200/content/application~1json/schema&quot;, &quot;/paths/~1pets~1{petId}/get/responses/default/content/application~1json/schema&quot;, &quot;/paths/~1pets~1{petId}/get/security/0/default&quot; ],
+    &quot;assessmentVersion&quot; : &quot;3.0.0&quot;,
+    &quot;oasVersion&quot; : &quot;3.0.0&quot;,
+    &quot;apiVersion&quot; : &quot;1.0.0&quot;,
+    &quot;fileId&quot; : &quot;fd21f9f7-3674-49cf-8a83-dca401f635de&quot;,
+    &quot;apiId&quot; : &quot;&quot;,
+    &quot;openapiState&quot; : &quot;semanticInvalid&quot;,
+    &quot;score&quot; : 28.0172,
+    &quot;valid&quot; : false,
+    &quot;criticality&quot; : 4,
+    &quot;issueCounter&quot; : 27,
+    &quot;semanticErrors&quot; : {
+      &quot;issues&quot; : {
+        &quot;v3.semantic.parameter.namein.multiple&quot; : {
+          &quot;description&quot; : &quot;Parameters defined having the same name + in combination&quot;,
+          &quot;issues&quot; : [ {
+            &quot;specificDescription&quot; : &quot;Parameters in &#39;operation&#39;, /paths/~1pets/get/parameters/0&#39;, and &#39;/paths/~1pets/get/parameters/1&#39; have the same name + in combination&quot;,
+            &quot;pointer&quot; : 11
+          }, {
+            &quot;specificDescription&quot; : &quot;Parameters in &#39;operation&#39;, /paths/~1pets/get/parameters/0&#39;, and &#39;/paths/~1pets/get/parameters/1&#39; have the same name + in combination&quot;,
+            &quot;pointer&quot; : 13
+          } ],
+          &quot;totalIssues&quot; : 2,
+          &quot;tooManyError&quot; : false
+        }
+      }
+    },
+    &quot;minimalReport&quot; : true,
+    &quot;maxEntriesPerIssue&quot; : 30,
+    &quot;maxImpactedPerEntry&quot; : 30,
+    &quot;security&quot; : {
+      &quot;issueCounter&quot; : 4,
+      &quot;score&quot; : 15,
+      &quot;criticality&quot; : 3,
+      &quot;issues&quot; : {
+        &quot;v3.global.http.clear&quot; : {
+          &quot;description&quot; : &quot;API accepts HTTP requests in the clear&quot;,
+          &quot;issues&quot; : [ {
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -7.5,
+            &quot;pointer&quot; : 0,
+            &quot;tooManyImpacted&quot; : false,
+            &quot;pointersAffected&quot; : [ 10, 19, 23 ]
+          } ],
+          &quot;issueCounter&quot; : 1,
+          &quot;score&quot; : -7.5,
+          &quot;criticality&quot; : 3,
+          &quot;tooManyError&quot; : false
+        },
+        &quot;v3.operation.securityRequirement.weak&quot; : {
+          &quot;description&quot; : &quot;Access tokens transported as cleartext&quot;,
+          &quot;issues&quot; : [ {
+            &quot;specificDescription&quot; : &quot;The operation &#39;get&#39; accepts access tokens sent as cleartext&quot;,
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -2.5,
+            &quot;pointer&quot; : 18,
+            &quot;tooManyImpacted&quot; : false
+          }, {
+            &quot;specificDescription&quot; : &quot;The operation &#39;post&#39; accepts access tokens sent as cleartext&quot;,
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -2.5,
+            &quot;pointer&quot; : 22,
+            &quot;tooManyImpacted&quot; : false
+          }, {
+            &quot;specificDescription&quot; : &quot;The operation &#39;get&#39; accepts access tokens sent as cleartext&quot;,
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -2.5,
+            &quot;pointer&quot; : 27,
+            &quot;tooManyImpacted&quot; : false
+          } ],
+          &quot;issueCounter&quot; : 3,
+          &quot;score&quot; : -7.5,
+          &quot;criticality&quot; : 3,
+          &quot;tooManyError&quot; : false
+        }
+      }
+    },
+    &quot;data&quot; : {
+      &quot;issueCounter&quot; : 22,
+      &quot;score&quot; : 13.017199999999999,
+      &quot;criticality&quot; : 4,
+      &quot;issues&quot; : {
+        &quot;v3.response.schema.undefined&quot; : {
+          &quot;description&quot; : &quot;Response that should contain a body has no schema defined&quot;,
+          &quot;issues&quot; : [ {
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -8.166666666666666,
+            &quot;pointer&quot; : 20,
+            &quot;tooManyImpacted&quot; : false
+          } ],
+          &quot;issueCounter&quot; : 1,
+          &quot;score&quot; : -8.166666666666666,
+          &quot;criticality&quot; : 1,
+          &quot;tooManyError&quot; : false
+        },
+        &quot;v3.schema.array.maxItems&quot; : {
+          &quot;description&quot; : &quot;Array schema has no maximum number of the items defined&quot;,
+          &quot;issues&quot; : [ {
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -0.7839999999999999,
+            &quot;pointer&quot; : 8,
+            &quot;tooManyImpacted&quot; : false,
+            &quot;pointersAffected&quot; : [ 8, 15 ]
+          } ],
+          &quot;issueCounter&quot; : 1,
+          &quot;score&quot; : -0.7839999999999999,
+          &quot;criticality&quot; : 4,
+          &quot;tooManyError&quot; : false
+        },
+        &quot;v3.schema.numerical.max&quot; : {
+          &quot;description&quot; : &quot;Numeric schema has no maximum defined&quot;,
+          &quot;issues&quot; : [ {
+            &quot;specificDescription&quot; : &quot;Numeric schema of type &#39;integer&#39; has no maximum defined&quot;,
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -3.733333333333334,
+            &quot;pointer&quot; : 12,
+            &quot;tooManyImpacted&quot; : false
+          }, {
+            &quot;specificDescription&quot; : &quot;Numeric schema of type &#39;integer&#39; has no maximum defined&quot;,
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -3.733333333333334,
+            &quot;pointer&quot; : 14,
+            &quot;tooManyImpacted&quot; : false
+          }, {
+            &quot;specificDescription&quot; : &quot;Numeric schema of type &#39;integer&#39; has no maximum defined&quot;,
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -0.98,
+            &quot;pointer&quot; : 2,
+            &quot;tooManyImpacted&quot; : false,
+            &quot;pointersAffected&quot; : [ 1, 17, 21, 26 ]
+          }, {
+            &quot;specificDescription&quot; : &quot;Numeric schema of type &#39;integer&#39; has no maximum defined&quot;,
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -0.3397333333333333,
+            &quot;pointer&quot; : 5,
+            &quot;tooManyImpacted&quot; : false,
+            &quot;pointersAffected&quot; : [ 4, 8, 9, 15, 25 ]
+          } ],
+          &quot;issueCounter&quot; : 4,
+          &quot;score&quot; : -8.7864,
+          &quot;criticality&quot; : 3,
+          &quot;tooManyError&quot; : false
+        },
+        &quot;v3.schema.numerical.min&quot; : {
+          &quot;description&quot; : &quot;Numeric schema has no minimum defined&quot;,
+          &quot;issues&quot; : [ {
+            &quot;specificDescription&quot; : &quot;Numeric schema of type &#39;integer&#39; has no minimum defined&quot;,
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -3.733333333333334,
+            &quot;pointer&quot; : 12,
+            &quot;tooManyImpacted&quot; : false
+          }, {
+            &quot;specificDescription&quot; : &quot;Numeric schema of type &#39;integer&#39; has no minimum defined&quot;,
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -3.733333333333334,
+            &quot;pointer&quot; : 14,
+            &quot;tooManyImpacted&quot; : false
+          }, {
+            &quot;specificDescription&quot; : &quot;Numeric schema of type &#39;integer&#39; has no minimum defined&quot;,
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -0.98,
+            &quot;pointer&quot; : 2,
+            &quot;tooManyImpacted&quot; : false,
+            &quot;pointersAffected&quot; : [ 1, 17, 21, 26 ]
+          }, {
+            &quot;specificDescription&quot; : &quot;Numeric schema of type &#39;integer&#39; has no minimum defined&quot;,
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -0.3397333333333333,
+            &quot;pointer&quot; : 5,
+            &quot;tooManyImpacted&quot; : false,
+            &quot;pointersAffected&quot; : [ 4, 8, 9, 15, 25 ]
+          } ],
+          &quot;issueCounter&quot; : 4,
+          &quot;score&quot; : -8.7864,
+          &quot;criticality&quot; : 3,
+          &quot;tooManyError&quot; : false
+        },
+        &quot;v3.schema.object.additionalProperties.true&quot; : {
+          &quot;description&quot; : &quot;Schema allows additional properties&quot;,
+          &quot;issues&quot; : [ {
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -4.8999999999999995,
+            &quot;pointer&quot; : 1,
+            &quot;tooManyImpacted&quot; : false,
+            &quot;pointersAffected&quot; : [ 1, 17, 21, 26 ]
+          }, {
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -2.0906666666666665,
+            &quot;pointer&quot; : 4,
+            &quot;tooManyImpacted&quot; : false,
+            &quot;pointersAffected&quot; : [ 4, 8, 9, 15, 25 ]
+          } ],
+          &quot;issueCounter&quot; : 2,
+          &quot;score&quot; : -6.990666666666666,
+          &quot;criticality&quot; : 3,
+          &quot;tooManyError&quot; : false
+        },
+        &quot;v3.schema.string.maxLength&quot; : {
+          &quot;description&quot; : &quot;String schema has no maximum length defined&quot;,
+          &quot;issues&quot; : [ {
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -7.466666666666668,
+            &quot;pointer&quot; : 24,
+            &quot;tooManyImpacted&quot; : false
+          }, {
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -0.98,
+            &quot;pointer&quot; : 3,
+            &quot;tooManyImpacted&quot; : false,
+            &quot;pointersAffected&quot; : [ 1, 17, 21, 26 ]
+          }, {
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -0.3397333333333333,
+            &quot;pointer&quot; : 6,
+            &quot;tooManyImpacted&quot; : false,
+            &quot;pointersAffected&quot; : [ 4, 8, 9, 15, 25 ]
+          }, {
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -0.3397333333333333,
+            &quot;pointer&quot; : 7,
+            &quot;tooManyImpacted&quot; : false,
+            &quot;pointersAffected&quot; : [ 4, 8, 9, 15, 25 ]
+          }, {
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -0.26133333333333336,
+            &quot;pointer&quot; : 16,
+            &quot;tooManyImpacted&quot; : false
+          } ],
+          &quot;issueCounter&quot; : 5,
+          &quot;score&quot; : -9.387466666666668,
+          &quot;criticality&quot; : 3,
+          &quot;tooManyError&quot; : false
+        },
+        &quot;v3.schema.string.pattern&quot; : {
+          &quot;description&quot; : &quot;String schema has no pattern defined&quot;,
+          &quot;issues&quot; : [ {
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -11.2,
+            &quot;pointer&quot; : 24,
+            &quot;tooManyImpacted&quot; : false
+          }, {
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -1.4699999999999998,
+            &quot;pointer&quot; : 3,
+            &quot;tooManyImpacted&quot; : false,
+            &quot;pointersAffected&quot; : [ 1, 17, 21, 26 ]
+          }, {
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -0.5095999999999998,
+            &quot;pointer&quot; : 6,
+            &quot;tooManyImpacted&quot; : false,
+            &quot;pointersAffected&quot; : [ 4, 8, 9, 15, 25 ]
+          }, {
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -0.5095999999999998,
+            &quot;pointer&quot; : 7,
+            &quot;tooManyImpacted&quot; : false,
+            &quot;pointersAffected&quot; : [ 4, 8, 9, 15, 25 ]
+          }, {
+            &quot;sensitivity&quot; : 2,
+            &quot;score&quot; : -0.39199999999999996,
+            &quot;pointer&quot; : 16,
+            &quot;tooManyImpacted&quot; : false
+          } ],
+          &quot;issueCounter&quot; : 5,
+          &quot;score&quot; : -14.081199999999999,
+          &quot;criticality&quot; : 3,
+          &quot;tooManyError&quot; : false
+        }
+      }
+    }
+  }
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d/auditapi&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
+
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>Accept</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Media types acceptable for the response. Default is application/json.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">application/json</p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. The Security Audit Report has been returned. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#AuditReport">AuditReport</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. The Security Audit Report was not found. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+</div>

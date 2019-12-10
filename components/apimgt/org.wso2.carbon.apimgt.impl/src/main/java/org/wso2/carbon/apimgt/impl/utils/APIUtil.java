@@ -118,6 +118,7 @@ import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
@@ -148,6 +149,8 @@ import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
+import org.wso2.carbon.databridge.commons.Event;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.endpoints.EndpointManager;
 import org.wso2.carbon.governance.api.endpoints.dataobjects.Endpoint;
@@ -157,6 +160,7 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
+import org.wso2.carbon.governance.registry.extensions.utils.APIUtils;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -206,6 +210,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -300,6 +305,8 @@ public final class APIUtil {
 
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
     private static final String NONE = "NONE";
+    private static final String SUPER_TENANT_SUFFIX =
+            APIConstants.EMAIL_DOMAIN_SEPARATOR + APIConstants.SUPER_TENANT_DOMAIN;
 
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
     static {
@@ -619,6 +626,16 @@ public final class APIUtil {
 
             Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
 
+            // AWS Lambda: get paths
+            OASParserUtil oasParserUtil = new OASParserUtil();
+            String resourceConfigsString = oasParserUtil.getAPIDefinition(apiIdentifier, registry);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject paths = null;
+            if (resourceConfigsString != null) {
+                JSONObject resourceConfigsJSON = (JSONObject) jsonParser.parse(resourceConfigsString);
+                paths = (JSONObject) resourceConfigsJSON.get(APIConstants.SWAGGER_PATHS);
+            }
+
             for (URITemplate uriTemplate : uriTemplates) {
                 String uTemplate = uriTemplate.getUriTemplate();
                 String method = uriTemplate.getHTTPVerb();
@@ -628,6 +645,17 @@ public final class APIUtil {
                 uriTemplate.setScopes(scope);
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
+                // AWS Lambda: set arn to URI template
+                if (paths != null) {
+                    JSONObject path = (JSONObject) paths.get(uTemplate);
+                    if (path != null) {
+                        JSONObject operation = (JSONObject) path.get(method.toLowerCase());
+                        if (operation != null && operation.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
+                            uriTemplate.setAmznResourceName((String)
+                                    operation.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+                        }
+                    }
+                }
             }
 
             if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
@@ -958,9 +986,7 @@ public final class APIUtil {
                 //ignore
             }
             api.setCacheTimeout(cacheTimeout);
-
             boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
-
             if (isGlobalThrottlingEnabled) {
                 String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
                 api.setApiLevelPolicy(apiLevelTier);
@@ -1018,7 +1044,6 @@ public final class APIUtil {
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
-
             try {
                 api.setEnvironmentList(extractEnvironmentListForAPI(
                         artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
@@ -1029,7 +1054,6 @@ public final class APIUtil {
                 String msg = "Invalid endpoint config JSON found in API: " + apiName + " " + apiVersion;
                 throw new APIManagementException(msg, e);
             }
-
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact";
             throw new APIManagementException(msg, e);
@@ -5456,6 +5480,17 @@ public final class APIUtil {
     }
 
     /**
+     * Return the sequence extension name.
+     * eg: admin--testAPi--v1.00
+     *
+     * @param api
+     * @return
+     */
+    public static String getSequenceExtensionName(String provider, String name, String version) {
+        return  provider+ "--" + name + ":v" + version;
+    }
+
+    /**
      * @param token
      * @return
      */
@@ -7108,6 +7143,9 @@ public final class APIUtil {
     }
 
     public static int getManagementTransportPort (String mgtTransport){
+        if (StringUtils.isEmpty(mgtTransport)) {
+            mgtTransport = APIConstants.HTTPS_PROTOCOL;
+        }
         AxisConfiguration axisConfiguration = ServiceReferenceHolder
                 .getContextService().getServerConfigContext().getAxisConfiguration();
         int mgtTransportPort = CarbonUtils.getTransportProxyPort(axisConfiguration, mgtTransport);
@@ -7115,6 +7153,30 @@ public final class APIUtil {
             mgtTransportPort = CarbonUtils.getTransportPort(axisConfiguration, mgtTransport);
         }
         return mgtTransportPort;
+    }
+
+    public static int getCarbonTransportPort(String mgtTransport) {
+
+        if (StringUtils.isEmpty(mgtTransport)) {
+            mgtTransport = APIConstants.HTTPS_PROTOCOL;
+        }
+        AxisConfiguration axisConfiguration = ServiceReferenceHolder
+                .getContextService().getServerConfigContext().getAxisConfiguration();
+        return CarbonUtils.getTransportPort(axisConfiguration, mgtTransport);
+
+    }
+
+    /*
+     * Checks whether the proxy port is configured.
+     * @param transport  The transport
+     * @return boolean proxyport is enabled
+     * */
+    public static boolean isProxyPortEnabled(String mgtTransport) {
+
+        AxisConfiguration axisConfiguration = ServiceReferenceHolder
+                .getContextService().getServerConfigContext().getAxisConfiguration();
+        int mgtTransportProxyPort = CarbonUtils.getTransportProxyPort(axisConfiguration, mgtTransport);
+        return mgtTransportProxyPort > 0;
     }
 
     public static String getServerURL() throws APIManagementException {
@@ -8684,6 +8746,37 @@ public final class APIUtil {
     }
 
     /**
+     * Get the Security Audit Attributes for tenant from the Registry
+     *
+     * @param tenantId tenant id
+     * @return JSONObject JSONObject containing the properties
+     * @throws APIManagementException Throw if a registry or parse exception arises
+     */
+    public static JSONObject getSecurityAuditAttributesFromRegistry(int tenantId) throws APIManagementException {
+        try {
+            Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
+            if (registryConfig.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                Resource resource = registryConfig.get(APIConstants.API_TENANT_CONF_LOCATION);
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                if (content != null) {
+                    JSONObject tenantConfigs = (JSONObject) new JSONParser().parse(content);
+                    String property = APIConstants.SECURITY_AUDIT_CONFIGURATION;
+                    if (tenantConfigs.keySet().contains(property)) {
+                        return (JSONObject) tenantConfigs.get(property);
+                    }
+                }
+            }
+        } catch (RegistryException exception) {
+            String msg = "Error while retrieving Security Audit attributes from tenant registry.";
+            throw new APIManagementException(msg, exception);
+        } catch (ParseException parseException) {
+            String msg = "Couldn't create json object from Swagger object for custom security audit attributes.";
+            throw new APIManagementException(msg, parseException);
+        }
+        return null;
+    }
+
+    /**
      * Validate the input file name for invalid path elements
      *
      * @param fileName
@@ -8965,6 +9058,7 @@ public final class APIUtil {
             apiProduct.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             apiProduct.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
             apiProduct.setState(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
+            apiProduct.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             apiProduct.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
             apiProduct.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
             apiProduct.setVisibleTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS));
@@ -9559,6 +9653,43 @@ public final class APIUtil {
         }
     }
 
+    public static String convertOMtoString(OMElement faultSequence) throws XMLStreamException {
+
+        StringWriter stringWriter = new StringWriter();
+        faultSequence.serializeAndConsume(stringWriter);
+        return stringWriter.toString();
+    }
+
+    public static String getFaultSequenceName(API api) throws APIManagementException {
+
+        if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
+            String tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            if (api.getId().getProviderName().contains("-AT-")) {
+                String provider = api.getId().getProviderName().replace("-AT-", "@");
+                tenantDomain = MultitenantUtils.getTenantDomain(provider);
+            }
+            int tenantId;
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().
+                        getTenantManager().getTenantId(tenantDomain);
+                if (APIUtil.isPerAPISequence(api.getFaultSequence(), tenantId, api.getId(),
+                        APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT)) {
+                    return APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+                } else {
+                    return api.getFaultSequence();
+                }
+            } catch (UserStoreException e) {
+                throw new APIManagementException("Error while retrieving tenant Id from " +
+                        api.getId().getProviderName(), e);
+            } catch (APIManagementException e) {
+                throw new APIManagementException("Error while checking whether sequence " + api.getFaultSequence() +
+                        " is a per API sequence.", e);
+            }
+        }
+        return null;
+
+    }
+
     /**
      * return skipRolesByRegex config
      *
@@ -9569,4 +9700,48 @@ public final class APIUtil {
         String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
         return skipRolesByRegex;
     }
+
+    public static void publishEventToStream(String streamId, String eventPublisherName, Object[] eventData) {
+
+        boolean tenantFlowStarted = false;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            tenantFlowStarted = true;
+            OutputEventAdapterService eventAdapterService =
+                    ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
+            Event blockingMessage = new Event(streamId, System.currentTimeMillis(),
+                    null, null, eventData);
+            ThrottleProperties throttleProperties =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration().getThrottleProperties();
+
+            if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
+                eventAdapterService.publish(eventPublisherName, Collections.EMPTY_MAP, blockingMessage);
+            }
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+    }
+
+    /**
+     * append the tenant domain to the username when an email is used as the username and EmailUserName is not enabled
+     * in the super tenant
+     * @param username
+     * @param tenantDomain
+     * @return username is an email
+     */
+    public static String appendTenantDomainForEmailUsernames(String username, String tenantDomain) {
+        if (APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenantDomain) &&
+                !username.endsWith(SUPER_TENANT_SUFFIX) &&
+                !MultitenantUtils.isEmailUserName() &&
+                username.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR) > 0) {
+            return username += SUPER_TENANT_SUFFIX;
+        }
+        return username;
+    }
 }
+

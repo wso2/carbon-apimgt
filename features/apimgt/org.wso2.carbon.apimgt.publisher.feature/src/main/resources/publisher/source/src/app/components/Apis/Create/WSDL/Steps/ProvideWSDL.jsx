@@ -47,7 +47,7 @@ import Wsdl from 'AppData/Wsdl';
 import Banner from 'AppComponents/Shared/Banner';
 import DropZoneLocal, { humanFileSize } from 'AppComponents/Shared/DropZoneLocal';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     mandatoryStar: {
         color: theme.palette.error.main,
     },
@@ -199,15 +199,19 @@ export default function ProvideWSDL(props) {
         );
     }
 
-    const dropBoxControlLabel = isGenerateRESTAPI ? (<FormattedMessage
-        id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.file.dropzone'
-        defaultMessage='Drag & Drop WSDL file {break} -or-'
-        values={{ break: <br /> }}
-    />) : (<FormattedMessage
-        id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.file.archive.dropzone'
-        defaultMessage='Drag & Drop WSDL file/archive {break} -or-'
-        values={{ break: <br /> }}
-    />);
+    const dropBoxControlLabel = isGenerateRESTAPI ? (
+        <FormattedMessage
+            id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.file.dropzone'
+            defaultMessage='Drag & Drop WSDL file {break} -or-'
+            values={{ break: <br /> }}
+        />
+    ) : (
+        <FormattedMessage
+            id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.file.archive.dropzone'
+            defaultMessage='Drag & Drop WSDL file/archive {break} -or-'
+            values={{ break: <br /> }}
+        />
+    );
 
     /**
      * Render file upload UI.
@@ -227,7 +231,7 @@ export default function ProvideWSDL(props) {
             >
                 {isValidating ? (<CircularProgress />)
                     : (
-                        <React.Fragment>
+                        <>
                             { dropBoxControlLabel }
                             <Button
                                 color='primary'
@@ -238,9 +242,8 @@ export default function ProvideWSDL(props) {
                                     defaultMessage='Browse File to Upload'
                                 />
                             </Button>
-                        </React.Fragment>
-                    )
-                }
+                        </>
+                    )}
             </DropZoneLocal>
         );
     }
@@ -266,27 +269,32 @@ export default function ProvideWSDL(props) {
         );
     }
 
-    const fileControlLabel = isGenerateRESTAPI ? (<FormattedMessage
-        id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label.wsdl.file'
-        defaultMessage='WSDL File'
-    />) : (<FormattedMessage
-        id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label.wsdl.file.archive'
-        defaultMessage='WSDL File/Archive'
-    />);
+    const fileControlLabel = isGenerateRESTAPI ? (
+        <FormattedMessage
+            id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label.wsdl.file'
+            defaultMessage='WSDL File'
+        />
+    ) : (
+        <FormattedMessage
+            id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label.wsdl.file.archive'
+            defaultMessage='WSDL File/Archive'
+        />
+    );
 
     return (
-        <React.Fragment>
+        <>
             <Grid container spacing={5}>
                 <Grid item md={12}>
                     <FormControl component='fieldset'>
                         <FormLabel component='legend'>
-                            <React.Fragment>
-                                <sup className={classes.mandatoryStar}>*</sup>{' '}
+                            <>
+                                <sup className={classes.mandatoryStar}>*</sup>
+                                {' '}
                                 <FormattedMessage
                                     id='Apis.Create.WSDL.Steps.ProvideWSDL.implementation.type'
                                     defaultMessage='Implementation Type'
                                 />
-                            </React.Fragment>
+                            </>
                         </FormLabel>
                         <RadioGroup
                             aria-label='Implementation type'
@@ -303,49 +311,58 @@ export default function ProvideWSDL(props) {
                             <FormControlLabel
                                 value='SOAP'
                                 control={<Radio color='primary' />}
-                                label={<FormattedMessage
-                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.passthrough.label'
-                                    defaultMessage='Pass Through'
-                                />}
+                                label={(
+                                    <FormattedMessage
+                                        id='Apis.Create.WSDL.Steps.ProvideWSDL.passthrough.label'
+                                        defaultMessage='Pass Through'
+                                    />
+                                )}
                             />
                             <FormControlLabel
                                 value='SOAPTOREST'
                                 control={<Radio color='primary' />}
-                                label={<FormattedMessage
-                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.SOAPtoREST.label'
-                                    defaultMessage='Generate REST APIs'
-                                />}
+                                label={(
+                                    <FormattedMessage
+                                        id='Apis.Create.WSDL.Steps.ProvideWSDL.SOAPtoREST.label'
+                                        defaultMessage='Generate REST APIs'
+                                    />
+                                )}
                             />
                         </RadioGroup>
                         <FormHelperText>
                             <sup>*</sup>
-                            <b>Generate REST APIs</b> option is only available for WSDL URL input type
+                            <b>Generate REST APIs</b>
+                            {' '}
+option is only available for WSDL URL input type
                         </FormHelperText>
                     </FormControl>
                 </Grid>
                 <Grid item md={12}>
                     <FormControl component='fieldset'>
                         <FormLabel component='legend'>
-                            <React.Fragment>
-                                <sup className={classes.mandatoryStar}>*</sup>{' '}
+                            <>
+                                <sup className={classes.mandatoryStar}>*</sup>
+                                {' '}
                                 <FormattedMessage
                                     id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.type'
                                     defaultMessage='Input Type'
                                 />
-                            </React.Fragment>
+                            </>
                         </FormLabel>
                         <RadioGroup
                             aria-label='Input type'
                             value={apiInputs.inputType}
-                            onChange={event => inputsDispatcher({ action: 'inputType', value: event.target.value })}
+                            onChange={(event) => inputsDispatcher({ action: 'inputType', value: event.target.value })}
                         >
                             <FormControlLabel
                                 value='url'
                                 control={<Radio color='primary' />}
-                                label={<FormattedMessage
-                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.url.label'
-                                    defaultMessage='WSDL URL'
-                                />}
+                                label={(
+                                    <FormattedMessage
+                                        id='Apis.Create.WSDL.Steps.ProvideWSDL.url.label'
+                                        defaultMessage='WSDL URL'
+                                    />
+                                )}
                             />
                             <FormControlLabel
                                 value={isGenerateRESTAPI ? 'file' : 'archive'}
@@ -356,8 +373,8 @@ export default function ProvideWSDL(props) {
                         </RadioGroup>
                     </FormControl>
                 </Grid>
-                {isError && isError.file &&
-                    (
+                {isError && isError.file
+                    && (
                         <Grid item md={11}>
                             <Banner
                                 onClose={() => setValidity({ file: null })}
@@ -368,11 +385,10 @@ export default function ProvideWSDL(props) {
                                 message={isError.file.message}
                             />
                         </Grid>
-                    )
-                }
+                    )}
                 <Grid item md={11}>
-                    {(isFileInput || isArchiveInput) ? renderFileUpload() :
-                        (
+                    {(isFileInput || isArchiveInput) ? renderFileUpload()
+                        : (
                             <TextField
                                 autoFocus
                                 id='outlined-full-width'
@@ -393,16 +409,16 @@ export default function ProvideWSDL(props) {
                                     endAdornment: urlStateEndAdornment,
                                 }}
                                 helperText={
-                                    (isError && isError.url && isError.url.message) || 'Click away to validate the URL'}
+                                    (isError && isError.url && isError.url.message) || 'Click away to validate the URL'
+                                }
                                 error={isError && Boolean(isError.url)}
                                 disabled={isValidating}
                             />
-                        )
-                    }
+                        )}
 
                 </Grid>
             </Grid>
-        </React.Fragment>
+        </>
     );
 }
 

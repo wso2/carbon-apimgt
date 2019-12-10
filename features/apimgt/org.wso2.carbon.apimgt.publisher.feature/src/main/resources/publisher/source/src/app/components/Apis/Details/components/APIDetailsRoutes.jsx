@@ -22,7 +22,7 @@ const APIDetailsRoutes = ({ api, apiDetailPages }) => {
                 <Route
                     key={pathName}
                     path={`/apis/:apiUUID/${pathName}`}
-                    render={routeProps => <PageComponent api={api} {...routeProps} />}
+                    render={(routeProps) => <PageComponent api={api} {...routeProps} />}
                 />
             ))}
             <Route component={ResourceNotFound} />

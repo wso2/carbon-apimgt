@@ -92,11 +92,15 @@ public class APIExecutor implements Execution {
         String domain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
      
         String userWithDomain = user;
-        if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(domain)){
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(domain)) {
             userWithDomain = user + APIConstants.EMAIL_DOMAIN_SEPARATOR + domain;
-        }       
-        
+        } else {
+            userWithDomain = APIUtil.appendTenantDomainForEmailUsernames(user, domain);
+        }
         userWithDomain = APIUtil.replaceEmailDomainBack(userWithDomain);
+        if (log.isDebugEnabled()) {
+            log.debug("Corrected username with domain = " + userWithDomain);
+        }
 
         try {
             String tenantUserName = MultitenantUtils.getTenantAwareUsername(userWithDomain);

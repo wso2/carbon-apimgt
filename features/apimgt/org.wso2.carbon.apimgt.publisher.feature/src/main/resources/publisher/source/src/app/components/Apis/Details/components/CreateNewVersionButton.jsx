@@ -28,7 +28,7 @@ import { FormattedMessage } from 'react-intl';
 import { resourceMethod, resourcePath, ScopeValidation } from 'AppData/ScopeValidation';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         height: 70,
         background: theme.palette.background.paper,
@@ -79,7 +79,7 @@ const styles = theme => ({
 function CreateNewVersionButton(props) {
     const { api, classes } = props;
     return (
-        <React.Fragment>
+        <>
             {/* allowing create new version based on scopes */}
             <ScopeValidation resourceMethod={resourceMethod.POST} resourcePath={resourcePath.API_COPY}>
                 <div className={classes.createNewVersionWrapper}>
@@ -102,7 +102,7 @@ function CreateNewVersionButton(props) {
                     </Link>
                 </div>
             </ScopeValidation>
-        </React.Fragment>
+        </>
     );
 }
 

@@ -91,6 +91,7 @@ class PublisherRootErrorBoundary extends Component {
                         />
                     </span>
                     <button
+                        type='button'
                         onClick={() => {
                             window.location.reload(true);
                         }}

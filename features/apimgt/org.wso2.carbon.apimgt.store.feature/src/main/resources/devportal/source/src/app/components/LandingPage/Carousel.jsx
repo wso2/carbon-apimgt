@@ -49,7 +49,7 @@ const styles = theme => ({
         background: '#00000044',
         color: theme.palette.getContrastText('#000000'),
         bottom: 0,
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
     },
     slideContentTitle: {
         fontWeight: theme.typography.fontWeightLight,
@@ -97,6 +97,7 @@ function Carousel(props) {
                     direction={slideDirection}
                     in={counter === index}
                     timeout={{ enter: 500, exit: 0 }}
+                    key={index}
                     mountOnEnter
                     unmountOnExit
                 >

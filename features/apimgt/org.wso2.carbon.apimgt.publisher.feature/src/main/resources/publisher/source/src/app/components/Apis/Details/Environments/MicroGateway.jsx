@@ -33,7 +33,7 @@ import Paper from '@material-ui/core/Paper';
 import { isRestricted } from 'AppData/AuthManager';
 import { makeStyles } from '@material-ui/core/styles';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         display: 'flex',
         flexWrap: 'wrap',
@@ -76,7 +76,7 @@ export default function MicroGateway(props) {
     }, []);
 
     return (
-        <React.Fragment>
+        <>
             <Typography variant='h4' align='left' className={classes.mainTitle}>
                 <FormattedMessage
                     id='Apis.Details.Environments.Environments.Microgateways'
@@ -85,7 +85,7 @@ export default function MicroGateway(props) {
             </Typography>
             {mgLabels.length > 0 ? (
                 <Paper className={classes.gatewayPaper}>
-                    <Table >
+                    <Table>
                         <TableHead>
                             <TableRow>
                                 <TableCell />
@@ -95,7 +95,7 @@ export default function MicroGateway(props) {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {mgLabels.map(row => (
+                            {mgLabels.map((row) => (
                                 <TableRow key={row.name}>
                                     <TableCell padding='checkbox'>
                                         <Checkbox
@@ -107,8 +107,9 @@ export default function MicroGateway(props) {
                                                     if (checked) {
                                                         setSelectedMgLabel([...selectedMgLabel, name]);
                                                     } else {
-                                                        setSelectedMgLabel(selectedMgLabel.filter(env =>
-                                                            env !== name));
+                                                        setSelectedMgLabel(
+                                                            selectedMgLabel.filter((env) => env !== name),
+                                                        );
                                                     }
                                                 }
                                             }
@@ -125,9 +126,10 @@ export default function MicroGateway(props) {
                             ))}
                         </TableBody>
                     </Table>
-                </Paper>) :
-                (
-                    <InlineMessage type='info' height={100} className={classes.emptyBox} >
+                </Paper>
+            )
+                : (
+                    <InlineMessage type='info' height={100} className={classes.emptyBox}>
                         <div className={classes.contentWrapper}>
                             <Typography component='p' className={classes.content}>
                                 <FormattedMessage
@@ -141,9 +143,8 @@ export default function MicroGateway(props) {
                             </Typography>
                         </div>
                     </InlineMessage>
-                )
-            }
-        </React.Fragment>
+                )}
+        </>
     );
 }
 MicroGateway.defaultProps = {

@@ -22,14 +22,14 @@ import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
 import getMockedModel, { getAllScopes } from 'AppTests/Utils/MockAPIModel.js';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
-import Configurations from 'Config';
+import Themes from 'Themes';
 import { MemoryRouter } from 'react-router-dom';
 import ScopeValidation from 'AppData/ScopeValidation';
 import AuthManager from 'AppData/AuthManager';
+import User from 'AppData/User';
 import SampleAPI from './SampleAPI/SampleAPI';
 import Listing from './Listing';
 import TableView from './TableView/TableView';
-import User from 'AppData/User';
 
 
 const mockedGetUser = jest.fn();
@@ -48,7 +48,7 @@ jest.mock('AppData/api.js', () => {
     Object.assign(mockedAPI, OriginalAPI.default);
     return mockedAPI;
 });
-const { light } = Configurations.themes;
+const { light } = Themes;
 
 const mockedHasScopes = jest.fn();
 const mockedAll = jest.fn();
@@ -59,7 +59,7 @@ describe('APIs <Listing/> component tests', () => {
         ScopeValidation.hasScopes = mockedHasScopes.bind(ScopeValidation);
         const mockedUser = new User('DEFAULT', 'admin');
         const allScopes = await getAllScopes();
-        mockedUser.scopes = allScopes.filter(policy => policy !== 'apim:api_publish');
+        mockedUser.scopes = allScopes.filter((policy) => policy !== 'apim:api_publish');
         mockedGetUser.mockReturnValue(mockedUser);
     });
 

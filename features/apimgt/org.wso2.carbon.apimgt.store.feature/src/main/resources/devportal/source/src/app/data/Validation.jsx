@@ -19,7 +19,8 @@
 import Joi from '@hapi/joi';
 
 const definition = {
-    timeout: Joi.number().integer(),
+    number: Joi.number().integer(),
+    url: Joi.string().uri().allow(''),
 };
 
 export default definition;

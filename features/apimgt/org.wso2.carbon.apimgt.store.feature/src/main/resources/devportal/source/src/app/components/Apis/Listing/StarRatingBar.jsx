@@ -50,6 +50,7 @@ const styles = theme => ({
         display: 'flex',
         justifyContent: 'flex-start',
         alignItems: 'center',
+        cursor: 'pointer',
     },
 });
 
@@ -93,7 +94,7 @@ class StarRatingBar extends React.Component {
      * @memberof StarRatingBar
      */
     getApiRating() {
-        const { apiId } = this.props;
+        const { apiId, setRatingUpdate } = this.props;
         const user = AuthManager.getUser();
         const api = new Api();
         // get api rating
@@ -106,6 +107,11 @@ class StarRatingBar extends React.Component {
                     count: response.body.count,
                     total: response.body.pagination.total,
                 });
+                if(setRatingUpdate) setRatingUpdate({
+                    avgRating: response.body.avgRating,
+                    count: response.body.count,
+                    total: response.body.pagination.total 
+                });
             });
         }
     }
@@ -117,14 +123,13 @@ class StarRatingBar extends React.Component {
      * @memberof StarRatingBar
      */
     doRate(rateIndex) {
-        const { apiId, setRatingUpdate } = this.props;
+        const { apiId } = this.props;
         const api = new Api();
         const ratingInfo = { rating: rateIndex };
         const promise = api.addRating(apiId, ratingInfo);
         promise
             .then(() => {
                 this.getApiRating();
-                setRatingUpdate();
             })
             .catch((error) => {
                 Alert.error('Error occured while adding ratings');
@@ -169,6 +174,7 @@ class StarRatingBar extends React.Component {
         const {
             classes, isEditable, showSummary, apiRating,
         } = this.props;
+        const apiRatingNumber = parseFloat(apiRating);
         return (
             <React.Fragment>
                 {showSummary ? (
@@ -193,7 +199,7 @@ class StarRatingBar extends React.Component {
                             </React.Fragment>
                         ) : (
                             <React.Fragment>
-                                <Rating name='half-rating' value={apiRating} precision={0.1} readOnly />
+                                <Rating name='half-rating' value={apiRatingNumber} precision={0.1} readOnly />
                             </React.Fragment>
                         )}
                     </React.Fragment>
@@ -204,7 +210,9 @@ class StarRatingBar extends React.Component {
 }
 
 StarRatingBar.defaultProps = {
-    apiRating: '0',
+    apiRating: 0,
+    ratingUpdate: 0,
+    setRatingUpdate: () => {},
 };
 
 StarRatingBar.propTypes = {
@@ -213,9 +221,12 @@ StarRatingBar.propTypes = {
     apiId: PropTypes.string.isRequired,
     isEditable: PropTypes.bool.isRequired,
     showSummary: PropTypes.bool.isRequired,
-    apiRating: PropTypes.string,
-    ratingUpdate: PropTypes.number.isRequired,
-    setRatingUpdate: PropTypes.func.isRequired,
+    apiRating: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number
+    ]),
+    ratingUpdate: PropTypes.number,
+    setRatingUpdate: PropTypes.func,
 };
 
 export default withStyles(styles, { withTheme: true })(StarRatingBar);

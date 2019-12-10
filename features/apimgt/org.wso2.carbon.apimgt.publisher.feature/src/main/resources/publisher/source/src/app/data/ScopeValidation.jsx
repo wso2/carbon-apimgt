@@ -84,6 +84,7 @@ export default class ScopeValidation extends React.Component {
             return userScopes.includes(scope);
         });
     }
+
     /**
      * Creates an instance of ScopeValidation.
      * @param {any} props @inheritDoc
@@ -99,7 +100,8 @@ export default class ScopeValidation extends React.Component {
      * @memberof ScopeValidation
      */
     componentDidMount() {
-        const hasScope = ScopeValidation.hasScopes(this.props.resourcePath, this.props.resourceMethod);
+        const { resourcePath: currentResourcePath, resourceMethod: currentResourceMethod } = this.props;
+        const hasScope = ScopeValidation.hasScopes(currentResourcePath, currentResourceMethod);
         hasScope.then((haveScope) => {
             this.setState({ haveScope });
         });

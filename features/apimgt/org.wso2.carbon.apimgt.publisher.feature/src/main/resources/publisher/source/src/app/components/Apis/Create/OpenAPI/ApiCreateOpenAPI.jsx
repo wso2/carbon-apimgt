@@ -138,8 +138,8 @@ export default function ApiCreateOpenAPI(props) {
         }
         additionalProperties.gatewayEnvironments = ['Production and Sandbox'];
         const newAPI = new API(additionalProperties);
-        const promisedResponse =
-            inputType === 'file' ? newAPI.importOpenAPIByFile(inputValue) : newAPI.importOpenAPIByUrl(inputValue);
+        const promisedResponse = inputType === 'file'
+            ? newAPI.importOpenAPIByFile(inputValue) : newAPI.importOpenAPIByUrl(inputValue);
         promisedResponse
             .then((api) => {
                 Alert.info('API created successfully');
@@ -158,8 +158,8 @@ export default function ApiCreateOpenAPI(props) {
 
     return (
         <APICreateBase
-            title={
-                <React.Fragment>
+            title={(
+                <>
                     <Typography variant='h5'>
                         <FormattedMessage
                             id='Apis.Create.OpenAPI.ApiCreateOpenAPI.heading'
@@ -172,8 +172,8 @@ export default function ApiCreateOpenAPI(props) {
                             defaultMessage='Create an API using an existing OpenAPI definition (swagger) file or URL.'
                         />
                     </Typography>
-                </React.Fragment>
-            }
+                </>
+            )}
         >
             <Box>
                 <Stepper alternativeLabel activeStep={0}>
@@ -231,12 +231,16 @@ export default function ApiCreateOpenAPI(props) {
                                     </Button>
                                 </Link>
                             )}
-                            {wizardStep === 1 && <Button onClick={() => setWizardStep(step => step - 1)}>Back</Button>}
+                            {wizardStep === 1 && (
+                                <Button onClick={() => setWizardStep((step) => step - 1)}>
+                                    Back
+                                </Button>
+                            )}
                         </Grid>
                         <Grid item>
                             {wizardStep === 0 && (
                                 <Button
-                                    onClick={() => setWizardStep(step => step + 1)}
+                                    onClick={() => setWizardStep((step) => step + 1)}
                                     variant='contained'
                                     color='primary'
                                     disabled={!apiInputs.isFormValid}
@@ -251,7 +255,9 @@ export default function ApiCreateOpenAPI(props) {
                                     disabled={!apiInputs.isFormValid || isCreating}
                                     onClick={createAPI}
                                 >
-                                    Create {isCreating && <CircularProgress size={24} />}
+                                    Create
+                                    {' '}
+                                    {isCreating && <CircularProgress size={24} />}
                                 </Button>
                             )}
                         </Grid>

@@ -22,7 +22,7 @@ import Hidden from '@material-ui/core/Hidden';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import GlobalNavLinks from './GlobalNavLinks';
 
-const styles = theme => ({
+const styles = (theme) => ({
     list: {
         width: theme.custom.drawerWidth,
     },
@@ -60,7 +60,7 @@ const GlobalNavBar = (props) => {
         },
     };
     return (
-        <React.Fragment>
+        <>
             <Hidden smDown>
                 <VerticalDivider height={32} />
                 <div className={classes.listInline}>
@@ -92,7 +92,7 @@ const GlobalNavBar = (props) => {
                     </div>
                 </Drawer>
             </Hidden>
-        </React.Fragment>
+        </>
     );
 };
 

@@ -36,7 +36,7 @@ import { isRestricted } from 'AppData/AuthManager';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import Paper from '@material-ui/core/Paper';
 
-const styles = theme => ({
+const styles = (theme) => ({
     subHeading: {
         fontSize: '1rem',
         fontWeight: 400,
@@ -94,6 +94,7 @@ class SchemaValidation extends React.Component {
             this.setIsOpen(true);
         }
     }
+
     /**
      *
      * Set isOpen state of the dialog box which shows the caution message when enabling schema validation
@@ -126,13 +127,13 @@ class SchemaValidation extends React.Component {
                                 defaultMessage='Schema Validation'
                             />
                             <Tooltip
-                                title={
+                                title={(
                                     <FormattedMessage
                                         id='Apis.Details.Configuration.components.schema.validation.tooltip'
-                                        defaultMessage={'Enable the request and response ' +
-                                        'validation against the OpenAPI definition'}
+                                        defaultMessage={'Enable the request and response '
+                                        + 'validation against the OpenAPI definition'}
                                     />
-                                }
+                                )}
                                 aria-label='Schema Validation'
                                 placement='right-end'
                                 interactive
@@ -142,21 +143,19 @@ class SchemaValidation extends React.Component {
                         </Typography>
                         <FormControlLabel
                             className={classes.actionSpace}
-                            control={
+                            control={(
                                 <Switch
                                     disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                     checked={
                                         api.enableSchemaValidation === undefined ? false : api.enableSchemaValidation
                                     }
-                                    onChange={({ target: { checked } }) =>
-                                        configDispatcher({
-                                            action: 'enableSchemaValidation',
-                                            value: checked,
-                                        })
-                                    }
+                                    onChange={({ target: { checked } }) => configDispatcher({
+                                        action: 'enableSchemaValidation',
+                                        value: checked,
+                                    })}
                                     color='primary'
                                 />
-                            }
+                            )}
                         />
                     </Grid>
                 </Grid>
@@ -178,17 +177,17 @@ class SchemaValidation extends React.Component {
                                 <FormattedMessage
                                     id='Apis.Details.Configuration.components.SchemaValidation.description'
                                     defaultMessage={
-                                        'Enabling JSON schema validation will cause to build the' +
-                                        ' payload in every request and response. This will impact' +
-                                        ' the round trip time of an API request!'
+                                        'Enabling JSON schema validation will cause to build the'
+                                        + ' payload in every request and response. This will impact'
+                                        + ' the round trip time of an API request!'
                                     }
                                 />
                             </Typography>
                             <Typography variant='subtitle2' display='block' gutterBottom>
                                 <b>
                                     <FormattedMessage
-                                        id={'Apis.Details.Configuration.components.SchemaValidation' +
-                                        '.description.question'}
+                                        id={'Apis.Details.Configuration.components.SchemaValidation'
+                                        + '.description.question'}
                                         defaultMessage='Do you want to enable schema validation?'
                                     />
                                 </b>

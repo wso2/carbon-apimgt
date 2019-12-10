@@ -36,8 +36,8 @@ const styles = theme => ({
     root: {
         display: 'flex',
         alignItems: 'center',
-        paddingTop: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit * 2,
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
     },
     paper: {
         marginRight: theme.spacing(3),
@@ -45,7 +45,7 @@ const styles = theme => ({
         paddingRight: theme.spacing(2),
     },
     contentWrapper: {
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
         paddingTop: theme.spacing.unig,
     },
     contentWrapperOverview: {
@@ -61,7 +61,7 @@ const styles = theme => ({
         cursor: 'pointer',
     },
     verticalSpace: {
-        marginTop: theme.spacing.unit * 0.2,
+        marginTop: theme.spacing(0.2),
     },
     loadMoreLink: {
         textDecoration: 'underline',

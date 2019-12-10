@@ -46,17 +46,17 @@ import SubscriptionTableData from './SubscriptionTableData';
  */
 const styles = theme => ({
     root: {
-        padding: theme.spacing.unit * 3,
+        padding: theme.spacing(3),
     },
     keyTitle: {
         textTransform: 'uppercase',
-        marginBottom: theme.spacing.unit * 2,
+        marginBottom: theme.spacing(2),
     },
     firstCell: {
         paddingLeft: 0,
     },
     cardTitle: {
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
     },
     cardContent: {
         minHeight: 200,
@@ -304,7 +304,7 @@ class Subscriptions extends React.Component {
                     </Typography>
 
                     <Grid container className='tab-grid' spacing={2}>
-                        <Grid item xs={5} className={classes.cardGrid}>
+                        <Grid item xs={4} className={classes.cardGrid}>
                             <APIList
                                 apisNotFound={apisNotFound}
                                 unsubscribedAPIList={unsubscribedAPIList}
@@ -312,7 +312,7 @@ class Subscriptions extends React.Component {
                                 handleSubscribe={(app, api, policy) => this.handleSubscribe(app, api, policy)}
                             />
                         </Grid>
-                        <Grid item xs={7} xl={10}>
+                        <Grid item xs={8} xl={11}>
                             <Card className={classes.card}>
                                 <CardActions>
                                     <Typography variant='h6' gutterBottom className={classes.cardTitle}>
@@ -333,7 +333,14 @@ class Subscriptions extends React.Component {
                                                     <TableCell className={classes.firstCell}>
                                                         <FormattedMessage
                                                             id='Applications.Details.Subscriptions.api.name'
-                                                            defaultMessage='API Name'
+                                                            defaultMessage='API'
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <FormattedMessage
+                                                            id={`Applications.Details.Subscriptions
+                                                                    .subscription.state`}
+                                                            defaultMessage='Lifecycle State'
                                                         />
                                                     </TableCell>
                                                     <TableCell>
@@ -346,7 +353,7 @@ class Subscriptions extends React.Component {
                                                     <TableCell>
                                                         <FormattedMessage
                                                             id='Applications.Details.Subscriptions.Status'
-                                                            defaultMessage='Status'
+                                                            defaultMessage='Subscription Status'
                                                         />
                                                     </TableCell>
                                                     <TableCell>
@@ -392,10 +399,10 @@ Subscriptions.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     match: PropTypes.shape({
         params: PropTypes.shape({
-            application_uuid: PropTypes.string.isRequired,
+            applicationId: PropTypes.string,
         }).isRequired,
     }).isRequired,
-    intl: PropTypes.func.isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Subscriptions));

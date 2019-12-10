@@ -37,7 +37,7 @@ import base64url from 'base64url';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Error from '@material-ui/core/SvgIcon/SvgIcon';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         flexGrow: 1,
         marginTop: 10,
@@ -62,33 +62,33 @@ const styles = theme => ({
         paddingLeft: 0,
     },
     FormControl: {
-        padding: `0 0 0 ${theme.spacing.unit}px`,
+        padding: `0 0 0 ${theme.spacing(1)}px`,
         width: '100%',
         marginTop: 0,
     },
     FormControlOdd: {
-        padding: `0 0 0 ${theme.spacing.unit}px`,
+        padding: `0 0 0 ${theme.spacing(1)}px`,
         backgroundColor: theme.palette.background.paper,
         width: '100%',
         marginTop: 0,
     },
     FormControlLabel: {
-        marginBottom: theme.spacing.unit,
-        marginTop: theme.spacing.unit,
+        marginBottom: theme.spacing(1),
+        marginTop: theme.spacing(1),
         fontSize: theme.typography.caption.fontSize,
     },
     buttonSection: {
-        paddingTop: theme.spacing.unit * 3,
+        paddingTop: theme.spacing(3),
     },
     saveButton: {
-        marginRight: theme.spacing.unit * 2,
+        marginRight: theme.spacing(2),
     },
     helpText: {
         color: theme.palette.text.hint,
-        marginTop: theme.spacing.unit,
+        marginTop: theme.spacing(1),
     },
     extraPadding: {
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
     },
     addNewOther: {
         paddingTop: 40,
@@ -126,6 +126,42 @@ class EditScope extends React.Component {
         this.handleRoleDeletion = this.handleRoleDeletion.bind(this);
         this.handleRoleAddition = this.handleRoleAddition.bind(this);
         this.validateScopeDescription = this.validateScopeDescription.bind(this);
+    }
+
+
+    handleRoleDeletion = (role) => {
+        const { validRoles, invalidRoles } = this.state;
+        if (invalidRoles.includes(role)) {
+            const invalidRolesArray = invalidRoles.filter((existingRole) => existingRole !== role);
+            this.setState({ invalidRoles: invalidRolesArray });
+            if (invalidRolesArray.length === 0) {
+                this.setState({ roleValidity: true });
+            }
+        } else {
+            this.setState({ validRoles: validRoles.filter((existingRole) => existingRole !== role) });
+        }
+    };
+
+    /**
+     * Handle api scope addition event
+     * @param {any} event Button Click event
+     * @memberof Scopes
+     */
+    handleInputs(event) {
+        if (Array.isArray(event)) {
+            const { apiScope } = this.state;
+            apiScope.bindings.values = event;
+            this.setState({
+                apiScope,
+            });
+        } else {
+            const input = event.target;
+            const { apiScope } = this.state;
+            apiScope[input.id] = input.value;
+            this.setState({
+                apiScope,
+            });
+        }
     }
 
     /**
@@ -167,41 +203,6 @@ class EditScope extends React.Component {
             }
         });
     }
-
-    /**
-     * Handle api scope addition event
-     * @param {any} event Button Click event
-     * @memberof Scopes
-     */
-    handleInputs(event) {
-        if (Array.isArray(event)) {
-            const { apiScope } = this.state;
-            apiScope.bindings.values = event;
-            this.setState({
-                apiScope,
-            });
-        } else {
-            const input = event.target;
-            const { apiScope } = this.state;
-            apiScope[input.id] = input.value;
-            this.setState({
-                apiScope,
-            });
-        }
-    }
-
-    handleRoleDeletion = (role) => {
-        const { validRoles, invalidRoles } = this.state;
-        if (invalidRoles.includes(role)) {
-            const invalidRolesArray = invalidRoles.filter(existingRole => existingRole !== role);
-            this.setState({ invalidRoles: invalidRolesArray });
-            if (invalidRolesArray.length === 0) {
-                this.setState({ roleValidity: true });
-            }
-        } else {
-            this.setState({ validRoles: validRoles.filter(existingRole => existingRole !== role) });
-        }
-    };
 
     handleRoleAddition(role) {
         const { validRoles, invalidRoles } = this.state;
@@ -293,12 +294,12 @@ class EditScope extends React.Component {
                                         label='Description'
                                         variant='outlined'
                                         placeholder='Short description about the scope'
-                                        helperText={
+                                        helperText={(
                                             <FormattedMessage
                                                 id='Apis.Details.Scopes.EditScope.short.description.about.the.scope'
                                                 defaultMessage='Short description about the scope'
                                             />
-                                        }
+                                        )}
                                         margin='normal'
                                         InputLabelProps={{
                                             shrink: true,

@@ -29,7 +29,7 @@ import CommentEdit from './CommentEdit';
 import CommentOptions from './CommentOptions';
 import CommentReply from './CommentReply';
 
-const styles = theme => ({
+const styles = (theme) => ({
     link: {
         color: theme.palette.getContrastText(theme.palette.background.default),
         cursor: 'pointer',
@@ -45,11 +45,11 @@ const styles = theme => ({
         overflowWrap: 'break-word',
     },
     root: {
-        marginTop: theme.spacing.unit * 2.5,
+        marginTop: theme.spacing(2.5),
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(2),
         paddingTop: theme.spacing(2),
     },
 });
@@ -235,8 +235,8 @@ class Comment extends React.Component {
         const { editIndex, replyIndex, openDialog } = this.state;
         const props = { api, allComments, commentsUpdate };
         return [
-            comments &&
-                comments
+            comments
+                && comments
                     .slice(0)
                     .reverse()
                     .map((comment, index) => (

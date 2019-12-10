@@ -27,7 +27,7 @@ import Chip from '@material-ui/core/Chip';
 import API from 'AppData/api';
 import CONSTS from 'AppData/Constants';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
         height: 250,
@@ -139,8 +139,7 @@ function getSuggestions(value, suggestions, { showEmpty = false } = {}) {
     return inputLength === 0 && !showEmpty
         ? []
         : suggestions.filter((suggestion) => {
-            const keep =
-          count < 15 && suggestion.slice(0, inputLength).toLowerCase() === inputValue;
+            const keep = count < 15 && suggestion.slice(0, inputLength).toLowerCase() === inputValue;
             if (keep) {
                 count += 1;
             }
@@ -175,7 +174,7 @@ function DownshiftMultiple(props) {
         setTenantList(newSelectedItem);
     }
 
-    const handleDelete = item => () => {
+    const handleDelete = (item) => () => {
         const newSelectedItem = [...tenantList];
         newSelectedItem.splice(newSelectedItem.indexOf(item), 1);
         setTenantList(newSelectedItem);
@@ -213,7 +212,7 @@ function DownshiftMultiple(props) {
                             label: 'Tenants',
                             InputLabelProps: getLabelProps(),
                             InputProps: {
-                                startAdornment: tenantList.map(item => (
+                                startAdornment: tenantList.map((item) => (
                                     <Chip
                                         key={item}
                                         tabIndex={-1}
@@ -234,14 +233,13 @@ function DownshiftMultiple(props) {
 
                         {isOpen ? (
                             <Paper className={classes.paper} square>
-                                {getSuggestions(inputValue2, suggestions).map((suggestion, index) =>
-                                    renderSuggestion({
-                                        suggestion,
-                                        index,
-                                        itemProps: getItemProps({ item: suggestion }),
-                                        highlightedIndex,
-                                        tenantList: tenantList2,
-                                    }))}
+                                {getSuggestions(inputValue2, suggestions).map((suggestion, index) => renderSuggestion({
+                                    suggestion,
+                                    index,
+                                    itemProps: getItemProps({ item: suggestion }),
+                                    highlightedIndex,
+                                    tenantList: tenantList2,
+                                }))}
                             </Paper>
                         ) : null}
                     </div>

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.5.362-SNAPSHOT</version>
+        <version>6.5.432-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -51,7 +51,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.mediation</groupId>
-            <artifactId>org.wso2.carbon.rest.api.stub</artifactId>
+            <artifactId>org.wso2.carbon.rest.api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -103,7 +103,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.mediation</groupId>
-            <artifactId>org.wso2.carbon.localentry.stub</artifactId>
+            <artifactId>org.wso2.carbon.localentry</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.io.swagger</groupId>
@@ -183,12 +183,6 @@
                                 <importBundleDef>org.wso2.orbit.io.swagger:swagger-codegen:${swagger.codegen.version}
                                 </importBundleDef>
                                 <importBundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.hostobjects.sso
-                                </importBundleDef>
-                                <importBundleDef>
-                                    org.wso2.carbon.mediation:org.wso2.carbon.rest.api.stub:${carbon.mediation.version}
-                                </importBundleDef>
-                                <importBundleDef>
-                                    org.wso2.carbon.mediation:org.wso2.carbon.localentry.stub:${carbon.mediation.version}
                                 </importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:pdfbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:fontbox:${pdfbox.version}</importBundleDef>

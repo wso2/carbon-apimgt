@@ -1087,6 +1087,8 @@ paths:
           description: |
             Created.
             Successful response with the newly created API as entity in the body. Location header contains URL of newly created API.
+          schema:
+            $ref: '#/definitions/API'
           headers:
             Location:
               description: |
@@ -2026,6 +2028,50 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ######################################################
+  # AWS Lambda
+  ######################################################
+  /apis/{apiId}/amznResourceNames:
+    #-----------------------------------------------------
+    # Retrieve the ARNs of AWS Lambda functions
+    #-----------------------------------------------------
+    get:
+      x-examples:
+        $ref: docs/examples/apis/apis_id_amznresourcenames_get.yaml
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/64eca60b-2e55-4c38-8603-e9e6bad7d809/amznResourceNames"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/64eca60b-2e55-4c38-8603-e9e6bad7d809/arns
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"count\": \"2\",\n   \"list\": [\n      \"arn:aws:lambda:us-west-2:123456789012:function:my-function1\",\n      \"arn:aws:lambda:us-west-2:123456789012:function:my-function2\"\n   ]\n}"
+      summary: Retrieve the ARNs of AWS Lambda functions
+      description: |
+        This operation can be use to retrieve ARNs of AWS Lambda function for a given AWS credentials.
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - AWS Lambda (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Requested ARN List of the API is returned
+          schema:
+            type: string
+            example: "{\n   \"count\": \"2\",\n   \"list\": [\n      \"arn:aws:lambda:us-west-2:123456789012:function:my-function1\",\n      \"arn:aws:lambda:us-west-2:123456789012:function:my-function2\"\n   ]\n}"
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        404:
+          description: |
+            Not Found.
+            Requested resource does not exist.
+          schema:
+            $ref: '#/definitions/Error'
 
   #########################################################
 # The "Configure Monetization" Processing Function resource API
@@ -3312,6 +3358,47 @@ paths:
           description: |
             Not Acceptable.
             The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+  ######################################################
+  # The Security Audit API List
+  ######################################################
+  /apis/{apiId}/auditapi:
+    #-----------------------------------------------------
+    # Retrieve the Security Audit Report of the Audit API
+    #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      x-examples:
+        $ref: "docs/examples/apis/apis_id_auditapi_get.yaml"
+      summary: Retrieve the Security Audit Report of the Audit API
+      description: |
+        Retrieve the Security Audit Report of the Audit API
+      parameters:
+        - $ref: "#/parameters/Accept"
+        - $ref: "#/parameters/apiId"
+      tags:
+        - API Audit
+      responses:
+        200:
+          description: |
+            OK.
+            The Security Audit Report has been returned.
+          headers:
+            Content-Type:
+              description: |
+                The content of the body.
+              default: application/json
+              type: string
+          schema:
+            $ref: '#/definitions/AuditReport'
+        404:
+          description: |
+            Not Found.
+            The Security Audit Report was not found.
           schema:
             $ref: '#/definitions/Error'
 
@@ -5808,9 +5895,9 @@ paths:
 # The Publisher settings List
 ######################################################
   /settings:
-#-----------------------------------------------------
-# Retrieve publisher settings
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve publisher settings
+    #-----------------------------------------------------
     get:
       summary: Retreive publisher settings
       security:
@@ -7047,6 +7134,27 @@ definitions:
                   type: integer
 
   #-----------------------------------------------------
+  # The Audit Report resource
+  #-----------------------------------------------------
+  AuditReport:
+    title: Resource for Audit Report
+    properties:
+      report:
+        type: string
+        description: |
+          The API Security Audit Report
+      grade:
+        type: string
+        description: |
+          The overall grade of the Security Audit
+        example: "27.95"
+      numErrors:
+        type: integer
+        description: |
+          The number of errors in the API Definition
+        example: 20
+
+  #-----------------------------------------------------
   # The API Product List resource
   #-----------------------------------------------------
   APIProductList:
@@ -7091,9 +7199,9 @@ definitions:
           If the provider value is not given, the user invoking the API will be used as the provider.
         type: string
         example: admin
-      thumbnailUri:
-        type: string
-        example: /api-products/01234567-0123-0123-0123-012345678901/thumbnail
+      hasThumbnail:
+        type: boolean
+        example: true
       state:
         type: string
         description: |
@@ -7138,9 +7246,9 @@ definitions:
           If the provider value is not given, the user invoking the API will be used as the provider.
         type: string
         example: admin
-      thumbnailUri:
-        type: string
-        example: /api-products/01234567-0123-0123-0123-012345678901/thumbnail
+      hasThumbnail:
+        type: boolean
+        example: true
       state:
         type: string
         description: |
@@ -7925,8 +8033,8 @@ definitions:
         example: basic
         description: Accepts one of the following, basic or digest.
         enum:
-          - basic
-          - digest
+          - BASIC
+          - DIGEST
       username:
         type: string
         example: admin
@@ -8123,6 +8231,8 @@ definitions:
         type: array
         items:
           type: string
+      amznResourceName:
+        type: string
 
 
 #-----------------------------------------------------
@@ -8638,7 +8748,10 @@ definitions:
       list:
         type: array
         items:
-          $ref: '#/definitions/SearchResult'
+          anyOf:
+            - $ref: '#/definitions/APISearchResult'
+            - $ref: '#/definitions/APIProductSearchResult'
+            - $ref: '#/definitions/DocumentSearchResult'
       pagination:
         $ref: '#/definitions/Pagination'
 
@@ -8856,11 +8969,35 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/MonetizationAttribute'
+      securityAuditProperties:
+        type: object
+        items:
+          type: string
       externalStoresEnabled:
         type: boolean
         description: |
           Is External Stores configuration enabled
         example: true
+
+  #-----------------------------------------------------
+  # The SecurityAuditAttribute resource
+  #-----------------------------------------------------
+  SecurityAuditAttribute:
+    title: SecurityAuditAttributeDTO
+    properties:
+      isGlobal:
+        type: boolean
+        example: false
+      overrideGlobal:
+        type: boolean
+        example: false
+      apiToken:
+        type: string
+        example: b1267ytf-b7gc-4aee-924d-ece81241efec
+      collectionId:
+        type: string
+        example: 456ef957-5a79-449f-83y3-9027945d3c60
+
 
 #-----------------------------------------------------
 # The pagination resource

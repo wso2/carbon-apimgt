@@ -44,6 +44,7 @@ class APICreateWrapper extends Component {
         this.inputChange = this.inputChange.bind(this);
         this.handleOASVersionChange = this.handleOASVersionChange.bind(this);
     }
+
     /**
      * Do create API from either swagger URL or swagger file upload.In case of URL pre fetch the swagger file and make
      * a blob
@@ -85,6 +86,7 @@ class APICreateWrapper extends Component {
                 }
             });
     }
+
     /**
      * Change input
      * @param {any} e Synthetic React Event
@@ -128,7 +130,7 @@ class APICreateWrapper extends Component {
     render() {
         const { type } = this.props;
         return (
-            <React.Fragment>
+            <>
                 <APICreateDefault
                     api={this.state.api}
                     oasVersion={this.state.oasVersion}
@@ -139,7 +141,8 @@ class APICreateWrapper extends Component {
                     valid={this.state.valid}
                     type={type}
                 />
-            </React.Fragment>);
+            </>
+        );
     }
 }
 

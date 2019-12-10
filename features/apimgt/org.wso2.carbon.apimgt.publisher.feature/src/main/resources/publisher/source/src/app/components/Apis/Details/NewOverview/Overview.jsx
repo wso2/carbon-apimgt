@@ -34,7 +34,7 @@ import CustomizedStepper from './CustomizedStepper';
 import MetaData from './MetaData';
 import Endpoints from './Endpoints';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         ...theme.mixins.gutters(),
         paddingTop: theme.spacing(2),
@@ -160,7 +160,7 @@ function Overview(props) {
         api.type = API.CONSTS.APIProduct;
     }
     return (
-        <React.Fragment>
+        <>
             <Typography variant='h4' align='left' className={classes.mainTitle}>
                 <FormattedMessage
                     id='Apis.Details.Overview.Overview.topic.header'
@@ -204,7 +204,7 @@ function Overview(props) {
                     </Grid>
                 </Paper>
             </div>
-        </React.Fragment>
+        </>
     );
 }
 

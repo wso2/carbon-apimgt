@@ -28,7 +28,7 @@ import Base from 'AppComponents/Base';
 import AuthManager from 'AppData/AuthManager';
 import Header from 'AppComponents/Base/Header';
 import Avatar from 'AppComponents/Base/Header/avatar/Avatar';
-import Configurations from 'Config';
+import Themes from 'Themes';
 import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import { IntlProvider } from 'react-intl';
@@ -42,7 +42,7 @@ const DeferredAPIs = () => (
         <Apis />
     </Suspense>
 );
-const theme = createMuiTheme(Configurations.themes.light);
+const theme = createMuiTheme(Themes.light);
 
 /**
  * Language.
@@ -77,14 +77,14 @@ export default class Protected extends Component {
         const settingPromise = api.getSettings();
         if (user) {
             this.setState({ user });
-            settingPromise.then(settingsNew => this.setState({ settings: settingsNew }));
+            settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
         } else {
             // If no user data available , Get the user info from existing token information
             // This could happen when OAuth code authentication took place and could send
             // user information via redirection
             const userPromise = AuthManager.getUserFromToken();
-            userPromise.then(loggedUser => this.setState({ user: loggedUser }));
-            settingPromise.then(settingsNew => this.setState({ settings: settingsNew }));
+            userPromise.then((loggedUser) => this.setState({ user: loggedUser }));
+            settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
         }
     }
 
@@ -93,13 +93,13 @@ export default class Protected extends Component {
      * @memberof Protected
      */
     render() {
-        const user = this.state.user || AuthManager.getUser();
+        const { user = AuthManager.getUser(), messages } = this.state;
         const header = <Header avatar={<Avatar user={user} />} user={user} />;
         const { settings } = this.state;
 
         if (!user) {
             return (
-                <IntlProvider locale={language} messages={this.state.messages}>
+                <IntlProvider locale={language} messages={messages}>
                     <RedirectToLogin />
                 </IntlProvider>
             );

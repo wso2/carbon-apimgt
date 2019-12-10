@@ -32,7 +32,7 @@ import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 function BusinessInformation(props) {
     const { parentClasses, api } = props;
     return (
-        <React.Fragment>
+        <>
             <Grid item xs={12} md={6} lg={4}>
                 {/* Business Owner */}
                 <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
@@ -45,17 +45,17 @@ function BusinessInformation(props) {
             <Grid item xs={12} md={6} lg={8}>
                 <Typography component='p' variant='body1'>
                     {api.businessInformation.businessOwner && (
-                        <React.Fragment>{api.businessInformation.businessOwner}</React.Fragment>
+                        <>{api.businessInformation.businessOwner}</>
                     )}
                 </Typography>
                 <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
                     {!api.businessInformation.businessOwner && (
-                        <React.Fragment>
+                        <>
                             <FormattedMessage
                                 id='Apis.Details.NewOverview.BusinessInformation.business.owner.not.set'
                                 defaultMessage='-'
                             />
-                        </React.Fragment>
+                        </>
                     )}
                 </Typography>
             </Grid>
@@ -70,21 +70,21 @@ function BusinessInformation(props) {
             </Grid>
             <Grid item xs={12} md={6} lg={8}>
                 <Typography component='p' variant='body1'>
-                    {api.businessInformation.technicalOwner &&
-                        <React.Fragment>{api.businessInformation.technicalOwner}</React.Fragment>}
+                    {api.businessInformation.technicalOwner
+                        && <>{api.businessInformation.technicalOwner}</>}
                 </Typography>
                 <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
                     {!api.businessInformation.technicalOwner && (
-                        <React.Fragment>
+                        <>
                             <FormattedMessage
                                 id='Apis.Details.NewOverview.BusinessInformation.technical.owner.not.set'
                                 defaultMessage='-'
                             />
-                        </React.Fragment>
+                        </>
                     )}
                 </Typography>
             </Grid>
-        </React.Fragment>
+        </>
     );
 }
 

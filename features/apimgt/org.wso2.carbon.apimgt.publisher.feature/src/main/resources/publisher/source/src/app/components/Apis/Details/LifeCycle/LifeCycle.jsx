@@ -30,7 +30,7 @@ import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import LifeCycleUpdate from './LifeCycleUpdate';
 import LifeCycleHistory from './LifeCycleHistory';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         flexGrow: 1,
         marginTop: 10,
@@ -42,8 +42,8 @@ const styles = theme => ({
         alignItems: 'center',
     },
     historyHead: {
-        marginTop: theme.spacing.unit * 2,
-        marginBottom: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2),
     },
 });
 /**
@@ -78,7 +78,7 @@ class LifeCycle extends Component {
         this.updateData();
     }
 
-    handleChangeCheckList = index => (event, checked) => {
+    handleChangeCheckList = (index) => (event, checked) => {
         const { checkList } = this.state;
         checkList[index].checked = checked;
         this.setState({ checkList });
@@ -146,6 +146,7 @@ class LifeCycle extends Component {
                 }
             });
     }
+
     /**
      *
      *
@@ -166,8 +167,8 @@ class LifeCycle extends Component {
                             <FormattedMessage
                                 id='Apis.Details.LifeCycle.LifeCycle.change.not.allowed'
                                 defaultMessage={
-                                    '* You are not authorized to change the life cycle state of the API' +
-                                    ' due to insufficient permissions'
+                                    '* You are not authorized to change the life cycle state of the API'
+                                    + ' due to insufficient permissions'
                                 }
                             />
                         </Typography>
@@ -180,7 +181,7 @@ class LifeCycle extends Component {
             return <Progress />;
         }
         return (
-            <React.Fragment>
+            <>
                 <Typography variant='h4' gutterBottom>
                     <FormattedMessage id='Apis.Details.LifeCycle.LifeCycle.lifecycle' defaultMessage='Lifecycle' />
                 </Typography>
@@ -211,7 +212,7 @@ class LifeCycle extends Component {
                         </Grid>
                     </Grid>
                 </div>
-            </React.Fragment>
+            </>
         );
     }
 }

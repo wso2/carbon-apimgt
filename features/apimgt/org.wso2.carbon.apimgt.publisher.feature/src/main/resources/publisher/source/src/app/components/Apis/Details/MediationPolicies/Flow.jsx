@@ -76,7 +76,7 @@ function InFlow(props) {
         setEditing(true);
     }
     return (
-        <React.Fragment>
+        <>
             <Typography variant='h6' align='left' className={classes.subTitle}>
                 {type === 'IN' && (
                     <FormattedMessage
@@ -146,7 +146,7 @@ function InFlow(props) {
                 selectedMediationPolicy={selectedMediationPolicy}
                 type={type}
             />
-        </React.Fragment>
+        </>
     );
 }
 

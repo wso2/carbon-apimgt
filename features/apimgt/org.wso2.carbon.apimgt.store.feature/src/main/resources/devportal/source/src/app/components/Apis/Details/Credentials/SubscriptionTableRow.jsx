@@ -30,9 +30,9 @@ import { FormattedMessage } from 'react-intl';
  * @inheritdoc
  * @param {*} theme theme object
  */
-const styles = theme => ({
+const styles = (theme) => ({
     button: {
-        padding: theme.spacing.unit,
+        padding: theme.spacing(1),
         color: theme.palette.getContrastText(theme.palette.background.default),
         display: 'flex',
         alignItems: 'center',
@@ -52,7 +52,7 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.default),
         borderBottom: 'solid 1px ' + theme.palette.grey.A200,
         fontSize: '11px',
-        paddingLeft: theme.spacing.unit,
+        paddingLeft: theme.spacing(1),
         height: 35,
     },
     selectedWrapper: {
@@ -64,10 +64,10 @@ const styles = theme => ({
 const subscriptionTableRow = (props) => {
     const {
         classes, loadInfo, handleSubscriptionDelete,
-        theme, selectedAppId, updateSubscriptionData, selectedKeyType, app, index, applicationOwner,
+        theme, selectedAppId, updateSubscriptionData, selectedKeyType, app, index, applicationOwner, hashEnabled,
     } = props;
     return (
-        <React.Fragment>
+        <>
             <tr style={{ backgroundColor: index % 2 ? '' : '#ffffff' }}>
                 <td className={classes.td}>{app.label}</td>
                 <td className={classes.td}>{app.policy}</td>
@@ -173,14 +173,19 @@ const subscriptionTableRow = (props) => {
                         <div className={classes.selectedWrapper}>
                             <TokenManager
                                 keyType={selectedKeyType}
-                                selectedApp={{ appId: app.value, label: app.label, owner: applicationOwner }}
+                                selectedApp={{
+                                    appId: app.value,
+                                    label: app.label,
+                                    owner: applicationOwner,
+                                    hashEnabled,
+                                }}
                                 updateSubscriptionData={updateSubscriptionData}
                             />
                         </div>
                     </td>
                 </tr>
             )}
-        </React.Fragment>
+        </>
     );
 };
 subscriptionTableRow.propTypes = {

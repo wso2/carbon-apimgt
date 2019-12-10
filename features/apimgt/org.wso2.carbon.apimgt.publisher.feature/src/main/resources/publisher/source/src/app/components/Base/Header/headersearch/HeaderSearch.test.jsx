@@ -21,7 +21,7 @@ import Autosuggest from 'react-autosuggest';
 import { MemoryRouter } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
-import Configurations from 'Config';
+import Themes from 'Themes';
 import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
 import API from 'AppData/api.js';
 import AuthManager from 'AppData/AuthManager';
@@ -38,7 +38,7 @@ jest.mock('history', () => {
     mockedPush.push = jest.fn();
     return {
         ...originalHistory,
-        createMemoryHistory: jest.fn(props => mockedPush),
+        createMemoryHistory: jest.fn(() => mockedPush),
     };
 });
 
@@ -56,7 +56,7 @@ describe('Publisher <HeaderSearch> component tests', () => {
      * wrapper: mounted HeaderSearch component
      */
     async function mountHeaderSearchComponent() {
-        const { light } = Configurations.themes;
+        const { light } = Themes;
         const headerSearchComponent = (
             <MuiThemeProvider theme={createMuiTheme(light)}>
                 <MemoryRouter>
@@ -108,8 +108,8 @@ describe('Publisher <HeaderSearch> component tests', () => {
         const autoSuggestProps = wrapper.find(Autosuggest).props();
         const firstSuggestion = autoSuggestProps.suggestions[0];
         autoSuggestProps.onSuggestionSelected({ key: 'Enter' }, { suggestion: firstSuggestion });
-        const expectedPath = firstSuggestion.type === 'API' ? `/apis/${firstSuggestion.id}/overview` :
-            `/apis/${firstSuggestion.apiUUID}/documents/${firstSuggestion.id}/details`;
+        const expectedPath = firstSuggestion.type === 'API' ? `/apis/${firstSuggestion.id}/overview`
+            : `/apis/${firstSuggestion.apiUUID}/documents/${firstSuggestion.id}/details`;
         expect(wrapper.find('HeaderSearch').props().history.push.mock.calls[0][0]).toEqual(expectedPath);
     });
     test('Search results needs to be wiped out when search query is erased', async () => {

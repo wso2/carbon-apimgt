@@ -37,7 +37,7 @@ import API from '../../../../data/api'; // TODO: Use webpack aliases instead of 
 import Alert from '../../../Shared/Alert';
 import { endpointsToList } from './endpointUtils';
 
-const styles = theme => ({
+const styles = (theme) => ({
     endpointTypeSelect: {
         width: '50%',
     },
@@ -184,7 +184,7 @@ function GeneralConfiguration(props) {
     }, []);
 
     return (
-        <React.Fragment>
+        <>
             <ExpansionPanel
                 expanded={isConfigExpanded}
                 onChange={() => setConfigExpand(!isConfigExpanded)}
@@ -196,9 +196,9 @@ function GeneralConfiguration(props) {
                     id='panel1bh-header'
                     className={classes.configHeaderContainer}
                 >
-                    {endpointType.key === 'awslambda' ?
-                        (<div />) :
-                        (
+                    {endpointType.key === 'awslambda'
+                        ? (<div />)
+                        : (
                             <Typography
                                 className={classes.secondaryHeading}
                                 hidden={
@@ -209,7 +209,10 @@ function GeneralConfiguration(props) {
                                 <FormattedMessage
                                     id='Apis.Details.Endpoints.GeneralConfiguration.endpoint.security.sub.heading'
                                     defaultMessage='Endpoint Security'
-                                /> : {endpointSecurityInfo !== null ? endpointSecurityInfo.type : 'NONE'}
+                                />
+                                {' '}
+:
+                                {endpointSecurityInfo !== null ? endpointSecurityInfo.type : 'NONE'}
                             </Typography>
                         )}
                     {endpointType.key === 'default' || endpointType.key === 'awslambda' ? (
@@ -219,12 +222,14 @@ function GeneralConfiguration(props) {
                             className={classes.secondaryHeading}
                             hidden={endpointType.key === 'default' || endpointType.key === 'awslambda'}
                         >
-                            {' | '}
+                             |
                             <FormattedMessage
                                 id='Apis.Details.Endpoints.GeneralConfiguration.certificates.sub.heading'
                                 defaultMessage='Certificates'
                             />
-                            : {endpointCertificates.length}
+                            :
+                            {' '}
+                            {endpointCertificates.length}
                         </Typography>
                     )}
                 </ExpansionPanelSummary>
@@ -246,23 +251,23 @@ function GeneralConfiguration(props) {
                                         <FormControlLabel
                                             value='start'
                                             checked={endpointSecurityInfo !== null}
-                                            control={
+                                            control={(
                                                 <Switch
                                                     color='primary'
                                                     disabled={isRestricted(['apim:api_create'], api)}
                                                 />
-                                            }
-                                            label={
+                                            )}
+                                            label={(
                                                 <Typography className={classes.securityHeading}>
                                                     <FormattedMessage
                                                         id={
-                                                            'Apis.Details.Endpoints.EndpointOverview.' +
-                                                            'endpoint.security.enable.switch'
+                                                            'Apis.Details.Endpoints.EndpointOverview.'
+                                                            + 'endpoint.security.enable.switch'
                                                         }
                                                         defaultMessage='Endpoint Security'
                                                     />
                                                 </Typography>
-                                            }
+                                            )}
                                             labelPlacement='start'
                                             onChange={handleToggleEndpointSecurity}
                                         />
@@ -293,7 +298,7 @@ function GeneralConfiguration(props) {
                     </Grid>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
-        </React.Fragment>
+        </>
     );
 }
 

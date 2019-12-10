@@ -97,7 +97,6 @@ function GlobalNavBar(props) {
         iconWidth = 16;
         strokeColor = theme.palette.getContrastText(theme.custom.appBar.background);
     }
-    const linkTextClasses = classNames({ [classes.small]: smallView });
     return (
         <List className={classes.listRoot}>
             {theme.custom.landingPage.active
@@ -122,7 +121,7 @@ function GlobalNavBar(props) {
                                     }),
                                 }}
                                 primary={intl.formatMessage({
-                                    id: 'Base.Generic.GlobalNavbar.menu.home',
+                                    id: 'Base.Header.GlobalNavbar.menu.home',
                                     defaultMessage: 'Home',
                                 })}
                             />
@@ -153,7 +152,7 @@ function GlobalNavBar(props) {
                             }),
                         }}
                         primary={intl.formatMessage({
-                            id: 'Base.Generic.GlobalNavbar.menu.apis',
+                            id: 'Base.Header.GlobalNavbar.menu.apis',
                             defaultMessage: 'APIs',
                         })}
                     />
@@ -180,7 +179,7 @@ function GlobalNavBar(props) {
                             }),
                         }}
                         primary={intl.formatMessage({
-                            id: 'Base.Generic.GlobalNavbar.menu.applications',
+                            id: 'Base.Header.GlobalNavbar.menu.applications',
                             defaultMessage: 'Applications',
                         })}
                     />

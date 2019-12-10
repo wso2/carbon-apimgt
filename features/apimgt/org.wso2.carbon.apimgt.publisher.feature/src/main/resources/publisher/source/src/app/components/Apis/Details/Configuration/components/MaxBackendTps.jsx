@@ -39,7 +39,7 @@ import { Collapse } from '@material-ui/core';
 import { FormattedMessage } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     expansionPanel: {
         marginBottom: theme.spacing(1), // TODO: replace with <Box /> element `mb`
     },
@@ -70,7 +70,7 @@ export default function MaxBackendTps(props) {
     const classes = useStyles();
 
     return (
-        <React.Fragment>
+        <>
             <Grid item xs={12}>
                 <ExpansionPanel className={classes.expansionPanel} defaultExpanded>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
@@ -80,13 +80,13 @@ export default function MaxBackendTps(props) {
                                 defaultMessage='Backend Throughput'
                             />
                             <Tooltip
-                                title={
+                                title={(
                                     <FormattedMessage
                                         id='Apis.Details.Configuration.components.MaxBackendTps.tooltip'
-                                        defaultMessage={'Limits the total number of calls the API Manager is allowed' +
-                                        ' to make to the backend'}
+                                        defaultMessage={'Limits the total number of calls the API Manager is allowed'
+                                        + ' to make to the backend'}
                                     />
-                                }
+                                )}
                                 aria-label='APISecurity'
                                 placement='right-end'
                                 interactive
@@ -113,20 +113,24 @@ export default function MaxBackendTps(props) {
                             >
                                 <FormControlLabel
                                     value='unlimited'
-                                    control={<Radio
-                                        color='primary'
-                                        disabled={isRestricted(['apim:api_create'], api)}
-                                    />}
+                                    control={(
+                                        <Radio
+                                            color='primary'
+                                            disabled={isRestricted(['apim:api_create'], api)}
+                                        />
+                                    )}
                                     label='Unlimited'
                                     labelPlacement='end'
 
                                 />
                                 <FormControlLabel
                                     value='specify'
-                                    control={<Radio
-                                        color='primary'
-                                        disabled={isRestricted(['apim:api_create'], api)}
-                                    />}
+                                    control={(
+                                        <Radio
+                                            color='primary'
+                                            disabled={isRestricted(['apim:api_create'], api)}
+                                        />
+                                    )}
                                     label='Specify'
                                     labelPlacement='end'
                                     disabled={isRestricted(['apim:api_create'], api)}
@@ -180,7 +184,7 @@ export default function MaxBackendTps(props) {
                     </ExpansionPanelDetails>
                 </ExpansionPanel>
             </Grid>
-        </React.Fragment>
+        </>
     );
 }
 

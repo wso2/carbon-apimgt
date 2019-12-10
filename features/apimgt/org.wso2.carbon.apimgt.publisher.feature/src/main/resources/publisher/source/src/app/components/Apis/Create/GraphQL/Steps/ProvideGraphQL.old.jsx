@@ -28,7 +28,7 @@ import Backup from '@material-ui/icons/Backup';
 import Icon from '@material-ui/core/Icon';
 import API from 'AppData/api';
 
-const styles = theme => ({
+const styles = (theme) => ({
     radioWrapper: {
         display: 'flex',
         flexDirection: 'row',
@@ -38,7 +38,7 @@ const styles = theme => ({
         color: theme.palette.grey[500],
         border: 'dashed 1px ' + theme.palette.grey[500],
         background: theme.palette.grey[100],
-        padding: theme.spacing.unit * 4,
+        padding: theme.spacing(4),
         textAlign: 'center',
         cursor: 'pointer',
     },
@@ -63,7 +63,7 @@ const styles = theme => ({
     },
     errorIcon: {
         color: theme.palette.error.main,
-        marginRight: theme.spacing.unit * 2,
+        marginRight: theme.spacing(2),
     },
     fileNameWrapper: {
         flexDirection: 'row',
@@ -215,8 +215,8 @@ class ProvideGraphQL extends Component {
             return <Progress error={error} />;
         }
         return (
-            <React.Fragment>
-                <React.Fragment>
+            <>
+                <>
                     {valid.graphQLFile.invalidFile && (
                         <div className={classes.errorMessageWrapper}>
                             <ErrorOutline className={classes.errorIcon} />
@@ -240,7 +240,12 @@ class ProvideGraphQL extends Component {
                                         <Icon className={classes.largeIcon}>insert_drive_file</Icon>
                                         <div className={classes.fileNameWrapper}>
                                             <Typography variant='body2' gutterBottom>
-                                                {file.name} - {file.size} bytes
+                                                {file.name}
+                                                {' '}
+-
+                                                {file.size}
+                                                {' '}
+bytes
                                             </Typography>
                                         </div>
                                     </div>
@@ -250,8 +255,8 @@ class ProvideGraphQL extends Component {
                                         <div>
                                             <FormattedMessage
                                                 id='Apis.GraphQL.Steps.ProvideGraphQL.try.dropping.schema.file'
-                                                defaultMessage={'Try dropping schema file here, or click to select ' +
-                                                'schema to upload.'}
+                                                defaultMessage={'Try dropping schema file here, or click to select '
+                                                + 'schema to upload.'}
                                             />
                                         </div>
                                     </div>
@@ -267,8 +272,8 @@ class ProvideGraphQL extends Component {
                             />
                         )}
                     </FormHelperText>
-                </React.Fragment>
-            </React.Fragment>
+                </>
+            </>
         );
     }
 }

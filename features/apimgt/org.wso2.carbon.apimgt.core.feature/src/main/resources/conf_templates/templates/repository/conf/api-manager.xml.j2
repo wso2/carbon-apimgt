@@ -910,6 +910,14 @@
         </LogTracer>
     </OpenTracer>
 
+    {% if security_audit is defined %}
+        <APISecurityAudit>
+            <APIToken>{{security_audit.api_token}}</APIToken>
+            <CollectionID>{{security_audit.collection_id}}</CollectionID>
+            <Global>{{security_audit.global}}</Global>
+        </APISecurityAudit>
+    {% endif %}
+
     {% if apim.devportal.application_attributes is defined %}
     <ApplicationConfiguration>
         <ApplicationAttributes>

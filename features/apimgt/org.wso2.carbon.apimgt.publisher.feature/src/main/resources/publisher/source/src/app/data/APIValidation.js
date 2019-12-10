@@ -46,7 +46,7 @@ function getMessage(errorType) {
 * arguments to custom Joi schema validate function.
 * Ref: https://hapi.dev/family/joi/?v=15.1.1#extendextension
 */
-const roleSchema = Joi.extend(joi => ({
+const roleSchema = Joi.extend((joi) => ({
     base: joi.string(),
     name: 'systemRole',
     rules: [
@@ -60,7 +60,7 @@ const roleSchema = Joi.extend(joi => ({
     ],
 }));
 
-const scopeSchema = Joi.extend(joi => ({
+const scopeSchema = Joi.extend((joi) => ({
     base: joi.string(),
     name: 'scopes',
     rules: [
@@ -74,7 +74,7 @@ const scopeSchema = Joi.extend(joi => ({
     ],
 }));
 
-const userRoleSchema = Joi.extend(joi => ({
+const userRoleSchema = Joi.extend((joi) => ({
     base: joi.string(),
     name: 'userRole',
     rules: [
@@ -88,7 +88,7 @@ const userRoleSchema = Joi.extend(joi => ({
     ],
 }));
 
-const apiSchema = Joi.extend(joi => ({
+const apiSchema = Joi.extend((joi) => ({
     base: joi.string(),
     name: 'api',
     rules: [
@@ -106,7 +106,7 @@ const apiSchema = Joi.extend(joi => ({
     ],
 }));
 
-const documentSchema = Joi.extend(joi => ({
+const documentSchema = Joi.extend((joi) => ({
     base: joi.object(),
     name: 'document',
     rules: [
@@ -123,7 +123,7 @@ const documentSchema = Joi.extend(joi => ({
 const definition = {
     apiName: Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/).required()
         .error((errors) => {
-            return errors.map(error => ({ ...error, message: 'Name ' + getMessage(error.type) }));
+            return errors.map((error) => ({ ...error, message: 'Name ' + getMessage(error.type) }));
         }),
     apiVersion: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/).required().error((errors) => {
         const tmpErrors = [...errors];
@@ -136,7 +136,7 @@ const definition = {
     }),
     apiContext: Joi.string().max(60).regex(/(?!.*\/t\/.*|.*\/t$)^[^~!@#:%^&*+=|\\<>"',&\s]*$/).required()
         .error((errors) => {
-            return errors.map(error => ({ ...error, message: 'Context ' + getMessage(error.type) }));
+            return errors.map((error) => ({ ...error, message: 'Context ' + getMessage(error.type) }));
         }),
     role: roleSchema.systemRole().role(),
     scope: scopeSchema.scopes().scope(),
@@ -151,7 +151,7 @@ const definition = {
     }),
     alias: Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/).required()
         .error((errors) => {
-            return errors.map(error => ({ ...error, message: 'Alias ' + getMessage(error.type) }));
+            return errors.map((error) => ({ ...error, message: 'Alias ' + getMessage(error.type) }));
         }),
     userRole: userRoleSchema.userRole().role(),
     apiParameter: apiSchema.api().isAPIParameterExist(),

@@ -17,7 +17,9 @@
  */
 
 import React from 'react';
-import { Input, Icon, Button, Row, Col } from 'antd';
+import {
+    Input, Icon, Button, Row, Col,
+} from 'antd';
 import 'react-tagsinput/react-tagsinput.css';
 import TagsInput from 'react-tagsinput';
 import PropTypes from 'prop-types';
@@ -69,7 +71,7 @@ class Scope extends React.Component {
                     console.warn('Page not found');
                 }
             });
-        this.setState({ visible: !this.state.visible });
+        this.setState((cState) => ({ visible: !cState.visible }));
     }
 
     /**
@@ -101,6 +103,7 @@ class Scope extends React.Component {
             this.props.deleteScope(scopeName);
         });
     }
+
     /**
      *
      * @param {any} roles Associate roles for the group

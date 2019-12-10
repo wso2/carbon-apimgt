@@ -16,27 +16,28 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 
+
+import {
+    API_SECURITY_MUTUAL_SSL_MANDATORY,
+    DEFAULT_API_SECURITY_OAUTH2,
+    API_SECURITY_BASIC_AUTH,
+    API_SECURITY_API_KEY,
+    API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY,
+    API_SECURITY_MUTUAL_SSL,
+} from './components/apiSecurityConstants';
 import ApplicationLevel from './components/ApplicationLevel';
 import TransportLevel from './components/TransportLevel';
 
-// Check this file for more info  <CARBON_APIMGT>/components/apimgt/org.wso2.carbon.apimgt.impl
-// /src/main/java/org/wso2/carbon/apimgt/impl/APIConstants.java
 
-const DEFAULT_API_SECURITY_OAUTH2 = 'oauth2';
-const API_SECURITY_BASIC_AUTH = 'basic_auth';
-const API_SECURITY_API_KEY = 'api_key';
-const API_SECURITY_MUTUAL_SSL = 'mutualssl';
-const API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = 'oauth_basic_auth_api_key_mandatory';
-const API_SECURITY_MUTUAL_SSL_MANDATORY = 'mutualssl_mandatory';
-
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     error: {
         color: theme.palette.error.main,
     },
@@ -58,19 +59,33 @@ export default function APISecurity(props) {
         configDispatcher,
         api,
     } = props;
-    const haveMultiLevelSecurity =
-        securityScheme.includes(API_SECURITY_MUTUAL_SSL) &&
-        (securityScheme.includes(API_SECURITY_BASIC_AUTH) ||
-        securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2) || securityScheme.includes(API_SECURITY_API_KEY));
+    const apiContext = useContext(ApiContext);
+    const isAPIProduct = apiContext.api.apiType === 'APIProduct';
+    let isEndpointAvailable;
+    let isPrototyped;
+    if (isAPIProduct) {
+        isEndpointAvailable = false;
+        isPrototyped = false;
+    } else {
+        isEndpointAvailable = apiContext.api.endpointConfig !== null;
+        isPrototyped = apiContext.api.endpointConfig !== null
+             && apiContext.api.endpointConfig.implementation_status === 'prototyped';
+    }
+
+    const haveMultiLevelSecurity = securityScheme.includes(API_SECURITY_MUTUAL_SSL)
+        && (securityScheme.includes(API_SECURITY_BASIC_AUTH)
+        || securityScheme.includes(
+            DEFAULT_API_SECURITY_OAUTH2,
+        ) || securityScheme.includes(API_SECURITY_API_KEY));
     const classes = useStyles();
 
     // Check the validation conditions and return an error message
     const Validate = () => {
         if (
-            !securityScheme.includes(API_SECURITY_MUTUAL_SSL) &&
-            !securityScheme.includes(API_SECURITY_BASIC_AUTH) &&
-            !securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2) &&
-            !securityScheme.includes(API_SECURITY_API_KEY)
+            !securityScheme.includes(API_SECURITY_MUTUAL_SSL)
+            && !securityScheme.includes(API_SECURITY_BASIC_AUTH)
+            && !securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2)
+            && !securityScheme.includes(API_SECURITY_API_KEY)
         ) {
             return (
                 <Typography className={classes.bottomSpace}>
@@ -82,10 +97,10 @@ export default function APISecurity(props) {
             );
         } else if (
             // User has enabled both security levels and set both levels as optional
-            haveMultiLevelSecurity &&
-            !(
-                securityScheme.includes(API_SECURITY_MUTUAL_SSL_MANDATORY) ||
-                securityScheme.includes(API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)
+            haveMultiLevelSecurity
+            && !(
+                securityScheme.includes(API_SECURITY_MUTUAL_SSL_MANDATORY)
+                || securityScheme.includes(API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)
             )
         ) {
             return (
@@ -100,42 +115,38 @@ export default function APISecurity(props) {
         return null; // No errors :-)
     };
     return (
-        <React.Fragment>
+        <>
             <Grid container spacing={2} alignItems='flex-start'>
-                <TransportLevel
-                    haveMultiLevelSecurity={haveMultiLevelSecurity}
-                    securityScheme={securityScheme}
-                    configDispatcher={configDispatcher}
-                    api={api}
-                    id={id}
-                />
-                <ApplicationLevel
-                    haveMultiLevelSecurity={haveMultiLevelSecurity}
-                    securityScheme={securityScheme}
-                    api={api}
-                    configDispatcher={configDispatcher}
-                    id={id}
-                />
-                <Grid item>
-                    <span className={classes.error}>
-                        <Validate />
-                    </span>
-                </Grid>
+                {(isAPIProduct || (!isEndpointAvailable || (isEndpointAvailable && !isPrototyped)))
+                && (
+                    <>
+                        <TransportLevel
+                            haveMultiLevelSecurity={haveMultiLevelSecurity}
+                            securityScheme={securityScheme}
+                            configDispatcher={configDispatcher}
+                            api={api}
+                            id={id}
+                        />
+                        <ApplicationLevel
+                            haveMultiLevelSecurity={haveMultiLevelSecurity}
+                            securityScheme={securityScheme}
+                            api={api}
+                            configDispatcher={configDispatcher}
+                            id={id}
+                        />
+                        <Grid item>
+                            <span className={classes.error}>
+                                <Validate />
+                            </span>
+                        </Grid>
+                    </>
+                )}
             </Grid>
-        </React.Fragment>
+        </>
     );
 }
 
 APISecurity.propTypes = {
     api: PropTypes.shape({}).isRequired,
     configDispatcher: PropTypes.func.isRequired,
-};
-
-export {
-    DEFAULT_API_SECURITY_OAUTH2,
-    API_SECURITY_BASIC_AUTH,
-    API_SECURITY_API_KEY,
-    API_SECURITY_MUTUAL_SSL,
-    API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY,
-    API_SECURITY_MUTUAL_SSL_MANDATORY,
 };

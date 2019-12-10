@@ -160,13 +160,13 @@ function getSuggestionValue(suggestion) {
 /**
  * Compose the query that needs to be send to the backend api
  * @param searchText
- * @param lcState
+ * @param lcstate
  * @returns {string}
  */
-function buildSearchQuery(searchText, lcState) {
+function buildSearchQuery(searchText, lcstate) {
     searchText = (searchText && !searchText.includes(':')) ? 'content:' + searchText : searchText;
-    return lcState
-        ? (searchText + ' status:' + lcState).trim().toLowerCase() : searchText.trim().toLowerCase();
+    return lcstate
+        ? (searchText + ' status:' + lcstate).trim().toLowerCase() : searchText.trim().toLowerCase();
 }
 
 /**
@@ -175,8 +175,8 @@ function buildSearchQuery(searchText, lcState) {
  * @param {String} value current value in input element
  * @returns {Promise} If no input text, return a promise which resolve to empty array, else return the API.all response
  */
-function getSuggestions(searchText, lcState) {
-    const searchQuery = buildSearchQuery(searchText, lcState);
+function getSuggestions(searchText, lcstate) {
+    const searchQuery = buildSearchQuery(searchText, lcstate);
     if (/:(\s+|(?![\s\S]))/g.test(searchText)) {
         return new Promise(resolve => resolve({ obj: { list: [] } }));
     } else {

@@ -36,7 +36,11 @@ const APINotFound = (props) => {
                         id='Base.Errors.APINotfound.message'
                         defaultMessage='Can&apos;t find an API associate with the given API ID'
                     />
-                    <span style={{ color: 'green' }}> {props.match.params.apiUUID} </span>
+                    <span style={{ color: 'green' }}>
+                        {' '}
+                        {props.match.params.apiUUID}
+                        {' '}
+                    </span>
                 </p>
             </div>
         </div>

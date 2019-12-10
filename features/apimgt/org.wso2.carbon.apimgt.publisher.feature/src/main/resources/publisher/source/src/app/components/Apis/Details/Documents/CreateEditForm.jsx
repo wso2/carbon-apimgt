@@ -38,14 +38,14 @@ import Alert from 'AppComponents/Shared/Alert';
 
 const styles = theme => ({
     button: {
-        marginLeft: theme.spacing.unit * 2,
+        marginLeft: theme.spacing(2),
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
     },
     addNewOther: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
     },
     radioGroup: {
         display: 'flex',
@@ -53,7 +53,7 @@ const styles = theme => ({
         width: 300,
     },
     expansionPanel: {
-        marginBottom: theme.spacing.unit,
+        marginBottom: theme.spacing(1),
     },
     group: {
         display: 'flex',
@@ -92,7 +92,7 @@ const styles = theme => ({
         borderRadius: '5px',
         cursor: 'pointer',
         height: 75,
-        padding: `${theme.spacing.unit * 2}px 0px`,
+        padding: `${theme.spacing(2)}px 0px`,
         position: 'relative',
         textAlign: 'center',
         width: '100%',
@@ -277,20 +277,6 @@ class CreateEditForm extends React.Component {
                 this.setState({ summeryEmpty: false });
             }
         }
-        const {
-            name, summary, nameNotDuplicate, sourceType, sourceUrl,
-        } = this.state;
-        const { setSaveDisabled } = this.props;
-        if (
-            name !== '' &&
-            summary !== '' &&
-            nameNotDuplicate &&
-            ((!invalidUrl && sourceUrl !== '') || sourceType !== 'URL')
-        ) {
-            setSaveDisabled(false);
-        } else {
-            setSaveDisabled(true);
-        }
     }
     componentDidMount() {
         this.getDocument();
@@ -366,7 +352,17 @@ class CreateEditForm extends React.Component {
             summeryEmpty,
             urlEmpty,
         } = this.state;
-        const { classes } = this.props;
+        const { classes, setSaveDisabled } = this.props;
+        if (
+            name !== '' &&
+            summary !== '' &&
+            nameNotDuplicate &&
+            ((!invalidUrl && sourceUrl !== '') || sourceType !== 'URL')
+        ) {
+            setSaveDisabled(false);
+        } else {
+            setSaveDisabled(true);
+        }
         return (
             <div className={classes.addNewOther}>
                 <FormControl margin='normal' className={classes.FormControlOdd}>
@@ -668,7 +664,7 @@ class CreateEditForm extends React.Component {
                 {sourceType === 'FILE' && (
                     <Dropzone
                         multiple={false}
-                        accept='application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/pdf'
+                        accept='application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/pdf, text/plain'
                         className={classes.dropzone}
                         activeClassName={classes.acceptDrop}
                         rejectClassName={classes.rejectDrop}

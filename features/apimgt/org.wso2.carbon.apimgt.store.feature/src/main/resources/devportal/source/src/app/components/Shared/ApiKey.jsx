@@ -48,7 +48,7 @@ const tokens = (props) => {
     * @param {*} event event fired
     */
     const handleChange = (field, event) => {
-        const { accessTokenRequest, updateAccessTokenRequest} = props;
+        const { accessTokenRequest, updateAccessTokenRequest } = props;
         const newRequest = { ...accessTokenRequest };
 
         const { target: currentTarget } = event;
@@ -63,7 +63,7 @@ const tokens = (props) => {
                 }
                 break;
             case 'timeout':
-                if (Validation.timeout.validate(currentTarget.value).error === undefined) {
+                if (Validation.number.validate(currentTarget.value).error === undefined) {
                     newRequest.timeout = currentTarget.value;
                     setInvaildTimeout(false);
                 } else {
@@ -88,12 +88,12 @@ const tokens = (props) => {
                         value={accessTokenRequest.timeout}
                         color='primary'
                     />}
-                    label='Api Key with infinite validity period'
+                    label='API Key with infinite validity period'
                 />
                 {!infiniteValidity && <TextField
                     required
                     label={intl.formatMessage({
-                        defaultMessage: 'Api Key validity period',
+                        defaultMessage: 'API Key validity period',
                         id: 'Shared.AppsAndKeys.Tokens.apikey',
                     })}
                     InputLabelProps={{
@@ -103,14 +103,14 @@ const tokens = (props) => {
                         invalidTimeout ? (
                             intl.formatMessage({
                                 defaultMessage: 'Please use a valid number for API Key expiry time',
-                                id: 'Shared.AppsAndKeys.Tokens.apikey.set.validity',
+                                id: 'Shared.AppsAndKeys.Tokens.apikey.set.validity.error',
                             })
                         ) : (
                             intl.formatMessage({
                                 defaultMessage: 'You can set an expiration period to determine the validity period of '
                                 + 'the token after generation. Set this as -1 to ensure that the '
                                 + 'apikey never expires.',
-                                id: 'Shared.AppsAndKeys.Tokens.apikey.set.validity',
+                                id: 'Shared.AppsAndKeys.Tokens.apikey.set.validity.help',
                             })
                         )
                     }

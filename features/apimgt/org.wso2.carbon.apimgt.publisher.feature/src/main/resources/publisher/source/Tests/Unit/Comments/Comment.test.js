@@ -25,8 +25,8 @@ import ConfirmDialog from '../../../src/app/components/Shared/ConfirmDialog';
 
 const CommentUnwrapped = unwrap(Comment);
 
-let comment, 
-reply;
+let comment;
+let reply;
 
 /**
  * Initialize common properties to be passed

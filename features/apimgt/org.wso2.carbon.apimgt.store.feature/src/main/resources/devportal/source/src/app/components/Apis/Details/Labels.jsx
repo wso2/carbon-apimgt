@@ -23,16 +23,18 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
+import CopyToClipboard from 'react-copy-to-clipboard';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
+import Tooltip from '@material-ui/core/Tooltip';
 import Icon from '@material-ui/core/Icon';
 import API from 'AppData/api';
-import { FormattedMessage } from 'react-intl';
 import Utils from 'AppData/Utils';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import { ApiContext } from './ApiContext';
 
-const styles = theme => ({
+const styles = (theme) => ({
     iconAligner: {
         display: 'flex',
         justifyContent: 'flex-start',
@@ -40,11 +42,7 @@ const styles = theme => ({
     },
     iconEven: {
         color: theme.palette.secondary.light,
-        width: theme.spacing.unit * 3,
-    },
-    iconOdd: {
-        color: theme.palette.secondary.main,
-        width: theme.spacing.unit * 3,
+        width: theme.spacing(3),
     },
     iconTextWrapper: {
         display: 'inline-block',
@@ -53,7 +51,7 @@ const styles = theme => ({
     bootstrapRoot: {
         padding: 0,
         'label + &': {
-            marginTop: theme.spacing.unit * 3,
+            marginTop: theme.spacing(3),
         },
     },
     bootstrapInput: {
@@ -71,6 +69,9 @@ const styles = theme => ({
     buttonIcon: {
         marginRight: 10,
     },
+    iconStyle: {
+        cursor: 'grab',
+    },
 });
 
 class Labels extends React.Component {
@@ -78,24 +79,20 @@ class Labels extends React.Component {
         super(props);
         this.apiClient = new API();
         this.state = {
-            prodUrlCopied: false,
-            epUrl: '',
+            urlCopied: false,
         };
     }
 
-    onCopy = name => () => {
+    onCopy = (name) => {
         this.setState({
             [name]: true,
         });
         const that = this;
-        const elementName = name;
         const caller = function () {
-            that.setState({
-                [elementName]: false,
-            });
+            that.setState({ urlCopied: false });
         };
-        setTimeout(caller, 4000);
-    };
+        setTimeout(caller, 2000);
+    }
 
     /**
      * Downloads the Swagger of the api for the provided label
@@ -103,7 +100,7 @@ class Labels extends React.Component {
      * @param {string} apiId uuid of the API
      * @param {string} label name of the environment
      */
-    downloadSwagger(apiId, label) {       
+    downloadSwagger(apiId, label) {
         const promiseSwagger = this.apiClient.getSwaggerByAPIIdAndLabel(apiId, label);
         promiseSwagger
             .then((done) => {
@@ -120,8 +117,8 @@ class Labels extends React.Component {
 
     render() {
         const { api } = this.context;
-        const { classes } = this.props;
-        const { prodUrlCopied, epUrl } = this.state;
+        const { classes, intl } = this.props;
+        const { urlCopied } = this.state;
 
         return (
             <Grid container spacing={2} item xs={12}>
@@ -151,8 +148,8 @@ class Labels extends React.Component {
                                                 defaultMessage='Microgateway URLs'
                                             />
                                         </Typography>
-                                        {label.accessUrls.map(row => (
-                                            <Grid item xs={12}>
+                                        {label.accessUrls.map((row) => (
+                                            <Grid item xs={12} key={row}>
                                                 <TextField
                                                     defaultValue={row}
                                                     id='bootstrap-input'
@@ -169,6 +166,28 @@ class Labels extends React.Component {
                                                         className: classes.bootstrapFormLabel,
                                                     }}
                                                 />
+                                                <Tooltip
+                                                    title={
+                                                        urlCopied
+                                                            ? intl.formatMessage({
+                                                                defaultMessage: 'Copied',
+                                                                id: 'Apis.Details.Labels.copied',
+                                                            })
+                                                            : intl.formatMessage({
+                                                                defaultMessage: 'Copy to clipboard',
+                                                                id: 'Apis.Details.Labels.copy.to.clipboard',
+                                                            })
+                                                    }
+                                                    placement='right'
+                                                    className={classes.iconStyle}
+                                                >
+                                                    <CopyToClipboard
+                                                        text={row}
+                                                        onCopy={() => this.onCopy('urlCopied')}
+                                                    >
+                                                        <Icon color='secondary'>insert_drive_file</Icon>
+                                                    </CopyToClipboard>
+                                                </Tooltip>
                                             </Grid>
                                         ))}
                                         {(api.type === 'HTTP' || api.type === 'SOAPTOREST') && (
@@ -201,4 +220,4 @@ Labels.propTypes = {
 };
 Labels.contextType = ApiContext;
 
-export default withStyles(styles)(Labels);
+export default injectIntl(withStyles(styles)(Labels));
