@@ -173,7 +173,6 @@ public class GraphQLSecurityHandler extends AbstractHandler {
                     if (errors.size()>0) {
                         List<String> errorList = new ArrayList<>();
                         for (GraphQLError error : errors) {
-                            //log.error(errorMessage);
                             errorList.add(error.getMessage());
                         }
 
@@ -192,7 +191,7 @@ public class GraphQLSecurityHandler extends AbstractHandler {
                         }
 
                         handleFailure(messageContext, APISecurityConstants.QUERY_TOO_DEEP, errorList.toString());
-                        log.error(errorlist.toString());
+                        log.error(errorList.toString());
                         return false;
                     }
                     if (log.isDebugEnabled()) {
