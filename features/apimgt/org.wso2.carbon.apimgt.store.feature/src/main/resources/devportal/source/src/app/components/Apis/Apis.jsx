@@ -18,7 +18,6 @@
 
 import React from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
-import CONSTS from 'AppData/Constants';
 import { withStyles } from '@material-ui/core';
 import CommonListing from './Listing/CommonListing';
 import TagCloudListing from './Listing/TagCloudListing';
@@ -36,35 +35,24 @@ function Apis() {
             <Route
                 exact
                 path='/api-groups'
-                render={props => (
-                    <TagCloudListing {...props} apiType={CONSTS.API_TYPE} />)}
+                render={(props) => (
+                    <TagCloudListing {...props} />)}
             />
             <Route
                 exact
                 path='/apis'
-                render={props => (
-                    <CommonListing {...props} apiType={CONSTS.API_TYPE} />)}
-            />
-            <Route
-                exact
-                path='/api-products'
-                render={props => (
-                    <CommonListing {...props} apiType={CONSTS.API_PRODUCT_TYPE} />)}
+                render={(props) => (
+                    <CommonListing {...props} />)}
             />
             <Route
                 path='/apis/search'
-                render={props => (
-                    <CommonListing {...props} apiType={CONSTS.API_TYPE} />)}
+                render={(props) => (
+                    <CommonListing {...props} />)}
             />
             <Route
                 path='/apis/:api_uuid/'
-                render={props => (
-                    <Details {...props} apiType={CONSTS.API_TYPE} />)}
-            />
-            <Route
-                path='/api-products/:api_uuid/'
-                render={props => (
-                    <Details {...props} apiType={CONSTS.API_PRODUCT_TYPE} />)}
+                render={(props) => (
+                    <Details {...props} />)}
             />
             <Route component={ResourceNotFound} />
         </Switch>

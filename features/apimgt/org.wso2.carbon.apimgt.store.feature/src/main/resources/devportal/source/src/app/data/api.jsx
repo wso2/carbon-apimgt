@@ -303,7 +303,7 @@ export default class API extends Resource {
     addComment(apiId, comment) {
         return this.client.then((client) => {
             const payload = { apiId, body: comment };
-            return client.apis['Comments'].addCommentToAPI(payload, this._requestMetaData());
+            return client.apis.Comments.addCommentToAPI(payload, this._requestMetaData());
         });
     }
 
@@ -313,7 +313,7 @@ export default class API extends Resource {
      */
     getAllComments(apiId) {
         return this.client.then((client) => {
-            return client.apis['Comments'].getAllCommentsOfAPI({ apiId }, this._requestMetaData());
+            return client.apis.Comments.getAllCommentsOfAPI({ apiId }, this._requestMetaData());
         });
     }
 
@@ -324,7 +324,7 @@ export default class API extends Resource {
      */
     deleteComment(apiId, commentId) {
         return this.client.then((client) => {
-            return client.apis['Comments'].deleteComment({ apiId, commentId }, this._requestMetaData());
+            return client.apis.Comments.deleteComment({ apiId, commentId }, this._requestMetaData());
         });
     }
 
@@ -465,7 +465,7 @@ export default class API extends Resource {
 
     generateApiKey(applicationId, keyType, validityPeriod) {
         const promiseGet = this.client.then((client) => {
-            const payload = { applicationId: applicationId, keyType: keyType, body: {validityPeriod: validityPeriod} };
+            const payload = { applicationId, keyType, body: { validityPeriod } };
             return client.apis['API Keys'].post_applications__applicationId__api_keys__keyType__generate(
                 payload,
                 this._requestMetaData(),
@@ -500,23 +500,17 @@ export default class API extends Resource {
      * @param {string} apiId id of the API that needs to be subscribed
      * @param {string} applicationId id of the application that needs to be subscribed
      * @param {string} policy throttle policy applicable for the subscription
-     * @param {string} apiType API type
      * @param {function} callback callback url
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    subscribe(apiId, applicationId, policy, apiType = CONSTS.API_TYPE, callback = null) {
+    subscribe(apiId, applicationId, policy, callback = null) {
         const promiseCreateSubscription = this.client.then((client) => {
             let subscriptionData = null;
 
-            if (apiType === CONSTS.API_TYPE) {
-                subscriptionData = {
-                    apiId, applicationId, throttlingPolicy: policy, type: apiType,
-                };
-            } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
-                subscriptionData = {
-                    apiProductId: apiId, applicationId, throttlingPolicy: policy, type: apiType,
-                };
-            }
+            subscriptionData = {
+                apiId, applicationId, throttlingPolicy: policy,
+            };
+
             const payload = { body: subscriptionData };
             return client.apis.Subscriptions.post_subscriptions(payload, { 'Content-Type': 'application/json' });
         });
@@ -690,7 +684,7 @@ export default class API extends Resource {
      * */
     subscribeAlerts(alerts) {
         return this.client.then((client) => {
-            return client.apis['Alert Subscriptions'].subscribeToAlerts({body: alerts}, this._requestMetaData());
+            return client.apis['Alert Subscriptions'].subscribeToAlerts({ body: alerts }, this._requestMetaData());
         });
     }
 
