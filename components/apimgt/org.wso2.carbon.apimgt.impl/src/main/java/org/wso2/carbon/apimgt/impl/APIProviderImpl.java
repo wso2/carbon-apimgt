@@ -4159,7 +4159,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                     }
                                 }
                         }
-                    }
                 }
             }
             if (log.isDebugEnabled()) {
@@ -8779,6 +8778,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Set<DeploymentEnvironments> deploymentEnvironments = existingAPI.getDeploymentEnvironments();
         List<DeploymentStatus> deploymentStatusList = new ArrayList<DeploymentStatus>();
         return deploymentStatusList;
+
     }
 
     /**
