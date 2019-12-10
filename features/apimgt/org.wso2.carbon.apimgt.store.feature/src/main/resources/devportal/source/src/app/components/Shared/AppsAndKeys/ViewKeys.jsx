@@ -362,7 +362,7 @@ class ViewKeys extends React.Component {
                                                         })
                                                         : intl.formatMessage({
                                                             defaultMessage: 'Copy to clipboard',
-                                                            id: 'Shared.AppsAndKeys.ViewKeys.copied',
+                                                            id: 'Shared.AppsAndKeys.ViewKeys.copy.to',
                                                         })
                                                 }
                                                 placement='right'
