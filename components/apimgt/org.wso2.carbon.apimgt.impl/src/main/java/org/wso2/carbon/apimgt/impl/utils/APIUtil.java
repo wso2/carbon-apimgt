@@ -117,7 +117,6 @@ import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
-import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -161,6 +160,7 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
+import org.wso2.carbon.governance.registry.extensions.utils.APIUtils;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -305,6 +305,8 @@ public final class APIUtil {
 
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
     private static final String NONE = "NONE";
+    private static final String SUPER_TENANT_SUFFIX =
+            APIConstants.EMAIL_DOMAIN_SEPARATOR + APIConstants.SUPER_TENANT_DOMAIN;
 
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
     static {
@@ -9725,41 +9727,21 @@ public final class APIUtil {
 
     }
 
-    public static Map<String, Map<String, String>> getClusterInfoFromConfig(JSONObject tenantConf) {
-
-        JSONArray clusterInfo = (JSONArray) ((JSONObject) tenantConf.get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO))
-                .get(ContainerBasedConstants.CLUSTER_INFO);
-        Map<String, Map<String, String>> clusters = new HashMap<String, Map<String, String>>();
-        for (Object info : clusterInfo) {
-
-            JSONObject clusterProperties = (JSONObject) ((JSONObject) info).get(ContainerBasedConstants.PROPERTIES);
-            String clusterName = ((JSONObject) info).get(ContainerBasedConstants.CLUSTER_NAME).toString();
-            Iterator<String> iterator = clusterProperties.keySet().iterator();
-            Map<String, String> clusterProperty = new HashMap<String, String>();
-            while (iterator.hasNext()) {
-
-                String key = iterator.next();
-                String value = clusterProperties.get(key).toString();
-                clusterProperty.put(key, value);
-            }
-            clusters.put(clusterName, clusterProperty);
+    /**
+     * append the tenant domain to the username when an email is used as the username and EmailUserName is not enabled
+     * in the super tenant
+     * @param username
+     * @param tenantDomain
+     * @return username is an email
+     */
+    public static String appendTenantDomainForEmailUsernames(String username, String tenantDomain) {
+        if (APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenantDomain) &&
+                !username.endsWith(SUPER_TENANT_SUFFIX) &&
+                !MultitenantUtils.isEmailUserName() &&
+                username.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR) > 0) {
+            return username += SUPER_TENANT_SUFFIX;
         }
-        return clusters;
+        return username;
     }
-
-    public static JSONObject getClusterInfoFromConfig(String tenantConfigContent) throws ParseException {
-
-        JSONParser jsonParser = new JSONParser();
-        JSONObject tenantConf = (JSONObject) jsonParser.parse(tenantConfigContent);
-        JSONArray ClusterInfo = (JSONArray) tenantConf.get(ContainerBasedConstants.CLUSTER_INFO);
-        JSONObject clusters = new JSONObject();
-        for (int i = 0; i < ClusterInfo.size(); i++) {
-
-            JSONObject clusterProperties = (JSONObject) ((JSONObject) ClusterInfo.get(i)).get(ContainerBasedConstants.PROPERTIES);
-            String name = ((JSONObject) ClusterInfo.get(i)).get(ContainerBasedConstants.CLUSTER_NAME).toString();
-            clusters.put(name, clusterProperties);
-        }
-        return clusters;
-    }
-
 }
+

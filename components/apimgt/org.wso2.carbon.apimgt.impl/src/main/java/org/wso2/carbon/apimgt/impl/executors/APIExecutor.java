@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.impl.executors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -50,12 +49,9 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static org.wso2.carbon.apimgt.impl.APIConstants.PUBLISH_IN_PRIVATE_JET_MODE;
 
 /**
  * This class is an implementation of the
@@ -96,11 +92,15 @@ public class APIExecutor implements Execution {
         String domain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
      
         String userWithDomain = user;
-        if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(domain)){
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(domain)) {
             userWithDomain = user + APIConstants.EMAIL_DOMAIN_SEPARATOR + domain;
-        }       
-        
+        } else {
+            userWithDomain = APIUtil.appendTenantDomainForEmailUsernames(user, domain);
+        }
         userWithDomain = APIUtil.replaceEmailDomainBack(userWithDomain);
+        if (log.isDebugEnabled()) {
+            log.debug("Corrected username with domain = " + userWithDomain);
+        }
 
         try {
             String tenantUserName = MultitenantUtils.getTenantAwareUsername(userWithDomain);
@@ -143,23 +143,13 @@ public class APIExecutor implements Execution {
             log.error("Failed to get tenant Id while executing APIExecutor. ", e);
             context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
                                 "APIManagementException:" + e.getMessage());
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        } catch (org.wso2.carbon.registry.api.RegistryException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         }
         return executed;
     }
     
     private boolean changeLifeCycle(RequestContext context, API api, Resource apiResource, Registry registry,
                                     APIProvider apiProvider, GenericArtifact apiArtifact, String targetState)
-            throws APIManagementException, FaultGatewaysException, org.wso2.carbon.registry.api.RegistryException, IllegalAccessException, ParseException, InstantiationException, ClassNotFoundException, UserStoreException {
+            throws APIManagementException, FaultGatewaysException, RegistryException {
         boolean executed;
 
         String oldStatus = APIUtil.getLcStateFromArtifact(apiArtifact);
@@ -221,8 +211,7 @@ public class APIExecutor implements Execution {
 
         boolean deprecateOldVersions = false;
         boolean makeKeysForwardCompatible = false;
-        boolean publishInPrivateJet = false;
-        int deprecateOldVersionsCheckListOrder = 0, makeKeysForwardCompatibleCheckListOrder = 1, publishInPrivateJetCheckListOrder = 2;
+        int deprecateOldVersionsCheckListOrder = 0, makeKeysForwardCompatibleCheckListOrder = 1;
         //If the API status is CREATED/PROTOTYPED ,check for check list items of lifecycle
         if (isCurrentCreatedOrPrototyped) {
             CheckListItemBean[] checkListItemBeans = GovernanceUtils
@@ -233,8 +222,6 @@ public class APIExecutor implements Execution {
                         deprecateOldVersionsCheckListOrder = checkListItemBean.getOrder();
                     } else if (APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM.equals(checkListItemBean.getName())) {
                         makeKeysForwardCompatibleCheckListOrder = checkListItemBean.getOrder();
-                    } else if (PUBLISH_IN_PRIVATE_JET_MODE.equals(checkListItemBean.getName())) {
-                        publishInPrivateJetCheckListOrder = checkListItemBean.getOrder();
                     }
                 }
             }
@@ -242,8 +229,6 @@ public class APIExecutor implements Execution {
                     .isLCItemChecked(deprecateOldVersionsCheckListOrder, APIConstants.API_LIFE_CYCLE);
             makeKeysForwardCompatible = !(apiArtifact
                     .isLCItemChecked(makeKeysForwardCompatibleCheckListOrder, APIConstants.API_LIFE_CYCLE));
-            publishInPrivateJet = (apiArtifact
-                    .isLCItemChecked(publishInPrivateJetCheckListOrder, APIConstants.API_LIFE_CYCLE));
         }
 
         if (isStateTransitionToPublished) {
@@ -263,11 +248,6 @@ public class APIExecutor implements Execution {
 
                     }
                 }
-            }
-            List<String> clusters = new ArrayList<String>();
-            //clients.add("cluster1");
-            if (publishInPrivateJet) {
-                apiProvider.publishInPrivateJet(api, api.getId(), clusters);
             }
         }
 

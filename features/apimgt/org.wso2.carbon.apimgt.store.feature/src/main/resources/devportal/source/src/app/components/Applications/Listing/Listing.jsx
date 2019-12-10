@@ -416,7 +416,7 @@ class Listing extends Component {
                                 })}
                                 buttonText={intl.formatMessage({
                                     defaultMessage: 'ADD NEW APPLICATION',
-                                    id: 'Applications.Listing.Listing.generic.display.description',
+                                    id: 'Applications.Listing.Listing.generic.display.description.text',
                                 })}
                             />
                         )}

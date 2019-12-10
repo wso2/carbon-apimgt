@@ -121,7 +121,7 @@ function GlobalNavBar(props) {
                                     }),
                                 }}
                                 primary={intl.formatMessage({
-                                    id: 'Base.Generic.GlobalNavbar.menu.home',
+                                    id: 'Base.Header.GlobalNavbar.menu.home',
                                     defaultMessage: 'Home',
                                 })}
                             />
@@ -152,7 +152,7 @@ function GlobalNavBar(props) {
                             }),
                         }}
                         primary={intl.formatMessage({
-                            id: 'Base.Generic.GlobalNavbar.menu.apis',
+                            id: 'Base.Header.GlobalNavbar.menu.apis',
                             defaultMessage: 'APIs',
                         })}
                     />
@@ -179,7 +179,7 @@ function GlobalNavBar(props) {
                             }),
                         }}
                         primary={intl.formatMessage({
-                            id: 'Base.Generic.GlobalNavbar.menu.applications',
+                            id: 'Base.Header.GlobalNavbar.menu.applications',
                             defaultMessage: 'Applications',
                         })}
                     />

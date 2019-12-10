@@ -347,7 +347,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             //get tenant domain
             String tenantDomain = MultitenantUtils.getTenantDomain(endUserName);
             //get tenantId
-            int tenantId = APIUtil.getTenantId(endUserName);
+            int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
             Certificate publicCert;
 
             if (!(publicCerts.containsKey(tenantId))) {

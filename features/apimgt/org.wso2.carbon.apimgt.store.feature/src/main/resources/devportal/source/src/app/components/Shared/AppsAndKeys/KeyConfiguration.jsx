@@ -192,10 +192,7 @@ const KeyConfiguration = (props) => {
                                             color='primary'
                                         />
                                     )}
-                                    label={intl.formatMessage({
-                                        defaultMessage: value,
-                                        id: 'Shared.AppsAndKeys.KeyConfiguration.' + value.replace(/ /g, '.'),
-                                    })}
+                                    label={value}
                                     key={key}
                                 />
                             );

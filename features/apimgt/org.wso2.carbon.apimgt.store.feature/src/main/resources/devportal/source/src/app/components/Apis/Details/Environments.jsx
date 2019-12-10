@@ -144,7 +144,7 @@ class Environments extends React.Component {
             .catch((error) => {
                 console.log(error);
                 Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.Environments.download.wsdl.error',
+                    id: 'Apis.Details.Environments.download.swagger.error',
                     defaultMessage: 'Error downloading the Swagger',
                 }));
             });

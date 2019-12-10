@@ -47,6 +47,7 @@ const styles = theme => ({
         width: '99%',
         whiteSpace: 'pre-wrap',
         overflowWrap: 'break-word',
+        wordBreak: 'break-all',
     },
     root: {
         marginTop: theme.spacing(2.5),
