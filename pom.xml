@@ -1710,6 +1710,40 @@
                 <artifactId>cdi-api</artifactId>
                 <scope>provided</scope>
                 <version>${javax.enterprise.version}</version>
+<!--                <groupId>io.fabric8</groupId>-->
+<!--                <artifactId>kubernetes-client</artifactId>-->
+<!--                <version>${io.fabric8.kubernetes.client.version}</version>-->
+<!--            </dependency>-->
+
+<!--            <dependency>-->
+<!--                <groupId>io.fabric8</groupId>-->
+<!--                <artifactId>kubernetes-api</artifactId>-->
+<!--                <version>${io.fabric8.kuberenetes.api.version}</version>-->
+<!--            </dependency>-->
+
+<!--            <dependency>-->
+<!--                <groupId>io.fabric8</groupId>-->
+<!--                <artifactId>openshift-client</artifactId>-->
+<!--                <version>${io.fabric8.openshift.client.version}</version>-->
+<!--            </dependency>-->
+
+<!--            <dependency>-->
+<!--                <groupId>org.apache.commons</groupId>-->
+<!--                <artifactId>commons-compress</artifactId>-->
+<!--                <version>${org.apache.commons.compress.version}</version>-->
+<!--            </dependency>-->
+
+<!--            <dependency>-->
+<!--                <groupId>com.squareup.okhttp3</groupId>-->
+<!--                <artifactId>okhttp</artifactId>-->
+<!--                <version>${com.squareup.okhttp3.okhttp.version}</version>-->
+<!--            </dependency>-->
+
+<!--            <dependency>-->
+<!--                <groupId>com.squareup.okio</groupId>-->
+<!--                <artifactId>okio</artifactId>-->
+<!--                <version>${com.squareup.okio.version}</version>-->
+<!--&gt;>>>>>> Private Jet Mode classes-->
             </dependency>
             <dependency>
                 <groupId>io.github.openfeign</groupId>

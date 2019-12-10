@@ -95,6 +95,7 @@ public class K8sManager implements ContainerManager {
                     oauthSecurityCRName, basicAuthSecurityCRName, false);
 
             applyAPICustomResourceDefinition(openShiftClient, configmapNames, replicas, apiIdentifier, true);
+
             log.info("Successfully deployed the [API] " + apiIdentifier.getApiName() + " in Kubernetes");
 
 
