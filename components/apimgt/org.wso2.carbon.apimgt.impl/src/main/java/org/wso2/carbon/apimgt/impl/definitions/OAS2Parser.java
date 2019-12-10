@@ -530,6 +530,12 @@ public class OAS2Parser extends APIDefinition {
         return getSwaggerJsonString(swagger);
     }
 
+    @Override
+    public String getOASVersion(String oasDefinition) {
+        Swagger swagger = getSwagger(oasDefinition);
+        return swagger.getInfo().getVersion();
+    }
+
     /**
      * Update swagger with security definition
      *
