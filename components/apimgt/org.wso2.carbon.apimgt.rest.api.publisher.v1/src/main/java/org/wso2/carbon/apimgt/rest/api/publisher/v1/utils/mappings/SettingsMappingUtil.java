@@ -22,23 +22,26 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIMRegistryService;
+import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityAuditAttributeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.io.IOException;
 import java.security.PrivilegedAction;
@@ -48,6 +51,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
+
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 
 public class SettingsMappingUtil {
@@ -87,6 +92,7 @@ public class SettingsMappingUtil {
             settingsDTO.setSecurityAuditProperties(getSecurityAuditProperties());
             settingsDTO.setExternalStoresEnabled(
                     APIUtil.isExternalStoresEnabled(RestApiUtil.getLoggedInUserTenantDomain()));
+            settingsDTO.setDeployments(getCloudClusterInfoFromTenantConf());
         }
         settingsDTO.setScopes(GetScopeList());
         return settingsDTO;
@@ -165,5 +171,59 @@ public class SettingsMappingUtil {
             properties.setBaseUrl(baseUrl);
         }
         return properties;
+    }
+
+    /**
+     * This method returns the deployments list from the tenant configurations
+     *
+     * @return DeploymentsDTO list. List of Deployments
+     * @throws APIManagementException
+     */
+    private List<DeploymentsDTO> getCloudClusterInfoFromTenantConf() throws APIManagementException {
+
+        List<DeploymentsDTO> deploymentsList = new ArrayList<DeploymentsDTO>();
+
+        //Get cloud environments from tenant-conf.json file
+        //Get tenant domain to access tenant conf
+        APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        //read tenant-conf.json and get details
+        try {
+            String getTenantDomainConfContent = apimRegistryService
+                    .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+            JSONParser jsonParser = new JSONParser();
+            Object tenantObject = jsonParser.parse(getTenantDomainConfContent);
+            JSONObject tenant_conf = (JSONObject) tenantObject;
+            //get kubernetes cluster info
+            JSONObject ContainerMgtInfo = (JSONObject) tenant_conf.get("ContainerMgtInfo");
+            DeploymentsDTO k8sClustersInfoDTO = new DeploymentsDTO();
+            k8sClustersInfoDTO.setName((String) ContainerMgtInfo.get("Type"));
+            //get clusters' properties
+            List<DeploymentClusterInfoDTO> deploymentClusterInfoDTOList = new ArrayList<>();
+            JSONObject clustersInfo = APIUtil.getClusterInfoFromConfig(ContainerMgtInfo.toString());
+            clustersInfo.keySet().forEach(keyStr ->
+            {
+                Object clusterProperties = clustersInfo.get(keyStr);
+                DeploymentClusterInfoDTO deploymentClusterInfoDTO = new DeploymentClusterInfoDTO();
+                deploymentClusterInfoDTO.setClusterName((String) keyStr);
+                deploymentClusterInfoDTO.setMasterURL(((JSONObject) clusterProperties).get("MasterURL").toString());
+                deploymentClusterInfoDTO.setNamespace(((JSONObject) clusterProperties).get("Namespace").toString());
+
+                if (!keyStr.toString().equals("")) {
+                    deploymentClusterInfoDTOList.add(deploymentClusterInfoDTO);
+                }
+            });
+
+            k8sClustersInfoDTO.setClusters(deploymentClusterInfoDTOList);
+            deploymentsList.add(k8sClustersInfoDTO);
+
+        } catch (RegistryException e) {
+            handleException("Couldn't read tenant configuration from tenant registry", e);
+        } catch (UserStoreException e) {
+            handleException("Couldn't read tenant configuration from tenant registry", e);
+        } catch (ParseException e) {
+            handleException("Couldn't parse tenant configuration for reading extension handler position", e);
+        }
+        return deploymentsList;
     }
 }
