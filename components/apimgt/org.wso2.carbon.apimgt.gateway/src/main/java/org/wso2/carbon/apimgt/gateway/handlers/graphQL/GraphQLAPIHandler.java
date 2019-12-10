@@ -290,6 +290,10 @@ public class GraphQLAPIHandler extends AbstractHandler {
                                 log.debug("Added operation " + base64DecodedAdditionalType + "with security "
                                         + isSecurityEnabled);
                             }
+
+                        }  else if (additionalType.getName().contains(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY)) {
+                            String base64DecodedPolicy = new String(Base64.getUrlDecoder().decode(type.getName()));
+                            GraphQLAccessControlPolicy = base64DecodedPolicy;
                         }
                     }
                     if (!roleArrayList.isEmpty()) {
@@ -298,9 +302,6 @@ public class GraphQLAPIHandler extends AbstractHandler {
                             log.debug("Added scope " + base64DecodedAdditionalType + "with role list "
                                     + String.join(",", roleArrayList));
                         }
-                    } else if (additionalType.getName().contains(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY)) {
-                        String base64DecodedPolicy = new String(Base64.getUrlDecoder().decode(type.getName()));
-                        GraphQLAccessControlPolicy = base64DecodedPolicy;
                     }
                 }
             }
