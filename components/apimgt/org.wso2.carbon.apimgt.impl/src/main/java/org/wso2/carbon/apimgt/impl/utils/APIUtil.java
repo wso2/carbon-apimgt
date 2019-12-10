@@ -160,6 +160,7 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
+import org.wso2.carbon.governance.registry.extensions.utils.APIUtils;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -304,6 +305,8 @@ public final class APIUtil {
 
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
     private static final String NONE = "NONE";
+    private static final String SUPER_TENANT_SUFFIX =
+            APIConstants.EMAIL_DOMAIN_SEPARATOR + APIConstants.SUPER_TENANT_DOMAIN;
 
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
     static {
@@ -9724,4 +9727,21 @@ public final class APIUtil {
 
     }
 
+    /**
+     * append the tenant domain to the username when an email is used as the username and EmailUserName is not enabled
+     * in the super tenant
+     * @param username
+     * @param tenantDomain
+     * @return username is an email
+     */
+    public static String appendTenantDomainForEmailUsernames(String username, String tenantDomain) {
+        if (APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenantDomain) &&
+                !username.endsWith(SUPER_TENANT_SUFFIX) &&
+                !MultitenantUtils.isEmailUserName() &&
+                username.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR) > 0) {
+            return username += SUPER_TENANT_SUFFIX;
+        }
+        return username;
+    }
 }
+
