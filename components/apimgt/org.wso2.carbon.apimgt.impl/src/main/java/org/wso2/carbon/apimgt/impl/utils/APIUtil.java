@@ -128,6 +128,7 @@ import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
+import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -10585,7 +10586,6 @@ public final class APIUtil {
         }
 
     }
-
     /**
      * Returns the user claims for the given user.
      *
@@ -10784,7 +10784,6 @@ public final class APIUtil {
 
         return ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfigurations();
     }
-
     /**
      * Get scopes attached to the API.
      *
@@ -10839,4 +10838,43 @@ public final class APIUtil {
         }
         return claimMappingDtoList;
     }
+
+    public static Map<String, Map<String, String>> getClusterInfoFromConfig(JSONObject tenantConf) {
+
+        JSONArray clusterInfo = (JSONArray) ((JSONObject) tenantConf.get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO))
+                .get(ContainerBasedConstants.CLUSTER_INFO);
+        Map<String, Map<String, String>> clusters = new HashMap<String, Map<String, String>>();
+        for (Object info : clusterInfo) {
+
+            JSONObject clusterProperties = (JSONObject) ((JSONObject) info).get(ContainerBasedConstants.PROPERTIES);
+            String clusterName = ((JSONObject) info).get(ContainerBasedConstants.CLUSTER_NAME).toString();
+            Iterator<String> iterator = clusterProperties.keySet().iterator();
+            Map<String, String> clusterProperty = new HashMap<String, String>();
+            while (iterator.hasNext()) {
+
+                String key = iterator.next();
+                String value = clusterProperties.get(key).toString();
+                clusterProperty.put(key, value);
+            }
+            clusters.put(clusterName, clusterProperty);
+        }
+        return clusters;
+    }
+
+    public static JSONObject getClusterInfoFromConfig(String tenantConfigContent) throws ParseException {
+
+        JSONParser jsonParser = new JSONParser();
+        JSONObject tenantConf = (JSONObject) jsonParser.parse(tenantConfigContent);
+        JSONArray ClusterInfo = (JSONArray) tenantConf.get(ContainerBasedConstants.CLUSTER_INFO);
+        JSONObject clusters = new JSONObject();
+        for (int i = 0; i < ClusterInfo.size(); i++) {
+
+            JSONObject clusterProperties = (JSONObject) ((JSONObject) ClusterInfo.get(i)).get(ContainerBasedConstants.PROPERTIES);
+            String name = ((JSONObject) ClusterInfo.get(i)).get(ContainerBasedConstants.CLUSTER_NAME).toString();
+            clusters.put(name, clusterProperties);
+        }
+        return clusters;
+    }
+
 }
+
