@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
@@ -29,6 +30,8 @@ import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.registry.api.RegistryException;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -1447,6 +1450,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If failed to validate
      */
     void validateSharedScopes(Set<Scope> scopes, String tenantDomain) throws APIManagementException;
+<<<<<<< HEAD
 
     /**
      * Get the API and URI usages of the given shared scope
@@ -1457,4 +1461,15 @@ public interface APIProvider extends APIManager {
      */
     SharedScopeUsage getSharedScopeUsage(String uuid, int tenantId) throws APIManagementException;
 
+    /**
+     * This method is used to publish the api in private jet mode
+     *
+     * @param api           API Object
+     * @param apiIdentifier api identifier
+     * @throws APIManagementException if failed to add the schema as a resource to registry
+     * @throws IOException            if getTenantConfigContent returns nothing (But Never Happens that)
+     * @throws ParseException         for json file reading
+     */
+    void publishInPrivateJet(API api, APIIdentifier apiIdentifier, List<String> clusterNames) throws ParseException,
+            UserStoreException, RegistryException, IllegalAccessException, InstantiationException, ClassNotFoundException, APIManagementException;
 }
