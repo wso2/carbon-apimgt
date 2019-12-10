@@ -10640,7 +10640,6 @@ public final class APIUtil {
         }
 
     }
-
     /**
      * Returns the user claims for the given user.
      *
