@@ -24,6 +24,7 @@ import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -48,9 +49,8 @@ public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
     @Override
     public void handleMessage(Message message) throws Fault {
         String path = (String) message.get(Message.PATH_INFO);
-        String oldVersion = "/v0.15";
-        if (path.contains(oldVersion)) {
-            path = path.replace(oldVersion, "/");
+        if (path.contains(APIConstants.RestApiConstants.REST_API_OLD_VERSION)) {
+            path = path.replace("/" + APIConstants.RestApiConstants.REST_API_OLD_VERSION, "");
         }
         String httpMethod = (String) message.get(Message.HTTP_REQUEST_METHOD);
         Dictionary<URITemplate,List<String>> whiteListedResourcePathsMap;
