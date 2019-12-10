@@ -192,6 +192,7 @@ public class GraphQLSecurityHandler extends AbstractHandler {
                         }
 
                         handleFailure(messageContext, APISecurityConstants.QUERY_TOO_DEEP, errorList.toString());
+                        log.error(errorlist.toString());
                         return false;
                     }
                     if (log.isDebugEnabled()) {
