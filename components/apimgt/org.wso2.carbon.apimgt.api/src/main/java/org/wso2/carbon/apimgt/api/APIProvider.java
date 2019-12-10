@@ -1450,7 +1450,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If failed to validate
      */
     void validateSharedScopes(Set<Scope> scopes, String tenantDomain) throws APIManagementException;
-<<<<<<< HEAD
 
     /**
      * Get the API and URI usages of the given shared scope
