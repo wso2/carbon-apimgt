@@ -519,6 +519,12 @@ public class OAS3Parser extends APIDefinition {
         return Json.pretty(openAPI);
     }
 
+    @Override
+    public String getOASVersion(String oasDefinition) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(oasDefinition);
+        return openAPI.getInfo().getVersion();
+    }
+
     /**
      * Gets a list of scopes using the security requirements
      *

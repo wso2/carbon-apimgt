@@ -1802,6 +1802,8 @@ public final class APIConstants {
     public static class RestApiConstants {
         public static final String STORE_CONTEXT = "/store";
         public static final String REST_API_PUBLISHER_VERSION_1 = "v1.0";
+        public static final String REST_API_DEFAULT_VERSION = "v1";
+        public static final String REST_API_OLD_VERSION = "v0.15";
         public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
         public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
                 REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_1;
