@@ -3597,4 +3597,48 @@ public abstract class AbstractAPIManager implements APIManager {
 
     }
 
+    public ResourceFile getCategoryIcon(String categoryName, String username) throws APIManagementException {
+        String thumbPath = APIConstants.API_CATEGORY_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                categoryName;
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        Registry registry;
+        boolean isTenantFlowStarted = false;
+        try {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                startTenantFlow(tenantDomain);
+                isTenantFlowStarted = true;
+            }
+
+	        /* If the API provider is a tenant, load tenant registry*/
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                int id = getTenantManager().getTenantId(tenantDomain);
+                registry = getRegistryService().getGovernanceSystemRegistry(id);
+            } else {
+                if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
+                    registry = getRegistryService().getGovernanceUserRegistry(username, MultitenantConstants.SUPER_TENANT_ID);
+                } else {
+                    registry = this.registry;
+                }
+            }
+
+            if (registry.resourceExists(thumbPath)) {
+                Resource res = registry.get(thumbPath);
+                return new ResourceFile(res.getContentStream(), res.getMediaType());
+            }
+        } catch (RegistryException e) {
+            String msg = "Error while loading icon of API category " +  categoryName + " from the registry";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Error while loading icon of API category " + categoryName;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                endTenantFlow();
+            }
+        }
+        return null;
+    }
+
 }

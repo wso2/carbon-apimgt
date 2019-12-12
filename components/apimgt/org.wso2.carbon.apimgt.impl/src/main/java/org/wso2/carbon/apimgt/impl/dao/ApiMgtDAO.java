@@ -14357,7 +14357,8 @@ public class ApiMgtDAO {
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_CATEGORY)) {
             statement.setString(1, apiCategory.getDescription());
             statement.setString(2, apiCategory.getName());
-            statement.setString(3, apiCategory.getId());
+            statement.setString(3, apiCategory.getThumbnailUrl());
+            statement.setString(4, apiCategory.getId());
             statement.execute();
         } catch (SQLException e) {
             handleException("Failed to update API Category : " + apiCategory.getName() + " of tenant " +
@@ -14382,12 +14383,15 @@ public class ApiMgtDAO {
                 String id = rs.getString("UUID");
                 String name = rs.getString("NAME");
                 String description = rs.getString("DESCRIPTION");
+                String thumbnailUrl = rs.getString("THUMBNAILURL");
 
                 APICategory category = new APICategory();
                 category.setId(id);
                 category.setName(name);
                 category.setDescription(description);
                 category.setTenantID(tenantID);
+                category.setThumbnailUrl(thumbnailUrl);
+
                 categoriesList.add(category);
             }
         } catch (SQLException e) {

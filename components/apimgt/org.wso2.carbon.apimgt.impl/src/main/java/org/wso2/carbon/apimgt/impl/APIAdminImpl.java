@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -29,9 +30,13 @@ import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.text.SimpleDateFormat;
@@ -308,6 +313,14 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     public APICategory getAPICategoryByID(String apiCategoryId) throws APIManagementException {
-        return ApiMgtDAO.getInstance().getAPICategoryByID(apiCategoryId);
+        APICategory apiCategory = ApiMgtDAO.getInstance().getAPICategoryByID(apiCategoryId);
+        if (apiCategory != null) {
+            return apiCategory;
+        }else {
+            String msg = "Failed to get APICategory. API category corresponding to UUID " + apiCategoryId
+                    + " does not exist";
+            log.error(msg);
+            throw new APIMgtResourceNotFoundException(msg);
+        }
     }
 }

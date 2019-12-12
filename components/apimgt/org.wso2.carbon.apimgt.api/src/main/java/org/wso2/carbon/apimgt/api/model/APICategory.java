@@ -24,6 +24,7 @@ public class APICategory {
     private String id;
     private String name;
     private String description;
+    private String thumbnailUrl;
     private int tenantID;
 
     public void setId(String id) {
@@ -48,6 +49,14 @@ public class APICategory {
 
     public String getDescription() {
         return description;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
     }
 
     public void setTenantID(int tenantID) {

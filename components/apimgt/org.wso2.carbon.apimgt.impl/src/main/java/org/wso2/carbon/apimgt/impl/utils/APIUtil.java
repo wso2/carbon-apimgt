@@ -9924,5 +9924,17 @@ public final class APIUtil {
         }
         return categoryList;
     }
+
+    /**
+     * Utility method for creating storage path for an category icon.
+     *
+     * @param apiCategoryName APICategory name
+     * @return Icon storage path.
+     */
+    public static String getCategoryIconPath(String apiCategoryName) {
+        String artifactPath = APIConstants.API_CATEGORY_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiCategoryName + RegistryConstants.PATH_SEPARATOR;
+        return artifactPath;
+    }
 }
 

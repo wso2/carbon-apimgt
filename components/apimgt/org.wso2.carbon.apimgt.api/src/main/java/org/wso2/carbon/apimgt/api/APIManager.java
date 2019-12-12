@@ -794,4 +794,14 @@ public interface APIManager {
      * @throws APIManagementException
      */
     String getAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException;
+
+    /**
+     * Get icon of the API category
+     *
+     * @param categoryName
+     * @param username
+     * @return
+     * @throws APIManagementException
+     */
+    ResourceFile getCategoryIcon(String categoryName, String username) throws APIManagementException;
 }

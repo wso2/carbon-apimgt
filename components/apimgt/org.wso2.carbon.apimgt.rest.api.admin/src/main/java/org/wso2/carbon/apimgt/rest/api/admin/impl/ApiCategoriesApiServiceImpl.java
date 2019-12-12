@@ -1,23 +1,32 @@
 package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.ApiCategoriesApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.APICategoryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.APICategoryListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.APICategoryMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLConnection;
 import java.util.List;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
@@ -106,4 +115,74 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
         }
         return null;
     }
+
+    public Response apiCategoriesApiCategoryIdThumbnailGet(String apiCategoryId,String ifNoneMatch){
+        try {
+            APIAdmin apiAdmin = new APIAdminImpl();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String userName = RestApiUtil.getLoggedInUsername();
+            APICategory category = apiAdmin.getAPICategoryByID(apiCategoryId);
+            ResourceFile thumbnailResource = apiProvider.getCategoryIcon(category.getName(), userName);
+
+            if (thumbnailResource != null) {
+                return Response
+                        .ok(thumbnailResource.getContent(), MediaType.valueOf(thumbnailResource.getContentType()))
+                        .build();
+            } else {
+                return Response.noContent().build();
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_CATEGORY, apiCategoryId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving thumbnail of API category : " + apiCategoryId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    public Response apiCategoriesApiCategoryIdThumbnailPut(String apiCategoryId, InputStream fileInputStream,
+            Attachment fileDetail, String ifMatch) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIAdmin apiAdmin = new APIAdminImpl();
+            String userName = RestApiUtil.getLoggedInUsername();
+            String fileName = fileDetail.getDataHandler().getName();
+            String fileContentType = URLConnection.guessContentTypeFromName(fileName);
+            if (StringUtils.isBlank(fileContentType)) {
+                fileContentType = fileDetail.getContentType().toString();
+            }
+
+            APICategory apiCategory = apiAdmin.getAPICategoryByID(apiCategoryId);
+            ResourceFile categoryImage = new ResourceFile(fileInputStream, fileContentType);
+            String thumbPath = APIUtil.getCategoryIconPath(apiCategory.getName());
+            String thumbnailUrl = apiProvider.addResourceFile(null, thumbPath, categoryImage);
+            apiCategory.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, userName));
+
+            apiAdmin.updateCategory(apiCategory, userName);
+
+            String uriString = RestApiConstants.RESOURCE_PATH_CATEGORY_THUMBNAIL
+                    .replace(RestApiConstants.APICATEGORYID_PARAM, apiCategoryId);
+            URI uri = new URI(uriString);
+            FileInfoDTO infoDTO = new FileInfoDTO();
+            infoDTO.setRelativePath(uriString);
+            infoDTO.setMediaType(categoryImage.getContentType());
+            return Response.created(uri).entity(infoDTO).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_CATEGORY, apiCategoryId, e, log);
+            } else {
+                String errorMessage = "Error while adding thumbnail of API Category: " + apiCategoryId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while updating thumbnail of API: " + apiCategoryId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } finally {
+            IOUtils.closeQuietly(fileInputStream);
+        }
+        return null;
+    }
+
 }

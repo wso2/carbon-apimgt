@@ -8,6 +8,8 @@ import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.APICategoryDTO;
+import java.io.File;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.APICategoryListDTO;
 
 import java.util.List;
@@ -59,6 +61,46 @@ public class ApiCategoriesApi  {
     @ApiParam(value = "API Category object with updated information\n" ,required=true ) APICategoryDTO body)
     {
     return delegate.apiCategoriesApiCategoryIdPut(apiCategoryId,body);
+    }
+    @GET
+    @Path("/{apiCategoryId}/thumbnail")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Get thumbnail image", notes = "This operation can be used to download a thumbnail image of an API Category.\n", response = void.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nThumbnail image returned\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Document does not exist.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
+
+    public Response apiCategoriesApiCategoryIdThumbnailGet(@ApiParam(value = "API Category UUID\n",required=true ) @PathParam("apiCategoryId")  String apiCategoryId,
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource (Will be supported in future).\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
+    {
+    return delegate.apiCategoriesApiCategoryIdThumbnailGet(apiCategoryId,ifNoneMatch);
+    }
+    @PUT
+    @Path("/{apiCategoryId}/thumbnail")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Upload a thumbnail image", notes = "This operation can be used to upload a thumbnail image of an API category. The thumbnail to be uploaded should be given as a form data parameter `file`.\n", response = FileInfoDTO.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nImage updated\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nThe resource to be updated does not exist.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
+
+    public Response apiCategoriesApiCategoryIdThumbnailPut(@ApiParam(value = "API Category UUID\n",required=true ) @PathParam("apiCategoryId")  String apiCategoryId,
+    @ApiParam(value = "Image to upload") @Multipart(value = "file") InputStream fileInputStream,
+    @ApiParam(value = "Image to upload : details") @Multipart(value = "file" ) Attachment fileDetail,
+    @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future).\n"  )@HeaderParam("If-Match") String ifMatch)
+    {
+    return delegate.apiCategoriesApiCategoryIdThumbnailPut(apiCategoryId,fileInputStream,fileDetail,ifMatch);
     }
     @GET
     
