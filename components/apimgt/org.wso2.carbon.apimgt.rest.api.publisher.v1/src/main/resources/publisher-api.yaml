@@ -6834,6 +6834,9 @@ definitions:
             enum:
               - WSDL
               - ZIP
+      wsdlUrl:
+        type: string
+        example: /apimgt/applicationdata/wsdls/admin--soap1.wsdl
       responseCachingEnabled:
         type: boolean
         example: true

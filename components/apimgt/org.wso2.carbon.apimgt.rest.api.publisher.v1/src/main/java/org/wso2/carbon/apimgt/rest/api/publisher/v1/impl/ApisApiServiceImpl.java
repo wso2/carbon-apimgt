@@ -731,6 +731,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
                 }
             }
+            apiToUpdate.setWsdlUrl(body.getWsdlUrl());
             apiProvider.manageAPI(apiToUpdate);
 
             API updatedApi = apiProvider.getAPI(apiIdentifier);

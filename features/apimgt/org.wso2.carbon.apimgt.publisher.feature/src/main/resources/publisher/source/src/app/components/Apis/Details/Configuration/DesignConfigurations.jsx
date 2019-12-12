@@ -126,6 +126,7 @@ function copyAPIConfig(api) {
         tags: [...api.tags],
         maxTps: api.maxTps,
         transport: [...api.transport],
+        wsdlUrl: api.wsdlUrl,
         securityScheme: [...api.securityScheme],
         corsConfiguration: {
             corsConfigurationEnabled: api.corsConfiguration.corsConfigurationEnabled,
