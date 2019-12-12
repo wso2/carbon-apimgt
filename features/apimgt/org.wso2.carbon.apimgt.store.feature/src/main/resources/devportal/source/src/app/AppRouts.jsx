@@ -18,9 +18,6 @@
 import React, { lazy, Suspense } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { withStyles } from '@material-ui/core';
-import CategoryListing from 'AppComponents/Apis/Listing/CategoryListing';
-import Apis from 'AppComponents/Apis/Apis';
-import Landing from 'AppComponents/LandingPage/Landing';
 import ApplicationFormHandler from 'AppComponents/Applications/ApplicationFormHandler';
 import { PageNotFound, ScopeNotFound } from 'AppComponents/Base/Errors';
 import RedirectToLogin from 'AppComponents/Login/RedirectToLogin';
