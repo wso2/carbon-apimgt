@@ -570,7 +570,7 @@ class Details extends Component {
                                 Icon={<ScopesIcon />}
                             />
                         )}
-                        {api.type==='GRAPHQL' && (
+                        {api.type === 'GRAPHQL' && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.query.analysis',
@@ -692,7 +692,10 @@ class Details extends Component {
                                 />
 
                                 <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
-                                <Route path={Details.subPaths.QUERY_ANALYSIS} component={() => <QueryAnalysis api={api} />} />
+                                <Route
+                                    path={Details.subPaths.QUERY_ANALYSIS}
+                                    component={() => <QueryAnalysis api={api} />}
+                                />
                                 <Route path={Details.subPaths.DOCUMENTS} component={() => <Documents api={api} />} />
                                 <Route
                                     path={Details.subPaths.DOCUMENTS_PRODUCT}

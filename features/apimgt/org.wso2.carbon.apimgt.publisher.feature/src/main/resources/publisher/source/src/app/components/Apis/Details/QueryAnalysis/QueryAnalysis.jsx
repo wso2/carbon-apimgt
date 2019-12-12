@@ -72,7 +72,7 @@ function a11yProps(index) {
     };
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
         width: '100%',
@@ -102,7 +102,7 @@ function QueryAnalysis() {
     };
 
     return (
-        <React.Fragment>
+        <>
             <Box className={classes.titleWrapper}>
                 <Typography variant='h4'>
                     <FormattedMessage
@@ -142,7 +142,7 @@ function QueryAnalysis() {
                     <ComplexityAnalysis />
                 </TabPanel>
             </div>
-        </React.Fragment>
+        </>
     );
 }
 

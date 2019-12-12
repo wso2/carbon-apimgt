@@ -27,7 +27,7 @@ import Box from '@material-ui/core/Box';
  */
 function ComplexityAnalysis() {
     return (
-        <React.Fragment>
+        <>
             <Box>
                 <Typography variant='h6'>
                     <FormattedMessage
@@ -36,7 +36,7 @@ function ComplexityAnalysis() {
                     />
                 </Typography>
             </Box>
-        </React.Fragment>
+        </>
     );
 }
 
