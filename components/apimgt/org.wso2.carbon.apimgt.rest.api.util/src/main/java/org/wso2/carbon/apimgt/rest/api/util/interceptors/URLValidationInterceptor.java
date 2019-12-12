@@ -34,8 +34,9 @@ import java.io.IOException;
 public class URLValidationInterceptor extends AbstractPhaseInterceptor<Message> {
 
     private static final Log log = LogFactory.getLog(URLValidationInterceptor.class);
-    private static String definition, version = null;
     private static String majorVersion = "v1";
+    //TODO: Get latest version from swagger
+    private static String latestVersion = "v1.1";
     private String pathSeparator = "/";
     private final String BASE_PATH = "org.apache.cxf.message.Message.BASE_PATH";
     private final String PATH_INFO = "org.apache.cxf.message.Message.PATH_INFO";
@@ -44,22 +45,18 @@ public class URLValidationInterceptor extends AbstractPhaseInterceptor<Message> 
 
     public URLValidationInterceptor() throws IOException, APIManagementException {
         super(Phase.RECEIVE);
-        definition = IOUtils
-                .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.yaml"), "UTF-8");
-
-        version = OASParserUtil.getOASParser(definition).getOASVersion(definition);
     }
 
     @Override
     public void handleMessage(Message message) throws Fault {
         if (message.get(PATH_INFO).toString()
-                .contains(message.get(BASE_PATH).toString().concat(version + pathSeparator))) {
+                .contains(message.get(BASE_PATH).toString().concat(latestVersion + pathSeparator))) {
             message.put(PATH_INFO, message.get(PATH_INFO).toString()
-                    .replace(version + pathSeparator, ""));
+                    .replace(latestVersion + pathSeparator, ""));
             message.put(REQUEST_URI, message.get(REQUEST_URI).toString().
-                    replace(version + pathSeparator, ""));
+                    replace(latestVersion + pathSeparator, ""));
             message.put(REQUEST_URL, message.get(REQUEST_URL).toString().
-                    replace(version + pathSeparator, ""));
+                    replace(latestVersion + pathSeparator, ""));
         }
         if (message.get(PATH_INFO).toString()
                 .contains(message.get(BASE_PATH).toString().concat(majorVersion + pathSeparator))) {
