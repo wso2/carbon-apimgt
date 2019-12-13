@@ -97,6 +97,7 @@ const styles = (theme) => ({
         width: 250,
         marginLeft: 40,
         marginRight: 40,
+        display: 'table',
     },
     circularProgressBarScore: {
         fontSize: 70,
