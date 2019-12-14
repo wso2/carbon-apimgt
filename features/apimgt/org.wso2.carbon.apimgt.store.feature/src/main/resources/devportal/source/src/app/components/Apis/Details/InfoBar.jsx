@@ -50,7 +50,6 @@ import Labels from './Labels';
 const styles = (theme) => {
     const mainBack = theme.custom.infoBar.background || '#ffffff';
     const infoBarHeight = theme.custom.infoBar.height || 70;
-    const backIconDisplay = theme.custom.infoBar.showBackIcon ? 'flex' : 'none';
     const starColor = theme.custom.infoBar.starColor || theme.palette.getContrastText(mainBack);
 
     return {
@@ -96,11 +95,6 @@ const styles = (theme) => {
         contentWrapper: {
             maxWidth: theme.custom.contentAreaWidth - theme.custom.leftMenu.width,
             alignItems: 'center',
-        },
-        backLink: {
-            alignItems: 'center',
-            textDecoration: 'none',
-            display: backIconDisplay,
         },
         infoBarMain: {
             width: '100%',
@@ -164,6 +158,9 @@ const styles = (theme) => {
         expandWrapper: {
             cursor: 'pointer',
             display: 'block',
+        },
+        linkTitle: {
+            color: theme.palette.getContrastText(theme.custom.infoBar.background),
         },
         leftMenu: {},
         leftMenuHorizontal: {},
@@ -319,22 +316,13 @@ class InfoBar extends React.Component {
         return (
             <div className={classes.infoBarMain} id='infoBar'>
                 <div className={classes.root}>
-                    <Link to='/apis' className={classes.backLink}>
-                        <Icon className={classes.backIcon}>keyboard_arrow_left</Icon>
-                        <div className={classes.backText}>
-                            <FormattedMessage id='Apis.Details.InfoBar.back.to' defaultMessage='BACK TO' />
-                            <br />
-                            <FormattedMessage id='Apis.Details.InfoBar.listing' defaultMessage='APIS' />
-                        </div>
-                    </Link>
                     {showThumbnail && (
-                        <>
-                            <VerticalDivider height={height} />
-                            <ApiThumb api={api} customWidth={70} customHeight={50} showInfo={false} />
-                        </>
+                        <ApiThumb api={api} customWidth={70} customHeight={50} showInfo={false} />
                     )}
                     <div style={{ marginLeft: theme.spacing(1) }}>
-                        <Typography variant='h4'>{api.name}</Typography>
+                        <Link to={'/apis/' + api.id + '/overview'} className={classes.linkTitle}>
+                            <Typography variant='h4'>{api.name}</Typography>
+                        </Link>
                         <Typography variant='caption' gutterBottom align='left'>
                             {this.getProvider(api)}
                         </Typography>
