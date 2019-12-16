@@ -886,6 +886,11 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
             String status = api.getStatus();
+
+            // Extracting clicked API name by the user, for the recommendation system
+            String userName = RestApiUtil.getLoggedInUsername();
+            apiConsumer.publishClickedAPI(api, userName);
+
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
                             || APIConstants.DEPRECATED.equals(status)) {
                 return APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);

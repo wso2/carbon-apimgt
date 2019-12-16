@@ -896,6 +896,14 @@
         {% endif %}
     </Monetization>
 
+    {% if apim.devportal.recommendations is defined %}
+    <APIRecommendations>
+        <url>{{apim.devportal.recommendations.url}}</url>
+        <username>{{apim.devportal.recommendations.username}}</username>
+        <password>{{apim.devportal.recommendations.password}}</password>
+    </APIRecommendations>
+    {% endif %}
+
     <OpenTracer>
         <RemoteTracer>
             <Enabled>{{apim.open_tracer.remote_tracer.enable}}</Enabled>

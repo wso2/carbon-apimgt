@@ -90,6 +90,9 @@ public class SearchApiServiceImpl implements SearchApiService {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
 
+            // Extracting search queries for the recommendation system
+            apiConsumer.publishSearchQuery(query, username);
+
             Map<String, Object> result = apiConsumer
                     .searchPaginatedAPIs(query, requestedTenantDomain, offset, limit, false);
             ArrayList<Object> apis;
