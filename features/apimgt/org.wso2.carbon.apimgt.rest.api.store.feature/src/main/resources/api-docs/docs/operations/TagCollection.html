@@ -3,7 +3,7 @@
 
             <hr/>
             <h4 class="operation-heading"><a name="tagsGet"></a>Get all tags
-</h4> <code>GET https://apis.wso2.com/api/am/store/v0.15/tags</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v0.16/tags</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve a list of tags that are already added to APIs.
@@ -17,51 +17,9 @@
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
                 <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-tagsGet">
-                <h4 class="section-heading">
-                    Request
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-
-                <div id="request-tagsGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.15/tags
-</code></div>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-tagsGet">
-                <h4 class="section-heading">
-                    Response
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-                <div id="response-tagsGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-   &quot;previous&quot;: &quot;&quot;,
-   &quot;list&quot;:    [
-            {
-         &quot;weight&quot;: 1,
-         &quot;name&quot;: &quot;mobile&quot;
-      },
-            {
-         &quot;weight&quot;: 1,
-         &quot;name&quot;: &quot;multimedia&quot;
-      },
-            {
-         &quot;weight&quot;: 1,
-         &quot;name&quot;: &quot;phone&quot;
-      }
-   ],
-   &quot;count&quot;: 3,
-   &quot;next&quot;: &quot;&quot;
-}</code></div>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl &quot;https://localhost:9443/api/am/store/v0.15/tags&quot;</code></div>
-
-            <h4 class="section-heading">Sample CURL - for tenant</h4>
-            <div class="pre"><code class="bash">curl -k -H &quot;X-WSO2-Tenant:test.com&quot; https://localhost:9443/api/am/store/v0.15/tags</code></div>
-
+            <h4 class="section-heading">
+                Examples
+            </h4>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -83,16 +41,16 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-
+                            
                             <span class="param-in">Query </span>
-
-
-
+                            
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>limit</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -111,16 +69,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
+                            
                             <span class="param-in">Query </span>
-
-
-
+                            
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>offset</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -139,16 +97,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>X-WSO2-Tenant</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -168,16 +126,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -196,16 +154,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -255,7 +213,7 @@ variant of the resource.
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
+                                    
                             </span>
                         </td>
                     </tr>

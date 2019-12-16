@@ -2,39 +2,18 @@
     <h1><a name="Subscription Policy (Individual)"></a>Subscription Policy (Individual)</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="throttlingPoliciesSubscriptionPolicyIdDelete"></a>Delete a Subscription Policy</h4> <code>DELETE https://apis.wso2.com/api/am/admin/v0.15/throttling/policies/subscription/{policyId}</code>
+            <h4 class="operation-heading"><a name="throttlingPoliciesSubscriptionPolicyIdDelete"></a>Delete a Subscription Policy</h4> <code>DELETE https://apis.wso2.com/api/am/admin/v0.16/throttling/policies/subscription/{policyId}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to delete a subscription-level throttling policy specifying the Id of the policy as a path paramter.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:tier_manage</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:tier_manage' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+                <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesSubscriptionPolicyIdDelete">
-                <h4 class="section-heading">
-                    Request
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-
-                <div id="request-throttlingPoliciesSubscriptionPolicyIdDelete"class="pre collapse in"><code class="json">DELETE https://localhost:9443/api/am/admin/v0.15/throttling/policies/subscription/3cc8902e-f7c7-49dc-987b-b146e9bd8ee8
-Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122
-Content-Type: application/json
-</code></div>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesSubscriptionPolicyIdDelete">
-                <h4 class="section-heading">
-                    Response
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-                <div id="response-throttlingPoliciesSubscriptionPolicyIdDelete" class="pre collapse in"><code class="json">HTTP/1.1 200 OK</code></div>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -X DELETE -H &quot;Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122&quot; -H &quot;Content-Type: application/json&quot; https://localhost:9443/api/am/admin/v0.15/throttling/policies/subscription/3cc8902e-f7c7-49dc-987b-b146e9bd8ee8</code></div>
-
-
+            <h4 class="section-heading">
+                Examples
+            </h4>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -56,17 +35,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>policyId</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -84,16 +63,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-Match</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -112,16 +91,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-Unmodified-Since</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -161,7 +140,7 @@ Content-Type: application/json
                         <td class="parameter"><p class="marked">OK. Resource successfully deleted. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
+                                    
                             </span>
                         </td>
                     </tr>
@@ -186,67 +165,18 @@ Content-Type: application/json
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="throttlingPoliciesSubscriptionPolicyIdGet"></a>Get a Subscription Policy</h4> <code>GET https://apis.wso2.com/api/am/admin/v0.15/throttling/policies/subscription/{policyId}</code>
+            <h4 class="operation-heading"><a name="throttlingPoliciesSubscriptionPolicyIdGet"></a>Get a Subscription Policy</h4> <code>GET https://apis.wso2.com/api/am/admin/v0.16/throttling/policies/subscription/{policyId}</code>
             <p class="marked"></p>
 
             <p class="marked">Retrieve a single subscription-level throttling policy. We should provide the Id of the policy as a path parameter.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:tier_view</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:tier_view' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+                <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesSubscriptionPolicyIdGet">
-                <h4 class="section-heading">
-                    Request
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-
-                <div id="request-throttlingPoliciesSubscriptionPolicyIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/admin/v0.15/throttling/policies/subscription/6dd9fc11-bbe1-4daf-aee5-06a4d0e44476
-Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122
-</code></div>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesSubscriptionPolicyIdGet">
-                <h4 class="section-heading">
-                    Response
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-                <div id="response-throttlingPoliciesSubscriptionPolicyIdGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-  &quot;policyId&quot;: &quot;6dd9fc11-bbe1-4daf-aee5-06a4d0e44476&quot;,
-  &quot;policyName&quot;: &quot;Platinum&quot;,
-  &quot;displayName&quot;: &quot;Platinum&quot;,
-  &quot;description&quot;: &quot;Allows 4000 requests per minute&quot;,
-  &quot;isDeployed&quot;: true,
-  &quot;defaultLimit&quot;: {
-    &quot;type&quot;: &quot;RequestCountLimit&quot;,
-    &quot;timeUnit&quot;: &quot;min&quot;,
-    &quot;unitTime&quot;: 1,
-    &quot;requestCount&quot;: 4000
-  },
-  &quot;rateLimitCount&quot;: -1,
-  &quot;rateLimitTimeUnit&quot;: &quot;NA&quot;,
-  &quot;customAttributes&quot;: [
-    {
-      &quot;name&quot;: &quot;customAttr1&quot;,
-      &quot;value&quot;: &quot;value1&quot;
-    },
-    {
-      &quot;name&quot;: &quot;customAttr2&quot;,
-      &quot;value&quot;: &quot;value2&quot;
-    }
-  ],
-  &quot;stopOnQuotaReach&quot;: true,
-  &quot;billingPlan&quot;: &quot;COMMERCIAL&quot;
-}</code></div>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122&quot; https://localhost:9443/api/am/admin/v0.15/throttling/policies/subscription/6dd9fc11-bbe1-4daf-aee5-06a4d0e44476</code></div>
-
-
+            <h4 class="section-heading">
+                Examples
+            </h4>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -268,17 +198,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>policyId</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -296,16 +226,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -325,16 +255,16 @@ variant of the resource (Will be supported in future).
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-Modified-Since</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -384,7 +314,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
+                                    
                             </span>
                         </td>
                     </tr>
@@ -409,94 +339,18 @@ formerly retrieved variant of the resource (Will be supported in future).
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="throttlingPoliciesSubscriptionPolicyIdPut"></a>Update a Subscription Policy</h4> <code>PUT https://apis.wso2.com/api/am/admin/v0.15/throttling/policies/subscription/{policyId}</code>
+            <h4 class="operation-heading"><a name="throttlingPoliciesSubscriptionPolicyIdPut"></a>Update a Subscription Policy</h4> <code>PUT https://apis.wso2.com/api/am/admin/v0.16/throttling/policies/subscription/{policyId}</code>
             <p class="marked"></p>
 
             <p class="marked">Updates an existing subscription-level throttling policy.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:tier_manage</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:tier_manage' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+                <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesSubscriptionPolicyIdPut">
-                <h4 class="section-heading">
-                    Request
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-
-                <div id="request-throttlingPoliciesSubscriptionPolicyIdPut"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/admin/v0.15/throttling/policies/subscription/6dd9fc11-bbe1-4daf-aee5-06a4d0e44476
-Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122
-Content-Type: application/json
-
-{
-    &quot;policyName&quot;: &quot;Platinum&quot;,
-    &quot;displayName&quot;: &quot;Platinum&quot;,
-    &quot;description&quot;: &quot;Allows 10000 requests per minute&quot;,
-    &quot;defaultLimit&quot;:          {
-       &quot;type&quot;: &quot;RequestCountLimit&quot;,
-       &quot;timeUnit&quot;: &quot;min&quot;,
-       &quot;unitTime&quot;: 1,
-       &quot;requestCount&quot;: 10000
-    },
-    &quot;isDeployed&quot;: true,
-    &quot;rateLimitCount&quot;: -1,
-    &quot;rateLimitTimeUnit&quot;: &quot;NA&quot;,
-    &quot;customAttributes&quot;:          [
-                   {
-          &quot;name&quot;: &quot;customAttr0&quot;,
-          &quot;value&quot;: &quot;value1&quot;
-       },
-                   {
-          &quot;name&quot;: &quot;customAttr1&quot;,
-          &quot;value&quot;: &quot;value1&quot;
-       }
-    ],
-    &quot;stopOnQuotaReach&quot;: true,
-    &quot;billingPlan&quot;: &quot;COMMERCIAL&quot;
-}</code></div>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesSubscriptionPolicyIdPut">
-                <h4 class="section-heading">
-                    Response
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-                <div id="response-throttlingPoliciesSubscriptionPolicyIdPut" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-  &quot;policyId&quot;: &quot;6dd9fc11-bbe1-4daf-aee5-06a4d0e44476&quot;,
-  &quot;policyName&quot;: &quot;Platinum&quot;,
-  &quot;displayName&quot;: &quot;Platinum&quot;,
-  &quot;description&quot;: &quot;Allows 10000 requests per minute&quot;,
-  &quot;isDeployed&quot;: true,
-  &quot;defaultLimit&quot;: {
-    &quot;type&quot;: &quot;RequestCountLimit&quot;,
-    &quot;timeUnit&quot;: &quot;min&quot;,
-    &quot;unitTime&quot;: 1,
-    &quot;requestCount&quot;: 10000
-  },
-  &quot;rateLimitCount&quot;: -1,
-  &quot;rateLimitTimeUnit&quot;: &quot;NA&quot;,
-  &quot;customAttributes&quot;: [
-    {
-      &quot;name&quot;: &quot;customAttr0&quot;,
-      &quot;value&quot;: &quot;value1&quot;
-    },
-    {
-      &quot;name&quot;: &quot;customAttr1&quot;,
-      &quot;value&quot;: &quot;value1&quot;
-    }
-  ],
-  &quot;stopOnQuotaReach&quot;: true,
-  &quot;billingPlan&quot;: &quot;COMMERCIAL&quot;
-}</code></div>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -X PUT -H &quot;Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122&quot; -H &quot;Content-Type: application/json&quot; https://localhost:9443/api/am/admin/v0.15/throttling/policies/subscription/6dd9fc11-bbe1-4daf-aee5-06a4d0e44476 -d @data.json</code></div>
-
-
+            <h4 class="section-heading">
+                Examples
+            </h4>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -518,17 +372,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>policyId</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -546,17 +400,17 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
-
+                            
+                            
+                            
+                            
                             <span class="param-in">Body </span>
                         </td>
                         <td class="param-name">
                             <p>body</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -575,17 +429,17 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>Content-Type</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -603,16 +457,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-Match</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -631,16 +485,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-Unmodified-Since</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
