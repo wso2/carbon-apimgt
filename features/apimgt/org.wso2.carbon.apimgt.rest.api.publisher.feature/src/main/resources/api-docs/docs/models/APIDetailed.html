@@ -237,7 +237,7 @@
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">The transport to be set. Accepted values are HTTP, WS</p></td>
+                        <td class="parameter"><p class="marked">The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST</p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
@@ -312,7 +312,22 @@
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used.  </p></td>
+                        <td class="parameter"><p class="marked">Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. </p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>apiSecurity</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">Type of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. </p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
