@@ -32,7 +32,7 @@ import { ApiContext } from '../Details/ApiContext';
 import TagCloudListingTags from './TagCloudListingTags';
 import ApiTagCloud from './ApiTagCloud';
 
-const styles = theme => ({
+const styles = (theme) => ({
     rightIcon: {
         marginLeft: theme.spacing(1),
     },
@@ -177,6 +177,7 @@ class CommonListing extends React.Component {
     setListType = (value) => {
         this.setState({ listType: value });
     };
+
     /**
      *
      * Get all tags
@@ -194,8 +195,9 @@ class CommonListing extends React.Component {
             });
         this.isMonetizationEnabled();
     }
+
     toggleLeftMenu = () => {
-        this.setState(prevState => ({ showLeftMenu: !prevState.showLeftMenu }));
+        this.setState((prevState) => ({ showLeftMenu: !prevState.showLeftMenu }));
     };
 
     /**
@@ -215,7 +217,6 @@ class CommonListing extends React.Component {
      */
     render() {
         const {
-            apiType,
             theme,
             classes,
             location: { search },
@@ -226,7 +227,9 @@ class CommonListing extends React.Component {
                 tagCloud: { active: tagCloudActive },
             },
         } = theme;
-        const { listType, allTags, showLeftMenu, isMonetizationEnabled } = this.state;
+        const {
+            listType, allTags, showLeftMenu, isMonetizationEnabled,
+        } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
         const searchParam = new URLSearchParams(search);
         const searchQuery = searchParam.get('query');
@@ -247,7 +250,7 @@ class CommonListing extends React.Component {
         }
         const tagPaneVisible = allTags && allTags.length > 0 && (tagCloudActive || active);
         return (
-            <React.Fragment>
+            <>
                 {tagPaneVisible && showLeftMenu && (
                     <div className={classes.LeftMenu}>
                         <div className={classes.sliderButton} onClick={this.toggleLeftMenu}>
@@ -312,18 +315,18 @@ class CommonListing extends React.Component {
                     {active && allTags && allTags.length > 0 && <ApiBreadcrumbs selectedTag={selectedTag} />}
                     <div className={classes.listContentWrapper}>
                         {listType === 'grid' && (
-                            <ApiContext.Provider value={{ apiType, isMonetizationEnabled }}>
+                            <ApiContext.Provider value={{ isMonetizationEnabled }}>
                                 <ApiTableView gridView query={search} />
                             </ApiContext.Provider>
                         )}
                         {listType === 'list' && (
-                            <ApiContext.Provider value={{ apiType, isMonetizationEnabled }}>
+                            <ApiContext.Provider value={{ isMonetizationEnabled }}>
                                 <ApiTableView gridView={false} query={search} />
                             </ApiContext.Provider>
                         )}
                     </div>
                 </main>
-            </React.Fragment>
+            </>
         );
     }
 }
@@ -331,7 +334,6 @@ class CommonListing extends React.Component {
 CommonListing.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
-    apiType: PropTypes.string.isRequired,
     location: PropTypes.shape({
         search: PropTypes.string,
     }),

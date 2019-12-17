@@ -339,7 +339,7 @@ class Subscriptions extends React.Component {
                                                     <TableCell>
                                                         <FormattedMessage
                                                             id={`Applications.Details.Subscriptions
-                                                                    .subscription.tier`}
+                                                                    .subscription.state`}
                                                             defaultMessage='Lifecycle State'
                                                         />
                                                     </TableCell>

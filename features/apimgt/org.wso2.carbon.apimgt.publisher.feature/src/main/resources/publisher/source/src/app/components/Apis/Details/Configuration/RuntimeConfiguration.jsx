@@ -139,6 +139,7 @@ function copyAPIConfig(api) {
         visibleRoles: [...api.visibleRoles],
         tags: [...api.tags],
         maxTps: api.maxTps,
+        wsdlUrl: api.wsdlUrl,
         transport: [...api.transport],
         securityScheme: [...api.securityScheme],
         corsConfiguration: {

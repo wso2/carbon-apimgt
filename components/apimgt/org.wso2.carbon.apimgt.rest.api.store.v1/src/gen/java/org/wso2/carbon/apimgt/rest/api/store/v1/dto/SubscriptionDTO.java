@@ -24,40 +24,6 @@ public class SubscriptionDTO   {
     private ApplicationInfoDTO applicationInfo = null;
     private String throttlingPolicy = null;
 
-@XmlType(name="TypeEnum")
-@XmlEnum(String.class)
-public enum TypeEnum {
-
-    @XmlEnumValue("API") API(String.valueOf("API")), @XmlEnumValue("API_PRODUCT") API_PRODUCT(String.valueOf("API_PRODUCT"));
-
-
-    private String value;
-
-    TypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static TypeEnum fromValue(String v) {
-        for (TypeEnum b : TypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
-        }
-        return null;
-    }
-}
-
-    private TypeEnum type = null;
-
 @XmlType(name="StatusEnum")
 @XmlEnum(String.class)
 public enum StatusEnum {
@@ -201,23 +167,6 @@ public enum StatusEnum {
 
   /**
    **/
-  public SubscriptionDTO type(TypeEnum type) {
-    this.type = type;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("type")
-  public TypeEnum getType() {
-    return type;
-  }
-  public void setType(TypeEnum type) {
-    this.type = type;
-  }
-
-  /**
-   **/
   public SubscriptionDTO status(StatusEnum status) {
     this.status = status;
     return this;
@@ -249,13 +198,12 @@ public enum StatusEnum {
         Objects.equals(apiInfo, subscription.apiInfo) &&
         Objects.equals(applicationInfo, subscription.applicationInfo) &&
         Objects.equals(throttlingPolicy, subscription.throttlingPolicy) &&
-        Objects.equals(type, subscription.type) &&
         Objects.equals(status, subscription.status);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionId, applicationId, apiId, apiInfo, applicationInfo, throttlingPolicy, type, status);
+    return Objects.hash(subscriptionId, applicationId, apiId, apiInfo, applicationInfo, throttlingPolicy, status);
   }
 
   @Override
@@ -269,7 +217,6 @@ public enum StatusEnum {
     sb.append("    apiInfo: ").append(toIndentedString(apiInfo)).append("\n");
     sb.append("    applicationInfo: ").append(toIndentedString(applicationInfo)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
-    sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("}");
     return sb.toString();

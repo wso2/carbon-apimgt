@@ -1,7 +1,7 @@
 get:
   - request:
       method: GET
-      url: https://localhost:9443/api/am/store/v1.0/alert-types
+      url: https://localhost:9443/api/am/store/v1/alert-types
       headers: |
           Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
     response:

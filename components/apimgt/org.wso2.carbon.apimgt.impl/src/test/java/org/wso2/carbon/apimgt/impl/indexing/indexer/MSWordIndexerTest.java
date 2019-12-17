@@ -55,7 +55,8 @@ public class MSWordIndexerTest {
         WordExtractor wordExtractor = Mockito.mock(WordExtractor.class);
         XWPFWordExtractor xwpfExtractor = Mockito.mock(XWPFWordExtractor.class);
         XWPFDocument xwpfDocument = Mockito.mock(XWPFDocument.class);
-        PowerMockito.whenNew(POIFSFileSystem.class).withArguments(Mockito.anyObject())
+        PowerMockito.whenNew(POIFSFileSystem.class).withParameterTypes(InputStream.class)
+                .withArguments(Mockito.any(InputStream.class))
                 .thenThrow(OfficeXmlFileException.class)
                 .thenReturn(poiFS)
                 .thenThrow(APIManagementException.class);
@@ -92,7 +93,8 @@ public class MSWordIndexerTest {
 
     @Test(expected = SolrException.class)
     public void testShouldThrowExceptionWhenFailToReadFile() throws Exception {
-        PowerMockito.whenNew(POIFSFileSystem.class).withArguments(Mockito.anyObject())
+        PowerMockito.whenNew(POIFSFileSystem.class).withParameterTypes(InputStream.class)
+                .withArguments(Mockito.any(InputStream.class))
                 .thenThrow(OfficeXmlFileException.class);
         PowerMockito.whenNew(XWPFDocument.class).withParameterTypes(InputStream.class)
                 .withArguments(Mockito.any())

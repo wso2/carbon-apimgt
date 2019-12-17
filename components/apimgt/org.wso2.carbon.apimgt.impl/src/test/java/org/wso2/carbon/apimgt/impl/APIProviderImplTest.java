@@ -4594,4 +4594,173 @@ public class APIProviderImplTest {
             Assert.assertEquals(msg, e.getMessage());
         }
     }
+
+    /**
+     * This method tests the retrieval of API Security Audit Properties from the Global Config
+     * (i.e. deployment.toml)
+     * @throws APIManagementException
+     */
+    @Test
+    public void testGetSecurityAuditAttributesFromGlobalConfig() throws APIManagementException {
+        // Instantiate required variables
+        String username = "admin";
+        String apiToken = "2780f0ca-3423-435f-0e9f-a634e0do65915";
+        String collectionId = "8750f8ca-34f9-4baf-8b9f-c6854ed06534";
+        String global = "true";
+        // Mock retrieving the tenant domain
+        PowerMockito.mockStatic(MultitenantUtils.class);
+        Mockito.when(MultitenantUtils.getTenantDomain(username)).thenReturn("carbon.super");
+        // Create a new APIProviderImplWrapper object
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
+
+        // Create a mock APIManagerConfiguration Object for retrieving properties from the deployment.toml
+        APIManagerConfiguration apiManagerConfiguration = PowerMockito.mock(APIManagerConfiguration.class);
+        ServiceReferenceHolder serviceReferenceHolder = PowerMockito.mock(ServiceReferenceHolder.class);
+        APIManagerConfigurationService apiManagerConfigurationService = PowerMockito.mock(APIManagerConfigurationService.class);
+
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        // Mock the properties read from the deployment.toml
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_API_TOKEN)).thenReturn(apiToken);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_CID)).thenReturn(collectionId);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_GLOBAL)).thenReturn(global);
+
+        // Pass the mocked properties into the getSecurityAuditAttributesFromConfig method
+        JSONObject jsonObject = apiProvider.getSecurityAuditAttributesFromConfig(username);
+        // Compare the properties from the returned object and the mocked ones.
+        Assert.assertEquals(jsonObject.get(APIConstants.SECURITY_AUDIT_API_TOKEN), apiToken);
+        Assert.assertEquals(jsonObject.get(APIConstants.SECURITY_AUDIT_COLLECTION_ID), collectionId);
+    }
+
+    /**
+     * This method tests the retrieval of API Security Audit Properties from the Tenant Config
+     * (i.e. tenant-conf.json)
+     * @throws RegistryException
+     * @throws APIManagementException
+     */
+    @Test
+    public void testGetSecurityAuditAttributesFromTenantConfig()
+            throws RegistryException, APIManagementException {
+        // Instantiating required variables
+        final int tenantId = -1234;
+
+        String apiToken = "1234f0ca-9879-112f-0e8f-a098e0do12456";
+        String collectionId = "467f8ca-40f8-4baf-8b0f-c6854ed04653";
+        boolean overrideGlobal = true;
+
+        // Sample JSONObject for mocking
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("apiToken", apiToken);
+        jsonObject.put("collectionId", collectionId);
+        jsonObject.put("overrideGlobal", overrideGlobal);
+
+        // Create a new APIProviderImplWrapper object and make mock calls to the tenant config
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getConfigSystemRegistry(tenantId)).thenReturn(userRegistry);
+        Mockito.when(userRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
+        Mockito.when(userRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
+        Mockito.when(resource.getContent()).thenReturn(jsonObject);
+        PowerMockito.mockStatic(APIUtil.class);
+        Mockito.when(APIUtil.getSecurityAuditAttributesFromRegistry(tenantId)).thenReturn(jsonObject);
+
+        // Pass the mock values to the method call
+        JSONObject jsonObject1 = apiProvider.getSecurityAuditAttributesFromConfig("admin");
+
+        // Compare the API Token and Collection ID returned from the method call
+        Assert.assertEquals(jsonObject1.get(APIConstants.SECURITY_AUDIT_API_TOKEN), apiToken);
+        Assert.assertEquals(jsonObject1.get(APIConstants.SECURITY_AUDIT_COLLECTION_ID), collectionId);
+    }
+
+    /**
+     * This method tests the retrieval of API Security Audit Properties when both the global config
+     * and tenant configs return null
+     * @throws APIManagementException
+     */
+    @Test
+    public void testGetSecurityAuditAttributesFromNullConfig() throws APIManagementException {
+        // Create a new APIProviderImplWrapper object
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
+        // Make method call with null values
+        JSONObject jsonObject = apiProvider.getSecurityAuditAttributesFromConfig("admin");
+        // Check if the JSONObject returned is null
+        assertNull(jsonObject);
+    }
+
+    /**
+     * This method tests the retrieval of API Security Audit Properties when both the tenant and global
+     * configs contain values
+     * @throws APIManagementException
+     * @throws RegistryException
+     */
+    @Test
+    public void testGetSecurityAuditAttributesFromAllConfigs() throws APIManagementException, RegistryException {
+        // Mock values from global config
+        String username = "admin";
+        String apiToken = "2780f0ca-3423-435f-0e9f-a634e0do65915";
+        String collectionId = "8750f8ca-34f9-4baf-8b9f-c6854ed06534";
+        String global = "true";
+        // Mock retrieving the tenant domain
+        PowerMockito.mockStatic(MultitenantUtils.class);
+        Mockito.when(MultitenantUtils.getTenantDomain(username)).thenReturn("carbon.super");
+        // Create a new APIProviderImplWrapper object
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
+
+        // Create a mock APIManagerConfiguration Object for retrieving properties from the deployment.toml
+        APIManagerConfiguration apiManagerConfiguration = PowerMockito.mock(APIManagerConfiguration.class);
+        ServiceReferenceHolder serviceReferenceHolder = PowerMockito.mock(ServiceReferenceHolder.class);
+        APIManagerConfigurationService apiManagerConfigurationService = PowerMockito.mock(APIManagerConfigurationService.class);
+
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        // Mock the properties read from the deployment.toml
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_API_TOKEN)).thenReturn(apiToken);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_CID)).thenReturn(collectionId);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_GLOBAL)).thenReturn(global);
+
+        // Mock values from tenant config
+        final int tenantId = -1234;
+
+        String apiToken1 = "1234f0ca-9879-112f-0e8f-a098e0do12456";
+        String collectionId1 = "467f8ca-40f8-4baf-8b0f-c6854ed04653";
+        boolean overrideGlobal = true;
+
+        // Sample JSONObject for mocking
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("apiToken", apiToken1);
+        jsonObject.put("collectionId", collectionId1);
+        jsonObject.put("overrideGlobal", overrideGlobal);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getConfigSystemRegistry(tenantId)).thenReturn(userRegistry);
+        Mockito.when(userRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
+        Mockito.when(userRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
+        Mockito.when(resource.getContent()).thenReturn(jsonObject);
+        PowerMockito.mockStatic(APIUtil.class);
+        Mockito.when(APIUtil.getSecurityAuditAttributesFromRegistry(tenantId)).thenReturn(jsonObject);
+
+        // Test the object to be returned when overrideGlobal is true
+        JSONObject jsonObject1 = apiProvider.getSecurityAuditAttributesFromConfig("admin");
+        Assert.assertEquals(jsonObject1.get(APIConstants.SECURITY_AUDIT_API_TOKEN), apiToken1);
+        Assert.assertEquals(jsonObject1.get(APIConstants.SECURITY_AUDIT_COLLECTION_ID), collectionId1);
+
+        // Test the object to be returned when overrideGlobal is false
+        jsonObject.put("overrideGlobal", false);
+        JSONObject jsonObject2 = apiProvider.getSecurityAuditAttributesFromConfig("admin");
+        Assert.assertEquals(jsonObject2.get(APIConstants.SECURITY_AUDIT_API_TOKEN), apiToken);
+        Assert.assertEquals(jsonObject2.get(APIConstants.SECURITY_AUDIT_COLLECTION_ID), collectionId);
+    }
 }

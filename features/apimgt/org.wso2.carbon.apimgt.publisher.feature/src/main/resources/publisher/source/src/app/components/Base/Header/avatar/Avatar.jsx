@@ -3,6 +3,7 @@ import {
     IconButton,
     Menu,
     MenuItem,
+    Icon,
 } from '@material-ui/core';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import { withStyles } from '@material-ui/core/styles';
@@ -84,7 +85,8 @@ class Avatar extends Component {
     render() {
         const { classes, user } = this.props;
         let username = user.name;
-        if (user.name.endsWith('@carbon.super')) {
+        const count = (username.match(/@/g) || []).length;
+        if (user.name.endsWith('@carbon.super') && count <= 1) {
             username = user.name.replace('@carbon.super', '');
         }
         const { anchorEl } = this.state;
@@ -101,6 +103,9 @@ class Avatar extends Component {
                     <AccountCircle className={classes.accountIcon} />
                     {' '}
                     {username}
+                    <Icon style={{ fontSize: '22px', marginLeft: '1px' }}>
+                        keyboard_arrow_down
+                    </Icon>
                 </IconButton>
                 <Menu
                     id='logout-menu'

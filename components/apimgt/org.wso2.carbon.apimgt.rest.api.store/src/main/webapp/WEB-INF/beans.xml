@@ -26,8 +26,7 @@
 
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper" />
-        </jaxrs:providers>
-        <jaxrs:properties>
+        </jaxrs:providers>        <jaxrs:properties>
             <!-- This is added to catch interceptor level exceptions in GlobalThrowableMapper. -->
             <entry key="map.cxf.interceptor.fault" value="true" />
         </jaxrs:properties>

@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
@@ -160,6 +162,7 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
+import org.wso2.carbon.governance.registry.extensions.utils.APIUtils;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -304,6 +307,8 @@ public final class APIUtil {
 
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
     private static final String NONE = "NONE";
+    private static final String SUPER_TENANT_SUFFIX =
+            APIConstants.EMAIL_DOMAIN_SEPARATOR + APIConstants.SUPER_TENANT_DOMAIN;
 
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
     static {
@@ -3573,7 +3578,8 @@ public final class APIUtil {
                     publisherAccessRoles = new StringBuilder(APIConstants.NULL_USER_ROLE_LIST);
                 }
 
-                if (visibility.equalsIgnoreCase(APIConstants.API_GLOBAL_VISIBILITY)) {
+                if (visibility.equalsIgnoreCase(APIConstants.API_GLOBAL_VISIBILITY)
+                        || visibility.equalsIgnoreCase(APIConstants.API_PRIVATE_VISIBILITY)) {
                     registryResource.setProperty(APIConstants.STORE_VIEW_ROLES, APIConstants.NULL_USER_ROLE_LIST);
                     publisherAccessRoles = new StringBuilder(APIConstants.NULL_USER_ROLE_LIST); // set publisher
                     // access roles null since store visibility is global. We do not need to add any roles to
@@ -3966,25 +3972,26 @@ public final class APIUtil {
             UserRegistry registry = registryService.getConfigSystemRegistry(tenantID);
             byte[] data = getLocalTenantConfFileData();
             if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                log.debug("Tenant conf already uploaded to the registry");
+                log.debug("tenant-conf of tenant " + tenantID + " is  already uploaded to the registry");
                 Optional<Byte[]> migratedTenantConf = migrateTenantConfScopes(tenantID);
                 if (migratedTenantConf.isPresent()) {
-                    log.debug("Detected new additions to tenant-conf");
+                    log.debug("Detected new additions to tenant-conf of tenant " + tenantID);
                     data = ArrayUtils.toPrimitive(migratedTenantConf.get());
                 } else {
-                    log.debug("No changes required in tenant-conf.json");
+                    log.debug("No changes required in tenant-conf.json of tenant " + tenantID);
                     return;
                 }
             }
-            log.debug("Adding tenant config to the registry");
+            log.debug("Adding/updating tenant-conf.json to the registry of tenant " + tenantID);
             Resource resource = registry.newResource();
             resource.setMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             resource.setContent(data);
             registry.put(APIConstants.API_TENANT_CONF_LOCATION, resource);
+            log.debug("Successfully added/updated tenant-conf.json of tenant  " + tenantID);
         } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving tenant conf to the registry", e);
+            throw new APIManagementException("Error while saving tenant conf to the registry of tenant " + tenantID, e);
         } catch (IOException e) {
-            throw new APIManagementException("Error while reading tenant conf file content", e);
+            throw new APIManagementException("Error while reading tenant conf file content of tenant " + tenantID, e);
         }
     }
 
@@ -4062,10 +4069,24 @@ public final class APIUtil {
                 JSONObject scopeJson = new JSONObject();
                 scopeJson.put(APIConstants.REST_API_SCOPE_NAME, scope);
                 scopeJson.put(APIConstants.REST_API_SCOPE_ROLE, scopesLocal.get(scope));
+                if (log.isDebugEnabled()) {
+                    log.debug("Found scope that is not added to tenant-conf.json in tenant " + tenantId +
+                            ": " + scopeJson);
+                }
                 tenantScopesArray.add(scopeJson);
             }
-            return Optional.of(ArrayUtils.toObject(tenantConf.toJSONString().getBytes()));
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                String formattedTenantConf = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(tenantConf);
+                if (log.isDebugEnabled()) {
+                    log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
+                }
+                return Optional.of(ArrayUtils.toObject(formattedTenantConf.getBytes()));
+            } catch (JsonProcessingException e) {
+                throw new APIManagementException("Error while formatting tenant-conf.json of tenant " + tenantId);
+            }
         } else {
+            log.debug("Scopes in tenant-conf.json in tenant " + tenantId + " are already migrated.");
             return Optional.empty();
         }
     }
@@ -9724,4 +9745,21 @@ public final class APIUtil {
 
     }
 
+    /**
+     * append the tenant domain to the username when an email is used as the username and EmailUserName is not enabled
+     * in the super tenant
+     * @param username
+     * @param tenantDomain
+     * @return username is an email
+     */
+    public static String appendTenantDomainForEmailUsernames(String username, String tenantDomain) {
+        if (APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenantDomain) &&
+                !username.endsWith(SUPER_TENANT_SUFFIX) &&
+                !MultitenantUtils.isEmailUserName() &&
+                username.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR) > 0) {
+            return username += SUPER_TENANT_SUFFIX;
+        }
+        return username;
+    }
 }
+

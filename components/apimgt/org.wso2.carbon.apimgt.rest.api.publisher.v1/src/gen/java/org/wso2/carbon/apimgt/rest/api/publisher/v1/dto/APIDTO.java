@@ -37,6 +37,7 @@ public class APIDTO   {
     private String provider = null;
     private String lifeCycleStatus = null;
     private APIWsdlInfoDTO wsdlInfo = null;
+    private String wsdlUrl = null;
     private Boolean responseCachingEnabled = null;
     private Integer cacheTimeout = null;
     private String destinationStatsEnabled = null;
@@ -388,6 +389,23 @@ public enum EndpointImplementationTypeEnum {
   }
   public void setWsdlInfo(APIWsdlInfoDTO wsdlInfo) {
     this.wsdlInfo = wsdlInfo;
+  }
+
+  /**
+   **/
+  public APIDTO wsdlUrl(String wsdlUrl) {
+    this.wsdlUrl = wsdlUrl;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "/apimgt/applicationdata/wsdls/admin--soap1.wsdl", value = "")
+  @JsonProperty("wsdlUrl")
+  public String getWsdlUrl() {
+    return wsdlUrl;
+  }
+  public void setWsdlUrl(String wsdlUrl) {
+    this.wsdlUrl = wsdlUrl;
   }
 
   /**
@@ -1051,6 +1069,7 @@ public enum EndpointImplementationTypeEnum {
         Objects.equals(provider, API.provider) &&
         Objects.equals(lifeCycleStatus, API.lifeCycleStatus) &&
         Objects.equals(wsdlInfo, API.wsdlInfo) &&
+        Objects.equals(wsdlUrl, API.wsdlUrl) &&
         Objects.equals(responseCachingEnabled, API.responseCachingEnabled) &&
         Objects.equals(cacheTimeout, API.cacheTimeout) &&
         Objects.equals(destinationStatsEnabled, API.destinationStatsEnabled) &&
@@ -1092,7 +1111,7 @@ public enum EndpointImplementationTypeEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies);
   }
 
   @Override
@@ -1108,6 +1127,7 @@ public enum EndpointImplementationTypeEnum {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    wsdlInfo: ").append(toIndentedString(wsdlInfo)).append("\n");
+    sb.append("    wsdlUrl: ").append(toIndentedString(wsdlUrl)).append("\n");
     sb.append("    responseCachingEnabled: ").append(toIndentedString(responseCachingEnabled)).append("\n");
     sb.append("    cacheTimeout: ").append(toIndentedString(cacheTimeout)).append("\n");
     sb.append("    destinationStatsEnabled: ").append(toIndentedString(destinationStatsEnabled)).append("\n");

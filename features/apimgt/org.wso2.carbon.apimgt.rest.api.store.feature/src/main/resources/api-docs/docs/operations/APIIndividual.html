@@ -3,7 +3,7 @@
 
             <hr/>
             <h4 class="operation-heading"><a name="apisApiIdGet"></a>Get details of an API
-</h4> <code>GET https://apis.wso2.com/api/am/store/v0.15/apis/{apiId}</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v0.16/apis/{apiId}</code>
             <p class="marked"></p>
 
             <p class="marked">Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API to retrive it.
@@ -17,65 +17,9 @@
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
                 <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdGet">
-                <h4 class="section-heading">
-                    Request
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-
-                <div id="request-apisApiIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.15/apis/c43a325c-260b-4302-81cb-768eafaa3aed
-</code></div>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdGet">
-                <h4 class="section-heading">
-                    Response
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-                <div id="response-apisApiIdGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-   &quot;thumbnailUrl&quot;: null,
-   &quot;tiers&quot;: [&quot;Unlimited&quot;],
-   &quot;businessInformation&quot;:    {
-      &quot;technicalOwner&quot;: &quot;John Doe&quot;,
-      &quot;technicalOwnerEmail&quot;: &quot;architecture@pizzashack.com&quot;,
-      &quot;businessOwner&quot;: &quot;Jane Roe&quot;,
-      &quot;businessOwnerEmail&quot;: &quot;marketing@pizzashack.com&quot;
-   },
-   &quot;apiDefinition&quot;: &quot;{\&quot;paths\&quot;:{\&quot;/order\&quot;:{\&quot;post\&quot;:{\&quot;x-auth-type\&quot;:\&quot;Application &amp; Application User\&quot;,\&quot;x-throttling-tier\&quot;:\&quot;Unlimited\&quot;,\&quot;description\&quot;:\&quot;Create a new Order\&quot;,\&quot;parameters\&quot;:[{\&quot;schema\&quot;:{\&quot;$ref\&quot;:\&quot;#/definitions/Order\&quot;},\&quot;description\&quot;:\&quot;Order object that needs to be added\&quot;,\&quot;name\&quot;:\&quot;body\&quot;,\&quot;required\&quot;:true,\&quot;in\&quot;:\&quot;body\&quot;}],\&quot;responses\&quot;:{\&quot;201\&quot;:{\&quot;headers\&quot;:{\&quot;Location\&quot;:{\&quot;description\&quot;:\&quot;The URL of the newly created resource.\&quot;,\&quot;type\&quot;:\&quot;string\&quot;},\&quot;Content-Type\&quot;:{\&quot;description\&quot;:\&quot;The content type of the body.\&quot;,\&quot;type\&quot;:\&quot;string\&quot;}},\&quot;schema\&quot;:{\&quot;$ref\&quot;:\&quot;#/definitions/Order\&quot;},\&quot;description\&quot;:\&quot;Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity.\&quot;}}}},\&quot;/order/{orderId}\&quot;:{\&quot;get\&quot;:{\&quot;x-auth-type\&quot;:\&quot;Application &amp; Application User\&quot;,\&quot;x-throttling-tier\&quot;:\&quot;Unlimited\&quot;,\&quot;description\&quot;:\&quot;Get details of an Order\&quot;,\&quot;parameters\&quot;:[{\&quot;description\&quot;:\&quot;Order Id\&quot;,\&quot;name\&quot;:\&quot;orderId\&quot;,\&quot;format\&quot;:\&quot;string\&quot;,\&quot;type\&quot;:\&quot;string\&quot;,\&quot;required\&quot;:true,\&quot;in\&quot;:\&quot;path\&quot;}],\&quot;responses\&quot;:{\&quot;200\&quot;:{\&quot;schema\&quot;:{\&quot;$ref\&quot;:\&quot;#/definitions/Order\&quot;},\&quot;headers\&quot;:{},\&quot;description\&quot;:\&quot;OK Requested Order will be returned\&quot;}}}}},\&quot;schemes\&quot;:[\&quot;https\&quot;],\&quot;produces\&quot;:[\&quot;application/json\&quot;],\&quot;swagger\&quot;:\&quot;2.0\&quot;,\&quot;definitions\&quot;:{\&quot;Order\&quot;:{\&quot;title\&quot;:\&quot;Pizza Order\&quot;,\&quot;properties\&quot;:{\&quot;customerName\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;delivered\&quot;:{\&quot;type\&quot;:\&quot;boolean\&quot;},\&quot;address\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;pizzaType\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;creditCardNumber\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;quantity\&quot;:{\&quot;type\&quot;:\&quot;number\&quot;},\&quot;orderId\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;}},\&quot;required\&quot;:[\&quot;orderId\&quot;]}},\&quot;consumes\&quot;:[\&quot;application/json\&quot;],\&quot;info\&quot;:{\&quot;title\&quot;:\&quot;PizzaShackAPI\&quot;,\&quot;description\&quot;:\&quot;This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\n\&quot;,\&quot;license\&quot;:{\&quot;name\&quot;:\&quot;Apache 2.0\&quot;,\&quot;url\&quot;:\&quot;http://www.apache.org/licenses/LICENSE-2.0.html\&quot;},\&quot;contact\&quot;:{\&quot;email\&quot;:\&quot;architecture@pizzashack.com\&quot;,\&quot;name\&quot;:\&quot;John Doe\&quot;,\&quot;url\&quot;:\&quot;http://www.pizzashack.com\&quot;},\&quot;version\&quot;:\&quot;1.0.0\&quot;}}&quot;,
-   &quot;wsdlUri&quot;: null,
-   &quot;isDefaultVersion&quot;: false,
-   &quot;endpointURLs&quot;: [   {
-      &quot;environmentName&quot;: &quot;Production and Sandbox&quot;,
-      &quot;environmentType&quot;: &quot;hybrid&quot;,
-      &quot;environmentURLs&quot;:       {
-         &quot;http&quot;: &quot;http://localhost:8280//pizzashack/1.0.0&quot;,
-         &quot;https&quot;: &quot;https://localhost:8243//pizzashack/1.0.0&quot;
-      }
-   }],
-   &quot;transport&quot;:    [
-      &quot;http&quot;,
-      &quot;https&quot;
-   ],
-   &quot;tags&quot;: [&quot;pizza&quot;],
-   &quot;version&quot;: &quot;1.0.0&quot;,
-   &quot;description&quot;: &quot;This document describe a RESTFul API for Pizza Shack online pizza delivery store.\r\n&quot;,
-   &quot;provider&quot;: &quot;admin&quot;,
-   &quot;name&quot;: &quot;PizzaShackAPI&quot;,
-   &quot;context&quot;: &quot;/pizzashack/1.0.0&quot;,
-   &quot;id&quot;: &quot;8848faaa-7fd1-478a-baa2-48a4ebb92c98&quot;,
-   &quot;status&quot;: &quot;PUBLISHED&quot;
-}  </code></div>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl https://localhost:9443/api/am/store/v0.15/apis/c43a325c-260b-4302-81cb-768eafaa3aed</code></div>
-
-            <h4 class="section-heading">Sample CURL - for tenant</h4>
-            <div class="pre"><code class="bash">curl -k -H &quot;X-WSO2-Tenant:test.com&quot; https://localhost:9443/api/am/store/v0.15/apis/c43a325c-260b-4302-81cb-768eafaa3aed</code></div>
-
+            <h4 class="section-heading">
+                Examples
+            </h4>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -97,17 +41,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>apiId</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -127,16 +71,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -155,16 +99,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -184,16 +128,16 @@ variant of the resource.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-Modified-Since</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -213,16 +157,16 @@ formerly retrieved variant of the resource (Will be supported in future).
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>X-WSO2-Tenant</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -272,7 +216,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
+                                    
                             </span>
                         </td>
                     </tr>
@@ -298,7 +242,7 @@ formerly retrieved variant of the resource (Will be supported in future).
             </table>
             <hr/>
             <h4 class="operation-heading"><a name="apisApiIdSwaggerGet"></a>Get swagger definition
-</h4> <code>GET https://apis.wso2.com/api/am/store/v0.15/apis/{apiId}/swagger</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v0.16/apis/{apiId}/swagger</code>
             <p class="marked"></p>
 
             <p class="marked">You can use this operation to retrieve the swagger definition of an API.
@@ -312,51 +256,9 @@ formerly retrieved variant of the resource (Will be supported in future).
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
                 <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdSwaggerGet">
-                <h4 class="section-heading">
-                    Request
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-
-                <div id="request-apisApiIdSwaggerGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.15/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger
-</code></div>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdSwaggerGet">
-                <h4 class="section-heading">
-                    Response
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-                <div id="response-apisApiIdSwaggerGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-   &quot;paths&quot;: {&quot;/*&quot;: {&quot;get&quot;:    {
-      &quot;x-auth-type&quot;: &quot;Application&quot;,
-      &quot;x-throttling-tier&quot;: &quot;Unlimited&quot;,
-      &quot;responses&quot;: {&quot;200&quot;: {&quot;description&quot;: &quot;OK&quot;}}
-   }}},
-   &quot;x-wso2-security&quot;: {&quot;apim&quot;: {&quot;x-wso2-scopes&quot;: []}},
-   &quot;swagger&quot;: &quot;2.0&quot;,
-   &quot;info&quot;:    {
-      &quot;title&quot;: &quot;PhoneVerification&quot;,
-      &quot;description&quot;: &quot;Verify a phone number&quot;,
-      &quot;contact&quot;:       {
-         &quot;email&quot;: &quot;xx@ee.com&quot;,
-         &quot;name&quot;: &quot;xx&quot;
-      },
-      &quot;version&quot;: &quot;2.0.0&quot;
-   }
-}
-</code></div>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl https://localhost:9443/api/am/store/v0.15/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger</code></div>
-
-            <h4 class="section-heading">Sample CURL - for tenant</h4>
-            <div class="pre"><code class="bash">curl -k -H &quot;X-WSO2-Tenant:test.com&quot; https://localhost:9443/api/am/store/v0.15/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger</code></div>
-
+            <h4 class="section-heading">
+                Examples
+            </h4>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -378,17 +280,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>apiId</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -408,16 +310,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -436,16 +338,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -465,16 +367,16 @@ variant of the resource.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-Modified-Since</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -494,16 +396,16 @@ formerly retrieved variant of the resource (Will be supported in future).
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>X-WSO2-Tenant</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -544,7 +446,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">OK. Requested swagger document of the API is returned </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
+                                    
                             </span>
                         </td>
                     </tr>
@@ -553,7 +455,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
+                                    
                             </span>
                         </td>
                     </tr>
@@ -578,7 +480,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdThumbnailGet"></a>Get thumbnail image</h4> <code>GET https://apis.wso2.com/api/am/store/v0.15/apis/{apiId}/thumbnail</code>
+            <h4 class="operation-heading"><a name="apisApiIdThumbnailGet"></a>Get thumbnail image</h4> <code>GET https://apis.wso2.com/api/am/store/v0.16/apis/{apiId}/thumbnail</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to download a thumbnail image of an API.
@@ -592,33 +494,9 @@ formerly retrieved variant of the resource (Will be supported in future).
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
                 <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdThumbnailGet">
-                <h4 class="section-heading">
-                    Request
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-
-                <div id="request-apisApiIdThumbnailGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.15/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail
-</code></div>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdThumbnailGet">
-                <h4 class="section-heading">
-                    Response
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-                <div id="response-apisApiIdThumbnailGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Content-Type: image/jpeg
-
-[image content]</code></div>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl https://localhost:9443/api/am/store/v0.15/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail &gt; image.jpg</code></div>
-
-            <h4 class="section-heading">Sample CURL - for tenant</h4>
-            <div class="pre"><code class="bash">curl -k -H &quot;X-WSO2-Tenant:test.com&quot; https://localhost:9443/api/am/store/v0.15/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail &gt; image.jpg</code></div>
-
+            <h4 class="section-heading">
+                Examples
+            </h4>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -640,17 +518,17 @@ Content-Type: image/jpeg
                 </thead>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>apiId</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -670,16 +548,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>X-WSO2-Tenant</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -699,16 +577,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -727,16 +605,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -756,16 +634,16 @@ variant of the resource.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-Modified-Since</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -806,7 +684,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">OK. Thumbnail image returned </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
+                                    
                             </span>
                         </td>
                     </tr>
@@ -815,7 +693,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
+                                    
                             </span>
                         </td>
                     </tr>
@@ -841,42 +719,18 @@ formerly retrieved variant of the resource (Will be supported in future).
             </table>
             <hr/>
             <h4 class="operation-heading"><a name="apisGenerateSdkPost"></a>Generate SDK for an API
-</h4> <code>POST https://apis.wso2.com/api/am/store/v0.15/apis/generate-sdk/</code>
+</h4> <code>POST https://apis.wso2.com/api/am/store/v0.16/apis/generate-sdk/</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to generate SDK for an API by providing the id of the API along with the preferred language.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:subscribe</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:subscribe' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+                <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-apisGenerateSdkPost">
-                <h4 class="section-heading">
-                    Request
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-
-                <div id="request-apisGenerateSdkPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/store/v0.15/apis/generate-sdk?apiId&#x3D;e93fb282-b456-48fc-8981-003fb89086ae&amp;language&#x3D;java
-Authorization: Bearer 2e29904b-f3b0-366e-ba13-b469abedd88e
-</code></div>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-apisGenerateSdkPost">
-                <h4 class="section-heading">
-                    Response
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-                <div id="response-apisGenerateSdkPost" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Content-Disposition: attachment; filename&#x3D;&quot;PizzaShackAPI_1.0.0_java.zip&quot;
-Content-Type: application/zip
-
-[zip content]</code></div>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 2e29904b-f3b0-366e-ba13-b469abedd88e&quot; -X POST &#39;https://localhost:9443/api/am/store/v0.15/apis/generate-sdk?apiId&#x3D;5721d128-76d0-4cb9-b300-2bd9578beddb&amp;language&#x3D;java&#39; &gt; PizzaAPI_Java_SDK.zip</code></div>
-
-
+            <h4 class="section-heading">
+                Examples
+            </h4>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -898,17 +752,17 @@ Content-Type: application/zip
                 </thead>
                     <tr>
                         <td class="parameter">
-
+                            
                             <span class="param-in">Query </span>
-
-
-
+                            
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>apiId</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -928,17 +782,17 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
+                            
                             <span class="param-in">Query </span>
-
-
-
+                            
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>language</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -956,16 +810,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>X-WSO2-Tenant</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -1006,7 +860,7 @@ Should be formatted as **provider-name-version**.
                         <td class="parameter"><p class="marked">OK. SDK generated successfully. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
+                                    
                             </span>
                         </td>
                     </tr>

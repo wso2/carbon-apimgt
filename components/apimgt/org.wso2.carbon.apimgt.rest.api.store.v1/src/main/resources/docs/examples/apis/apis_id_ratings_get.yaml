@@ -1,7 +1,7 @@
 - id: getAPIRatings
   request:
     method: GET
-    url: https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings
+    url: https://localhost:9443/api/am/store/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings
     headers: |
       Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       X-WSO2-Tenant: test.com

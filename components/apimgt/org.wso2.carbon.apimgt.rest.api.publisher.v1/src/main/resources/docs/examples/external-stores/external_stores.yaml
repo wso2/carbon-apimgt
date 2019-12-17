@@ -2,7 +2,7 @@ getAllExternalStores:
   - id: getAllExternalStores
     request:
       method: GET
-      url: https://127.0.0.1:9443/api/am/publisher/v1.0/external-stores
+      url: https://127.0.0.1:9443/api/am/publisher/v1/external-stores
       headers: |
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
     response:
@@ -32,7 +32,7 @@ getAllExternalStores:
   - id: getAllExternalStoreNotAvailable
     request:
       method: GET
-      url: https://127.0.0.1:9443/api/am/publisher/v1.0/external-stores
+      url: https://127.0.0.1:9443/api/am/publisher/v1/external-stores
       headers: |
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
     response:
@@ -50,7 +50,7 @@ getPublishedExternalStoresByAPI:
   - id: getPublishedExternalStoresByAPI
     request:
       method: GET
-      url: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/e09a19cf-18b0-4773-9124-5157a17dfb65/external-stores
+      url: https://127.0.0.1:9443/api/am/publisher/v1/apis/e09a19cf-18b0-4773-9124-5157a17dfb65/external-stores
       headers: |
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
     response:
@@ -76,7 +76,7 @@ getPublishedExternalStoresByAPI:
   - id: getPublishedExternalStoresNoneByAPI
     request:
       method: GET
-      url: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/e09a19cf-18b0-4773-9124-5157a17dfb65/external-stores
+      url: https://127.0.0.1:9443/api/am/publisher/v1/apis/e09a19cf-18b0-4773-9124-5157a17dfb65/external-stores
       headers: |
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
     response:
@@ -93,7 +93,7 @@ getPublishedExternalStoresByAPI:
   - id: getPublishedExternalStoresByNonExistenceAPI
     request:
       method: GET
-      url: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/e09a19cf-18b0-4773-9124-5157a17dfb65/external-stores
+      url: https://127.0.0.1:9443/api/am/publisher/v1/apis/e09a19cf-18b0-4773-9124-5157a17dfb65/external-stores
       headers: |
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
     response:
@@ -114,7 +114,7 @@ publishToExternalStore:
   - id: publishToExternalStores
     request:
       method: POST
-      url: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/e09a19cf-18b0-4773-9124-5157a17dfb65/publish-to-external-stores?externalStoreId=StoreABC&externalStoreId=StoreXYZ
+      url: https://127.0.0.1:9443/api/am/publisher/v1/apis/e09a19cf-18b0-4773-9124-5157a17dfb65/publish-to-external-stores?externalStoreId=StoreABC&externalStoreId=StoreXYZ
       headers: |
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
     response:
@@ -140,7 +140,7 @@ publishToExternalStore:
   - id: publishToExternalStoresRemoveFromAll
     request:
       method: POST
-      url: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/e09a19cf-18b0-4773-9124-5157a17dfb65/publish-to-external-stores?externalStoreId=
+      url: https://127.0.0.1:9443/api/am/publisher/v1/apis/e09a19cf-18b0-4773-9124-5157a17dfb65/publish-to-external-stores?externalStoreId=
       headers: |
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
     response:
@@ -157,7 +157,7 @@ publishToExternalStore:
   - id: publishToExternalStoresNotAvailable
     request:
       method: POST
-      url: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/e09a19cf-18b0-4773-9124-5157a17dfb65/publish-to-external-stores?externalStoreId=
+      url: https://127.0.0.1:9443/api/am/publisher/v1/apis/e09a19cf-18b0-4773-9124-5157a17dfb65/publish-to-external-stores?externalStoreId=
       headers: |
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
     response:
@@ -177,7 +177,7 @@ publishToExternalStore:
   - id: publishedToExternalStoresByNonExistenceAPI
     request:
       method: POST
-      url: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/e09a19cf-18b0-4773-9124-5157a17dfb65/publish-to-external-stores?externalStoreId=StoreABC
+      url: https://127.0.0.1:9443/api/am/publisher/v1/apis/e09a19cf-18b0-4773-9124-5157a17dfb65/publish-to-external-stores?externalStoreId=StoreABC
       headers: |
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
     response:

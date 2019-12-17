@@ -7214,6 +7214,7 @@ public class ApiMgtDAO {
         int id;
 
         String deleteLCEventQuery = SQLConstants.REMOVE_FROM_API_LIFECYCLE_SQL;
+        String deleteAuditAPIMapping = SQLConstants.REMOVE_SECURITY_AUDIT_MAP_SQL;
         String deleteCommentQuery = SQLConstants.REMOVE_FROM_API_COMMENT_SQL;
         String deleteRatingsQuery = SQLConstants.REMOVE_FROM_API_RATING_SQL;
         String deleteSubscriptionQuery = SQLConstants.REMOVE_FROM_API_SUBSCRIPTION_SQL;
@@ -7230,6 +7231,11 @@ public class ApiMgtDAO {
             synchronized (scopeMutex) {
                 removeAPIScope(apiId);
             }
+
+            prepStmt = connection.prepareStatement(deleteAuditAPIMapping);
+            prepStmt.setInt(1, id);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
             prepStmt = connection.prepareStatement(deleteSubscriptionQuery);
             prepStmt.setInt(1, id);
@@ -9730,6 +9736,10 @@ public class ApiMgtDAO {
                     } else {
                         return false;
                     }
+                } else {
+                    //If the API which is being saved is not available in the DB, but if the scope is key already
+                    //available in the DB, return true since this means the scope is already assigned to another API.
+                    return true;
                 }
             }
         } catch (SQLException e) {
@@ -14092,7 +14102,6 @@ public class ApiMgtDAO {
                         APIProductResource resource = new APIProductResource();
                         APIIdentifier apiId = new APIIdentifier(rs.getString("API_PROVIDER"), rs.getString("API_NAME"),
                                 rs.getString("API_VERSION"));
-                        Set<Scope> scopes = getAPIScopes(apiId);
                         resource.setProductIdentifier(productIdentifier);
                         resource.setApiIdentifier(apiId);
                         resource.setApiName(rs.getString("API_NAME"));
@@ -14103,10 +14112,26 @@ public class ApiMgtDAO {
                         uriTemplate.setId(rs.getInt("URL_MAPPING_ID"));
                         uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
                         uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
-                        String resourceScopeKey = APIUtil.getResourceKey(rs.getString("CONTEXT"), apiId.getVersion(),
-                                uriTemplate.getUriTemplate(), uriTemplate.getHTTPVerb());
-                        HashMap<String, String> resourceScopes = getResourceToScopeMapping(apiId);
-                        uriTemplate.setScope(APIUtil.findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
+
+                        String resourceScopeKey = APIUtil.getResourceKey(rs.getString("CONTEXT"),
+                                rs.getString("API_VERSION"), uriTemplate.getUriTemplate(),
+                                uriTemplate.getHTTPVerb());
+                        try (PreparedStatement scopesStatement = connection.
+                                prepareStatement(SQLConstants.GET_SCOPES_BY_RESOURCE_PATHS)) {
+                            scopesStatement.setString(1, resourceScopeKey);
+                            try (ResultSet scopesResult = scopesStatement.executeQuery()) {
+                                while (scopesResult.next()) {
+                                    Scope scope = new Scope();
+                                    scope.setKey(scopesResult.getString("NAME"));
+                                    scope.setDescription(scopesResult.getString("DESCRIPTION"));
+                                    scope.setId(scopesResult.getInt("SCOPE_ID"));
+                                    scope.setName(scopesResult.getString("DISPLAY_NAME"));
+                                    scope.setRoles(scopesResult.getString("SCOPE_BINDING"));
+                                    uriTemplate.setScope(scope);
+                                }
+                            }
+                        }
+
                         resource.setUriTemplate(uriTemplate);
                         productResourceList.add(resource);
                     }
