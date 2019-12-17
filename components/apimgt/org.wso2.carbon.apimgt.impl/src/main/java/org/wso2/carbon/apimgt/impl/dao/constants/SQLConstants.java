@@ -2771,7 +2771,7 @@ public class SQLConstants {
                     "  NAME IN (";
 
     public static final String GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_SUFFIX =
-            ") AND TENANT_ID =? ;";
+            ") AND TENANT_ID =?";
 
     public static final String GET_GLOBAL_POLICIES =
             " SELECT " +
