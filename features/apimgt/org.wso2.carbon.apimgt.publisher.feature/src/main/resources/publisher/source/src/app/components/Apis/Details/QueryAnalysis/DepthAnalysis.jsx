@@ -68,7 +68,8 @@ function DepthAnalysis() {
     const [defaultDepth, setDefaultDepth] = React.useState(2);
     const [depthCheck, setDepthCheck] = React.useState(true);
     const [showPageContent, setShowPageContent] = React.useState(true);
-
+    const [defaultDepthValidationInvalid, setDefaultDepthValidationInvalid] = React.useState(false);
+    const [defaultDepthValidationError, setDefaultDepthValidationError] = React.useState('');
 
     const handleDepthToggle = (event) => {
         setDepthCheck(event.target.checked);
@@ -77,6 +78,7 @@ function DepthAnalysis() {
     const onDepthValueSave = () => {
         setDepthCheck(true);
         setShowPageContent(true);
+        
     };
 
     useEffect(() => {
@@ -131,18 +133,18 @@ function DepthAnalysis() {
                         <TextField
                             id='defaultDepthLimitation'
                             label='Default Depth Limitation'
-                            placeholder='Default Depth Limitation'
-                            // error={this.state.valid.name.invalid}
-                            // helperText={
-                            //     this.state.valid.name.invalid ? (
-                            //         this.state.valid.name.error
-                            //     ) : (
-                            //         <FormattedMessage
-                            //             id='Apis.Details.QueryAnalysis.DepthAnalysis.dialog.depth.value'
-                            //             defaultMessage='Enter Depth Limitation Value ( Ex: 20 )'
-                            //         />
-                            //     )
-                            // }
+                            placeholder='Enter the maximum depth allowed'
+                            error={defaultDepthValidationInvalid}
+                            helperText={
+                                defaultDepthValidationInvalid ? (
+                                    defaultDepthValidationError
+                                ) : (
+                                    <FormattedMessage
+                                        id='Apis.Details.QueryAnalysis.DepthAnalysis.dialog.depth.value'
+                                        defaultMessage='Enter Depth Limitation Value ( Ex: 20 )'
+                                    />
+                                )
+                            }
                             margin='normal'
                             variant='outlined'
                             InputLabelProps={{
