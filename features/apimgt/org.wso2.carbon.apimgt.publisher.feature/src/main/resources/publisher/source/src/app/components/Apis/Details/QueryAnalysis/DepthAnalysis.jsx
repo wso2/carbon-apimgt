@@ -78,7 +78,18 @@ function DepthAnalysis() {
     const onDepthValueSave = () => {
         setDepthCheck(true);
         setShowPageContent(true);
-        
+    };
+
+    const handleDefaultDepthInput = (event) => {
+        setDefaultDepth(event.target.value);
+        let inputError = '';
+        let inputValid = true;
+
+        if (defaultDepth <= 0) {
+            inputValid = false;
+            er
+        }
+
     };
 
     useEffect(() => {
@@ -151,7 +162,7 @@ function DepthAnalysis() {
                                 shrink: true,
                             }}
                             value={defaultDepth}
-                            onChange={(event) => setDefaultDepth(event.target.value)}
+                            onChange={(event) => handleDefaultDepthInput(event)}
                         />
                     </FormControl>
                     <DialogActions>

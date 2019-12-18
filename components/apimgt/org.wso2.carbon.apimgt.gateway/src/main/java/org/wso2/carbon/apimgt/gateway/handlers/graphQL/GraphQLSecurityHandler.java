@@ -20,7 +20,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -110,6 +109,10 @@ public class GraphQLSecurityHandler extends AbstractHandler {
      * @return maximum query depth value if exists, or -1 to denote no depth limitation
      */
     private int getMaxQueryDepth(String[] userRoles, JSONObject policyDefinition) {
+        //
+        Object complexityObject = policyDefinition.get("COMPLEXITY");
+        Object testObject = policyDefinition.get("A");
+        //
         Object depthObject = policyDefinition.get("DEPTH");
         ArrayList<Integer> allocatedDepths = new ArrayList<Integer>();
         for (String role: userRoles) {
@@ -123,7 +126,9 @@ public class GraphQLSecurityHandler extends AbstractHandler {
             }
         }
         if (allocatedDepths.size()==0) {
-            return -1;
+            int depth = ((Long)((JSONObject) depthObject).get("default")).intValue();
+            return depth;
+//            return -1;
         } else {
             return Collections.max(allocatedDepths);
         }
