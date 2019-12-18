@@ -49,6 +49,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -160,7 +161,7 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
      * @return Organization list from the assertion
      */
     private String getOrganizationFromSamlAssertion(List<Assertion> assertions) {
-        String attributeValueString = null;
+        List<String> attributeValueArray = new ArrayList<>();
         String organizationAttributeName = getOrganizationClaim();
 
         for (Assertion assertion : assertions) {
@@ -170,13 +171,11 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
                     List<Attribute> attributesList = statement.getAttributes();
                     for (Attribute attribute : attributesList) {
                         String attributeName = attribute.getName();
-                        if (attributeName != null && organizationAttributeName.equals(attributeName)) {
+                        if (organizationAttributeName.equals(attributeName)) {
                             List<XMLObject> attributeValues = attribute.getAttributeValues();
                             if (attributeValues != null) {
-                                attributeValueString = getAttributeValue(attributeValues.get(0));
-
-                                if (log.isDebugEnabled()) {
-                                    log.debug(", AttributeValue : " + attributeValueString);
+                                for (XMLObject attributeValue : attributeValues) {
+                                    attributeValueArray.add(getAttributeValue(attributeValue));
                                 }
                             }
                         }
@@ -185,10 +184,10 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug("Organization list found for assertion: " + attributeValueString );
+            log.debug("Organization list found in assertion: " + attributeValueArray);
         }
 
-        return attributeValueString;
+        return String.join(",", attributeValueArray);
     }
 
     /**
