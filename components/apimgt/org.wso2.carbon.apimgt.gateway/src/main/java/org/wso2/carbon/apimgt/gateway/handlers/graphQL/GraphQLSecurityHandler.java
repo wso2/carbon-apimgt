@@ -110,8 +110,12 @@ public class GraphQLSecurityHandler extends AbstractHandler {
      */
     private int getMaxQueryDepth(String[] userRoles, JSONObject policyDefinition) {
         //
-        Object complexityObject = policyDefinition.get("COMPLEXITY");
-        Object testObject = policyDefinition.get("A");
+        try {
+            Object complexityObject = policyDefinition.get("COMPLEXITY");
+            Object testObject = policyDefinition.get("A");
+        } catch (NullPointerException e) {
+            log.error("Hello world");
+        }
         //
         Object depthObject = policyDefinition.get("DEPTH");
         ArrayList<Integer> allocatedDepths = new ArrayList<Integer>();
@@ -126,8 +130,13 @@ public class GraphQLSecurityHandler extends AbstractHandler {
             }
         }
         if (allocatedDepths.size()==0) {
-            int depth = ((Long)((JSONObject) depthObject).get("default")).intValue();
-            return depth;
+            try {
+                int depth = ((Long)((JSONObject) depthObject).get("default")).intValue();
+                return depth;
+            } catch (NullPointerException e) {
+                log.error("Test");
+                return -1;
+            }
 //            return -1;
         } else {
             return Collections.max(allocatedDepths);
