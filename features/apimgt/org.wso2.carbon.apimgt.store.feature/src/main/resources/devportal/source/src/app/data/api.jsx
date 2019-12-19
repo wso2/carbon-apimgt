@@ -781,10 +781,10 @@ export default class API extends Resource {
      * Get all API Categories of the given tenant
      * @return {Promise}
      * */
-    apiCategories() {
+    apiCategories(params) {
         return this.client.then((client) => {
             return client.apis['API Category (Collection)'].get_api_categories(
-                this._requestMetaData());
+                params, this._requestMetaData());
         });
     }
 }

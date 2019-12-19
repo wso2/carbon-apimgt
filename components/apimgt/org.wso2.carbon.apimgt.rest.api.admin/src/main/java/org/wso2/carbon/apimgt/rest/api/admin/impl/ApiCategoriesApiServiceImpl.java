@@ -55,7 +55,7 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
             String userName = RestApiUtil.getLoggedInUsername();
             apiCategory = APICategoryMappingUtil.fromCategoryDTOToCategory(body);
             APICategoryDTO categoryDTO = APICategoryMappingUtil.
-                    fromCategoryToCategoryDTO(apiAdmin.addCategory(userName, apiCategory));
+                    fromCategoryToCategoryDTO(apiAdmin.addCategory(apiCategory, userName));
             URI location = new URI(RestApiConstants.RESOURCE_PATH_CATEGORY + "/" + categoryDTO.getId());
             return Response.created(location).entity(categoryDTO).build();
         } catch (APIManagementException | URISyntaxException e) {
@@ -92,7 +92,7 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
                 throw new APIManagementException(errorMsg);
             }
 
-            apiAdmin.updateCategory(apiCategoryToUpdate, userName);
+            apiAdmin.updateCategory(apiCategoryToUpdate);
             APICategory updatedAPICategory = apiAdmin.getAPICategoryByID(apiCategoryId);
             APICategoryDTO updatedAPICategoryDTO = APICategoryMappingUtil.fromCategoryToCategoryDTO(updatedAPICategory);
             return Response.ok().entity(updatedAPICategoryDTO).build();
@@ -160,7 +160,7 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
             String thumbnailUrl = apiProvider.addResourceFile(null, thumbPath, categoryImage);
             apiCategory.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, userName));
 
-            apiAdmin.updateCategory(apiCategory, userName);
+            apiAdmin.updateCategory(apiCategory);
 
             String uriString = RestApiConstants.RESOURCE_PATH_CATEGORY_THUMBNAIL
                     .replace(RestApiConstants.APICATEGORYID_PARAM, apiCategoryId);

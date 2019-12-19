@@ -20,5 +20,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApiCategoriesApiService {
-      public Response apiCategoriesGet(MessageContext messageContext) throws APIManagementException;
+      public Response apiCategoriesGet(String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
 }

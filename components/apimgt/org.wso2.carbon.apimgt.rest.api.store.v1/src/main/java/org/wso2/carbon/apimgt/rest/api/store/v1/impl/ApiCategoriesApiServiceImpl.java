@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -31,6 +32,8 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APICategoryListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APICategoryMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.List;
 
@@ -39,16 +42,24 @@ import javax.ws.rs.core.Response;
 public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
     private static final Log log = LogFactory.getLog(ApiCategoriesApiServiceImpl.class);
 
-    public Response apiCategoriesGet(MessageContext messageContext) {
+    public Response apiCategoriesGet(String xWSO2Tenant, MessageContext messageContext) {
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
+                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
+            }
+
             APIAdmin apiAdmin = new APIAdminImpl();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+            int tenantID = APIUtil.getTenantIdFromTenantDomain(requestedTenantDomain);
             List<APICategory> categoryList = apiAdmin.getAllAPICategoriesOfTenant(tenantID);
             APICategoryListDTO categoryListDTO = APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);
             return Response.ok().entity(categoryListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API categories";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;

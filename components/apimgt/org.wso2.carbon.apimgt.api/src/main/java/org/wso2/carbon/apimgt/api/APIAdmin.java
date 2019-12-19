@@ -131,7 +131,7 @@ public interface APIAdmin  {
      * @param category        category to add
      * @throws APIManagementException if failed add category
      */
-    APICategory addCategory(String userName, APICategory category) throws APIManagementException;
+    APICategory addCategory(APICategory category, String userName) throws APIManagementException;
 
     /**
      * Updates an API Category
@@ -140,7 +140,7 @@ public interface APIAdmin  {
      * @return
      * @throws APIManagementException
      */
-    void updateCategory(APICategory apiCategory, String userName) throws APIManagementException;
+    void updateCategory(APICategory apiCategory) throws APIManagementException;
 
     /**
      * Delete an API Category

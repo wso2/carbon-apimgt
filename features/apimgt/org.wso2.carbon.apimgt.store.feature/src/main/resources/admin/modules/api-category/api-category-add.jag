@@ -2,9 +2,7 @@
 var log = new Log();
 var addAPICategory = function (action, uuid, categoryName, description) {
     try {
-        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
         var username = jagg.getUser().username;
-        var tenantDomain = MultitenantUtils.getTenantDomain(username);
         var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
         var apiAdmin = new APIAdminImpl();
 
@@ -17,10 +15,10 @@ var addAPICategory = function (action, uuid, categoryName, description) {
 
         if (action == "categoryAction") {
             var category = constructCategoryObject(uuid, categoryName, description);
-            apiAdmin.addCategory(tenantDomain, category);
+            apiAdmin.addCategory(category, username);
         } else if (action == "update") {
             var category = constructCategoryObject(uuid, categoryName, description);
-            apiAdmin.updateCategory(category, username);
+            apiAdmin.updateCategory(category);
         }
         return {
             error: false

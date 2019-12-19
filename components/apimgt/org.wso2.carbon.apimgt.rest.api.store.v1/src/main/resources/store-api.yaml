@@ -3422,6 +3422,8 @@ paths:
       summary: Get all API categories
       description: |
         Get all API categories
+      parameters:
+        - $ref : '#/parameters/requestedTenant'
       tags:
         - API Category (Collection)
       responses:

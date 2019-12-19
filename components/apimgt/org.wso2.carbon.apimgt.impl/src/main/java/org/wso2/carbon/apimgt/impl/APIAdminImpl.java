@@ -287,16 +287,15 @@ public class APIAdminImpl implements APIAdmin {
         apiMgtDAO.deleteBotDataEmailList(uuid);
     }
 
-    public APICategory addCategory(String userName, APICategory category) throws APIManagementException {
+    public APICategory addCategory(APICategory category, String userName) throws APIManagementException {
         int tenantID = APIUtil.getTenantId(userName);
         if (isCategoryNameExists(category.getName(), null, tenantID)) {
             APIUtil.handleException("Category with name '" + category.getName() + "' already exists");
         }
-        //todo-category: check whether user has admin permissions to add category
         return apiMgtDAO.addCategory(tenantID, category);
     }
 
-    public void updateCategory(APICategory apiCategory, String userName) throws APIManagementException {
+    public void updateCategory(APICategory apiCategory) throws APIManagementException {
         apiMgtDAO.updateCategory(apiCategory);
     }
 
