@@ -79,6 +79,7 @@ public class URITemplate implements Serializable{
         if (mediationScript != null  && !mediationScript.trim().equals("") && !mediationScript.trim().equals("null")){
             mediationScripts.put(method, mediationScript);
         }
+
     }
 
     /**

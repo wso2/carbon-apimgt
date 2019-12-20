@@ -1583,6 +1583,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    @Override
+    public Response apisApiIdGenerateMocksPost(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+
+
+        return null;
+    }
+
     /**
      * Get external store list which the given API is already published to.
      * @param apiId API Identifier
