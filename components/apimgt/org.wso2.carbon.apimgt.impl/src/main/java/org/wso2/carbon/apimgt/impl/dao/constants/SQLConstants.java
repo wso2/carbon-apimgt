@@ -1205,6 +1205,52 @@ public class SQLConstants {
             "   AND API.API_ID = SUBS.API_ID" +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
+    public static final String GET_APP_SUBSCRIPTION_TO_API_SQL =
+            " SELECT " +
+                    "   SUBS.TIER_ID ," +
+                    "   API.API_PROVIDER ," +
+                    "   API.API_NAME ," +
+                    "   API.API_VERSION ," +
+                    "   SUBS.APPLICATION_ID " +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUBS," +
+                    "   AM_SUBSCRIBER SUB, " +
+                    "   AM_APPLICATION  APP, " +
+                    "   AM_API API " +
+                    " WHERE " +
+                    "   API.API_PROVIDER  = ?" +
+                    "   AND API.API_NAME = ?" +
+                    "   AND API.API_VERSION = ?" +
+                    "   AND SUB.USER_ID = ?" +
+                    "   AND SUB.TENANT_ID = ? " +
+                    "   AND SUBS.APPLICATION_ID = ? " +
+                    "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID" +
+                    "   AND API.API_ID = SUBS.API_ID" +
+                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+
+    public static final String GET_APP_SUBSCRIPTION_TO_API_CASE_INSENSITIVE_SQL =
+            " SELECT " +
+                    "   SUBS.TIER_ID ," +
+                    "   API.API_PROVIDER ," +
+                    "   API.API_NAME ," +
+                    "   API.API_VERSION ," +
+                    "   SUBS.APPLICATION_ID " +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUBS," +
+                    "   AM_SUBSCRIBER SUB, " +
+                    "   AM_APPLICATION  APP, " +
+                    "   AM_API API " +
+                    " WHERE " +
+                    "   API.API_PROVIDER  = ?" +
+                    "   AND API.API_NAME = ?" +
+                    "   AND API.API_VERSION = ?" +
+                    "   AND LOWER(SUB.USER_ID) = LOWER(?)" +
+                    "   AND SUB.TENANT_ID = ? " +
+                    "   AND SUBS.APPLICATION_ID = ? " +
+                    "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID" +
+                    "   AND API.API_ID = SUBS.API_ID" +
+                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+
     public static final String GET_APP_API_USAGE_BY_PROVIDER_SQL =
             " SELECT " +
             "   SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
