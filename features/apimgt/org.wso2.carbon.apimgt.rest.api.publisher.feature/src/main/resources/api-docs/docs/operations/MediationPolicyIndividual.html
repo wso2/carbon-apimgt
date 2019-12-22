@@ -2,37 +2,18 @@
     <h1><a name="Mediation Policy (Individual)"></a>Mediation Policy (Individual)</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdPoliciesMediationMediationPolicyIdDelete"></a>Delete an API specific mediation policy</h4> <code>DELETE https://apis.wso2.com/api/am/publisher/v0.15/apis/{apiId}/policies/mediation/{mediationPolicyId}</code>
+            <h4 class="operation-heading"><a name="apisApiIdPoliciesMediationMediationPolicyIdDelete"></a>Delete an API specific mediation policy</h4> <code>DELETE https://apis.wso2.com/api/am/publisher/v0.16/apis/{apiId}/policies/mediation/{mediationPolicyId}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to delete an existing API specific mediation policy providing the Id of the API and the Id of the mediation policy.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:api_create</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:api_create' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+                <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdPoliciesMediationMediationPolicyIdDelete">
-                <h4 class="section-heading">
-                    Request
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-
-                <div id="request-apisApiIdPoliciesMediationMediationPolicyIdDelete"class="pre collapse in"><code class="json">DELETE https://localhost:9443/api/am/publisher/v0.15/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/60f5146d-1774-405d-86b3-9b040ac266d5
-Authorization: Bearer fb2a0784-f60c-3276-8fde-5b0f70e61ecc</code></div>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdPoliciesMediationMediationPolicyIdDelete">
-                <h4 class="section-heading">
-                    Response
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-                <div id="response-apisApiIdPoliciesMediationMediationPolicyIdDelete" class="pre collapse in"><code class="json">HTTP/1.1 200 OK</code></div>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer fb2a0784-f60c-3276-8fde-5b0f70e61ecc&quot; -X DELETE https://localhost:9443/api/am/publisher/v0.15/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/60f5146d-1774-405d-86b3-9b040ac266d5</code></div>
-
-
+            <h4 class="section-heading">
+                Examples
+            </h4>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -54,17 +35,17 @@ Authorization: Bearer fb2a0784-f60c-3276-8fde-5b0f70e61ecc</code></div>
                 </thead>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>apiId</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -84,17 +65,17 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>mediationPolicyId</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -112,16 +93,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-Match</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -140,16 +121,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-Unmodified-Since</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -189,7 +170,7 @@ Should be formatted as **provider-name-version**.
                         <td class="parameter"><p class="marked">OK. Resource successfully deleted. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
+                                    
                             </span>
                         </td>
                     </tr>
@@ -223,45 +204,18 @@ Should be formatted as **provider-name-version**.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdPoliciesMediationMediationPolicyIdGet"></a>Get an API specific mediation policy</h4> <code>GET https://apis.wso2.com/api/am/publisher/v0.15/apis/{apiId}/policies/mediation/{mediationPolicyId}</code>
+            <h4 class="operation-heading"><a name="apisApiIdPoliciesMediationMediationPolicyIdGet"></a>Get an API specific mediation policy</h4> <code>GET https://apis.wso2.com/api/am/publisher/v0.16/apis/{apiId}/policies/mediation/{mediationPolicyId}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve a particular API specific mediation policy.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:api_view</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:api_view' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+                <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdPoliciesMediationMediationPolicyIdGet">
-                <h4 class="section-heading">
-                    Request
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-
-                <div id="request-apisApiIdPoliciesMediationMediationPolicyIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v0.15/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/624b9f7d-bfaf-484b-94cc-e84491f5d725
-Authorization: Bearer 5aa0acc0-0ce3-3a0b-8cc8-db5ef696ee23</code></div>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdPoliciesMediationMediationPolicyIdGet">
-                <h4 class="section-heading">
-                    Response
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-                <div id="response-apisApiIdPoliciesMediationMediationPolicyIdGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-   &quot;id&quot;: &quot;624b9f7d-bfaf-484b-94cc-e84491f5d725&quot;,
-   &quot;name&quot;: &quot;add_custom_header_fault&quot;,
-   &quot;type&quot;: &quot;fault&quot;,
-   &quot;config&quot;: &quot;&lt;sequence xmlns&#x3D;\&quot;http://ws.apache.org/ns/synapse\&quot; name&#x3D;\&quot;add_custom_header_fault\&quot;&gt;\n    &lt;property name&#x3D;\&quot;CustomHeader\&quot; scope&#x3D;\&quot;transport\&quot; value&#x3D;\&quot;example\&quot;/&gt;\n&lt;\/sequence&gt;\n&quot;
-}</code></div>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 5aa0acc0-0ce3-3a0b-8cc8-db5ef696ee23&quot; https://localhost:9443/api/am/publisher/v0.15/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/624b9f7d-bfaf-484b-94cc-e84491f5d725</code></div>
-
-
+            <h4 class="section-heading">
+                Examples
+            </h4>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -283,17 +237,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>apiId</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -313,17 +267,17 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>mediationPolicyId</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -341,16 +295,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -369,16 +323,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -398,16 +352,16 @@ variant of the resource (Will be supported in future).
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-Modified-Since</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -457,7 +411,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
+                                    
                             </span>
                         </td>
                     </tr>
@@ -482,52 +436,18 @@ formerly retrieved variant of the resource (Will be supported in future).
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdPoliciesMediationMediationPolicyIdPut"></a>Update an API specific mediation policy</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v0.15/apis/{apiId}/policies/mediation/{mediationPolicyId}</code>
+            <h4 class="operation-heading"><a name="apisApiIdPoliciesMediationMediationPolicyIdPut"></a>Update an API specific mediation policy</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v0.16/apis/{apiId}/policies/mediation/{mediationPolicyId}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to update an existing mediation policy of an API.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:api_create</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:api_create' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+                <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdPoliciesMediationMediationPolicyIdPut">
-                <h4 class="section-heading">
-                    Request
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-
-                <div id="request-apisApiIdPoliciesMediationMediationPolicyIdPut"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/publisher/v0.15/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/820fdcf7-7258-42b5-809e-674b893644d1
-Content-Type: application/json
-Authorization: Bearer 9e41fae2-3ada-3dd1-8f12-2077202f4285
-
-{
-   &quot;name&quot;: &quot;add_custom_header_fault&quot;,
-   &quot;type&quot;: &quot;fault&quot;,
-   &quot;config&quot;: &quot;&lt;sequence xmlns&#x3D;\&quot;http://ws.apache.org/ns/synapse\&quot; name&#x3D;\&quot;add_custom_header_fault\&quot;&gt;\n    &lt;property name&#x3D;\&quot;CustomHeader\&quot; scope&#x3D;\&quot;transport\&quot; value&#x3D;\&quot;example\&quot;/&gt;\n&lt;\/sequence&gt;\n&quot;
-}</code></div>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdPoliciesMediationMediationPolicyIdPut">
-                <h4 class="section-heading">
-                    Response
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-                <div id="response-apisApiIdPoliciesMediationMediationPolicyIdPut" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-   &quot;id&quot;: &quot;a7365481-5b3f-463c-a646-a498895ac210&quot;,
-   &quot;name&quot;: &quot;add_custom_header_fault&quot;,
-   &quot;type&quot;: &quot;fault&quot;,
-   &quot;config&quot;: &quot;&lt;sequence xmlns&#x3D;\&quot;http://ws.apache.org/ns/synapse\&quot; name&#x3D;\&quot;add_custom_header_fault\&quot;&gt;\n    &lt;property name&#x3D;\&quot;CustomHeader\&quot; scope&#x3D;\&quot;transport\&quot; value&#x3D;\&quot;example\&quot;/&gt;\n&lt;\/sequence&gt;\n&quot;
-}</code></div>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 9e41fae2-3ada-3dd1-8f12-2077202f4285&quot; -H &quot;Content-Type: application/json&quot; -X PUT -d @data.json https://localhost:9443/api/am/publisher/v0.15/apis/40082986-6488-4b86-801a-b0b069d4588c/policies/mediation/820fdcf7-7258-42b5-809e-674b893644d1</code></div>
-
-
+            <h4 class="section-heading">
+                Examples
+            </h4>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -549,17 +469,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>apiId</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -579,17 +499,17 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>mediationPolicyId</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -607,17 +527,17 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
-
+                            
+                            
+                            
+                            
                             <span class="param-in">Body </span>
                         </td>
                         <td class="param-name">
                             <p>body</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -636,17 +556,17 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>Content-Type</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -664,16 +584,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-Match</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -692,16 +612,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-Unmodified-Since</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>

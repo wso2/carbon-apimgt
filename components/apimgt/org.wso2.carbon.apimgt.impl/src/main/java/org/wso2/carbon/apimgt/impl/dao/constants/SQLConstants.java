@@ -1727,8 +1727,12 @@ public class SQLConstants {
 
     public static final String GET_AUDIT_UUID_SQL =
             "SELECT MAP.AUDIT_UUID FROM AM_SECURITY_AUDIT_UUID_MAPPING MAP WHERE MAP.API_ID = ?";
+
     public static final String ADD_SECURITY_AUDIT_MAP_SQL =
             "INSERT INTO AM_SECURITY_AUDIT_UUID_MAPPING (API_ID, AUDIT_UUID) VALUES (?,?)";
+
+    public static final String REMOVE_SECURITY_AUDIT_MAP_SQL =
+            "DELETE FROM AM_SECURITY_AUDIT_UUID_MAPPING WHERE API_ID = ?";
 
     public static final String ADD_API_LIFECYCLE_EVENT_SQL =
             " INSERT INTO AM_API_LC_EVENT (API_ID, PREVIOUS_STATE, NEW_STATE, USER_ID, TENANT_ID, EVENT_DATE)" +
@@ -2767,7 +2771,7 @@ public class SQLConstants {
                     "  NAME IN (";
 
     public static final String GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_SUFFIX =
-            ") AND TENANT_ID =? ;";
+            ") AND TENANT_ID =?";
 
     public static final String GET_GLOBAL_POLICIES =
             " SELECT " +

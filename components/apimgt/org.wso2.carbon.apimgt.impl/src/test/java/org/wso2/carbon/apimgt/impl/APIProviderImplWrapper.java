@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.axis2.AxisFault;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -112,6 +113,12 @@ public class APIProviderImplWrapper extends APIProviderImpl {
         ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
         policyBuilder.setPolicyTemplateLocation(POLICY_LOCATION);
         return policyBuilder;
+    }
+
+
+    @Override
+    public JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException {
+        return super.getSecurityAuditAttributesFromConfig(userId);
     }
     
     @Override

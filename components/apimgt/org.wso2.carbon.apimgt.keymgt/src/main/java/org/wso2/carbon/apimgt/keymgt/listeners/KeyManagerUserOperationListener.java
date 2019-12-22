@@ -22,6 +22,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
@@ -32,7 +33,6 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
-import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.listener.IdentityOathEventListener;
@@ -41,6 +41,8 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
 import java.util.Set;
@@ -317,7 +319,11 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
         String tenantDomain = getTenantDomain();
 
         username = UserCoreUtil.addDomainToName(username, userStoreDomain);
-        username = UserCoreUtil.addTenantDomainToEntry(username, tenantDomain);
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(tenantDomain) ||
+                (!MultitenantUtils.isEmailUserName() &&
+                username.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR) > 0)) {
+            username = UserCoreUtil.addTenantDomainToEntry(username, tenantDomain);
+        }
 
         //If the username is not case sensitive
         if (!isUserStoreInUsernameCaseSensitive(username)) {

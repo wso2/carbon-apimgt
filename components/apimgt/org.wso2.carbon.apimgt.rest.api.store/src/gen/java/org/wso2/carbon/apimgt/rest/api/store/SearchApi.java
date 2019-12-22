@@ -15,7 +15,6 @@ import java.io.InputStream;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
 
@@ -31,7 +30,7 @@ public class SearchApi  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Retrieve/Search APIs and Inline Docs by content\n", notes = "This operation provides you a list of available APIs and Inline Docs qualifying the given keyword match.\n", response = SearchResultListDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Retrieve/Search APIs and API Documents by content\n", notes = "This operation provides you a list of available APIs and API Documents qualifying the given keyword match.\n", response = SearchResultListDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nList of qualifying APIs and docs is returned.\n"),
         
