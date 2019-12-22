@@ -18,8 +18,10 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
+import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.rest.AbstractHandler;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -28,6 +30,9 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthCredentialValidator;
+import org.wso2.carbon.apimgt.gateway.handlers.security.usermgt.APIKeyMgtRemoteUserClient;
+import org.wso2.carbon.apimgt.gateway.handlers.security.usermgt.APIKeyMgtRemoteUserClientPool;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -44,33 +49,52 @@ import java.util.ListIterator;
 public class GraphQLSecurityHandler extends AbstractHandler {
 
     private static final Log log = LogFactory.getLog(GraphQLSecurityHandler.class);
+    private APIKeyMgtRemoteUserClientPool clientPool = APIKeyMgtRemoteUserClientPool.getInstance();
     private GraphQLSchema schema = null;
     private static int MAX_QUERY_DEPTH = -1;
-    private APIKeyMgtRemoteUserStoreMgtServiceStub apiKeyMgtRemoteUserStoreMgtServiceStub;
+//    private APIKeyMgtRemoteUserStoreMgtServiceStub apiKeyMgtRemoteUserStoreMgtServiceStub;
 
     public GraphQLSecurityHandler() throws APISecurityException {
-        ConfigurationContext configurationContext = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-        String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
-        String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
-        if (url == null) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    "API key manager URL unspecified");
-        }
-
-        try {
-            apiKeyMgtRemoteUserStoreMgtServiceStub = new APIKeyMgtRemoteUserStoreMgtServiceStub(configurationContext, url +
-                    "APIKeyMgtRemoteUserStoreMgtService");
-            ServiceClient client = apiKeyMgtRemoteUserStoreMgtServiceStub._getServiceClient();
-            Options options = client.getOptions();
-            options.setCallTransportCleanup(true);
-            options.setManageSession(true);
-            CarbonUtils.setBasicAccessSecurityHeaders(username, password, client);
-        } catch (AxisFault axisFault) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage(), axisFault);
-        }
     }
+
+//    /**
+//     * Initializes this authenticator instance.
+//     *
+//     * @param env Current SynapseEnvironment instance
+//     */
+//    public void init(SynapseEnvironment env) {
+//        try {
+//            ConfigurationContext configurationContext = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
+//            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+//            String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+//            String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+//            String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
+//            if (url == null) {
+//                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+//                        "API key manager URL unspecified");
+//            }
+//
+//            try {
+//                apiKeyMgtRemoteUserStoreMgtServiceStub = new APIKeyMgtRemoteUserStoreMgtServiceStub(configurationContext, url +
+//                        "APIKeyMgtRemoteUserStoreMgtService");
+//                ServiceClient client = apiKeyMgtRemoteUserStoreMgtServiceStub._getServiceClient();
+//                Options options = client.getOptions();
+//                options.setCallTransportCleanup(true);
+//                options.setManageSession(true);
+//                CarbonUtils.setBasicAccessSecurityHeaders(username, password, client);
+//            } catch (AxisFault axisFault) {
+//                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage(), axisFault);
+//            }
+////            this.basicAuthCredentialValidator = new BasicAuthCredentialValidator();
+//        } catch (APISecurityException e) {
+//            log.error(e);
+//        }
+//    }
+//
+//    @Override
+//    public void destroy() {
+//
+//    }
 
     public boolean handleRequest(MessageContext messageContext) {
         schema = (GraphQLSchema) messageContext.getProperty(APIConstants.GRAPHQL_SCHEMA);
@@ -88,14 +112,18 @@ public class GraphQLSecurityHandler extends AbstractHandler {
     /**
      * This method returns the user roles
      *
-     * @param username username of the user
      * @return list of user roles
      */
-    private String[] getUserRoles(String username) throws APISecurityException {
+    private String[] getUserRoles() throws APISecurityException {
         String[] userRoles;
+        APIKeyMgtRemoteUserClient client = null;
         try {
-            userRoles = apiKeyMgtRemoteUserStoreMgtServiceStub.getUserRoles(username);
+//            userRoles = apiKeyMgtRemoteUserStoreMgtServiceStub.getUserRoles(username);
+            client = clientPool.get();
+            userRoles = client.getUserRoles();
         } catch (APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException | RemoteException e) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
+        } catch (Exception e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
         }
         return userRoles;
@@ -167,9 +195,9 @@ public class GraphQLSecurityHandler extends AbstractHandler {
      */
     private boolean queryDepthAnalysis(MessageContext messageContext, String payload) {
         JSONParser jsonParser = new JSONParser();
-        String username = APISecurityUtils.getAuthenticationContext(messageContext).getUsername();
+//        String username = APISecurityUtils.getAuthenticationContext(messageContext).getUsername();
         try {
-            String[] userRoles = getUserRoles(username);
+            String[] userRoles = getUserRoles();
             String GraphQLAccessControlPolicy = (String) messageContext.getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY);
             JSONObject policyDefinition = (JSONObject) jsonParser.parse(GraphQLAccessControlPolicy);
             MAX_QUERY_DEPTH = getMaxQueryDepth(userRoles, policyDefinition);
