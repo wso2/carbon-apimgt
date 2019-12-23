@@ -20,29 +20,18 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.context.ServiceContext;
-import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.commons.httpclient.Header;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException;
-import org.wso2.carbon.apimgt.tracing.TracingSpan;
-import org.wso2.carbon.apimgt.tracing.TracingTracer;
-import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceStub;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.rmi.RemoteException;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 public class APIKeyMgtRemoteUserClient {
     private static final Log log = LogFactory.getLog(APIKeyMgtRemoteUserClient.class);
@@ -76,7 +65,7 @@ public class APIKeyMgtRemoteUserClient {
         }
     }
 
-    public String[] getUserRoles() throws RemoteException, APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException {
+    public String[] getUserRoles(String username) throws RemoteException, APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException {
         String[] userRoles = apiKeyMgtRemoteUserStoreMgtServiceStub.getUserRoles(username);
         return  userRoles;
     }

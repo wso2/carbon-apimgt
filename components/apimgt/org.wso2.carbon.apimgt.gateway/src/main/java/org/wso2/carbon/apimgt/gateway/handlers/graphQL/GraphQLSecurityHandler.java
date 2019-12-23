@@ -1,27 +1,38 @@
+/*
+ *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
 import graphql.analysis.MaxQueryDepthInstrumentation;
-import graphql.analysis.QueryDepthInfo;
 import graphql.schema.GraphQLSchema;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.Options;
-import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
-import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.rest.AbstractHandler;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -30,15 +41,10 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthCredentialValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.usermgt.APIKeyMgtRemoteUserClient;
 import org.wso2.carbon.apimgt.gateway.handlers.security.usermgt.APIKeyMgtRemoteUserClientPool;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException;
-import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceStub;
-import org.wso2.carbon.utils.CarbonUtils;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -49,39 +55,13 @@ import java.util.ListIterator;
 public class GraphQLSecurityHandler extends AbstractHandler {
 
     private static final Log log = LogFactory.getLog(GraphQLSecurityHandler.class);
-//    private APIKeyMgtRemoteUserClientPool clientPool = APIKeyMgtRemoteUserClientPool.getInstance();
+    private APIKeyMgtRemoteUserClientPool clientPool;
     private GraphQLSchema schema = null;
     private static int MAX_QUERY_DEPTH = -1;
-    private APIKeyMgtRemoteUserStoreMgtServiceStub apiKeyMgtRemoteUserStoreMgtServiceStub;
-
-    public GraphQLSecurityHandler() throws APISecurityException {
-        ConfigurationContext configurationContext = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-        String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
-        String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
-        if (url == null) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    "API key manager URL unspecified");
-        }
-
-        try {
-            apiKeyMgtRemoteUserStoreMgtServiceStub = new APIKeyMgtRemoteUserStoreMgtServiceStub(configurationContext, url +
-                    "APIKeyMgtRemoteUserStoreMgtService");
-            ServiceClient client = apiKeyMgtRemoteUserStoreMgtServiceStub._getServiceClient();
-            Options options = client.getOptions();
-            options.setCallTransportCleanup(true);
-            options.setManageSession(true);
-            CarbonUtils.setBasicAccessSecurityHeaders(username, password, client);
-        } catch (AxisFault axisFault) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage(), axisFault);
-        }
-    }
 
     public boolean handleRequest(MessageContext messageContext) {
         schema = (GraphQLSchema) messageContext.getProperty(APIConstants.GRAPHQL_SCHEMA);
         String payload = messageContext.getProperty(APIConstants.GRAPHQL_PAYLOAD).toString();
-
         if (!analyseQuery(messageContext, payload)) {
             if (log.isDebugEnabled()) {
                 log.debug("Query was blocked by the static query analyser");
@@ -98,11 +78,11 @@ public class GraphQLSecurityHandler extends AbstractHandler {
      */
     private String[] getUserRoles(String username) throws APISecurityException {
         String[] userRoles;
-//        APIKeyMgtRemoteUserClient client = null;
+        APIKeyMgtRemoteUserClient client = null;
         try {
-            userRoles = apiKeyMgtRemoteUserStoreMgtServiceStub.getUserRoles(username);
-//            client = clientPool.get();
-//            userRoles = client.getUserRoles();
+            clientPool = APIKeyMgtRemoteUserClientPool.getInstance();
+            client = clientPool.get();
+            userRoles = client.getUserRoles(username);
         } catch (APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException | RemoteException e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
         } catch (Exception e) {
@@ -119,37 +99,33 @@ public class GraphQLSecurityHandler extends AbstractHandler {
      * @return maximum query depth value if exists, or -1 to denote no depth limitation
      */
     private int getMaxQueryDepth(String[] userRoles, JSONObject policyDefinition) {
-        //
-        try {
-            Object complexityObject = policyDefinition.get("COMPLEXITY");
-            Object testObject = policyDefinition.get("A");
-        } catch (NullPointerException e) {
-            log.error("Hello world");
-        }
-        //
         Object depthObject = policyDefinition.get("DEPTH");
+        Boolean depthCheckEnabled = (Boolean) ((JSONObject) depthObject).get("enabled");
         ArrayList<Integer> allocatedDepths = new ArrayList<Integer>();
-        for (String role: userRoles) {
-            try {
-                int depth = ((Long)((JSONObject) depthObject).get(role)).intValue();
-                allocatedDepths.add(depth);
-            } catch (NullPointerException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("No depth limitation value was assigned for " +  role + " role");
+        if (depthCheckEnabled==true) {
+            for (String role: userRoles) {
+                try {
+                    int depth = ((Long)((JSONObject) depthObject).get(role)).intValue();
+                    allocatedDepths.add(depth);
+                } catch (NullPointerException e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("No depth limitation value was assigned for " +  role + " role");
+                    }
                 }
             }
-        }
-        if (allocatedDepths.size()==0) {
-            try {
-                int depth = ((Long)((JSONObject) depthObject).get("default")).intValue();
-                return depth;
-            } catch (NullPointerException e) {
-                log.error("Test");
-                return -1;
+            if (allocatedDepths.size()==0) {
+                try {
+                    int depth = ((Long)((JSONObject) depthObject).get("default")).intValue();
+                    return depth;
+                } catch (NullPointerException e) {
+                    log.error("No default depth was allocated");
+                    return -1;
+                }
+            } else {
+                return Collections.max(allocatedDepths);
             }
-//            return -1;
         } else {
-            return Collections.max(allocatedDepths);
+            return -1;
         }
     }
 
@@ -161,11 +137,20 @@ public class GraphQLSecurityHandler extends AbstractHandler {
      * @return true or false
      */
     private boolean analyseQuery(MessageContext messageContext, String payload) {
-        if(queryDepthAnalysis(messageContext, payload)) {
-            return true;
-        } else {
-            return false;
+        JSONParser jsonParser = new JSONParser();
+
+        try {
+            String GraphQLAccessControlPolicy = (String) messageContext.getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY);
+            JSONObject policyDefinition = (JSONObject) jsonParser.parse(GraphQLAccessControlPolicy);
+            if(queryDepthAnalysis(messageContext, payload, policyDefinition)) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
+        return false;
     }
 
     /**
@@ -175,13 +160,11 @@ public class GraphQLSecurityHandler extends AbstractHandler {
      * @param payload payload of the request
      * @return true or false
      */
-    private boolean queryDepthAnalysis(MessageContext messageContext, String payload) {
-        JSONParser jsonParser = new JSONParser();
+    private boolean queryDepthAnalysis(MessageContext messageContext, String payload, JSONObject policyDefinition) {
         String username = APISecurityUtils.getAuthenticationContext(messageContext).getUsername();
+
         try {
             String[] userRoles = getUserRoles(username);
-            String GraphQLAccessControlPolicy = (String) messageContext.getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY);
-            JSONObject policyDefinition = (JSONObject) jsonParser.parse(GraphQLAccessControlPolicy);
             MAX_QUERY_DEPTH = getMaxQueryDepth(userRoles, policyDefinition);
             if (MAX_QUERY_DEPTH > 0) {
 
@@ -229,7 +212,7 @@ public class GraphQLSecurityHandler extends AbstractHandler {
             } else {
                 return true; // No depth limitation check
             }
-        } catch (APISecurityException | ParseException e) {
+        } catch (APISecurityException e) {
             e.printStackTrace();
         }
         return false;
