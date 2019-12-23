@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
+import graphql.analysis.FieldComplexityCalculator;
+import graphql.analysis.MaxQueryComplexityInstrumentation;
 import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.schema.GraphQLSchema;
 
@@ -57,7 +59,9 @@ public class GraphQLSecurityHandler extends AbstractHandler {
     private static final Log log = LogFactory.getLog(GraphQLSecurityHandler.class);
     private APIKeyMgtRemoteUserClientPool clientPool;
     private GraphQLSchema schema = null;
-    private static int MAX_QUERY_DEPTH = -1;
+    private FieldComplexityCalculator customComplexityCalculator;
+    private static int MAX_QUERY_DEPTH;
+    private static int MAX_QUERY_COMPLEXITY;
 
     public boolean handleRequest(MessageContext messageContext) {
         schema = (GraphQLSchema) messageContext.getProperty(APIConstants.GRAPHQL_SCHEMA);
@@ -74,6 +78,7 @@ public class GraphQLSecurityHandler extends AbstractHandler {
     /**
      * This method returns the user roles
      *
+     * @param  username username of the user
      * @return list of user roles
      */
     private String[] getUserRoles(String username) throws APISecurityException {
@@ -95,7 +100,7 @@ public class GraphQLSecurityHandler extends AbstractHandler {
      * This method returns the maximum query depth value
      *
      * @param userRoles list of user roles
-     * @param policyDefinition object with role to depth mappings
+     * @param policyDefinition json object which contains the policy
      * @return maximum query depth value if exists, or -1 to denote no depth limitation
      */
     private int getMaxQueryDepth(String[] userRoles, JSONObject policyDefinition) {
@@ -142,7 +147,7 @@ public class GraphQLSecurityHandler extends AbstractHandler {
         try {
             String GraphQLAccessControlPolicy = (String) messageContext.getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY);
             JSONObject policyDefinition = (JSONObject) jsonParser.parse(GraphQLAccessControlPolicy);
-            if(queryDepthAnalysis(messageContext, payload, policyDefinition)) {
+            if(queryDepthAnalysis(messageContext, payload, policyDefinition) && queryComplexityAnalysis(messageContext, payload, policyDefinition)) {
                 return true;
             } else {
                 return false;
@@ -158,6 +163,7 @@ public class GraphQLSecurityHandler extends AbstractHandler {
      *
      * @param messageContext message context of the request
      * @param payload payload of the request
+     * @param policyDefinition json object which contains the policy
      * @return true or false
      */
     private boolean queryDepthAnalysis(MessageContext messageContext, String payload, JSONObject policyDefinition) {
@@ -167,9 +173,7 @@ public class GraphQLSecurityHandler extends AbstractHandler {
             String[] userRoles = getUserRoles(username);
             MAX_QUERY_DEPTH = getMaxQueryDepth(userRoles, policyDefinition);
             if (MAX_QUERY_DEPTH > 0) {
-
                 MaxQueryDepthInstrumentation maxQueryDepthInstrumentation = new MaxQueryDepthInstrumentation(MAX_QUERY_DEPTH);
-
                 GraphQL runtime = GraphQL.newGraphQL(schema)
                         .instrumentation(maxQueryDepthInstrumentation)
                         .build();
@@ -219,8 +223,91 @@ public class GraphQLSecurityHandler extends AbstractHandler {
     }
 
     /**
+     * This method analyses the query complexity
+     *
+     * @param messageContext message context of the request
+     * @param payload payload of the request
+     * @param policyDefinition json object which contains the policy
+     * @return true or false
+     */
+    private boolean queryComplexityAnalysis(MessageContext messageContext, String payload, JSONObject policyDefinition) {
+        customComplexityCalculator = new CustomComplexityCalculator(messageContext);
+        MAX_QUERY_COMPLEXITY = getMaxQueryComplexity(policyDefinition);
+
+        if (MAX_QUERY_COMPLEXITY > 0) {
+            MaxQueryComplexityInstrumentation maxQueryComplexityInstrumentation = new MaxQueryComplexityInstrumentation(MAX_QUERY_COMPLEXITY, customComplexityCalculator);
+            GraphQL runtime = GraphQL.newGraphQL(schema)
+                    .instrumentation(maxQueryComplexityInstrumentation)
+                    .build();
+
+            try {
+                ExecutionResult executionResult = runtime.execute(payload);
+                List<GraphQLError> errors = executionResult.getErrors();
+                if (errors.size()>0) {
+                    List<String> errorList = new ArrayList<>();
+                    for (GraphQLError error : errors) {
+                        errorList.add(error.getMessage());
+                    }
+
+                    ListIterator<String> iterator = errorList.listIterator();
+                    while (iterator.hasNext()) {
+                        if (iterator.next().contains("non-nullable")) {
+                            iterator.remove();
+                        }
+                    }
+
+                    if (errorList.size()==0) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Maximum query complexity was not exceeded");
+                        }
+                        return true;
+                    } else {
+                        errorList.clear();
+                        errorList.add("maximum query complexity exceeded");
+                    }
+
+                    handleFailure(messageContext, APISecurityConstants.QUERY_TOO_COMPLEX, errorList.toString());
+                    log.error(errorList.toString());
+                    return false;
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Maximum query complexity was not exceeded");
+                }
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            return true; // No complexity limitation check
+        }
+        return false;
+    }
+
+    /**
+     * This method returns the maximum query complexity value
+     *
+     * @param policyDefinition json object which contains the policy
+     * @return maximum query complexity value if exists, or -1 to denote no complexity limitation
+     */
+    private int getMaxQueryComplexity(JSONObject policyDefinition) {
+        Object complexityObject = policyDefinition.get("COMPLEXITY");
+        Boolean complexityCheckEnabled = (Boolean) ((JSONObject) complexityObject).get("enabled");
+        if (complexityCheckEnabled==true) {
+            try {
+                int complexity = ((Long)((JSONObject) complexityObject).get("max_query_complexity")).intValue();
+                return complexity;
+            } catch (Exception e) {
+                log.error("Maximum query complexity was not allocated");
+                return -1;
+            }
+        } else {
+            return -1;
+        }
+    }
+
+    /**
      * This method handle the failure
-     *  @param messageContext message context of the request
+     * @param messageContext message context of the request
      * @param errorMessage   error message of the failure
      * @param errorDescription error description of the failure
      */
@@ -236,6 +323,7 @@ public class GraphQLSecurityHandler extends AbstractHandler {
 
     /**
      * @param message fault message
+     * @param description description of the fault message
      * @return the OMElement
      */
     private OMElement getFaultPayload(String message, String description) {
