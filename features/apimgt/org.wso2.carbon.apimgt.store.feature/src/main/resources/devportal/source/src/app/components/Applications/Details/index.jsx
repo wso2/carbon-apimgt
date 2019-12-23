@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -19,6 +20,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Route, Switch, Redirect, Link } from 'react-router-dom';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
@@ -35,6 +37,8 @@ import Tab from '@material-ui/core/Tab';
 import Paper from '@material-ui/core/Paper';
 import Subscriptions from './Subscriptions';
 import InfoBar from './InfoBar';
+import Overview from './Overview';
+
 /**
  *
  *
@@ -231,9 +235,9 @@ class Details extends Component {
      */
     render() {
         const { classes, match, theme } = this.props;
-        const { notFound, application, active } = this.state;
+        const { notFound, application } = this.state;
         const pathPrefix = '/applications/' + match.params.application_uuid;
-        const redirectUrl = pathPrefix + '/productionkeys';
+        const redirectUrl = pathPrefix + '/overview';
         const {
             custom: {
                 leftMenu: {
@@ -248,7 +252,7 @@ class Details extends Component {
             return <Loading />;
         }
         return (
-            <React.Fragment>
+            <>
                 <div
                     className={classNames(
                         classes.LeftMenu,
@@ -274,9 +278,10 @@ class Details extends Component {
                             )}
                         </Link>
                     )}
-                    <LeftMenuItem text='production keys' route='productionkeys' to={pathPrefix + '/productionkeys'} />
-                    <LeftMenuItem text='sandbox keys' route='sandBoxkeys' to={pathPrefix + '/sandBoxkeys'} />
-                    <LeftMenuItem text='subscriptions' route='subscriptions' to={pathPrefix + '/subscriptions'} />
+                    <LeftMenuItem text='overview' iconText='overview' route='overview' to={pathPrefix + '/overview'} />
+                    <LeftMenuItem text='production keys' route='productionkeys' to={pathPrefix + '/productionkeys'} Icon={<VpnKeyIcon />} />
+                    <LeftMenuItem text='sandbox keys' route='sandBoxkeys' to={pathPrefix + '/sandBoxkeys'} Icon={<VpnKeyIcon />} />
+                    <LeftMenuItem text='subscriptions' iconText='subscriptions' route='subscriptions' to={pathPrefix + '/subscriptions'} />
                 </div>
                 <div className={classes.content}>
                     <InfoBar applicationId={match.params.application_uuid} innerRef={node => (this.infoBar = node)} />
@@ -285,9 +290,13 @@ class Details extends Component {
                             { [classes.contentLoader]: position === 'horizontal' },
                             { [classes.contentLoaderRightMenu]: position === 'vertical-right' },
                         )}
-                    >   
+                    >
                         <Switch>
                             <Redirect exact from='/applications/:applicationId' to={redirectUrl} />
+                            <Route
+                                path='/applications/:applicationId/overview'
+                                component={Overview}
+                            />
                             <Route
                                 path='/applications/:applicationId/productionkeys'
                                 component={() => (this.renderManager(application, 'PRODUCTION'))}
@@ -301,7 +310,7 @@ class Details extends Component {
                         </Switch>
                     </div>
                 </div>
-            </React.Fragment>
+            </>
         );
     }
 }

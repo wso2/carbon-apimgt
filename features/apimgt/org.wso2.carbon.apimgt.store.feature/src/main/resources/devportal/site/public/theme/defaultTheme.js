@@ -87,6 +87,7 @@ const Configurations = {
                     commentsBackground: '/site/public/images/overview/comments.svg',
                     documentsBackground: '/site/public/images/overview/documents.svg',
                     credentialsBackground: '/site/public/images/overview/credentials.svg',
+                    keysBackground: '/site/public/images/overview/keys.svg',
                 },
                 resourceChipColors: {
                     get: '#02a8f4',

@@ -236,8 +236,8 @@ function Overview(props) {
             </>
         );
     }
-    const {titleIconColor} = theme.custom.overview;
-    const {titleIconSize} = theme.custom.overview;
+    const { titleIconColor } = theme.custom.overview;
+    const { titleIconSize } = theme.custom.overview;
     const user = AuthManager.getUser();
     return (
         <Grid container className={classes.root} spacing={2}>
@@ -279,74 +279,74 @@ function Overview(props) {
                                 </Grid>
                             </ExpansionPanelDetails>
                         ) : (
-                            <ExpansionPanelDetails classes={{ root: classes.expansionRoot }}>
-                                <Grid container className={classes.root} spacing={2}>
-                                    <Grid item xs={12}>
-                                        <Typography variant='subtitle2'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Overview.subscriptions.title'
-                                                defaultMessage='Subscriptions'
-                                            />
-                                        </Typography>
-                                        <Typography variant='body2'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Overview.subscribe.info'
-                                                defaultMessage={
-                                                    'Subscription enables you to receive access'
-                                                    + ' tokens and be authenticated to invoke this API.'
-                                                }
-                                            />
-                                        </Typography>
-                                        <Box display='block' mt={2}>
-                                            <Grid item xs={12}>
-                                                {user ? (
-                                                    <Box display='inline' mr={2}>
-                                                        <Link
-                                                            to={'/apis/' + api.id + '/credentials'}
-                                                            style={
-                                                                !api.isSubscriptionAvailable ?
-                                                                    { pointerEvents: 'none' } : null
-                                                            }
-                                                        >
-                                                            <Button
-                                                                variant='contained'
-                                                                color='primary'
-                                                                size='large'
-                                                                disabled={!api.isSubscriptionAvailable}
+                                <ExpansionPanelDetails classes={{ root: classes.expansionRoot }}>
+                                    <Grid container className={classes.root} spacing={2}>
+                                        <Grid item xs={12}>
+                                            <Typography variant='subtitle2'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Overview.subscriptions.title'
+                                                    defaultMessage='Subscriptions'
+                                                />
+                                            </Typography>
+                                            <Typography variant='body2'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Overview.subscribe.info'
+                                                    defaultMessage={
+                                                        'Subscription enables you to receive access'
+                                                        + ' tokens and be authenticated to invoke this API.'
+                                                    }
+                                                />
+                                            </Typography>
+                                            <Box display='block' mt={2}>
+                                                <Grid item xs={12}>
+                                                    {user ? (
+                                                        <Box display='inline' mr={2}>
+                                                            <Link
+                                                                to={'/apis/' + api.id + '/credentials'}
+                                                                style={
+                                                                    !api.isSubscriptionAvailable ?
+                                                                        { pointerEvents: 'none' } : null
+                                                                }
                                                             >
-                                                                <FormattedMessage
-                                                                    id={'Apis.Details.Overview.subscribe' +
-                                                                    'btn.link'}
-                                                                    defaultMessage='Subscribe'
-                                                                />
-                                                            </Button>
-                                                        </Link>
-                                                    </Box>
-                                                ) : (
-                                                    <Box display='inline' mr={2}>
-                                                        <a href={app.context + '/services/configs'}>
-                                                            <Button
-                                                                variant='contained'
-                                                                color='primary'
-                                                                size='large'
-                                                                disabled={!api.isSubscriptionAvailable}
-                                                            >
-                                                                <FormattedMessage
-                                                                    id={'Apis.Details.Overview.signin' +
-                                                                    '.subscribe.btn.link'}
-                                                                    defaultMessage='Sign in to Subscribe'
-                                                                />
-                                                            </Button>
-                                                        </a>
-                                                    </Box>
-                                                )}
-                                            </Grid>
-                                        </Box>
-                                    </Grid>
+                                                                <Button
+                                                                    variant='contained'
+                                                                    color='primary'
+                                                                    size='large'
+                                                                    disabled={!api.isSubscriptionAvailable}
+                                                                >
+                                                                    <FormattedMessage
+                                                                        id={'Apis.Details.Overview.subscribe' +
+                                                                            'btn.link'}
+                                                                        defaultMessage='Subscribe'
+                                                                    />
+                                                                </Button>
+                                                            </Link>
+                                                        </Box>
+                                                    ) : (
+                                                            <Box display='inline' mr={2}>
+                                                                <a href={app.context + '/services/configs'}>
+                                                                    <Button
+                                                                        variant='contained'
+                                                                        color='primary'
+                                                                        size='large'
+                                                                        disabled={!api.isSubscriptionAvailable}
+                                                                    >
+                                                                        <FormattedMessage
+                                                                            id={'Apis.Details.Overview.signin' +
+                                                                                '.subscribe.btn.link'}
+                                                                            defaultMessage='Sign in to Subscribe'
+                                                                        />
+                                                                    </Button>
+                                                                </a>
+                                                            </Box>
+                                                        )}
+                                                </Grid>
+                                            </Box>
+                                        </Grid>
 
-                                </Grid>
-                            </ExpansionPanelDetails>
-                        )}
+                                    </Grid>
+                                </ExpansionPanelDetails>
+                            )}
                     </ExpansionPanel>
                 </Grid>
             )}

@@ -1,150 +1,320 @@
-/*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
-import React, { Component } from 'react';
-import Grid from '@material-ui/core/Grid';
+import React, { useEffect, useState } from 'react';
+import classNames from 'classnames';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
-import PropTypes from 'prop-types';
+import Typography from '@material-ui/core/Typography';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-import { FormattedMessage } from 'react-intl';
+import Icon from '@material-ui/core/Icon';
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import { Link } from 'react-router-dom';
+import Divider from '@material-ui/core/Divider';
+import ExpansionPanelActions from '@material-ui/core/ExpansionPanelActions';
+import { app } from 'Settings';
 import Loading from 'AppComponents/Base/Loading/Loading';
-import API from 'AppData/data/api';
+import API from 'AppData/api';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import TokenManager from 'AppComponents/Shared/AppsAndKeys/TokenManager';
+
+
+const useStyles = makeStyles(theme => ({
+    root: {
+        padding: theme.spacing(3, 2),
+    },
+    table: {
+        minWidth: '100%',
+    },
+    leftCol: {
+        width: 200,
+    },
+    iconAligner: {
+        display: 'flex',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+    },
+    iconTextWrapper: {
+        display: 'inline-block',
+        paddingLeft: 20,
+    },
+    iconEven: {
+        color: theme.custom.infoBar.iconEvenColor,
+        width: theme.spacing(3),
+    },
+    iconOdd: {
+        color: theme.custom.infoBar.iconOddColor,
+        width: theme.spacing(3),
+    },
+    noKeysRoot: {
+        backgroundImage: `url(${app.context + theme.custom.overviewPage.keysBackground})`,
+        height: '100%',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'cover',
+        minHeight: 192,
+        display: 'flex',
+        alignItems: 'center',
+    },
+    heading: {
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+        paddingLeft: theme.spacing(1),
+    },
+    emptyBox: {
+        background: '#ffffff55',
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+        border: 'solid 1px #fff',
+        padding: theme.spacing(2),
+        width: '100%',
+    },
+    summaryRoot: {
+        display: 'flex',
+        alignItems: 'center',
+    },
+    actionPanel: {
+        justifyContent: 'flex-start',
+    },
+}));
 
 /**
- *
- *
- * @class Overview
- * @extends {Component}
+ * Render application overview page.
+ * @param {JSON} props Props passed down from parent.
+ * @returns {JSX} jsx output from render.
  */
-class Overview extends Component {
-    /**
-     *Creates an instance of Overview.
-     * @param {*} props properties
-     * @memberof Overview
-     */
-    constructor(props) {
-        super(props);
-        this.state = {
-            application: null,
-            notFound: false,
-            tierDescription: null,
-        };
-    }
-
-    /**
-     *
-     *
-     * @memberof Overview
-     */
-    componentDidMount() {
+function Overview(props) {
+    const classes = useStyles();
+    const theme = useTheme();
+    const [application, setApplication] = useState(null);
+    const [tierDescription, setTierDescription] = useState(null);
+    const [notFound, setNotFound] = useState(false);
+    const { match: { params: { applicationId } } } = props;
+    useEffect(() => {
         const client = new API();
-        const { match } = this.props;
         // Get application
-        const promisedApplication = client.getApplication(match.params.applicationId);
+        const promisedApplication = client.getApplication(applicationId);
         promisedApplication
             .then((response) => {
-                const promisedTier = client.getTierByName(response.obj.throttlingTier, 'application');
-                return Promise.all([response, promisedTier]);
-            })
-            .then((response) => {
-                const [application, tier] = response.map(data => data.obj);
-                this.setState({ application, tierDescription: tier.description });
-            })
-            .catch((error) => {
+                const promisedTier = client.getTierByName(response.obj.throttlingPolicy, 'application');
+                const app = response.obj;
+                promisedTier.then((tierResponse) => {
+                    setTierDescription(tierResponse.obj.description);
+                    setApplication(app);
+                });
+            }).catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
                 const { status } = error;
                 if (status === 404) {
-                    this.setState({ notFound: true });
+                    setNotFound(true);
+                } else {
+                    setNotFound(false);
                 }
             });
+    }, []);
+    if (notFound) {
+        return <ResourceNotFound />;
     }
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof Overview
-     */
-    render() {
-        const { application, tierDescription, notFound } = this.state;
-        if (notFound) {
-            return <ResourceNotFound />;
-        }
-        if (!application) {
-            return <Loading />;
-        }
-        return (
-            <Paper>
-                <Grid container className='tab-grid' spacing={0}>
-                    <Grid>
-                        <Table>
-                            <TableBody>
+    if (!application) {
+        return <Loading />;
+    }
+    const { titleIconColor } = theme.custom.overview;
+    const { titleIconSize } = theme.custom.overview;
+    const pathPrefix = '/applications/' + applicationId;
+    console.info(application);
+    return (
+        <>
+            <Paper className={classes.root}>
+                <Table className={classes.table}>
+                    <TableBody>
+                        <TableRow>
+                            <TableCell component='th' scope='row' className={classes.leftCol}>
+                                <div className={classes.iconAligner}>
+                                    <Icon className={classes.iconEven}>description</Icon>
+                                    <span className={classes.iconTextWrapper}>
+                                        <Typography variant='caption' gutterBottom align='left'>
+                                            <FormattedMessage
+                                                id='Applications.Details.Overview.description'
+                                                defaultMessage='Description'
+                                            />
+                                        </Typography>
+                                    </span>
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                {application.description}
+                            </TableCell>
+                        </TableRow>
+                        {tierDescription
+                            && (
                                 <TableRow>
-                                    <TableCell>
-                                        <FormattedMessage
-                                            id='Applications.Details.Overview.less'
-                                            defaultMessage='Throttling Tier'
-                                        />
+                                    <TableCell component='th' scope='row' className={classes.leftCol}>
+                                        <div className={classes.iconAligner}>
+                                            <Icon className={classes.iconOdd}>settings_input_component</Icon>
+                                            <span className={classes.iconTextWrapper}>
+                                                <Typography variant='caption' gutterBottom align='left'>
+                                                    <FormattedMessage
+                                                        id='Applications.Details.InfoBar.throttling.tier'
+                                                        defaultMessage='Throttling Tier'
+                                                    />
+                                                </Typography>
+                                            </span>
+                                        </div>
                                     </TableCell>
-                                    <TableCell>
-                                        {application.throttlingTier}
-                                        {' '}
-                                        {tierDescription}
-                                    </TableCell>
+                                    {application
+                                        && (
+                                            <TableCell>
+                                                {application.throttlingPolicy}
+                                                {' '}
+                                                {`(${tierDescription})`}
+                                            </TableCell>
+                                        )}
                                 </TableRow>
-                                <TableRow>
-                                    <TableCell>
-                                        <FormattedMessage
-                                            id='Applications.Details.Overview.life.cycle.state'
-                                            defaultMessage='Life Cycle State'
-                                        />
-                                    </TableCell>
-                                    <TableCell>{application.lifeCycleStatus}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>
-                                        <FormattedMessage
-                                            id='Applications.Details.Overview.application.description'
-                                            defaultMessage='Application Description'
-                                        />
-                                    </TableCell>
-                                    <TableCell>{application.description}</TableCell>
-                                </TableRow>
-                            </TableBody>
-                        </Table>
-                    </Grid>
-                </Grid>
+                            )}
+                        <TableRow>
+                            <TableCell component='th' scope='row' className={classes.leftCol}>
+                                <div className={classes.iconAligner}>
+                                    <Icon className={classes.iconEven}>vpn_key</Icon>
+                                    <span className={classes.iconTextWrapper}>
+                                        <Typography variant='caption' gutterBottom align='left'>
+                                            <FormattedMessage
+                                                id='Applications.Details.Overview.token.type'
+                                                defaultMessage='Token Type'
+                                            />
+                                        </Typography>
+                                    </span>
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                {application.tokenType}
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell component='th' scope='row' className={classes.leftCol}>
+                                <div className={classes.iconAligner}>
+                                    <Icon className={classes.iconOdd}>assignment_turned_in</Icon>
+                                    <span className={classes.iconTextWrapper}>
+                                        <Typography variant='caption' gutterBottom align='left'>
+                                            <FormattedMessage
+                                                id='Applications.Details.Overview.workflow.status'
+                                                defaultMessage='Workflow Status'
+                                            />
+                                        </Typography>
+                                    </span>
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                {application.status}
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell component='th' scope='row' className={classes.leftCol}>
+                                <div className={classes.iconAligner}>
+                                    <Icon className={classes.iconEven}>account_box</Icon>
+                                    <span className={classes.iconTextWrapper}>
+                                        <Typography variant='caption' gutterBottom align='left'>
+                                            <FormattedMessage
+                                                id='Applications.Details.Overview.application.owner'
+                                                defaultMessage='Application Owner'
+                                            />
+                                        </Typography>
+                                    </span>
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                {application.owner}
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
             </Paper>
-        );
-    }
+            <Grid container className={classes.root} spacing={2}>
+                <Grid item xs={12} lg={6}>
+                    <ExpansionPanel defaultExpanded>
+                        <ExpansionPanelSummary classes={{ content: classes.summaryRoot }}>
+                            <Icon className={classes.iconEven}>vpn_key</Icon>
+                            <Typography className={classes.heading} variant='h6'>
+                                <FormattedMessage
+                                    id='Applications.Details.Overview.prod.keys.title'
+                                    defaultMessage='Production Keys'
+                                />
+                            </Typography>
+                        </ExpansionPanelSummary>
+                        <ExpansionPanelDetails
+                            classes={{ root: classNames({ [classes.noKeysRoot]: true }) }}
+                        >
+                            <TokenManager
+                                keyType='PRODUCTION'
+                                selectedApp={{
+                                    appId: application.applicationId,
+                                    label: application.name,
+                                    tokenType: application.tokenType,
+                                    owner: application.owner,
+                                    hashEnabled: application.hashEnabled,
+                                }}
+                                summary
+                            />
+                        </ExpansionPanelDetails>
+                        <Divider />
+                        <ExpansionPanelActions className={classes.actionPanel}>
+                            <Link to={pathPrefix + '/productionkeys'} className={classes.button}>
+                                <Button size='small' color='primary'>
+                                    <FormattedMessage
+                                        id='Applications.Details.Overview.show.more'
+                                        defaultMessage='Manage >>'
+                                    />
+                                </Button>
+                            </Link>
+                        </ExpansionPanelActions>
+                    </ExpansionPanel>
+                </Grid>
+                <Grid item xs={12} lg={6}>
+                    <ExpansionPanel defaultExpanded>
+                        <ExpansionPanelSummary classes={{ content: classes.summaryRoot }}>
+                            <Icon className={classes.iconEven}>vpn_key</Icon>
+                            <Typography className={classes.heading} variant='h6'>
+                                <FormattedMessage
+                                    id='Applications.Details.Overview.sand.keys.title'
+                                    defaultMessage='Sandbox Keys'
+                                />
+                            </Typography>
+                        </ExpansionPanelSummary>
+                        <ExpansionPanelDetails
+                            classes={{ root: classNames({ [classes.noKeysRoot]: true }) }}
+                        >
+                            <TokenManager
+                                keyType='SANDBOX'
+                                selectedApp={{
+                                    appId: application.applicationId,
+                                    label: application.name,
+                                    tokenType: application.tokenType,
+                                    owner: application.owner,
+                                    hashEnabled: application.hashEnabled,
+                                }}
+                                summary
+                            />
+                        </ExpansionPanelDetails>
+                        <Divider />
+                        <ExpansionPanelActions className={classes.actionPanel}>
+                            <Link to={pathPrefix + '/sandboxkeys'} className={classes.button}>
+                                <Button size='small' color='primary'>
+                                    <FormattedMessage
+                                        id='Applications.Details.Overview.show.more'
+                                        defaultMessage='Manage >>'
+                                    />
+                                </Button>
+                            </Link>
+                        </ExpansionPanelActions>
+                    </ExpansionPanel>
+                </Grid>
+            </Grid>
+        </>
+    );
 }
-
-Overview.propTypes = {
-    match: PropTypes.shape({
-        params: PropTypes.shape({
-            application_uuid: PropTypes.string.isRequired,
-        }).isRequired,
-    }).isRequired,
-};
-export default Overview;
+export default injectIntl(Overview);

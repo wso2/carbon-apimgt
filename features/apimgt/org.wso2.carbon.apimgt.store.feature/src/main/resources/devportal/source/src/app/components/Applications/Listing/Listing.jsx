@@ -111,9 +111,6 @@ const styles = theme => ({
         width: 1000,
         padding: theme.spacing(2),
     },
-    fullHeight: {
-        height: '100%',
-    },
     container: {
         height: '100%',
     },
@@ -297,6 +294,7 @@ class Listing extends Component {
         }
         const { classes, theme, intl } = this.props;
         const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
+        const paginationEnabled = totalApps > rowsPerPage;
         return (
             <main className={classes.content}>
                 <div className={classes.root}>
@@ -361,8 +359,8 @@ class Listing extends Component {
                     <Grid item xs={12}>
                         {data.size > 0 ? (
                             <div className={classes.appContent}>
-                                <Paper className={data.size < 9 ? classes.fullHeight : ''}>
-                                    <Table className={classes.fullHeight}>
+                                <Paper>
+                                    <Table>
                                         <ApplicationTableHead
                                             order={order}
                                             orderBy={orderBy}
@@ -378,48 +376,51 @@ class Listing extends Component {
                                             isApplicationSharingEnabled={isApplicationSharingEnabled}
                                             toggleDeleteConfirmation={this.toggleDeleteConfirmation}
                                         />
-                                        <TableFooter>
-                                            <TableRow>
-                                                <TablePagination
-                                                    component='td'
-                                                    count={totalApps}
-                                                    rowsPerPage={rowsPerPage}
-                                                    rowsPerPageOptions={[5, 10, 15]}
-                                                    labelRowsPerPage='Show'
-                                                    page={page}
-                                                    backIconButtonProps={{
-                                                        'aria-label': 'Previous Page',
-                                                    }}
-                                                    nextIconButtonProps={{
-                                                        'aria-label': 'Next Page',
-                                                    }}
-                                                    onChangePage={this.handleChangePage}
-                                                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                                                />
-                                            </TableRow>
-                                        </TableFooter>
+                                        {paginationEnabled
+                                            && (
+                                                <TableFooter>
+                                                    <TableRow>
+                                                        <TablePagination
+                                                            component='td'
+                                                            count={totalApps}
+                                                            rowsPerPage={rowsPerPage}
+                                                            rowsPerPageOptions={[5, 10, 15]}
+                                                            labelRowsPerPage='Show'
+                                                            page={page}
+                                                            backIconButtonProps={{
+                                                                'aria-label': 'Previous Page',
+                                                            }}
+                                                            nextIconButtonProps={{
+                                                                'aria-label': 'Next Page',
+                                                            }}
+                                                            onChangePage={this.handleChangePage}
+                                                            onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                                                        />
+                                                    </TableRow>
+                                                </TableFooter>
+                                            )}
                                     </Table>
                                 </Paper>
                             </div>
                         ) : (
-                            <GenericDisplayDialog
-                                classes={classes}
-                                handleClick={this.handleClickOpen}
-                                heading='Create New Application'
-                                caption={intl.formatMessage({
-                                    defaultMessage: `An application is a logical collection of APIs. Applications
+                                <GenericDisplayDialog
+                                    classes={classes}
+                                    handleClick={this.handleClickOpen}
+                                    heading='Create New Application'
+                                    caption={intl.formatMessage({
+                                        defaultMessage: `An application is a logical collection of APIs. Applications
                                     allow you to use a single access token to invoke a collection
                                     of APIs and to subscribe to one API multiple times with different
                                     SLA levels. The DefaultApplication is pre-created and allows unlimited
                                     access by default.`,
-                                    id: 'Applications.Listing.Listing.generic.display.description',
-                                })}
-                                buttonText={intl.formatMessage({
-                                    defaultMessage: 'ADD NEW APPLICATION',
-                                    id: 'Applications.Listing.Listing.generic.display.description.text',
-                                })}
-                            />
-                        )}
+                                        id: 'Applications.Listing.Listing.generic.display.description',
+                                    })}
+                                    buttonText={intl.formatMessage({
+                                        defaultMessage: 'ADD NEW APPLICATION',
+                                        id: 'Applications.Listing.Listing.generic.display.description.text',
+                                    })}
+                                />
+                            )}
                         <DeleteConfirmation
                             handleAppDelete={this.handleAppDelete}
                             isDeleteOpen={isDeleteOpen}

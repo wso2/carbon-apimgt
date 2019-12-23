@@ -583,9 +583,10 @@ export default class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getTierByName(name, level, callback = null) {
+        const payload = { policyId: name, policyLevel: level };
         const promiseGet = this.client.then((client) => {
             return client.apis['Throttling Policies'].get_throttling_policies__policyLevel___policyId_(
-                { policyId: name, policyLevel: level },
+                payload,
                 this._requestMetaData(),
             );
         });

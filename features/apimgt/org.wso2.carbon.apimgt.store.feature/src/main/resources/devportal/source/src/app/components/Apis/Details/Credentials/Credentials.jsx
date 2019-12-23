@@ -309,7 +309,7 @@ class Credentials extends React.Component {
                         classes={classes}
                         handleClick={this.goToWizard}
                         heading={user ? intl.formatMessage({
-                            defaultMessage: 'Subscribe to an Application',
+                            defaultMessage: 'Subscribe',
                             id: 'Apis.Details.Credentials.Credentials.subscribe.to.application',
                         })
                             : intl.formatMessage({
@@ -339,7 +339,7 @@ class Credentials extends React.Component {
                                     <FormattedMessage
                                         id={'Apis.Details.Credentials.Credentials.' +
                                         'subscribe.to.application'}
-                                        defaultMessage='Subscribe to an Application'
+                                        defaultMessage='Subscribe'
                                     />
                                 </Typography>
                                 <div className={classes.credentialBoxWrapper}>
@@ -371,7 +371,7 @@ class Credentials extends React.Component {
                                                     <FormattedMessage
                                                         id={'Apis.Details.Credentials.'
                                                         + 'SubscibeButtonPanel.subscribe.wizard.with.new.app'}
-                                                        defaultMessage='Subscribe to a new application'
+                                                        defaultMessage='Subscription &amp; Key Generation Wizard'
                                                     />
                                                 </Button>
                                             </Link>
@@ -432,7 +432,7 @@ class Credentials extends React.Component {
                                     <FormattedMessage
                                         id={'Apis.Details.Credentials.Credentials.'
                                         + 'api.credentials.subscribed.apps.description'}
-                                        defaultMessage='( Applications Subscribed to this Applications )'
+                                        defaultMessage='( Applications Subscribed to this Api )'
                                     />
                                 </Typography>
                                 <table className={classes.tableMain}>
@@ -508,7 +508,7 @@ class Credentials extends React.Component {
                                             <FormattedMessage
                                                 id={'Apis.Details.Credentials.'
                                                 + 'SubscibeButtonPanel.subscribe.wizard.with.new.app'}
-                                                defaultMessage='Subscribe to a new application'
+                                                defaultMessage='Subscription &amp; Key Generation Wizard'
                                             />
                                         </Button>
                                     </Link>
