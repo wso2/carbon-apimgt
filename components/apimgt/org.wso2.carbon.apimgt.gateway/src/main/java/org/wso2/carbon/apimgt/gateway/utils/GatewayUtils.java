@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimeDTO;
@@ -490,31 +491,59 @@ public class GatewayUtils {
 
     public static AuthenticationContext generateAuthenticationContext(String tokenSignature, JSONObject payload,
                                                                       JSONObject api,
-                                                                      String apiLevelPolicy, boolean isOauth) {
+                                                                      APIKeyValidationInfoDTO apiKeyValidationInfoDTO,String apiLevelPolicy, boolean isOauth) {
 
-        JSONObject applicationObj = payload.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION);
 
         AuthenticationContext authContext = new AuthenticationContext();
         authContext.setAuthenticated(true);
         authContext.setApiKey(tokenSignature);
-        if (payload.has(APIConstants.JwtTokenConstants.KEY_TYPE)) {
-            authContext.setKeyType(payload.getString(APIConstants.JwtTokenConstants.KEY_TYPE));
+
+        if (apiKeyValidationInfoDTO != null) {
+            authContext.setApiTier(apiKeyValidationInfoDTO.getApiTier());
+            authContext.setKeyType(apiKeyValidationInfoDTO.getType());
+            authContext.setUsername(apiKeyValidationInfoDTO.getEndUserName());
+            authContext.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
+            authContext.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
+            authContext.setApplicationTier(apiKeyValidationInfoDTO.getApplicationTier());
+            authContext.setSubscriber(apiKeyValidationInfoDTO.getSubscriber());
+            authContext.setTier(apiKeyValidationInfoDTO.getTier());
+            authContext.setSubscriberTenantDomain(apiKeyValidationInfoDTO.getSubscriberTenantDomain());
+            authContext.setApiName(apiKeyValidationInfoDTO.getApiName());
+            authContext.setApiPublisher(apiKeyValidationInfoDTO.getApiPublisher());
+            authContext.setStopOnQuotaReach(apiKeyValidationInfoDTO.isStopOnQuotaReach());
+            authContext.setSpikeArrestLimit(apiKeyValidationInfoDTO.getSpikeArrestLimit());
+            authContext.setSpikeArrestUnit(apiKeyValidationInfoDTO.getSpikeArrestUnit());
+            authContext.setConsumerKey(apiKeyValidationInfoDTO.getConsumerKey());
         } else {
-            authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
-        }
-        authContext.setUsername(payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
-        authContext.setApiTier(apiLevelPolicy);
-        authContext
+            if (payload.has(APIConstants.JwtTokenConstants.KEY_TYPE)) {
+                authContext.setKeyType(payload.getString(APIConstants.JwtTokenConstants.KEY_TYPE));
+            } else {
+                authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+            }
+
+            authContext.setApiTier(apiLevelPolicy);
+            authContext.setUsername(payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
+
+            if (payload.has(APIConstants.JwtTokenConstants.APPLICATION)) {
+                JSONObject applicationObj = payload.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION);
+
+                authContext
                 .setApplicationId(String.valueOf(applicationObj.getInt(APIConstants.JwtTokenConstants.APPLICATION_ID)));
-        authContext.setApplicationName(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
-        authContext.setApplicationTier(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
-        authContext.setSubscriber(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
-
+                authContext.setApplicationName(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
+                authContext.setApplicationTier(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
+                authContext.setSubscriber(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
+            }
+        }
         if (isOauth) {
-            authContext.setConsumerKey(payload.getString(APIConstants.JwtTokenConstants.CONSUMER_KEY));
+            if (payload.has(APIConstants.JwtTokenConstants.CONSUMER_KEY)) {
+                authContext.setConsumerKey(payload.getString(APIConstants.JwtTokenConstants.CONSUMER_KEY));
+            } else if (payload.has(APIConstants.JwtTokenConstants.AUTHORIZED_PARTY)) {
+                authContext.setConsumerKey(payload.getString(APIConstants.JwtTokenConstants.AUTHORIZED_PARTY));
+            }
         }
 
-        if (api != null) {
+        if (apiKeyValidationInfoDTO == null && api != null) {
+
             // If the user is subscribed to the API
             String subscriptionTier = api.getString(APIConstants.JwtTokenConstants.SUBSCRIPTION_TIER);
             authContext.setTier(subscriptionTier);

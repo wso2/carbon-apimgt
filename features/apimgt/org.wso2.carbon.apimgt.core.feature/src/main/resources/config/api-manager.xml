@@ -743,4 +743,8 @@
         </LogTracer>
     </OpenTracer>
 
+    <JWTAuthentication>
+        <EnableSubscriptionValidationViaKeyManager>false</EnableSubscriptionValidationViaKeyManager>
+    </JWTAuthentication>
+
 </APIManager>

@@ -1588,6 +1588,8 @@ public final class APIConstants {
         public static final String APPLICATION_OWNER = "owner";
         public static final String KEY_TYPE = "keytype";
         public static final String CONSUMER_KEY = "consumerKey";
+        public static final String AUTHORIZED_PARTY = "azp";
+        public static final String KEY_ID = "kid";
         public static final String SUBJECT = "sub";
         public static final String SUBSCRIPTION_TIER = "subscriptionTier";
         public static final String SUBSCRIBER_TENANT_DOMAIN = "subscriberTenantDomain";
@@ -1846,5 +1848,9 @@ public final class APIConstants {
     public static final String AMZN_ACCESS_KEY = "amznAccessKey";
     public static final String AMZN_SECRET_KEY = "amznSecretKey";
     public static final String NO_ENTITY_BODY = "NO_ENTITY_BODY";
+
+    public static final String JWT_AUTHENTICATION_CONFIG = "JWTAuthentication";
+    public static final String JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION =
+            JWT_AUTHENTICATION_CONFIG + ".EnableSubscriptionValidationViaKeyManager";
 
 }

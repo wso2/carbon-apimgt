@@ -1005,4 +1005,8 @@
     <skipRolesByRegex>{{apim.skip_roles_by_regex.regex}}</skipRolesByRegex>
     {% endif %}
 
+    <JWTAuthentication>
+        <EnableSubscriptionValidationViaKeyManager>{{apim.jwt_authenitcation.subscription_validation_via_km}}</EnableSubscriptionValidationViaKeyManager>
+    </JWTAuthentication>
+
 </APIManager>
