@@ -49,52 +49,34 @@ import java.util.ListIterator;
 public class GraphQLSecurityHandler extends AbstractHandler {
 
     private static final Log log = LogFactory.getLog(GraphQLSecurityHandler.class);
-    private APIKeyMgtRemoteUserClientPool clientPool = APIKeyMgtRemoteUserClientPool.getInstance();
+//    private APIKeyMgtRemoteUserClientPool clientPool = APIKeyMgtRemoteUserClientPool.getInstance();
     private GraphQLSchema schema = null;
     private static int MAX_QUERY_DEPTH = -1;
-//    private APIKeyMgtRemoteUserStoreMgtServiceStub apiKeyMgtRemoteUserStoreMgtServiceStub;
+    private APIKeyMgtRemoteUserStoreMgtServiceStub apiKeyMgtRemoteUserStoreMgtServiceStub;
 
     public GraphQLSecurityHandler() throws APISecurityException {
-    }
+        ConfigurationContext configurationContext = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+        String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
+        if (url == null) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "API key manager URL unspecified");
+        }
 
-//    /**
-//     * Initializes this authenticator instance.
-//     *
-//     * @param env Current SynapseEnvironment instance
-//     */
-//    public void init(SynapseEnvironment env) {
-//        try {
-//            ConfigurationContext configurationContext = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
-//            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-//            String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-//            String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
-//            String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
-//            if (url == null) {
-//                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-//                        "API key manager URL unspecified");
-//            }
-//
-//            try {
-//                apiKeyMgtRemoteUserStoreMgtServiceStub = new APIKeyMgtRemoteUserStoreMgtServiceStub(configurationContext, url +
-//                        "APIKeyMgtRemoteUserStoreMgtService");
-//                ServiceClient client = apiKeyMgtRemoteUserStoreMgtServiceStub._getServiceClient();
-//                Options options = client.getOptions();
-//                options.setCallTransportCleanup(true);
-//                options.setManageSession(true);
-//                CarbonUtils.setBasicAccessSecurityHeaders(username, password, client);
-//            } catch (AxisFault axisFault) {
-//                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage(), axisFault);
-//            }
-////            this.basicAuthCredentialValidator = new BasicAuthCredentialValidator();
-//        } catch (APISecurityException e) {
-//            log.error(e);
-//        }
-//    }
-//
-//    @Override
-//    public void destroy() {
-//
-//    }
+        try {
+            apiKeyMgtRemoteUserStoreMgtServiceStub = new APIKeyMgtRemoteUserStoreMgtServiceStub(configurationContext, url +
+                    "APIKeyMgtRemoteUserStoreMgtService");
+            ServiceClient client = apiKeyMgtRemoteUserStoreMgtServiceStub._getServiceClient();
+            Options options = client.getOptions();
+            options.setCallTransportCleanup(true);
+            options.setManageSession(true);
+            CarbonUtils.setBasicAccessSecurityHeaders(username, password, client);
+        } catch (AxisFault axisFault) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage(), axisFault);
+        }
+    }
 
     public boolean handleRequest(MessageContext messageContext) {
         schema = (GraphQLSchema) messageContext.getProperty(APIConstants.GRAPHQL_SCHEMA);
@@ -114,13 +96,13 @@ public class GraphQLSecurityHandler extends AbstractHandler {
      *
      * @return list of user roles
      */
-    private String[] getUserRoles() throws APISecurityException {
+    private String[] getUserRoles(String username) throws APISecurityException {
         String[] userRoles;
-        APIKeyMgtRemoteUserClient client = null;
+//        APIKeyMgtRemoteUserClient client = null;
         try {
-//            userRoles = apiKeyMgtRemoteUserStoreMgtServiceStub.getUserRoles(username);
-            client = clientPool.get();
-            userRoles = client.getUserRoles();
+            userRoles = apiKeyMgtRemoteUserStoreMgtServiceStub.getUserRoles(username);
+//            client = clientPool.get();
+//            userRoles = client.getUserRoles();
         } catch (APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException | RemoteException e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
         } catch (Exception e) {
@@ -195,9 +177,9 @@ public class GraphQLSecurityHandler extends AbstractHandler {
      */
     private boolean queryDepthAnalysis(MessageContext messageContext, String payload) {
         JSONParser jsonParser = new JSONParser();
-//        String username = APISecurityUtils.getAuthenticationContext(messageContext).getUsername();
+        String username = APISecurityUtils.getAuthenticationContext(messageContext).getUsername();
         try {
-            String[] userRoles = getUserRoles();
+            String[] userRoles = getUserRoles(username);
             String GraphQLAccessControlPolicy = (String) messageContext.getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY);
             JSONObject policyDefinition = (JSONObject) jsonParser.parse(GraphQLAccessControlPolicy);
             MAX_QUERY_DEPTH = getMaxQueryDepth(userRoles, policyDefinition);
