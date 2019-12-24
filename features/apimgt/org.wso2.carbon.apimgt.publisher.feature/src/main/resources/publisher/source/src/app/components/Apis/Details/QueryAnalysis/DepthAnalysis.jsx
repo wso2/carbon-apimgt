@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import FormGroup from '@material-ui/core/FormGroup';
 import { makeStyles } from '@material-ui/core/styles';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -32,19 +32,6 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-// import PropTypes from 'prop-types';
-
-// /**
-//  * Tab Panel configurations
-//  * @param {*} props props
-//  * @returns {*} content which are displayed under the tab
-//  */
-// function DefaultDepthDialog() {
-//     return (
-
-//     );
-// }
-
 
 const useStyles = makeStyles((theme) => ({
     button: {
@@ -72,17 +59,12 @@ function DepthAnalysis() {
     const [defaultDepth, setDefaultDepth] = React.useState(2);
     const [depthCheck, setDepthCheck] = React.useState(true);
     const [showPageContent, setShowPageContent] = React.useState(true);
-    // const [disableButton, setDisableButton] = React.useState(false);
-    // const [defaultDepthValidationInvalid, setDefaultDepthValidationInvalid] = React.useState(false);
-    // const [defaultDepthValidationError, setDefaultDepthValidationError] = React.useState('');
-    // const [errors, setErrors] = React.useState();
-
-    // const {
-    //     intl,
-    // } = props;
 
     const handleDepthToggle = (event) => {
         setDepthCheck(event.target.checked);
+        if (!event.target.checked) {
+            setShowPageContent(false);
+        }
     };
 
     const onDepthValueSave = () => {
@@ -92,40 +74,14 @@ function DepthAnalysis() {
 
     const handleDefaultDepthInput = (event) => {
         setDefaultDepth(event.target.value);
-        // const fdfsedfs = event.target.value;
-        // setDefaultDepth(fdfsedfs);
-        // let inputError = '';
-        // let inputValid = true;
-        // console.log(defaultDepth);
-
-        // if (defaultDepth === '') {
-        //     inputValid = false;
-        //     // inputError = (intl.formatMessage({
-        //     //     id: 'Apis.Details.QueryAnalysis.DepthAnalysis.DefaultDepthInput.negative',
-        //     //     defaultMessage: 'Default depth should not be empty',
-        //     // }));
-        //     // inputError = 'Default depth should not be empty';
-        // }
-        // // setErrors(inputError);
-        // return inputValid;
     };
 
     let errors = '';
     let disableButton = false;
-    if (defaultDepth === '') {
-        errors = 'Default depth should not be empty';
-        disableButton = true;
-        // contains. includes ('e') ('-')
-    } else if (defaultDepth.toString().includes('e') || defaultDepth.toString().includes('-')) {
+    if (!/^(\+?\d+|-?0+)$/.test(defaultDepth)) {
         errors = 'Default depth should be a non-negative integer';
         disableButton = true;
     }
-
-    useEffect(() => {
-        if (depthCheck === false) {
-            setShowPageContent(false);
-        }
-    });
 
     return (
         <>
@@ -170,34 +126,29 @@ function DepthAnalysis() {
                         </DialogContentText>
                     </DialogContent>
                     <FormControl className={classes.formControl}>
-                        <form nonValidate autoComplete='off'>
-                            <TextField
-                                id='defaultDepthLimitation'
-                                // autoFocus
-                                type='number'
-                                inputProps={{ min: '0' }}
-                                // label='Default Depth Limitation'
-                                // placeholder=''
-                                error={errors}
-                                helperText={errors && `${errors}`}
-                                label={(
-                                    <>
-                                        <FormattedMessage
-                                            id='Apis.Details.QueryAnalysis.DepthAnalysis.dialog.depth.value'
-                                            defaultMessage='Default Depth Limitation'
-                                        />
-                                        <sup className={classes.mandatoryStar}>*</sup>
-                                    </>
-                                )}
-                                margin='normal'
-                                variant='outlined'
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                value={defaultDepth}
-                                onChange={(event) => handleDefaultDepthInput(event)}
-                            />
-                        </form>
+                        <TextField
+                            id='defaultDepthLimitation'
+                            type='number'
+                            inputProps={{ min: '0' }}
+                            error={errors}
+                            helperText={errors && `${errors}`}
+                            label={(
+                                <>
+                                    <FormattedMessage
+                                        id='Apis.Details.QueryAnalysis.DepthAnalysis.dialog.depth.value'
+                                        defaultMessage='Default Depth Limitation'
+                                    />
+                                    <sup className={classes.mandatoryStar}>*</sup>
+                                </>
+                            )}
+                            margin='normal'
+                            variant='outlined'
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            value={defaultDepth}
+                            onChange={(event) => handleDefaultDepthInput(event)}
+                        />
                     </FormControl>
                     <DialogActions>
                         <Button
@@ -226,9 +177,5 @@ function DepthAnalysis() {
         </>
     );
 }
-
-// DepthAnalysis.propTypes = {
-//     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
-// };
 
 export default DepthAnalysis;
