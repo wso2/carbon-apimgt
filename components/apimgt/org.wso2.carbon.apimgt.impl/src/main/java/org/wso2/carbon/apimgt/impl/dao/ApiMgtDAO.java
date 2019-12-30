@@ -12924,12 +12924,6 @@ public class ApiMgtDAO {
                     return infoDTO;
                 }
 
-                String tokenType = rs.getString("TOKEN_TYPE");
-                if (APIConstants.JWT.equals(tokenType)) {
-                    infoDTO.setAuthorized(false);
-                    return infoDTO;
-                }
-
                 final String API_PROVIDER = rs.getString("API_PROVIDER");
                 final String SUB_TIER = rs.getString("TIER_ID");
                 final String APP_TIER = rs.getString("APPLICATION_TIER");

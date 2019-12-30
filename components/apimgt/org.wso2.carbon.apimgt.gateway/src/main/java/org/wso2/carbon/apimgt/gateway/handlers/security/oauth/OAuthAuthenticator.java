@@ -93,7 +93,7 @@ public class OAuthAuthenticator implements Authenticator {
 
     public void init(SynapseEnvironment env) {
         this.keyValidator = new APIKeyValidator(env.getSynapseConfiguration().getAxisConfiguration());
-        this.jwtValidator = new JWTValidator(apiLevelPolicy);
+        this.jwtValidator = new JWTValidator(apiLevelPolicy, this.keyValidator);
         initOAuthParams();
     }
 
@@ -187,17 +187,14 @@ public class OAuthAuthenticator implements Authenticator {
             //Initial guess of a JWT token using the presence of a DOT.
             if (StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT)) {
                 try {
-                    JSONObject decodedHeader = new JSONObject(new String(Base64.getUrlDecoder()
-                            .decode(apiKey.split("\\.")[0])));
-                    // Check if the decoded header contains type as 'JWT'.
-                    if (APIConstants.JWT.equals(decodedHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))) {
-                        isJwtToken = true;
-                        if (StringUtils.countMatches(apiKey, APIConstants.DOT) != 2) {
-                            log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
-                            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                    "Invalid JWT token");
-                        }
+                    // Check if the header part is decoded
+                    Base64.getUrlDecoder().decode(apiKey.split("\\.")[0]);
+                    if (StringUtils.countMatches(apiKey, APIConstants.DOT) != 2) {
+                        log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
+                        throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                "Invalid JWT token");
                     }
+                    isJwtToken = true;
                 } catch (JSONException | IllegalArgumentException e) {
                     isJwtToken = false;
                     log.debug("Not a JWT token. Failed to decode the token header.", e);

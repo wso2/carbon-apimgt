@@ -77,6 +77,18 @@ public interface APIKeyDataStore {
 
 
     /**
+     * Validate API subscriptions.
+     *
+     * @param context Context of an API
+     * @param version A valid version of the API
+     * @param consumerKey consumer key
+     * @return an APIKeyValidationInfoDTO instance containing key validation data
+     * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException on error
+     */
+    APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey)
+            throws APISecurityException;
+
+    /**
      * Clean up any resources allocated to this API key data store instance.
      */
     void cleanup();
