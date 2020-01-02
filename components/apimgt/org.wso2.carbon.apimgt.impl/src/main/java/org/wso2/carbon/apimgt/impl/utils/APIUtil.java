@@ -4129,6 +4129,7 @@ public final class APIUtil {
                     throw new APIManagementException("Error while formatting tenant-conf.json of tenant " + tenantId);
                 }
             } else {
+                log.debug("Scopes in tenant-conf.json in tenant " + tenantId + " are already migrated.");
                 return Optional.empty();
             }
         } else {
