@@ -4,7 +4,7 @@ const Configurations = {
             palette: {
                 primary: {
                     // light: will be calculated from palette.primary.main,
-                    main: '#15b8cf',
+                    main: '#6093c1',
                     // dark: will be calculated from palette.primary.main,
                     // contrastText: will be calculated to contrast with palette.primary.main
                 },
@@ -41,8 +41,8 @@ const Configurations = {
                     logo: '/site/public/images/logo.svg', // You can set the url to an external image also ( ex: https://dummyimage.com/208x19/66aad1/ffffff&text=testlogo)
                     logoHeight: 19,
                     logoWidth: 208,
-                    background: '#1d344f',
-                    activeBackground: '#254061',
+                    background: '#6093c1',
+                    activeBackground: '#3f6a9f',
                     showSearch: true,
                     drawerWidth: 200,
                 },
@@ -52,18 +52,17 @@ const Configurations = {
                     iconSize: 24,
                     leftMenuTextStyle: 'uppercase',
                     width: 180,
-                    background: '#1a1f2f',
+                    background: '#222',
                     leftMenuActive: '#254061',
-                    activeBackground: 'rgb(29, 52, 79)',
+                    activeBackground: '#191e46',
                     rootIconVisible: true,
                     rootIconSize: 42,
                     rootIconTextVisible: false,
-                    rootBackground: '#204d6a',
+                    rootBackground: '#000',
                 },
                 infoBar: {
                     height: 70,
                     background: '#ffffff',
-                    showBackIcon: true,
                     showThumbnail: true,
                     starColor: '#f6bf21', // By default the opasite color of infoBar.background is derived. From here you can override it.
                     sliderBackground: '#ffffff',
@@ -88,6 +87,7 @@ const Configurations = {
                     commentsBackground: '/site/public/images/overview/comments.svg',
                     documentsBackground: '/site/public/images/overview/documents.svg',
                     credentialsBackground: '/site/public/images/overview/credentials.svg',
+                    keysBackground: '/site/public/images/overview/keys.svg',
                 },
                 resourceChipColors: {
                     get: '#02a8f4',
@@ -210,10 +210,10 @@ const Configurations = {
                     leftMenu: { // These params will be applyed only if the style is 'fixed-left'
                         width: 200,
                         height: 'calc(100vh - 222px)',
-                        background: '#1a1f2f',
+                        background: '#222',
                         color: '#c7e9ff',
-                        titleBackground: '#335c8b',
-                        sliderBackground: '#335c8b',
+                        titleBackground: '#000',
+                        sliderBackground: '#000',
                         sliderWidth: 25,
                         hasIcon: false,
                     },
@@ -244,8 +244,8 @@ const Configurations = {
                 footer: {
                     active: true,
                     text: '', // Leave empty to show the default WSO2 Text. Provide custom text to display your own thing.
-                    background: '#bdbdbd',
-                    color: '#222222',
+                    background: '#000',
+                    color: '#fff',
                 },
             },
         },

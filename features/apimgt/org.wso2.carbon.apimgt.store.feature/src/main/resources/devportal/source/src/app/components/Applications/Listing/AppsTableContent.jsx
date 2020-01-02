@@ -42,8 +42,30 @@ const styles = theme => ({
     },
     tableRow: {
         height: theme.spacing(5),
+        borderLeft: 'solid 1px #fff',
+        borderRight: 'solid 1px #fff',
     },
 });
+const StyledTableCell = withStyles(theme => ({
+    head: {
+        backgroundColor: theme.palette.common.black,
+        color: theme.palette.common.white,
+    },
+    body: {
+        fontSize: 14,
+    },
+    root: {
+        padding: `0 0 0  ${theme.spacing(2)}px`,
+    },
+}))(TableCell);
+
+const StyledTableRow = withStyles(theme => ({
+    root: {
+        '&:nth-of-type(odd)': {
+            backgroundColor: theme.palette.background.default,
+        },
+    },
+}))(TableRow);
 /**
  *
  *
@@ -91,18 +113,17 @@ class AppsTableContent extends Component {
                 {appsTableData
                     .map((app) => {
                         return (
-                            <TableRow className={classes.tableRow} key={app.applicationId}>
-                                <TableCell align='left'>
+                            <StyledTableRow className={classes.tableRow} key={app.applicationId}>
+                                <StyledTableCell align='left'>
                                     {app.status === this.APPLICATION_STATES.APPROVED ? (
                                         <Link to={'/applications/' + app.applicationId}>{app.name}</Link>
                                     ) : (
                                         app.name
-                                    )
-                                    }
-                                </TableCell>
-                                <TableCell align='left'>{app.owner}</TableCell>
-                                <TableCell align='left'>{app.throttlingPolicy}</TableCell>
-                                <TableCell align='left'>
+                                    )}
+                                </StyledTableCell>
+                                <StyledTableCell align='left'>{app.owner}</StyledTableCell>
+                                <StyledTableCell align='left'>{app.throttlingPolicy}</StyledTableCell>
+                                <StyledTableCell align='left'>
                                     {app.status === this.APPLICATION_STATES.APPROVED && (
                                         <Typography variant='subtitle1' gutterBottom>
                                             <FormattedMessage
@@ -112,7 +133,7 @@ class AppsTableContent extends Component {
                                         </Typography>
                                     )}
                                     {app.status === this.APPLICATION_STATES.CREATED && (
-                                        <React.Fragment>
+                                        <>
                                             <Typography variant='subtitle1' gutterBottom>
                                                 <FormattedMessage
                                                     id='Applications.Listing.AppsTableContent.inactive'
@@ -126,7 +147,7 @@ class AppsTableContent extends Component {
                                                     defaultMessage='waiting for approval'
                                                 />
                                             </Typography>
-                                        </React.Fragment>
+                                        </>
                                     )}
                                     {app.status === this.APPLICATION_STATES.REJECTED && (
                                         <Typography variant='subtitle1' gutterBottom>
@@ -136,9 +157,9 @@ class AppsTableContent extends Component {
                                             />
                                         </Typography>
                                     )}
-                                </TableCell>
-                                <TableCell align='left'>{app.subscriptionCount}</TableCell>
-                                <TableCell align='left'>
+                                </StyledTableCell>
+                                <StyledTableCell align='left'>{app.subscriptionCount}</StyledTableCell>
+                                <StyledTableCell align='left'>
                                     <ScopeValidation
                                         resourcePath={resourcePaths.SINGLE_APPLICATION}
                                         resourceMethod={resourceMethods.PUT}
@@ -189,14 +210,10 @@ class AppsTableContent extends Component {
                                         </Tooltip>
                                     </ScopeValidation>
                                     {app.deleting && <CircularProgress size={24} />}
-                                </TableCell>
-                            </TableRow>
+                                </StyledTableCell>
+                            </StyledTableRow>
                         );
                     })}
-                {apps.size < 8 && (
-                    <TableRow>
-                        <TableCell colSpan={6} />
-                    </TableRow>)}
             </TableBody>
         );
     }

@@ -103,6 +103,23 @@ export default class API extends Resource {
     }
 
     /**
+     * Get the Documents of an API
+     * @param {string} apiId api id.
+     * @param {string} documentId document id.
+     * @returns {promise} promise to get the document.
+     */
+    getDocumentByDocId(apiId, documentId) {
+        const promiseGet = this.client.then((client) => {
+            const payload = {
+                apiId,
+                documentId,
+            };
+            return client.apis['Documents'].get_apis__apiId__documents__documentId_(payload, this._requestMetaData());
+        });
+        return promiseGet;
+    }
+
+    /**
      * Get the Document content of an API by document Id
      * @param api_id {String} UUID of the API in which the document needed
      * @param docId {String} UUID of the Document need to view
@@ -566,9 +583,10 @@ export default class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getTierByName(name, level, callback = null) {
+        const payload = { policyId: name, policyLevel: level };
         const promiseGet = this.client.then((client) => {
             return client.apis['Throttling Policies'].get_throttling_policies__policyLevel___policyId_(
-                { policyId: name, policyLevel: level },
+                payload,
                 this._requestMetaData(),
             );
         });

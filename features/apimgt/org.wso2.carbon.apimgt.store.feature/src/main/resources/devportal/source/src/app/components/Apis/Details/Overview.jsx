@@ -49,7 +49,7 @@ import OverviewDocuments from './OverviewDocuments';
  *
  * @param {*} theme
  */
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         padding: theme.spacing(3),
         color: theme.palette.getContrastText(theme.palette.background.paper),
@@ -165,7 +165,7 @@ const ExpansionPanelSummary = withStyles({
         alignItems: 'center',
     },
     expanded: {},
-})(props => <MuiExpansionPanelSummary {...props} />);
+})((props) => <MuiExpansionPanelSummary {...props} />);
 
 ExpansionPanelSummary.muiName = 'ExpansionPanelSummary';
 
@@ -192,7 +192,7 @@ function Overview(props) {
         const promisedApi = restApi.getDocumentsByAPIId(api.id);
         promisedApi
             .then((response) => {
-                const overviewDoc = response.body.list.filter(item => item.otherTypeName === '_overview');
+                const overviewDoc = response.body.list.filter((item) => item.otherTypeName === '_overview');
                 if (overviewDoc.length > 0) {
                     // We can override the UI with this content
                     setOverviewDocOverride(overviewDoc[0]); // Only one doc we can render
@@ -229,15 +229,15 @@ function Overview(props) {
     };
     if (overviewDocOverride) {
         return (
-            <React.Fragment>
+            <>
                 <Paper className={classes.paper}>
                     <View doc={overviewDocOverride} apiId={api.id} fullScreen />
                 </Paper>
-            </React.Fragment>
+            </>
         );
     }
-    const titleIconColor = theme.custom.overview.titleIconColor;
-    const titleIconSize = theme.custom.overview.titleIconSize;
+    const { titleIconColor } = theme.custom.overview;
+    const { titleIconSize } = theme.custom.overview;
     const user = AuthManager.getUser();
     return (
         <Grid container className={classes.root} spacing={2}>
@@ -254,8 +254,8 @@ function Overview(props) {
                             />
                             <Typography className={classes.heading} variant='h6'>
                                 <FormattedMessage
-                                    id='Apis.Details.Overview.api.credentials'
-                                    defaultMessage='API Credentials'
+                                    id='Apis.Details.Overview.api.subscriptions'
+                                    defaultMessage='Subscriptions'
                                 />
                             </Typography>
                         </ExpansionPanelSummary>
@@ -279,53 +279,28 @@ function Overview(props) {
                                 </Grid>
                             </ExpansionPanelDetails>
                         ) : (
-                            <ExpansionPanelDetails classes={{ root: classes.expansionRoot }}>
-                                <Grid container className={classes.root} spacing={2}>
-                                    <Grid item xs={12}>
-                                        <Typography variant='subtitle2'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Overview.subscribe.to.application'
-                                                defaultMessage='Generate Credentials'
-                                            />
-                                        </Typography>
-                                        <Typography variant='body2'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Overview.credential.wizard.info'
-                                                defaultMessage={
-                                                    'Use the Key Generation Wizard. Create a new application ' +
-                                                    '-> Subscribe -> ' +
-                                                    ' Generate keys and Access Token to invoke this API.'
-                                                }
-                                            />
-                                        </Typography>
-                                        <Box display='block' mt={2}>
-                                            <Grid item xs={12}>
-                                                {user && (
-                                                    <Box display='inline' mr={2}>
-                                                        <Link
-                                                            to={{
-                                                                pathname: '/apis/' + api.id + '/credentials/wizard',
-                                                            }}
-                                                            style={!api.isSubscriptionAvailable ?
-                                                                { pointerEvents: 'none' } : null}
-                                                        >
-                                                            <Button
-                                                                variant='contained'
-                                                                color='primary'
-                                                                size='large'
-                                                                disabled={!api.isSubscriptionAvailable}
-                                                            >
-                                                                <FormattedMessage
-                                                                    id='Apis.Details.Overview.credential.wizard.title'
-                                                                    defaultMessage='Key Generation Wizard'
-                                                                />
-                                                            </Button>
-                                                        </Link>
-                                                    </Box>
-                                                )}
-                                                {applicationsAvailable && applicationsAvailable.length > 0 && (
-                                                    <Box display='inline'>
-                                                        <React.Fragment>
+                                <ExpansionPanelDetails classes={{ root: classes.expansionRoot }}>
+                                    <Grid container className={classes.root} spacing={2}>
+                                        <Grid item xs={12}>
+                                            <Typography variant='subtitle2'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Overview.subscriptions.title'
+                                                    defaultMessage='Subscriptions'
+                                                />
+                                            </Typography>
+                                            <Typography variant='body2'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Overview.subscribe.info'
+                                                    defaultMessage={
+                                                        'Subscription enables you to receive access'
+                                                        + ' tokens and be authenticated to invoke this API.'
+                                                    }
+                                                />
+                                            </Typography>
+                                            <Box display='block' mt={2}>
+                                                <Grid item xs={12}>
+                                                    {user ? (
+                                                        <Box display='inline' mr={2}>
                                                             <Link
                                                                 to={'/apis/' + api.id + '/credentials'}
                                                                 style={
@@ -341,21 +316,37 @@ function Overview(props) {
                                                                 >
                                                                     <FormattedMessage
                                                                         id={'Apis.Details.Overview.subscribe' +
-                                                                        'to.application.btn'}
-                                                                        defaultMessage='Subscribe to an Application'
+                                                                            'btn.link'}
+                                                                        defaultMessage='Subscribe'
                                                                     />
                                                                 </Button>
                                                             </Link>
-                                                        </React.Fragment>
-                                                    </Box>
-                                                )}
-                                            </Grid>
-                                        </Box>
-                                    </Grid>
+                                                        </Box>
+                                                    ) : (
+                                                            <Box display='inline' mr={2}>
+                                                                <a href={app.context + '/services/configs'}>
+                                                                    <Button
+                                                                        variant='contained'
+                                                                        color='primary'
+                                                                        size='large'
+                                                                        disabled={!api.isSubscriptionAvailable}
+                                                                    >
+                                                                        <FormattedMessage
+                                                                            id={'Apis.Details.Overview.signin' +
+                                                                                '.subscribe.btn.link'}
+                                                                            defaultMessage='Sign in to Subscribe'
+                                                                        />
+                                                                    </Button>
+                                                                </a>
+                                                            </Box>
+                                                        )}
+                                                </Grid>
+                                            </Box>
+                                        </Grid>
 
-                                </Grid>
-                            </ExpansionPanelDetails>
-                        )}
+                                    </Grid>
+                                </ExpansionPanelDetails>
+                            )}
                     </ExpansionPanel>
                 </Grid>
             )}
@@ -378,7 +369,7 @@ function Overview(props) {
                             {getResourcesForAPIs(api.type, api)}
                         </ExpansionPanelDetails>
                         {!api.advertiseInfo.advertised && (
-                            <React.Fragment>
+                            <>
                                 <Divider />
                                 <ExpansionPanelActions className={classes.actionPanel}>
                                     <Link to={'/apis/' + api.id + '/test'} className={classes.linkToTest}>
@@ -390,13 +381,13 @@ function Overview(props) {
                                         </Button>
                                     </Link>
                                 </ExpansionPanelActions>
-                            </React.Fragment>
+                            </>
                         )}
                     </ExpansionPanel>
                 </Grid>
             )}
             {!api.advertiseInfo.advertised && (
-                <React.Fragment>
+                <>
                     {showComments && (
                         <Grid item xs={12} lg={6}>
                             <ExpansionPanel defaultExpanded>
@@ -508,7 +499,7 @@ function Overview(props) {
                             </ExpansionPanel>
                         </Grid>
                     )}
-                </React.Fragment>
+                </>
             )}
             {showDocuments && (
                 <Grid item xs={12} lg={6}>
@@ -532,9 +523,7 @@ function Overview(props) {
                         <ExpansionPanelDetails
                             classes={{ root: classNames({ [classes.noDocumentRoot]: totalDocuments === 0 }) }}
                         >
-                            <Grid container className={classes.root} spacing={2}>
-                                <OverviewDocuments apiId={api.id} setDocsCount={setDocsCount} />
-                            </Grid>
+                            <OverviewDocuments apiId={api.id} setDocsCount={setDocsCount} />
                         </ExpansionPanelDetails>
                         <Divider />
                         <ExpansionPanelActions className={classes.actionPanel}>
