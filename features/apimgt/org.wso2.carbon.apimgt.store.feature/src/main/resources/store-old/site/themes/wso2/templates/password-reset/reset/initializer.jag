@@ -1,9 +1,0 @@
-<%
-jagg.initializer("password-reset/reset", {
-    preInitialize:function () {
-        //custom JS
-        jagg.addFooterJS("password-reset/reset", "password.reset.reset.js",
-                "templates/password-reset/reset/js/reset.js");
-    }
-});
-%>

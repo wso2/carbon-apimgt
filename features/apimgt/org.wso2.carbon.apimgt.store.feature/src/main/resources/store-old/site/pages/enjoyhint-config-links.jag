@@ -1,9 +1,0 @@
-<!--START Enjoyhint links-->
-<link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/enjoyhint-3.1.0/enjoyhint.css"))%>" rel="stylesheet">
-<link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/enjoyhint-3.1.0/src/jquery.enjoyhint.css"))%>" rel="stylesheet">
-
-<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('libs/enjoyhint-3.1.0/enjoyhint.js'))%>"></script>
-
-<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('libs/enjoyhint-3.1.0/js/cloud-enjoyhint-script-data.js'))%>"></script>
-<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('libs/enjoyhint-3.1.0/js/cloud-enjoyhint-functions.js'))%>"></script>
-<!--END Enjoyhint links-->
