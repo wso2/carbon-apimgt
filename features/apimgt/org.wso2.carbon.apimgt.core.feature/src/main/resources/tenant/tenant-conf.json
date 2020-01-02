@@ -194,6 +194,11 @@
       }
     ]
   },
+  "Meta" : {
+    "Migration": {
+      "3.0.0": true
+    }
+  },
   "NotificationsEnabled":"false",
   "Notifications":[{
     "Type":"new_api_version",

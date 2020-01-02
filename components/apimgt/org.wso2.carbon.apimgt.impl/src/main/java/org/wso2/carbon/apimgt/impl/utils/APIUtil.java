@@ -307,6 +307,9 @@ public final class APIUtil {
 
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
     private static final String NONE = "NONE";
+    private static final String MIGRATION = "Migration";
+    private static final String VERSION_3 = "3.0.0";
+    private static final String META = "Meta";
     private static final String SUPER_TENANT_SUFFIX =
             APIConstants.EMAIL_DOMAIN_SEPARATOR + APIConstants.SUPER_TENANT_DOMAIN;
 
@@ -4060,30 +4063,73 @@ public final class APIUtil {
         Map<String, String> scopesTenant = getRESTAPIScopesFromConfig(scopesConfigTenant);
         Map<String, String> scopesLocal = getRESTAPIScopesFromConfig(scopeConfigLocal);
         JSONArray tenantScopesArray = (JSONArray)scopesConfigTenant.get(APIConstants.REST_API_SCOPE);
+        boolean isRoleUpdated = false;
+        boolean isMigrated = false;
+        JSONObject metaJson = (JSONObject) tenantConf.get(MIGRATION);
 
-        Set<String> scopes = scopesLocal.keySet();
-        //Find any scopes that are not added to tenant conf which is available in local tenant-conf
-        scopes.removeAll(scopesTenant.keySet());
-        if (!scopes.isEmpty()) {
-            for (String scope: scopes) {
-                JSONObject scopeJson = new JSONObject();
-                scopeJson.put(APIConstants.REST_API_SCOPE_NAME, scope);
-                scopeJson.put(APIConstants.REST_API_SCOPE_ROLE, scopesLocal.get(scope));
-                if (log.isDebugEnabled()) {
-                    log.debug("Found scope that is not added to tenant-conf.json in tenant " + tenantId +
-                            ": " + scopeJson);
-                }
-                tenantScopesArray.add(scopeJson);
-            }
+        if (metaJson != null && metaJson.get(VERSION_3) != null) {
+            isMigrated = Boolean.parseBoolean(metaJson.get(VERSION_3).toString());
+        }
+
+        if (!isMigrated) {
             try {
-                ObjectMapper mapper = new ObjectMapper();
-                String formattedTenantConf = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(tenantConf);
-                if (log.isDebugEnabled()) {
-                    log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
+                //Get admin role name of the current domain
+                String adminRoleName = CarbonContext.getThreadLocalCarbonContext().getUserRealm()
+                        .getRealmConfiguration().getAdminRoleName();
+                for (int i = 0; i < tenantScopesArray.size(); i++) {
+                    JSONObject scope = (JSONObject) tenantScopesArray.get(i);
+                    String roles = scope.get(APIConstants.REST_API_SCOPE_ROLE).toString();
+                    if (APIConstants.APIM_SUBSCRIBE_SCOPE.equals(scope.get(APIConstants.REST_API_SCOPE_NAME)) &&
+                            !roles.contains(adminRoleName)) {
+                        tenantScopesArray.remove(i);
+                        JSONObject scopeJson = new JSONObject();
+                        scopeJson.put(APIConstants.REST_API_SCOPE_NAME, APIConstants.APIM_SUBSCRIBE_SCOPE);
+                        scopeJson.put(APIConstants.REST_API_SCOPE_ROLE,
+                                roles + APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT + adminRoleName);
+                        tenantScopesArray.add(scopeJson);
+                        isRoleUpdated = true;
+                        break;
+                    }
                 }
-                return Optional.of(ArrayUtils.toObject(formattedTenantConf.getBytes()));
-            } catch (JsonProcessingException e) {
-                throw new APIManagementException("Error while formatting tenant-conf.json of tenant " + tenantId);
+                if (isRoleUpdated) {
+                    JSONObject metaInfo = new JSONObject();
+                    JSONObject migrationInfo = new JSONObject();
+                    migrationInfo.put(VERSION_3, true);
+                    metaInfo.put(MIGRATION, migrationInfo);
+                    tenantConf.put(META, metaInfo);
+                }
+            } catch (UserStoreException e) {
+                String tenantDomain = getTenantDomainFromTenantId(tenantId);
+                String errorMessage = "Error while retrieving admin role name of " + tenantDomain;
+                log.error(errorMessage, e);
+                throw new APIManagementException(errorMessage, e);
+            }
+            Set<String> scopes = scopesLocal.keySet();
+            //Find any scopes that are not added to tenant conf which is available in local tenant-conf
+            scopes.removeAll(scopesTenant.keySet());
+            if (!scopes.isEmpty() || isRoleUpdated) {
+                for (String scope : scopes) {
+                    JSONObject scopeJson = new JSONObject();
+                    scopeJson.put(APIConstants.REST_API_SCOPE_NAME, scope);
+                    scopeJson.put(APIConstants.REST_API_SCOPE_ROLE, scopesLocal.get(scope));
+                    if (log.isDebugEnabled()) {
+                        log.debug("Found scope that is not added to tenant-conf.json in tenant " + tenantId +
+                                ": " + scopeJson);
+                    }
+                    tenantScopesArray.add(scopeJson);
+                }
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    String formattedTenantConf = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(tenantConf);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
+                    }
+                    return Optional.of(ArrayUtils.toObject(formattedTenantConf.getBytes()));
+                } catch (JsonProcessingException e) {
+                    throw new APIManagementException("Error while formatting tenant-conf.json of tenant " + tenantId);
+                }
+            } else {
+                return Optional.empty();
             }
         } else {
             log.debug("Scopes in tenant-conf.json in tenant " + tenantId + " are already migrated.");
