@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
@@ -594,7 +593,7 @@ class APISecurityAudit extends Component {
                                                         target='_blank'
                                                         rel='noopener noreferrer'
                                                     >
-link
+                                                        link
                                                     </a>
                                                 </strong>),
                                         }}
@@ -632,7 +631,7 @@ link
                                                         target='_blank'
                                                         rel='noopener noreferrer'
                                                     >
-link
+                                                        link
                                                     </a>
                                                 </strong>),
                                         }}
@@ -738,7 +737,8 @@ link
                                                     <>
                                                         <Typography variant='body1'>
                                                             <FormattedMessage
-                                                                id='Apis.Details.APIDefinition.AuditApi.OverallCriticality'
+                                                                id={'Apis.Details.APIDefinition'
+                                                                + '.AuditApi.OverallCriticality'}
                                                                 defaultMessage={
                                                                     '{overallCriticalityText} {overallCriticality}'
                                                                 }
@@ -759,14 +759,41 @@ link
                                                                 title={(
                                                                     <>
                                                                         <FormattedMessage
-                                                                            id='Apis.Details.APIDefinition.AuditApi.tooltip'
-                                                                            defaultMessage={
-                                                                                'Severity ranges from INFO, LOW, MEDIUM, '
-                                                                            + 'HIGH to CRITICAL, with INFO being '
-                                                                            + 'low vulnerability and CRITICAL'
-                                                                            + 'being high vulnerability'
-                                                                            }
+                                                                            id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.severity'}
+                                                                            defaultMessage='Severity ranges from: '
                                                                         />
+                                                                        <br />
+                                                                        <FormattedMessage
+                                                                            id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.info'}
+                                                                            defaultMessage='1. INFO'
+                                                                        />
+                                                                        <br />
+                                                                        <FormattedMessage
+                                                                            id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.low'}
+                                                                            defaultMessage='2. LOW'
+                                                                        />
+                                                                        <br />
+                                                                        <FormattedMessage
+                                                                            id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.medium'}
+                                                                            defaultMessage='3. MEDIUM'
+                                                                        />
+                                                                        <br />
+                                                                        <FormattedMessage
+                                                                            id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.high'}
+                                                                            defaultMessage='4. HIGH'
+                                                                        />
+                                                                        <br />
+                                                                        <FormattedMessage
+                                                                            id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.critical'}
+                                                                            defaultMessage='5. CRITICAL'
+                                                                        />
+                                                                        <br />
                                                                     </>
                                                                 )}
                                                             >
@@ -793,7 +820,7 @@ link
                                                                             this.roundScore(reportObject.security.score)
                                                                         }
                                                                         {' '}
-/ 30)
+                                                                        / 30)
                                                                     </strong>
                                                                 ),
                                                             }}
@@ -801,7 +828,8 @@ link
                                                         <VisibilitySensor>
                                                             {({ isVisible }) => {
                                                                 const progressScore = isVisible
-                                                                    ? ((this.roundScore(reportObject.security.score) / 30
+                                                                    ? ((this.roundScore(reportObject.security.score)
+                                                                     / 30
                                                                     ) * 100) : 0;
                                                                 return (
                                                                     <Line
@@ -817,7 +845,8 @@ link
                                                 && (
                                                     <Typography variant='body1'>
                                                         <FormattedMessage
-                                                            id='Apis.Details.APIDefinition.AuditApi.DataValidationSummary'
+                                                            id={'Apis.Details.APIDefinition'
+                                                            + '.AuditApi.DataValidationSummary'}
                                                             defaultMessage='{dataValidationSummary}'
                                                             values={{
                                                                 dataValidationSummary: (
@@ -826,7 +855,7 @@ link
                                                                     (
                                                                         {this.roundScore(reportObject.data.score)}
                                                                         {' '}
-/ 70)
+                                                                        / 70)
                                                                     </strong>
                                                                 ),
                                                             }}
@@ -856,14 +885,17 @@ link
                                                                 className={classes.head}
                                                             >
                                                                 <FormattedMessage
-                                                                    id='Apis.Details.APIDefinition.AuditApi.FailedToValidate.Heading'
+                                                                    id={'Apis.Details.APIDefinition'
+                                                                    + '.AuditApi.FailedToValidate.Heading'}
                                                                     defaultMessage='Failed to Validate OpenAPI File'
                                                                 />
                                                             </Typography>
                                                             <Typography component='p' className={classes.content}>
                                                                 <FormattedMessage
-                                                                    id='Apis.Details.APIDefinition.AuditApi.FailedToValidate.Content'
-                                                                    defaultMessage='Fix the critical errors shown below and run the audit again.'
+                                                                    id={'Apis.Details.APIDefinition'
+                                                                    + '.AuditApi.FailedToValidate.Content'}
+                                                                    defaultMessage={'Fix the critical errors '
+                                                                    + 'shown below and run the audit again.'}
                                                                 />
                                                             </Typography>
                                                         </div>
@@ -1009,6 +1041,7 @@ link
                                                                 <strong>Severity:</strong>
                                                             ),
                                                             securityCriticality: (
+                                                                // eslint-disable-next-line max-len
                                                                 this.criticalityObject[reportObject.security.criticality]
                                                             ),
                                                         }}
@@ -1021,14 +1054,41 @@ link
                                                         title={(
                                                             <>
                                                                 <FormattedMessage
-                                                                    id='Apis.Details.APIDefinition.AuditApi.tooltip'
-                                                                    defaultMessage={
-                                                                        'Severity ranges from INFO, LOW, MEDIUM, HIGH '
-                                                                    + 'to CRITICAL, with INFO being '
-                                                                    + 'low vulnerability and CRITICAL'
-                                                                    + 'being high vulnerability'
-                                                                    }
+                                                                    id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.severity'}
+                                                                    defaultMessage='Severity ranges from: '
                                                                 />
+                                                                <br />
+                                                                <FormattedMessage
+                                                                    id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.info'}
+                                                                    defaultMessage='1. INFO'
+                                                                />
+                                                                <br />
+                                                                <FormattedMessage
+                                                                    id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.low'}
+                                                                    defaultMessage='2. LOW'
+                                                                />
+                                                                <br />
+                                                                <FormattedMessage
+                                                                    id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.medium'}
+                                                                    defaultMessage='3. MEDIUM'
+                                                                />
+                                                                <br />
+                                                                <FormattedMessage
+                                                                    id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.high'}
+                                                                    defaultMessage='4. HIGH'
+                                                                />
+                                                                <br />
+                                                                <FormattedMessage
+                                                                    id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.critical'}
+                                                                    defaultMessage='5. CRITICAL'
+                                                                />
+                                                                <br />
                                                             </>
                                                         )}
                                                     >
@@ -1121,14 +1181,41 @@ link
                                                         title={(
                                                             <>
                                                                 <FormattedMessage
-                                                                    id='Apis.Details.APIDefinition.AuditApi.tooltip'
-                                                                    defaultMessage={
-                                                                        'Severity ranges from INFO, LOW, MEDIUM, '
-                                                                    + 'HIGH to CRITICAL, with INFO being '
-                                                                    + 'low vulnerability and CRITICAL'
-                                                                    + 'being high vulnerability'
-                                                                    }
+                                                                    id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.severity'}
+                                                                    defaultMessage='Severity ranges from: '
                                                                 />
+                                                                <br />
+                                                                <FormattedMessage
+                                                                    id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.info'}
+                                                                    defaultMessage='1. INFO'
+                                                                />
+                                                                <br />
+                                                                <FormattedMessage
+                                                                    id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.low'}
+                                                                    defaultMessage='2. LOW'
+                                                                />
+                                                                <br />
+                                                                <FormattedMessage
+                                                                    id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.medium'}
+                                                                    defaultMessage='3. MEDIUM'
+                                                                />
+                                                                <br />
+                                                                <FormattedMessage
+                                                                    id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.high'}
+                                                                    defaultMessage='4. HIGH'
+                                                                />
+                                                                <br />
+                                                                <FormattedMessage
+                                                                    id={'Apis.Details.APIDefinition'
+                                                                            + '.AuditApi.tooltip.critical'}
+                                                                    defaultMessage='5. CRITICAL'
+                                                                />
+                                                                <br />
                                                             </>
                                                         )}
                                                     >
