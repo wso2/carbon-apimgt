@@ -169,6 +169,8 @@ export default function UploadCertificate(props) {
         const extension = certificateFile.name.split('.');
         if (rejectedFiles.includes(extension[1])) {
             setIsRejected(true);
+        } else {
+            setIsRejected(false);
         }
         if (certificateFile) {
             setCertificate({ name: certificateFile.name, content: certificateFile });
