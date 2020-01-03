@@ -90,10 +90,6 @@ var isGlobalCEPThrottlingEnabled = function() {
      var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
         return APIUtil.isAdvanceThrottlingEnabled();
 };
-var getUsageClient = function() {
-    var user = jagg.getUser();
-    return org.wso2.carbon.apimgt.usage.client.UsageClient.getClient(user.username);
-};
 
 function validateHostName(match, host) {
      var log = new Log();
