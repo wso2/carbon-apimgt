@@ -1,7 +1,0 @@
-<%
-jagg.block("page/messages", {
-    initialize:function (data) {
-
-    }
-});
-%>
