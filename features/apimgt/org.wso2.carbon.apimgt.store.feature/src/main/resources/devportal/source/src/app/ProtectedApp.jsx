@@ -38,8 +38,12 @@ import LoginDenied from './LoginDenied';
  * Language.
  * @type {string}
  */
-const language = (navigator.languages && navigator.languages[0])
-    || navigator.language || navigator.userLanguage;
+const language = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage;
+
+/**
+ * Language without region code.
+ */
+const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
 
 /**
  * Render protected application paths
@@ -69,6 +73,9 @@ export default class ProtectedApp extends Component {
      *  Check if data available ,if not get the user info from existing token information
      */
     componentDidMount() {
+        const locale = languageWithoutRegionCode || language;
+        this.loadLocale(locale);
+
         const { location: { search } } = this.props;
         const { setTenantDomain } = this.context;
         const { tenant } = queryString.parse(search);
@@ -153,10 +160,10 @@ export default class ProtectedApp extends Component {
     loadLocale(locale = 'en') {
         fetch(`${Settings.app.context}/site/public/locales/${locale}.json`)
             .then(resp => resp.json())
-            .then((data) => {
+            .then((messages) => {
                 // eslint-disable-next-line global-require, import/no-dynamic-require
                 addLocaleData(require(`react-intl/locale-data/${locale}`));
-                this.setState({ messages: defineMessages({ ...data }) });
+                this.setState({ messages });
             });
     }
 

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -63,7 +64,7 @@ public enum TokenTypeEnum {
     private Integer subscriptionCount = null;
     private List<ApplicationKeyDTO> keys = new ArrayList<>();
     private Map<String, String> attributes = new HashMap<>();
-    private List<String> subscriptionScopes = new ArrayList<>();
+    private List<ScopeInfoDTO> subscriptionScopes = new ArrayList<>();
     private String owner = null;
     private Boolean hashEnabled = null;
 
@@ -242,18 +243,18 @@ public enum TokenTypeEnum {
 
   /**
    **/
-  public ApplicationDTO subscriptionScopes(List<String> subscriptionScopes) {
+  public ApplicationDTO subscriptionScopes(List<ScopeInfoDTO> subscriptionScopes) {
     this.subscriptionScopes = subscriptionScopes;
     return this;
   }
 
   
-  @ApiModelProperty(example = "[\"admin\"]", value = "")
+  @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("subscriptionScopes")
-  public List<String> getSubscriptionScopes() {
+  public List<ScopeInfoDTO> getSubscriptionScopes() {
     return subscriptionScopes;
   }
-  public void setSubscriptionScopes(List<String> subscriptionScopes) {
+  public void setSubscriptionScopes(List<ScopeInfoDTO> subscriptionScopes) {
     this.subscriptionScopes = subscriptionScopes;
   }
 

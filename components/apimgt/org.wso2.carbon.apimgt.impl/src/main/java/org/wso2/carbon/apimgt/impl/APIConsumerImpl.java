@@ -2644,21 +2644,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPIs;
     }
 
-    public JSONArray getScopesForApplicationSubscription(String username, int applicationId)
+    public Set<Scope> getScopesForApplicationSubscription(String username, int applicationId)
             throws APIManagementException {
-        Set<Scope> scopeSet;
-        JSONArray scopeArray = new JSONArray();
-
         Subscriber subscriber = new Subscriber(username);
-        scopeSet = apiMgtDAO.getScopesForApplicationSubscription(subscriber, applicationId);
-
-        for (Scope scope : scopeSet) {
-            JSONObject scopeObj = new JSONObject();
-            scopeObj.put("scopeKey", scope.getKey());
-            scopeObj.put("scopeName", scope.getName());
-            scopeArray.add(scopeObj);
-        }
-        return scopeArray;
+        return apiMgtDAO.getScopesForApplicationSubscription(subscriber, applicationId);
     }
 
     /*
@@ -2802,8 +2791,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         API api = null;
         APIProduct product = null;
         Identifier identifier = null;
-        String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
-        String tenantDomain = MultitenantUtils.getTenantDomain(tenantAwareUsername);
+        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
         final boolean isApiProduct = apiTypeWrapper.isAPIProduct();
         String state;
         String apiContext;

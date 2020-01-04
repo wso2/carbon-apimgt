@@ -22,6 +22,7 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
+import { Radio, RadioGroup, FormControlLabel, FormControl } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -45,6 +46,9 @@ import SelectAppPanel from './SelectAppPanel';
 const styles = theme => ({
     buttonIcon: {
         marginRight: 10,
+    },
+    centerItems: {
+        margin: 'auto',
     },
     inputAdornmentStart: {
         minWidth: theme.spacing(18),
@@ -84,7 +88,10 @@ class ApiConsole extends React.Component {
      */
     constructor(props) {
         super(props);
-        this.state = { showToken: false };
+        this.state = {
+            showToken: false,
+            securitySchemeType: 'OAUTH',
+        };
         this.handleChanges = this.handleChanges.bind(this);
         this.accessTokenProvider = this.accessTokenProvider.bind(this);
         this.handleClickShowToken = this.handleClickShowToken.bind(this);
@@ -112,8 +119,6 @@ class ApiConsole extends React.Component {
         let accessToken;
 
         this.apiClient = new Api();
-
-
         const promiseAPI = this.apiClient.getAPIById(apiID);
 
         promiseAPI
@@ -145,7 +150,8 @@ class ApiConsole extends React.Component {
             })
             .then((subscriptionsResponse) => {
                 if (subscriptionsResponse != null) {
-                    subscriptions = subscriptionsResponse.obj.list.filter(item => item.status === 'UNBLOCKED' || item.status === 'PROD_ONLY_BLOCKED');
+                    subscriptions = subscriptionsResponse.obj.list.filter(item => item.status === 'UNBLOCKED'
+                    || item.status === 'PROD_ONLY_BLOCKED');
 
                     if (subscriptions && subscriptions.length > 0) {
                         selectedApplication = subscriptions[0].applicationId;
@@ -256,6 +262,9 @@ class ApiConsole extends React.Component {
             case 'selectedKeyType':
                 this.setState({ [name]: value }, this.updateAccessToken);
                 break;
+            case 'securityScheme':
+                this.setState({ securitySchemeType: value });
+                break;
             default:
                 this.setState({ [name]: value });
         }
@@ -309,8 +318,9 @@ class ApiConsole extends React.Component {
         let accessToken;
         let keyType;
 
-        if (subscriptions != null && subscriptions.find(sub => sub.applicationId === selectedApplication).status === 'PROD_ONLY_BLOCKED') {
-            this.setState({ selectedKeyType: 'SANDBOX'});
+        if (subscriptions != null && subscriptions.find(sub => sub.applicationId
+            === selectedApplication).status === 'PROD_ONLY_BLOCKED') {
+            this.setState({ selectedKeyType: 'SANDBOX' });
             keyType = 'SANDBOX';
         } else {
             keyType = selectedKeyType;
@@ -336,11 +346,9 @@ class ApiConsole extends React.Component {
         const { classes } = this.props;
         const {
             api, notFound, swagger, accessToken, showToken, subscriptions, selectedApplication, selectedKeyType,
-            selectedEnvironment, environments, labels,
+            selectedEnvironment, environments, labels, securitySchemeType,
         } = this.state;
         const user = AuthManager.getUser();
-
-
         const downloadSwagger = JSON.stringify({ ...swagger });
         const downloadLink = 'data:text/json;charset=utf-8, ' + encodeURIComponent(downloadSwagger);
         const fileName = 'swagger.json';
@@ -351,10 +359,18 @@ class ApiConsole extends React.Component {
         if (notFound) {
             return 'API Not found !';
         }
-
-        const authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
+        let isApiKeyEnabled = false;
+        let authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
+        let prefix = 'Bearer';
+        if (api && api.securityScheme) {
+            isApiKeyEnabled = api.securityScheme.includes('api_key');
+            if (isApiKeyEnabled && securitySchemeType === 'API-KEY') {
+                authorizationHeader = 'apikey';
+                prefix = '';
+            }
+        }
         const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
-        
+
         return (
             <React.Fragment>
                 <Typography variant='h4' className={classes.titleSub}>
@@ -363,7 +379,7 @@ class ApiConsole extends React.Component {
                 <Paper className={classes.paper}>
                     <Grid container className={classes.grid}>
                         {!isPrototypedAPI && !user && (
-                            <Grid item md={6} item>
+                            <Grid item md={6}>
                                 <Paper className={classes.userNotificationPaper}>
                                     <Typography variant='h5' component='h3'>
                                         <Icon>warning</Icon>
@@ -463,8 +479,8 @@ class ApiConsole extends React.Component {
                                         )}
                                     </Grid>
                                 </Box>
-                                <Box display='flex' justifyContent='center'>
-                                    <Grid x={12} md={6} item>
+                                <Box display='block' justifyContent='center'>
+                                    <Grid x={12} md={6} className={classes.centerItems} item>
                                         <TextField
                                             fullWidth
                                             margin='normal'
@@ -497,11 +513,34 @@ class ApiConsole extends React.Component {
                                                         className={classes.inputAdornmentStart}
                                                         position='start'
                                                     >
-                                                        {`${authorizationHeader}: Bearer`}
+                                                        {`${authorizationHeader}: ${prefix}`}
                                                     </InputAdornment>
                                                 ),
                                             }}
                                         />
+                                    </Grid>
+                                    <Grid x={12} md={6} className={classes.centerItems}>
+                                        {isApiKeyEnabled && (
+                                            <FormControl component='fieldset' >
+                                                <RadioGroup
+                                                    name='securityScheme'
+                                                    value={securitySchemeType}
+                                                    onChange={this.handleChanges}
+                                                    row
+                                                >
+                                                    <FormControlLabel
+                                                        value='OAUTH'
+                                                        control={<Radio />}
+                                                        label='OAUTH'
+                                                    />
+                                                    <FormControlLabel
+                                                        value='API-KEY'
+                                                        control={<Radio />}
+                                                        label='API-KEY'
+                                                    />
+                                                </RadioGroup>
+                                            </FormControl>
+                                        )}
                                     </Grid>
                                 </Box>
                             </Box>
@@ -537,13 +576,16 @@ class ApiConsole extends React.Component {
     }
 }
 
-ApiConsole.defaultProps = {
-    // handleInputs: false,
-};
-
 ApiConsole.propTypes = {
-    // handleInputs: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        paper: PropTypes.string.isRequired,
+        titleSub: PropTypes.string.isRequired,
+        grid: PropTypes.string.isRequired,
+        userNotificationPaper: PropTypes.string.isRequired,
+        inputAdornmentStart: PropTypes.string.isRequired,
+        buttonIcon: PropTypes.string.isRequired,
+        centerItems: PropTypes.string.isRequired,
+    }).isRequired,
 };
 
 export default withStyles(styles)(ApiConsole);

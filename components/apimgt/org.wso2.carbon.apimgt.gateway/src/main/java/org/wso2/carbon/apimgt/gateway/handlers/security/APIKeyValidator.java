@@ -759,4 +759,9 @@ public class APIKeyValidator {
     protected void setGatewayAPIResourceValidationEnabled(boolean gatewayAPIResourceValidationEnabled) {
         isGatewayAPIResourceValidationEnabled = gatewayAPIResourceValidationEnabled;
     }
+
+    public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey)
+            throws APISecurityException {
+        return dataStore.validateSubscription(context, version, consumerKey);
+    }
 }

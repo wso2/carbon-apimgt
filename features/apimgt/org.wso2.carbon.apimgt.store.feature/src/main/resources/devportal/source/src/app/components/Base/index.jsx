@@ -1,3 +1,5 @@
+/* eslint-disable react/jsx-props-no-spreading */
+/* eslint-disable react/prop-types */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -21,9 +23,12 @@ import { Link } from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
+import AccountCircle from '@material-ui/icons/AccountCircle';
 import Button from '@material-ui/core/Button';
 import Hidden from '@material-ui/core/Hidden';
-import { MenuItem, MenuList, ListItemIcon, ListItemText, Divider } from '@material-ui/core';
+import {
+    MenuItem, MenuList, ListItemIcon, ListItemText, Divider,
+} from '@material-ui/core';
 import Icon from '@material-ui/core/Icon';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -121,6 +126,7 @@ const styles = (theme) => {
         },
         icons: {
             marginRight: theme.spacing(),
+            fontSize: theme.spacing(3),
         },
         banner: {
             color: theme.custom.banner.color,
@@ -162,10 +168,12 @@ class Layout extends React.Component {
         openNavBar: false,
         openUserMenu: false,
     };
+
     componentWillMount() {
         const { theme } = this.props;
         document.body.style.backgroundColor = theme.custom.page.emptyAreadBackground || '#ffffff';
     }
+
     componentDidMount() {
         // Get Environments
         const promised_environments = ConfigManager.getConfigs()
@@ -228,7 +236,7 @@ class Layout extends React.Component {
     }
 
     handleToggleUserMenu = () => {
-        this.setState(state => ({ openUserMenu: !state.openUserMenu }));
+        this.setState((state) => ({ openUserMenu: !state.openUserMenu }));
     };
 
     handleCloseUserMenu = (event) => {
@@ -239,13 +247,29 @@ class Layout extends React.Component {
         this.setState({ openUserMenu: false });
     };
 
+    getLogoPath = () => {
+        const settingsContext = this.context;
+        const { tenantDomain } = settingsContext;
+        const { theme } = this.props;
+        const { custom: { appBar: { logo } } } = theme;
+        let logoWithTenant = logo;
+        if (logo && logoWithTenant) {
+            logoWithTenant = logo.replace('<tenant-domain>', tenantDomain);
+        }
+        if (logoWithTenant && /^(ftp|http|https):\/\/[^ "]+$/.test(logoWithTenant)) {
+            return logoWithTenant;
+        } else {
+            return app.context + logoWithTenant;
+        }
+    };
+
     /**
      * @inheritdoc
      * @returns {Component}
      * @memberof Layout
      */
     render() {
-        const { classes, theme } = this.props;
+        const { classes, theme, children } = this.props;
         const {
             custom: {
                 banner: {
@@ -256,7 +280,7 @@ class Layout extends React.Component {
                 },
             },
         } = theme;
-        const { openNavBar } = this.state;
+        const { openNavBar, openUserMenu, environments } = this.state;
         const { tenantDomain, setTenantDomain } = this.context;
         const user = AuthManager.getUser();
         // TODO: Refer to fix: https://github.com/mui-org/material-ui/issues/10076#issuecomment-361232810 ~tmkb
@@ -270,8 +294,23 @@ class Layout extends React.Component {
             },
         };
         return (
-            <React.Fragment>
-                {active && <div className={classes.banner}>{style === 'text' ? text : <img src={`${app.context}/${image}`} />}</div>}
+            <>
+                {active && (
+                    <div className={classes.banner}>
+                        {style === 'text' ? text
+                            : (
+                                <img
+                                    alt={(
+                                        <FormattedMessage
+                                            id='Base.index.banner.alt'
+                                            defaultMessage='Dev Portal Banner'
+                                        />
+                                    )}
+                                    src={`${app.context}/${image}`}
+                                />
+                            )}
+                    </div>
+                )}
                 <div className={classes.reactRoot} id='pageRoot'>
                     <div className={classes.wrapper}>
                         <AppBar position='fixed' className={classes.appBar} id='appBar'>
@@ -283,7 +322,13 @@ class Layout extends React.Component {
                                 </Hidden>
                                 <Link to='/' id='logoLink'>
                                     <img
-                                        src={app.context + theme.custom.appBar.logo}
+                                        alt={(
+                                            <FormattedMessage
+                                                id='Base.index.logo.alt'
+                                                defaultMessage='Dev Portal'
+                                            />
+                                        )}
+                                        src={this.getLogoPath()}
                                         style={{
                                             height: theme.custom.appBar.logoHeight,
                                             width: theme.custom.appBar.logoWidth,
@@ -344,13 +389,13 @@ class Layout extends React.Component {
                                 <VerticalDivider height={72} />
                                 {/* Environment menu */}
                                 <EnvironmentMenu
-                                    environments={this.state.environments}
+                                    environments={environments}
                                     environmentLabel={Utils.getEnvironment().label}
                                     handleEnvironmentChange={this.handleEnvironmentChange}
                                     id='environmentMenu'
                                 />
                                 {user ? (
-                                    <React.Fragment>
+                                    <>
                                         <Link to='/settings' id='settingsLink'>
                                             <Button className={classes.userLink}>
                                                 <Icon className={classes.icons}>settings</Icon>
@@ -372,12 +417,15 @@ class Layout extends React.Component {
                                             className={classes.userLink}
                                             id='userToggleButton'
                                         >
-                                            <Icon className={classes.icons}>person</Icon>
+                                            <AccountCircle className={classes.icons} />
                                             {user.name}
+                                            <Icon style={{ fontSize: '22px', marginLeft: '1px' }}>
+                                                keyboard_arrow_down
+                                            </Icon>
                                         </Button>
                                         <Popper
                                             id='userPopup'
-                                            open={this.state.openUserMenu}
+                                            open={openUserMenu}
                                             anchorEl={this.anchorEl}
                                             transition
                                             disablePortal
@@ -414,9 +462,9 @@ class Layout extends React.Component {
                                                 </Grow>
                                             )}
                                         </Popper>
-                                    </React.Fragment>
+                                    </>
                                 ) : (
-                                    <React.Fragment>
+                                    <>
                                         {/* TODO: uncomment when the feature is working */}
                                         {/* <Link to={'/sign-up'}>
                                      <Button className={classes.userLink}>
@@ -429,23 +477,27 @@ class Layout extends React.Component {
                                                 <FormattedMessage id='Base.index.sign.in' defaultMessage=' Sign-in' />
                                             </Button>
                                         </a>
-                                    </React.Fragment>
+                                    </>
                                 )}
                             </Toolbar>
                         </AppBar>
-                        <div className={classes.contentWrapper}>{this.props.children}</div>
+                        <div className={classes.contentWrapper}>{children}</div>
                         {footerActive && <div className={classes.push} />}
                     </div>
-                    {footerActive && <footer className={classes.footer} id='footer'>
-                        <Typography noWrap>
-                            {footerText && footerText !== '' ? <span>{footerText}</span> : <FormattedMessage
-                                id='Base.index.copyright.text'
-                                defaultMessage='WSO2 API-M v3.1.0 | © 2019 WSO2 Inc'
-                            />}
-                        </Typography>
-                                     </footer>}
+                    {footerActive && (
+                        <footer className={classes.footer} id='footer'>
+                            <Typography noWrap>
+                                {footerText && footerText !== '' ? <span>{footerText}</span> : (
+                                    <FormattedMessage
+                                        id='Base.index.copyright.text'
+                                        defaultMessage='WSO2 API-M v3.1.0 | © 2019 WSO2 Inc'
+                                    />
+                                )}
+                            </Typography>
+                        </footer>
+                    )}
                 </div>
-            </React.Fragment>
+            </>
         );
     }
 }

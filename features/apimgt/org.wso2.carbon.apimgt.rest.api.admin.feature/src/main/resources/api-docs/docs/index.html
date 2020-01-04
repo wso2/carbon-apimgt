@@ -20,7 +20,7 @@
     <script src="assets/js/main.js" type="text/javascript"></script>
     <script src="assets/js/marked.min.js" type="text/javascript"></script>
 
-    <title>WSO2 API Manager - Admin : v0.15.0</title>
+    <title>WSO2 API Manager - Admin : v0.16.0</title>
 
 
     <!-- Custom CSS -->
@@ -74,6 +74,14 @@
             </ul>
             <h3>Resources</h3>
             <ul class="nav nav-stacked fixed">
+                        <hr/>
+                        <span class="class-name">API (Individual)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-exportApiGet"><a href="#!/operations#APIIndividual#exportApiGet">Export an API</a></li>
+                                        <li id="op-importApiPost"><a href="#!/operations#APIIndividual#importApiPost">Import an API</a></li>
+                            </ul>
+                        </li>
                         <hr/>
                         <span class="class-name">Advanced Policy (Collection)</span>
                         <li class="section-box">
@@ -165,6 +173,16 @@
                             </ul>
                         </li>
                         <hr/>
+                        <span class="class-name">default</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-botDataAddEmailPost"><a href="#!/operations#Default#botDataAddEmailPost">Add an Email</a></li>
+                                        <li id="op-botDataDeleteEmailDelete"><a href="#!/operations#Default#botDataDeleteEmailDelete">Delete an configured email.</a></li>
+                                        <li id="op-botDataGetEmailListGet"><a href="#!/operations#Default#botDataGetEmailListGet">Get all configured email list
+</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
                         <span class="class-name">Label</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
@@ -199,6 +217,14 @@
                             </ul>
                         </li>
                         <hr/>
+                        <span class="class-name">Monetization (Collection)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-monetizationPublishUsagePost"><a href="#!/operations#MonetizationCollection#monetizationPublishUsagePost">Publish Usage Records</a></li>
+                                        <li id="op-monetizationPublishUsageStatusGet"><a href="#!/operations#MonetizationCollection#monetizationPublishUsageStatusGet">Get the status of Monetization usage publisher</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
                         <span class="class-name">Subscription Policy (Collection)</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
@@ -213,6 +239,21 @@
                                         <li id="op-throttlingPoliciesSubscriptionPolicyIdDelete"><a href="#!/operations#SubscriptionPolicyIndividual#throttlingPoliciesSubscriptionPolicyIdDelete">Delete a Subscription Policy</a></li>
                                         <li id="op-throttlingPoliciesSubscriptionPolicyIdGet"><a href="#!/operations#SubscriptionPolicyIndividual#throttlingPoliciesSubscriptionPolicyIdGet">Get a Subscription Policy</a></li>
                                         <li id="op-throttlingPoliciesSubscriptionPolicyIdPut"><a href="#!/operations#SubscriptionPolicyIndividual#throttlingPoliciesSubscriptionPolicyIdPut">Update a Subscription Policy</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Tenants</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-getTenantInfoByUsername"><a href="#!/operations#Tenants#getTenantInfoByUsername">Get tenant id of the user
+</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Workflows (Individual)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-workflowsUpdateWorkflowStatusPost"><a href="#!/operations#WorkflowsIndividual#workflowsUpdateWorkflowStatusPost">Update workflow status</a></li>
                             </ul>
                         </li>
             </ul>
@@ -275,6 +316,11 @@
                         </li>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
+                                <li id="def-Email"><a href="#!/models#Email">Email</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
                                 <li id="def-Error"><a href="#!/models#Error">Error</a></li>
                             </ul>
                         </li>
@@ -310,7 +356,27 @@
                         </li>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
+                                <li id="def-MonetizationInfo"><a href="#!/models#MonetizationInfo">MonetizationInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-MonetizationUsagePublishInfo"><a href="#!/models#MonetizationUsagePublishInfo">MonetizationUsagePublishInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-PublishStatus"><a href="#!/models#PublishStatus">PublishStatus</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
                                 <li id="def-SubscriptionThrottlePolicyList"><a href="#!/models#SubscriptionThrottlePolicyList">SubscriptionThrottlePolicyList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-TenantInfo"><a href="#!/models#TenantInfo">TenantInfo</a></li>
                             </ul>
                         </li>
                         <li class="section-box">
@@ -326,6 +392,11 @@
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                 <li id="def-ThrottlePolicy"><a href="#!/models#ThrottlePolicy">ThrottlePolicy</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Workflow"><a href="#!/models#Workflow">Workflow</a></li>
                             </ul>
                         </li>
                         <li class="section-box">
@@ -405,7 +476,7 @@ Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carb
                                     <h3>Version information</h3>
 
                                     <div class="paragraph">
-                                        <p class="marked">0.15.0</p>
+                                        <p class="marked">0.16.0</p>
                                     </div>
 
                                         <h3>Contact information</h3>
@@ -429,7 +500,7 @@ Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carb
                                     <div class="paragraph">
                                         <p class="marked">Host: apis.wso2.com</p>
 
-                                        <p class="marked">BasePath: /api/am/admin/v0.15</p>
+                                        <p class="marked">BasePath: /api/am/admin/v0.16</p>
                                         <code>Scheme: [HTTPS]</code>
                                     </div>
                                     <h3>Consumes</h3>

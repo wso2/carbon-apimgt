@@ -626,7 +626,7 @@ function EndpointOverview(props) {
                                                         <FormattedMessage
                                                             id={'Apis.Details.Endpoints.'
                                                                 + 'EndpointOverview.prototype.endpoint'
-                                                                + '.label'}
+                                                                + '.prototype.label'}
                                                             defaultMessage='Prototype Endpoint'
                                                         />
                                                     </Typography>
@@ -646,7 +646,7 @@ function EndpointOverview(props) {
                                                                 <FormattedMessage
                                                                     id={'Apis.Details.'
                                                                         + 'Endpoints.EndpointOverview'
-                                                                        + '.production.endpoint.label'}
+                                                                        + '.production.endpoint.production.label'}
                                                                     defaultMessage='Production Endpoint'
                                                                 />
                                                             </Typography>
@@ -664,9 +664,10 @@ function EndpointOverview(props) {
                                                                         id={'Apis.Details.Endpoints.EndpointOverview'
                                                                             + '.upload.mediation.message'}
                                                                         defaultMessage={
-                                                                            'Please upload a mediation sequence file to'
-                                                                            + ' Message Mediation Policies, which sets '
-                                                                            + 'the endpoints.'
+                                                                            'Please upload a mediation'
+                                                                            + ' sequence file to'
+                                                                            + ' Message Mediation Policies,'
+                                                                            + ' which sets the endpoints.'
                                                                         }
                                                                     />
                                                                     <IconButton
@@ -717,14 +718,14 @@ function EndpointOverview(props) {
                                                                     <FormattedMessage
                                                                         id={'Apis.Details.Endpoints.'
                                                                             + 'EndpointOverview.prototype'
-                                                                            + '.endpoint.header'}
+                                                                            + '.endpoint.prototype.header'}
                                                                         defaultMessage='Prototype Endpoint'
                                                                     />
                                                                 ) : (
                                                                     <FormattedMessage
                                                                         id={'Apis.Details.Endpoints.'
                                                                             + 'EndpointOverview.production'
-                                                                            + '.endpoint.header'}
+                                                                            + '.endpoint.production.header'}
                                                                         defaultMessage='Production Endpoint'
                                                                     />
                                                                 )}
@@ -777,9 +778,9 @@ function EndpointOverview(props) {
                                                                                         + '.mediation.message'}
                                                                                     defaultMessage={
                                                                                         'Please upload a mediation'
-                                                                                        + 'sequence file to '
-                                                                                        + 'Message Mediation Policies, '
-                                                                                        + 'which sets the endpoints.'
+                                                                                        + ' sequence file to'
+                                                                                        + ' Message Mediation Policies,'
+                                                                                        + ' which sets the endpoints.'
                                                                                     }
                                                                                 />
                                                                                 <IconButton

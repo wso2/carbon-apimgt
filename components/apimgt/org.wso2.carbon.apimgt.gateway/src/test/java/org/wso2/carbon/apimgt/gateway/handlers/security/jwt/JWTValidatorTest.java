@@ -86,7 +86,9 @@ public class JWTValidatorTest {
         );
 
         // Encoded jwt token
-        validJwtToken = "abc" +
+        validJwtToken = "eyJ4NXQiOiJOVEF4Wm1NeE5ETXlaRGczTVRVMVpHTTBNekV6T0RKaFpXSTRORE5sWkRVMU9HRmtOakZpTVEiL" +
+                "CJraWQiOiJOVEF4Wm1NeE5ETXlaRGczTVRVMVpHTTBNekV6T0RKaFpXSTRORE5sWkRVMU9HRmtOakZpTVEiLCJhbGciO" +
+                "iJSUzI1NiJ9" +
                 ".ewogICJzdWIiOiAiYWRtaW5AY2FyYm9uLnN1cGVyIiwKICAiaXNzIjogImh0dHBzOi8vbG9j" +
                 "YWxob3N0Ojk0NDMvb2F1dGgyL3Rva2VuIiwKICAidGllckluZm8iOiB7CiAgICAiVW5saW1pdGVkIjogewogICAgICAic" +
                 "3RvcE9uUXVvdGFSZWFjaCI6IHRydWUsCiAgICAgICJzcGlrZUFycmVzdExpbWl0IjogMCwKICAgICAgInNwaWtlQXJyZX" +
@@ -210,7 +212,7 @@ public class JWTValidatorTest {
                 "            }\n");
 
             AuthenticationContext authenticationContext = GatewayUtils.generateAuthenticationContext(splitToken[2],
-                    payload, api, APIConstants.UNLIMITED_TIER, true);
+                    payload, api, null, APIConstants.UNLIMITED_TIER, true);
 
         Assert.assertTrue(authenticationContext.isAuthenticated());
         Assert.assertEquals(splitToken[2], authenticationContext.getApiKey());

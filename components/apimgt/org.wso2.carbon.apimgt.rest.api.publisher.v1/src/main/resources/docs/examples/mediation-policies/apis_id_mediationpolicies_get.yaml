@@ -1,7 +1,7 @@
 - title : get mediation policies of an api
   request:
     method: GET
-    url: https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d/mediation-policies
+    url: https://localhost:9443/api/am/publisher/v1/apis/a8f0fb89-edf9-484c-b937-036b088f287d/mediation-policies
     headers: |
       Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
   response:

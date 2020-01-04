@@ -37,6 +37,8 @@ import KeyConfiguration from './KeyConfiguration';
 import ViewKeys from './ViewKeys';
 import WaitingForApproval from './WaitingForApproval';
 import { ScopeValidation, resourceMethods, resourcePaths } from '../ScopeValidation';
+import TokenMangerSummary from './TokenManagerSummary';
+import Progress from '../Progress';
 
 const styles = theme => ({
     root: {
@@ -364,7 +366,7 @@ class TokenManager extends React.Component {
      */
     render() {
         const {
-            classes, selectedApp, keyType,
+            classes, selectedApp, keyType, summary,
         } = this.props;
         const {
             keys, keyRequest, notFound, isKeyJWT, providedConsumerKey,
@@ -382,6 +384,23 @@ class TokenManager extends React.Component {
         const key = keys.get(keyType);
         if (key && key.token) {
             keyRequest.validityTime = key.token.validityTime;
+        }
+        if (summary) {
+            if (keys) {
+                return (
+                    <TokenMangerSummary
+                        keys={keys}
+                        key={key}
+                        keyStates={this.keyStates}
+                        selectedApp={selectedApp}
+                        keyType={keyType}
+                        isKeyJWT={isKeyJWT}
+                        isUserOwner={isUserOwner}
+                    />
+                );
+            } else {
+                return (<Progress />);
+            }
         }
         if (keys.size > 0 && key && key.keyState === 'APPROVED' && !key.consumerKey) {
             return (
@@ -603,6 +622,7 @@ class TokenManager extends React.Component {
 }
 TokenManager.defaultProps = {
     updateSubscriptionData: () => {},
+    summary: false,
 };
 TokenManager.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
@@ -616,6 +636,7 @@ TokenManager.propTypes = {
     keyType: PropTypes.string.isRequired,
     updateSubscriptionData: PropTypes.func,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
+    summary: PropTypes.bool,
 };
 
 export default injectIntl(withStyles(styles)(TokenManager));

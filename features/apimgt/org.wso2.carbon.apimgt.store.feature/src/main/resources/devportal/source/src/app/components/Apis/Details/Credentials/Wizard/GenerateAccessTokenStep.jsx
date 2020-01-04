@@ -49,7 +49,7 @@ const generateAccessTokenStep = (props) => {
             .then((application) => {
                 application.getKeys().then(() => {
                     const subscriptionScopesList = application.subscriptionScopes
-                        .map((scope) => { return scope.scopeKey; });
+                        .map((scope) => { return scope.key; });
                     setSubscriptionScopes(subscriptionScopesList);
                 });
             }).catch((error) => {
@@ -89,7 +89,7 @@ const generateAccessTokenStep = (props) => {
     };
 
     return (
-        <React.Fragment>
+        <>
             <Tabs
                 value={0}
                 variant='fullWidth'
@@ -110,7 +110,7 @@ const generateAccessTokenStep = (props) => {
                 currentStep={currentStep}
                 handleCurrentStep={generateAccessToken}
             />
-        </React.Fragment>
+        </>
     );
 };
 

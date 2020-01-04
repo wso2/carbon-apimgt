@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -16,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Icon from '@material-ui/core/Icon';
@@ -24,8 +25,13 @@ import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
 import View from 'AppComponents/Apis/Details/Documents/View';
 import Typography from '@material-ui/core/Typography';
+import { matchPath } from 'react-router';
+import API from 'AppData/api';
+import Progress from 'AppComponents/Shared/Progress';
+import Alert from 'AppComponents/Shared/Alert';
+import DocList from './DocList';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     fullView: {
         cursor: 'pointer',
         position: 'absolute',
@@ -50,17 +56,22 @@ const useStyles = makeStyles(theme => ({
         marginTop: 50,
     },
 }));
-
+/**
+ * Switch routes for documents.
+ * @param {JSON} props The props passed down from parents.
+ * @returns {JSX} Returning JSX to render.
+ */
 export default function Details(props) {
-    const apiId = props.match.params.apiUuid;
+    // const restApi = new API();
+    const { documentList, apiId, selectedDoc } = props;
     const classes = useStyles();
     const [open, setOpen] = useState(false);
-    const { selectedDoc } = props;
+    // const [doc, setDoc] = useState(null);
     const toggleOpen = () => {
         setOpen(!open);
     };
     return (
-        <React.Fragment>
+        <>
             <Paper className={classes.paper}>
                 {(selectedDoc.sourceType === 'MARKDOWN' || selectedDoc.sourceType === 'INLINE') && (
                     <Icon className={classes.fullView} onClick={toggleOpen}>
@@ -80,6 +91,6 @@ export default function Details(props) {
                     <View doc={selectedDoc} apiId={apiId} fullScreen={open} />
                 </div>
             </Dialog>
-        </React.Fragment>
+        </>
     );
 }

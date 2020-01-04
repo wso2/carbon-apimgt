@@ -65,7 +65,7 @@ const subscrbeToApps = (props) => {
     const appPlaceholder = appLength > 0
         ? intl.formatMessage({
             defaultMessage: 'Applications',
-            id: 'Apis.Details.Credentials.SubscibeToApps.application',
+            id: 'Apis.Details.Credentials.SubscibeToApps.applications',
         }) : intl.formatMessage({
             defaultMessage: 'Application',
             id: 'Apis.Details.Credentials.SubscibeToApps.application',

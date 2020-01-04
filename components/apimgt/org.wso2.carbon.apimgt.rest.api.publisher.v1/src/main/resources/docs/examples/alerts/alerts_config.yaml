@@ -2,7 +2,7 @@ get:
   - id: GetAlertConfigurations
     request:
       method: GET
-      url: https://localhost:9443/api/am/publisher/v1.0/alerts/AbnormalRequestTime/configurations
+      url: https://localhost:9443/api/am/publisher/v1/alerts/AbnormalRequestTime/configurations
       headers: |
         Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
     response:
@@ -30,7 +30,7 @@ put:
   - id: AddAlertConfiguration
     request:
       method: PUT
-      url: https://localhost:9443/api/am/publisher/v1.0/alerts/AbnormalRequestTime/configurations/UGl6emFTaGFja0FQSSMxLjAuMA
+      url: https://localhost:9443/api/am/publisher/v1/alerts/AbnormalRequestTime/configurations/UGl6emFTaGFja0FQSSMxLjAuMA
       headers: |
         Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
         Content-Type: application/json
@@ -61,7 +61,7 @@ delete:
   - id: RemoveAlertConfiguration
     request:
       method: DELETE
-      url: https://localhost:9443/api/am/publisher/v1.0/alerts/AbnormalRequestTime/configurations/UGl6emFTaGFja0FQSSMxLjAuMA
+      url: https://localhost:9443/api/am/publisher/v1/alerts/AbnormalRequestTime/configurations/UGl6emFTaGFja0FQSSMxLjAuMA
       headers: |
         Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
         Content-Type: application/json

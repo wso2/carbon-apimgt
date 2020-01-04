@@ -147,7 +147,7 @@ class Wizard extends Component {
                                 <FormattedMessage
                                     id={'Apis.Details.Credentials.Credentials'
                              + '.api.credentials.generate'}
-                                    defaultMessage='Key Generation Wizard'
+                                    defaultMessage='Subscription &amp; Key Generation Wizard'
                                 />
                             </Typography>
                         </Box>

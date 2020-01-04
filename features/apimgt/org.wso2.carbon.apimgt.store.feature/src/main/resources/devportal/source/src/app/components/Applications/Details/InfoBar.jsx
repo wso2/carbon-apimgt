@@ -23,7 +23,6 @@ import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Collapse from '@material-ui/core/Collapse';
 import Icon from '@material-ui/core/Icon';
-import Hidden from '@material-ui/core/Hidden';
 import IconButton from '@material-ui/core/IconButton';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Loading from 'AppComponents/Base/Loading/Loading';
@@ -43,7 +42,6 @@ import AuthManager from 'AppData/AuthManager';
 const styles = (theme) => {
     const mainBack = theme.custom.infoBar.background || '#ffffff';
     const infoBarHeight = theme.custom.infoBar.height || 70;
-    const backIconDisplay = theme.custom.infoBar.showBackIcon ? 'flex' : 'none';
     const starColor = theme.custom.infoBar.starColor || theme.palette.getContrastText(mainBack);
 
     return {
@@ -232,6 +230,9 @@ const styles = (theme) => {
             maxWidth: 980,
             lineHeight: 1.3,
         },
+        linkTitle: {
+            color: theme.palette.getContrastText(theme.custom.infoBar.background),
+        },
     };
 };
 /**
@@ -380,38 +381,13 @@ class InfoBar extends React.Component {
         return (
             <div className={classes.infoBarMain}>
                 <div className={classes.root}>
-                    <Link to='/applications' className={classes.backLink}>
-                        <Icon className={classes.backIcon}>keyboard_arrow_left</Icon>
-                        <div className={classes.backText}>
-                            <FormattedMessage id='Applications.Details.InfoBar.new.back.to' defaultMessage='BACK TO' />{' '}
-                            <br />
-                            <FormattedMessage id='Applications.Details.InfoBar.listing' defaultMessage='LISTING' />
-                        </div>
-                    </Link>
-                    <VerticalDivider height={70} />
                     <Grid item xs={10}>
                         <div style={{ marginLeft: theme.spacing(1) }}>
-                            <Hidden smUp>
-                                <Typography className={classes.appNameXSmall} variant='h4'>
-                                    {application.name}
-                                </Typography>
-                            </Hidden>
-
-                            <Hidden xsDown mdUp>
-                                <Typography className={classes.appNameSmall} variant='h4'>
-                                    {application.name}
-                                </Typography>
-                            </Hidden>
-                            <Hidden smDown lgUp>
-                                <Typography className={classes.appNameMid} variant='h4'>
-                                    {application.name}
-                                </Typography>
-                            </Hidden>
-                            <Hidden mdDown xlUp>
-                                <Typography className={classes.appNameBig} variant='h4'>
-                                    {application.name}
-                                </Typography>
-                            </Hidden>
+                            <Link to={'/applications/' + application.id + '/overview'} className={classes.linkTitle}>
+                                <Typography variant='h4'>{application.name}</Typography>
+                            </Link>
+                        </div>
+                        <div style={{ marginLeft: theme.spacing(1) }}>
                             <Typography variant='caption' gutterBottom align='left'>
                                 {application.subscriptionCount}{' '}
                                 <FormattedMessage
@@ -483,7 +459,7 @@ class InfoBar extends React.Component {
                                 />
                             )}
                         >
-                            <Icon >delete</Icon>
+                            <Icon>delete</Icon>
                             <Typography variant='caption' style={{ marginTop: '2px' }} >
                                 <FormattedMessage
                                     id='Applications.Details.InfoBar.text'
@@ -497,60 +473,6 @@ class InfoBar extends React.Component {
                             toggleDeleteConfirmation={this.toggleDeleteConfirmation}
                         />
                     </Grid>
-                </div>
-                {position === 'horizontal' && <div style={{ height: 60 }} />}
-                {showOverview && (
-                    <Collapse in={showOverview} timeout='auto' unmountOnExit>
-                        <div className={classes.infoContent}>
-                            <div className={classes.contentWrapper}>
-                                <div className={classes.topBar}>
-                                    <div className={classes.infoItem}>
-                                        <Typography variant='subtitle1' gutterBottom>
-                                            {application.throttlingPolicy}{' '}
-                                            <Typography variant='caption'>({tierDescription} )</Typography>
-                                        </Typography>
-                                        <Typography variant='caption' gutterBottom align='left'>
-                                            <FormattedMessage
-                                                id='Applications.Details.InfoBar.throttling.tier'
-                                                defaultMessage='Throttling Tier'
-                                            />
-                                        </Typography>
-                                    </div>
-                                    {Object.entries(application.attributes).map(([key, value]) =>
-                                        (value !== '' ? (
-                                            <div className={classes.infoItem} key={key}>
-                                                <Typography variant='subtitle1' gutterBottom>
-                                                    {key}
-                                                    {' : '}
-                                                    <Typography variant='caption'>{value}</Typography>
-                                                </Typography>
-                                            </div>
-                                        ) : null))}
-                                </div>
-                                <Typography>{application.description}</Typography>
-                            </div>
-                        </div>
-                    </Collapse>
-                )}
-                <div className={classes.infoContentBottom}>
-                    <div
-                        className={classes.contentWrapper}
-                        onClick={this.toggleOverview}
-                        onKeyDown={this.toggleOverview}
-                    >
-                        <div className={classes.buttonView}>
-                            {showOverview ? (
-                                <Typography className={classes.buttonOverviewText}>
-                                    <FormattedMessage id='Applications.Details.InfoBar.less' defaultMessage='LESS' />
-                                </Typography>
-                            ) : (
-                                <Typography className={classes.buttonOverviewText}>
-                                    <FormattedMessage id='Applications.Details.InfoBar.more' defaultMessage='MORE' />
-                                </Typography>
-                            )}
-                            {showOverview ? <Icon>arrow_drop_up_circle</Icon> : <Icon>arrow_drop_down_circle</Icon>}
-                        </div>
-                    </div>
                 </div>
             </div>
         );

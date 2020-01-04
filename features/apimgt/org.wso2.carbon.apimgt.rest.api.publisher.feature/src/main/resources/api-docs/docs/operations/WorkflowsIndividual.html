@@ -2,50 +2,18 @@
     <h1><a name="Workflows (Individual)"></a>Workflows (Individual)</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="workflowsUpdateWorkflowStatusPost"></a>Update workflow status</h4> <code>POST https://apis.wso2.com/api/am/publisher/v0.15/workflows/update-workflow-status</code>
+            <h4 class="operation-heading"><a name="workflowsUpdateWorkflowStatusPost"></a>Update workflow status</h4> <code>POST https://apis.wso2.com/api/am/publisher/v0.16/workflows/update-workflow-status</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to approve or reject a workflow task.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:api_workflow</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:api_workflow' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+                <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-workflowsUpdateWorkflowStatusPost">
-                <h4 class="section-heading">
-                    Request
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-
-                <div id="request-workflowsUpdateWorkflowStatusPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v0.15/workflows/update-workflow-status?workflowReferenceId&#x3D;56e3a170-a7a7-45f8-b051-7e43a58a67e1
-Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-Content-Type: application/json
-
-{
-   &quot;status&quot; : &quot;APPROVED&quot;,
-   &quot;attributes&quot; : {
-      &quot;apiCurrentState&quot;: &quot;Created&quot;,
-      &quot;apiLCAction&quot;: &quot;Publish&quot;,
-      &quot;apiName&quot;:&quot;APIname&quot;,
-      &quot;apiVersion&quot; : &quot;1.0.0&quot;,
-      &quot;apiProvider&quot; : &quot;admin&quot;,
-      &quot;invoker&quot;: &quot;admin&quot;
-   }
-}</code></div>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-workflowsUpdateWorkflowStatusPost">
-                <h4 class="section-heading">
-                    Response
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-                <div id="response-workflowsUpdateWorkflowStatusPost" class="pre collapse in"><code class="json">HTTP/1.1 200 OK</code></div>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://localhost:9443/api/am/publisher/v0.15/workflows/update-workflow-status?workflowReferenceId&#x3D;56e3a170-a7a7-45f8-b051-7e43a58a67e1&quot;</code></div>
-
-
+            <h4 class="section-heading">
+                Examples
+            </h4>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -67,17 +35,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-
+                            
                             <span class="param-in">Query </span>
-
-
-
+                            
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>workflowReferenceId</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -95,17 +63,17 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
-
+                            
+                            
+                            
+                            
                             <span class="param-in">Body </span>
                         </td>
                         <td class="param-name">
                             <p>body</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>

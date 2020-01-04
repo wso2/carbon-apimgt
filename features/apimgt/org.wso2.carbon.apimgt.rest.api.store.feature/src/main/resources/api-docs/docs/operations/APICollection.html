@@ -3,7 +3,7 @@
 
             <hr/>
             <h4 class="operation-heading"><a name="apisGet"></a>Retrieve/Search APIs
-</h4> <code>GET https://apis.wso2.com/api/am/store/v0.15/apis</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v0.16/apis</code>
             <p class="marked"></p>
 
             <p class="marked">This operation provides you a list of available APIs qualifying under a given search condition.
@@ -20,66 +20,9 @@ This operation supports retriving APIs of other tenants. The required tenant dom
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
                 <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-apisGet">
-                <h4 class="section-heading">
-                    Request
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-
-                <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.15/apis
-</code></div>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-apisGet">
-                <h4 class="section-heading">
-                    Response
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-                <div id="response-apisGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-   &quot;previous&quot;: &quot;&quot;,
-   &quot;list&quot;:    [
-            {
-         &quot;provider&quot;: &quot;admin&quot;,
-         &quot;version&quot;: &quot;1.0.0&quot;,
-         &quot;description&quot;: &quot;This API provide Account Status Validation.&quot;,
-         &quot;status&quot;: &quot;PUBLISHED&quot;,
-         &quot;name&quot;: &quot;AccountVal&quot;,
-         &quot;context&quot;: &quot;/account/1.0.0&quot;,
-         &quot;id&quot;: &quot;2e81f147-c8a8-4f68-b4f0-69e0e7510b01&quot;
-      },
-            {
-         &quot;provider&quot;: &quot;admin&quot;,
-         &quot;version&quot;: &quot;1.0.0&quot;,
-         &quot;description&quot;: null,
-         &quot;status&quot;: &quot;PUBLISHED&quot;,
-         &quot;name&quot;: &quot;api1&quot;,
-         &quot;context&quot;: &quot;/api1/1.0.0&quot;,
-         &quot;id&quot;: &quot;3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e&quot;
-      },
-            {
-         &quot;provider&quot;: &quot;admin&quot;,
-         &quot;version&quot;: &quot;2.0.0&quot;,
-         &quot;description&quot;: &quot;Verify a phone number&quot;,
-         &quot;status&quot;: &quot;PUBLISHED&quot;,
-         &quot;name&quot;: &quot;PhoneVerification&quot;,
-         &quot;context&quot;: &quot;/phoneverify/2.0.0&quot;,
-         &quot;id&quot;: &quot;c43a325c-260b-4302-81cb-768eafaa3aed&quot;
-      }
-   ],
-   &quot;count&quot;: 3,
-   &quot;next&quot;: &quot;&quot;
-}</code></div>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl https://localhost:9443/api/am/store/v0.15/apis</code></div>
-
-            <h4 class="section-heading">Sample CURL - for tenant</h4>
-            <div class="pre"><code class="bash">curl -k -H &quot;X-WSO2-Tenant:test.com&quot; https://localhost:9443/api/am/store/v0.15/apis</code></div>
-
+            <h4 class="section-heading">
+                Examples
+            </h4>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -101,16 +44,16 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-
+                            
                             <span class="param-in">Query </span>
-
-
-
+                            
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>limit</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -129,16 +72,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
+                            
                             <span class="param-in">Query </span>
-
-
-
+                            
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>offset</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -157,16 +100,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>X-WSO2-Tenant</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -186,16 +129,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
+                            
                             <span class="param-in">Query </span>
-
-
-
+                            
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>query</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -230,16 +173,16 @@ given query string against API Name.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -258,16 +201,16 @@ given query string against API Name.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -317,7 +260,259 @@ variant of the resource.
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h4 class="operation-heading"><a name="searchGet"></a>Retrieve/Search APIs and API Documents by content
+</h4> <code>GET https://apis.wso2.com/api/am/store/v0.16/search</code>
+            <p class="marked"></p>
 
+            <p class="marked">This operation provides you a list of available APIs and API Documents qualifying the given keyword match.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <p>Not required</p>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>limit</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Maximum size of resource array to return.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                Integer
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">25</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>offset</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Starting point within the complete list of items qualified.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                Integer
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">0</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>X-WSO2-Tenant</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
+  retirieved from.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>query</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**Search**.
+
+You can search by using providing the search term in the query parameters.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>Accept</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Media types acceptable for the response. Default is application/json.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">application/json</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resource.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. List of qualifying APIs and docs is returned. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#SearchResultList">SearchResultList</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
                             </span>
                         </td>
                     </tr>

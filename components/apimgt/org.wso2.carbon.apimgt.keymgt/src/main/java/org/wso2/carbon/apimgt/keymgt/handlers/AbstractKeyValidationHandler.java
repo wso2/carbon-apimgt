@@ -143,4 +143,23 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         return false;
     }
 
+    @Override
+    public APIKeyValidationInfoDTO validateSubscription(String apiContext, String apiVersion, String consumerKey) {
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO =  new APIKeyValidationInfoDTO();
+
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Before validating subscriptions");
+                log.debug("Validation Info : { context : " + apiContext + " , " + "version : "
+                        + apiVersion + " , consumerKey : " + consumerKey + " }");
+            }
+            dao.validateSubscriptionDetails(apiContext, apiVersion, consumerKey, apiKeyValidationInfoDTO);
+            if (log.isDebugEnabled()) {
+                log.debug("After validating subscriptions");
+            }
+        } catch (APIManagementException e) {
+            log.error("Error Occurred while validating subscription.", e);
+        }
+        return apiKeyValidationInfoDTO;
+    }
 }
