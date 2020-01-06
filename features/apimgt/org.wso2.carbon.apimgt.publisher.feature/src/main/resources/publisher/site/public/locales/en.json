@@ -512,6 +512,7 @@
   "Apis.Details.Monetization.Index.monetization.disabled.successfully": "Monetization Disabled Successfully",
   "Apis.Details.Monetization.Index.monetization.properties": "Monetization Properties",
   "Apis.Details.Monetization.Index.save": "Save",
+  "Apis.Details.Monetization.Index.cancel": "Cancel",
   "Apis.Details.Monetization.Index.something.went.wrong.while.configuring.monetization": "Something went wrong while configuring monetization",
   "Apis.Details.Monetization.Index.there.are.no .monetization.properties.configured": "There are no monetization properties configured",
   "Apis.Details.Monetization.Index.update.not.allowed": "* You are not authorized to update API monetization due to insufficient permissions",
