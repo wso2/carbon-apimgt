@@ -542,7 +542,9 @@ APIDesigner.prototype.init_controllers = function(){
         var deleteData = $(this).attr("data-path");
         var i = $(this).attr("data-index");
 
-        var deleteDataArray = deleteData.split(".");
+        var regex = /\.(?![^\[\]]*\])/;
+        //this regex pattern will skip the split if the dot is found inside a square bracket
+        var deleteDataArray = deleteData.split(regex);
         var operations = deleteDataArray[2].replace(/]|[[]|'/g, '');
         var operation = deleteDataArray[3];
         var paramName = API_DESIGNER.api_doc.paths[operations][operation]['parameters'][i]['name'];
