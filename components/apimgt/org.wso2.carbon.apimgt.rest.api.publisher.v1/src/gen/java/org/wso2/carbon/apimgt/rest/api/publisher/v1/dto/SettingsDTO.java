@@ -156,6 +156,10 @@ public class SettingsDTO   {
     return this;
   }
 
+<<<<<<< HEAD
+=======
+  
+>>>>>>> correcting cluster info retrival path with DTOs
   @ApiModelProperty(value = "")
   @JsonProperty("deployments")
   public List<DeploymentsDTO> getDeployments() {
