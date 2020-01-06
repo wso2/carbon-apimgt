@@ -81,13 +81,15 @@ class AuthManager {
     static getUser(environmentName = Utils.getCurrentEnvironment().label) {
         const userData = localStorage.getItem(`${User.CONST.LOCALSTORAGE_USER}_${environmentName}`);
         const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1, environmentName);
+        const refreshToken = Utils.getCookie(User.CONST.WSO2_AM_REFRESH_TOKEN_1, environmentName);
+
         const isLoginCookie = Utils.getCookie('IS_LOGIN', 'DEFAULT');
         if (isLoginCookie) {
             Utils.deleteCookie('IS_LOGIN', Settings.app.context, 'DEFAULT');
             localStorage.removeItem(`${User.CONST.LOCALSTORAGE_USER}_${environmentName}`);
             return null;
         }
-        if (!(userData && partialToken)) {
+        if (!(userData && (partialToken || refreshToken))) {
             return null;
         }
 
@@ -120,7 +122,7 @@ class AuthManager {
             { credentials: 'same-origin' },
         );
         return promisedResponse
-            .then(response => response.json())
+            .then((response) => response.json())
             .then((data) => {
                 let user = null;
                 let username;
@@ -220,7 +222,7 @@ class AuthManager {
 
         promised_response
             .then((response) => {
-                const validityPeriod = response.data.validityPeriod; // In seconds
+                const { validityPeriod } = response.data; // In seconds
                 const WSO2_AM_TOKEN_1 = response.data.partialToken;
                 const user = new User(Utils.getEnvironment().label, response.data.authUser, response.data.idToken);
                 user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Settings.app.context);
@@ -303,7 +305,7 @@ class AuthManager {
 
         promised_response
             .then((response) => {
-                const validityPeriod = response.data.validityPeriod;
+                const { validityPeriod } = response.data;
                 const WSO2_AM_TOKEN_1 = response.data.partialToken;
                 const user = new User(Utils.getEnvironment().label, response.data.authUser, response.data.idToken);
                 user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Settings.app.context);
@@ -316,5 +318,12 @@ class AuthManager {
         return promised_response;
     }
 }
+
+// TODO: derive this from swagger definitions ~tmkb
+AuthManager.CONST = {
+    USER_SCOPES:
+        'apim:api_key apim:app_manage apim:app_update apim:dedicated_gateway apim:self-signup '
+        + 'apim:store_settings apim:sub_alert_manage apim:sub_manage apim:subscribe openid',
+};
 
 export default AuthManager;

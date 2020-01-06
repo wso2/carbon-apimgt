@@ -78,7 +78,18 @@
     cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': accessTokenPart2, 'path': "/api/am/store/", "httpOnly": true, "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
     response.addCookie(cookie);
 
-    cookie = {'name': 'AM_REF_TOKEN_DEFAULT_P2', 'value': refreshTokenPart2, 'path': app.context + "/", "httpOnly": true, "secure": true, "maxAge": -1};
+    cookie = {'name': 'AM_REF_TOKEN_DEFAULT_P2', 'value': refreshTokenPart2, 'path': app.context + "/", "httpOnly": true, "secure": true,
+                "maxAge": 86400 // TODO: Default value a day, need to get this from idn configs ~tmkb
+            };
+    response.addCookie(cookie);
+
+    cookie = {
+        'name': 'WSO2_AM_REFRESH_TOKEN_1_Default',
+        'value': refreshTokenPart1,
+        'path': app.context + "/",
+        "secure": true,
+        "maxAge": 86400 // TODO: Default value a day, need to get this from idn configs ~tmkb
+    };
     response.addCookie(cookie);
 
     cookie = {'name': 'WSO2_AM_TOKEN_1_Default', 'value': accessTokenPart1, 'path': app.context + "/", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};

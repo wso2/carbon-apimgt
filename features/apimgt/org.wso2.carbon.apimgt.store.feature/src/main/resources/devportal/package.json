@@ -58,8 +58,8 @@
         "react-safe-html": "^0.6.1",
         "react-tagcloud": "^1.4.0",
         "react-tap-event-plugin": "^2.0.1",
-        "swagger-client": "3.4.8",
-        "swagger-ui": "3.22.2"
+        "swagger-client": "^3.9.6",
+        "swagger-ui": "^3.22.2"
     },
     "devDependencies": {
         "@babel/core": "^7.4.4",
