@@ -38,7 +38,7 @@ import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined'
 
 import DescriptionAndSummary from './operationComponents/DescriptionAndSummary';
 import OperationGovernance from './operationComponents/OperationGovernance';
-import AmznResourceName from './operationComponents/AmznResourceName';
+import AWSLambdaSettings from './operationComponents/AWSLambdaSettings';
 import Parameters from './operationComponents/Parameters';
 import SOAPToRESTListing from './operationComponents/SOAPToREST/SOAPToRESTListing';
 
@@ -66,6 +66,7 @@ function Operation(props) {
         resourcePoliciesDispatcher,
         target,
         verb,
+        arns,
     } = props;
     const [isExpanded, setIsExpanded] = useState(false);
     const useStyles = makeStyles((theme) => {
@@ -265,12 +266,12 @@ API product(s)
                             && api.endpointConfig.endpoint_type
                             && api.endpointConfig.endpoint_type === 'awslambda'
                             && (
-                                <AmznResourceName
-                                    api={api}
+                                <AWSLambdaSettings
                                     operation={operation}
                                     operationsDispatcher={operationsDispatcher}
                                     target={target}
                                     verb={verb}
+                                    arns={arns}
                                 />
                             )
                         }
@@ -309,6 +310,7 @@ Operation.propTypes = {
     spec: PropTypes.shape({}).isRequired,
     highlight: PropTypes.bool,
     operationRateLimits: PropTypes.arrayOf(PropTypes.shape({})),
+    arns: PropTypes.shape([]).isRequired,
 };
 
 export default React.memo(Operation);
