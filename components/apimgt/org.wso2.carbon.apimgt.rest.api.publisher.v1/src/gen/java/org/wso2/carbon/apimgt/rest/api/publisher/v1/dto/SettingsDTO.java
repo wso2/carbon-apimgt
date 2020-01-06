@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
 import javax.validation.constraints.*;
@@ -138,7 +139,7 @@ public class SettingsDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "")
   @JsonProperty("deployments")
   public List<DeploymentsDTO> getDeployments() {
@@ -147,8 +148,6 @@ public class SettingsDTO   {
   public void setDeployments(List<DeploymentsDTO> deployments) {
     this.deployments = deployments;
   }
-
-
 
 
   @Override
@@ -165,8 +164,8 @@ public class SettingsDTO   {
         Objects.equals(scopes, settings.scopes) &&
         Objects.equals(monetizationAttributes, settings.monetizationAttributes) &&
         Objects.equals(securityAuditProperties, settings.securityAuditProperties) &&
-            Objects.equals(externalStoresEnabled, settings.externalStoresEnabled) &&
-            Objects.equals(deployments, settings.deployments);
+        Objects.equals(externalStoresEnabled, settings.externalStoresEnabled) &&
+        Objects.equals(deployments, settings.deployments);
   }
 
   @Override
