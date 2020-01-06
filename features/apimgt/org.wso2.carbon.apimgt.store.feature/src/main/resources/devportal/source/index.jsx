@@ -20,11 +20,10 @@ import 'react-app-polyfill/ie11';
 import 'react-app-polyfill/stable';
 import ReactDOM from 'react-dom';
 import React from 'react';
-// import 'typeface./src/App.jsx
-import Store from './src/App';
+import DevPortal from './src/DevPortal';
 import './customPolyfill';
 
 ReactDOM.render(
-    <Store />,
+    <DevPortal />,
     document.getElementById('react-root'),
 );

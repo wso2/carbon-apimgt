@@ -663,6 +663,8 @@ export default class API extends Resource {
 
     /**
      * method to get store settings such as grant types, scopes, application sharing settings etc
+     * Settings API can be invoked with and without access token, When a token is not present it will return the public
+     * settings info, when a valid token is present it will return all the settings info.
      * @returns {Promise} promise object return from SwaggerClient-js
      * @memberof API
      */
