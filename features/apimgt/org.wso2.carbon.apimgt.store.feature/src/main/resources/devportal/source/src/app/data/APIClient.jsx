@@ -59,7 +59,7 @@ class APIClient {
             );
             SwaggerClient.http.withCredentials = true;
             return new SwaggerClient(argsv);
-        } );
+        });
         this._client.catch(AuthManager.unauthorizedErrorHandler);
         this.mutex = new Mutex();
     }
@@ -103,7 +103,7 @@ class APIClient {
         }
         return APIClient.spec.then((resolved) => {
             return resolved.spec.paths[resourcePath] && resolved.spec.paths[resourcePath][resourceMethod] && resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0];
-        } );
+        });
     }
 
     /**
@@ -183,30 +183,25 @@ class APIClient {
             }
 
             const env = this.environment;
-            const promise = new Promise((resolve, reject) => {
-                this.mutex.acquire().then((release) => {
-                    existingToken = AuthManager.getUser(env.label).getPartialToken();
-                    if (existingToken) {
-                        request.headers.authorization = 'Bearer ' + existingToken;
-                        release();
-                        resolve(request);
-                    } else {
-                        AuthManager.refresh(env).then(res => res.json())
-                            .then(() => {
-                                request.headers.authorization = 'Bearer '
-                                    + AuthManager.getUser(env.label).getPartialToken();
-                                release();
-                                resolve(request);
-                            }).catch((error) => {
-                                console.error('Error:', error);
-                                release();
-                                reject();
-                            })
-                            .finally(() => {
-                                release();
-                            });
-                    }
-                });
+            const promise = this.mutex.acquire().then((release) => {
+                existingToken = AuthManager.getUser(env.label).getPartialToken();
+                if (existingToken) {
+                    request.headers.authorization = 'Bearer ' + existingToken;
+                    release();
+                    return request;
+                } else {
+                    return AuthManager.refresh(env).then((res) => res.json())
+                        .then(() => {
+                            request.headers.authorization = 'Bearer '
+                                + AuthManager.getUser(env.label).getPartialToken();
+                            return request;
+                        }).catch((error) => {
+                            console.error('Error:', error);
+                        })
+                        .finally(() => {
+                            release();
+                        });
+                }
             });
 
             if (APIClient.getETag(request.url)
