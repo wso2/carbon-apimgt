@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
+//import io.swagger.inflector.examples.ExampleBuilder;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -80,6 +81,11 @@ import java.util.Set;
 public class OAS2Parser extends APIDefinition {
     private static final Log log = LogFactory.getLog(OAS2Parser.class);
     private static final String SWAGGER_SECURITY_SCHEMA_KEY = "default";
+
+    @Override
+    public String genExample(String apiDefinition) {
+        return null;
+    }
 
     /**
      * This method returns URI templates according to the given swagger file

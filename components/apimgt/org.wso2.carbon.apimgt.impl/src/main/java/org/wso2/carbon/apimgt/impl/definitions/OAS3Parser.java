@@ -20,6 +20,7 @@
 package org.wso2.carbon.apimgt.impl.definitions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.oas.inflector.examples.ExampleBuilder;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -83,6 +84,11 @@ import java.util.Set;
 public class OAS3Parser extends APIDefinition {
     private static final Log log = LogFactory.getLog(OAS3Parser.class);
     static final String OPENAPI_SECURITY_SCHEMA_KEY = "default";
+
+    @Override
+    public String genExample(String apiDefinition) {
+        return null;
+    }
 
     /**
      * This method returns URI templates according to the given swagger file

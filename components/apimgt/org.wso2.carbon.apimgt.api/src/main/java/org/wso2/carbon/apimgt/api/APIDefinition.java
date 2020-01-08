@@ -42,6 +42,8 @@ public abstract class APIDefinition {
     private static final Pattern CURLY_BRACES_PATTERN = Pattern.compile("(?<=\\{)(?!\\s*\\{)[^{}]+");
     public static final String KEEP_LEGACY_EXTENSION_PROP = "preserveLegacyExtensions";
 
+    public abstract String genExample(String apiDefinition);
+
     /**
      * This method extracts the URI templates from the API definition
      *

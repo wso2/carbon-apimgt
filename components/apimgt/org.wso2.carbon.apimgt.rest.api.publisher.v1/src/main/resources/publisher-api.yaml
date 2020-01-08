@@ -5418,7 +5418,7 @@ paths:
             Unsupported media type.
             The entity of the request was in a not supported format.
 
-            ######################################################
+  ######################################################
   # The "Individual Document" resource APIs
   ######################################################
   /api-products/{apiProductId}/documents/{documentId}:

@@ -116,6 +116,12 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.wso2.orbit.io.swagger</groupId>
+                    <artifactId>swagger-inflector</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
@@ -126,6 +132,11 @@
                     <artifactId>jackson-annotations</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-inflector</artifactId>
+            <version>2.0.0-rc3</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>

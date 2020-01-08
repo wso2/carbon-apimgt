@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.gson.Gson;
 import graphql.language.FieldDefinition;
 import graphql.language.ObjectTypeDefinition;
@@ -30,7 +31,20 @@ import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
+//import io.swagger.inflector.examples.ExampleBuilder;
+//import io.swagger.inflector.examples.models.Example;
+//import io.swagger.inflector.processors.JsonNodeExampleSerializer;
+import io.swagger.oas.inflector.examples.ExampleBuilder;
+import io.swagger.oas.inflector.examples.models.Example;
+import io.swagger.oas.inflector.processors.JsonNodeExampleSerializer;
+import io.swagger.util.Json;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.axiom.om.OMElement;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -1583,9 +1597,188 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+
+    /**
+     * Generates Mock response examples in Inline prototyping
+     * of a swagger
+     *
+     * @param apiId
+     * @param ifNoneMatch
+     * @param messageContext
+     * @return
+     * @throws APIManagementException
+     */
+
     @Override
     public Response apisApiIdGenerateMocksPost(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        APIIdentifier apiIdentifier = originalAPI.getId();
+        String swaggerDef = apiProvider.getOpenAPIDefinition(apiIdentifier);
 
+//        String swaggerWithExamples = OASParserUtil.generateExamples(swagger);
+
+
+        //return Response.ok().entity(apiToReturn).build();
+
+        OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
+        SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(swaggerDef, null, null);
+        if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
+            log.debug("Errors found when parsing OAS definition");
+        }
+        OpenAPI swagger = parseAttemptForV3.getOpenAPI();
+
+        System.out.println(swagger);
+
+        System.out.println(swagger.getInfo().getDescription());
+
+        for(Map.Entry<String, PathItem> entry : swagger.getPaths().entrySet()){
+
+            /**
+             * Gets Path of the operation
+             */
+
+            System.out.println(entry.getKey());
+
+
+            Map < String, Schema > definitions = swagger.getComponents().getSchemas();
+
+            try {
+
+                String path = entry.getKey();
+
+                /**
+                 POST Operation Examples
+                 **/
+
+                if(swagger.getPaths().get(path).getPost() != null) {
+
+                    Schema model = swagger.getPaths().get(path).getPost().getResponses().get("200").getContent().get("application/json").getSchema();
+
+
+                    Example example = ExampleBuilder.fromSchema(model, definitions);
+                    SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
+                    Json.mapper().registerModule(simpleModule);
+                    String jsonExample = Json.pretty(example);
+                    System.out.println(jsonExample);
+
+
+                    /**
+                     GET Operation Examples
+                     **/
+
+                }
+                if (swagger.getPaths().get(path).getGet() != null){
+
+                    Schema model = swagger.getPaths().get(path).getGet().getResponses().get("200").getContent().get("application/json").getSchema();
+
+
+                    Example example = ExampleBuilder.fromSchema(model, definitions);
+                    SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
+                    Json.mapper().registerModule(simpleModule);
+                    String jsonExample = Json.pretty(example);
+                    System.out.println(jsonExample);
+
+                    /**
+                     PUT Operation Examples
+                     **/
+
+
+                }
+                if (swagger.getPaths().get(path).getPut() != null) {
+
+
+                    Schema model = swagger.getPaths().get(path).getPut().getResponses().get("200").getContent().get("application/json").getSchema();
+
+
+                    Example example = ExampleBuilder.fromSchema(model, definitions);
+                    SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
+                    Json.mapper().registerModule(simpleModule);
+                    String jsonExample = Json.pretty(example);
+                    System.out.println(jsonExample);
+
+                    /**
+                     PATCH Operation Examples
+                     **/
+
+
+                }
+                if (swagger.getPaths().get(path).getPatch() != null){
+
+
+                    Schema model = swagger.getPaths().get(path).getPatch().getResponses().get("200").getContent().get("application/json").getSchema();
+
+
+                    Example example = ExampleBuilder.fromSchema(model, definitions);
+                    SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
+                    Json.mapper().registerModule(simpleModule);
+                    String jsonExample = Json.pretty(example);
+                    System.out.println(jsonExample);
+
+                    /**
+                     DELETE Operation Examples
+                     **/
+
+
+                }
+                if (swagger.getPaths().get(path).getDelete() != null) {
+
+
+                    Schema model = swagger.getPaths().get(path).getDelete().getResponses().get("200").getContent().get("application/json").getSchema();
+
+
+                    Example example = ExampleBuilder.fromSchema(model, definitions);
+                    SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
+                    Json.mapper().registerModule(simpleModule);
+                    String jsonExample = Json.pretty(example);
+                    System.out.println(jsonExample);
+
+                    /**
+                     HEAD Operation Examples
+                     **/
+
+
+                }
+                if (swagger.getPaths().get(path).getHead() != null) {
+
+
+                    Schema model = swagger.getPaths().get(path).getHead().getResponses().get("200").getContent().get("application/json").getSchema();
+
+
+                    Example example = ExampleBuilder.fromSchema(model, definitions);
+                    SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
+                    Json.mapper().registerModule(simpleModule);
+                    String jsonExample = Json.pretty(example);
+                    System.out.println(jsonExample);
+
+
+                    /**
+                     OPTIONS Operation Examples
+                     **/
+
+
+                } if (swagger.getPaths().get(path).getOptions() != null) {
+
+
+                    Schema model = swagger.getPaths().get(path).getOptions().getResponses().get("200").getContent().get("application/json").getSchema();
+
+
+                    Example example = ExampleBuilder.fromSchema(model, definitions);
+                    SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
+                    Json.mapper().registerModule(simpleModule);
+                    String jsonExample = Json.pretty(example);
+                    System.out.println(jsonExample);
+
+                }
+
+            }catch (NullPointerException e){
+
+                System.out.println("No Examples Defined In Spec");
+
+            }
+
+        }
 
         return null;
     }
@@ -1622,6 +1815,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 ExternalStoreMappingUtil.fromAPIExternalStoreCollectionToDTO(publishedStores);
         return Response.ok().entity(apiExternalStoreListDTO).build();
     }
+
+
     /**
      * Retrieves API Lifecycle history information
      *
