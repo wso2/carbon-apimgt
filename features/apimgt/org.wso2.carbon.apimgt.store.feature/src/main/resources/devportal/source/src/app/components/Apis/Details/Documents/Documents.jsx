@@ -22,19 +22,10 @@ import { ResourceNotFound } from 'AppComponents/Base/Errors/index';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { withStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Icon from '@material-ui/core/Icon';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
-import CustomIcon from 'AppComponents/Shared/CustomIcon';
-import useWindowSize from 'AppComponents/Shared/UseWindowSize';
-import { PageNotFound } from 'AppComponents/Base/Errors';
 import Progress from 'AppComponents/Shared/Progress';
 import { matchPath } from 'react-router';
 import DocList from 'AppComponents/Apis/Details/Documents/DocList';
@@ -85,7 +76,7 @@ const styles = (theme) => ({
         paddingTop: theme.spacing(3),
     },
     titleSub: {
-        marginLeft: theme.spacing(2),
+        marginLeft: theme.spacing(3),
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
     },
@@ -127,9 +118,9 @@ const styles = (theme) => ({
     },
     docContainer: {
         display: 'flex',
-        marginLeft: 20,
-        marginRight: 20,
-        marginTop: 20,
+        marginLeft: theme.spacing(3),
+        marginRight: theme.spacing(2),
+        marginTop: theme.spacing(2),
     },
     docListWrapper: {
         width: 285,

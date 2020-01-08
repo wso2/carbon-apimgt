@@ -48,7 +48,7 @@ const styles = (theme) => ({
         paddingTop: theme.spacing(3),
     },
     titleSub: {
-        marginLeft: theme.spacing(2),
+        marginLeft: theme.spacing(3),
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
     },
@@ -99,7 +99,7 @@ const styles = (theme) => ({
         flex: 1,
     },
     paper: {
-        marginLeft: theme.spacing(2),
+        marginLeft: theme.spacing(3),
         padding: theme.spacing(2),
     },
     descWrapper: {

@@ -15,7 +15,7 @@ const Configurations = {
                     contrastText: '#ffcc00',
                 },
                 background: {
-                    default: '#efefef',
+                    default: '#f9f9f9',
                     paper: '#ffffff',
                     drawer: '#1a1f2f',
                 },
@@ -25,6 +25,9 @@ const Configurations = {
                 fontSize: 12,
                 body2: {
                     lineHeight: 2,
+                },
+                h4: {
+                    fontWeight: 200,
                 },
             },
             custom: {
@@ -54,6 +57,7 @@ const Configurations = {
                     width: 180,
                     background: '#222',
                     leftMenuActive: '#254061',
+                    leftMenuActiveSubmenu: '#0d1723',
                     activeBackground: '#191e46',
                     rootIconVisible: true,
                     rootIconSize: 42,

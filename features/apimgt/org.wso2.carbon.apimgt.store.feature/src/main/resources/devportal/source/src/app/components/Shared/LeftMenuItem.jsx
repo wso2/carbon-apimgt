@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /*
  * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -24,7 +25,7 @@ import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import CustomIcon from './CustomIcon';
 
-const styles = theme => ({
+const styles = (theme) => ({
     leftLInkText: {
         color: theme.palette.getContrastText(theme.custom.leftMenu.background),
         textTransform: 'capitalize',
@@ -73,24 +74,30 @@ const styles = theme => ({
     leftLInkText_NoText: {
         display: 'none',
     },
+    submenu: {
+        paddingLeft: theme.spacing(4),
+    },
 });
+/**
+ * Renders the left menu section.
+ * @param {JSON} props props passed from parent
+ * @returns {JSX} Leftmenu element.
+ */
 function LeftMenuItem(props) {
     const [selected, setSelected] = useState(false);
 
     const {
-        classes, theme, Icon, to, history, text, route,
+        classes, theme, Icon, to, history, text, route, submenu,
     } = props;
     const routeToCheck = route || text;
     const { leftMenu } = theme.custom;
     const strokeColor = theme.palette.getContrastText(leftMenu.background);
-    const iconSize = leftMenu.iconSize;
+    const { iconSize } = leftMenu;
     const ditectCurrentMenu = (location) => {
         const { pathname } = location;
         const test1 = new RegExp('/' + routeToCheck + '$', 'g');
         const test2 = new RegExp('/' + routeToCheck + '/', 'g');
         if (pathname.match(test1) || pathname.match(test2)) {
-            setSelected(true);
-        } else if(pathname.split('/').length <= 3 && routeToCheck === 'overview'){
             setSelected(true);
         } else {
             setSelected(false);
@@ -103,30 +110,38 @@ function LeftMenuItem(props) {
     history.listen((location) => {
         ditectCurrentMenu(location);
     });
-
+    let activeBackground = '';
+    if(selected && !submenu) {
+        activeBackground = leftMenu.leftMenuActive;
+    } else if ( selected && submenu ) {
+        activeBackground = leftMenu.leftMenuActiveSubmenu;
+    } 
     return (
         <Link
             className={classNames(
                 classes.leftLInk,
                 {
                     [classes.leftLink_IconLeft]: leftMenu === 'icon left',
+                    [classes.submenu]: submenu,
                 },
                 'leftLInk',
             )}
             to={to}
-            style={{ backgroundColor: selected ? leftMenu.leftMenuActive : '' }}
+            style={{ backgroundColor: activeBackground }}
         >
-            {// If the icon pro ( which is comming from the React Material library )
-            // is coming we add css class and render.
-            // If leftMenu='no icon' at the theme object we hide the icon. Also we add static classes to
-            // allow customers theme
-            // the product without compiling.
+            {!submenu && (
+                // If the icon pro ( which is comming from the React Material library )
+                // is coming we add css class and render.
+                // If leftMenu='no icon' at the theme object we hide the icon. Also we add static classes to
+                // allow customers theme
+                // the product without compiling.
                 Icon ? (
                     React.cloneElement(Icon, {
                         className: classNames(
                             classes.leftLink_Icon,
                             {
                                 [classes.noIcon]: leftMenu.style === 'no icon',
+                                [classes.submenu]: submenu,
                             },
                             'leftLink_Icon',
                         ),
@@ -146,7 +161,7 @@ function LeftMenuItem(props) {
                             'leftLink_Icon',
                         )}
                     />
-                )}
+                ))}
             <Typography
                 className={classNames(
                     classes.leftLInkText,
@@ -166,6 +181,7 @@ LeftMenuItem.defaultProps = {
     route: null,
     iconText: null,
     Icon: null,
+    submenu: false,
 };
 LeftMenuItem.propTypes = {
     classes: PropTypes.shape({}).isRequired,
@@ -173,13 +189,14 @@ LeftMenuItem.propTypes = {
     Icon: PropTypes.element,
     text: PropTypes.oneOfType([
         PropTypes.string,
-        PropTypes.shape({})
-      ]).isRequired,
+        PropTypes.shape({}),
+    ]).isRequired,
     to: PropTypes.string.isRequired,
     route: PropTypes.string,
     iconText: PropTypes.string,
     history: PropTypes.shape({
         location: PropTypes.shape({}).isRequired,
     }).isRequired,
+    submenu: PropTypes.bool,
 };
 export default withRouter(withStyles(styles, { withTheme: true })(LeftMenuItem));

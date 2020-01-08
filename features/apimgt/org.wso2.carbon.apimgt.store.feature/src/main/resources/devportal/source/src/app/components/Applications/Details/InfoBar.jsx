@@ -24,6 +24,7 @@ import Typography from '@material-ui/core/Typography';
 import Collapse from '@material-ui/core/Collapse';
 import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
@@ -383,7 +384,7 @@ class InfoBar extends React.Component {
                 <div className={classes.root}>
                     <Grid item xs={10}>
                         <div style={{ marginLeft: theme.spacing(1) }}>
-                            <Link to={'/applications/' + application.id + '/overview'} className={classes.linkTitle}>
+                            <Link to={'/applications/' + applicationId + '/overview'} className={classes.linkTitle}>
                                 <Typography variant='h4'>{application.name}</Typography>
                             </Link>
                         </div>
@@ -401,7 +402,7 @@ class InfoBar extends React.Component {
                     <Grid item xs={1} m={1} className={classes.editButton}>
                         {isUserOwner ? (
                             <Link to={`/applications/${applicationId}/edit/`} className={classes.editButton}>
-                                <IconButton
+                                <Button
                                     style={{ padding: '4px' }}
                                     color='default'
                                     classes={{ label: classes.iconButton }}
@@ -419,10 +420,10 @@ class InfoBar extends React.Component {
                                             defaultMessage='Edit'
                                         />
                                     </Typography>
-                                </IconButton>
+                                </Button>
                             </Link>) :
                             (
-                                <IconButton
+                                <Button
                                     disabled
                                     style={{ padding: '4px' }}
                                     color='default'
@@ -441,17 +442,16 @@ class InfoBar extends React.Component {
                                             defaultMessage='Edit'
                                         />
                                     </Typography>
-                                </IconButton>
+                                </Button>
                             )}
                     </Grid>
                     <VerticalDivider height={70} />
                     <Grid item xs={1} m={1} className={classes.button}>
-                        <IconButton
+                        <Button
                             onClick={this.handleDeleteConfimation}
                             disabled={AuthManager.getUser().name !== applicationOwner}
                             color='default'
                             classes={{ label: classes.iconButton }}
-                            disableRipple
                             aria-label={(
                                 <FormattedMessage
                                     id='Applications.Details.InfoBar.delete'
@@ -466,7 +466,7 @@ class InfoBar extends React.Component {
                                     defaultMessage='Delete'
                                 />
                             </Typography>
-                        </IconButton>
+                        </Button>
                         <DeleteConfirmation
                             handleAppDelete={this.handleAppDelete}
                             isDeleteOpen={isDeleteOpen}
