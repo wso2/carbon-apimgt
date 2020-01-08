@@ -1620,6 +1620,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 //        String swaggerWithExamples = OASParserUtil.generateExamples(swagger);
 
 
+
         //return Response.ok().entity(apiToReturn).build();
 
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
