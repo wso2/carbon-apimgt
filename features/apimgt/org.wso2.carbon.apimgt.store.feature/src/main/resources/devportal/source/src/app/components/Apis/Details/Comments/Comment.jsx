@@ -63,7 +63,8 @@ const styles = (theme) => ({
         marginTop: theme.spacing(1),
     },
     paper: {
-        margin: theme.spacing(3),
+        margin: 0,
+        marginRight: theme.spacing(3),
         paddingBottom: theme.spacing(3),
     },
     cleanBack: {

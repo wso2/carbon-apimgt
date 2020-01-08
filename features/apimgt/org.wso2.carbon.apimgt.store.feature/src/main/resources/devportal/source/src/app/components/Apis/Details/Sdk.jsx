@@ -41,7 +41,7 @@ const styles = theme => ({
         margin: theme.spacing(2),
     },
     titleSub: {
-        marginLeft: theme.spacing(2),
+        marginLeft: theme.spacing(3),
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
     },

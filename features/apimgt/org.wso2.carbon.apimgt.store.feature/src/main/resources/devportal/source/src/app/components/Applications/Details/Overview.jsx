@@ -124,10 +124,7 @@ function Overview(props) {
     if (!application) {
         return <Loading />;
     }
-    const { titleIconColor } = theme.custom.overview;
-    const { titleIconSize } = theme.custom.overview;
     const pathPrefix = '/applications/' + applicationId;
-    console.info(application);
     return (
         <>
             <Paper className={classes.root}>
@@ -263,7 +260,7 @@ function Overview(props) {
                         </ExpansionPanelDetails>
                         <Divider />
                         <ExpansionPanelActions className={classes.actionPanel}>
-                            <Link to={pathPrefix + '/productionkeys'} className={classes.button}>
+                            <Link to={pathPrefix + '/productionkeys/oauth'} className={classes.button}>
                                 <Button size='small' color='primary'>
                                     <FormattedMessage
                                         id='Applications.Details.Overview.show.more'
@@ -302,7 +299,7 @@ function Overview(props) {
                         </ExpansionPanelDetails>
                         <Divider />
                         <ExpansionPanelActions className={classes.actionPanel}>
-                            <Link to={pathPrefix + '/sandboxkeys'} className={classes.button}>
+                            <Link to={pathPrefix + '/sandboxkeys/oauth'} className={classes.button}>
                                 <Button size='small' color='primary'>
                                     <FormattedMessage
                                         id='Applications.Details.Overview.show.more'

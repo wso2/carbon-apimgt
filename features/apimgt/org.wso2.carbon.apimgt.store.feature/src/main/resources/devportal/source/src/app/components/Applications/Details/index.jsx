@@ -138,7 +138,6 @@ class Details extends Component {
         this.state = {
             application: null,
             active: 'overview',
-            secScheme: 'Oauth',
         };
     }
 
@@ -177,26 +176,10 @@ class Details extends Component {
         this.setState({ active: menuLink });
     };
 
-
-    handleChange = (event, secScheme) => {
-        this.setState({ secScheme });
-    }
-
-    renderManager = (application, keyType) => {
+    renderManager = (application, keyType, secScheme) => {
         return (
             <Paper>
-                <Tabs
-                    value={this.state.secScheme}
-                    onChange={this.handleChange}
-                    indicatorColor='primary'
-                    textColor='primary'
-                    variant='fullWidth'
-                    scrollButtons='auto'
-                >
-                    <Tab label='Oauth' value='Oauth' />
-                    <Tab label='ApiKey' value='ApiKey' />
-                </Tabs>
-                {this.state.secScheme === 'Oauth' && (
+                {secScheme === 'oauth' && (
                     <div>
                         <TokenManager
                             keyType={keyType}
@@ -210,7 +193,7 @@ class Details extends Component {
                         />
                     </div>
                 )}
-                {this.state.secScheme === 'ApiKey' && (
+                {secScheme === 'apikey' && (
                     <div>
                         <ApiKeyManager
                             keyType={keyType}
@@ -245,7 +228,6 @@ class Details extends Component {
                 },
             },
         } = theme;
-        const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
         if (notFound) {
             return <ResourceNotFound />;
         } else if (!application) {
@@ -278,10 +260,14 @@ class Details extends Component {
                             )}
                         </Link>
                     )}
-                    <LeftMenuItem text='overview' iconText='overview' route='overview' to={pathPrefix + '/overview'} />
-                    <LeftMenuItem text='production keys' route='productionkeys' to={pathPrefix + '/productionkeys'} Icon={<VpnKeyIcon />} />
-                    <LeftMenuItem text='sandbox keys' route='sandBoxkeys' to={pathPrefix + '/sandBoxkeys'} Icon={<VpnKeyIcon />} />
-                    <LeftMenuItem text='subscriptions' iconText='subscriptions' route='subscriptions' to={pathPrefix + '/subscriptions'} />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.overview' defaultMessage='Overview' />} iconText='overview' route='overview' to={pathPrefix + '/overview'} />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.prod.keys' defaultMessage='Production Keys' />} route='productionkeys' to={pathPrefix + '/productionkeys/oauth'} Icon={<VpnKeyIcon />} />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.oauth.tokens' defaultMessage='OAuth2 Tokens' />} route='productionkeys/oauth' to={pathPrefix + '/productionkeys/oauth'} submenu />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.api.key' defaultMessage='Api Key' />} route='productionkeys/apikey' to={pathPrefix + '/productionkeys/apikey'} submenu />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.sandbox.keys' defaultMessage='Sandbox Keys' />} route='sandboxkeys' to={pathPrefix + '/sandboxkeys/oauth'} Icon={<VpnKeyIcon />} />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.oauth.tokens' defaultMessage='OAuth2 Tokens' />} route='sandboxkeys/oauth' to={pathPrefix + '/sandboxkeys/oauth'} submenu />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.api.key' defaultMessage='Api Key' />} route='sandboxkeys/apikey' to={pathPrefix + '/sandboxkeys/apikey'} submenu />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.subscriptions' defaultMessage='Subscriptions' />} iconText='subscriptions' route='subscriptions' to={pathPrefix + '/subscriptions'} />
                 </div>
                 <div className={classes.content}>
                     <InfoBar applicationId={match.params.application_uuid} innerRef={node => (this.infoBar = node)} />
@@ -298,12 +284,20 @@ class Details extends Component {
                                 component={Overview}
                             />
                             <Route
-                                path='/applications/:applicationId/productionkeys'
-                                component={() => (this.renderManager(application, 'PRODUCTION'))}
+                                path='/applications/:applicationId/productionkeys/oauth'
+                                component={() => (this.renderManager(application, 'PRODUCTION', 'oauth'))}
                             />
                             <Route
-                                path='/applications/:applicationId/sandBoxkeys'
-                                component={() => (this.renderManager(application, 'SANDBOX'))}
+                                path='/applications/:applicationId/productionkeys/apikey'
+                                component={() => (this.renderManager(application, 'PRODUCTION', 'apikey'))}
+                            />
+                            <Route
+                                path='/applications/:applicationId/sandboxkeys/oauth'
+                                component={() => (this.renderManager(application, 'SANDBOX', 'oauth'))}
+                            />
+                            <Route
+                                path='/applications/:applicationId/sandboxkeys/apikey'
+                                component={() => (this.renderManager(application, 'SANDBOX', 'apikey'))}
                             />
                             <Route path='/applications/:applicationId/subscriptions' component={Subscriptions} />
                             <Route component={ResourceNotFound} />
