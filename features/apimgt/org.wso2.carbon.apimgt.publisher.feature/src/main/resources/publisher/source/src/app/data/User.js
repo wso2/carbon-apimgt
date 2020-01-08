@@ -140,6 +140,20 @@ export default class User {
     }
 
     /**
+     *  Get tenant domain from username
+     * sc1 - normal time : td is always carbon.super
+     * sc2 - tenanted : td can be something
+     * sc3 - tenanted : td can be carbon.super
+     */
+    getTenantDomain() {
+        const domains = this.name.split('@');
+        if (domains.length > 1) {
+            return domains[domains.length - 1];
+        }
+        return null;
+    }
+
+    /**
      * Provide user data in JSON structure.
      * @returns {JSON} - JSON representation of the user object
      */

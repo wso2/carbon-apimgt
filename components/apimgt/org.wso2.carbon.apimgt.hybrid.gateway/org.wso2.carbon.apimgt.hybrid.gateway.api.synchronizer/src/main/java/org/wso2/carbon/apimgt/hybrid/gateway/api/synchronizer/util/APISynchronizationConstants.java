@@ -35,7 +35,7 @@ public class APISynchronizationConstants {
     public static final String API_NAME = "name";
     public static final String API_SEQUENCE = "sequence";
     public static final String API_VERSION_PARAM = "{version}";
-    public static final String API_DEFAULT_VERSION = "v0.15";
+    public static final String API_DEFAULT_VERSION = "v0.16";
     public static final String URL_PATH_SEPARATOR = "/";
     public static final String CLOUD_API = "cloud";
     public static final String QUESTION_MARK = "?";
@@ -45,4 +45,5 @@ public class APISynchronizationConstants {
     public static final String PAGINATION_LIMIT_PREFIX = "limit=";
     public static final String PAGINATION_LIMIT = "500";
     public static final String CHARSET_UTF8 = "UTF-8";
+    public static final String SEQUENCE_NAME = "name";
 }

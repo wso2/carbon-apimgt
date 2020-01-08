@@ -28,6 +28,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -134,6 +135,7 @@ import org.wso2.carbon.governance.custom.lifecycles.checklist.beans.LifecycleBea
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleBeanPopulator;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.Property;
+import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.common.CommonConstants;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
@@ -145,6 +147,7 @@ import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
+import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
@@ -186,7 +189,6 @@ import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.retrieveSavedEmailList;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -769,6 +771,33 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateResourceThrottlingTiers(api, tenantDomain);
+
+        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+
+        //Add default API LC if it is not there
+        try {
+            if (!CommonUtil.lifeCycleExists(APIConstants.API_LIFE_CYCLE,
+                    registryService.getConfigSystemRegistry(tenantId))) {
+                String defaultLifecyclePath = CommonUtil.getDefaltLifecycleConfigLocation() + File.separator
+                        + APIConstants.API_LIFE_CYCLE + APIConstants.XML_EXTENSION;
+                File file = new File(defaultLifecyclePath);
+                String content = null;
+                if (file != null && file.exists()) {
+                    content = FileUtils.readFileToString(file);
+                }
+                if (content != null) {
+                    CommonUtil.addLifecycle(content, registryService.getConfigSystemRegistry(tenantId),
+                            CommonUtil.getRootSystemRegistry(tenantId));
+                }
+            }
+        } catch (RegistryException e) {
+            handleException("Error occurred while adding default APILifeCycle.", e);
+        } catch (IOException e) {
+            handleException("Error occurred while loading APILifeCycle.xml.", e);
+        } catch (XMLStreamException e) {
+            handleException("Error occurred while adding default API LifeCycle.", e);
+        }
+
         createAPI(api);
 
         if (log.isDebugEnabled()) {
@@ -1236,29 +1265,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (gatewayExists && isAPIPublished && !oldApi.getUriTemplates().equals(api.getUriTemplates())) {
                 Set<URITemplate> resourceVerbs = api.getUriTemplates();
 
-                Map<String, Environment> gatewayEns = config.getApiGatewayEnvironments();
-                for (Environment environment : gatewayEns.values()) {
-                    try {
-                        if (resourceVerbs != null) {
-                            for (URITemplate resourceVerb : resourceVerbs) {
-                                String resourceURLContext = resourceVerb.getUriTemplate();
-                                invalidateResourceCache(api.getContext(), api.getId().getVersion(),
-                                        resourceURLContext, resourceVerb.getHTTPVerb(), environment);
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Calling invalidation cache");
-                                }
+
+                    if (resourceVerbs != null) {
+                            invalidateResourceCache(api.getContext(), api.getId().getVersion(),resourceVerbs);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Calling invalidation cache");
                             }
-                        }
-                    } catch (AxisFault ex) {
-                             /*
-                            didn't throw this exception to handle multiple gateway publishing feature therefore
-                            this didn't break invalidating cache from the all the gateways if one gateway is
-                            unreachable
-                             */
-                        log.error("Error while invalidating from environment " +
-                                environment.getName(), ex);
                     }
-                }
 
             }
 
@@ -1902,7 +1915,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        gatewayManager.setProductResourceSequences(this, apiProduct, tenantDomain);
+        gatewayManager.setProductResourceSequences(this, apiProduct);
 
         try {
             builder = getAPITemplateBuilder(apiProduct);
@@ -2214,11 +2227,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private Map<String, String> removeFromGateway(APIProduct apiProduct) throws APIManagementException {
         String tenantDomain = null;
+
         if (apiProduct.getId().getProviderName().contains("AT")) {
             String provider = apiProduct.getId().getProviderName().replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        } else {
+            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
-
         Map<String, String> failedEnvironment = removeFromGateway(apiProduct, tenantDomain);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + apiProduct.getId().getName() + ", API Version " + apiProduct.getId().getVersion()
@@ -3203,6 +3218,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), visibility, authorizedRoles, filePath,
                         registry);
+                registry.addAssociation(artifact.getPath(), filePath, APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
             }
 
         } catch (RegistryException e) {
@@ -3561,7 +3577,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
             } else {
-                log.debug("Gateway is not existed for the current API Provider");
+                log.debug("Gateway does not exist for the current API Provider");
             }
             //Check if there are already published external APIStores.If yes,removing APIs from them.
             Set<APIStore> apiStoreSet = getPublishedExternalAPIStores(api.getId());
@@ -5684,25 +5700,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 policyLevel = PolicyConstants.POLICY_LEVEL_API;
 
                 APIManagerConfiguration config = getAPIManagerConfiguration();
-                Map<String, Environment> gatewayEns = config.getApiGatewayEnvironments();
-                for (Environment environment : gatewayEns.values()) {
-                    try {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Calling invalidation cache for API Policy for tenant ");
-                        }
-                        String policyContext = APIConstants.POLICY_CACHE_CONTEXT + "/t/" + apiPolicy.getTenantDomain()
-                                + "/";
-                        invalidateResourceCache(policyContext, null, null, null, environment);
-
-                    } catch (AxisFault ex) {
-                        /*
-                         * didn't throw this exception to handle multiple gateway publishing feature therefore
-                         * this didn't break invalidating cache from the all the gateways if one gateway is
-                         * unreachable
-                         */
-                        log.error("Error while invalidating from environment " + environment.getName(), ex);
+                if (log.isDebugEnabled()) {
+                        log.debug("Calling invalidation cache for API Policy for tenant ");
                     }
-                }
+                    String policyContext = APIConstants.POLICY_CACHE_CONTEXT + "/t/" + apiPolicy.getTenantDomain()
+                            + "/";
+                    invalidateResourceCache(policyContext, null, Collections.EMPTY_SET);
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
@@ -6446,10 +6449,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     }
 
-    protected void invalidateResourceCache(String apiContext, String apiVersion, String resourceURLContext,
-                                           String httpVerb, Environment environment) throws AxisFault {
-        APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
-        client.invalidateResourceCache(apiContext, apiVersion, resourceURLContext, httpVerb);
+    protected void invalidateResourceCache(String apiContext, String apiVersion,Set<URITemplate> uriTemplates) {
+        APIAuthenticationAdminClient client = new APIAuthenticationAdminClient();
+        client.invalidateResourceCache(apiContext, apiVersion, uriTemplates);
     }
 
     protected ThrottlePolicyTemplateBuilder getThrottlePolicyTemplateBuilder() {
@@ -6607,6 +6609,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         rolesQuery.append('(');
         rolesQuery.append(APIConstants.NULL_USER_ROLE_LIST);
         String[] userRoles = APIUtil.getListOfRoles(userNameWithoutChange);
+        String skipRolesByRegex = APIUtil.getSkipRolesByRegex();
+        if (StringUtils.isNotEmpty(skipRolesByRegex)) {
+            List<String> filteredUserRoles = new ArrayList<>(Arrays.asList(userRoles));
+            String[] regexList = skipRolesByRegex.split(",");
+            for (int i = 0; i < regexList.length; i++) {
+                Pattern p = Pattern.compile(regexList[i]);
+                Iterator<String> itr = filteredUserRoles.iterator();
+                while(itr.hasNext()) {
+                    String role = itr.next();
+                    Matcher m = p.matcher(role);
+                    if (m.matches()) {
+                        itr.remove();
+                    }
+                }
+            }
+            userRoles = filteredUserRoles.toArray(new String[0]);
+        }
         if (userRoles != null) {
             for (String userRole : userRoles) {
                 rolesQuery.append(" OR ");
@@ -7667,5 +7686,71 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
         return getGraphqlSchemaDefinition(apiId);
+    }
+
+    /**
+     * This method returns the security audit properties
+     *
+     * @param userId user id
+     * @return JSONObject security audit properties
+     * @throws APIManagementException
+     */
+    public JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
+
+        int tenantId = 0;
+        try {
+            tenantId = getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            handleException("Error in getting tenantId of: " + tenantDomain, e);
+        }
+        JSONObject securityAuditConfig = APIUtil.getSecurityAuditAttributesFromRegistry(tenantId);
+        if (securityAuditConfig != null) {
+            if ((securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL) != null) &&
+                    (Boolean) securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL)) {
+                String apiToken = (String) securityAuditConfig.get(APIConstants.SECURITY_AUDIT_API_TOKEN);
+                String collectionId = (String) securityAuditConfig.get(APIConstants.SECURITY_AUDIT_COLLECTION_ID);
+                JSONObject tenantProperties = new JSONObject();
+
+                if (StringUtils.isNotEmpty(apiToken) && StringUtils.isNotEmpty(collectionId)) {
+                    tenantProperties.put(APIConstants.SECURITY_AUDIT_API_TOKEN, apiToken);
+                    tenantProperties.put(APIConstants.SECURITY_AUDIT_COLLECTION_ID, collectionId);
+                    return tenantProperties;
+                }
+            } else {
+                return getSecurityAuditConfigurationProperties(tenantDomain);
+            }
+        } else {
+            return getSecurityAuditConfigurationProperties(tenantDomain);
+        }
+        return null;
+    }
+
+    /**
+     * This method returns security audit properties from the API Manager Configuration
+     *
+     * @param tenantDomain tenant domain name
+     * @return JSONObject security audit properties
+     */
+    private JSONObject getSecurityAuditConfigurationProperties(String tenantDomain) {
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String apiToken = configuration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_API_TOKEN);
+        String collectionId = configuration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_CID);
+        String baseUrl = configuration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_BASE_URL);
+        boolean isGlobal = Boolean.parseBoolean(configuration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_GLOBAL));
+        JSONObject configProperties = new JSONObject();
+
+        if (StringUtils.isNotEmpty(apiToken) && StringUtils.isNotEmpty(collectionId)) {
+            configProperties.put(APIConstants.SECURITY_AUDIT_API_TOKEN, apiToken);
+            configProperties.put(APIConstants.SECURITY_AUDIT_COLLECTION_ID, collectionId);
+            configProperties.put(APIConstants.SECURITY_AUDIT_BASE_URL, baseUrl);
+            if (isGlobal || "carbon.super".equals(tenantDomain)) {
+                return configProperties;
+            } else {
+                return null;
+            }
+        }
+        return null;
     }
 }

@@ -30,7 +30,7 @@ public class DocumentDTO  {
   private String summary = null;
   
   public enum SourceTypeEnum {
-     INLINE, MARKDOWN, URL, FILE,
+     INLINE,  MARKDOWN,  URL,  FILE, 
   };
   @NotNull
   private SourceTypeEnum sourceType = null;

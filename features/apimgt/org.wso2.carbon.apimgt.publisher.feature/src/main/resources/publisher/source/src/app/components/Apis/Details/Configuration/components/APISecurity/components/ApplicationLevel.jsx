@@ -45,9 +45,9 @@ import {
     API_SECURITY_API_KEY,
     API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY,
     API_SECURITY_MUTUAL_SSL,
-} from '../APISecurity';
+} from './apiSecurityConstants';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     expansionPanel: {
         marginBottom: theme.spacing(1),
     },
@@ -85,8 +85,8 @@ export default function ApplicationLevel(props) {
 
     let mandatoryValue = 'optional';
     // If not Oauth2, Basic auth or ApiKey security is selected, no mandatory values should be pre-selected
-    if (!(securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2) || securityScheme.includes(API_SECURITY_BASIC_AUTH) ||
-        securityScheme.includes(API_SECURITY_API_KEY))) {
+    if (!(securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2) || securityScheme.includes(API_SECURITY_BASIC_AUTH)
+        || securityScheme.includes(API_SECURITY_API_KEY))) {
         mandatoryValue = null;
     } else if (!securityScheme.includes(API_SECURITY_MUTUAL_SSL)) {
         mandatoryValue = API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY;
@@ -95,7 +95,7 @@ export default function ApplicationLevel(props) {
     }
 
     return (
-        <React.Fragment>
+        <>
             <Grid item xs={12}>
                 <ExpansionPanel className={classes.expansionPanel}>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
@@ -106,20 +106,20 @@ export default function ApplicationLevel(props) {
                                 defaultMessage='Application Level Security'
                             />
                             <Tooltip
-                                title={
+                                title={(
                                     <FormattedMessage
                                         id='Apis.Details.Configuration.components.APISecurity.tooltip'
                                         defaultMessage={
-                                            'This option determines the type of security' +
-                                            ' that will be used to secure this API. An API can be secured ' +
-                                            'with either OAuth2/Basic/ApiKey or it can be secured with all of them. ' +
-                                            'If OAuth2 option is selected, relevant API will require a valid ' +
-                                            'OAuth2 token for successful invocation. If Mutual SSL option is ' +
-                                            'selected, a trusted client certificate should be presented to access' +
-                                            'the API'
+                                            'This option determines the type of security'
+                                            + ' that will be used to secure this API. An API can be secured '
+                                            + 'with either OAuth2/Basic/ApiKey or it can be secured with all of them. '
+                                            + 'If OAuth2 option is selected, relevant API will require a valid '
+                                            + 'OAuth2 token for successful invocation. If Mutual SSL option is '
+                                            + 'selected, a trusted client certificate should be presented to access'
+                                            + 'the API'
                                         }
                                     />
-                                }
+                                )}
                                 aria-label='APISecurity'
                                 placement='right-end'
                                 interactive
@@ -138,8 +138,7 @@ export default function ApplicationLevel(props) {
                                         onChange={({ target: { checked, value } }) => configDispatcher({
                                             action: 'securityScheme',
                                             event: { checked, value },
-                                        })
-                                        }
+                                        })}
                                         value={DEFAULT_API_SECURITY_OAUTH2}
                                         color='primary'
                                     />
@@ -154,8 +153,7 @@ export default function ApplicationLevel(props) {
                                         onChange={({ target: { checked, value } }) => configDispatcher({
                                             action: 'securityScheme',
                                             event: { checked, value },
-                                        })
-                                        }
+                                        })}
                                         value={API_SECURITY_BASIC_AUTH}
                                         color='primary'
                                     />
@@ -163,20 +161,18 @@ export default function ApplicationLevel(props) {
                                 label='Basic'
                             />
                             <FormControlLabel
-                                control={
+                                control={(
                                     <Checkbox
                                         checked={securityScheme.includes(API_SECURITY_API_KEY)}
                                         disabled={isRestricted(['apim:api_create'], apiFromContext)}
-                                        onChange={({ target: { checked, value } }) =>
-                                            configDispatcher({
-                                                action: 'securityScheme',
-                                                event: { checked, value },
-                                            })
-                                        }
+                                        onChange={({ target: { checked, value } }) => configDispatcher({
+                                            action: 'securityScheme',
+                                            event: { checked, value },
+                                        })}
                                         value={API_SECURITY_API_KEY}
                                         color='primary'
                                     />
-                                }
+                                )}
                                 label='Api Key'
                             />
                         </FormGroup>
@@ -188,31 +184,30 @@ export default function ApplicationLevel(props) {
                                 onChange={({ target: { name, value } }) => configDispatcher({
                                     action: 'securityScheme',
                                     event: { name, value },
-                                })
-                                }
+                                })}
                                 row
                             >
                                 <FormControlLabel
                                     value={API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY}
-                                    control={
+                                    control={(
                                         <Radio
-                                            disabled={!haveMultiLevelSecurity ||
-                                                isRestricted(['apim:api_create'], apiFromContext)}
+                                            disabled={!haveMultiLevelSecurity
+                                                || isRestricted(['apim:api_create'], apiFromContext)}
                                             color='primary'
                                         />
-                                    }
+                                    )}
                                     label='Mandatory'
                                     labelPlacement='end'
                                 />
                                 <FormControlLabel
                                     value='optional'
-                                    control={
+                                    control={(
                                         <Radio
-                                            disabled={!haveMultiLevelSecurity ||
-                                                isRestricted(['apim:api_create'], apiFromContext)}
+                                            disabled={!haveMultiLevelSecurity
+                                                || isRestricted(['apim:api_create'], apiFromContext)}
                                             color='primary'
                                         />
-                                    }
+                                    )}
                                     label='Optional'
                                     labelPlacement='end'
                                 />
@@ -228,7 +223,7 @@ export default function ApplicationLevel(props) {
                     </ExpansionPanelDetails>
                 </ExpansionPanel>
             </Grid>
-        </React.Fragment>
+        </>
     );
 }
 

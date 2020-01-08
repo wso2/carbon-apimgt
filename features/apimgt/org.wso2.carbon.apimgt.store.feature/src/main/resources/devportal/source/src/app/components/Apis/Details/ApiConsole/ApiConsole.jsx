@@ -22,6 +22,7 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
+import { Radio, RadioGroup, FormControlLabel, FormControl } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -46,6 +47,9 @@ const styles = theme => ({
     buttonIcon: {
         marginRight: 10,
     },
+    centerItems: {
+        margin: 'auto',
+    },
     inputAdornmentStart: {
         minWidth: theme.spacing(18),
     },
@@ -54,13 +58,13 @@ const styles = theme => ({
         padding: theme.spacing(1),
     },
     grid: {
-        marginTop: theme.spacing.unit * 4,
-        marginBottom: theme.spacing.unit * 4,
-        paddingRight: theme.spacing.unit * 2,
+        marginTop: theme.spacing(4),
+        marginBottom: theme.spacing(4),
+        paddingRight: theme.spacing(2),
         justifyContent: 'center',
     },
     userNotificationPaper: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
     },
     titleSub: {
         marginLeft: theme.spacing(2),
@@ -84,7 +88,10 @@ class ApiConsole extends React.Component {
      */
     constructor(props) {
         super(props);
-        this.state = { showToken: false };
+        this.state = {
+            showToken: false,
+            securitySchemeType: 'OAUTH',
+        };
         this.handleChanges = this.handleChanges.bind(this);
         this.accessTokenProvider = this.accessTokenProvider.bind(this);
         this.handleClickShowToken = this.handleClickShowToken.bind(this);
@@ -112,8 +119,6 @@ class ApiConsole extends React.Component {
         let accessToken;
 
         this.apiClient = new Api();
-
-
         const promiseAPI = this.apiClient.getAPIById(apiID);
 
         promiseAPI
@@ -145,7 +150,8 @@ class ApiConsole extends React.Component {
             })
             .then((subscriptionsResponse) => {
                 if (subscriptionsResponse != null) {
-                    subscriptions = subscriptionsResponse.obj.list.filter(item => item.status === 'UNBLOCKED');
+                    subscriptions = subscriptionsResponse.obj.list.filter(item => item.status === 'UNBLOCKED'
+                    || item.status === 'PROD_ONLY_BLOCKED');
 
                     if (subscriptions && subscriptions.length > 0) {
                         selectedApplication = subscriptions[0].applicationId;
@@ -256,6 +262,9 @@ class ApiConsole extends React.Component {
             case 'selectedKeyType':
                 this.setState({ [name]: value }, this.updateAccessToken);
                 break;
+            case 'securityScheme':
+                this.setState({ securitySchemeType: value });
+                break;
             default:
                 this.setState({ [name]: value });
         }
@@ -304,17 +313,26 @@ class ApiConsole extends React.Component {
      * @memberof ApiConsole
      */
     updateApplication() {
-        const { selectedApplication, selectedKeyType } = this.state;
+        const { selectedApplication, selectedKeyType, subscriptions } = this.state;
         const promiseApp = Application.get(selectedApplication);
         let accessToken;
+        let keyType;
+
+        if (subscriptions != null && subscriptions.find(sub => sub.applicationId
+            === selectedApplication).status === 'PROD_ONLY_BLOCKED') {
+            this.setState({ selectedKeyType: 'SANDBOX' });
+            keyType = 'SANDBOX';
+        } else {
+            keyType = selectedKeyType;
+        }
 
         promiseApp
             .then((application) => {
                 return application.getKeys();
             })
             .then((appKeys) => {
-                if (appKeys.get(selectedKeyType)) {
-                    ({ accessToken } = appKeys.get(selectedKeyType).token);
+                if (appKeys.get(keyType)) {
+                    ({ accessToken } = appKeys.get(keyType).token);
                 }
                 this.setState({ accessToken, keys: appKeys });
             });
@@ -328,11 +346,9 @@ class ApiConsole extends React.Component {
         const { classes } = this.props;
         const {
             api, notFound, swagger, accessToken, showToken, subscriptions, selectedApplication, selectedKeyType,
-            selectedEnvironment, environments, labels,
+            selectedEnvironment, environments, labels, securitySchemeType,
         } = this.state;
         const user = AuthManager.getUser();
-
-
         const downloadSwagger = JSON.stringify({ ...swagger });
         const downloadLink = 'data:text/json;charset=utf-8, ' + encodeURIComponent(downloadSwagger);
         const fileName = 'swagger.json';
@@ -343,8 +359,16 @@ class ApiConsole extends React.Component {
         if (notFound) {
             return 'API Not found !';
         }
-
-        const authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
+        let isApiKeyEnabled = false;
+        let authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
+        let prefix = 'Bearer';
+        if (api && api.securityScheme) {
+            isApiKeyEnabled = api.securityScheme.includes('api_key');
+            if (isApiKeyEnabled && securitySchemeType === 'API-KEY') {
+                authorizationHeader = 'apikey';
+                prefix = '';
+            }
+        }
         const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
 
         return (
@@ -374,7 +398,7 @@ class ApiConsole extends React.Component {
                             </Grid>
                         )}
                         {!isPrototypedAPI &&
-                        <Grid xs={12} md={12}>
+                        <Grid xs={12} md={12} item>
                             <Box display='block'>
                                 {user && subscriptions && subscriptions.length > 0 && (
                                     <SelectAppPanel
@@ -382,8 +406,8 @@ class ApiConsole extends React.Component {
                                         handleChanges={this.handleChanges}
                                         selectedApplication={selectedApplication}
                                         selectedKeyType={selectedKeyType}
-                                        selectedEnvironment={selectedEnvironment}
-                                        environments={environments}
+                                        // selectedEnvironment={selectedEnvironment}
+                                        // environments={environments}
                                     />
                                 )}
                                 {subscriptions && subscriptions.length === 0 && (
@@ -398,7 +422,7 @@ class ApiConsole extends React.Component {
 
                                 )}
                                 <Box display='flex' justifyContent='center'>
-                                    <Grid xs={12} md={6}>
+                                    <Grid xs={12} md={6} item>
                                         {((environments && environments.length > 0) || (labels && labels.length > 0))
                                         && (
                                             <TextField
@@ -411,7 +435,6 @@ class ApiConsole extends React.Component {
                                                 value={selectedEnvironment}
                                                 name='selectedEnvironment'
                                                 onChange={this.handleChanges}
-                                                SelectProps={environments}
                                                 helperText={<FormattedMessage
                                                     defaultMessage='Please select an environment'
                                                     id='Apis.Details.ApiConsole.SelectAppPanel.select.an.environment'
@@ -431,7 +454,7 @@ class ApiConsole extends React.Component {
                                                 )}
                                                 {environments && (
                                                     environments.map(env => (
-                                                        <MenuItem value={env}>
+                                                        <MenuItem value={env} key={env}>
                                                             {env}
                                                         </MenuItem>
                                                     )))}
@@ -447,7 +470,7 @@ class ApiConsole extends React.Component {
                                                 )}
                                                 {labels && (
                                                     labels.map(label => (
-                                                        <MenuItem value={label}>
+                                                        <MenuItem value={label} key={label}>
                                                             {label}
                                                         </MenuItem>
                                                     ))
@@ -456,8 +479,8 @@ class ApiConsole extends React.Component {
                                         )}
                                     </Grid>
                                 </Box>
-                                <Box display='flex' justifyContent='center'>
-                                    <Grid x={12} md={6}>
+                                <Box display='block' justifyContent='center'>
+                                    <Grid x={12} md={6} className={classes.centerItems} item>
                                         <TextField
                                             fullWidth
                                             margin='normal'
@@ -490,20 +513,43 @@ class ApiConsole extends React.Component {
                                                         className={classes.inputAdornmentStart}
                                                         position='start'
                                                     >
-                                                        {`${authorizationHeader}: Bearer`}
+                                                        {`${authorizationHeader}: ${prefix}`}
                                                     </InputAdornment>
                                                 ),
                                             }}
                                         />
+                                    </Grid>
+                                    <Grid x={12} md={6} className={classes.centerItems}>
+                                        {isApiKeyEnabled && (
+                                            <FormControl component='fieldset' >
+                                                <RadioGroup
+                                                    name='securityScheme'
+                                                    value={securitySchemeType}
+                                                    onChange={this.handleChanges}
+                                                    row
+                                                >
+                                                    <FormControlLabel
+                                                        value='OAUTH'
+                                                        control={<Radio />}
+                                                        label='OAUTH'
+                                                    />
+                                                    <FormControlLabel
+                                                        value='API-KEY'
+                                                        control={<Radio />}
+                                                        label='API-KEY'
+                                                    />
+                                                </RadioGroup>
+                                            </FormControl>
+                                        )}
                                     </Grid>
                                 </Box>
                             </Box>
                         </Grid>
                         }
 
-                        <Grid xs={12} container>
-                            <Grid xs={10} />
-                            <Grid xs={2}>
+                        <Grid container>
+                            <Grid xs={10} item />
+                            <Grid xs={2} item>
                                 <a href={downloadLink} download={fileName}>
                                     <Button size='small'>
                                         <CloudDownloadRounded className={classes.buttonIcon} />
@@ -530,13 +576,16 @@ class ApiConsole extends React.Component {
     }
 }
 
-ApiConsole.defaultProps = {
-    // handleInputs: false,
-};
-
 ApiConsole.propTypes = {
-    // handleInputs: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        paper: PropTypes.string.isRequired,
+        titleSub: PropTypes.string.isRequired,
+        grid: PropTypes.string.isRequired,
+        userNotificationPaper: PropTypes.string.isRequired,
+        inputAdornmentStart: PropTypes.string.isRequired,
+        buttonIcon: PropTypes.string.isRequired,
+        centerItems: PropTypes.string.isRequired,
+    }).isRequired,
 };
 
 export default withStyles(styles)(ApiConsole);

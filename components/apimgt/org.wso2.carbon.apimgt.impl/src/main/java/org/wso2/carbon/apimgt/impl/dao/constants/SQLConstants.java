@@ -126,6 +126,13 @@ public class SQLConstants {
                     "   AND APP.APPLICATION_ID= ? " +
                     "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
+    public static final String GET_INCLUDED_APIS_IN_PRODUCT_SQL =
+            "SELECT "
+                    + "DISTINCT API_ID "
+                    + "FROM AM_API_URL_MAPPING "
+                    + "WHERE URL_MAPPING_ID IN "
+                    + "(SELECT URL_MAPPING_ID FROM AM_API_PRODUCT_MAPPING WHERE API_ID = ?)";
+
     public static final String GET_SUBSCRIBED_APIS_OF_USER_BY_APP_SQL =
             " SELECT " +
                     "   API.API_PROVIDER AS API_PROVIDER," +
@@ -421,19 +428,14 @@ public class SQLConstants {
             " VALUES (?,?,?,?,?,?,?)";
 
     public static final String ADD_MONETIZATION_USAGE_PUBLISH_INFO =
-            " INSERT" +
-                    " INTO AM_MONETIZATION_USAGE (ID, STATE, STATUS, STARTED_TIME, PUBLISHED_TIME) " +
-                    " VALUES (?,?,?,?,?)";
+            " INSERT INTO AM_MONETIZATION_USAGE (ID, STATE, STATUS, STARTED_TIME, PUBLISHED_TIME) VALUES (?,?,?,?,?)";
 
     public static final String UPDATE_MONETIZATION_USAGE_PUBLISH_INFO =
-            " UPDATE AM_MONETIZATION_USAGE SET" +
-                    " STATE = ?, STATUS = ?, STARTED_TIME = ?, PUBLISHED_TIME = ?" +
+            " UPDATE AM_MONETIZATION_USAGE SET STATE = ?, STATUS = ?, STARTED_TIME = ?, PUBLISHED_TIME = ?" +
                     " WHERE ID = ?";
 
     public static final String GET_MONETIZATION_USAGE_PUBLISH_INFO =
-            " SELECT " +
-                    "ID, STATE, STATUS, STARTED_TIME, PUBLISHED_TIME " +
-                    "FROM AM_MONETIZATION_USAGE";
+            " SELECT ID, STATE, STATUS, STARTED_TIME, PUBLISHED_TIME FROM AM_MONETIZATION_USAGE";
 
     public static final String UPDATE_SUBSCRIBER_SQL =
             " UPDATE AM_SUBSCRIBER " +
@@ -1723,6 +1725,15 @@ public class SQLConstants {
             "SELECT API_ID, API_TIER FROM AM_API WHERE API_PROVIDER = ? " +
                     "AND API_NAME = ? AND API_VERSION = ? AND API_TYPE = '" + APIConstants.API_PRODUCT + "'";
 
+    public static final String GET_AUDIT_UUID_SQL =
+            "SELECT MAP.AUDIT_UUID FROM AM_SECURITY_AUDIT_UUID_MAPPING MAP WHERE MAP.API_ID = ?";
+
+    public static final String ADD_SECURITY_AUDIT_MAP_SQL =
+            "INSERT INTO AM_SECURITY_AUDIT_UUID_MAPPING (API_ID, AUDIT_UUID) VALUES (?,?)";
+
+    public static final String REMOVE_SECURITY_AUDIT_MAP_SQL =
+            "DELETE FROM AM_SECURITY_AUDIT_UUID_MAPPING WHERE API_ID = ?";
+
     public static final String ADD_API_LIFECYCLE_EVENT_SQL =
             " INSERT INTO AM_API_LC_EVENT (API_ID, PREVIOUS_STATE, NEW_STATE, USER_ID, TENANT_ID, EVENT_DATE)" +
             " VALUES (?,?,?,?,?,?)";
@@ -2447,22 +2458,24 @@ public class SQLConstants {
             " WHERE" +
             "   A.API_ID = ? ";
 
+    public static final String GET_SUBSCRIBED_APIS_FROM_CONSUMER_KEY =
+        "SELECT SUB.API_ID "
+                + "FROM AM_SUBSCRIPTION SUB, AM_APPLICATION_KEY_MAPPING AKM "
+                + "WHERE AKM.CONSUMER_KEY = ? AND AKM.APPLICATION_ID = SUB.APPLICATION_ID";
+
     public static final String GET_SCOPE_ROLES_OF_APPLICATION_SQL =
-            "SELECT " +
-            "   IOS.NAME, " +
-            "   ISB.SCOPE_BINDING " +
-            " FROM " +
-            "   IDN_OAUTH2_SCOPE IOS, " +
-            "   AM_APPLICATION_KEY_MAPPING AKM, " +
-            "   AM_SUBSCRIPTION SUB, " +
-            "   AM_API_SCOPES SCOPE, " +
-            "   IDN_OAUTH2_SCOPE_BINDING ISB" +
-            " WHERE" +
-            "   AKM.CONSUMER_KEY = ? " +
-            "   AND AKM.APPLICATION_ID = SUB.APPLICATION_ID " +
-            "   AND SUB.API_ID = SCOPE.API_ID " +
-            "   AND IOS.SCOPE_ID = ISB.SCOPE_ID " +
-            "   AND SCOPE.SCOPE_ID = IOS.SCOPE_ID";
+            "SELECT "
+                    + "DISTINCT A.NAME, C.SCOPE_BINDING "
+                    + "FROM ((IDN_OAUTH2_SCOPE AS A INNER JOIN AM_API_SCOPES AS B ON A.SCOPE_ID = B.SCOPE_ID) "
+                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING AS C ON B.SCOPE_ID = C.SCOPE_ID ) WHERE B.API_ID IN (";
+
+    public static final String GET_SCOPE_ROLES_OF_APPLICATION_ORACLE_SQL =
+            "SELECT "
+                    + "DISTINCT A.NAME, C.SCOPE_BINDING "
+                    + "FROM ((IDN_OAUTH2_SCOPE A INNER JOIN AM_API_SCOPES B ON A.SCOPE_ID = B.SCOPE_ID) "
+                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING C ON B.SCOPE_ID = C.SCOPE_ID ) WHERE B.API_ID IN (";
+
+    public static final String CLOSING_BRACE = ")";
 
     public static final String GET_SCOPES_FOR_API_LIST = "SELECT "
             + "B.API_ID,A.SCOPE_ID, A.NAME, A.DESCRIPTION "
@@ -2758,7 +2771,7 @@ public class SQLConstants {
                     "  NAME IN (";
 
     public static final String GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_SUFFIX =
-            ") AND TENANT_ID =? ;";
+            ") AND TENANT_ID =?";
 
     public static final String GET_GLOBAL_POLICIES =
             " SELECT " +
@@ -3067,10 +3080,23 @@ public class SQLConstants {
             + "API_TIER, CREATED_BY, CREATED_TIME, API_TYPE) VALUES (?,?,?,?,?,?,?,?)";
 
     public static final String GET_RESOURCES_OF_PRODUCT = 
-            "SELECT API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, "
-            + "API_UM.THROTTLING_TIER, API.API_PROVIDER, API.API_NAME, API.API_VERSION, API.CONTEXT, PRO_UM.API_ID "
-            + "FROM AM_API_URL_MAPPING AS API_UM, AM_API_PRODUCT_MAPPING AS PRO_UM, AM_API AS API "
-            + "WHERE API_UM.URL_MAPPING_ID = PRO_UM.URL_MAPPING_ID AND API_UM.API_ID = API.API_ID AND PRO_UM.API_ID = ?";
+            "SELECT API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, " +
+                "API_UM.THROTTLING_TIER, API.API_PROVIDER, API.API_NAME, API.API_VERSION, API.CONTEXT " +
+            "FROM AM_API_URL_MAPPING API_UM " +
+            "INNER JOIN AM_API API " +
+                "ON API.API_ID = API_UM.API_ID " +
+            "INNER JOIN AM_API_PRODUCT_MAPPING PROD_MAP " +
+                "ON PROD_MAP.URL_MAPPING_ID = API_UM.URL_MAPPING_ID " +
+            "WHERE PROD_MAP.API_ID = ?";
+
+    public static final String GET_SCOPES_BY_RESOURCE_PATHS =
+            "SELECT SCOPE.NAME, SCOPE.DISPLAY_NAME, SCOPE.DESCRIPTION, SCOPE.SCOPE_ID , BINDING.SCOPE_BINDING " +
+            "FROM IDN_OAUTH2_SCOPE SCOPE " +
+            "INNER JOIN IDN_OAUTH2_SCOPE_BINDING BINDING " +
+                "ON BINDING.SCOPE_ID = SCOPE.SCOPE_ID " +
+            "INNER JOIN IDN_OAUTH2_RESOURCE_SCOPE RES_SCOPE " +
+                "ON RES_SCOPE.SCOPE_ID = SCOPE.SCOPE_ID " +
+            "WHERE RES_SCOPE.RESOURCE_PATH = ?";
 
     /** Throttle related constants**/
 

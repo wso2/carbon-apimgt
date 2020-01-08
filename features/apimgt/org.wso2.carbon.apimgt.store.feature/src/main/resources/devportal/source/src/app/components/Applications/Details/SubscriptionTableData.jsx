@@ -103,7 +103,7 @@ class SubscriptionTableData extends React.Component {
         promisedApi.then((response) => {
             if (response && response.data) {
                 const apiData = JSON.parse(response.data);
-                this.setState({isMonetizedAPI: apiData.monetization.enabled});
+                this.setState({ isMonetizedAPI: apiData.monetization.enabled });
             }
         });
     }
@@ -124,10 +124,10 @@ class SubscriptionTableData extends React.Component {
                     promisedPolicy.then((policyResponse) => {
                         const policyData = JSON.parse(policyResponse.data);
                         if (policyData.monetizationAttributes.billingType && (policyData.monetizationAttributes.billingType === 'DYNAMICRATE')) {
-                            this.setState({isDynamicUsagePolicy: true});
+                            this.setState({ isDynamicUsagePolicy: true });
                         }
                     });
-                }                
+                }
             }
         });
     }
@@ -148,13 +148,14 @@ class SubscriptionTableData extends React.Component {
             },
         } = this.props;
         const { openMenu, isMonetizedAPI, isDynamicUsagePolicy } = this.state;
-        const link = <Link to={'/apis/' + apiId}>{apiInfo.name}</Link>;
+        const link = <Link to={'/apis/' + apiId}>{apiInfo.name + ' - ' + apiInfo.version}</Link>;
 
         return (
             <TableRow hover>
                 <TableCell style={{ paddingLeft: 0 }}>
                     { link }
                 </TableCell>
+                <TableCell>{apiInfo.lifeCycleStatus}</TableCell>
                 <TableCell>{throttlingPolicy}</TableCell>
                 <TableCell>{status}</TableCell>
 
@@ -207,6 +208,8 @@ SubscriptionTableData.propTypes = {
     subscription: PropTypes.shape({
         apiInfo: PropTypes.shape({
             name: PropTypes.string.isRequired,
+            version: PropTypes.string.isRequired,
+            lifeCycleStatus: PropTypes.string.isRequired,
         }).isRequired,
         throttlingPolicy: PropTypes.string.isRequired,
         subscriptionId: PropTypes.string.isRequired,

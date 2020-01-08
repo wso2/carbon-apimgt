@@ -210,6 +210,36 @@ public final class APIConstants {
 
     public static final String WORKFLOW_MEDIA_TYPE = "workflow-config";
 
+    // Constants used in API Security Audit feature
+    // For configs
+    public static final String API_SECURITY_AUDIT = "APISecurityAudit.";
+    public static final String API_SECURITY_AUDIT_API_TOKEN = API_SECURITY_AUDIT + "APIToken";
+    public static final String API_SECURITY_AUDIT_CID = API_SECURITY_AUDIT + "CollectionID";
+    public static final String API_SECURITY_AUDIT_BASE_URL = API_SECURITY_AUDIT + "BaseUrl";
+    public static final String API_SECURITY_AUDIT_GLOBAL = API_SECURITY_AUDIT + "Global";
+
+    public static final String SECURITY_AUDIT_CONFIGURATION = "SecurityAuditConfig";
+    public static final String SECURITY_AUDIT_API_TOKEN = "apiToken";
+    public static final String SECURITY_AUDIT_COLLECTION_ID = "collectionId";
+    public static final String SECURITY_AUDIT_BASE_URL = "baseUrl";
+    public static final String SECURITY_AUDIT_OVERRIDE_GLOBAL = "overrideGlobal";
+    // For HTTP requests
+    public static final String HEADER_ACCEPT = "Accept";
+    public static final String HEADER_CONTENT_TYPE = "Content-Type";
+    public static final String HEADER_API_TOKEN = "X-API-KEY";
+    public static final String MULTIPART_FORM_BOUNDARY = "X-WSO2-BOUNDARY";
+    public static final String MULTIPART_LINE_FEED = "\r\n";
+    public static final String BASE_AUDIT_URL = "https://platform.42crunch.com/api/v1/apis";
+    public static final String MULTIPART_CONTENT_TYPE = "multipart/form-data; boundary=";
+    public static final String DATA = "data";
+    public static final String ATTR = "attr";
+    public static final String GRADE = "grade";
+    public static final String NUM_ERRORS = "numErrors";
+    public static final String DESC = "desc";
+    public static final String ID = "id";
+    public static final String IS_VALID = "isValid";
+    public static final String ASSESSMENT_REPORT = "/assessmentreport?";
+
     //registry resource containing the self signup user config
     public static final String SELF_SIGN_UP_CONFIG_LOCATION = API_APPLICATION_DATA_LOCATION + "/sign-up-config.xml";
     public static final String SELF_SIGN_UP_CONFIG_MEDIA_TYPE = "signup-config";
@@ -451,6 +481,7 @@ public final class APIConstants {
     public static final String BLOCKING_CONDITIONS_STREAM_ID = "org.wso2.blocking.request.stream:1.0.0";
     public static final String TOKEN_REVOCATION_STREAM_ID = "org.wso2.apimgt.token.revocation.stream:1.0.0";
     public static final String KEY_TEMPLATE_STREM_ID = "org.wso2.keytemplate.request.stream:1.0.0";
+    public static final String CACHE_INVALIDATION_STREAM_ID = "org.wso2.apimgt.cache.invalidation.stream:1.0.0";
 
     //Property for enabling scope sharing between APIs
     public static final String ENABLE_API_SCOPES_SHARING = "enable-api-scopes-sharing";
@@ -464,6 +495,7 @@ public final class APIConstants {
     public static final String TOKEN_TYPE_JWT = "JWT";
 
     public static final String PASSWORD_RESOLVER_IMPL_CLASS = "PasswordResolverImpl";
+    public static final String CACHE_INVALIDATION_TYPE = "type";
 
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
@@ -795,6 +827,7 @@ public final class APIConstants {
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
     public static final String BLOCKING_EVENT_PUBLISHER = "blockingEventPublisher";
     public static final String TOKEN_REVOCATION_EVENT_PUBLISHER = "tokenRevocationPublisher";
+    public static final String CACHE_INVALIDATION_EVENT_PUBLISHER = "cacheInvalidationEventPublisher";
 
     public static final int AM_CREATOR_APIMGT_EXECUTION_ID = 200;
     public static final int AM_CREATOR_GOVERNANCE_EXECUTION_ID = 201;
@@ -1152,6 +1185,8 @@ public final class APIConstants {
     public static final String CUSTOM_ERROR_MESSAGE = "ERROR_MESSAGE";
     //Swagger v2.0 constants
     public static final String SWAGGER_X_SCOPE = "x-scope";
+    public static final String SWAGGER_X_AMZN_RESOURCE_NAME = "x-amzn-resource-name";
+    public static final String SWAGGER_X_AMZN_RESOURCE_TIMEOUT = "x-amzn-resource-timeout";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
     public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
     public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
@@ -1255,6 +1290,7 @@ public final class APIConstants {
     public static final String ENDPOINT_CONFIG = "endpoint_config";
     public static final String ENDPOINT_TYPE_HTTP = "http";
     public static final String ENDPOINT_TYPE_ADDRESS = "address";
+    public static final String ENDPOINT_TYPE_AWSLAMBDA = "awslambda";
     public static final String ENDPOINT_PRODUCTION_FAILOVERS = "production_failovers";
     public static final String ENDPOINT_SANDBOX_FAILOVERS = "sandbox_failovers";
     public static final String ENDPOINT_PRODUCTION_ENDPOINTS = "production_endpoints";
@@ -1277,6 +1313,7 @@ public final class APIConstants {
     public static final String REST_API_SCOPE_NAME = "Name";
     public static final String REST_API_SCOPE_ROLE = "Roles";
     public static final String REST_API_SCOPES_CONFIG = "RESTAPIScopes";
+    public static final String APIM_SUBSCRIBE_SCOPE = "apim:subscribe";
 
     public static final String HTTPS_PROTOCOL = "https";
     public static final String HTTPS_PROTOCOL_URL_PREFIX = "https://";
@@ -1553,6 +1590,8 @@ public final class APIConstants {
         public static final String APPLICATION_OWNER = "owner";
         public static final String KEY_TYPE = "keytype";
         public static final String CONSUMER_KEY = "consumerKey";
+        public static final String AUTHORIZED_PARTY = "azp";
+        public static final String KEY_ID = "kid";
         public static final String SUBJECT = "sub";
         public static final String SUBSCRIPTION_TIER = "subscriptionTier";
         public static final String SUBSCRIBER_TENANT_DOMAIN = "subscriberTenantDomain";
@@ -1767,11 +1806,13 @@ public final class APIConstants {
     public static class RestApiConstants {
         public static final String STORE_CONTEXT = "/store";
         public static final String REST_API_PUBLISHER_VERSION_1 = "v1.0";
+        public static final String REST_API_DEFAULT_VERSION = "v1";
+        public static final String REST_API_OLD_VERSION = "v0.16";
         public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
         public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
                 REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_1;
         public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
-        public static final String REST_API_ADMIN_VERSION = "v0.15";
+        public static final String REST_API_ADMIN_VERSION = "v0.16";
         public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION;
         public static final String REST_API_ADMIN_IMPORT_API_RESOURCE = "/import/api";
         public static final String IMPORT_API_PRESERVE_PROVIDER = "preserveProvider";
@@ -1800,5 +1841,19 @@ public final class APIConstants {
     public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
     public static final String UTILITY_WEB_APP_EP = "/throttle/data/v1";
     public static final String API_KEY_REVOKE_PATH = "/apikey/revoke";
+
+    public static final String SKIP_ROLES_BY_REGEX = "skipRolesByRegex";
+
+    // AWS Lambda: Constants for aws lambda
+    public static final String AWS_SECRET_KEY = "AWS_SECRET_KEY";
+    public static final int AWS_ENCRYPTED_SECRET_KEY_LENGTH = 620;
+    public static final int AWS_DEFAULT_CONNECTION_TIMEOUT = 50000;
+    public static final String AMZN_ACCESS_KEY = "amznAccessKey";
+    public static final String AMZN_SECRET_KEY = "amznSecretKey";
+    public static final String NO_ENTITY_BODY = "NO_ENTITY_BODY";
+
+    public static final String JWT_AUTHENTICATION_CONFIG = "JWTAuthentication";
+    public static final String JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION =
+            JWT_AUTHENTICATION_CONFIG + ".EnableSubscriptionValidationViaKeyManager";
 
 }

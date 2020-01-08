@@ -1,29 +1,32 @@
 /*
-*  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package org.wso2.carbon.apimgt.jms.listener.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.dto.ResourceCacheInvalidationDto;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
@@ -35,17 +38,23 @@ import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import javax.jms.Topic;
 
 public class JMSMessageListener implements MessageListener {
 
@@ -63,12 +72,13 @@ public class JMSMessageListener implements MessageListener {
     public static final String RESOURCE_KEY = "key";
 
     public void onMessage(Message message) {
+
         try {
             if (message != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Event received in JMS Event Receiver - " + message);
                 }
-
+                Topic jmsDestination = (Topic) message.getJMSDestination();
                 if (message instanceof MapMessage) {
                     MapMessage mapMessage = (MapMessage) message;
                     Map<String, Object> map = new HashMap<String, Object>();
@@ -77,39 +87,58 @@ public class JMSMessageListener implements MessageListener {
                         String key = (String) enumeration.nextElement();
                         map.put(key, mapMessage.getObject(key));
                     }
+                    if (JMSConstants.TOPIC_THROTTLE_DATA.equalsIgnoreCase(jmsDestination.getTopicName())) {
+                        if (map.get(APIConstants.THROTTLE_KEY) != null) {
+                            /*
+                             * This message contains throttle data in map which contains Keys
+                             * throttleKey - Key of particular throttling level
+                             * isThrottled - Whether message has throttled or not
+                             * expiryTimeStamp - When the throttling time window will expires
+                             */
 
-                    if (map.get(APIConstants.THROTTLE_KEY) != null) {
-                        /*
-                         * This message contains throttle data in map which contains Keys
-                         * throttleKey - Key of particular throttling level
-                         * isThrottled - Whether message has throttled or not
-                         * expiryTimeStamp - When the throttling time window will expires
-                         */
+                            handleThrottleUpdateMessage(map);
+                        } else if (map.get(APIConstants.BLOCKING_CONDITION_KEY) != null) {
+                            /*
+                             * This message contains blocking condition data
+                             * blockingCondition - Blocking condition type
+                             * conditionValue - blocking condition value
+                             * state - State whether blocking condition is enabled or not
+                             */
+                            handleBlockingMessage(map);
+                        } else if (map.get(APIConstants.POLICY_TEMPLATE_KEY) != null) {
+                            /*
+                             * This message contains key template data
+                             * keyTemplateValue - Value of key template
+                             * keyTemplateState - whether key template active or not
+                             */
+                            handleKeyTemplateMessage(map);
+                        }
+                    } else if (JMSConstants.TOPIC_TOKEN_REVOCATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
+                        if (map.get(APIConstants.REVOKED_TOKEN_KEY) !=
+                                null) {
+                            /*
+                             * This message contains revoked token data
+                             * revokedToken - Revoked Token which should be removed from the cache
+                             * expiryTime - ExpiryTime of the token if token is JWT, otherwise expiry is set to 0
+                             */
+                            handleRevokedTokenMessage((String) map.get(APIConstants.REVOKED_TOKEN_KEY),
+                                    (Long) map.get(APIConstants.REVOKED_TOKEN_EXPIRY_TIME));
+                        }
 
-                        handleThrottleUpdateMessage(map);
-                    } else if (map.get(APIConstants.BLOCKING_CONDITION_KEY) != null) {
-                        /*
-                         * This message contains blocking condition data
-                         * blockingCondition - Blocking condition type
-                         * conditionValue - blocking condition value
-                         * state - State whether blocking condition is enabled or not
-                         */
-                        handleBlockingMessage(map);
-                    } else if (map.get(APIConstants.POLICY_TEMPLATE_KEY) != null) {
-                        /*
-                         * This message contains key template data
-                         * keyTemplateValue - Value of key template
-                         * keyTemplateState - whether key template active or not
-                         */
-                        handleKeyTemplateMessage(map);
-                    } else if (map.get(APIConstants.REVOKED_TOKEN_KEY) != null) {
-                        /*
-                         * This message contains revoked token data
-                         * revokedToken - Revoked Token which should be removed from the cache
-                         * expiryTime - ExpiryTime of the token if token is JWT, otherwise expiry is set to 0
-                         */
-                        handleRevokedTokenMessage((String) map.get(APIConstants.REVOKED_TOKEN_KEY),
-                                (Long) map.get(APIConstants.REVOKED_TOKEN_EXPIRY_TIME));
+                    } else if (JMSConstants.TOPIC_CACHE_INVALIDATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
+                        if (map.get(APIConstants.CACHE_INVALIDATION_TYPE) != null) {
+                            if (APIConstants.RESOURCE_CACHE_NAME
+                                    .equalsIgnoreCase((String) map.get(APIConstants.CACHE_INVALIDATION_TYPE))) {
+                                handleResourceCacheInvalidationMessage(map);
+                            } else if (APIConstants.GATEWAY_KEY_CACHE_NAME
+                                    .equalsIgnoreCase((String) map.get(APIConstants.CACHE_INVALIDATION_TYPE))) {
+                                handleKeyCacheInvalidationMessage(map);
+                            } else if (APIConstants.GATEWAY_USERNAME_CACHE_NAME
+                                    .equalsIgnoreCase((String) map.get(APIConstants.CACHE_INVALIDATION_TYPE))) {
+                                handleUserCacheInvalidationMessage(map);
+                            }
+
+                        }
                     }
                 } else {
                     log.warn("Event dropped due to unsupported message type " + message.getClass());
@@ -124,8 +153,58 @@ public class JMSMessageListener implements MessageListener {
         }
     }
 
-    private void handleThrottleUpdateMessage(Map<String, Object> map) throws ParseException {
+    private void handleUserCacheInvalidationMessage(Map<String, Object> map) throws ParseException {
 
+        if (map.containsKey("value")) {
+            String value = (String) map.get("value");
+            JSONParser jsonParser = new JSONParser();
+            JSONArray jsonValue = (JSONArray) jsonParser.parse(value);
+
+            ServiceReferenceHolder.getInstance().getCacheInvalidationService()
+                    .invalidateCachedUsernames((String[]) jsonValue.toArray(new String[jsonValue.size()]));
+        }
+    }
+
+    private void handleKeyCacheInvalidationMessage(Map<String, Object> map) throws ParseException {
+
+        if (map.containsKey("value")) {
+            String value = (String) map.get("value");
+            JSONParser jsonParser = new JSONParser();
+            JSONArray jsonValue = (JSONArray) jsonParser.parse(value);
+
+            ServiceReferenceHolder.getInstance().getCacheInvalidationService()
+                    .invalidateCachedTokens((String[]) jsonValue.toArray(new String[jsonValue.size()]));
+        }
+    }
+
+    private void handleResourceCacheInvalidationMessage(Map<String, Object> map) throws ParseException {
+
+        if (map.containsKey("value")) {
+            String value = (String) map.get("value");
+            JSONParser jsonParser = new JSONParser();
+            JSONObject jsonValue = (JSONObject) jsonParser.parse(value);
+            String apiContext = (String) jsonValue.get("apiContext");
+            String apiVersion = (String) jsonValue.get("apiVersion");
+            JSONArray resources = (JSONArray) jsonValue.get("resources");
+            List<ResourceCacheInvalidationDto> resourceCacheInvalidationDtoList = new ArrayList<>();
+            for (Object resource : resources) {
+                JSONObject uriTemplate = (JSONObject) resource;
+                String resourceURLContext = (String) uriTemplate.get("resourceURLContext");
+                String httpVerb = (String) uriTemplate.get("httpVerb");
+                ResourceCacheInvalidationDto uriTemplateDto = new ResourceCacheInvalidationDto();
+                uriTemplateDto.setHttpVerb(httpVerb);
+                uriTemplateDto.setResourceURLContext(resourceURLContext);
+                resourceCacheInvalidationDtoList.add(uriTemplateDto);
+            }
+            ServiceReferenceHolder.getInstance().getCacheInvalidationService().invalidateResourceCache(apiContext,
+                    apiVersion,
+                    resourceCacheInvalidationDtoList
+                            .toArray(new ResourceCacheInvalidationDto[resourceCacheInvalidationDtoList.size()]));
+        }
+
+    }
+
+    private void handleThrottleUpdateMessage(Map<String, Object> map) throws ParseException {
 
         String throttleKey = map.get(APIThrottleConstants.THROTTLE_KEY).toString();
         String throttleState = map.get(APIThrottleConstants.IS_THROTTLED).toString();
@@ -134,7 +213,7 @@ public class JMSMessageListener implements MessageListener {
 
         if (log.isDebugEnabled()) {
             log.debug("Received Key -  throttleKey : " + throttleKey + " , " +
-                      "isThrottled :" + throttleState + " , expiryTime : " + new Date(timeStamp).toString());
+                    "isThrottled :" + throttleState + " , expiryTime : " + new Date(timeStamp).toString());
         }
 
         if (ThrottleConstants.TRUE.equalsIgnoreCase(throttleState)) {
@@ -169,18 +248,20 @@ public class JMSMessageListener implements MessageListener {
                 }
 
                 ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeThrottledAPIKey(extractedKey.getResourceKey());
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeThrottledApiConditions(extractedKey.getResourceKey(),extractedKey.getName());
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeThrottledApiConditions(extractedKey.getResourceKey(), extractedKey.getName());
             }
         }
     }
 
-    //Synchronized due to blocking data contains or not can updated by multiple threads. Will not be a performance isssue
+    //Synchronized due to blocking data contains or not can updated by multiple threads. Will not be a performance
+    // isssue
     //as this will not happen more frequently
     private synchronized void handleBlockingMessage(Map<String, Object> map) {
+
         if (log.isDebugEnabled()) {
             log.debug("Received Key -  blockingCondition : " + map.get(APIConstants.BLOCKING_CONDITION_KEY).toString() + " , " +
-                      "conditionValue :" + map.get(APIConstants.BLOCKING_CONDITION_VALUE).toString() + " , " +
-                      "tenantDomain : " + map.get(APIConstants.BLOCKING_CONDITION_DOMAIN));
+                    "conditionValue :" + map.get(APIConstants.BLOCKING_CONDITION_VALUE).toString() + " , " +
+                    "tenantDomain : " + map.get(APIConstants.BLOCKING_CONDITION_DOMAIN));
         }
 
         String condition = map.get(APIConstants.BLOCKING_CONDITION_KEY).toString();
@@ -195,19 +276,22 @@ public class JMSMessageListener implements MessageListener {
             }
         } else if (APIConstants.BLOCKING_CONDITIONS_API.equals(condition)) {
             if (ThrottleConstants.TRUE.equals(conditionState)) {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().addAPIBlockingCondition(conditionValue, conditionValue);
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder().addAPIBlockingCondition(conditionValue,
+                        conditionValue);
             } else {
                 ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeAPIBlockingCondition(conditionValue);
             }
         } else if (APIConstants.BLOCKING_CONDITIONS_USER.equals(condition)) {
             if (ThrottleConstants.TRUE.equals(conditionState)) {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().addUserBlockingCondition(conditionValue, conditionValue);
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder().addUserBlockingCondition(conditionValue,
+                        conditionValue);
             } else {
                 ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeUserBlockingCondition(conditionValue);
             }
         } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(condition)) {
             if (ThrottleConstants.TRUE.equals(conditionState)) {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().addIplockingCondition(conditionValue, conditionValue);
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder().addIplockingCondition(conditionValue,
+                        conditionValue);
             } else {
                 ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeIpBlockingCondition(conditionValue);
             }
@@ -215,6 +299,7 @@ public class JMSMessageListener implements MessageListener {
     }
 
     private APICondition extractAPIorResourceKey(String throttleKey) {
+
         Matcher m = resourcePattern.matcher(throttleKey);
         if (m.matches()) {
             if (m.groupCount() == RESOURCE_PATTERN_GROUPS) {
@@ -236,6 +321,7 @@ public class JMSMessageListener implements MessageListener {
     }
 
     private synchronized void handleKeyTemplateMessage(Map<String, Object> map) {
+
         if (log.isDebugEnabled()) {
             log.debug("Received Key -  KeyTemplate : " + map.get(APIConstants.POLICY_TEMPLATE_KEY).toString());
         }
@@ -259,7 +345,8 @@ public class JMSMessageListener implements MessageListener {
         //handle JWT tokens
         if (revokedToken.contains(APIConstants.DOT) && APIUtil.isValidJWT(revokedToken)) {
             revokedToken = APIUtil.getSignatureIfJWT(revokedToken); //JWT signature is the cache key
-            RevokedJWTDataHolder.getInstance().addRevokedJWTToMap(revokedToken, expiryTime);  // Add revoked token to revoked JWT map
+            RevokedJWTDataHolder.getInstance().addRevokedJWTToMap(revokedToken, expiryTime);  // Add revoked token to
+            // revoked JWT map
         }
 
         //Find the actual tenant domain on which the access token was cached. It is stored as a reference in

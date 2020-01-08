@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -40,6 +42,8 @@ import java.util.List;
  */
 public class SubscriptionMappingUtil {
 
+    private static final Log log = LogFactory.getLog(SubscriptionMappingUtil.class);
+
     /** Converts a SubscribedAPI object into SubscriptionDTO
      *
      * @param subscription SubscribedAPI object
@@ -57,14 +61,12 @@ public class SubscriptionMappingUtil {
             subscriptionDTO.setApiId(api.getUUID());
             APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(api);
             subscriptionDTO.setApiInfo(apiInfo);
-            subscriptionDTO.setType(SubscriptionDTO.TypeEnum.API);
         }
         if (apiProdId != null) {
             APIProduct apiProduct = apiConsumer.getAPIProduct(apiProdId);
             subscriptionDTO.setApiId(apiProduct.getUuid());
             APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(apiProduct);
             subscriptionDTO.setApiInfo(apiInfo);
-            subscriptionDTO.setType(SubscriptionDTO.TypeEnum.API_PRODUCT);
         }
         Application application = subscription.getApplication();
         application = apiConsumer.getLightweightApplicationByUUID(application.getUUID());
@@ -97,7 +99,11 @@ public class SubscriptionMappingUtil {
         }
 
         for (SubscribedAPI subscription : subscriptions) {
-            subscriptionDTOs.add(fromSubscriptionToDTO(subscription));
+            try {
+                subscriptionDTOs.add(fromSubscriptionToDTO(subscription));
+            } catch (APIManagementException e) {
+                log.error("Error while obtaining api metadata", e);
+            }
         }
 
         subscriptionListDTO.setCount(subscriptionDTOs.size());

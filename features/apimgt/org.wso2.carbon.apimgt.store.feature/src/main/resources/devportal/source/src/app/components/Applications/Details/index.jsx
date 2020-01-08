@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -19,6 +20,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Route, Switch, Redirect, Link } from 'react-router-dom';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
@@ -35,6 +37,8 @@ import Tab from '@material-ui/core/Tab';
 import Paper from '@material-ui/core/Paper';
 import Subscriptions from './Subscriptions';
 import InfoBar from './InfoBar';
+import Overview from './Overview';
+
 /**
  *
  *
@@ -96,7 +100,7 @@ const styles = (theme) => {
             fontSize: 18,
             color: theme.palette.grey[500],
             textDecoration: 'none',
-            paddingLeft: theme.spacing.unit * 2,
+            paddingLeft: theme.spacing(2),
         },
         detailsContent: {
             display: 'flex',
@@ -108,7 +112,7 @@ const styles = (theme) => {
             flexDirection: 'column',
             marginLeft: shiftToLeft,
             marginRight: shiftToRight,
-            paddingBottom: theme.spacing.unit * 3,
+            paddingBottom: theme.spacing(3),
         },
         contentLoader: {
             paddingTop: theme.spacing(3),
@@ -134,7 +138,6 @@ class Details extends Component {
         this.state = {
             application: null,
             active: 'overview',
-            secScheme: 'Oauth',
         };
     }
 
@@ -173,26 +176,10 @@ class Details extends Component {
         this.setState({ active: menuLink });
     };
 
-
-    handleChange = (event, secScheme) => {
-        this.setState({ secScheme });
-    }
-
-    renderManager = (application, keyType) => {
+    renderManager = (application, keyType, secScheme) => {
         return (
             <Paper>
-                <Tabs
-                    value={this.state.secScheme}
-                    onChange={this.handleChange}
-                    indicatorColor='primary'
-                    textColor='primary'
-                    variant='fullWidth'
-                    scrollButtons='auto'
-                >
-                    <Tab label='Oauth' value='Oauth' />
-                    <Tab label='ApiKey' value='ApiKey' />
-                </Tabs>
-                {this.state.secScheme === 'Oauth' && (
+                {secScheme === 'oauth' && (
                     <div>
                         <TokenManager
                             keyType={keyType}
@@ -206,7 +193,7 @@ class Details extends Component {
                         />
                     </div>
                 )}
-                {this.state.secScheme === 'ApiKey' && (
+                {secScheme === 'apikey' && (
                     <div>
                         <ApiKeyManager
                             keyType={keyType}
@@ -231,9 +218,9 @@ class Details extends Component {
      */
     render() {
         const { classes, match, theme } = this.props;
-        const { notFound, application, active } = this.state;
+        const { notFound, application } = this.state;
         const pathPrefix = '/applications/' + match.params.application_uuid;
-        const redirectUrl = pathPrefix + '/productionkeys';
+        const redirectUrl = pathPrefix + '/overview';
         const {
             custom: {
                 leftMenu: {
@@ -241,14 +228,13 @@ class Details extends Component {
                 },
             },
         } = theme;
-        const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
         if (notFound) {
             return <ResourceNotFound />;
         } else if (!application) {
             return <Loading />;
         }
         return (
-            <React.Fragment>
+            <>
                 <div
                     className={classNames(
                         classes.LeftMenu,
@@ -274,9 +260,14 @@ class Details extends Component {
                             )}
                         </Link>
                     )}
-                    <LeftMenuItem text='production keys' route='productionkeys' to={pathPrefix + '/productionkeys'} />
-                    <LeftMenuItem text='sandbox keys' route='sandBoxkeys' to={pathPrefix + '/sandBoxkeys'} />
-                    <LeftMenuItem text='subscriptions' route='subscriptions' to={pathPrefix + '/subscriptions'} />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.overview' defaultMessage='Overview' />} iconText='overview' route='overview' to={pathPrefix + '/overview'} />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.prod.keys' defaultMessage='Production Keys' />} route='productionkeys' to={pathPrefix + '/productionkeys/oauth'} Icon={<VpnKeyIcon />} />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.oauth.tokens' defaultMessage='OAuth2 Tokens' />} route='productionkeys/oauth' to={pathPrefix + '/productionkeys/oauth'} submenu />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.api.key' defaultMessage='Api Key' />} route='productionkeys/apikey' to={pathPrefix + '/productionkeys/apikey'} submenu />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.sandbox.keys' defaultMessage='Sandbox Keys' />} route='sandboxkeys' to={pathPrefix + '/sandboxkeys/oauth'} Icon={<VpnKeyIcon />} />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.oauth.tokens' defaultMessage='OAuth2 Tokens' />} route='sandboxkeys/oauth' to={pathPrefix + '/sandboxkeys/oauth'} submenu />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.api.key' defaultMessage='Api Key' />} route='sandboxkeys/apikey' to={pathPrefix + '/sandboxkeys/apikey'} submenu />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.subscriptions' defaultMessage='Subscriptions' />} iconText='subscriptions' route='subscriptions' to={pathPrefix + '/subscriptions'} />
                 </div>
                 <div className={classes.content}>
                     <InfoBar applicationId={match.params.application_uuid} innerRef={node => (this.infoBar = node)} />
@@ -289,19 +280,31 @@ class Details extends Component {
                         <Switch>
                             <Redirect exact from='/applications/:applicationId' to={redirectUrl} />
                             <Route
-                                path='/applications/:applicationId/productionkeys'
-                                component={() => (this.renderManager(application, 'PRODUCTION'))}
+                                path='/applications/:applicationId/overview'
+                                component={Overview}
                             />
                             <Route
-                                path='/applications/:applicationId/sandBoxkeys'
-                                component={() => (this.renderManager(application, 'SANDBOX'))}
+                                path='/applications/:applicationId/productionkeys/oauth'
+                                component={() => (this.renderManager(application, 'PRODUCTION', 'oauth'))}
+                            />
+                            <Route
+                                path='/applications/:applicationId/productionkeys/apikey'
+                                component={() => (this.renderManager(application, 'PRODUCTION', 'apikey'))}
+                            />
+                            <Route
+                                path='/applications/:applicationId/sandboxkeys/oauth'
+                                component={() => (this.renderManager(application, 'SANDBOX', 'oauth'))}
+                            />
+                            <Route
+                                path='/applications/:applicationId/sandboxkeys/apikey'
+                                component={() => (this.renderManager(application, 'SANDBOX', 'apikey'))}
                             />
                             <Route path='/applications/:applicationId/subscriptions' component={Subscriptions} />
                             <Route component={ResourceNotFound} />
                         </Switch>
                     </div>
                 </div>
-            </React.Fragment>
+            </>
         );
     }
 }

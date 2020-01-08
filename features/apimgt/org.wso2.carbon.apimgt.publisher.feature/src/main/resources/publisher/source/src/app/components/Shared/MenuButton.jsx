@@ -7,7 +7,7 @@ import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import { withStyles } from '@material-ui/core/styles';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         display: 'flex',
     },
@@ -46,7 +46,7 @@ class MenuButton extends React.Component {
      * @memberof MenuButton
      */
     handleToggle() {
-        this.setState(state => ({ open: !state.open }));
+        this.setState((state) => ({ open: !state.open }));
     }
 
     /**
@@ -69,10 +69,12 @@ class MenuButton extends React.Component {
      * @memberof MenuButton
      */
     render() {
-        const { children, menuList, buttonProps } = this.props;
+        const {
+            classes, children, menuList, buttonProps,
+        } = this.props;
         const { open } = this.state;
         return (
-            <React.Fragment>
+            <>
                 <Button
                     id='itest-id-createapi'
                     buttonRef={(node) => {
@@ -83,7 +85,9 @@ class MenuButton extends React.Component {
                     onClick={this.handleToggle}
                     {...buttonProps}
                 >
-                    {children} ▼
+                    {children}
+                    {' '}
+▼
                 </Button>
                 <Popper
                     open={open}
@@ -91,7 +95,7 @@ class MenuButton extends React.Component {
                     anchorEl={this.anchorEl}
                     transition
                     disablePortal
-                    className={this.props.classes.position}
+                    className={classes.position}
                 >
                     {({ TransitionProps, placement }) => (
                         <Grow
@@ -105,7 +109,7 @@ class MenuButton extends React.Component {
                         </Grow>
                     )}
                 </Popper>
-            </React.Fragment>
+            </>
         );
     }
 }

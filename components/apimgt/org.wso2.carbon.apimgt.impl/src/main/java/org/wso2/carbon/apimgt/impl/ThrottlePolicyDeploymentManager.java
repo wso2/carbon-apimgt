@@ -100,37 +100,6 @@ public class ThrottlePolicyDeploymentManager {
     }
 
     /**
-     * deploy policy in the gateway manager
-     *
-     * @param policy
-     * @throws APIManagementException
-     */
-    public void deployPolicyToGatewayManager(String policy) throws APIManagementException {
-        OMElement element;
-        try {
-            element = AXIOMUtil.stringToOM(policy);
-            String fileName = element.getAttributeValue(new QName(APIConstants.POLICY_NAME_ELEM));
-            for (Map.Entry<String, Environment> environment : environments.entrySet()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("deploy policy to gateway : " + environment.getValue().getName());
-                }
-                APIGatewayAdminClient client = new APIGatewayAdminClient(environment.getValue());
-                client.deployPolicy(policy, fileName);
-            }
-
-        } catch (XMLStreamException e) {
-            String msg = "Error while parsing the policy to get the eligibility query: ";
-            log.error(msg, e);
-            throw new APIManagementException(msg);
-        } catch (IOException e) {
-            String msg = "Error while deploying the policy in gateway manager: ";
-            log.error(msg, e);
-            throw new APIManagementException(msg);
-        }
-
-    }
-
-    /**
      * Undeploy policy from the gateway manager nodes
      *
      * @param policyNames

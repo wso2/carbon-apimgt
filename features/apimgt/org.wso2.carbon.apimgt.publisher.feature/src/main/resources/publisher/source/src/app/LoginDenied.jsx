@@ -73,13 +73,14 @@ function onLogout() {
 }
 
 class LoginDenied extends Component {
-    componentWillMount() {
+    componentDidMount() {
         document.body.style.backgroundColor = '#dfdfdf';
     }
 
     componentWillUnmount() {
         document.body.style.backgroundColor = null;
     }
+
     render() {
         return (
             <div style={messageStyles}>
@@ -97,13 +98,13 @@ class LoginDenied extends Component {
                             + 'that you are authorized to access the requested resource.'}
                     />
                 </p>
-                <button onClick={onRetry} style={buttonStyleRetry}>
+                <button type='button' onClick={onRetry} style={buttonStyleRetry}>
                     <FormattedMessage
                         id='LoginDenied.retry'
                         defaultMessage='Retry'
                     />
                 </button>
-                <button onClick={onLogout} style={buttonStyleLogout}>
+                <button type='button' onClick={onLogout} style={buttonStyleLogout}>
                     <FormattedMessage
                         id='LoginDenied.logout'
                         defaultMessage='Logout'

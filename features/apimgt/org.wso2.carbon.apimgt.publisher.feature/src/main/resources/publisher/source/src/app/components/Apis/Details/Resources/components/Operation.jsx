@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import Grid from '@material-ui/core/Grid';
@@ -34,11 +34,13 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
 import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined';
-// splitted operation components
+// spliced operation components
 
 import DescriptionAndSummary from './operationComponents/DescriptionAndSummary';
 import OperationGovernance from './operationComponents/OperationGovernance';
+import AWSLambdaSettings from './operationComponents/AWSLambdaSettings';
 import Parameters from './operationComponents/Parameters';
+import SOAPToRESTListing from './operationComponents/SOAPToREST/SOAPToRESTListing';
 
 /**
  *
@@ -60,8 +62,11 @@ function Operation(props) {
         markAsDelete,
         hideParameters,
         spec,
+        resourcePolicy,
+        resourcePoliciesDispatcher,
         target,
         verb,
+        arns,
     } = props;
     const [isExpanded, setIsExpanded] = useState(false);
     const useStyles = makeStyles((theme) => {
@@ -96,8 +101,9 @@ function Operation(props) {
         };
     });
     const apiOperation = api.operations[target] && api.operations[target][verb.toUpperCase()];
-    const isUsedInAPIProduct =
-        apiOperation && Array.isArray(apiOperation.usedProductIds) && apiOperation.usedProductIds.length;
+    const isUsedInAPIProduct = apiOperation && Array.isArray(
+        apiOperation.usedProductIds,
+    ) && apiOperation.usedProductIds.length;
 
     /**
      *
@@ -122,12 +128,12 @@ function Operation(props) {
     }
     const classes = useStyles();
     return (
-        <Fragment>
+        <>
             {markAsDelete && (
                 <Box className={classes.overlayUnmarkDelete}>
                     <Tooltip title='Marked for delete' aria-label='Marked for delete'>
                         <Button onClick={toggleDelete} variant='outlined' style={{ marginTop: '10px' }}>
-                            Undo
+                            Undo Delete
                         </Button>
                     </Tooltip>
                 </Box>
@@ -177,7 +183,11 @@ function Operation(props) {
                                 <Box display='flex'>
                                     <ReportProblemOutlinedIcon fontSize='small' />
                                     <Box display='flex' ml={1} mt={1 / 4} fontSize='caption.fontSize'>
-                                        This operation is used in {isUsedInAPIProduct} API product(s)
+                                        This operation is used in
+                                        {' '}
+                                        {isUsedInAPIProduct}
+                                        {' '}
+API product(s)
                                     </Box>
                                 </Box>
                             </Grid>
@@ -238,16 +248,42 @@ function Operation(props) {
                                 verb={verb}
                             />
                         )}
+                        {resourcePolicy && (
+                            <SOAPToRESTListing
+                                operation={operation}
+                                operationsDispatcher={operationsDispatcher}
+                                operationRateLimits={operationRateLimits}
+                                resourcePolicy={resourcePolicy}
+                                resourcePoliciesDispatcher={resourcePoliciesDispatcher}
+                                disableUpdate={disableUpdate}
+                                spec={spec}
+                                target={target}
+                                verb={verb}
+                            />
+                        )}
+                        {
+                            api.endpointConfig
+                            && api.endpointConfig.endpoint_type
+                            && api.endpointConfig.endpoint_type === 'awslambda'
+                            && (
+                                <AWSLambdaSettings
+                                    operation={operation}
+                                    operationsDispatcher={operationsDispatcher}
+                                    target={target}
+                                    verb={verb}
+                                    arns={arns}
+                                />
+                            )
+                        }
                     </Grid>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
-        </Fragment>
+        </>
     );
 }
 Operation.defaultProps = {
     highlight: false,
     disableUpdate: false,
-    /* Set following prop to false , After implementing the `Parameter` section */
     hideParameters: false,
     disableDelete: false,
     onMarkAsDelete: () => {},
@@ -255,19 +291,26 @@ Operation.defaultProps = {
     operationRateLimits: [], // Response body.list from apis policies for `api` throttling policies type
 };
 Operation.propTypes = {
-    api: PropTypes.shape({ scopes: PropTypes.arrayOf(PropTypes.shape({})) }).isRequired,
+    api: PropTypes.shape({ scopes: PropTypes.arrayOf(PropTypes.shape({})), resourcePolicies: PropTypes.shape({}) })
+        .isRequired,
     operationsDispatcher: PropTypes.func.isRequired,
     onMarkAsDelete: PropTypes.func,
+    resourcePoliciesDispatcher: PropTypes.func.isRequired,
     markAsDelete: PropTypes.bool,
     disableDelete: PropTypes.bool,
     disableUpdate: PropTypes.bool,
     hideParameters: PropTypes.bool,
-    operation: PropTypes.shape({}).isRequired,
+    resourcePolicy: PropTypes.shape({}).isRequired,
+    operation: PropTypes.shape({
+        'x-wso2-new': PropTypes.bool,
+        summary: PropTypes.string,
+    }).isRequired,
     target: PropTypes.string.isRequired,
     verb: PropTypes.string.isRequired,
     spec: PropTypes.shape({}).isRequired,
     highlight: PropTypes.bool,
     operationRateLimits: PropTypes.arrayOf(PropTypes.shape({})),
+    arns: PropTypes.shape([]).isRequired,
 };
 
 export default React.memo(Operation);

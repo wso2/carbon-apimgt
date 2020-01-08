@@ -37,12 +37,13 @@ public class ApplicationInfoDTO  {
   
   
   private Object attributes = null;
+  
+  
+  private String owner = null;
 
   private String lastUpdatedTime = null;
 
   private String createdTime = null;
-
-  private String owner = null;
 
   /**
   * gets and sets the lastUpdatedTime for ApplicationInfoDTO
@@ -163,6 +164,10 @@ public class ApplicationInfoDTO  {
     this.attributes = attributes;
   }
 
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
   @JsonProperty("owner")
   public String getOwner() {
     return owner;

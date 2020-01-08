@@ -1,6 +1,6 @@
 - request:
     method: GET
-    url: https://localhost:9443/api/am/publisher/v1.0/apis
+    url: https://localhost:9443/api/am/publisher/v1/apis
     headers: |
       Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
   response:
@@ -37,10 +37,10 @@
         }
       }
 - rawRequest: |
-    GET https://localhost:9443/api/am/publisher/v1.0/apis HTTP/1.1
+    GET https://localhost:9443/api/am/publisher/v1/apis HTTP/1.1
     Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
   curl: |
-    curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/publisher/v1.0/apis
+    curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/publisher/v1/apis
   rawResponse: |
     HTTP/1.1 200 OK
     Content-Type: application/json

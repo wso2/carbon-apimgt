@@ -3,7 +3,7 @@
 
             <hr/>
             <h4 class="operation-heading"><a name="tiersTierLevelTierNameGet"></a>Get details of a tier
-</h4> <code>GET https://apis.wso2.com/api/am/store/v0.15/tiers/{tierLevel}/{tierName}</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v0.16/tiers/{tierLevel}/{tierName}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve details of a single tier by specifying the tier level and tier name.
@@ -14,42 +14,9 @@
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
                 <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-tiersTierLevelTierNameGet">
-                <h4 class="section-heading">
-                    Request
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-
-                <div id="request-tiersTierLevelTierNameGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.15/tiers/api/Bronze
-</code></div>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-tiersTierLevelTierNameGet">
-                <h4 class="section-heading">
-                    Response
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-                <div id="response-tiersTierLevelTierNameGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-   &quot;unitTime&quot;: 60000,
-   &quot;tierPlan&quot;: &quot;FREE&quot;,
-   &quot;stopOnQuotaReach&quot;: true,
-   &quot;tierLevel&quot;: &quot;api&quot;,
-   &quot;requestCount&quot;: 1,
-   &quot;description&quot;: &quot;Allows 1 request(s) per minute.&quot;,
-   &quot;name&quot;: &quot;Bronze&quot;,
-   &quot;attributes&quot;: {}
-}</code></div>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl &quot;https://localhost:9443/api/am/store/v0.15/tiers/api/Bronze&quot;</code></div>
-
-            <h4 class="section-heading">Sample CURL - for tenant</h4>
-            <div class="pre"><code class="bash">curl -k -H &quot;X-WSO2-Tenant:test.com&quot; https://localhost:9443/api/am/store/v0.15/tiers/api/Bronze</code></div>
-
+            <h4 class="section-heading">
+                Examples
+            </h4>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -71,17 +38,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>tierName</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -99,17 +66,17 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>tierLevel</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -133,16 +100,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>X-WSO2-Tenant</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -162,16 +129,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -190,16 +157,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -219,16 +186,16 @@ variant of the resource.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-Modified-Since</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -278,7 +245,7 @@ formerly retrieved variant of the resource (Will be supported in future).
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
+                                    
                             </span>
                         </td>
                     </tr>

@@ -23,6 +23,7 @@ import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import Validation from 'AppData/Validation';
 
 // Styles for Grid and Paper elements
 const styles = theme => ({
@@ -38,6 +39,7 @@ const styles = theme => ({
  */
 const tokens = (props) => {
     const [infiniteValidity, setInfiniteValidity] = useState(true);
+    const [invalidTimeout, setInvaildTimeout] = useState(false);
 
     /**
     * This method is used to handle the updating of create api key
@@ -61,7 +63,13 @@ const tokens = (props) => {
                 }
                 break;
             case 'timeout':
-                newRequest.timeout = currentTarget.value;
+                if (Validation.number.validate(currentTarget.value).error === undefined) {
+                    newRequest.timeout = currentTarget.value;
+                    setInvaildTimeout(false);
+                } else {
+                    newRequest.timeout = null;
+                    setInvaildTimeout(true);
+                }
                 break;
             default:
                 break;
@@ -80,23 +88,32 @@ const tokens = (props) => {
                         value={accessTokenRequest.timeout}
                         color='primary'
                     />}
-                    label='Api Key with infinite validity period'
+                    label='API Key with infinite validity period'
                 />
                 {!infiniteValidity && <TextField
                     required
                     label={intl.formatMessage({
-                        defaultMessage: 'Api Key validity period',
+                        defaultMessage: 'API Key validity period',
                         id: 'Shared.AppsAndKeys.Tokens.apikey',
                     })}
                     InputLabelProps={{
                         shrink: true,
                     }}
-                    helperText={intl.formatMessage({
-                        defaultMessage: 'You can set an expiration period to determine the validity period of '
+                    helperText={
+                        invalidTimeout ? (
+                            intl.formatMessage({
+                                defaultMessage: 'Please use a valid number for API Key expiry time',
+                                id: 'Shared.AppsAndKeys.Tokens.apikey.set.validity.error',
+                            })
+                        ) : (
+                            intl.formatMessage({
+                                defaultMessage: 'You can set an expiration period to determine the validity period of '
                                 + 'the token after generation. Set this as -1 to ensure that the '
                                 + 'apikey never expires.',
-                        id: 'Shared.AppsAndKeys.Tokens.apikey.set.validity',
-                    })}
+                                id: 'Shared.AppsAndKeys.Tokens.apikey.set.validity.help',
+                            })
+                        )
+                    }
                     fullWidth
                     name='timeout'
                     onChange={e => handleChange('timeout', e)}
@@ -107,6 +124,7 @@ const tokens = (props) => {
                     value={accessTokenRequest.timeout}
                     autoFocus
                     className={classes.inputText}
+                    error={invalidTimeout}
                 />
                 }
             </FormControl>

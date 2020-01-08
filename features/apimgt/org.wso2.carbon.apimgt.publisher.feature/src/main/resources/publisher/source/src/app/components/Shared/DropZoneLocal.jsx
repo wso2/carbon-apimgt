@@ -105,12 +105,10 @@ export default function DropZoneLocal(props) {
 
     return (
         <section className='container' style={containerStyles}>
-            {(
-                <div {...getRootProps({ style })}>
-                    <input {...getInputProps()} multiple={false} accept={accept} />
-                    {children || <p>{message}</p>}
-                </div>
-            )}
+            <div {...getRootProps({ style })}>
+                <input {...getInputProps()} multiple={false} accept={accept} />
+                {children || <p>{message}</p>}
+            </div>
         </section>
     );
 }

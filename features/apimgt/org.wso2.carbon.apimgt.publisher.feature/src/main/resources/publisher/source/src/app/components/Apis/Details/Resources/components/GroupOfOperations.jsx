@@ -32,7 +32,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
  */
 export default function GroupOfOperations(props) {
     const { openAPI, children, tag } = props;
-    const currentTagInfo = openAPI.tags && openAPI.tags.find(tagInfo => tagInfo.name === tag);
+    const currentTagInfo = openAPI.tags && openAPI.tags.find((tagInfo) => tagInfo.name === tag);
     return (
         <ExpansionPanel defaultExpanded>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} aria-controls='panel1a-content' id='panel1a-header'>
@@ -52,6 +52,6 @@ export default function GroupOfOperations(props) {
 
 GroupOfOperations.propTypes = {
     children: PropTypes.element.isRequired,
-    openAPI: PropTypes.shape({}).isRequired,
+    openAPI: PropTypes.shape({ tags: PropTypes.arrayOf(PropTypes.string) }).isRequired,
     tag: PropTypes.string.isRequired,
 };

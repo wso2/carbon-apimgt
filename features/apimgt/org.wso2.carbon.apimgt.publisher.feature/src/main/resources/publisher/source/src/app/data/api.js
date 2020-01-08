@@ -177,6 +177,18 @@ class API extends Resource {
     }
 
     /**
+     * Get API Security Audit Report
+     */
+    getSecurityAuditReport(apiId) {
+        const promiseGetAuditReport = this.client.then((client) => {
+            return client.apis['API Audit'].get_apis__apiId__auditapi({
+                apiId: apiId
+            }, this._requestMetaData());
+        });
+        return promiseGetAuditReport;
+    }
+
+    /**
      * Get detailed policy information of the API
      * @returns {Promise} Promise containing policy detail request calls for all the available policies
      * @memberof API
@@ -196,11 +208,21 @@ class API extends Resource {
         return Promise.all(promisedPolicies).then(policies => policies.map(response => response.body));
     }
 
-    getResourcePolicies() {
+    getResourcePolicies(sequenceType = 'in') {
         return this.client.then(client => {
             return client.apis['API Resource Policies'].get_apis__apiId__resource_policies({
                 apiId: this.id,
-                sequenceType: 'in',
+                sequenceType,
+            });
+        });
+    }
+
+    updateResourcePolicy(resourcePolicy) {
+        return this.client.then(client => {
+            return client.apis['API Resource Policies'].put_apis__apiId__resource_policies__resourcePolicyId_({
+                apiId: this.id,
+                resourcePolicyId: resourcePolicy.id,
+                body: resourcePolicy,
             });
         });
     }
@@ -1570,7 +1592,6 @@ class API extends Resource {
             });
             params.query = query;
         }
-        console.log(params);
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         const promisedAPIs = apiClient.then(client => {
             return client.apis['APIs'].get_apis(params, Resource._requestMetaData());
@@ -2168,7 +2189,26 @@ class API extends Resource {
             );
         });
     }
+
+    /**
+     * Get ARNs of an user role
+     * @param id {string} UUID of the api product.
+     * @param callback {function} A callback function to invoke after receiving successful response.
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getAmznResourceNames(id) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['AWS Lambda (Individual)'].get_apis__apiId__amznResourceNames(
+                {
+                    apiId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
+    }
 }
+
 
 API.CONSTS = {
     API: 'API',

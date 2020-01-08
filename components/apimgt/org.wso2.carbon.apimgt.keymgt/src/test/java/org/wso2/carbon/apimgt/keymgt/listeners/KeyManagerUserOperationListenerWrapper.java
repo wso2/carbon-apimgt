@@ -103,7 +103,7 @@ public class KeyManagerUserOperationListenerWrapper extends KeyManagerUserOperat
     }
 
     @Override
-    protected APIAuthenticationAdminClient getApiAuthenticationAdminClient(Environment environment) throws AxisFault {
+    protected APIAuthenticationAdminClient getApiAuthenticationAdminClient() {
         return apiAuthenticationAdminClient;
     }
 

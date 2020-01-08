@@ -31,7 +31,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     error: {
         color: theme.palette.error.main,
     },
@@ -73,14 +73,12 @@ export default function Transports(props) {
                             control={(
                                 <Checkbox
                                     disabled={isRestricted(['apim:api_create'], apiFromContext)}
-                                    checked={api.transport ?
-                                        api.transport.includes('http') : null
-                                    }
+                                    checked={api.transport
+                                        ? api.transport.includes('http') : null}
                                     onChange={({ target: { checked } }) => configDispatcher({
                                         action: 'transport',
                                         event: { checked, value: 'http' },
-                                    })
-                                    }
+                                    })}
                                     value='http'
                                     color='primary'
                                 />
@@ -91,13 +89,12 @@ export default function Transports(props) {
                             control={(
                                 <Checkbox
                                     disabled={isRestricted(['apim:api_create'], apiFromContext)}
-                                    checked={api.transport ?
-                                        api.transport.includes('https') : null}
+                                    checked={api.transport
+                                        ? api.transport.includes('https') : null}
                                     onChange={({ target: { checked } }) => configDispatcher({
                                         action: 'transport',
                                         event: { checked, value: 'https' },
-                                    })
-                                    }
+                                    })}
                                     value='https'
                                     color='primary'
                                 />

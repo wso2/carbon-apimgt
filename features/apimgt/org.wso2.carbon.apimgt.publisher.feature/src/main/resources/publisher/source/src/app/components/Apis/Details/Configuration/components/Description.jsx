@@ -43,7 +43,7 @@ export default function Description(props) {
             margin='0'
             fullWidth
             variant='outlined'
-            onChange={e => configDispatcher({ action: 'description', value: e.target.value })}
+            onChange={(e) => configDispatcher({ action: 'description', value: e.target.value })}
             disabled={isRestricted(['apim:api_create'], apiFromContext)}
         />
     );

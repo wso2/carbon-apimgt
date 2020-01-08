@@ -90,7 +90,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     private static final Log log = LogFactory.getLog(ThrottleHandler.class);
     private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
     private volatile Throttle throttle;
-    private static volatile ThrottleDataPublisher throttleDataPublisher = null;
     private String policyKeyApplication = null;
     private static final String THROTTLE_MAIN = "THROTTLE_MAIN";
     private static final String INIT_SPIKE_ARREST = "INIT_SPIKE_ARREST";
@@ -130,17 +129,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         }
         this.roleBasedAccessController = new RoleBasedAccessRateController();
 
-        /**
-         * This method will initialize data publisher and this data publisher will be used to push events to central policy
-         * server.
-         */
-        if (throttleDataPublisher == null) {
-            // The publisher initializes in the first request only
-            synchronized (this) {
-                throttleDataPublisher = new ThrottleDataPublisher();
-            }
-        }
     }
+
 
     /**
      * This method is responsible for throttle incoming messages. This method will perform Application, Subscription
@@ -401,12 +391,15 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                             isThrottled = true;
 
                                         } else {
-                                            throttleDataPublisher.publishNonThrottledEvent(applicationLevelThrottleKey,
-                                                    applicationLevelTier, apiLevelThrottleKey, apiLevelTier,
-                                                    subscriptionLevelThrottleKey, subscriptionLevelTier,
-                                                    resourceLevelThrottleKey, resourceLevelTier, authorizedUser, apiContext,
-                                                    apiVersion, subscriberTenantDomain, apiTenantDomain, applicationId,
-                                                    synCtx, authContext);
+                                            ServiceReferenceHolder.getInstance().getThrottleDataPublisher().
+                                                    publishNonThrottledEvent(applicationLevelThrottleKey,
+                                                            applicationLevelTier, apiLevelThrottleKey, apiLevelTier,
+                                                            subscriptionLevelThrottleKey, subscriptionLevelTier,
+                                                            resourceLevelThrottleKey, resourceLevelTier,
+                                                            authorizedUser, apiContext,
+                                                            apiVersion, subscriberTenantDomain, apiTenantDomain,
+                                                            applicationId,
+                                                            synCtx, authContext);
                                         }
                                     } else {
                                         log.debug("Request throttled at custom throttling");

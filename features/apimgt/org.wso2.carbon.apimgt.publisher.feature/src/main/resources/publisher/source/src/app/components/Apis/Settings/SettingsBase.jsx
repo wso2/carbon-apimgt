@@ -22,7 +22,7 @@ import { FormattedMessage } from 'react-intl';
 import Settings from 'AppComponents/Apis/Settings/Settings';
 import PropTypes from 'prop-types';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         padding: theme.spacing(3),
         width: '100%',
@@ -30,7 +30,7 @@ const styles = theme => ({
     headingWrapper: {
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
-        paddingLeft: theme.spacing(),
+        paddingLeft: theme.spacing(1),
     },
 });
 

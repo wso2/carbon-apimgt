@@ -8,16 +8,22 @@ const styles = {
     },
 };
 
+
+/**
+ *
+ *
+ * @param {*} props
+ * @returns
+ */
 function VerticalDivider(props) {
-    const { classes } = props;
-    const height = props.height ? props.height : 30;
-    const marginLeft = props.marginLeft ? props.marginLeft : 10;
-    const marginRight = props.marginRight ? props.marginRight : 10;
+    const {
+        classes, height = 30, marginLeft = 10, marginRight = 10,
+    } = props;
 
     return (
-        <React.Fragment>
+        <>
             <div className={classes.divider} style={{ height, marginLeft, marginRight }} />
-        </React.Fragment>
+        </>
     );
 }
 

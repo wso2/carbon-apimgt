@@ -34,9 +34,9 @@ import { app } from 'Settings';
  */
 const styles = theme => ({
     thumbContent: {
-        width: theme.custom.tagWise.thumbnail.width - theme.spacing.unit,
+        width: theme.custom.tagWise.thumbnail.width - theme.spacing(1),
         backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing.unit,
+        padding: theme.spacing(1),
     },
     thumbLeft: {
         alignSelf: 'flex-start',
@@ -49,7 +49,7 @@ const styles = theme => ({
         display: 'flex',
     },
     thumbHeader: {
-        width: theme.custom.tagWise.thumbnail.width - theme.spacing.unit,
+        width: theme.custom.tagWise.thumbnail.width - theme.spacing(1),
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -59,7 +59,7 @@ const styles = theme => ({
     },
     contextBox: {
         // eslint-disable-next-line radix
-        width: parseInt((150 - theme.spacing.unit) / 2),
+        width: parseInt(150 - theme.spacing(0.5)),
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -71,7 +71,7 @@ const styles = theme => ({
     thumbWrapper: {
         position: 'relative',
         paddingTop: 20,
-        marginRight: theme.spacing.unit * 2,
+        marginRight: theme.spacing(2),
     },
     deleteIcon: {
         fill: 'red',
@@ -88,7 +88,7 @@ const styles = theme => ({
     imageWrapper: {
         color: theme.palette.text.secondary,
         backgroundColor: theme.palette.background.paper,
-        width: theme.custom.tagWise.thumbnail.width + theme.spacing.unit,
+        width: theme.custom.tagWise.thumbnail.width + theme.spacing(1),
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

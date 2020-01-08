@@ -1,9 +1,0 @@
-<%
-jagg.block("oidc/logout", {
-    initialize:function (data) {
-
-    }
-
-
-});
-%>

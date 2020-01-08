@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.gateway.service;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.gateway.utils.LocalEntryClient;
+import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
 
 /**
  * API Local Entry Admin Service.
@@ -39,19 +39,19 @@ public class APILocalEntryAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @throws AxisFault
      */
     public boolean addLocalEntry(String content, String tenantDomain) throws AxisFault {
-        LocalEntryClient localEntryClient = getLocalEntryAdminClient(tenantDomain);
-        return localEntryClient.addLocalEntry(content);
+        LocalEntryServiceProxy localEntryServiceProxy = getLocalEntryAdminClient(tenantDomain);
+        return localEntryServiceProxy.addLocalEntry(content);
     }
 
     /**
      * Get the Local entry client.
      *
      * @param tenantDomain Tenant Domain
-     * @return LocalEntryClient
+     * @return LocalEntryServiceProxy
      * @throws AxisFault
      */
-    protected LocalEntryClient getLocalEntryAdminClient(String tenantDomain) throws AxisFault {
-        return new LocalEntryClient(tenantDomain);
+    protected LocalEntryServiceProxy getLocalEntryAdminClient(String tenantDomain) throws AxisFault {
+        return new LocalEntryServiceProxy(tenantDomain);
     }
 
     /**
@@ -63,8 +63,8 @@ public class APILocalEntryAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @throws AxisFault
      */
     public Object getEntry(String key, String tenantDomain) throws AxisFault {
-        LocalEntryClient localEntryAdminClient = getLocalEntryAdminClient(tenantDomain);
-        return localEntryAdminClient.getEntry(key);
+        LocalEntryServiceProxy localEntryServiceProxy = getLocalEntryAdminClient(tenantDomain);
+        return localEntryServiceProxy.getEntry(key);
     }
 
     /**
@@ -76,7 +76,7 @@ public class APILocalEntryAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @throws AxisFault
      */
     public Boolean deleteLocalEntry(String key, String tenantDomain) throws AxisFault {
-        LocalEntryClient localEntryAdminClient = getLocalEntryAdminClient(tenantDomain);
-        return localEntryAdminClient.deleteEntry(key);
+        LocalEntryServiceProxy localEntryServiceProxy = getLocalEntryAdminClient(tenantDomain);
+        return localEntryServiceProxy.deleteEntry(key);
     }
 }

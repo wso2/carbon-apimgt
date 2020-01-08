@@ -51,7 +51,7 @@ const dropzoneStyles = {
     margin: '10px 0',
 };
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     fileinput: {
         display: 'none',
     },
@@ -169,6 +169,8 @@ export default function UploadCertificate(props) {
         const extension = certificateFile.name.split('.');
         if (rejectedFiles.includes(extension[1])) {
             setIsRejected(true);
+        } else {
+            setIsRejected(false);
         }
         if (certificateFile) {
             setCertificate({ name: certificateFile.name, content: certificateFile });
@@ -201,13 +203,15 @@ export default function UploadCertificate(props) {
                 <FormattedMessage
                     id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias.exist.error'
                     defaultMessage='Alias already exists'
-                />);
+                />
+            );
         } else {
             return (
                 <FormattedMessage
                     id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias.default.message'
                     defaultMessage='Alias for the Certificate'
-                />);
+                />
+            );
         }
     };
 
@@ -234,27 +238,28 @@ export default function UploadCertificate(props) {
                                 required
                                 validate={onValidate}
                             />
-                        ) :
-                            <SelectEndpoint
-                                endpoints={endpoints}
-                                onChange={handleEndpointOnChange}
-                                endpoint={endpoint}
-                                isEndpointEmpty={isEndpointEmpty}
-                                required
-                            />
-                        }
+                        )
+                            : (
+                                <SelectEndpoint
+                                    endpoints={endpoints}
+                                    onChange={handleEndpointOnChange}
+                                    endpoint={endpoint}
+                                    isEndpointEmpty={isEndpointEmpty}
+                                    required
+                                />
+                            )}
                         <TextField
                             required
                             id='certificateAlias'
-                            label={
+                            label={(
                                 <FormattedMessage
                                     id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias'
                                     defaultMessage='Alias'
                                 />
-                            }
+                            )}
                             value={alias}
                             placeholder='My Alias'
-                            onChange={event => setAlias(event.target.value)}
+                            onChange={(event) => setAlias(event.target.value)}
                             onBlur={() => handleAliasOnBlur()}
                             margin='normal'
                             variant='outlined'
@@ -268,16 +273,16 @@ export default function UploadCertificate(props) {
                         <Dropzone
                             multiple={false}
                             accept={
-                                'application/pkcs8,' +
-                                    'application/pkcs10, application/pkix-crl,' +
-                                    'application/pkcs7-mime,' +
-                                    'application/x-x509-ca-cert,' +
-                                    'application/x-x509-user-cert,' +
-                                    'application/x-pkcs7-crl,' +
-                                    'application/x-pkcs12,' +
-                                    'application/x-pkcs7-certificates,' +
-                                    'application/x-pkcs7-certreqresp,' +
-                                    '.p8, .p10, .cer, .cert, .p7c, .crt, .der, .p12, .pfx, .p7b, .spc, .p7r'
+                                'application/pkcs8,'
+                                    + 'application/pkcs10, application/pkix-crl,'
+                                    + 'application/pkcs7-mime,'
+                                    + 'application/x-x509-ca-cert,'
+                                    + 'application/x-x509-user-cert,'
+                                    + 'application/x-pkcs7-crl,'
+                                    + 'application/x-pkcs12,'
+                                    + 'application/x-pkcs7-certificates,'
+                                    + 'application/x-pkcs7-certreqresp,'
+                                    + '.p8, .p10, .cer, .cert, .p7c, .crt, .der, .p12, .pfx, .p7b, .spc, .p7r'
                             }
                             className={classes.dropzone}
                             activeClassName={classes.acceptDrop}
@@ -296,12 +301,12 @@ export default function UploadCertificate(props) {
                                                 <Typography>
                                                     <FormattedMessage
                                                         id={
-                                                            'Apis.Details.Endpoints.GeneralConfiguration' +
-                                                                '.UploadCertificate.click.or.drop.to.upload.file'
+                                                            'Apis.Details.Endpoints.GeneralConfiguration'
+                                                                + '.UploadCertificate.click.or.drop.to.upload.file'
                                                         }
                                                         defaultMessage={
-                                                            'Click or drag the certificate ' +
-                                                                ' file to upload.'
+                                                            'Click or drag the certificate '
+                                                                + ' file to upload.'
                                                         }
                                                     />
                                                 </Typography>
@@ -318,8 +323,8 @@ export default function UploadCertificate(props) {
                                                         <Typography variant='caption' color='error'>
                                                             <FormattedMessage
                                                                 id={
-                                                                    'Apis.Details.Endpoints.GeneralConfiguration' +
-                                                            '.UploadCertificate.invalid.file'
+                                                                    'Apis.Details.Endpoints.GeneralConfiguration'
+                                                            + '.UploadCertificate.invalid.file'
                                                                 }
                                                                 defaultMessage='Invalid file type'
                                                             />
@@ -356,11 +361,11 @@ export default function UploadCertificate(props) {
                     color='primary'
                     autoFocus
                     disabled={
-                        alias === '' || (aliasValidity && !aliasValidity.isValid) ||
-                            (!isMutualSSLEnabled && endpoint === '') ||
-                            certificate.name === '' ||
-                            (isMutualSSLEnabled && isPoliciesEmpty) ||
-                            isSaving || (aliasList && aliasList.includes(alias)) || isRejected
+                        alias === '' || (aliasValidity && !aliasValidity.isValid)
+                            || (!isMutualSSLEnabled && endpoint === '')
+                            || certificate.name === ''
+                            || (isMutualSSLEnabled && isPoliciesEmpty)
+                            || isSaving || (aliasList && aliasList.includes(alias)) || isRejected
                     }
                 >
                     <FormattedMessage

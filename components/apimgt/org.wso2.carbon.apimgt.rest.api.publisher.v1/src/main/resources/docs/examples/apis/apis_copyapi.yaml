@@ -3,7 +3,7 @@ post:
     title: Copying an API without specifying a default version
     request:
       method: POST
-      url: https://localhost:9443/api/am/publisher/v1.0/apis/copy-api?newVersion=2.0.0&apiId=a8f0fb89-edf9-484c-b937-036b088f287d
+      url: https://localhost:9443/api/am/publisher/v1/apis/copy-api?newVersion=2.0.0&apiId=a8f0fb89-edf9-484c-b937-036b088f287d
       headers: |
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
     response:
@@ -12,7 +12,7 @@ post:
         msg: Created
       headers: |
         Content-Type: application/json
-        Location: https://localhost:9443/api/am/publisher/v1.0/apis/740a2695-74f3-4d8f-826b-356e39553912
+        Location: https://localhost:9443/api/am/publisher/v1/apis/740a2695-74f3-4d8f-826b-356e39553912
       body:
         {
           "id":"740a2695-74f3-4d8f-826b-356e39553912",
@@ -214,7 +214,7 @@ post:
       In order to create the new API as a default version API, provide `defaultVersion=true` query parameter.
     request:
       method: POST
-      url: https://localhost:9443/api/am/publisher/v1.0/apis/copy-api?newVersion=2.0.0&defaultVersion=true&apiId=a8f0fb89-edf9-484c-b937-036b088f287d
+      url: https://localhost:9443/api/am/publisher/v1/apis/copy-api?newVersion=2.0.0&defaultVersion=true&apiId=a8f0fb89-edf9-484c-b937-036b088f287d
       headers: |
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
     response:
@@ -223,7 +223,7 @@ post:
         msg: Created
       headers: |
         Content-Type: application/json
-        Location: https://localhost:9443/api/am/publisher/v1.0/apis/740a2695-74f3-4d8f-826b-356e39553912
+        Location: https://localhost:9443/api/am/publisher/v1/apis/740a2695-74f3-4d8f-826b-356e39553912
       body:
         {
           "id":"740a2695-74f3-4d8f-826b-356e39553912",
@@ -423,7 +423,7 @@ post:
     title: Creating an API with existing version
     request:
       method: POST
-      url: https://localhost:9443/api/am/publisher/v1.0/apis/copy-api?newVersion=2.0.0&defaultVersion=false&apiId=a8f0fb89-edf9-484c-b937-036b088f287d
+      url: https://localhost:9443/api/am/publisher/v1/apis/copy-api?newVersion=2.0.0&defaultVersion=false&apiId=a8f0fb89-edf9-484c-b937-036b088f287d
       headers: |
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
     response:

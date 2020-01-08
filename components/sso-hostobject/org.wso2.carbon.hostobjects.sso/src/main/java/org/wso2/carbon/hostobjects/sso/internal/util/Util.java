@@ -24,35 +24,34 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.impl.Constants;
 import org.apache.xerces.util.SecurityManager;
-import org.opensaml.Configuration;
-import org.opensaml.DefaultBootstrap;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Attribute;
-import org.opensaml.saml2.core.AttributeStatement;
-import org.opensaml.saml2.core.EncryptedAssertion;
-import org.opensaml.saml2.core.NameID;
-import org.opensaml.saml2.core.NameIDPolicy;
-import org.opensaml.saml2.core.Subject;
-import org.opensaml.saml2.core.impl.NameIDBuilder;
-import org.opensaml.saml2.core.impl.NameIDPolicyBuilder;
-import org.opensaml.saml2.encryption.Decrypter;
-import org.opensaml.security.SAMLSignatureProfileValidator;
-import org.opensaml.xml.ConfigurationException;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.XMLObjectBuilder;
-import org.opensaml.xml.encryption.EncryptedKey;
-import org.opensaml.xml.io.Marshaller;
-import org.opensaml.xml.io.MarshallerFactory;
-import org.opensaml.xml.io.Unmarshaller;
-import org.opensaml.xml.io.UnmarshallerFactory;
-import org.opensaml.xml.security.SecurityHelper;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
-import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
-import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.signature.SignatureValidator;
-import org.opensaml.xml.util.Base64;
-import org.opensaml.xml.validation.ValidationException;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.Attribute;
+import org.opensaml.saml.saml2.core.AttributeStatement;
+import org.opensaml.saml.saml2.core.EncryptedAssertion;
+import org.opensaml.saml.saml2.core.NameID;
+import org.opensaml.saml.saml2.core.NameIDPolicy;
+import org.opensaml.saml.saml2.core.Subject;
+import org.opensaml.saml.saml2.core.impl.NameIDBuilder;
+import org.opensaml.saml.saml2.core.impl.NameIDPolicyBuilder;
+import org.opensaml.saml.saml2.encryption.Decrypter;
+import org.opensaml.saml.security.impl.SAMLSignatureProfileValidator;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.XMLObjectBuilder;
+import org.opensaml.xmlsec.encryption.EncryptedKey;
+import org.opensaml.core.xml.io.Marshaller;
+import org.opensaml.core.xml.io.MarshallerFactory;
+import org.opensaml.core.xml.io.Unmarshaller;
+import org.opensaml.core.xml.io.UnmarshallerFactory;
+import org.opensaml.core.config.InitializationException;
+import org.opensaml.security.credential.CredentialSupport;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
+import org.opensaml.xmlsec.keyinfo.impl.StaticKeyInfoCredentialResolver;
+import org.opensaml.xmlsec.signature.Signature;
+import org.opensaml.xmlsec.signature.support.SignatureValidator;
+import net.shibboleth.utilities.java.support.codec.Base64Support;
+import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -68,6 +67,7 @@ import org.wso2.carbon.hostobjects.sso.exception.SSOHostObjectException;
 import org.wso2.carbon.hostobjects.sso.internal.SSOConstants;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.identity.saml.common.util.SAMLInitializer;
 import org.xml.sax.SAXException;
 
 import javax.crypto.SecretKey;
@@ -83,7 +83,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.util.List;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.Deflater;
@@ -110,17 +109,17 @@ public class Util {
     private static Log log = LogFactory.getLog(Util.class);
 
     /**
-     * This method is used to initialize the OpenSAML2 library. It calls the bootstrap method, if it
+     * This method is used to initialize the OpenSAML3 library. It calls the bootstrap method, if it
      * is not initialized yet.
      */
     public static void doBootstrap() {
         if (!bootStrapped) {
             try {
-                DefaultBootstrap.bootstrap();
+                SAMLInitializer.doBootstrap();
                 bootStrapped = true;
-            } catch (ConfigurationException e) {
-                System.err.println("Error in bootstrapping the OpenSAML2 library");
-                log.error("Error in bootstrapping the OpenSAML2 library", e);
+            } catch (InitializationException e) {
+                System.err.println("Error in bootstrapping the OpenSAML3 library");
+                log.error("Error in bootstrapping the OpenSAML3 library", e);
             }
         }
     }
@@ -135,7 +134,7 @@ public class Util {
     public static XMLObject buildXMLObject(QName objectQName)
             throws SSOHostObjectException {
 
-        XMLObjectBuilder builder = org.opensaml.xml.Configuration.getBuilderFactory().getBuilder(objectQName);
+        XMLObjectBuilder builder = XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(objectQName);
         if (builder == null) {
             throw new SSOHostObjectException("Unable to retrieve builder for object QName "
                     + objectQName);
@@ -187,7 +186,7 @@ public class Util {
                 document = getDocument(documentBuilderFactory, authReqStr);
             }
             Element element = document.getDocumentElement();
-            UnmarshallerFactory unmarshallerFactory = Configuration.getUnmarshallerFactory();
+            UnmarshallerFactory unmarshallerFactory = XMLObjectProviderRegistrySupport.getUnmarshallerFactory();
             Unmarshaller unmarshaller = unmarshallerFactory.getUnmarshaller(element);
             return unmarshaller.unmarshall(element);
         } catch (Exception e) {
@@ -209,7 +208,7 @@ public class Util {
             System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
                     "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
 
-            MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
+            MarshallerFactory marshallerFactory = XMLObjectProviderRegistrySupport.getMarshallerFactory();
             Marshaller marshaller = marshallerFactory.getMarshaller(xmlObject);
             Element element = marshaller.marshall(xmlObject);
 
@@ -236,7 +235,7 @@ public class Util {
     public static String encode(String xmlString) throws Exception {
 
         // Encoding the compressed message
-        String encodedRequestMessage = Base64.encodeBytes(xmlString.getBytes("UTF-8"), Base64.DONT_BREAK_LINES);
+        String encodedRequestMessage = Base64Support.encode(xmlString.getBytes("UTF-8"), Base64Support.UNCHUNKED);
         return encodedRequestMessage.trim();
     }
 
@@ -254,8 +253,8 @@ public class Util {
         deflaterOutputStream.close();
 
         // Encoding the compressed message
-        String encodedRequestMessage = Base64.encodeBytes(byteArrayOutputStream
-                .toByteArray(), Base64.DONT_BREAK_LINES);
+        String encodedRequestMessage = Base64Support.encode(byteArrayOutputStream
+                .toByteArray(), Base64Support.UNCHUNKED);
         return encodedRequestMessage.trim();
 
     }
@@ -267,7 +266,7 @@ public class Util {
      * @return decoded AuthReq
      */
     public static String decode(String encodedStr) throws Exception {
-        return new String(Base64.decode(encodedStr));
+        return new String(Base64Support.decode(encodedStr));
     }
 
     /**
@@ -276,10 +275,9 @@ public class Util {
      * @param signature Signature to verify
      * @return true, if signature is valid.
      */
-    public static boolean validateSignature(Signature signature, String keyStoreName,
-                                            String keyStorePassword, String alias, int tenantId,
-                                            String tenantDomain) throws SignatureVerificationException,
-            SignatureVerificationFailure {
+    public static boolean validateSignature(Signature signature, String keyStoreName, String keyStorePassword,
+            String alias, int tenantId, String tenantDomain)
+            throws SignatureVerificationException, SignatureVerificationFailure {
         boolean isSigValid = false;
         try {
             KeyStore keyStore = null;
@@ -300,7 +298,7 @@ public class Util {
             try {
                 SAMLSignatureProfileValidator signatureProfileValidator = new SAMLSignatureProfileValidator();
                 signatureProfileValidator.validate(signature);
-            } catch (ValidationException e) {
+            } catch (SignatureException e) {
                 String logMsg = "The signature do not confirm to SAML signature profile. Possible XML Signature Wrapping Attack!";
                 if (log.isDebugEnabled()) {
                     log.debug(logMsg, e);
@@ -310,8 +308,7 @@ public class Util {
                 return false;
             }
             X509CredentialImpl credentialImpl = new X509CredentialImpl(cert);
-            SignatureValidator signatureValidator = new SignatureValidator(credentialImpl);
-            signatureValidator.validate(signature);
+            SignatureValidator.validate(signature, credentialImpl);
             isSigValid = true;
             return isSigValid;
 
@@ -330,7 +327,7 @@ public class Util {
         } catch (IOException e) {
             log.error("Could not load the keystore " + keyStoreName, e);
             throw new SignatureVerificationException(e);
-        } catch (ValidationException e) {
+        } catch (SignatureException e) {
             String logMsg = "The signature do not confirm to SAML signature profile. Possible XML Signature Wrapping Attack!";
             if (log.isDebugEnabled()) {
                 log.debug(logMsg, e);
@@ -365,7 +362,7 @@ public class Util {
             Decrypter decrypter = new Decrypter(null, keyResolver, null);
             SecretKey dkey = (SecretKey) decrypter.decryptKey(key, encryptedAssertion.getEncryptedData().
                     getEncryptionMethod().getAlgorithm());
-            Credential shared = SecurityHelper.getSimpleCredential(dkey);
+            Credential shared = CredentialSupport.getSimpleCredential(dkey);
             decrypter = new Decrypter(new StaticKeyInfoCredentialResolver(shared), null, null);
             decrypter.setRootInNewDocument(true);
             return decrypter.decrypt(encryptedAssertion);

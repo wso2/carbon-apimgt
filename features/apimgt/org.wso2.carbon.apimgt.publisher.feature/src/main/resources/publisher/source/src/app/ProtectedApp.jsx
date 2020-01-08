@@ -16,27 +16,33 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Suspense, lazy } from 'react';
 import PropTypes from 'prop-types';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 // import MaterialDesignCustomTheme from 'AppComponents/Shared/CustomTheme';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-import Apis from 'AppComponents/Apis/Apis';
 import Api from 'AppData/api';
 import Base from 'AppComponents/Base';
 import AuthManager from 'AppData/AuthManager';
 import Header from 'AppComponents/Base/Header';
 import Avatar from 'AppComponents/Base/Header/avatar/Avatar';
-import Configurations from 'Config';
+import Themes from 'Themes';
 import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import { IntlProvider } from 'react-intl';
 import { AppContextProvider } from 'AppComponents/Shared/AppContext';
 import SettingsBase from 'AppComponents/Apis/Settings/SettingsBase';
+import Progress from 'AppComponents/Shared/Progress';
 
-const theme = createMuiTheme(Configurations.themes.light);
+const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "DeferredAPIs" */));
+const DeferredAPIs = () => (
+    <Suspense fallback={<Progress message='Loading components ...' />}>
+        <Apis />
+    </Suspense>
+);
+const theme = createMuiTheme(Themes.light);
 
 /**
  * Language.
@@ -71,14 +77,14 @@ export default class Protected extends Component {
         const settingPromise = api.getSettings();
         if (user) {
             this.setState({ user });
-            settingPromise.then(settingsNew => this.setState({ settings: settingsNew }));
+            settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
         } else {
             // If no user data available , Get the user info from existing token information
             // This could happen when OAuth code authentication took place and could send
             // user information via redirection
             const userPromise = AuthManager.getUserFromToken();
-            userPromise.then(loggedUser => this.setState({ user: loggedUser }));
-            settingPromise.then(settingsNew => this.setState({ settings: settingsNew }));
+            userPromise.then((loggedUser) => this.setState({ user: loggedUser }));
+            settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
         }
     }
 
@@ -87,35 +93,37 @@ export default class Protected extends Component {
      * @memberof Protected
      */
     render() {
-        const user = this.state.user || AuthManager.getUser();
+        const { user = AuthManager.getUser(), messages } = this.state;
         const header = <Header avatar={<Avatar user={user} />} user={user} />;
         const { settings } = this.state;
 
         if (!user) {
             return (
-                <IntlProvider locale={language} messages={this.state.messages}>
+                <IntlProvider locale={language} messages={messages}>
                     <RedirectToLogin />
                 </IntlProvider>
             );
         }
         return (
-            settings && (
-                <AppContextProvider value={{ settings, user }}>
-                    <MuiThemeProvider theme={theme}>
-                        <AppErrorBoundary>
-                            <Base header={header}>
+            <MuiThemeProvider theme={theme}>
+                <AppErrorBoundary>
+                    <Base header={header}>
+                        {settings ? (
+                            <AppContextProvider value={{ settings, user }}>
                                 <Switch>
                                     <Redirect exact from='/' to='/apis' />
-                                    <Route path='/apis' component={Apis} />
-                                    <Route path='/api-products' component={Apis} />
+                                    <Route path='/apis' component={DeferredAPIs} />
+                                    <Route path='/api-products' component={DeferredAPIs} />
                                     <Route path='/settings' component={SettingsBase} />
                                     <Route component={ResourceNotFound} />
                                 </Switch>
-                            </Base>
-                        </AppErrorBoundary>
-                    </MuiThemeProvider>
-                </AppContextProvider>
-            )
+                            </AppContextProvider>
+                        ) : (
+                            <Progress message='Loading Settings ...' />
+                        )}
+                    </Base>
+                </AppErrorBoundary>
+            </MuiThemeProvider>
         );
     }
 }

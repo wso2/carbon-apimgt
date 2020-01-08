@@ -67,7 +67,6 @@ public class KeyManagerUserOperationListenerTestCase {
     private WorkflowExecutor workflowExecutor;
     private APIManagerConfiguration config;
     private APIAuthenticationAdminClient apiAuthenticationAdminClient;
-    private String tenantedUsername;
     private Map<String, Environment> environmentMap;
 
     @Before
@@ -79,7 +78,6 @@ public class KeyManagerUserOperationListenerTestCase {
         apiAuthenticationAdminClient = Mockito.mock(APIAuthenticationAdminClient.class);
         tenant = new Tenant();
         username = "testuser";
-        tenantedUsername = username + "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         environmentMap = new HashMap<String, Environment>();
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -141,7 +139,7 @@ public class KeyManagerUserOperationListenerTestCase {
         environmentMap.put("hybrid", environment);
         Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environmentMap);
         //Throws APIMgtException while retrieving access tokens
-        Mockito.doThrow(APIManagementException.class).when(apiMgtDAO).getActiveAccessTokensOfUser(tenantedUsername);
+        Mockito.doThrow(APIManagementException.class).when(apiMgtDAO).getActiveAccessTokensOfUser(username);
         //Should always continue when the handler is disabled, even though Gateway cache update fails
         Assert.assertTrue(keyManagerUserOperationListener.doPreDeleteUser(username, userStoreManager));
     }
@@ -154,7 +152,7 @@ public class KeyManagerUserOperationListenerTestCase {
                 (apiMgtDAO, workflowExecutor, null, config, apiAuthenticationAdminClient, true);
         Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environmentMap);
         //Throws APIMgtException while retrieving access tokens
-        Mockito.doThrow(APIManagementException.class).when(apiMgtDAO).getActiveAccessTokensOfUser(tenantedUsername);
+        Mockito.doThrow(APIManagementException.class).when(apiMgtDAO).getActiveAccessTokensOfUser(username);
         //Should always return true when the gateway environments are not available,
         //before throwing APIManagementException while retrieving accessTokens
         Assert.assertTrue(keyManagerUserOperationListener.doPreDeleteUser(username, userStoreManager));
@@ -169,7 +167,7 @@ public class KeyManagerUserOperationListenerTestCase {
         Environment environment = new Environment();
         environmentMap.put("hybrid", environment);
         Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environmentMap);
-        Mockito.when(apiMgtDAO.getActiveAccessTokensOfUser(tenantedUsername)).thenReturn(new HashSet<String>());
+        Mockito.when(apiMgtDAO.getActiveAccessTokensOfUser(username)).thenReturn(new HashSet<String>());
         Assert.assertTrue(keyManagerUserOperationListener.doPreDeleteUser(username, userStoreManager));
     }
 
@@ -181,25 +179,10 @@ public class KeyManagerUserOperationListenerTestCase {
         environmentMap.put("hybrid", environment);
         Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environmentMap);
         //Throws APIMgtException while retrieving access tokens
-        Mockito.doThrow(APIManagementException.class).when(apiMgtDAO).getActiveAccessTokensOfUser(tenantedUsername);
+        Mockito.doThrow(APIManagementException.class).when(apiMgtDAO).getActiveAccessTokensOfUser(username);
         Assert.assertFalse(keyManagerUserOperationListener.doPreDeleteUser(username, userStoreManager));
     }
 
-    @Test
-    public void testDoPreDeleteUserWithTokenCacheInvalidationAxisFault() throws AxisFault, APIManagementException {
-        KeyManagerUserOperationListener keyManagerUserOperationListener = new KeyManagerUserOperationListenerWrapper
-                (apiMgtDAO, workflowExecutor, null, config, apiAuthenticationAdminClient, true);
-        Environment environment = new Environment();
-        environmentMap.put("hybrid", environment);
-        Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environmentMap);
-        Set<String> activeTokens = new HashSet<String>();
-        activeTokens.add(UUID.randomUUID().toString());
-        Mockito.when(apiMgtDAO.getActiveAccessTokensOfUser(tenantedUsername)).thenReturn(activeTokens);
-        //Test AxisFault while invalidating Cached Tokens via Admin Client
-        Mockito.doThrow(AxisFault.class).when(apiAuthenticationAdminClient).invalidateCachedTokens(activeTokens);
-        Assert.assertTrue(keyManagerUserOperationListener.doPreDeleteUser(username, userStoreManager));
-
-    }
 
     @Test
     public void testDoPreDeleteUserWithActiveAccessTokens() throws APIManagementException {
@@ -210,7 +193,7 @@ public class KeyManagerUserOperationListenerTestCase {
         Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environmentMap);
         Set<String> activeTokens = new HashSet<String>();
         activeTokens.add(UUID.randomUUID().toString());
-        Mockito.when(apiMgtDAO.getActiveAccessTokensOfUser(tenantedUsername)).thenReturn(activeTokens);
+        Mockito.when(apiMgtDAO.getActiveAccessTokensOfUser(username)).thenReturn(activeTokens);
         //Test AxisFault while invalidating Cached Tokens via Admin Client
         Assert.assertTrue(keyManagerUserOperationListener.doPreDeleteUser(username, userStoreManager));
     }

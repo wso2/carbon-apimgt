@@ -36,8 +36,8 @@ const styles = theme => ({
     root: {
         display: 'flex',
         alignItems: 'center',
-        paddingTop: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit * 2,
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
     },
     paper: {
         marginRight: theme.spacing(3),
@@ -45,7 +45,7 @@ const styles = theme => ({
         paddingRight: theme.spacing(2),
     },
     contentWrapper: {
-        paddingLeft: theme.spacing.unit * 2,
+        paddingLeft: theme.spacing(3),
         paddingTop: theme.spacing.unig,
     },
     contentWrapperOverview: {
@@ -61,13 +61,15 @@ const styles = theme => ({
         cursor: 'pointer',
     },
     verticalSpace: {
-        marginTop: theme.spacing.unit * 0.2,
+        marginTop: theme.spacing(0.2),
     },
     loadMoreLink: {
         textDecoration: 'underline',
     },
     genericMessageWrapper: {
-        margin: theme.spacing(2),
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2),
+        marginRight: theme.spacing(3),
     },
 });
 
@@ -279,7 +281,7 @@ class Comments extends Component {
                                 />
                             </Paper>
                         )}
-                        {totalComments === 0 && AuthManager.getUser() === null && !isOverview &&
+                        {totalComments === 0 && !isOverview &&
                             <div className={classes.genericMessageWrapper}>
                                 <InlineMessage type='info' className={classes.dialogContainer}>
                                     <Typography variant='h5' component='h3'>

@@ -18,6 +18,14 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import com.amazonaws.SdkClientException;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.services.lambda.AWSLambda;
+import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
+import com.amazonaws.services.lambda.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.gson.Gson;
@@ -31,9 +39,7 @@ import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
-//import io.swagger.inflector.examples.ExampleBuilder;
-//import io.swagger.inflector.examples.models.Example;
-//import io.swagger.inflector.processors.JsonNodeExampleSerializer;
+
 import io.swagger.oas.inflector.examples.ExampleBuilder;
 import io.swagger.oas.inflector.examples.models.Example;
 import io.swagger.oas.inflector.processors.JsonNodeExampleSerializer;
@@ -43,6 +49,9 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+
+import org.apache.axiom.util.base64.Base64Utils;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -52,9 +61,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.XML;
 import org.json.simple.JSONObject;
@@ -74,13 +89,16 @@ import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -89,22 +107,33 @@ import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -138,6 +167,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
@@ -286,6 +316,20 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest("Endpoint URLs should be valid web socket URLs", log);
             }
 
+            // AWS Lambda: secret key encryption while creating the API
+            if (body.getEndpointConfig() != null) {
+                LinkedHashMap endpointConfig = (LinkedHashMap) body.getEndpointConfig();
+                if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                    String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                    if (!StringUtils.isEmpty(secretKey)) {
+                        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                        String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                        endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                        body.setEndpointConfig(endpointConfig);
+                    }
+                }
+            }
+
             API apiToAdd = prepareToCreateAPIByDTO(body);
             validateScopes(apiToAdd);
             //adding the api
@@ -317,6 +361,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
                     body.getName() + "-" + body.getVersion();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (CryptoException e) {
+            String errorMessage = "Error while encrypting the secret key of API : " + body.getProvider() + "-" +
+                    body.getName() + "-" + body.getVersion() + " - " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -457,7 +505,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         assignLabelsToDTO(body,apiToAdd);
 
         // set default API Level Policy
-        if (StringUtils.isBlank(apiToAdd.getApiLevelPolicy())) {
+        if (apiToAdd.getApiLevelPolicy() != null) {
             Policy[] apiPolicies = apiProvider.getPolicies(username, PolicyConstants.POLICY_LEVEL_API);
             if (apiPolicies.length > 0) {
                 for (Policy policy : apiPolicies) {
@@ -588,6 +636,29 @@ public class ApisApiServiceImpl implements ApisApiService {
                     APIDTO.class.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
             boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
 
+            // AWS Lambda: secret key encryption while updating the API
+            if (body.getEndpointConfig() != null) {
+                LinkedHashMap endpointConfig = (LinkedHashMap) body.getEndpointConfig();
+                if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                    String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                    if (!StringUtils.isEmpty(secretKey)) {
+                        if (!APIConstants.AWS_SECRET_KEY.equals(secretKey)) {
+                            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                            String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                            endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                            body.setEndpointConfig(endpointConfig);
+                        } else {
+                            JSONParser jsonParser = new JSONParser();
+                            JSONObject originalEndpointConfig = (JSONObject)
+                                    jsonParser.parse(originalAPI.getEndpointConfig());
+                            String encryptedSecretKey = (String) originalEndpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                            endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                            body.setEndpointConfig(endpointConfig);
+                        }
+                    }
+                }
+            }
+
             if (!hasClassLevelScope) {
                 // Validate per-field scopes
                 body = getFieldOverriddenAPIDTO(body, originalAPI, tokenScopes);
@@ -674,6 +745,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
                 }
             }
+            apiToUpdate.setWsdlUrl(body.getWsdlUrl());
             apiProvider.manageAPI(apiToUpdate);
 
             API updatedApi = apiProvider.getAPI(apiIdentifier);
@@ -687,14 +759,271 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while updating API : " + apiId, e, log);
             } else {
-                String errorMessage = "Error while updating API : " + apiId;
+                String errorMessage = "Error while updating the API : " + apiId + " - " + e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (CryptoException e) {
+            String errorMessage = "Error while encrypting the secret key of API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (ParseException e) {
+            String errorMessage = "Error while parsing endpoint config of API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    // AWS Lambda: rest api operation to get ARNs
+    @Override
+    public Response apisApiIdAmznResourceNamesGet(String apiId, MessageContext messageContext) {
+        JSONObject arns = new JSONObject();
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            String endpointConfigString = api.getEndpointConfig();
+            if (!StringUtils.isEmpty(endpointConfigString)) {
+                JSONParser jsonParser = new JSONParser();
+                JSONObject endpointConfig = (JSONObject) jsonParser.parse(endpointConfigString);
+                if (endpointConfig != null) {
+                    if (endpointConfig.containsKey(APIConstants.AMZN_ACCESS_KEY) &&
+                            endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                        String accessKey = (String) endpointConfig.get(APIConstants.AMZN_ACCESS_KEY);
+                        String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                        AWSCredentialsProvider credentialsProvider;
+                        if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
+                            credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
+                        } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey)) {
+                            if (secretKey.length() == APIConstants.AWS_ENCRYPTED_SECRET_KEY_LENGTH) {
+                                CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                                secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
+                                        APIConstants.DigestAuthConstants.CHARSET);
+                            }
+                            BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
+                            credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
+                        } else {
+                            log.error("Missing AWS Credentials");
+                            return null;
+                        }
+                        AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
+                                .withCredentials(credentialsProvider)
+                                .build();
+                        ListFunctionsResult listFunctionsResult = awsLambda.listFunctions();
+                        List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
+                        arns.put("count", functionConfigurations.size());
+                        JSONArray list = new JSONArray();
+                        for (FunctionConfiguration functionConfiguration : functionConfigurations) {
+                            list.put(functionConfiguration.getFunctionArn());
+                        }
+                        arns.put("list", list);
+                        return Response.ok().entity(arns.toString()).build();
+                    }
+                }
+            }
+        } catch (SdkClientException e) {
+            if (e.getCause() instanceof UnknownHostException) {
+                arns.put("error", "No internet connection to connect the given access method.");
+                log.error("No internet connection to connect the given access method of API : " + apiId, e);
+                return Response.serverError().entity(arns.toString()).build();
+            } else {
+                arns.put("error", "Unable to access Lambda functions under the given access method.");
+                log.error("Unable to access Lambda functions under the given access method of API : " + apiId, e);
+                return Response.serverError().entity(arns.toString()).build();
+            }
+        } catch (ParseException e) {
+            String errorMessage = "Error while parsing endpoint config of the API: " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (CryptoException | UnsupportedEncodingException e) {
+            String errorMessage = "Error while decrypting the secret key of the API: " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving the API: " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdAuditapiGet(String apiId, String accept, MessageContext messageContext) {
+        boolean isDebugEnabled = log.isDebugEnabled();
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = api.getId();
+            String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+            // Get configuration file, retrieve API token and collection id
+            JSONObject securityAuditPropertyObject = apiProvider.getSecurityAuditAttributesFromConfig(username);
+            String apiToken = (String) securityAuditPropertyObject.get("apiToken");
+            String collectionId = (String) securityAuditPropertyObject.get("collectionId");
+            String baseUrl = (String) securityAuditPropertyObject.get("baseUrl");
+
+            if (baseUrl == null) {
+                baseUrl = APIConstants.BASE_AUDIT_URL;
+            }
+            // Retrieve the uuid from the database
+            String auditUuid = ApiMgtDAO.getInstance().getAuditApiId(apiIdentifier);
+            if (auditUuid != null) {
+                updateAuditApi(apiDefinition, apiToken, auditUuid, baseUrl, isDebugEnabled);
+            } else {
+                auditUuid = createAuditApi(collectionId, apiToken, apiIdentifier, apiDefinition, baseUrl,
+                        isDebugEnabled);
+            }
+            // Logic for the HTTP request
+            String getUrl = baseUrl + "/" + auditUuid + APIConstants.ASSESSMENT_REPORT;
+            URL getReportUrl = new URL(getUrl);
+            try (CloseableHttpClient getHttpClient = (CloseableHttpClient) APIUtil
+                    .getHttpClient(getReportUrl.getPort(), getReportUrl.getProtocol())) {
+                HttpGet httpGet = new HttpGet(getUrl);
+                // Set the header properties of the request
+                httpGet.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                httpGet.setHeader(APIConstants.HEADER_API_TOKEN, apiToken);
+                // Code block for the processing of the response
+                try (CloseableHttpResponse response = getHttpClient.execute(httpGet)) {
+                    if (isDebugEnabled) {
+                        log.debug("HTTP status " + response.getStatusLine().getStatusCode());
+                    }
+                    if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                        BufferedReader reader = new BufferedReader(
+                                new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+                        String inputLine;
+                        StringBuilder responseString = new StringBuilder();
+
+                        while ((inputLine = reader.readLine()) != null) {
+                            responseString.append(inputLine);
+                        }
+                        JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
+                        String report = responseJson.get(APIConstants.DATA).toString();
+                        String grade = (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR))
+                                .get(APIConstants.DATA)).get(APIConstants.GRADE);
+                        Integer numErrors = Integer.valueOf(
+                                (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR))
+                                        .get(APIConstants.DATA)).get(APIConstants.NUM_ERRORS));
+                        String decodedReport = new String(Base64Utils.decode(report), "UTF-8");
+                        AuditReportDTO auditReportDTO = new AuditReportDTO();
+                        auditReportDTO.setReport(decodedReport);
+                        auditReportDTO.setGrade(grade);
+                        auditReportDTO.setNumErrors(numErrors);
+                        return Response.ok().entity(auditReportDTO).build();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            RestApiUtil.handleInternalServerError("Error occurred while getting "
+                    + "HttpClient instance", e, log);
+        } catch (ParseException e) {
+            RestApiUtil.handleInternalServerError("API Definition String "
+                    + "could not be parsed into JSONObject.", e, log);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while Auditing API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    private void updateAuditApi(String apiDefinition, String apiToken, String auditUuid, String baseUrl,
+            boolean isDebugEnabled)
+            throws IOException, APIManagementException {
+        // Set the property to be attached in the body of the request
+        // Attach API Definition to property called specfile to be sent in the request
+        JSONObject jsonBody = new JSONObject();
+        jsonBody.put("specfile", Base64Utils.encode(apiDefinition.getBytes("UTF-8")));
+        // Logic for HTTP Request
+        String putUrl = baseUrl + "/" + auditUuid;
+        URL updateApiUrl = new URL(putUrl);
+        try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil
+                .getHttpClient(updateApiUrl.getPort(), updateApiUrl.getProtocol())) {
+            HttpPut httpPut = new HttpPut(putUrl);
+            // Set the header properties of the request
+            httpPut.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            httpPut.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            httpPut.setHeader(APIConstants.HEADER_API_TOKEN, apiToken);
+            httpPut.setEntity(new StringEntity(jsonBody.toJSONString()));
+            // Code block for processing the response
+            try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
+                if (isDebugEnabled) {
+                    log.debug("HTTP status " + response.getStatusLine().getStatusCode());
+                }
+                if (!(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)) {
+                    throw new APIManagementException(
+                            "Error while sending data to the API Security Audit Feature. Found http status " +
+                                    response.getStatusLine());
+                }
+            } finally {
+                httpPut.releaseConnection();
+            }
+        }
+    }
+
+    private String createAuditApi(String collectionId, String apiToken, APIIdentifier apiIdentifier,
+            String apiDefinition, String baseUrl, boolean isDebugEnabled)
+            throws IOException, APIManagementException, ParseException {
+        HttpURLConnection httpConn;
+        OutputStream outputStream;
+        PrintWriter writer;
+        String auditUuid = null;
+        URL url = new URL(baseUrl);
+        httpConn = (HttpURLConnection) url.openConnection();
+        httpConn.setUseCaches(false);
+        httpConn.setDoOutput(true); // indicates POST method
+        httpConn.setDoInput(true);
+        httpConn.setRequestProperty(APIConstants.HEADER_CONTENT_TYPE,
+                APIConstants.MULTIPART_CONTENT_TYPE + APIConstants.MULTIPART_FORM_BOUNDARY);
+        httpConn.setRequestProperty(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+        httpConn.setRequestProperty(APIConstants.HEADER_API_TOKEN, apiToken);
+        outputStream = httpConn.getOutputStream();
+        writer = new PrintWriter(new OutputStreamWriter(outputStream, "UTF-8"), true);
+        // Name property
+        writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY).append(APIConstants.MULTIPART_LINE_FEED)
+                .append("Content-Disposition: form-data; name=\"name\"")
+                .append(APIConstants.MULTIPART_LINE_FEED).append(APIConstants.MULTIPART_LINE_FEED)
+                .append(apiIdentifier.getApiName()).append(APIConstants.MULTIPART_LINE_FEED);
+        writer.flush();
+        // Specfile property
+        writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY).append(APIConstants.MULTIPART_LINE_FEED)
+                .append("Content-Disposition: form-data; name=\"specfile\"; filename=\"swagger.json\"")
+                .append(APIConstants.MULTIPART_LINE_FEED)
+                .append(APIConstants.HEADER_CONTENT_TYPE + ": " + APIConstants.APPLICATION_JSON_MEDIA_TYPE)
+                .append(APIConstants.MULTIPART_LINE_FEED).append(APIConstants.MULTIPART_LINE_FEED)
+                .append(apiDefinition).append(APIConstants.MULTIPART_LINE_FEED);
+        writer.flush();
+        // CollectionID property
+        writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY).append(APIConstants.MULTIPART_LINE_FEED)
+                .append("Content-Disposition: form-data; name=\"cid\"").append(APIConstants.MULTIPART_LINE_FEED)
+                .append(APIConstants.MULTIPART_LINE_FEED).append(collectionId)
+                .append(APIConstants.MULTIPART_LINE_FEED);
+        writer.flush();
+        writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY + "--")
+                .append(APIConstants.MULTIPART_LINE_FEED);
+        writer.close();
+        // Checks server's status code first
+        int status = httpConn.getResponseCode();
+        if (status == HttpURLConnection.HTTP_OK) {
+            if (isDebugEnabled) {
+                log.debug("HTTP status " + status);
+            }
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(httpConn.getInputStream(), "UTF-8"));
+            String inputLine;
+            StringBuilder responseString = new StringBuilder();
+
+            while ((inputLine = reader.readLine()) != null) {
+                responseString.append(inputLine);
+            }
+            reader.close();
+            httpConn.disconnect();
+            JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
+            auditUuid = (String) ((JSONObject) responseJson.get(APIConstants.DESC)).get(APIConstants.ID);
+            ApiMgtDAO.getInstance().addAuditApiMapping(apiIdentifier, auditUuid);
+        } else {
+            throw new APIManagementException(
+                    "Error while retrieving data for the API Security Audit Report. Found http status: " +
+                    httpConn.getResponseCode() + " - " + httpConn.getResponseMessage());
+        }
+        return auditUuid;
     }
 
     /**
@@ -2191,6 +2520,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         String fileName = "";
         String mediationPolicyUrl = "";
+        String mediationResourcePath = "";
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
@@ -2210,17 +2540,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
             //Getting registry Api base path out of apiResourcePath
             apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
-            fileName = fileDetail.getDataHandler().getName();
-
-            //Constructing mediation resource path
-            String mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR +
-                    type + RegistryConstants.PATH_SEPARATOR + fileName;
-            if (apiProvider.checkIfResourceExists(mediationResourcePath)) {
-                RestApiUtil.handleConflict("Mediation policy already " +
-                        "exists in the given resource path, cannot create a new.", log);
-            }
 
             if (fileInputStream != null) {
+                fileName = fileDetail.getDataHandler().getName();
+                //Constructing mediation resource path
+                mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR +
+                        type + RegistryConstants.PATH_SEPARATOR + fileName;
                 String fileContentType = URLConnection.guessContentTypeFromName(fileName);
 
                 if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
@@ -2233,7 +2558,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
                 OMElement seqElement = APIUtil.buildOMElement(new ByteArrayInputStream(sequenceBytes));
                 String localName = seqElement.getLocalName();
-
+                checkMediationPolicy(apiProvider,mediationResourcePath);
                 if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
                     ResourceFile contentFile = new ResourceFile(inSequenceStream, fileContentType);
                     //Adding api specific mediation policy
@@ -2241,8 +2566,19 @@ public class ApisApiServiceImpl implements ApisApiService {
                 } else {
                     throw new APIManagementException("Sequence is malformed");
                 }
-            } else if (inlineContent != null) {
-                //todo
+            }
+            if (inlineContent != null) {
+                //Extracting the file name specified in the config
+                fileName = this.getMediationNameFromConfig(inlineContent);
+                //Constructing mediation resource path
+                mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR + type +
+                        RegistryConstants.PATH_SEPARATOR + fileName;
+                checkMediationPolicy(apiProvider,mediationResourcePath);
+                InputStream contentStream = new ByteArrayInputStream(inlineContent.getBytes(StandardCharsets.UTF_8));
+                String contentType = URLConnection.guessContentTypeFromName(fileName);
+                ResourceFile contentFile = new ResourceFile(contentStream, contentType);
+                //Adding api specific mediation policy
+                mediationPolicyUrl = apiProvider.addResourceFile(apiIdentifier, mediationResourcePath, contentFile);
             }
 
             if (StringUtils.isNotBlank(mediationPolicyUrl)) {
@@ -2692,7 +3028,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while updating swagger definition of API: " + apiId, e, log);
             } else {
-                String errorMessage = "Error while retrieving API : " + apiId;
+                String errorMessage = "Error while updating the swagger definition of the API: " + apiId + " - "
+                        + e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (FaultGatewaysException e) {
@@ -3297,7 +3634,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //add the generated swagger definition to SOAP
             APIDefinition oasParser = new OAS2Parser();
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
-            String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
+            String apiDefinition = generateSOAPAPIDefinition(oasParser.generateAPIDefinition(swaggerData));
             apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition);
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
@@ -3307,6 +3644,26 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError("Error while importing WSDL to create a SOAP API", e, log);
         }
         return null;
+    }
+
+    /**
+     * Add soap parameters to the default soap api resource.
+     *
+     * @param apiDefinition The API definition string.
+     * @return Modified api definition.
+     * */
+    private String generateSOAPAPIDefinition(String apiDefinition) throws APIManagementException {
+        JSONParser jsonParser = new JSONParser();
+        JSONObject apiJson;
+        JSONObject paths;
+        try {
+            apiJson = (JSONObject) jsonParser.parse(apiDefinition);
+            paths = (JSONObject) jsonParser.parse(RestApiPublisherUtils.getSOAPOperation());
+            apiJson.replace("paths", paths);
+            return apiJson.toJSONString();
+        } catch (ParseException e) {
+            throw new APIManagementException("Error while parsing the api definition.", e);
+        }
     }
 
     /**
@@ -3865,6 +4222,17 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    /**
+     * Check the existence of the mediation policy
+     * @param mediationResourcePath mediation config content
+     *
+     */
+    public void checkMediationPolicy(APIProvider apiProvider,String mediationResourcePath) throws APIManagementException {
+        if (apiProvider.checkIfResourceExists(mediationResourcePath)) {
+            RestApiUtil.handleConflict("Mediation policy already " +
+                    "exists in the given resource path, cannot create new", log);
+        }
+    }
     /**
      * validate user inout scopes
      *

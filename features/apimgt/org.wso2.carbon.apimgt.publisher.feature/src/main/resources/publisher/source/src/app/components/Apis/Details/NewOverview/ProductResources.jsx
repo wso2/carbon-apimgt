@@ -38,10 +38,12 @@ function RenderMethodBase(props) {
     } else {
         chipTextColor = theme.palette.getContrastText(theme.custom.resourceChipColors[methodLower]);
     }
-    return (<Chip
-        label={method.toUpperCase()}
-        style={{ backgroundColor: chipColor, color: chipTextColor, height: 20 }}
-    />);
+    return (
+        <Chip
+            label={method.toUpperCase()}
+            style={{ backgroundColor: chipColor, color: chipTextColor, height: 20 }}
+        />
+    );
 }
 
 RenderMethodBase.propTypes = {
@@ -82,7 +84,7 @@ class ProductResources extends React.PureComponent {
         const { classes, parentClasses, api } = this.props;
         const apiResources = api.apis;
         return (
-            <React.Fragment>
+            <>
                 <div className={parentClasses.titleWrapper} style={{ margin: '20px 0 0' }}>
                     <Typography variant='h5' component='h3' className={parentClasses.title}>
                         <FormattedMessage
@@ -118,7 +120,7 @@ class ProductResources extends React.PureComponent {
                         })}
                     </div>
                 </div>
-            </React.Fragment>
+            </>
         );
     }
 }

@@ -16,53 +16,37 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import Icon from '@material-ui/core/Icon';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import Loading from 'AppComponents/Base/Loading/Loading';
-import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
-import AuthManager from 'AppData/AuthManager';
-import Settings from 'AppComponents/Shared/SettingsContext';
-import KeyConfiguration from './KeyConfiguration';
-import ViewKeys from './ViewKeys';
-import ViewToken from './ViewToken';
-import WaitingForApproval from './WaitingForApproval';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import ApiKey from './../ApiKey'
-import FormLabel from '@material-ui/core/FormLabel';
 import FormGroup from '@material-ui/core/FormGroup';
 import Grid from '@material-ui/core/Grid';
+import ViewToken from './ViewToken';
+import ApiKey from '../ApiKey';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
-        padding: theme.spacing.unit * 3,
+        padding: theme.spacing(3),
     },
     button: {
-        marginLeft: theme.spacing.unit * 5,
+        marginLeft: theme.spacing(5),
         padding: '10px',
     },
     tokenSection: {
-        marginTop: theme.spacing.unit * 2,
-        marginBottom: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2),
     },
     margin: {
-        marginRight: theme.spacing.unit * 2,
-    },
-    keyTitle: {
-        textTransform: 'uppercase',
+        marginRight: theme.spacing(2),
     },
     keyConfigWrapper: {
         flexDirection: 'column',
@@ -74,13 +58,9 @@ const styles = theme => ({
     },
     paper: {
         display: 'flex',
-        marginTop: theme.spacing.unit * 2,
-        marginBottom: theme.spacing.unit * 2,
-        marginLeft: theme.spacing.unit * 10,
-    },
-    formLabel: {
-        'align-self': 'center',
-        'font-size': 'large',
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2),
+        marginLeft: theme.spacing(10),
     },
     dialogTitle: {
         padding: '24px 24px 0px',
@@ -93,14 +73,16 @@ const styles = theme => ({
     },
     gridWrapper: {
         'align-self': 'center',
-    }
+    },
+    keyTitle: {
+        textTransform: 'capitalize',
+    },
 });
 
 class ApiKeyManager extends React.Component {
-
     constructor(props) {
         super(props);
-        const {classes, selectedApp, keyType } = this.props;
+        const { classes, selectedApp, keyType } = this.props;
         this.state = {
             apikey: null,
             open: false,
@@ -112,10 +94,10 @@ class ApiKeyManager extends React.Component {
     }
 
     handleClose = () => {
-        this.setState(() => ({open: false, accessTokenRequest: {timeout:-1}}))
+        this.setState(() => ({ open: false, accessTokenRequest: { timeout: -1 } }));
     }
 
-    handleClickOpen =() => {
+    handleClickOpen = () => {
         this.setState(() => ({ open: true, showToken: false }));
     }
 
@@ -129,8 +111,8 @@ class ApiKeyManager extends React.Component {
         promisedKey
             .then((response) => {
                 console.log('Non empty response received');
-                const apikey = {accessToken: response.body.apikey, validityTime: response.body.validityTime, isOauth:false};
-                this.setState(() => ({apikey: apikey, open: true, showToken: true}));
+                const apikey = { accessToken: response.body.apikey, validityTime: response.body.validityTime, isOauth: false };
+                this.setState(() => ({ apikey, open: true, showToken: true }));
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -144,68 +126,73 @@ class ApiKeyManager extends React.Component {
     }
 
     render() {
-        const {classes, selectedApp, keyType } = this.props;
-        const {showToken, accessTokenRequest, open, apikey} = this.state;
+        const { classes, selectedApp, keyType } = this.props;
+        const {
+            showToken, accessTokenRequest, open, apikey,
+        } = this.state;
         return (
             <div className={classes.root}>
-                    <Typography variant='h5' className={classes.keyTitle}>
-                        {keyType + ' '}
-                        <FormattedMessage
-                            defaultMessage='Api Key'
-                            id='Shared.AppsAndKeys.TokenManager.ApiKey'
-                        />
-                    </Typography>
-                    <FormGroup row className={classes.formGroup}>
-                        <Grid container spacing={3}>
-                            <Grid item xs={4}>
-                            </Grid>
-                            <Grid item xs={2} className={classes.gridWrapper}>
-                                <FormLabel className={classes.formLabel}>Generate Api Key</FormLabel>
-                            </Grid>
-                            <Grid item xs={3}>
+                <Typography variant='h5' className={classes.keyTitle}>
+                    {keyType.toLowerCase() + ' '}
+                    <FormattedMessage
+                        defaultMessage='API Key'
+                        id='Shared.AppsAndKeys.TokenManager.ApiKey'
+                    />
+                </Typography>
+                <FormGroup row className={classes.formGroup}>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} className={classes.gridWrapper}>
+                            <div>
                                 <Button
                                     variant='contained'
                                     color='primary'
-                                    className={classes.button}
-                                    onClick= {this.handleClickOpen}
+                                    onClick={this.handleClickOpen}
                                 >
                                     {'Generate Key'}
                                 </Button>
-                            </Grid>
-                        </Grid>
-                    </FormGroup>
-                    <Dialog open={open} onClose={this.handleClose} aria-labelledby="form-dialog-title">
-                        <DialogTitle id='responsive-dialog-title' className={classes.dialogTitle}>
-                            {'Generate Api Key'}
-                        </DialogTitle>
-                        <DialogContent className={classes.dialogContent}>
-                            <DialogContentText>
-                                {!showToken && (
-                                    <ApiKey
-                                        updateAccessTokenRequest={this.updateAccessTokenRequest}
-                                        accessTokenRequest={accessTokenRequest}
-                                    />
-                                )}
-                                {showToken && <ViewToken token={apikey} />}
-                            </DialogContentText>
-                        </DialogContent>
-                        <DialogActions>
-                            {!showToken && (
-                                <Button onClick={() => this.generateKeys(selectedApp,keyType)} disabled={!accessTokenRequest.timeout} color='primary'>
-                                    <FormattedMessage
-                                        id='Shared.AppsAndKeys.ViewKeys.consumer.generate.btn'
-                                        defaultMessage='Generate'
-                                    />
-                                </Button>
-                            )}
-                            <Button onClick={this.handleClose} color='primary' autoFocus>
+                            </div>
+                            <Typography component='div' variant='body2' className={classes.formLabel}>
                                 <FormattedMessage
-                                    id='Shared.AppsAndKeys.ViewKeys.consumer.close.btn'
-                                    defaultMessage='Close'
+                                    id='Shared.AppsAndKeys.ApiKeyManager.generate.key.help'
+                                    defaultMessage='Use the Generate Key button to generate a self-contained JWT token.'
                                 />
-                                </Button>
-                        </DialogActions>
-                    </Dialog>
+                            </Typography>
+
+                        </Grid>
+                    </Grid>
+                </FormGroup>
+                <Dialog open={open} onClose={this.handleClose} aria-labelledby='form-dialog-title'>
+                    <DialogTitle id='responsive-dialog-title' className={classes.dialogTitle}>
+                        {'Generate API Key'}
+                    </DialogTitle>
+                    <DialogContent className={classes.dialogContent}>
+                        <DialogContentText>
+                            {!showToken && (
+                                <ApiKey
+                                    updateAccessTokenRequest={this.updateAccessTokenRequest}
+                                    accessTokenRequest={accessTokenRequest}
+                                />
+                            )}
+                            {showToken && <ViewToken token={apikey} />}
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        {!showToken && (
+                            <Button onClick={() => this.generateKeys(selectedApp, keyType)} disabled={!accessTokenRequest.timeout} color='primary'>
+                                <FormattedMessage
+                                    id='Shared.AppsAndKeys.ViewKeys.consumer.generate.btn'
+                                    defaultMessage='Generate'
+                                />
+                            </Button>
+                        )}
+                        <Button onClick={this.handleClose} color='primary' autoFocus>
+                            <FormattedMessage
+                                id='Shared.AppsAndKeys.ViewKeys.consumer.close.btn'
+                                defaultMessage='Close'
+                            />
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
         );
     }

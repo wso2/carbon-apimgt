@@ -73,7 +73,7 @@ class Wsdl extends Resource {
                 implementationType,
             });
 
-            return promisedResponse.then(response => new API(response.body));
+            return promisedResponse.then((response) => new API(response.body));
         });
     }
 
@@ -96,7 +96,7 @@ class Wsdl extends Resource {
                 implementationType,
             });
 
-            return promisedResponse.then(response => new API(response.body));
+            return promisedResponse.then((response) => new API(response.body));
         });
     }
 }

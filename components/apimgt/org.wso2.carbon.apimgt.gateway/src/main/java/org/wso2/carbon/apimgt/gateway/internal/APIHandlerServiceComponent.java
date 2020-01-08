@@ -32,20 +32,30 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
+import org.wso2.carbon.apimgt.gateway.handlers.security.service.APIAuthenticationService;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataServiceImpl;
+import org.wso2.carbon.apimgt.gateway.service.CacheInvalidationService;
+import org.wso2.carbon.apimgt.gateway.service.CacheInvalidationServiceImpl;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
+import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.throttling.util.BlockingConditionRetriever;
 import org.wso2.carbon.apimgt.gateway.throttling.util.KeyTemplateRetriever;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.base.api.ServerConfigurationService;
+import org.wso2.carbon.endpoint.service.EndpointAdmin;
+import org.wso2.carbon.localentry.service.LocalEntryAdmin;
+import org.wso2.carbon.mediation.security.vault.MediationSecurityAdminService;
+import org.wso2.carbon.rest.api.service.RestApiAdmin;
+import org.wso2.carbon.sequences.services.SequenceAdmin;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -73,27 +83,36 @@ public class APIHandlerServiceComponent {
             log.debug("API handlers component activated");
         }
         try {
-            ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(getClientRepoLocation(), getAxis2ClientXmlLocation());
+            ConfigurationContext ctx =
+                    ConfigurationContextFactory.createConfigurationContextFromFileSystem(getClientRepoLocation(),
+                            getAxis2ClientXmlLocation());
             ServiceReferenceHolder.getInstance().setAxis2ConfigurationContext(ctx);
             if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(APISecurityUtils.getKeyValidatorClientType())) {
                 clientPool = APIKeyValidatorClientPool.getInstance();
             }
             String filePath = getFilePath();
             configuration.load(filePath);
+            ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl(configuration));
+            ServiceReferenceHolder.getInstance().setThrottleProperties(configuration.getThrottleProperties());
             String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
             if ("Synapse".equalsIgnoreCase(gatewayType)) {
                 // Register Tenant service creator to deploy tenant specific common synapse configurations
                 TenantServiceCreator listener = new TenantServiceCreator();
                 bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);
                 if (configuration.getThrottleProperties().isEnabled()) {
+                    ServiceReferenceHolder.getInstance().setThrottleDataPublisher(new ThrottleDataPublisher());
                     ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
                     APIThrottleDataServiceImpl throttleDataServiceImpl = new APIThrottleDataServiceImpl();
+                    CacheInvalidationService cacheInvalidationService = new CacheInvalidationServiceImpl();
                     throttleDataServiceImpl.setThrottleDataHolder(throttleDataHolder);
                     // Register APIThrottleDataService so that ThrottleData maps are available to other components.
-                    registration = context.getBundleContext().registerService(APIThrottleDataService.class.getName(), throttleDataServiceImpl, null);
+                    registration = context.getBundleContext().registerService(APIThrottleDataService.class.getName(),
+                            throttleDataServiceImpl, null);
+                    registration =
+                            context.getBundleContext().registerService(CacheInvalidationService.class.getName(),
+                                    cacheInvalidationService, null);
                     ServiceReferenceHolder.getInstance().setThrottleDataHolder(throttleDataHolder);
                     log.debug("APIThrottleDataService Registered...");
-                    ServiceReferenceHolder.getInstance().setThrottleProperties(configuration.getThrottleProperties());
                     // start web service throttle data retriever as separate thread and start it.
                     if (configuration.getThrottleProperties().getBlockCondition().isEnabled()) {
                         BlockingConditionRetriever webServiceThrottleDataRetriever = new BlockingConditionRetriever();
@@ -113,7 +132,7 @@ public class APIHandlerServiceComponent {
                 RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
                 revokedJWTMapCleaner.startJWTRevokedMapCleaner();
             }
-        } catch (APIManagementException | AxisFault e) {
+        } catch (AxisFault | APIManagementException e) {
             log.error("Error while initializing the API Gateway (APIHandlerServiceComponent) component", e);
         }
         // Create caches for the super tenant
@@ -259,6 +278,85 @@ public class APIHandlerServiceComponent {
 
     protected void unsetRealmService(RealmService realmService) {
         ServiceReferenceHolder.getInstance().setRealmService(null);
+    }
+
+    @Reference(
+            name = "restapi.admin.service.component",
+            service = RestApiAdmin.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRestAPIAdmin")
+    protected void setRestAPIAdmin(RestApiAdmin restAPIAdmin) {
+
+        ServiceReferenceHolder.getInstance().setRestAPIAdmin(restAPIAdmin);
+    }
+
+    protected void unsetRestAPIAdmin(RestApiAdmin restAPIAdmin) {
+
+        ServiceReferenceHolder.getInstance().setRestAPIAdmin(null);
+    }
+
+
+    @Reference(
+            name = "sequence.admin.service.component",
+            service = SequenceAdmin.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetSequenceAdmin")
+    protected void setSequenceAdmin(SequenceAdmin sequenceAdmin) {
+
+        ServiceReferenceHolder.getInstance().setSequenceAdmin(sequenceAdmin);
+    }
+
+    protected void unsetSequenceAdmin(SequenceAdmin sequenceAdmin) {
+
+        ServiceReferenceHolder.getInstance().setSequenceAdmin(null);
+    }
+    @Reference(
+            name = "localentry.admin.service.component",
+            service = LocalEntryAdmin.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetLocalEntryAdmin")
+    protected void setLocalEntryAdmin(LocalEntryAdmin localEntryAdmin) {
+
+        ServiceReferenceHolder.getInstance().setLocalEntryAdmin(localEntryAdmin);
+    }
+
+    protected void unsetLocalEntryAdmin(LocalEntryAdmin localEntryAdmin) {
+
+        ServiceReferenceHolder.getInstance().setLocalEntryAdmin(null);
+    }
+    @Reference(
+            name = "endpoint.admin.service.component",
+            service = EndpointAdmin.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetEndpointAdmin")
+    protected void setEndpointAdmin(EndpointAdmin endpointAdmin) {
+
+        ServiceReferenceHolder.getInstance().setEndpointAdmin(endpointAdmin);
+    }
+
+    protected void unsetEndpointAdmin(EndpointAdmin endpointAdmin) {
+
+        ServiceReferenceHolder.getInstance().setEndpointAdmin(null);
+    }
+
+    @Reference(
+            name = "mediation.security.admin.service.component",
+            service = MediationSecurityAdminService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetMediationSecurityAdminService")
+    protected void setMediationSecurityAdminService(MediationSecurityAdminService mediationSecurityAdminService) {
+
+        ServiceReferenceHolder.getInstance().setMediationSecurityAdminService(mediationSecurityAdminService);
+    }
+
+    protected void unsetMediationSecurityAdminService(MediationSecurityAdminService mediationSecurityAdminService) {
+
+        ServiceReferenceHolder.getInstance().setMediationSecurityAdminService(null);
     }
 }
 

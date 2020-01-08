@@ -36,7 +36,7 @@ import { isRestricted } from 'AppData/AuthManager';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import Delete from './Delete';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         paddingTop: 0,
         paddingLeft: 0,
@@ -45,7 +45,7 @@ const styles = theme => ({
         position: 'relative',
         margin: theme.spacing(1),
     },
-    headline: { paddingTop: theme.spacing.unit * 1.25, paddingLeft: theme.spacing.unit * 2.5 },
+    headline: { paddingTop: theme.spacing(1.25), paddingLeft: theme.spacing(2.5) },
     heading: {
         flexGrow: 1,
         marginTop: 10,
@@ -68,7 +68,7 @@ const styles = theme => ({
         marginRight: theme.spacing(1),
     },
     content: {
-        margin: `${theme.spacing.unit * 2}px 0 ${theme.spacing.unit * 2}px 0`,
+        margin: `${theme.spacing(2)}px 0 ${theme.spacing(2)}px 0`,
     },
     head: {
         fontWeight: 200,
@@ -139,7 +139,7 @@ class Scopes extends React.Component {
                         if (value && tableMeta.rowData) {
                             return (
                                 <List component='nav' className={classes.root}>
-                                    {value.map(resource => (
+                                    {value.map((resource) => (
                                         <ListItem button>
                                             <ListItemText primary={resource} />
                                         </ListItem>

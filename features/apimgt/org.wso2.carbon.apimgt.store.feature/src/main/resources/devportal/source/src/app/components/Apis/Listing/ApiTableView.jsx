@@ -444,9 +444,9 @@ class ApiTableView extends React.Component {
                 const artifact = tableViewObj.state.data[dataIndex];
                 if (artifact) {
                     if (artifact.type === 'DOC') {
-                        return <DocThumb doc={artifact} />;
+                        return <tr key={rowIndex}><td><DocThumb doc={artifact} /></td></tr>;
                     } else {
-                        return <ApiThumb api={artifact} />;
+                        return <tr key={rowIndex}><td><ApiThumb api={artifact} /></td></tr>;
                     }
                 }
                 return <span />;

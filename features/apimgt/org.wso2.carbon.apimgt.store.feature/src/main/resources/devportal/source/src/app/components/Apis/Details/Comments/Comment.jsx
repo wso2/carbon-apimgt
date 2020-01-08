@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -25,15 +26,13 @@ import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
 import { injectIntl } from 'react-intl';
 import classNames from 'classnames';
-import Alert from '../../../Shared/Alert';
-import ConfirmDialog from '../../../Shared/ConfirmDialog';
-import CommentAdd from './CommentAdd';
+import Alert from 'AppComponents/Shared/Alert';
+import ConfirmDialog from 'AppComponents/Shared/ConfirmDialog';
+import API from 'AppData/api';
 import CommentEdit from './CommentEdit';
 import CommentOptions from './CommentOptions';
-import CommentReply from './CommentReply';
-import API from '../../../../data/api';
 
-const styles = theme => ({
+const styles = (theme) => ({
     link: {
         color: theme.palette.getContrastText(theme.palette.background.default),
         cursor: 'pointer',
@@ -43,27 +42,29 @@ const styles = theme => ({
     },
     commentText: {
         color: theme.palette.getContrastText(theme.palette.background.default),
-        marginTop: theme.spacing.unit * 0.8,
+        marginTop: theme.spacing(0.8),
         width: '99%',
         whiteSpace: 'pre-wrap',
         overflowWrap: 'break-word',
+        wordBreak: 'break-all',
     },
     root: {
-        marginTop: theme.spacing.unit * 2.5,
+        marginTop: theme.spacing(2.5),
     },
     contentWrapper: {
-        paddingLeft: theme.spacing.unit * 2,
-        paddingTop: theme.spacing.unit,
+        paddingLeft: theme.spacing(2),
+        paddingTop: theme.spacing(1),
     },
     contentWrapperOverview: {
         background: 'transparent',
         width: '100%',
     },
     divider: {
-        marginTop: theme.spacing.unit,
+        marginTop: theme.spacing(1),
     },
     paper: {
-        margin: theme.spacing(3),
+        margin: 0,
+        marginRight: theme.spacing(3),
         paddingBottom: theme.spacing(3),
     },
     cleanBack: {
@@ -105,8 +106,9 @@ class Comment extends React.Component {
     }
 
     /**
-     * Filters the comments to be remained
-     * @memberof Comment
+     * Add two numbers.
+     * @param {string} commentToFilter comment to filter.
+     * @returns {boolean} filtering needed or not.
      */
     filterRemainingComments(commentToFilter) {
         const { deleteComment } = this.state;
@@ -114,11 +116,12 @@ class Comment extends React.Component {
     }
 
     /**
-     * Filters the comments to be deleted
-     * @memberof Comment
+     * Add two numbers.
+     * @param {JSON} commentToFilter comment to filter.
+     * @returns {string} id of the comment.
      */
     filterCommentToDelete(commentToFilter) {
-        const { deleteComment } = this.state;
+        // const { deleteComment } = this.state;
         // return commentToFilter.id === deleteComment.parentCommentId;
         return commentToFilter.id;
     }
@@ -187,7 +190,7 @@ class Comment extends React.Component {
 
     /**
      * Handles the Confirm Dialog
-     * @param {*} bool properies passed by the Confirm Dialog
+     * @param {*} message properies passed by the Confirm Dialog
      * @memberof Comment
      */
     handleConfirmDialog(message) {
@@ -215,7 +218,7 @@ class Comment extends React.Component {
 
         apiClient
             .deleteComment(apiId, commentIdOfCommentToDelete)
-            .then((result) => {
+            .then(() => {
                 // if (parentCommentIdOfCommentToDelete === undefined) {
                 const remainingComments = allComments.filter(this.filterRemainingComments);
                 commentsUpdate(remainingComments);
@@ -255,15 +258,17 @@ class Comment extends React.Component {
             classes, comments, apiId, allComments, commentsUpdate, isOverview,
         } = this.props;
 
-        const { editIndex, replyIndex, openDialog } = this.state;
-        return [
-            <Paper className={classNames({ [classes.paper]: !isOverview && comments.length > 0 }, { [classes.cleanBack]: isOverview })}>
-                {comments &&
-                    comments
+        const { editIndex, openDialog } = this.state;
+        return (
+            <>
+                <Paper className={classNames({ [classes.paper]: !isOverview && comments.length > 0 }, { [classes.cleanBack]: isOverview })}>
+                    {comments
+                    && comments
                         .slice(0)
                         .reverse()
                         .map((comment, index) => (
                             <div
+                                // eslint-disable-next-line react/no-array-index-key
                                 key={comment.commentId + '-' + index}
                                 className={classNames(
                                     { [classes.contentWrapper]: !isOverview },
@@ -295,7 +300,6 @@ class Comment extends React.Component {
                                         )}
 
                                         <CommentOptions
-                                            classes={classes}
                                             comment={comment}
                                             editIndex={editIndex}
                                             index={index}
@@ -326,27 +330,30 @@ class Comment extends React.Component {
                                 </Grid>
                             </div>
                         ))}
-            </Paper>,
-            <ConfirmDialog
-                key='key-dialog'
-                labelCancel='Cancel'
-                title='Confirm Delete'
-                message='Are you sure you want to delete this comment?'
-                labelOk='Yes'
-                callback={this.handleConfirmDialog}
-                open={openDialog}
-            />,
-        ];
+                </Paper>
+                <ConfirmDialog
+                    key='key-dialog'
+                    labelCancel='Cancel'
+                    title='Confirm Delete'
+                    message='Are you sure you want to delete this comment?'
+                    labelOk='Yes'
+                    callback={this.handleConfirmDialog}
+                    open={openDialog}
+                />
+            </>
+        );
     }
 }
-
+Comment.defaultProps = {
+    isOverview: false,
+};
 Comment.propTypes = {
-    classes: PropTypes.instanceOf(Object).isRequired,
+    classes: PropTypes.shape({}).isRequired,
     apiId: PropTypes.string.isRequired,
     allComments: PropTypes.instanceOf(Array).isRequired,
     commentsUpdate: PropTypes.func.isRequired,
     comments: PropTypes.instanceOf(Array).isRequired,
-    isOverview: PropTypes.bool.isRequired,
+    isOverview: PropTypes.bool,
 };
 
 export default injectIntl(withStyles(styles)(Comment));

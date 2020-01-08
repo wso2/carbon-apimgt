@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         flexGrow: 1,
         height: '100%',
@@ -43,9 +43,9 @@ const styles = theme => ({
 const PageNav = (props) => {
     const { navItems } = props;
     return (
-        <React.Fragment>
+        <>
             {navItems}
-        </React.Fragment>
+        </>
     );
 };
 

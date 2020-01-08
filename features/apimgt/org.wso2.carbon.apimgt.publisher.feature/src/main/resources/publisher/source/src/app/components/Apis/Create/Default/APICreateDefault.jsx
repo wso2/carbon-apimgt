@@ -122,7 +122,7 @@ function APICreateDefault(props) {
                 },
             };
         }
-        apiData.gatewayEnvironments = settings.environment.map(env => env.name);
+        apiData.gatewayEnvironments = settings.environment.map((env) => env.name);
         if (isWebSocket) {
             apiData.type = 'WS';
         }
@@ -180,27 +180,26 @@ function APICreateDefault(props) {
      */
     function createAndPublish() {
         setIsPublishing(true);
-        createAPI().then(api =>
-            api
-                .publish()
-                .then(() => {
-                    Alert.info('API published successfully');
-                    history.push(`/apis/${api.id}/overview`);
-                })
-                .catch((error) => {
-                    if (error.response) {
-                        Alert.error(error.response.body.description);
-                        setPageError(error.response.body);
-                    } else {
-                        const message = 'Something went wrong while publishing the API';
-                        Alert.error(message);
-                        setPageError(message);
-                    }
-                    console.error(error);
-                })
-                .finally(() => {
-                    setIsPublishing(false);
-                }));
+        createAPI().then((api) => api
+            .publish()
+            .then(() => {
+                Alert.info('API published successfully');
+                history.push(`/apis/${api.id}/overview`);
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                    setPageError(error.response.body);
+                } else {
+                    const message = 'Something went wrong while publishing the API';
+                    Alert.error(message);
+                    setPageError(message);
+                }
+                console.error(error);
+            })
+            .finally(() => {
+                setIsPublishing(false);
+            }));
     }
 
     /**
@@ -213,7 +212,7 @@ function APICreateDefault(props) {
         });
     }
     let pageTitle = (
-        <React.Fragment>
+        <>
             <Typography variant='h5'>
                 <FormattedMessage
                     id='Apis.Create.Default.APICreateDefault.api.heading'
@@ -224,16 +223,16 @@ function APICreateDefault(props) {
                 <FormattedMessage
                     id='Apis.Create.Default.APICreateDefault.api.sub.heading'
                     defaultMessage={
-                        'Create an API by providing a Name, a Version, a Context,' +
-                        ' Backend Endpoint(s) (optional), and Business Plans (optional).'
+                        'Create an API by providing a Name, a Version, a Context,'
+                        + ' Backend Endpoint(s) (optional), and Business Plans (optional).'
                     }
                 />
             </Typography>
-        </React.Fragment>
+        </>
     );
     if (isAPIProduct) {
         pageTitle = (
-            <React.Fragment>
+            <>
                 <Typography variant='h5'>
                     <FormattedMessage
                         id='Apis.Create.Default.APICreateDefault.apiProduct.heading'
@@ -249,11 +248,11 @@ function APICreateDefault(props) {
                         }
                     />
                 </Typography>
-            </React.Fragment>
+            </>
         );
     } else if (isWebSocket) {
         pageTitle = (
-            <React.Fragment>
+            <>
                 <Typography variant='h5'>
                     <FormattedMessage
                         id='Apis.Create.Default.APICreateDefault.webSocket.heading'
@@ -269,7 +268,7 @@ function APICreateDefault(props) {
                         }
                     />
                 </Typography>
-            </React.Fragment>
+            </>
         );
     }
 
@@ -311,7 +310,9 @@ function APICreateDefault(props) {
                                 disabled={isAPICreateDisabled}
                                 onClick={createAPIOnly}
                             >
-                                Create {isCreating && !isPublishing && <CircularProgress size={24} />}
+                                Create
+                                {' '}
+                                {isCreating && !isPublishing && <CircularProgress size={24} />}
                             </Button>
                         </Grid>
                         {!AuthManager.isNotPublisher() && (

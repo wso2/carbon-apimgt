@@ -38,6 +38,8 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceAPIKeyMgtException;
+import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceAPIManagementException;
 import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceStub;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -159,6 +161,40 @@ public class APIKeyValidatorClient {
             if (Util.tracingEnabled() && span != null) {
                 Util.finishSpan(span);
             }
+        }
+    }
+
+    public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey)
+            throws APISecurityException {
+        CarbonUtils.setBasicAccessSecurityHeaders(username, password, keyValidationServiceStub._getServiceClient());
+        if (cookie != null) {
+            keyValidationServiceStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
+        }
+        try {
+
+            if (log.isDebugEnabled()) {
+                log.debug("Subscription Validation request from gateway " +
+                        "to key manager via web service call for:" + context
+                        + " with ID: " + MessageContext.getCurrentMessageContext().getMessageID() + " at "
+                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+            }
+            org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO dto =
+                    keyValidationServiceStub.validateSubscription(context, version, consumerKey);
+            if (log.isDebugEnabled()) {
+                log.debug("Subscription Validation response received to gateway " +
+                        "from key manager via web service call for:"
+                        + context + " with ID: " + MessageContext.getCurrentMessageContext().getMessageID() + " at "
+                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+            }
+            ServiceContext serviceContext = keyValidationServiceStub.
+                    _getServiceClient().getLastOperationContext().getServiceContext();
+            cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
+            return toDTO(dto);
+        } catch (RemoteException | APIKeyValidationServiceAPIKeyMgtException |
+                APIKeyValidationServiceAPIManagementException e) {
+            log.error("Error while accessing backend services to validate subscriptions", e);
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Error while accessing backend services for API subscription validation", e);
         }
     }
 

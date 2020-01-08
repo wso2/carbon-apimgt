@@ -16,7 +16,9 @@
  * under the License.
  */
 import { unwrap } from '@material-ui/core/test-utils';
-import { TextField, Button, Typography, Select, MenuItem } from '@material-ui/core';
+import {
+    TextField, Button, Typography, Select, MenuItem,
+} from '@material-ui/core';
 import CommentEdit from '../../../src/app/components/Apis/Details/Comments/CommentEdit';
 
 const CommentEditUnwrapped = unwrap(CommentEdit);
@@ -101,7 +103,7 @@ describe('<CommentEdit /> interactions', () => {
 
     it('should change the state commentText and currentlength when the onChange function of the TextField is invoked', () => {
         wrapper.find(TextField).simulate(
-'change',
+            'change',
             { target: { value: commentText } },
         );
         expect(wrapper.state('commentText')).toEqual(commentText);
@@ -110,7 +112,7 @@ describe('<CommentEdit /> interactions', () => {
 
     it('should change the state commentText and currentlength when the onChange function of the Select is invoked', () => {
         wrapper.find(Select).simulate(
-'change',
+            'change',
             { target: { value: category } },
         );
         expect(wrapper.state('category')).toEqual(category);
