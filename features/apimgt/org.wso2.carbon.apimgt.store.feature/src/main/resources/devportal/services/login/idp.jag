@@ -23,7 +23,6 @@
     include("/services/constants.jag");
 
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
-    var serverPort = utils.getManagementTransportPort(MGT_TRANSPORT.split(":")[0]);
     var serverUrl = utils.getServerURL();
     var forwarded_for = request.getHeader(app.customUrl.forwardedHeader);
     if (app.customUrl.enabled && forwarded_for) {
@@ -31,13 +30,16 @@
     } else {
         serverUrl = utils.getServerURL();
     }
-    application.put("serverPort", serverPort);
+    var authorizeEndpoint = serverUrl + AUTHORIZE_ENDPOINT_SUFFIX;
 
+    var idpConfig = utils.getIdentityProviderConfig();
+    if (idpConfig != null) {
+        authorizeEndpoint = idpConfig.getAuthorizeEndpoint();
+    }
     var settingsAPIUrl = appUtils.getLoopbackOrigin() + SETTINGS_REST_API_URL_SUFFIX;
     var settingsResponse = get(settingsAPIUrl, {}, "json");
 
     var dcrUrl = appUtils.getLoopbackOrigin() + DCR_URL_SUFFIX;
-    var authorizeEndpoint = utils.getServerURL() + AUTHORIZE_ENDPOINT_SUFFIX;
     var loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
     var logoutCallbackUrl = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
     var callbackUrl = "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";

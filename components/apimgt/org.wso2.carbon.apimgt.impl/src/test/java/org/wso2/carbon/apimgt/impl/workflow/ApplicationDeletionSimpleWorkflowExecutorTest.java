@@ -100,7 +100,7 @@ public class ApplicationDeletionSimpleWorkflowExecutorTest {
     @Test
     public void testGetWorkflowDetails(){
         try {
-            applicationDeletionSimpleWorkflowExecutor.getWorkflowDetails(Mockito.anyString());
+            applicationDeletionSimpleWorkflowExecutor.getWorkflowDetails("random_string");
         } catch (WorkflowException e) {
             Assert.fail("Unexpected exception occurred while retriving workflow details");
         }
