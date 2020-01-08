@@ -180,7 +180,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created Document object as entity in the body. Location header contains URL of newly added document. ", response = DocumentDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
-        @ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format.  ###################################################### ", response = Void.class) })
+        @ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = Void.class) })
     public Response apiProductsApiProductIdDocumentsPost(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Document object that needs to be added " ,required=true) DocumentDTO body) throws APIManagementException{
         return delegate.apiProductsApiProductIdDocumentsPost(apiProductId, body, securityContext);
     }

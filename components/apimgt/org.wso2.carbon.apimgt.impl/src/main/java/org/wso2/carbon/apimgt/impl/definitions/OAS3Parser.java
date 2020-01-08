@@ -87,6 +87,11 @@ public class OAS3Parser extends APIDefinition {
 
     @Override
     public String genExample(String apiDefinition) {
+
+
+
+
+
         return null;
     }
 

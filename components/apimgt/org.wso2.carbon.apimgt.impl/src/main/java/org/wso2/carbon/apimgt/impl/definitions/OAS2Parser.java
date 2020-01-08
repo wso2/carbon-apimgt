@@ -82,8 +82,14 @@ public class OAS2Parser extends APIDefinition {
     private static final Log log = LogFactory.getLog(OAS2Parser.class);
     private static final String SWAGGER_SECURITY_SCHEMA_KEY = "default";
 
+
+
     @Override
     public String genExample(String apiDefinition) {
+
+
+
+
         return null;
     }
 

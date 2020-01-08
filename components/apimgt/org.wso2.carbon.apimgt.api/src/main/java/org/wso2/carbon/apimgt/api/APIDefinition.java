@@ -42,6 +42,13 @@ public abstract class APIDefinition {
     private static final Pattern CURLY_BRACES_PATTERN = Pattern.compile("(?<=\\{)(?!\\s*\\{)[^{}]+");
     public static final String KEEP_LEGACY_EXTENSION_PROP = "preserveLegacyExtensions";
 
+    /**
+     * This method generates Mock/Sample payloads for API prototyping
+     *
+     * @param apiDefinition
+     * @return
+     */
+
     public abstract String genExample(String apiDefinition);
 
     /**

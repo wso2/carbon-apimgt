@@ -1611,13 +1611,14 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdGenerateMocksPost(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIIdentifier apiIdentifier = originalAPI.getId();
         String swaggerDef = apiProvider.getOpenAPIDefinition(apiIdentifier);
 
-//        String swaggerWithExamples = OASParserUtil.generateExamples(swagger);
+        //String swaggerWithExamples = OASParserUtil.generateExamples(swagger);
 
 
 
