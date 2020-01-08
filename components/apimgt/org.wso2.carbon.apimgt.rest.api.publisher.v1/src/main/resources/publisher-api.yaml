@@ -825,13 +825,8 @@ paths:
         - application/json
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_create
-      x-wso2-curl: "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F apiDefinition=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://localhost:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/resource-policies/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\""
-=======
           - apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F apiDefinition=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://localhost:9443/api/am/publisher/v1/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/resource-policies/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\""
->>>>>>> upstream/master
       x-wso2-request: |
         PUT https://localhost:9443/api/am/publisher/v1/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/resource-policies/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5
         Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013
@@ -976,15 +971,9 @@ paths:
         - multipart/form-data
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_create
-            - apim:api_publish
-      x-wso2-curl: "curl -X POST -H \"Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail -F file=@image.jpg"
-=======
           - apim:api_create
           - apim:api_publish
       x-wso2-curl: "curl -X POST -H \"Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9\" https://127.0.0.1:9443/api/am/publisher/v1/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail -F file=@image.jpg"
->>>>>>> upstream/master
       x-wso2-request: |
         POST https://127.0.0.1:9443/api/am/publisher/v1/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/thumbnail
         Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9
@@ -1191,13 +1180,8 @@ paths:
     post:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish\""
-=======
           - apim:api_publish
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish\""
->>>>>>> upstream/master
       x-wso2-request: |
         POST https://127.0.0.1:9443/api/am/publisher/v1/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -1305,19 +1289,11 @@ paths:
     get:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer f8828f52-175a-4cb2-b246-02b1e6054f97\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/0527a55e-8dcf-4ce5-bddf-c77e8418be8a/lifecycle-history"
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-history
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-=======
           - apim:api_publish
       x-wso2-curl: "curl -k -H \"Authorization: Bearer f8828f52-175a-4cb2-b246-02b1e6054f97\" https://127.0.0.1:9443/api/am/publisher/v1/apis/0527a55e-8dcf-4ce5-bddf-c77e8418be8a/lifecycle-history"
       x-wso2-request: |
             GET https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-history
             Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
->>>>>>> upstream/master
       x-wso2-response: "HTTP/1.1 200 OK\n Content-Type: application/json \n Content-Encoding: gzip \n Transfer-Encoding:
       chunked \n\n [ { \"postState\" : \"Created\",\n    \"updatedTime\" : \"Feb 23, 2017 5:17:02 PM\",\n\"user\" :
       \"admin\"\n  },\n { \"postState\" : \"Published\",\n    \"previousState\" : \"Created\",\n    \"updatedTime\" :
@@ -1368,21 +1344,12 @@ paths:
     get:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_publish
-            - apim:api_create
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer f8828f52-175a-4cb2-b246-02b1e6054f97\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/0527a55e-8dcf-4ce5-bddf-c77e8418be8a/lifecycle"
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-=======
           - apim:api_publish
           - apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization: Bearer f8828f52-175a-4cb2-b246-02b1e6054f97\" https://127.0.0.1:9443/api/am/publisher/v1/apis/0527a55e-8dcf-4ce5-bddf-c77e8418be8a/lifecycle"
       x-wso2-request: |
             GET https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle
             Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
->>>>>>> upstream/master
       x-wso2-response: "HTTP/1.1 200 OK\n Content-Type: application/json \n Content-Encoding: gzip \n Transfer-Encoding:
       chunked \n\n {  \n   \"lcName\":\"API_LIFECYCLE\",\n   \"state\":\"Published\",\n   \"lifecycleId\":\"2febf145f07e457c9643100b6ec60679\",\n   \"checkItemBeanList\":[  \n\n   ],\n   \"inputBeanList\":[  \n\n   ],\n   \"customCodeBeanList\":[  \n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Maintenance\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Deprecated\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Created\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Prototyped\"\n      }\n   ],\n   \"availableTransitionBeanList\":[  \n      {  \n         \"event\":\"Move to Maintenance\",\n         \"targetState\":\"Maintenance\"\n      },\n      {  \n         \"event\":\"Deploy as a Prototype\",\n         \"targetState\":\"Prototyped\"\n      },\n      {  \n         \"event\":\"Demote to Created\",\n         \"targetState\":\"Created\"\n      },\n      {  \n         \"event\":\"Deprecate\",\n         \"targetState\":\"Deprecated\"\n      },\n      {  \n         \"event\":\"Publish\",\n         \"targetState\":\"Published\"\n      }\n   ],\n   \"permissionBeanList\":[  \n\n   ]\n}"
       summary: Get Lifecycle state data of the API.
@@ -1443,13 +1410,8 @@ paths:
     delete:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer f8828f52-175a-4cb2-b246-02b1e6054f97\" -X DELETE https://127.0.0.1:9443/api/am/publisher/v1/apis/0527a55e-8dcf-4ce5-bddf-c77e8418be8a/lifecycle/lifecycle-pending-task"
       x-wso2-request: |
-<<<<<<< HEAD
-        DELETE https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle/lifecycle-pending-task
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-=======
             DELETE https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle/lifecycle-pending-task
             Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
->>>>>>> upstream/master
       x-wso2-response: "HTTP/1.1 200 OK"
       security:
         - OAuth2Security:
@@ -2329,13 +2291,8 @@ paths:
     get:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents\""
-=======
           - apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents\""
->>>>>>> upstream/master
       x-wso2-request: |
         GET https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -2452,13 +2409,8 @@ paths:
     get:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\""
-=======
           - apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\""
->>>>>>> upstream/master
       x-wso2-request: |
         GET https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -2588,13 +2540,8 @@ paths:
     delete:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:document_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058"
-=======
           - apim:document_manage
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058"
->>>>>>> upstream/master
       x-wso2-request: |
         DELETE https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -2640,13 +2587,8 @@ paths:
         - application/octet-stream
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_view
-      x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\" > sample.pdf"
-=======
           - apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" \"https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\" > sample.pdf"
->>>>>>> upstream/master
       x-wso2-request: |
         GET https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content
         Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a
@@ -2725,13 +2667,8 @@ paths:
         - multipart/form-data
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:document_create
-      x-wso2-curl: "curl -k -H \"Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -F file=@\"sample.pdf\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\""
-=======
           - apim:document_create
       x-wso2-curl: "curl -k -H \"Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -F file=@\"sample.pdf\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\""
->>>>>>> upstream/master
       x-wso2-request: |
         POST https://127.0.0.1:9443/api/am/publisher/v1/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content
         Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -3433,15 +3370,9 @@ paths:
     get:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer 5aa0acc0-0ce3-3a0b-8cc8-db5ef696ee23\" https://localhost:9443/api/am/publisher/v1.0/apis/40082986-6488-4b86-801a-b0b069d4588c/resource-paths"
-      x-wso2-request: "GET https://localhost:9443/api/am/publisher/v1.0/apis/40082986-6488-4b86-801a-b0b069d4588c/resource-paths\r\nAuthorization: Bearer 5aa0acc0-0ce3-3a0b-8cc8-db5ef696ee23"
-=======
           - apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer 5aa0acc0-0ce3-3a0b-8cc8-db5ef696ee23\" https://localhost:9443/api/am/publisher/v1/apis/40082986-6488-4b86-801a-b0b069d4588c/resource-paths"
       x-wso2-request: "GET https://localhost:9443/api/am/publisher/v1/apis/40082986-6488-4b86-801a-b0b069d4588c/resource-paths\r\nAuthorization: Bearer 5aa0acc0-0ce3-3a0b-8cc8-db5ef696ee23"
->>>>>>> upstream/master
       x-wso2-response: ""
       summary: Get Resource Paths of an API
       description: |
@@ -3493,10 +3424,6 @@ paths:
             $ref: '#/definitions/Error'
 
   ######################################################
-<<<<<<< HEAD
-  # The "ExternalStore Collection" resource APIs
-  ######################################################
-=======
   # The Security Audit API List
   ######################################################
   /apis/{apiId}/auditapi:
@@ -3540,7 +3467,7 @@ paths:
 ######################################################
 # The "ExternalStore Collection" resource APIs
 ######################################################
->>>>>>> upstream/master
+
   /apis/{apiId}/external-stores:
 
     #-------------------------------------------------------------
@@ -3656,13 +3583,8 @@ paths:
     get:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:subscription_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b\""
-=======
           - apim:subscription_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1/subscriptions?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b\""
->>>>>>> upstream/master
       x-wso2-request: |
         GET https://127.0.0.1:9443/api/am/publisher/v1/subscriptions?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -3774,13 +3696,8 @@ paths:
     post:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:subscription_block
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions/block-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809&blockState=PROD_ONLY_BLOCKED\""
-=======
           - apim:subscription_block
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1/subscriptions/block-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809&blockState=PROD_ONLY_BLOCKED\""
->>>>>>> upstream/master
       x-wso2-request: |
         POST https://127.0.0.1:9443/api/am/publisher/v1/subscriptions/block-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809&blockState=PROD_ONLY_BLOCKED
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -3851,13 +3768,8 @@ paths:
     post:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:subscription_block
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions/unblock-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809\""
-=======
           - apim:subscription_block
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1/subscriptions/unblock-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809\""
->>>>>>> upstream/master
       x-wso2-request: |
         POST https://127.0.0.1:9443/api/am/publisher/v1/subscriptions/unblock-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8`
@@ -3916,13 +3828,8 @@ paths:
     get:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/policies/api"
-=======
           - apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1/policies/api"
->>>>>>> upstream/master
       x-wso2-request: |
         GET https://127.0.0.1:9443/api/am/publisher/v1/policies/api
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -3978,13 +3885,8 @@ paths:
     get:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/policies/api/Bronze"
-=======
           - apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1/policies/api/Bronze"
->>>>>>> upstream/master
       x-wso2-request: |
         GET https://127.0.0.1:9443/api/am/publisher/v1/policies/api/Bronze
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -4049,13 +3951,8 @@ paths:
     get:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:mediation_policy_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v1.0/mediation-policies"
-=======
           - apim:mediation_policy_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v1/mediation-policies"
->>>>>>> upstream/master
       x-wso2-request: |
         GET https://localhost:9443/api/am/publisher/v1/mediation-policies
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -4878,15 +4775,9 @@ paths:
     get:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:ep_certificates_view
-      x-wso2-curl: "curl -X GET \"https://apis.wso2.com/api/am/publisher/v1.0/certificates/wso2carbon/content\" -H \"accept: application/json\""
-      x-wso2-request: "GET https://apis.wso2.com/api/am/publisher/v1.0/certificates/wso2carbon/content Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-=======
           - apim:ep_certificates_view
       x-wso2-curl: "curl -X GET \"https://apis.wso2.com/api/am/publisher/v1/certificates/wso2carbon/content\" -H \"accept: application/json\""
       x-wso2-request: "GET https://apis.wso2.com/api/am/publisher/v1/certificates/wso2carbon/content Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
->>>>>>> upstream/master
       x-wso2-response: "HTTP/1.1 200 OK\r\n [content of the certificate]"
       summary: Download a certificate.
       description: |
@@ -5510,13 +5401,8 @@ paths:
     get:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v1.0/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents\""
-=======
           - apim:api_publish
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v1/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents\""
->>>>>>> upstream/master
       x-wso2-request: |
         GET https://localhost:9443/api/am/publisher/v1/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -5571,17 +5457,10 @@ paths:
     post:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v1.0/api-products/96077508-fd01-4fae-bc64-5de0e2baf43c/documents\""
-      x-wso2-request: "POST https://localhost:9443/api/am/publisher/v1.0/api-products/96077508-fd01-4fae-bc64-5de0e2baf43c/documents\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n    \"visibility\": \"API_LEVEL\",\n    \"sourceType\": \"INLINE\",\n    \"sourceUrl\": null,\n    \"otherTypeName\": null,\n    \"summary\": \"This is a sample documentation\",\n    \"name\": \"Introduction to PhoneVerification API\",\n    \"type\": \"HOWTO\"\n}"
-      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058\",\n   \"summary\": \"This is a sample documentation\",\n   \"name\": \"Introduction to PhoneVerification API\",\n   \"type\": \"HOWTO\"\n}"
-=======
           - apim:api_publish
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v1/api-products/96077508-fd01-4fae-bc64-5de0e2baf43c/documents\""
       x-wso2-request: "POST https://localhost:9443/api/am/publisher/v1/api-products/96077508-fd01-4fae-bc64-5de0e2baf43c/documents\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n    \"visibility\": \"API_LEVEL\",\n    \"sourceType\": \"INLINE\",\n    \"sourceUrl\": null,\n    \"otherTypeName\": null,\n    \"summary\": \"This is a sample documentation\",\n    \"name\": \"Introduction to PhoneVerification API\",\n    \"type\": \"HOWTO\"\n}"
       x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058\",\n   \"summary\": \"This is a sample documentation\",\n   \"name\": \"Introduction to PhoneVerification API\",\n   \"type\": \"HOWTO\"\n}"
->>>>>>> upstream/master
       summary: Add a new document to an API Product
       description: |
         This operation can be used to add a new documentation to an API Product. This operation only adds the metadata of a document. To add the actual content we need to use **Upload the content of an API Product document ** API once we obtain a document Id by this operation.
@@ -5640,13 +5519,8 @@ paths:
     get:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\""
-=======
           - apim:api_publish
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\""
->>>>>>> upstream/master
       x-wso2-request: |
         GET https://localhost:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -5706,17 +5580,11 @@ paths:
     put:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X PUT -d data.json \"https://localhost:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\""
-      x-wso2-request: "PUT https://localhost:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\nAuthorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation for v1.0.0\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}"
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation for v1.0.0\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}"
-=======
+
           - apim:api_publish
       x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X PUT -d data.json \"https://localhost:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\""
       x-wso2-request: "PUT https://localhost:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\nAuthorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation for v1.0\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}"
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation for v1.0\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}"
->>>>>>> upstream/master
       summary: Update a document of an API Product
       description: |
         This operation can be used to update metadata of an API's document.
@@ -5784,13 +5652,8 @@ paths:
     delete:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://localhost:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058"
-=======
           - apim:api_publish
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://localhost:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058"
->>>>>>> upstream/master
       x-wso2-request: |
         DELETE https://localhost:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -5834,13 +5697,8 @@ paths:
     get:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" \"https://localhost:9443/api/am/publisher/v1.0/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\" > sample.pdf"
-=======
           - apim:api_publish
       x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" \"https://localhost:9443/api/am/publisher/v1/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\" > sample.pdf"
->>>>>>> upstream/master
       x-wso2-request: |
         GET https://localhost:9443/api/am/publisher/v1/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content
         Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a
@@ -5920,13 +5778,8 @@ paths:
         - multipart/form-data
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -F file=@\"sample.pdf\" -X POST \"https://localhost:9443/api/am/publisher/v1.0/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\""
-=======
           - apim:api_publish
       x-wso2-curl: "curl -k -H \"Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -F file=@\"sample.pdf\" -X POST \"https://localhost:9443/api/am/publisher/v1/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\""
->>>>>>> upstream/master
       x-wso2-request: |
         POST https://localhost:9443/api/am/publisher/v1/api-products/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content
         Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -6143,13 +5996,8 @@ paths:
     get:
       security:
         - OAuth2Security:
-<<<<<<< HEAD
-            - apim:api_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v1.0/environments\""
-=======
           - apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v1/environments\""
->>>>>>> upstream/master
       x-wso2-request: |
         GET https://localhost:9443/api/am/publisher/v1/environments
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -9201,10 +9049,6 @@ definitions:
         example: true
 
   #-----------------------------------------------------
-<<<<<<< HEAD
-  # The pagination resource
-  #-----------------------------------------------------
-=======
   # The SecurityAuditAttribute resource
   #-----------------------------------------------------
   SecurityAuditAttribute:
@@ -9229,7 +9073,6 @@ definitions:
 #-----------------------------------------------------
 # The pagination resource
 #-----------------------------------------------------
->>>>>>> upstream/master
   Pagination:
     title: Pagination
     properties:
