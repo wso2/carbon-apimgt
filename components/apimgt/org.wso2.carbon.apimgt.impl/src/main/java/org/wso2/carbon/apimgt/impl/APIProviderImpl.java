@@ -7831,7 +7831,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 Map<String, String> clusterInfo = allClusters.get(clusterName);
                 ContainerManager containerManager = getContainerManagerInstance();
-                containerManager.initManager(clusterInfo);
+                Map<String, Map<String, String>> selectedClusterInfo =  new HashMap<String, Map<String, String>>();
+                selectedClusterInfo.put(clusterName,clusterInfo);
+                   containerManager.initManager(selectedClusterInfo);
+//                containerManager.initManager(clusterInfo);
                 containerManager.changeLCStateCreatedToPublished(api, apiIdentifier);
             }
         }
