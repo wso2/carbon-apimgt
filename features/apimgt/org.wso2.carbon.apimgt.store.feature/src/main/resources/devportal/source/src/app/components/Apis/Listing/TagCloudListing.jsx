@@ -20,7 +20,7 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
-import CategoryListingCategories from './CategoryListingCategories';
+import TagCloudListingTags from './TagCloudListingTags';
 import CustomIcon from '../../Shared/CustomIcon';
 
 const useStyles = makeStyles(theme => ({
@@ -55,16 +55,16 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-export default function CategoryListing() {
+export default function TagCloudListing() {
     const classes = useStyles();
     const theme = useTheme();
-    const [allCategories, setAllCategories] = useState(null);
+    const [allTags, setAllTags] = useState(null);
     useEffect(() => {
         const restApiClient = new API();
-        const promisedCategories = restApiClient.apiCategories();
-        promisedCategories
+        const promisedTags = restApiClient.getAllTags();
+        promisedTags
             .then((response) => {
-                setAllCategories(response.body.list);
+                setAllTags(response.body.list);
             })
             .catch((error) => {
                 console.log(error);
@@ -81,14 +81,14 @@ export default function CategoryListing() {
                 <div className={classes.mainTitleWrapper}>
                     <Typography variant='h4' className={classes.mainTitle}>
                         <FormattedMessage
-                            defaultMessage='API Categories'
-                            id='Apis.Listing.CategoryListing.apigroups.main'
+                            defaultMessage='API Groups'
+                            id='Apis.Listing.TagCloudListing.apigroups.main'
                         />
                     </Typography>
                 </div>
             </div>
             <div className={classes.listContentWrapper}>
-                {allCategories && <CategoryListingCategories allCategories={allCategories} />}
+                {allTags && <TagCloudListingTags allTags={allTags} />}
             </div>
         </main>
     );

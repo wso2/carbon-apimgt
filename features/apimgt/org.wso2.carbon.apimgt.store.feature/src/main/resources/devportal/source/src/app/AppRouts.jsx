@@ -25,7 +25,7 @@ import Progress from 'AppComponents/Shared/Progress';
 
 const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "Apis" */));
 const Landing = lazy(() => import('AppComponents/LandingPage/Landing' /* webpackChunkName: "Landing" */));
-const CategoryListing = lazy(() => import('AppComponents/Apis/Listing/CategoryListing' /* webpackChunkName: "CategoryListing" */));
+const TagCloudListing = lazy(() => import('AppComponents/Apis/Listing/TagCloudListing' /* webpackChunkName: "TagCloudListing" */));
 const SettingsBase = lazy(() => import('AppComponents/Settings/SettingsBase' /* webpackChunkName: "SettingsBase" */));
 const Listing = lazy(() => import('AppComponents/Applications/Listing/Listing' /* webpackChunkName: "ApiListing" */));
 const Details = lazy(() => import('AppComponents/Applications/Details/index' /* webpackChunkName: "ApplicationDetails" */));
@@ -43,7 +43,7 @@ function getRedirectingPath(theme) {
     && theme.custom.tagWise.active
     && theme.custom.tagWise.style === 'page'
     ) {
-        return '/api-categories';
+        return '/api-groups';
     } else {
         return 'apis';
     }
@@ -61,7 +61,7 @@ function AppRouts(props) {
             <Switch>
                 <Redirect exact from='/' to={getRedirectingPath(theme)} />
                 <Route path='/home' component={Landing} />
-                <Route path='/api-categories' component={CategoryListing} />
+                <Route path='/api-groups' component={TagCloudListing} />
                 <Route path='/(apis|api-products)' component={Apis} />
                 <Route
                     path='/settings'

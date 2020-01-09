@@ -101,24 +101,24 @@ const styles = theme => ({
 });
 
 /**
- * Get ApiCategoryThumb
+ * Get ApiTagThumb
  * @param {*} props properties
  * @returns {*}
  */
-function ApiCategoryThumb(props) {
+function ApiTagThumb(props) {
     const {
-        category, path, classes, theme, style,
+        tag, path, classes, theme, style,
     } = props;
-    const categoryLink = path + ':' + category.name;
+    const tagLink = path + ':' + tag.value;
     const {
         tagWise: {
             thumbnail: { image },
         },
     } = theme.custom;
-    const { name } = category;
+    const name = tag.value.split(theme.custom.tagWise.key)[0];
     if (style === 'fixed-left') {
         return (
-            <Link to={categoryLink} className={classes.textWrapper}>
+            <Link to={tagLink} className={classes.textWrapper}>
                 <ListItem button>
                     <ListItemIcon>
                         <Icon>label</Icon>
@@ -131,11 +131,11 @@ function ApiCategoryThumb(props) {
 
     return (
         <div className={classes.thumbWrapper}>
-            <Link to={categoryLink} className={classes.imageWrapper}>
+            <Link to={tagLink} className={classes.imageWrapper}>
                 <img src={app.context + image} className={classes.image} alt='' />
             </Link>
             <div className={classNames(classes.thumbContent)}>
-                <Link to={categoryLink} className={classes.textWrapper}>
+                <Link to={tagLink} className={classes.textWrapper}>
                     <Typography className={classes.thumbHeader} variant='h4' gutterBottom title={name}>
                         {name}
                     </Typography>
@@ -145,7 +145,7 @@ function ApiCategoryThumb(props) {
     );
 }
 
-ApiCategoryThumb.propTypes = {
+ApiTagThumb.propTypes = {
     classes: PropTypes.shape({
         thumbWrapper: PropTypes.shape({}).isRequired,
         imageWrapper: PropTypes.shape({}).isRequired,
@@ -160,11 +160,13 @@ ApiCategoryThumb.propTypes = {
             tagWise: PropTypes.shape({}).isRequired,
         }).isRequired,
     }).isRequired,
-    category: PropTypes.shape({
-        name: PropTypes.string.isRequired,
+    tag: PropTypes.shape({
+        value: PropTypes.shape({
+            split: PropTypes.func,
+        }).isRequired,
     }).isRequired,
     path: PropTypes.shape({}).isRequired,
     style: PropTypes.string.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(ApiCategoryThumb);
+export default withStyles(styles, { withTheme: true })(ApiTagThumb);
