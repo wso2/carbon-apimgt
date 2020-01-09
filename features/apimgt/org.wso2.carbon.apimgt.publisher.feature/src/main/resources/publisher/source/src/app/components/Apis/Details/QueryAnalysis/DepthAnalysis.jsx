@@ -48,6 +48,10 @@ const useStyles = makeStyles((theme) => ({
     mandatoryStar: {
         color: theme.palette.error.main,
     },
+    inputField: {
+        width: '100px',
+        padding: `0 ${theme.spacing(3)}px`,
+    },
 }));
 
 /**
@@ -172,7 +176,21 @@ function DepthAnalysis() {
                 </Dialog>
             ) : null}
             {(depthCheck === true && showPageContent === true) ? (
-                <h1>{defaultDepth}</h1>
+                <Box display='flex' justifyContent='center'>
+                    <Typography>
+                        <FormattedMessage
+                            id='Apis.Details.QueryAnalysis.DepthAnalysis.default.depth.value'
+                            defaultMessage='Default Depth'
+                        />
+                    </Typography>
+                    <TextField
+                        disabled
+                        id='default-depth-disabled'
+                        defaultValue={defaultDepth}
+                        variant='outlined'
+                        className={classes.inputField}
+                    />
+                </Box>
             ) : null}
         </>
     );
