@@ -34,14 +34,18 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     private TracingTracer tracer;
 
-    public APIMgtLatencySynapseHandler() {
-        tracer = ServiceReferenceHolder.getInstance().getTracingService()
-                .buildTracer(APIMgtGatewayConstants.SERVICE_NAME);
-    }
-
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
+
         if (Util.tracingEnabled()) {
+            if (tracer == null) {
+                synchronized (this) {
+                    if (tracer == null) {
+                        tracer = ServiceReferenceHolder.getInstance().getTracingService()
+                                .buildTracer(APIMgtGatewayConstants.SERVICE_NAME);
+                    }
+                }
+            }
             org.apache.axis2.context.MessageContext axis2MessageContext =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             Map headersMap =
