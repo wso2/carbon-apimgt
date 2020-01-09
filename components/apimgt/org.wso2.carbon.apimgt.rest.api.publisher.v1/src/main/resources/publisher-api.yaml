@@ -3297,6 +3297,92 @@ paths:
             Not Found.
             Requested scope name does not exist.
 
+#  ######################################################
+#  # The "Query Analysis" resource APIs
+#  ######################################################
+#  /apis/{apiId}/query-analysis:
+#
+#    #-----------------------------------------------------
+#    # Retrieve a particular API specific Query Depth Details
+#    #-----------------------------------------------------
+#    get:
+#      summary: Get the list of role-depth mappings of an API
+#      description: |
+#        This operation can be used to retrieve a list of role-depth mappings belonging to an API by providing the id of the API.
+#      parameters:
+#        - $ref : '#/parameters/apiId'
+#      tags:
+#        - scope
+#      responses:
+#        200:
+#          description:
+#            OK.
+#            Requested scope name exists.
+#        404:
+#          description:
+#            Not Found.
+#            Requested scope name does not exist.
+#
+#  ######################################################
+#  # The "Document Collection" resource APIs
+#  ######################################################
+#  /apis/{apiId}/documents:
+#
+#    #-----------------------------------------------------
+#    # Retrieve the documents associated with an API that qualify under a search condition
+#    #-----------------------------------------------------
+#    get:
+#      security:
+#        - OAuth2Security:
+#            - apim:api_view
+#      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents\""
+#      x-wso2-request: |
+#        GET https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents
+#        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+#      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"visibility\": \"API_LEVEL\",\n         \"sourceType\": \"INLINE\",\n         \"sourceUrl\": null,\n         \"otherTypeName\": null,\n         \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n         \"summary\": \"This is a sample documentation for v1.0\",\n         \"name\": \"PhoneVerification API Documentation\",\n         \"type\": \"HOWTO\"\n      },\n            {\n         \"visibility\": \"API_LEVEL\",\n         \"sourceType\": \"URL\",\n         \"sourceUrl\": \"http://wiki.cdyne.com/index.php/Phone_Verification\",\n         \"otherTypeName\": null,\n         \"documentId\": \"4145df31-04f1-440c-8d08-68952874622c\",\n         \"summary\": \"This is the URL for online documentation\",\n         \"name\": \"Online Documentation\",\n         \"type\": \"SAMPLES\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}"
+#      summary: Get a list of documents of an API
+#      description: |
+#        This operation can be used to retrieve a list of documents belonging to an API by providing the id of the API.
+#      parameters:
+#        - $ref: '#/parameters/apiId'
+#        - $ref: '#/parameters/limit'
+#        - $ref: '#/parameters/offset'
+#        - $ref: '#/parameters/If-None-Match'
+#      tags:
+#        - API Documents
+#      responses:
+#        200:
+#          description: |
+#            OK.
+#            Document list is returned.
+#          schema:
+#            $ref: '#/definitions/DocumentList'
+#          headers:
+#            Content-Type:
+#              description: |
+#                The content type of the body.
+#              type: string
+#            ETag:
+#              description: |
+#                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+#              type: string
+#        304:
+#          description: |
+#            Not Modified.
+#            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+#        404:
+#          description: |
+#            Not Found.
+#            Requested API does not exist.
+#          schema:
+#            $ref: '#/definitions/Error'
+#        406:
+#          description: |
+#            Not Acceptable.
+#            The requested media type is not supported
+#          schema:
+#            $ref: '#/definitions/Error'
+
   ######################################################
   # The "Resource Paths" resource
   ######################################################
