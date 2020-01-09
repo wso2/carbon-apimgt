@@ -8202,8 +8202,15 @@ public final class APIUtil {
      * @param accessExp        - Value of the ACCESSED Expiry Type
      * @return - The cache object
      */
-    public static Cache getCache(final String cacheManagerName, final String cacheName, final long modifiedExp,
+    public synchronized static Cache getCache(final String cacheManagerName, final String cacheName, final long modifiedExp,
                                  final long accessExp) {
+
+        Iterable<Cache<?, ?>> availableCaches = Caching.getCacheManager(cacheManagerName).getCaches();
+        for (Cache cache:availableCaches) {
+            if(cache.getName().equalsIgnoreCase(getCacheName(cacheName))){
+                return Caching.getCacheManager(cacheManagerName).getCache(cacheName);
+            }
+        }
 
         return Caching.getCacheManager(
                 cacheManagerName).createCacheBuilder(cacheName).
@@ -8222,6 +8229,11 @@ public final class APIUtil {
      */
     public static Cache getCache(final String cacheManagerName, final String cacheName) {
         return Caching.getCacheManager(cacheManagerName).getCache(cacheName);
+    }
+
+    private static String getCacheName(String cacheName) {
+        return Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("Cache.ForceLocalCache"))
+                && !cacheName.startsWith("$__local__$.") ? "$__local__$." + cacheName : cacheName;
     }
 
     /**
