@@ -9869,12 +9869,12 @@ public final class APIUtil {
 
         if (!availableAPICategories.isEmpty()) {
             try {
-                artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_ID);
+                artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
                 for (APICategory category : attachedApiCategories) {
                     int index = availableAPICategories.indexOf(category);
                     if (index != -1) {
                         APICategory candidateCategory = availableAPICategories.get(index);
-                        artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_ID, candidateCategory.getId());
+                        artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, candidateCategory.getName());
                     } else {
                         log.warn("Category name : " + category.getName() + " does not exist in the tenant : " + tenantDomain
                                 + ", hence skipping it.");
@@ -9903,19 +9903,19 @@ public final class APIUtil {
     private static List<APICategory> getAPICategoriesFromAPIGovernanceArtifact(GovernanceArtifact artifact, int tenantID)
             throws GovernanceException, APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
-        String[] categoriesOfAPI = artifact.getAttributes(APIConstants.API_CATEGORIES_CATEGORY_ID);
+        String[] categoriesOfAPI = artifact.getAttributes(APIConstants.API_CATEGORIES_CATEGORY_NAME);
 
         List<APICategory> categoryList = new ArrayList<>();
 
         if (ArrayUtils.isNotEmpty(categoriesOfAPI)) {
-            //category array retrieved from artifact has only the category ID, therefore we need to fetch categories
+            //category array retrieved from artifact has only the category name, therefore we need to fetch categories
             //and fill out missing attributes before attaching the list to the api
             List<APICategory> allCategories = apiAdmin.getAllAPICategoriesOfTenant(tenantID);
 
             //todo-category: optimize this loop with breaks
-            for (String categoryID : categoriesOfAPI) {
+            for (String categoryName : categoriesOfAPI) {
                 for (APICategory category : allCategories) {
-                    if (categoryID.equals(category.getId())) {
+                    if (categoryName.equals(category.getName())) {
                         categoryList.add(category);
                         break;
                     }

@@ -4,11 +4,13 @@
     var uuid = request.getParameter("uuid");
     var action = request.getParameter("action");
     var pageTitle = i18n.localize("Add API Category");
+    var nameFieldDisableStatus = "";
 
     if(action == null){
         action = "categoryAction";
     }
     if(uuid != null){
+        nameFieldDisableStatus = "readonly";
         pageTitle = i18n.localize("Edit API Category");
         var categories = session.get("categoryList");
     	var APICategory = Packages.org.wso2.carbon.apimgt.api.model.APICategory;
@@ -49,7 +51,7 @@
     <div class="form-group">
 		<label class="control-label col-sm-3"><%=i18n.localize("API Category")%>  <span class="requiredAstrix">*</span></label>
 		<div class="col-md-9">
-		    <input class="form-control" type="text" id="categoryName" name="categoryName"/>
+		    <input class="form-control" type="text" id="categoryName" name="categoryName" <%=nameFieldDisableStatus%>/>
 		</div>
 	</div>
     <div class="form-group">

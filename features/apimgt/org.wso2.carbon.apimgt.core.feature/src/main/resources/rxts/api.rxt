@@ -276,10 +276,10 @@
         </table>
         <table name="API Categories" columns="1"  maxoccurs="unbounded">
             <subheading>
-                <heading>Category ID</heading>
+                <heading>Category Name</heading>
             </subheading>
             <field type="text">
-                <name label="Category ID">categoryID</name>
+                <name label="Category Name">categoryName</name>
             </field>
         </table>
 </content>

@@ -11,7 +11,6 @@ jagg.block("api-category/api-category-list", {
         var log = new Log();
         result = jagg.module("api-category").getAllAPICategories();
         categoryList = result.categoryList;
-        log.info(categoryList);
 
         // we put results to the session.
         session.put("categoryList", categoryList);

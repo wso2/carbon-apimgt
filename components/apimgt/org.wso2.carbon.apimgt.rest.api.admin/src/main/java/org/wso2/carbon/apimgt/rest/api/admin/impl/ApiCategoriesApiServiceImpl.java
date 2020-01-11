@@ -80,6 +80,7 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
             }
 
             //Override several properties as they are not allowed to be updated
+            apiCategoryToUpdate.setName(apiCategoryOriginal.getName());
             apiCategoryToUpdate.setId(apiCategoryOriginal.getId());
             apiCategoryToUpdate.setTenantID(apiCategoryOriginal.getTenantID());
 
