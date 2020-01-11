@@ -474,5 +474,7 @@
   "grant.types": "Grant Types",
   "micro.gateways": "Microgateways",
   "notice": "Notice",
-  "subscription.pending": "Your subscription request has been submitted and is now awaiting approval."
+  "subscription.pending": "Your subscription request has been submitted and is now awaiting approval.",
+  "Apis.Listing.CategoryListingCategories.title": "API Categories",
+  "Apis.Listing.CategoryListingCategories.categoriesNotFound": "Categories cannot be found"
 }

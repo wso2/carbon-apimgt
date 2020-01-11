@@ -30,6 +30,7 @@ import ApiBreadcrumbs from './ApiBreadcrumbs';
 import ApiTableView from './ApiTableView';
 import { ApiContext } from '../Details/ApiContext';
 import TagCloudListingTags from './TagCloudListingTags';
+import CategoryListingCategories from './CategoryListingCategories';
 import ApiTagCloud from './ApiTagCloud';
 
 const styles = (theme) => ({
@@ -193,6 +194,14 @@ class CommonListing extends React.Component {
             .catch((error) => {
                 console.log(error);
             });
+        const promisedCategories = restApiClient.apiCategories();
+            promisedCategories
+                .then((response) => {
+                    this.setState({ allCategories: response.body.list });
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
         this.isMonetizationEnabled();
     }
 
@@ -228,7 +237,7 @@ class CommonListing extends React.Component {
             },
         } = theme;
         const {
-            listType, allTags, showLeftMenu, isMonetizationEnabled,
+            listType, allTags, showLeftMenu, isMonetizationEnabled, allCategories,
         } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
         const searchParam = new URLSearchParams(search);
@@ -249,18 +258,20 @@ class CommonListing extends React.Component {
             }
         }
         const tagPaneVisible = allTags && allTags.length > 0 && (tagCloudActive || active);
+        const categoryPaneVisible = allCategories && allCategories.length > 0;
         return (
             <>
-                {tagPaneVisible && showLeftMenu && (
+                {(categoryPaneVisible || tagPaneVisible) && showLeftMenu && (
                     <div className={classes.LeftMenu}>
                         <div className={classes.sliderButton} onClick={this.toggleLeftMenu}>
                             <Icon>keyboard_arrow_left</Icon>
                         </div>
-                        {active && <TagCloudListingTags allTags={allTags} />}
-                        {tagCloudActive && <ApiTagCloud allTags={allTags} />}
+                        {categoryPaneVisible && <CategoryListingCategories allCategories={allCategories} />}
+                        {tagPaneVisible && active && <TagCloudListingTags allTags={allTags} />}
+                        {tagPaneVisible && tagCloudActive && <ApiTagCloud allTags={allTags} />}
                     </div>
                 )}
-                {tagPaneVisible && !showLeftMenu && (
+                {(categoryPaneVisible || tagPaneVisible) && !showLeftMenu && (
                     <div className={classes.LeftMenuForSlider}>
                         <div className={classes.sliderButton} onClick={this.toggleLeftMenu}>
                             <Icon>keyboard_arrow_right</Icon>
