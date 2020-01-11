@@ -12,6 +12,7 @@
                         <tr>
                             <th class=""><%= i18n.localize("Category Name")%></th>
                             <th class=""><%= i18n.localize("Description")%></th>
+                            <th class=""><%= i18n.localize("Number of APIs")%></th>
                             <th class=""></th>
                             <th class=""></th>
                         </tr>
@@ -21,6 +22,7 @@
                         var categories = outputs.categoryList;
                         var APICategory = Packages.org.wso2.carbon.apimgt.api.model.APICategory;
 
+                        var apiCount;
                         for (i = 0; i < categories.size(); i++) {
                             var category = new APICategory();
                             category = categories.get(i);
@@ -28,6 +30,7 @@
                             <tr>
                                 <td><%=category.getName()%></td>
                                 <td><%=category.getDescription()%></td>
+                                <td><%=category.getNumberOfAPIs()%></td>
                                 <td class="text-right">
                                     <a id="editCategoryButton" onClick="updateAPICategory('<%=category.getId()%>')" class="btn padding-reduce-on-grid-view">
                                         <span class="fw-stack">

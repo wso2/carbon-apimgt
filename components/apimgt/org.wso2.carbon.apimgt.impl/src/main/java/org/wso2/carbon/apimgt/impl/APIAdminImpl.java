@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -43,6 +44,7 @@ import java.text.SimpleDateFormat;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -305,6 +307,26 @@ public class APIAdminImpl implements APIAdmin {
 
     public List<APICategory> getAllAPICategoriesOfTenant(int tenantId) throws APIManagementException {
         return apiMgtDAO.getAllCategories(tenantId);
+    }
+
+    public List<APICategory> getAllAPICategoriesOfTenantForAdminListing(String username) throws APIManagementException{
+        int tenantID = APIUtil.getTenantId(username);
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        List<APICategory> categories = getAllAPICategoriesOfTenant(tenantID);
+        if (categories.size() > 0) {
+            for (APICategory category : categories) {
+                APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(username);
+                //no need to add type prefix here since we need to ge the total number of category associattions including both
+                //APIs and API categories
+                String searchQuery = APIConstants.CATEGORY_SEARCH_TYPE_PREFIX + "=*" + category.getName() + "*";
+                Map<String, Object> result = apiProvider
+                        .searchPaginatedAPIs(searchQuery, tenantDomain, 0, Integer.MAX_VALUE, true);
+                int length = (Integer)result.get("length");
+                category.setNumberOfAPIs(length);
+            }
+
+        }
+        return categories;
     }
 
     public boolean isCategoryNameExists(String categoryName, String uuid, int tenantID) throws APIManagementException {

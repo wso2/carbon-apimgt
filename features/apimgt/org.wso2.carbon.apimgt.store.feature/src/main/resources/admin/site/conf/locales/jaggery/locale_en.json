@@ -318,5 +318,7 @@
     "API Category": "API Category",
     "API Category contains one or more illegal characters": "API Category contains one or more illegal characters",
     "API Category name already Exists": "API Category name already Exists",
-    "Categories": "Categories"
+    "Categories": "Categories",
+    "Number of APIs": "Number of APIs"
+
 }

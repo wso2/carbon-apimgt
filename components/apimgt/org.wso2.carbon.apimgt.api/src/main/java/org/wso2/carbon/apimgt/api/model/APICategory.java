@@ -25,6 +25,7 @@ public class APICategory {
     private String name;
     private String description;
     private String thumbnailUrl;
+    private int numberOfAPIs;
     private int tenantID;
 
     public void setId(String id) {
@@ -65,6 +66,14 @@ public class APICategory {
 
     public int getTenantID() {
         return tenantID;
+    }
+
+    public void setNumberOfAPIs(int numberOfAPIs) {
+        this.numberOfAPIs = numberOfAPIs;
+    }
+
+    public int getNumberOfAPIs() {
+        return numberOfAPIs;
     }
 
     /**
