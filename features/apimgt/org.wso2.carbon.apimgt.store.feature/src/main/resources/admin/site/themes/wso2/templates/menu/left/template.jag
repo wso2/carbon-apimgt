@@ -149,7 +149,7 @@
               <li <%if (reqUrl.match("api-category-list")){%> class="active" <% } %>><a
                 href="<%= jagg.url("/api-category-list") %>"
                 onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                <i class="fw fw-file-browse"></i><%= i18n.localize("API Category")%></a>
+                <i class="fw fw-file-browse"></i><%= i18n.localize("API Categories")%></a>
               </li>
             </ul>
         </li>
