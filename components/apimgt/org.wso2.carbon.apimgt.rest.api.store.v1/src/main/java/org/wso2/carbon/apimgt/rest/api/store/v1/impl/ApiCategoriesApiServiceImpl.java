@@ -50,9 +50,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
 
-            APIAdmin apiAdmin = new APIAdminImpl();
-            int tenantID = APIUtil.getTenantIdFromTenantDomain(requestedTenantDomain);
-            List<APICategory> categoryList = apiAdmin.getAllAPICategoriesOfTenant(tenantID);
+            List<APICategory> categoryList = APIUtil.getAllAPICategoriesOfTenant(requestedTenantDomain);
             APICategoryListDTO categoryListDTO = APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);
             return Response.ok().entity(categoryListDTO).build();
         } catch (APIManagementException e) {

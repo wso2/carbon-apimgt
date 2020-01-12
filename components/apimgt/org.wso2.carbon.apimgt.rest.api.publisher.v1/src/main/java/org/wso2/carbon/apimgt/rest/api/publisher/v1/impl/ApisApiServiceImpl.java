@@ -318,6 +318,13 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             API apiToAdd = prepareToCreateAPIByDTO(body);
             validateScopes(apiToAdd);
+            //validate API categories
+            List<APICategory> apiCategories = apiToAdd.getApiCategories();
+            if (apiCategories != null && apiCategories.size() >0) {
+                if (!APIUtil.validateAPICategories(apiCategories, RestApiUtil.getLoggedInUserTenantDomain())) {
+                    RestApiUtil.handleBadRequest("Invalid API Category name(s) defined", log);
+                }
+            }
             //adding the api
             apiProvider.addAPI(apiToAdd);
 
@@ -732,6 +739,15 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
             apiToUpdate.setWsdlUrl(body.getWsdlUrl());
+
+            //validate API categories
+            List<APICategory> apiCategories = apiToUpdate.getApiCategories();
+            if (apiCategories != null && apiCategories.size() >0) {
+                if (!APIUtil.validateAPICategories(apiCategories, RestApiUtil.getLoggedInUserTenantDomain())) {
+                    RestApiUtil.handleBadRequest("Invalid API Category name(s) defined", log);
+                }
+            }
+
             apiProvider.manageAPI(apiToUpdate);
 
             API updatedApi = apiProvider.getAPI(apiIdentifier);

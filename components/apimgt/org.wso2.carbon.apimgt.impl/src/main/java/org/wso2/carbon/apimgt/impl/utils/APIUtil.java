@@ -1244,7 +1244,11 @@ public final class APIUtil {
             attachLabelsToAPIArtifact(artifact, api, tenantDomain);
 
             //attaching api categories to the API
-            attachAPICategoriesToArtifact(artifact, api, tenantDomain);
+            List<APICategory> attachedApiCategories = api.getApiCategories();
+            artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
+            for (APICategory category : attachedApiCategories) {
+                artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
+            }
 
             //set monetization status (i.e - enabled or disabled)
             artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS, Boolean.toString(api.getMonetizationStatus()));
@@ -1357,7 +1361,11 @@ public final class APIUtil {
             }
 
             //attaching api categories to the API
-            attachAPICategoriesToArtifact(artifact, apiProduct, tenantDomain);
+            List<APICategory> attachedApiCategories = apiProduct.getApiCategories();
+            artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
+            for (APICategory category : attachedApiCategories) {
+                artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
+            }
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + apiProduct.getId().getName();
             log.error(msg, e);
@@ -9839,60 +9847,6 @@ public final class APIUtil {
         return username;
     }
 
-     /** Validate the existence of the defined API categories and add to the API or API Product
-     *
-     * @param artifact
-     * @param model API or APIProduct
-     * @param tenantDomain
-     * @throws APIManagementException
-     */
-    public static void attachAPICategoriesToArtifact(GenericArtifact artifact, Object model, String tenantDomain) throws APIManagementException {
-        //Check whether the recieved model is an API or an APIProduct and get categories attached to API or Product,
-        // this may not contain category IDs
-        List<APICategory> attachedApiCategories = new ArrayList<>();
-        String modelName = "";
-        if (model instanceof API) {
-            API api = (API)model;
-            attachedApiCategories = api.getApiCategories();
-            modelName = api.getId().getApiName();
-        } else {
-            APIProduct apiProduct = (APIProduct)model;
-            attachedApiCategories = apiProduct.getApiCategories();
-            modelName = apiProduct.getId().getName();
-        }
-
-        //get all categories available in tenant
-        int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-
-        APIAdmin apiAdmin = new APIAdminImpl();
-        List<APICategory> availableAPICategories = apiAdmin.getAllAPICategoriesOfTenant(tenantID);
-
-        if (!availableAPICategories.isEmpty()) {
-            try {
-                artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
-                for (APICategory category : attachedApiCategories) {
-                    int index = availableAPICategories.indexOf(category);
-                    if (index != -1) {
-                        APICategory candidateCategory = availableAPICategories.get(index);
-                        artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, candidateCategory.getName());
-                    } else {
-                        log.warn("Category name : " + category.getName() + " does not exist in the tenant : " + tenantDomain
-                                + ", hence skipping it.");
-                    }
-                }
-            } catch (GovernanceException e) {
-                String msg = "Failed to add categories for API : " + modelName;
-                log.error(msg, e);
-                throw new APIManagementException(msg, e);
-            }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Categories are not yet defined in the tenant : " + tenantDomain
-                        + " . Hence skipped adding all categories");
-            }
-        }
-    }
-
     /**
      * This method returns the categories attached to the API
      *
@@ -9902,7 +9856,6 @@ public final class APIUtil {
      */
     private static List<APICategory> getAPICategoriesFromAPIGovernanceArtifact(GovernanceArtifact artifact, int tenantID)
             throws GovernanceException, APIManagementException {
-        APIAdmin apiAdmin = new APIAdminImpl();
         String[] categoriesOfAPI = artifact.getAttributes(APIConstants.API_CATEGORIES_CATEGORY_NAME);
 
         List<APICategory> categoryList = new ArrayList<>();
@@ -9910,7 +9863,8 @@ public final class APIUtil {
         if (ArrayUtils.isNotEmpty(categoriesOfAPI)) {
             //category array retrieved from artifact has only the category name, therefore we need to fetch categories
             //and fill out missing attributes before attaching the list to the api
-            List<APICategory> allCategories = apiAdmin.getAllAPICategoriesOfTenant(tenantID);
+            String tenantDomain = getTenantDomainFromTenantId(tenantID);
+            List<APICategory> allCategories = getAllAPICategoriesOfTenant(tenantDomain);
 
             //todo-category: optimize this loop with breaks
             for (String categoryName : categoriesOfAPI) {
@@ -9935,6 +9889,36 @@ public final class APIUtil {
         String artifactPath = APIConstants.API_CATEGORY_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiCategoryName + RegistryConstants.PATH_SEPARATOR;
         return artifactPath;
+    }
+
+    /**
+     * This method is used to get the categories in a given tenant space
+     *
+     * @param tenantDomain tenant domain name
+     * @return categories in a given tenant space
+     * @throws APIManagementException if failed to fetch categories
+     */
+    public static List<APICategory> getAllAPICategoriesOfTenant(String tenantDomain) throws APIManagementException {
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
+        return apiMgtDAO.getAllCategories(tenantId);
+    }
+
+    /**
+     * Validates the API category names to be attached to an API
+     * @param categories
+     * @param tenantDomain
+     * @return
+     */
+    public static boolean validateAPICategories(List<APICategory> categories, String tenantDomain)
+            throws APIManagementException {
+        List<APICategory> availableCategories = getAllAPICategoriesOfTenant(tenantDomain);
+        for (APICategory category : categories) {
+            if (!availableCategories.contains(category)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 
