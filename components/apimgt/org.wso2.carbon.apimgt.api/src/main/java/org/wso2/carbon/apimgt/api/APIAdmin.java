@@ -146,9 +146,10 @@ public interface APIAdmin  {
      * Delete an API Category
      *
      * @param categoryID
+     * @param username
      * @throws APIManagementException
      */
-    void deleteCategory(String categoryID) throws APIManagementException;
+    void deleteCategory(String categoryID, String username) throws APIManagementException;
 
     /**
      * Checks whether an api category exists by the given name

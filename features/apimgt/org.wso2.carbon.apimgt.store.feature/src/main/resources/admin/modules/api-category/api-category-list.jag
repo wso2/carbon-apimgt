@@ -27,7 +27,7 @@ var deleteAPICategory = function (uuid) {
     try {
         var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
         var apiAdmin = new APIAdminImpl();
-        apiAdmin.deleteCategory(uuid);
+        apiAdmin.deleteCategory(uuid, jagg.getUser().username);
         if (log.isDebugEnabled()) {
             log.debug("API Category " + uuid + " was deleted successfully.");
         }

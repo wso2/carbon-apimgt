@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -301,7 +300,12 @@ public class APIAdminImpl implements APIAdmin {
         apiMgtDAO.updateCategory(apiCategory);
     }
 
-    public void deleteCategory(String categoryID) throws APIManagementException {
+    public void deleteCategory(String categoryID, String username) throws APIManagementException {
+        APICategory category = getAPICategoryByID(categoryID);
+        int attchedAPICount = isCategoryAttached(category, username);
+        if ( attchedAPICount > 0) {
+            APIUtil.handleException("Unable to delete the category. It is attached to API(s)");
+        }
         apiMgtDAO.deleteCategory(categoryID);
     }
 
@@ -311,17 +315,10 @@ public class APIAdminImpl implements APIAdmin {
 
     public List<APICategory> getAllAPICategoriesOfTenantForAdminListing(String username) throws APIManagementException{
         int tenantID = APIUtil.getTenantId(username);
-        String tenantDomain = MultitenantUtils.getTenantDomain(username);
         List<APICategory> categories = getAllAPICategoriesOfTenant(tenantID);
         if (categories.size() > 0) {
             for (APICategory category : categories) {
-                APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(username);
-                //no need to add type prefix here since we need to ge the total number of category associattions including both
-                //APIs and API categories
-                String searchQuery = APIConstants.CATEGORY_SEARCH_TYPE_PREFIX + "=*" + category.getName() + "*";
-                Map<String, Object> result = apiProvider
-                        .searchPaginatedAPIs(searchQuery, tenantDomain, 0, Integer.MAX_VALUE, true);
-                int length = (Integer)result.get("length");
+                int length = isCategoryAttached(category, username);
                 category.setNumberOfAPIs(length);
             }
 
@@ -343,5 +340,17 @@ public class APIAdminImpl implements APIAdmin {
             log.error(msg);
             throw new APIMgtResourceNotFoundException(msg);
         }
+    }
+
+    private int isCategoryAttached(APICategory category, String username) throws APIManagementException {
+        APIProviderImpl apiProvider = new APIProviderImpl(username);
+        //no need to add type prefix here since we need to ge the total number of category associations including both
+        //APIs and API categories
+        String searchQuery = APIConstants.CATEGORY_SEARCH_TYPE_PREFIX + "=*" + category.getName() + "*";
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        Map<String, Object> result = apiProvider
+                .searchPaginatedAPIs(searchQuery, tenantDomain, 0, Integer.MAX_VALUE, true);
+        int length = (Integer) result.get("length");
+        return length;
     }
 }
