@@ -25,7 +25,7 @@ import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import TokenManager from 'AppComponents/Shared/AppsAndKeys/TokenManager';
 
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         padding: theme.spacing(3, 2),
     },
@@ -228,6 +228,35 @@ function Overview(props) {
                                 {application.owner}
                             </TableCell>
                         </TableRow>
+                        {application.attributes
+                            && (
+                                Object.keys(application.attributes).map((attr, index) => {
+                                    const attrValue = application.attributes[attr];
+                                    return (
+                                        <TableRow key={attr}>
+                                            <TableCell component='th' scope='row' className={classes.leftCol}>
+                                                <div className={classes.iconAligner}>
+                                                    <Icon className={classNames(
+                                                        { [classes.iconEven]: index % 2 !== 0 },
+                                                        { [classes.iconOdd]: index % 2 === 0 },
+                                                    )}
+                                                    >
+                                                        web_asset
+                                                    </Icon>
+                                                    <span className={classes.iconTextWrapper}>
+                                                        <Typography variant='caption' gutterBottom align='left'>
+                                                            {attr}
+                                                        </Typography>
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                {attrValue}
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                }))}
+
                     </TableBody>
                 </Table>
             </Paper>
