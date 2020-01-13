@@ -1246,8 +1246,10 @@ public final class APIUtil {
             //attaching api categories to the API
             List<APICategory> attachedApiCategories = api.getApiCategories();
             artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
-            for (APICategory category : attachedApiCategories) {
-                artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
+            if (attachedApiCategories != null) {
+                for (APICategory category : attachedApiCategories) {
+                    artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
+                }
             }
 
             //set monetization status (i.e - enabled or disabled)
@@ -1363,8 +1365,10 @@ public final class APIUtil {
             //attaching api categories to the API
             List<APICategory> attachedApiCategories = apiProduct.getApiCategories();
             artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
-            for (APICategory category : attachedApiCategories) {
-                artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
+            if (attachedApiCategories != null) {
+                for (APICategory category : attachedApiCategories) {
+                    artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
+                }
             }
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + apiProduct.getId().getName();

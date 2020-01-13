@@ -1401,8 +1401,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //attaching api categories to the API
             List<APICategory> attachedApiCategories = api.getApiCategories();
             artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
-            for (APICategory category : attachedApiCategories) {
-                artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
+            if (attachedApiCategories != null) {
+                for (APICategory category : attachedApiCategories) {
+                    artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
+                }
             }
             registry.commitTransaction();
             transactionCommitted = true;
