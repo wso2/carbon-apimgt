@@ -23,6 +23,7 @@ import io.swagger.inflector.examples.models.Example;
 import io.swagger.inflector.processors.JsonNodeExampleSerializer;
 import io.swagger.models.HttpMethod;
 import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.RefModel;
@@ -165,7 +166,7 @@ public class SequenceGenerator {
                 populateParametersFromOperation(operation, definitions, parameterJsonPathMapping, queryParameters);
 
                 Map<String, String> payloadSequence = createPayloadFacXMLForOperation(parameterJsonPathMapping, queryParameters,
-                        namespace, SOAPToRESTConstants.EMPTY_STRING, operationId);
+                        namespace, SOAPToRESTConstants.EMPTY_STRING, operationId, definitions);
                 try {
                     String[] propAndArgElements = getPropertyAndArgElementsForSequence(parameterJsonPathMapping,
                             queryParameters);
@@ -288,13 +289,16 @@ public class SequenceGenerator {
     }
 
     private static Map<String, String> createPayloadFacXMLForOperation(Map<String, String> parameterJsonPathMapping,
-            Map<String, String> queryPathParamMapping, String namespace, String prefix, String operationId)
+            Map<String, String> queryPathParamMapping, String namespace, String prefix, String operationId,
+                                                                       Map<String, Model> definitions)
             throws APIManagementException {
 
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         DocumentBuilder docBuilder;
         StringWriter stringWriter = new StringWriter();
+        Boolean isNamespaceQualified = false;
+        Boolean isRootComplexType = false;
 
         try {
             transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -314,12 +318,32 @@ public class SequenceGenerator {
                 int length = parameterType.equals(SOAPToRESTConstants.ParamTypes.ARRAY) ?
                         parameterTreeNodes.length - 1 :
                         parameterTreeNodes.length;
+                if (length > 0 && !isRootComplexType) {
+                    isRootComplexType = true;
+                }
                 for (int i = 0; i < length; i++) {
                     String parameterTreeNode = parameterTreeNodes[i];
+                    ModelImpl model = (ModelImpl) definitions.get(parameterTreeNode);
+                    if (model != null) {
+                        Map<String, Object> venderExtensions = model.getVendorExtensions();
+                        if (venderExtensions.get(SOAPToRESTConstants.X_NAMESPACE_QUALIFIED) != null &&
+                                Boolean.parseBoolean(venderExtensions.get(SOAPToRESTConstants.X_NAMESPACE_QUALIFIED)
+                                        .toString())) {
+                            isNamespaceQualified = true;
+                        }
+                    }
                     if (StringUtils.isNotBlank(parameterTreeNode)) {
-                        Element element = doc.createElementNS(namespace,
-                                SOAPToRESTConstants.SequenceGen.NAMESPACE_PREFIX
-                                        + SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR + parameterTreeNode);
+                        Element element;
+                        if (isNamespaceQualified) {
+                            element = doc.createElementNS(namespace, SOAPToRESTConstants.SequenceGen.NAMESPACE_PREFIX
+                                    + SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR + parameterTreeNode);
+                        } else if (!isNamespaceQualified && isRootComplexType) {
+                            element = doc.createElementNS(namespace, SOAPToRESTConstants.SequenceGen.NAMESPACE_PREFIX
+                                    + SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR + parameterTreeNode);
+                            isRootComplexType = false;
+                        } else {
+                            element = doc.createElementNS(null, parameterTreeNode);
+                        }
                         if (doc.getElementsByTagName(element.getTagName()).getLength() > 0) {
                             prevElement = (Element) doc.getElementsByTagName(element.getTagName()).item(0);
                         } else {
