@@ -29,8 +29,9 @@ import Alert from 'AppComponents/Shared/Alert';
 import Settings from 'AppComponents/Shared/SettingsContext';
 import Application from 'AppData/Application';
 import { Link } from 'react-router-dom';
-import ApplicationCreateBase from './Create/ApplicationCreateBase';
 import AuthManager from 'AppData/AuthManager';
+import Progress from 'AppComponents/Shared/Progress';
+import ApplicationCreateBase from './Create/ApplicationCreateBase';
 
 /**
  * Component used to handle application creation
@@ -59,7 +60,6 @@ class ApplicationFormHandler extends React.Component {
             throttlingPolicyList: [],
             allAppAttributes: null,
             isApplicationSharingEnabled: true,
-            isEdit: false,
             applicationOwner: '',
         };
         this.handleAddChip = this.handleAddChip.bind(this);
@@ -106,7 +106,7 @@ class ApplicationFormHandler extends React.Component {
         Promise.all([promisedApplication, promiseTiers, promisedAttributes])
             .then((response) => {
                 const [application, tierResponse, allAttributes] = response;
-                const throttlingPolicyList = tierResponse.body.list.map(item => item.name);
+                const throttlingPolicyList = tierResponse.body.list.map((item) => item.name);
                 const allAppAttributes = allAttributes.body.list;
                 const newRequest = { ...applicationRequest };
                 newRequest.applicationId = application.applicationId;
@@ -134,6 +134,7 @@ class ApplicationFormHandler extends React.Component {
             });
         this.isApplicationGroupSharingEnabled();
     }
+
     /**
      * Used to initialize the component state
      * @memberof ApplicationFormHandler
@@ -147,15 +148,15 @@ class ApplicationFormHandler extends React.Component {
             .then((response) => {
                 const [tierResponse, allAttributes] = response;
                 const { applicationRequest } = this.state;
-                const throttlingPolicyList = tierResponse.body.list.map(item => item.name);
+                const throttlingPolicyList = tierResponse.body.list.map((item) => item.name);
                 const newRequest = { ...applicationRequest };
                 if (throttlingPolicyList.length > 0) {
                     [newRequest.throttlingPolicy] = throttlingPolicyList;
                 }
                 const allAppAttributes = [];
-                allAttributes.body.list.map(item => allAppAttributes.push(item));
+                allAttributes.body.list.map((item) => allAppAttributes.push(item));
                 if (allAttributes.length > 0) {
-                    newRequest.attributes = allAppAttributes.filter(item => !item.hidden);
+                    newRequest.attributes = allAppAttributes.filter((item) => !item.hidden);
                 }
                 this.setState({ applicationRequest: newRequest, throttlingPolicyList, allAppAttributes });
             })
@@ -182,7 +183,7 @@ class ApplicationFormHandler extends React.Component {
      * @returns {void}
      * @memberof ApplicationFormHandler
      */
-    handleAttributesChange = name => (event) => {
+    handleAttributesChange = (name) => (event) => {
         const { applicationRequest } = this.state;
         applicationRequest.attributes[name] = event.target.value;
         this.setState({ applicationRequest });
@@ -354,7 +355,7 @@ class ApplicationFormHandler extends React.Component {
         const { applicationRequest } = this.state;
         const newRequest = { ...applicationRequest };
         let values = appGroups || [];
-        values = values.filter(v => v !== chip);
+        values = values.filter((v) => v !== chip);
         newRequest.groups = values;
         this.setState({ applicationRequest: newRequest });
     }
@@ -378,8 +379,10 @@ class ApplicationFormHandler extends React.Component {
             throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes, isApplicationSharingEnabled,
             isEdit, applicationOwner,
         } = this.state;
+        const { match: { params } } = this.props;
+
         const CreatePageTitle = (
-            <React.Fragment>
+            <>
                 <Typography variant='h5'>
                     <FormattedMessage
                         id='Applications.Create.ApplicationFormHandler.create.application.heading'
@@ -390,15 +393,15 @@ class ApplicationFormHandler extends React.Component {
                     <FormattedMessage
                         id='Applications.Create.ApplicationFormHandler.create.application.sub.heading'
                         defaultMessage={
-                            'Create an application providing name, quota and token type parameters.' +
-                            ' Description is optional'
+                            'Create an application providing name, quota and token type parameters.'
+                            + ' Description is optional'
                         }
                     />
                 </Typography>
-            </React.Fragment>
+            </>
         );
         const EditPageTitle = (
-            <React.Fragment>
+            <>
                 <Typography variant='h5'>
                     <FormattedMessage
                         id='Applications.Create.ApplicationFormHandler.edit.application.heading'
@@ -409,59 +412,64 @@ class ApplicationFormHandler extends React.Component {
                     <FormattedMessage
                         id='Applications.Create.ApplicationFormHandler.edit.application.sub.heading'
                         defaultMessage={
-                            'Edit this application. Name, quota and token type are mandatory parameters' +
-                            ' and description is optional'
+                            'Edit this application. Name, quota and token type are mandatory parameters'
+                            + ' and description is optional'
                         }
                     />
                 </Typography>
-            </React.Fragment>
+            </>
         );
         return (
-            <ApplicationCreateBase title={isEdit ? EditPageTitle : CreatePageTitle}>
-                <Box py={4} mb={2} display='flex' justifyContent='center'>
-                    <Grid item xs={10} md={9}>
-                        <ApplicationCreateForm
-                            throttlingPolicyList={throttlingPolicyList}
-                            applicationRequest={applicationRequest}
-                            updateApplicationRequest={this.updateApplicationRequest}
-                            validateName={this.validateName}
-                            isNameValid={isNameValid}
-                            allAppAttributes={allAppAttributes}
-                            handleAttributesChange={this.handleAttributesChange}
-                            isRequiredAttribute={this.isRequiredAttribute}
-                            getAttributeValue={this.getAttributeValue}
-                            isApplicationSharingEnabled={isApplicationSharingEnabled}
-                            handleDeleteChip={this.handleDeleteChip}
-                            handleAddChip={this.handleAddChip}
-                        />
-                        <Box display='flex' justifyContent='flex-start' mt={4} spacing={1}>
-                            <Box>
-                                <Button
-                                    variant='contained'
-                                    color='primary'
-                                    onClick={isEdit ? this.saveEdit : this.saveApplication}
-                                    disabled={isEdit && AuthManager.getUser().name !== applicationOwner}
-                                >
-                                    <FormattedMessage
-                                        id='Applications.Create.ApplicationFormHandler.save'
-                                        defaultMessage='SAVE'
-                                    />
-                                </Button>
-                            </Box>
-                            <Box ml={1}>
-                                <Link to='/applications/'>
-                                    <Button variant='text'>
-                                        <FormattedMessage
-                                            id='Applications.Create.ApplicationFormHandler.cancel'
-                                            defaultMessage='CANCEL'
-                                        />
-                                    </Button>
-                                </Link>
-                            </Box>
+            params.application_id && applicationRequest.name === ''
+                ? <Progress />
+                : (
+                    <ApplicationCreateBase title={isEdit ? EditPageTitle : CreatePageTitle}>
+                        <Box py={4} mb={2} display='flex' justifyContent='center'>
+                            <Grid item xs={10} md={9}>
+                                <ApplicationCreateForm
+                                    throttlingPolicyList={throttlingPolicyList}
+                                    applicationRequest={applicationRequest}
+                                    updateApplicationRequest={this.updateApplicationRequest}
+                                    validateName={this.validateName}
+                                    isNameValid={isNameValid}
+                                    allAppAttributes={allAppAttributes}
+                                    handleAttributesChange={this.handleAttributesChange}
+                                    isRequiredAttribute={this.isRequiredAttribute}
+                                    getAttributeValue={this.getAttributeValue}
+                                    isApplicationSharingEnabled={isApplicationSharingEnabled}
+                                    handleDeleteChip={this.handleDeleteChip}
+                                    handleAddChip={this.handleAddChip}
+                                />
+
+                                <Box display='flex' justifyContent='flex-start' mt={4} spacing={1}>
+                                    <Box>
+                                        <Button
+                                            variant='contained'
+                                            color='primary'
+                                            onClick={isEdit ? this.saveEdit : this.saveApplication}
+                                            disabled={isEdit && AuthManager.getUser().name !== applicationOwner}
+                                        >
+                                            <FormattedMessage
+                                                id='Applications.Create.ApplicationFormHandler.save'
+                                                defaultMessage='SAVE'
+                                            />
+                                        </Button>
+                                    </Box>
+                                    <Box ml={1}>
+                                        <Link to='/applications/'>
+                                            <Button variant='text'>
+                                                <FormattedMessage
+                                                    id='Applications.Create.ApplicationFormHandler.cancel'
+                                                    defaultMessage='CANCEL'
+                                                />
+                                            </Button>
+                                        </Link>
+                                    </Box>
+                                </Box>
+                            </Grid>
                         </Box>
-                    </Grid>
-                </Box>
-            </ApplicationCreateBase>
+                    </ApplicationCreateBase>
+                )
         );
     }
 }
@@ -469,9 +477,9 @@ ApplicationFormHandler.defaultProps = {
     match: {
         params: {
             application_id: null,
-        }
-    }
-}
+        },
+    },
+};
 ApplicationFormHandler.propTypes = {
     intl: PropTypes.shape({
         formatMessage: PropTypes.func.isRequired,

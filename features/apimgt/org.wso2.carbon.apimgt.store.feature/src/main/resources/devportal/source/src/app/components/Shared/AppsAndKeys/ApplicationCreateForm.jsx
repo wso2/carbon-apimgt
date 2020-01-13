@@ -231,8 +231,7 @@ const ApplicationCreate = (props) => {
                             variant='outlined'
                             required={isRequiredAttribute(item[1].attribute)}
                             label={item[1].attribute}
-                            id={configuration.configurationId}
-                            key={configuration.configurationId}
+                            value={getAttributeValue(item[1].attribute)}
                             helperText={item[1].description}
                             fullWidth
                             name={item[1].attribute}
