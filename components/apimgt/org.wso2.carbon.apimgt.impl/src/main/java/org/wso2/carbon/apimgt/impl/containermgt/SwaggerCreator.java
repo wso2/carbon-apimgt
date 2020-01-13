@@ -18,21 +18,27 @@
 
 package org.wso2.carbon.apimgt.impl.containermgt;
 
+import io.swagger.models.SwaggerVersion;
+import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.core.util.Json;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.*;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class extends the OAS3Parser class in order to override its method
@@ -77,8 +83,22 @@ public class SwaggerCreator {
     public String getOASDefinitionForPrivateJetMode(API api, String oasDefinition)
             throws APIManagementException, ParseException {
 
-        OAS3Parser oas3Parser = new OAS3Parser();
-        String apiDefinition = oas3Parser.getOASDefinitionForPublisher(api, oasDefinition);
+        APIDefinition oasParser = OASParserUtil.getOASParser(oasDefinition);
+        String apiDefinition = oasParser.getOASDefinitionForPublisher(api, oasDefinition);
+
+        OASParserUtil.SwaggerVersion swaggerVersion = OASParserUtil.getSwaggerVersion(apiDefinition);
+        if (swaggerVersion == OASParserUtil.SwaggerVersion.SWAGGER) {
+            //parsing swagger 2.0 to openAPI 3.0.1
+            OpenAPIParser openAPIParser = new OpenAPIParser();
+            SwaggerParseResult swaggerParseResult = openAPIParser.readContents(apiDefinition, null, null);
+            if (CollectionUtils.isNotEmpty(swaggerParseResult.getMessages())) {
+                log.debug("Errors found when parsing OAS definition");
+            }
+            OpenAPI openAPI = swaggerParseResult.getOpenAPI();
+            apiDefinition = Json.pretty(openAPI);
+        }
+
+        //get Json object from parsed openAPI definition
         JSONParser jsonParser = new JSONParser();
         JSONObject apiDefinitionJsonObject = (JSONObject) jsonParser.parse(apiDefinition);
 
