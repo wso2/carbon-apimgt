@@ -49,8 +49,22 @@ public class SettingsMappingUtil {
             settingsDTO.setApplicationSharingEnabled(APIUtil.isMultiGroupAppSharingEnabled());
             settingsDTO.setMapExistingAuthApps(APIUtil.isMapExistingAuthAppsEnabled());
             Map<String, Environment> environments = APIUtil.getEnvironments();
-            Environment environment = environments.get(RestApiConstants.DEFAULT_ENVIRONMENT);
-            settingsDTO.apiGatewayEndpoint(environment.getApiGatewayEndpoint());
+            if (environments.size()==1){
+                Map.Entry<String,Environment> entry = environments.entrySet().iterator().next();
+                Environment singleEnvironment = environments.get(entry.getKey());
+                settingsDTO.apiGatewayEndpoint(singleEnvironment.getApiGatewayEndpoint());
+            } else {
+                for (Map.Entry<String, Environment> entry : environments.entrySet()) {
+                    Environment multipleEnvironment = environments.get(entry.getKey());
+                    if (multipleEnvironment.isDefault()) {
+                        settingsDTO.apiGatewayEndpoint(multipleEnvironment.getApiGatewayEndpoint());
+                        break;
+                    }
+                }
+                Map.Entry<String,Environment> entry = environments.entrySet().iterator().next();
+                Environment singleEnvironment = environments.get(entry.getKey());
+                settingsDTO.apiGatewayEndpoint(singleEnvironment.getApiGatewayEndpoint());
+            }
         } else {
             settingsDTO.setScopes(GetScopeList());
             settingsDTO.setApplicationSharingEnabled(APIUtil.isMultiGroupAppSharingEnabled());
