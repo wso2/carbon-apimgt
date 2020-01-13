@@ -110,12 +110,7 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
-import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
-import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
+import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
@@ -7279,6 +7274,19 @@ public final class APIUtil {
         }
 
         return serverUrl;
+    }
+
+    /**
+     * Returns the configuration of the Identity Provider. This is used for login/logout operation of API Publisher and
+     *  API Developer Portal. By default, this is not defined in the configuration hence this returns null. In that
+     *  case, local server will be used as the IDP.
+     *
+     * @return configuration of the Identity Provider from the api-manager configuration
+     * @throws APIManagementException error when retrieving the configuration
+     */
+    public static IDPConfiguration getIdentityProviderConfig() throws APIManagementException {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getIdentityProviderConfig();
     }
 
     /**

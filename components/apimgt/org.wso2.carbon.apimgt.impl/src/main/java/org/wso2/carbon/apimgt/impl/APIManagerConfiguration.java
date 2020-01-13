@@ -115,6 +115,22 @@ public class APIManagerConfiguration {
     }
 
     /**
+     * Returns the configuration of the Identity Provider.
+     *
+     * @return configuration of the Identity Provider from the api-manager configuration
+     */
+    public IDPConfiguration getIdentityProviderConfig() {
+        if (getFirstProperty(APIConstants.IDENTITY_PROVIDER_AUTHORIZE_ENDPOINT) != null) {
+            return new IDPConfiguration.Builder()
+                    .authorizeEndpoint(getFirstProperty(APIConstants.IDENTITY_PROVIDER_AUTHORIZE_ENDPOINT))
+                    .oidcLogoutEndpoint(getFirstProperty(APIConstants.IDENTITY_PROVIDER_OIDC_LOGOUT_ENDPOINT))
+                    .build();
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Populate this configuration by reading an XML file at the given location. This method
      * can be executed only once on a given APIManagerConfiguration instance. Once invoked and
      * successfully populated, it will ignore all subsequent invocations.

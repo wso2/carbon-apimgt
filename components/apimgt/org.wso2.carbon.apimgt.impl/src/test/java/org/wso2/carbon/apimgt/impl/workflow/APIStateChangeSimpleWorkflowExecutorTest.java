@@ -63,7 +63,7 @@ public class APIStateChangeSimpleWorkflowExecutorTest {
     @Test
     public void testGetWorkflowDetails(){
         try {
-            apiStateChangeSimpleWorkflowExecutor.getWorkflowDetails(Mockito.anyString());
+            apiStateChangeSimpleWorkflowExecutor.getWorkflowDetails("random_string");
         } catch (WorkflowException e) {
             Assert.fail("Unexpected exception occurred while retriving workflow details");
         }
