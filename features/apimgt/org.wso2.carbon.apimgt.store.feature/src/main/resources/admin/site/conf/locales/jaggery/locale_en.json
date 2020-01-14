@@ -309,5 +309,17 @@
     "No Alert triggered" : "No Alert triggered",
     "Configure Emails": "Configure Emails",
     "Bot Detection": "Bot Detection",
-    "Bot Detection Data": "Bot Detection Data"
+    "Bot Detection Data": "Bot Detection Data",
+    "API Categories": "API Categories",
+    "Category Name": "Category Name",
+    "API Categories are not defined": "API Categories are not defined",
+    "Add API Category": "Add API Category",
+    "Edit API Category": "Edit API Category",
+    "API Category": "API Category",
+    "API Category contains one or more illegal characters": "API Category contains one or more illegal characters",
+    "API Category name already Exists": "API Category name already Exists",
+    "Categories": "Categories",
+    "Number of APIs": "Number of APIs",
+    "API Categories": "API Categories"
+
 }

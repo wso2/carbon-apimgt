@@ -775,4 +775,16 @@ export default class API extends Resource {
             );
         });
     }
+
+    /**
+     * @static
+     * Get all API Categories of the given tenant
+     * @return {Promise}
+     * */
+    apiCategories(params) {
+        return this.client.then((client) => {
+            return client.apis['API Category (Collection)'].get_api_categories(
+                params, this._requestMetaData());
+        });
+    }
 }

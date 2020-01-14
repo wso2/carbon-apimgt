@@ -190,6 +190,7 @@ public enum SubscriptionAvailabilityEnum {
     private String lastUpdatedTime = null;
     private List<ProductAPIDTO> apis = new ArrayList<>();
     private List<ScopeDTO> scopes = new ArrayList<>();
+    private List<String> categories = new ArrayList<>();
 
   /**
    * UUID of the api product 
@@ -771,6 +772,24 @@ public enum SubscriptionAvailabilityEnum {
     this.scopes = scopes;
   }
 
+  /**
+   * API categories 
+   **/
+  public APIProductDTO categories(List<String> categories) {
+    this.categories = categories;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "API categories ")
+  @JsonProperty("categories")
+  public List<String> getCategories() {
+    return categories;
+  }
+  public void setCategories(List<String> categories) {
+    this.categories = categories;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -813,12 +832,13 @@ public enum SubscriptionAvailabilityEnum {
         Objects.equals(createdTime, apIProduct.createdTime) &&
         Objects.equals(lastUpdatedTime, apIProduct.lastUpdatedTime) &&
         Objects.equals(apis, apIProduct.apis) &&
-        Objects.equals(scopes, apIProduct.scopes);
+        Objects.equals(scopes, apIProduct.scopes) &&
+        Objects.equals(categories, apIProduct.categories);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes);
+    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes, categories);
   }
 
   @Override
@@ -859,6 +879,7 @@ public enum SubscriptionAvailabilityEnum {
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    apis: ").append(toIndentedString(apis)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
+    sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
     sb.append("}");
     return sb.toString();
   }

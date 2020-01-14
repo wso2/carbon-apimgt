@@ -3405,6 +3405,36 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The "Category" resource API
+######################################################
+  /api-categories:
+
+#-----------------------------------------------------
+# Retrieve all categories
+#-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security: []
+      x-wso2-request: |
+              GET https://localhost:9443/api/am/store/v1.1/api-categories
+      x-wso2-curl: "curl -k \"https://localhost:9443/api/am/store/v1.1/api-categories\""
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\":1,\r\n   \"list\":[\r\n      {\r\n         \"id\":\"463e2c9f-5e99-43c3-a66e-de7e0f367373\",\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n      }\r\n   ]\r\n}"
+      summary: Get all API categories
+      description: |
+        Get all API categories
+      parameters:
+        - $ref : '#/parameters/requestedTenant'
+      tags:
+        - API Category (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            Categories returned
+          schema:
+            $ref: '#/definitions/APICategoryList'
+
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
@@ -3961,6 +3991,13 @@ definitions:
       isSubscriptionAvailable:
         type: boolean
         example: false
+      categories:
+        description: |
+          API categories
+        type: array
+        items:
+          type: string
+          example: ["Finance"]
 
 #-----------------------------------------------------
 # The Label resource
@@ -5294,6 +5331,40 @@ definitions:
       apiVersion: '1.0.0'
       applicationName: 'DefaultApplication'
       requestConunt: '12'
+
+  #-----------------------------------------------------
+  # The Category resource
+  #-----------------------------------------------------
+  APICategory:
+    title: API Category
+    required:
+    - name
+    properties:
+      id:
+        type: string
+        example: "01234567-0123-0123-0123-012345678901"
+      name:
+        type: string
+        example: "Finance"
+      description:
+        type: string
+        example: "Finance related APIs"
+
+  #-----------------------------------------------------
+  # The Category List resource
+  #-----------------------------------------------------
+  APICategoryList:
+    title: API Category List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of API categories returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/APICategory'
 
 #-----------------------------------------------------
 # END-OF-FILE

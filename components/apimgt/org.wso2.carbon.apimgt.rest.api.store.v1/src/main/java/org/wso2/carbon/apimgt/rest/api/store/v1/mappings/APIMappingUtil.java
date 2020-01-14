@@ -24,6 +24,7 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -235,6 +236,16 @@ public class APIMappingUtil {
         String subscriptionAllowedTenants = model.getSubscriptionAvailableTenants();
         dto.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
                 subscriptionAllowedTenants));
+
+        List<APICategory> apiCategories = model.getApiCategories();
+        List<String> categoryNamesList = new ArrayList<>();
+        if (apiCategories != null && !apiCategories.isEmpty()) {
+            for (APICategory category : apiCategories) {
+                categoryNamesList.add(category.getName());
+            }
+        }
+        dto.setCategories(categoryNamesList);
+
         return dto;
     }
 

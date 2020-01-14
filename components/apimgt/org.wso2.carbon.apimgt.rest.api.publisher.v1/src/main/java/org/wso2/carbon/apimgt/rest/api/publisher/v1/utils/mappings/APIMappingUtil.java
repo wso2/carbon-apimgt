@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -259,6 +260,10 @@ public class APIMappingUtil {
         setMaxTpsFromApiDTOToModel(dto, model);
         model.setAuthorizationHeader(dto.getAuthorizationHeader());
         model.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
+
+        //attach api categories to API model
+        setAPICategoriesToModel(dto, model, provider);
+
         return model;
     }
 
@@ -922,6 +927,16 @@ public class APIMappingUtil {
             dto.setCreatedTime(String.valueOf(timeStamp));
         }
         dto.setWorkflowStatus(model.getWorkflowStatus());
+
+        List<APICategory> apiCategories = model.getApiCategories();
+        List<String> categoryNameList = new ArrayList<>();
+        if (apiCategories != null && !apiCategories.isEmpty()) {
+            for (APICategory category : apiCategories) {
+                categoryNameList.add(category.getName());
+            }
+        }
+        dto.setCategories(categoryNameList);
+
         return dto;
     }
 
@@ -1834,6 +1849,15 @@ public class APIMappingUtil {
             productDto.setSecurityScheme(Arrays.asList(product.getApiSecurity().split(",")));
         }
 
+        List<APICategory> apiCategories = product.getApiCategories();
+        List<String> categoryNameList = new ArrayList<>();
+        if (apiCategories != null && !apiCategories.isEmpty()) {
+            for (APICategory category : apiCategories) {
+                categoryNameList.add(category.getName());
+            }
+        }
+        productDto.setCategories(categoryNameList);
+
         if (null != product.getLastUpdated()) {
             Date lastUpdateDate = product.getLastUpdated();
             Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
@@ -2045,6 +2069,9 @@ public class APIMappingUtil {
         product.setProductResources(productResources);
         product.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
         product.setAuthorizationHeader(dto.getAuthorizationHeader());
+
+        //attach api categories to API model
+        setAPICategoriesToModel(dto, product, provider);
         return product;
     }
 
@@ -2378,5 +2405,35 @@ public class APIMappingUtil {
         }
 
         return null;
+    }
+
+    /**
+     * Set API categories to API or APIProduct based on the instance type of the DTO object passes
+     * @param dto APIDTO or APIProductDTO
+     * @param model API or APIProduct
+     */
+    private static void setAPICategoriesToModel(Object dto, Object model, String provider) {
+        List<String> apiCategoryNames = new ArrayList<>();
+        if (dto instanceof APIDTO) {
+            APIDTO apiDTO = (APIDTO)dto;
+            apiCategoryNames = apiDTO.getCategories();
+        } else {
+            APIProductDTO apiProductDTO = (APIProductDTO)dto;
+            apiCategoryNames = apiProductDTO.getCategories();
+        }
+        String tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        List<APICategory> apiCategories = new ArrayList<>();
+        for (String categoryName : apiCategoryNames) {
+            APICategory category = new APICategory();
+            category.setName(categoryName);
+            category.setTenantID(tenantId);
+            apiCategories.add(category);
+        }
+        if (model instanceof API) {
+            ((API)model).setApiCategories(apiCategories);
+        } else {
+            ((APIProduct)model).setApiCategories(apiCategories);
+        }
     }
 }

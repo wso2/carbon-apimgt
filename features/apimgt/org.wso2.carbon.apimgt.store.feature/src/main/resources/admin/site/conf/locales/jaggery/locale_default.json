@@ -318,5 +318,12 @@
     "Application Name" : "Application Name",
     "Owner" : "Owner",
     "Change Application Owner" : "Change Application Owner",
-    "Invalid role name" : "Invalid role name"
+    "Invalid role name" : "Invalid role name",
+    "API Categories": "API Categories",
+    "Category Name": "Category Name",
+    "API Categories are not defined": "API Categories are not defined",
+    "API Category contains one or more illegal characters": "API Category contains one or more illegal characters",
+    "API Category name already Exists": "API Category name already Exists",
+    "Categories": "Categories",
+    "API Categories": "API Categories"
 }

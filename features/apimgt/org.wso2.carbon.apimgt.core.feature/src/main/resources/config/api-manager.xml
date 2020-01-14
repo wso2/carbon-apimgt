@@ -512,6 +512,10 @@
                 <URI>/api/am/store/{version}/api-products/{apiProductId}/thumbnail</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-categories</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
         </WhiteListedURIs>
         <ETagSkipList>
             <ETagSkipURI>

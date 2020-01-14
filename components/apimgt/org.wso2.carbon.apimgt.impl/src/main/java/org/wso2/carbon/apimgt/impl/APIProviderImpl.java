@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -1421,6 +1422,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                         artifactPath, registry);
+            }
+            //attaching api categories to the API
+            List<APICategory> attachedApiCategories = api.getApiCategories();
+            artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
+            if (attachedApiCategories != null) {
+                for (APICategory category : attachedApiCategories) {
+                    artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
+                }
             }
             registry.commitTransaction();
             transactionCommitted = true;
