@@ -388,13 +388,18 @@ public final class APIConstants {
     public static final String EXP = "exp";
     public static final String JWT = "JWT";
     public static final String JWT_DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
-    public static final String JWT_CONFIGS = "JWTConfiguration.";
-    public static final String JWT_HEADER = JWT_CONFIGS + "JWTHeader";
-    public static final String TOKEN_GENERATOR_IMPL = JWT_CONFIGS + "JWTGeneratorImpl";
-    public static final String ENABLE_JWT_GENERATION = JWT_CONFIGS + "EnableJWTGeneration";
-    public static final String CLAIMS_RETRIEVER_CLASS = JWT_CONFIGS + "ClaimsRetrieverImplClass";
-    public static final String CONSUMER_DIALECT_URI = JWT_CONFIGS + "ConsumerDialectURI";
-    public static final String JWT_SIGNATURE_ALGORITHM = JWT_CONFIGS + "SignatureAlgorithm";
+    public static final String JWT_CONFIGS = "JWTConfiguration";
+    public static final String JWT_HEADER = "JWTHeader";
+    public static final String TOKEN_GENERATOR_IMPL = "JWTGeneratorImpl";
+    public static final String ENABLE_JWT_GENERATION = "EnableJWTGeneration";
+    public static final String CLAIMS_RETRIEVER_CLASS = "ClaimsRetrieverImplClass";
+    public static final String CONSUMER_DIALECT_URI =  "ConsumerDialectURI";
+    public static final String JWT_SIGNATURE_ALGORITHM = "SignatureAlgorithm";
+    public static final String GATEWAY_JWT_GENERATOR = "GatewayJWTGeneration";
+    public static final String GATEWAY_JWT_GENERATOR_IMPL = "ImplClass";
+    public static final String GATEWAY_JWT_CONFIGURATION = "Configuration";
+    public static final String GATEWAY_JWT_GENERATOR_CLAIMS = "Claims";
+
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
     public static final String API_SECURITY = "APISecurity";

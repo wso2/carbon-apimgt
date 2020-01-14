@@ -26,10 +26,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.opensaml.xmlsec.signature.Q;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
@@ -89,6 +91,7 @@ public class APIManagerConfiguration {
 
     private boolean initialized;
     private ThrottleProperties throttleProperties = new ThrottleProperties();
+    private JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
     private static Properties realtimeNotifierProperties;
@@ -417,6 +420,8 @@ public class APIManagerConfiguration {
                 if (additionalAttributes != null) {
                     setMonetizationAdditionalAttributes(additionalAttributes);
                 }
+            }else if (APIConstants.JWT_CONFIGS.equals(localName)){
+                setJWTConfiguration(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -1083,6 +1088,58 @@ public class APIManagerConfiguration {
             }
         }
     }
+    private void setJWTConfiguration(OMElement omElement){
+        OMElement jwtConfigurationElement = omElement.getFirstChildWithName(new QName(APIConstants.JWT_CONFIGS));
+        OMElement jwtEnableElement = jwtConfigurationElement.getFirstChildWithName(new QName(APIConstants.ENABLE_JWT_GENERATION));
+        if (jwtEnableElement != null){
+            jwtConfigurationDto.setEnabled(Boolean.parseBoolean(jwtEnableElement.getText()));
+        }
+        OMElement jwtGeneratorImplElement =
+                jwtConfigurationElement.getFirstChildWithName(new QName(APIConstants.TOKEN_GENERATOR_IMPL));
+        if (jwtGeneratorImplElement != null){
+            jwtConfigurationDto.setJwtGeneratorImplClass(jwtGeneratorImplElement.getText());
+        }
+        OMElement dialectUriElement =
+                jwtConfigurationElement.getFirstChildWithName(new QName(APIConstants.CONSUMER_DIALECT_URI));
+        if (dialectUriElement != null){
+            jwtConfigurationDto.setConsumerDialectUri(dialectUriElement.getText());
+        }
+        OMElement signatureElement =
+                jwtConfigurationElement.getFirstChildWithName(new QName(APIConstants.JWT_SIGNATURE_ALGORITHM));
+        if (signatureElement != null){
+            jwtConfigurationDto.setSignatureAlgorithm(signatureElement.getText());
+        }
+        OMElement claimRetrieverImplElement =
+                jwtConfigurationElement.getFirstChildWithName(new QName(APIConstants.CLAIMS_RETRIEVER_CLASS));
+        if (claimRetrieverImplElement != null){
+            jwtConfigurationDto.setClaimRetrieverImplClass(claimRetrieverImplElement.getText());
+        }
+        OMElement jwtHeaderElement =
+                jwtConfigurationElement.getFirstChildWithName(new QName(APIConstants.JWT_HEADER));
+        if (jwtHeaderElement != null){
+            jwtConfigurationDto.setJwtHeader(jwtHeaderElement.getText());
+        }
+        OMElement gatewayJWTConfigurationElement =
+                jwtConfigurationElement.getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR));
+        if (gatewayJWTConfigurationElement != null){
+            OMElement gatewayJWTGeneratorImplElement = gatewayJWTConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR_IMPL));
+            jwtConfigurationDto.setGatewayJWTGeneratorImpl(gatewayJWTGeneratorImplElement.getText());
+            OMElement gatewayJWTConfigurationsElement = gatewayJWTConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_CONFIGURATION));
+            if (gatewayJWTConfigurationsElement != null){
+                OMElement claimsElement = gatewayJWTConfigurationElement
+                        .getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR_CLAIMS));
+                if (claimsElement != null){
+                    Iterator claimElements = claimsElement.getChildElements();
+                    while (claimElements.hasNext()){
+                        OMElement claim = (OMElement) claimElements.next();
+                        jwtConfigurationDto.getClaimConfigurations().add(claim.getText());
+                    }
+                }
+            }
+        }
+    }
 
     public ThrottleProperties getThrottleProperties() {
         return throttleProperties;
@@ -1126,5 +1183,10 @@ public class APIManagerConfiguration {
             monetizationAttribute.put(APIConstants.Monetization.IS_ATTRIBITE_REQUIRED, isRequired);
             monetizationAttributes.add(monetizationAttribute);
         }
+    }
+
+    public JWTConfigurationDto getJwtConfigurationDto() {
+
+        return jwtConfigurationDto;
     }
 }

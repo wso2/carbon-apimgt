@@ -73,6 +73,11 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>commons-codec.</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.13</version>
+        </dependency>
+        <dependency>
             <groupId>org.ops4j.pax.logging</groupId>
             <artifactId>pax-logging-api</artifactId>
         </dependency>
@@ -427,6 +432,7 @@
                             org.wso2.orbit.re2j.*; version="${re2j.version}",
                             graphql.*; version="${graphql.java.version}",
                             com.amazonaws.*; version="${com.amazonaws.version}",
+                            com.nimbusds.jwt.*"
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>
