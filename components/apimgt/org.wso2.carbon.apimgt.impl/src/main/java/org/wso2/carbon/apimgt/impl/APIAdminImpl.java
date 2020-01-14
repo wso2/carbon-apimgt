@@ -303,7 +303,7 @@ public class APIAdminImpl implements APIAdmin {
     public void deleteCategory(String categoryID, String username) throws APIManagementException {
         APICategory category = getAPICategoryByID(categoryID);
         int attchedAPICount = isCategoryAttached(category, username);
-        if ( attchedAPICount > 0) {
+        if (attchedAPICount > 0) {
             APIUtil.handleException("Unable to delete the category. It is attached to API(s)");
         }
         apiMgtDAO.deleteCategory(categoryID);
