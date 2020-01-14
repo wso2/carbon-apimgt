@@ -14394,7 +14394,6 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to retrieve API categories for tenant " + tenantID, e);
         }
-
         return categoriesList;
     }
 

@@ -321,7 +321,6 @@ public class APIAdminImpl implements APIAdmin {
                 int length = isCategoryAttached(category, username);
                 category.setNumberOfAPIs(length);
             }
-
         }
         return categories;
     }
@@ -337,7 +336,6 @@ public class APIAdminImpl implements APIAdmin {
         }else {
             String msg = "Failed to get APICategory. API category corresponding to UUID " + apiCategoryId
                     + " does not exist";
-            log.error(msg);
             throw new APIMgtResourceNotFoundException(msg);
         }
     }
