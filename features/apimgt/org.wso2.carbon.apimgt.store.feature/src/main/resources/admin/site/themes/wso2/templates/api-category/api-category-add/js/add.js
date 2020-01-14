@@ -137,7 +137,7 @@ function validateForNameAlreadyExists(text, element, errorMsg) {
             apiCategoryNameExist = result.exist;
         }
     });
-    if(apiCategoryNameExist) {
+    if (apiCategoryNameExist) {
         element.css("border", "1px solid red");
         $('#label' + elementId).remove();
         element.parent().append('<label class="error" id="label' + elementId + '" >' + errorMsg + '</label>');

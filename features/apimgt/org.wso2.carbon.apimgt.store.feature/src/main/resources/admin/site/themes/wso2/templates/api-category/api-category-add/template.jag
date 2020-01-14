@@ -13,8 +13,8 @@
         nameFieldDisableStatus = "readonly";
         pageTitle = i18n.localize("Edit API Category");
         var categories = session.get("categoryList");
-    	var APICategory = Packages.org.wso2.carbon.apimgt.api.model.APICategory;
-  		var category = new APICategory();
+        var APICategory = Packages.org.wso2.carbon.apimgt.api.model.APICategory;
+        var category = new APICategory();
 
         for (i=0; i < categories.size(); i++) {
         	if (uuid.equalsIgnoreCase(categories.get(i).getId())) {
@@ -22,7 +22,7 @@
                 break;
             }
 	    }
-		var name = category.getName();
+        var name = category.getName();
         var description = category.getDescription() == null ? "" : category.getDescription();
    	}
 %>
@@ -49,16 +49,16 @@
 	    <p class="lead"><%=i18n.localize("General Details")%></p>
 	</div>
     <div class="form-group">
-		<label class="control-label col-sm-3"><%=i18n.localize("API Category")%>  <span class="requiredAstrix">*</span></label>
-		<div class="col-md-9">
-		    <input class="form-control" type="text" id="categoryName" name="categoryName" <%=nameFieldDisableStatus%>/>
-		</div>
-	</div>
+        <label class="control-label col-sm-3"><%=i18n.localize("API Category")%>  <span class="requiredAstrix">*</span></label>
+        <div class="col-md-9">
+		<input class="form-control" type="text" id="categoryName" name="categoryName" <%=nameFieldDisableStatus%>/>
+        </div>
+    </div>
     <div class="form-group">
-		<label class="control-label col-sm-3"><%=i18n.localize("Description")%></label>
-		<div class="col-md-9">
-			<textarea class="form-control" id="description" class="text" name="description" ></textarea>
-		</div>
+        <label class="control-label col-sm-3"><%=i18n.localize("Description")%></label>
+        <div class="col-md-9">
+		<textarea class="form-control" id="description" class="text" name="description" ></textarea>
+        </div>
 	</div>
 
     <div class="form-group">
@@ -88,7 +88,7 @@
         if ('<%=encode.forHtmlAttribute(uuid)%>' != 'null') {
             isNewAPICategory = false;
         }
-        if(!isNewAPICategory){
+        if (!isNewAPICategory) {
             $('#categoryName').val("<%=name%>");
             $('#description').val("<%=description%>");
         }

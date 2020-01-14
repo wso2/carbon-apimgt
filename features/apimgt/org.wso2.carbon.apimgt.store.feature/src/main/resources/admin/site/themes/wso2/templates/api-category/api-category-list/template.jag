@@ -63,7 +63,7 @@
 </div>
 
 <script>
-    function updateAPICategory(uuid){
+    function updateAPICategory(uuid) {
         location.href = "<%= jagg.url('/api-category-add')%>?uuid="+uuid+"&action=update";
     }
 </script>
