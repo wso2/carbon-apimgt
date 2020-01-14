@@ -55,7 +55,7 @@ var isCategoryNameExists = function(categoryName, uuid, tenantId) {
     }
 }
 
-var constructCategoryObject  = function(categoryId, categoryName, description){
+var constructCategoryObject  = function(categoryId, categoryName, description) {
     var APICategory = Packages.org.wso2.carbon.apimgt.api.model.APICategory;
     var category = new APICategory();
 

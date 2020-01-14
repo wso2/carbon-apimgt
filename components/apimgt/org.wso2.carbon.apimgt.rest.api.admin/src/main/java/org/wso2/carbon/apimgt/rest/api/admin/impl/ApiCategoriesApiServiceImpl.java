@@ -40,7 +40,7 @@ import javax.ws.rs.core.Response;
 public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
     private static final Log log = LogFactory.getLog(ApiCategoriesApiServiceImpl.class);
 
-    public Response apiCategoriesGet(){
+    public Response apiCategoriesGet() {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -56,7 +56,7 @@ public class ApiCategoriesApiServiceImpl extends ApiCategoriesApiService {
         return null;
     }
 
-    public Response apiCategoriesPost(APICategoryDTO body){
+    public Response apiCategoriesPost(APICategoryDTO body) {
         APICategory apiCategory = null;
         try {
             APIAdmin apiAdmin = new APIAdminImpl();

@@ -5,7 +5,7 @@ var deleteAPICategory = function (uuid) {
         title:i18n.t('Confirm Deletion'),
         type:'confirm',
         anotherDialog:true,
-        okCallback:function(){
+        okCallback:function() {
             jagg.post("/site/blocks/api-category/api-category-list/ajax/api-category-list.jag", {
                     action:"deleteAPICategory",
                     uuid:uuid
