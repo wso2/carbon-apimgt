@@ -6,18 +6,18 @@
     var pageTitle = i18n.localize("Add API Category");
     var nameFieldDisableStatus = "";
 
-    if(action == null){
+    if (action == null) {
         action = "categoryAction";
     }
-    if(uuid != null){
+    if (uuid != null) {
         nameFieldDisableStatus = "readonly";
         pageTitle = i18n.localize("Edit API Category");
         var categories = session.get("categoryList");
     	var APICategory = Packages.org.wso2.carbon.apimgt.api.model.APICategory;
   		var category = new APICategory();
 
-        for(i=0; i < categories.size(); i++){
-        	if(uuid.equalsIgnoreCase(categories.get(i).getId())){
+        for (i=0; i < categories.size(); i++) {
+        	if (uuid.equalsIgnoreCase(categories.get(i).getId())) {
                 category = categories.get(i);
                 break;
             }
@@ -92,6 +92,6 @@
             $('#categoryName').val("<%=name%>");
             $('#description').val("<%=description%>");
         }
-    });
+   });
 </script>
 <%});%>

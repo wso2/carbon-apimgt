@@ -7,7 +7,7 @@ include("/jagg/jagg.jag");
     action = request.getParameter("action"),
     site = require("/site/conf/site.json"),
     msg = require("/site/conf/ui-messages.jag");
-    if(jagg.getUser() == null){
+    if (jagg.getUser() == null) {
         print({
             error:true,
             message:'timeout'
@@ -29,8 +29,7 @@ include("/jagg/jagg.jag");
                 }
             }
             print(obj);
+        }
     }
-
-       }
  }());
 %>

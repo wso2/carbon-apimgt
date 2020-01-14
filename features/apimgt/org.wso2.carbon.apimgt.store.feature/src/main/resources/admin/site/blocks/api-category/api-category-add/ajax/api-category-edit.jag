@@ -9,10 +9,10 @@ include("/jagg/jagg.jag");
     site = require("/site/conf/site.json"),
     msg = require("/site/conf/ui-messages.jag");
 
-    if(uuid == null){
+    if(uuid == null) {
         uuid = -1;
     }
-    if(jagg.getUser() == null){
+    if (jagg.getUser() == null) {
         print({
             error:true,
             message:'timeout'

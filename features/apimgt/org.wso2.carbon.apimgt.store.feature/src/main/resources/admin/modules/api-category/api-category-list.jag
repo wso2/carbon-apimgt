@@ -1,8 +1,8 @@
 <%
 var log = new Log();
 
-var getAllAPICategories = function(){
-    try{
+var getAllAPICategories = function() {
+    try {
         var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
         var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
         var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
@@ -41,7 +41,4 @@ var deleteAPICategory = function (uuid) {
         };
     }
 };
-
-
-
 %>
