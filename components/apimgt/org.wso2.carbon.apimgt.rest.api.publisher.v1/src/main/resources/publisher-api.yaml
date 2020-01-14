@@ -3297,91 +3297,113 @@ paths:
             Not Found.
             Requested scope name does not exist.
 
-#  ######################################################
-#  # The "Query Analysis" resource APIs
-#  ######################################################
-#  /apis/{apiId}/query-analysis:
-#
-#    #-----------------------------------------------------
-#    # Retrieve a particular API specific Query Depth Details
-#    #-----------------------------------------------------
-#    get:
-#      summary: Get the list of role-depth mappings of an API
-#      description: |
-#        This operation can be used to retrieve a list of role-depth mappings belonging to an API by providing the id of the API.
-#      parameters:
-#        - $ref : '#/parameters/apiId'
-#      tags:
-#        - scope
-#      responses:
-#        200:
-#          description:
-#            OK.
-#            Requested scope name exists.
-#        404:
-#          description:
-#            Not Found.
-#            Requested scope name does not exist.
-#
-#  ######################################################
-#  # The "Document Collection" resource APIs
-#  ######################################################
-#  /apis/{apiId}/documents:
-#
-#    #-----------------------------------------------------
-#    # Retrieve the documents associated with an API that qualify under a search condition
-#    #-----------------------------------------------------
-#    get:
-#      security:
-#        - OAuth2Security:
-#            - apim:api_view
-#      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents\""
-#      x-wso2-request: |
-#        GET https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents
-#        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-#      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"visibility\": \"API_LEVEL\",\n         \"sourceType\": \"INLINE\",\n         \"sourceUrl\": null,\n         \"otherTypeName\": null,\n         \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n         \"summary\": \"This is a sample documentation for v1.0\",\n         \"name\": \"PhoneVerification API Documentation\",\n         \"type\": \"HOWTO\"\n      },\n            {\n         \"visibility\": \"API_LEVEL\",\n         \"sourceType\": \"URL\",\n         \"sourceUrl\": \"http://wiki.cdyne.com/index.php/Phone_Verification\",\n         \"otherTypeName\": null,\n         \"documentId\": \"4145df31-04f1-440c-8d08-68952874622c\",\n         \"summary\": \"This is the URL for online documentation\",\n         \"name\": \"Online Documentation\",\n         \"type\": \"SAMPLES\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}"
-#      summary: Get a list of documents of an API
-#      description: |
-#        This operation can be used to retrieve a list of documents belonging to an API by providing the id of the API.
-#      parameters:
-#        - $ref: '#/parameters/apiId'
-#        - $ref: '#/parameters/limit'
-#        - $ref: '#/parameters/offset'
-#        - $ref: '#/parameters/If-None-Match'
-#      tags:
-#        - API Documents
-#      responses:
-#        200:
-#          description: |
-#            OK.
-#            Document list is returned.
-#          schema:
-#            $ref: '#/definitions/DocumentList'
-#          headers:
-#            Content-Type:
-#              description: |
-#                The content type of the body.
-#              type: string
-#            ETag:
-#              description: |
-#                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-#              type: string
-#        304:
-#          description: |
-#            Not Modified.
-#            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-#        404:
-#          description: |
-#            Not Found.
-#            Requested API does not exist.
-#          schema:
-#            $ref: '#/definitions/Error'
-#        406:
-#          description: |
-#            Not Acceptable.
-#            The requested media type is not supported
-#          schema:
-#            $ref: '#/definitions/Error'
+  ######################################################
+  # GraphQL "Query Analysis" resource APIs for "Query Depth"
+  ######################################################
+  /apis/{apiId}/query-analysis/depth:
+
+    #-----------------------------------------------------
+    # Retrieve Role-Depth Mappings of a given API
+    #-----------------------------------------------------
+    get:
+      summary: Get the list of role-depth mappings of an API
+      description: |
+        This operation can be used to retrieve a list of role-depth mappings belonging to an API by providing the id of the API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - GraphQL Query Analysis
+      responses:
+        200:
+          description: |
+            OK.
+            Requested role-depth mappings returned.
+        404:
+          description: |
+            Not Found.
+            Requested API does not contain any role-depth mappings.
+
+    #-----------------------------------------------------
+    # Add an API specific Role-Depth Mapping
+    #-----------------------------------------------------
+    post:
+      summary: Add a new role-depth mapping to an API
+      description: |
+        This operation can be used to add a role-depth mapping belonging to an API by providing the id of the API.
+      parameters:
+        - $ref : '#/parameters/apiId'
+        - in: body
+          name: body
+          description: |
+            Role-depth mapping that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/GraphQLQueryDepthInfo'
+      tags:
+        - GraphQL Query Analysis
+      responses:
+        200:
+          description: |
+            Created.
+            Role-Depth Mapping created successfully.
+        404:
+          description: |
+            Bad Request.
+            Role-Depth Mapping creation failed.
+
+  ######################################################
+  # GraphQL "Query Analysis" resource APIs for "Query Complexity"
+  ######################################################
+  /apis/{apiId}/query-analysis/complexity:
+
+    #-----------------------------------------------------
+    # Retrieve Complexity Info of a given API
+    #-----------------------------------------------------
+    get:
+      summary: Get the complexity related details of an API
+      description: |
+        This operation can be used to retrieve complexity related details belonging to an API by providing the id of the API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - GraphQL Query Analysis
+      responses:
+        200:
+          description: |
+            OK.
+            Requested complexity details returned.
+        404:
+          description: |
+            Not Found.
+            Requested API does not contain any complexity details.
+
+    #-----------------------------------------------------
+    # Add API specific Complexity Info
+    #-----------------------------------------------------
+    post:
+      summary: Add complexity related details to an API
+      description: |
+        This operation can be used to add complexity details belonging to an API by providing the id of the API.
+      parameters:
+        - $ref : '#/parameters/apiId'
+        - in: body
+          name: body
+          description: |
+            Role-depth mapping that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/GraphQLQueryComplexityInfo'
+      tags:
+        - GraphQL Query Analysis
+      responses:
+        200:
+          description: |
+            Created.
+            Complexity details created successfully.
+        404:
+          description: |
+            Bad Request.
+            Complexity detail addition failed.
 
   ######################################################
   # The "Resource Paths" resource
@@ -7714,6 +7736,64 @@ definitions:
       schemaDefinition:
         type: string
 
+  #-----------------------------------------------------
+  # The GraphQL Query Depth Info resource
+  #-----------------------------------------------------
+  GraphQLQueryDepthInfo:
+    title: GraphQL Query Depth Info
+    required:
+      - apiId
+    properties:
+      apiId:
+        type: string
+        description: |
+          The API id to which a role-depth mapping is being specified
+        example: 01234567-0123-0123-0123-012345678901
+      role:
+        type: string
+        description: |
+          The user role to which the allowed maximum depth is being specified
+        example: "admin"
+      depthValue:
+        type: integer
+        description: |
+          The depth value allocated for the associated role
+        example: 20
+
+  #-----------------------------------------------------
+  # The GraphQL Query Complexity Info resource
+  #-----------------------------------------------------
+  GraphQLQueryComplexityInfo:
+    title: GraphQL Query Complexity Info
+    required:
+      -apiId
+      -maxComplexity
+    properties:
+      -apiId:
+        type: string
+        description: |
+          The API id to which complexity related data is being specified
+        example: 01234567-0123-0123-0123-012345678901
+      -maxComplexity:
+        type: integer
+        description: |
+          The maximum complexity allowed for all queries of this API
+        example: 20
+      -type:
+        type: string
+        description: |
+          The type found within the schema of the API
+        example: "Country"
+      -field:
+        type: string
+        description: |
+          The field which is found under the type within the schema of the API
+        example: "name"
+      -complexityValue:
+        type: integer
+        description: |
+          The complexity value allocated for the associated field under the specified type
+        example: 1
 
   #-----------------------------------------------------
   # The Mediation List resource
