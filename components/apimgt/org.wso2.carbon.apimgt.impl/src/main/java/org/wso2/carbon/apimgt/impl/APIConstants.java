@@ -688,6 +688,10 @@ public final class APIConstants {
     public static final String AUTH_MANAGER_PASSWORD = AUTH_MANAGER + "Password";
     public static final String ENABLE_MTLS_FOR_APIS = "EnableMTLSForAPIs";
 
+    public static final String IDENTITY_PROVIDER = "IdentityProvider.";
+    public static final String IDENTITY_PROVIDER_AUTHORIZE_ENDPOINT = IDENTITY_PROVIDER + "AuthorizeEndpoint";
+    public static final String IDENTITY_PROVIDER_OIDC_LOGOUT_ENDPOINT = IDENTITY_PROVIDER + "OIDCLogoutEndpoint";
+
     public static final String SELF_SIGN_UP = "SelfSignUp.";
     public static final String SELF_SIGN_UP_ENABLED = SELF_SIGN_UP + "Enabled";
     public static final String SELF_SIGN_UP_ROLE = SELF_SIGN_UP + "SubscriberRoleName";

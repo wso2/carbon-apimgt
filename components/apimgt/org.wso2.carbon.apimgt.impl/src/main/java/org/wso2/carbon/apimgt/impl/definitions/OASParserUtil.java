@@ -485,13 +485,15 @@ public class OASParserUtil {
         readReferenceObjects(srcOperation, context);
 
         List<SecurityRequirement> srcOperationSecurity = srcOperation.getSecurity();
-        for (SecurityRequirement requirement : srcOperationSecurity) {
-            List<String> scopes = requirement.get(OAS3Parser.OPENAPI_SECURITY_SCHEMA_KEY);
-            if (scopes != null) {
-                for (String scopeKey : scopes) {
-                    for (Scope scope : allScopes) {
-                        if (scope.getKey().equals(scopeKey)) {
-                            aggregatedScopes.add(scope);
+        if (srcOperationSecurity != null) {
+            for (SecurityRequirement requirement : srcOperationSecurity) {
+                List<String> scopes = requirement.get(OAS3Parser.OPENAPI_SECURITY_SCHEMA_KEY);
+                if (scopes != null) {
+                    for (String scopeKey : scopes) {
+                        for (Scope scope : allScopes) {
+                            if (scope.getKey().equals(scopeKey)) {
+                                aggregatedScopes.add(scope);
+                            }
                         }
                     }
                 }

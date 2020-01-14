@@ -208,7 +208,15 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
         if (standardClaims != null) {
             if (customClaims != null) {
-                standardClaims.putAll(customClaims);
+                for (Map.Entry<String, String> entry : customClaims.entrySet()) {
+                    if (standardClaims.containsKey(entry.getKey())) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Skip already existing claim '" + entry.getKey() + "'");
+                        }
+                    } else {
+                        standardClaims.put(entry.getKey(), entry.getValue());
+                    }
+                }
             }
 
             JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();

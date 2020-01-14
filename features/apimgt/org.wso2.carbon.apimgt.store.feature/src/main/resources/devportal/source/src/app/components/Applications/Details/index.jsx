@@ -19,7 +19,9 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Route, Switch, Redirect, Link } from 'react-router-dom';
+import {
+    Route, Switch, Redirect, Link,
+} from 'react-router-dom';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -32,8 +34,6 @@ import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
 import TokenManager from 'AppComponents/Shared/AppsAndKeys/TokenManager';
 import ApiKeyManager from 'AppComponents/Shared/AppsAndKeys/ApiKeyManager';
 import classNames from 'classnames';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
 import Paper from '@material-ui/core/Paper';
 import Subscriptions from './Subscriptions';
 import InfoBar from './InfoBar';
@@ -261,10 +261,10 @@ class Details extends Component {
                         </Link>
                     )}
                     <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.overview' defaultMessage='Overview' />} iconText='overview' route='overview' to={pathPrefix + '/overview'} />
-                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.prod.keys' defaultMessage='Production Keys' />} route='productionkeys' to={pathPrefix + '/productionkeys/oauth'} Icon={<VpnKeyIcon />} />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.prod.keys' defaultMessage='Production Keys' />} iconText='productionkeys' route='productionkeys' to={pathPrefix + '/productionkeys/oauth'} />
                     <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.oauth.tokens' defaultMessage='OAuth2 Tokens' />} route='productionkeys/oauth' to={pathPrefix + '/productionkeys/oauth'} submenu />
                     <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.api.key' defaultMessage='Api Key' />} route='productionkeys/apikey' to={pathPrefix + '/productionkeys/apikey'} submenu />
-                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.sandbox.keys' defaultMessage='Sandbox Keys' />} route='sandboxkeys' to={pathPrefix + '/sandboxkeys/oauth'} Icon={<VpnKeyIcon />} />
+                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.sandbox.keys' defaultMessage='Sandbox Keys' />} iconText='productionkeys' route='sandboxkeys' to={pathPrefix + '/sandboxkeys/oauth'} />
                     <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.oauth.tokens' defaultMessage='OAuth2 Tokens' />} route='sandboxkeys/oauth' to={pathPrefix + '/sandboxkeys/oauth'} submenu />
                     <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.api.key' defaultMessage='Api Key' />} route='sandboxkeys/apikey' to={pathPrefix + '/sandboxkeys/apikey'} submenu />
                     <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.subscriptions' defaultMessage='Subscriptions' />} iconText='subscriptions' route='subscriptions' to={pathPrefix + '/subscriptions'} />

@@ -32,8 +32,14 @@
     } else {
         serverUrl = utils.getServerURL();
     }
+    var logoutEndpoint = serverUrl + OIDC_LOGOUT_ENDPOINT_SUFFIX;
+
+    var idpConfig = utils.getIdentityProviderConfig();
+    if (idpConfig != null) {
+        logoutEndpoint = idpConfig.getOidcLogoutEndpoint();
+    }
     var postLogoutRedirectURI = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
-    var url = serverUrl + '/oidc/logout?id_token_hint=' + idToken + '&post_logout_redirect_uri=' + postLogoutRedirectURI;
+    var url = logoutEndpoint + '?id_token_hint=' + idToken + '&post_logout_redirect_uri=' + postLogoutRedirectURI;
 
     log.debug("Redirecting to = " + url);
 

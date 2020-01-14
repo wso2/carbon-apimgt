@@ -110,12 +110,7 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
-import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
-import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
+import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
@@ -7282,6 +7277,19 @@ public final class APIUtil {
     }
 
     /**
+     * Returns the configuration of the Identity Provider. This is used for login/logout operation of API Publisher and
+     *  API Developer Portal. By default, this is not defined in the configuration hence this returns null. In that
+     *  case, local server will be used as the IDP.
+     *
+     * @return configuration of the Identity Provider from the api-manager configuration
+     * @throws APIManagementException error when retrieving the configuration
+     */
+    public static IDPConfiguration getIdentityProviderConfig() throws APIManagementException {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getIdentityProviderConfig();
+    }
+
+    /**
      * Extract the provider of the API from name
      *
      * @param apiVersion   - API Name with version
@@ -8202,8 +8210,15 @@ public final class APIUtil {
      * @param accessExp        - Value of the ACCESSED Expiry Type
      * @return - The cache object
      */
-    public static Cache getCache(final String cacheManagerName, final String cacheName, final long modifiedExp,
+    public synchronized static Cache getCache(final String cacheManagerName, final String cacheName, final long modifiedExp,
                                  final long accessExp) {
+
+        Iterable<Cache<?, ?>> availableCaches = Caching.getCacheManager(cacheManagerName).getCaches();
+        for (Cache cache:availableCaches) {
+            if(cache.getName().equalsIgnoreCase(getCacheName(cacheName))){
+                return Caching.getCacheManager(cacheManagerName).getCache(cacheName);
+            }
+        }
 
         return Caching.getCacheManager(
                 cacheManagerName).createCacheBuilder(cacheName).
@@ -8222,6 +8237,11 @@ public final class APIUtil {
      */
     public static Cache getCache(final String cacheManagerName, final String cacheName) {
         return Caching.getCacheManager(cacheManagerName).getCache(cacheName);
+    }
+
+    private static String getCacheName(String cacheName) {
+        return Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("Cache.ForceLocalCache"))
+                && !cacheName.startsWith("$__local__$.") ? "$__local__$." + cacheName : cacheName;
     }
 
     /**
