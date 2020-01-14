@@ -14,7 +14,7 @@ include("/jagg/jagg.jag");
         });
 
     } else if (request.getMethod() == 'POST') {
-        if (action == "deleteAPICategory" )  {
+        if (action == "deleteAPICategory" ) {
             mod = jagg.module("api-category");
             result = mod.deleteAPICategory(request.getParameter("uuid"));
             if (result.error) {

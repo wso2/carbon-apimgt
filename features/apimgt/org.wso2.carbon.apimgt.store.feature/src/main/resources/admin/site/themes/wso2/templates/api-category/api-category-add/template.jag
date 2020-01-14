@@ -21,7 +21,7 @@
                 category = categories.get(i);
                 break;
             }
-	    }
+        }
         var name = category.getName();
         var description = category.getDescription() == null ? "" : category.getDescription();
    	}
@@ -61,21 +61,21 @@
         </div>
 	</div>
 
-    <div class="form-group">
-		<button type="button" id="add-api-category-btn" onclick="addAPICategory()" name="save-api-category-btn" class="btn btn-primary has-spinner">
-			<span class="icon fw-stack">
-			    <i class="fw fw-save fw-stack-1x"></i>
-				<i class="fw fw-circle-outline fw-stack-2x"></i>
-			</span>
-			<%=i18n.localize("Save")%>
-		</button>
-		<button type="button" id="cancel-api-category-btn" class="btn btn-secondary">
-			<span class="icon fw-stack">
-				<i class="fw fw-cancel fw-stack-1x"></i>
-				<i class="fw fw-circle-outline fw-stack-2x"></i>
-			</span>
-			<%=i18n.localize("Cancel")%>
-		</button>
+	<div class="form-group">
+        <button type="button" id="add-api-category-btn" onclick="addAPICategory()" name="save-api-category-btn" class="btn btn-primary has-spinner">
+        	<span class="icon fw-stack">
+                <i class="fw fw-save fw-stack-1x"></i>
+                <i class="fw fw-circle-outline fw-stack-2x"></i>
+        	</span>
+        	<%=i18n.localize("Save")%>
+        </button>
+        <button type="button" id="cancel-api-category-btn" class="btn btn-secondary">
+        	<span class="icon fw-stack">
+                <i class="fw fw-cancel fw-stack-1x"></i>
+                <i class="fw fw-circle-outline fw-stack-2x"></i>
+        	</span>
+        	<%=i18n.localize("Cancel")%>
+        </button>
 	</div>
 </form>
 
