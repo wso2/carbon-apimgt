@@ -5786,6 +5786,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 while (null != (line = br.readLine())) {
                     content.append(line);
                 }
+                if(log.isDebugEnabled()) {
+                    log.debug("Recommendations received for user " + adminUsername + " is " + content.toString());
+                }
                 return content.toString();
 
             } catch (IOException e) {

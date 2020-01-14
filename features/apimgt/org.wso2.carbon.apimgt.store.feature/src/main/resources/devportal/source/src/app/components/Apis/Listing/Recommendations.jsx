@@ -155,18 +155,15 @@ class Recommendations extends React.Component {
     };
 
     componentDidMount() {
-        this.apiType = this.context.apiType;
         this.getData();
     }
 
     componentDidUpdate(prevProps) {
         const { query, selectedTag } = this.props;
         if (
-            this.apiType !== this.context.apiType ||
             query !== prevProps.query ||
             prevProps.selectedTag !== selectedTag
         ) {
-            this.apiType = this.context.apiType;
             this.getData();
         }
     }
@@ -202,7 +199,6 @@ class Recommendations extends React.Component {
     };
 
     xhrRequest = () => {
-       
         const api = new API();
         return api.getApiRecommendations();
     };

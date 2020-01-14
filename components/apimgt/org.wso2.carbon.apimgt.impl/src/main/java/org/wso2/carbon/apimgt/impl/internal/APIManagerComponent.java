@@ -25,22 +25,11 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
+import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -90,11 +79,7 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
 
 import javax.cache.Cache;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -250,6 +235,7 @@ public class APIManagerComponent {
             //Initialize product REST API token caches
             CacheProvider.createRESTAPITokenCache();
             CacheProvider.createRESTAPIInvalidTokenCache();
+            configureRecommendationEventPublisherProperties();
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {
@@ -659,6 +645,35 @@ public class APIManagerComponent {
      */
     protected void unsetOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(null);
+    }
+
+    private void configureRecommendationEventPublisherProperties() {
+        OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
+        adapterConfiguration.setName("recommendationEventPublisher");
+        adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
+        adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
+        Map<String, String> adapterParameters = new HashMap<>();
+        if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
+            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            if (configuration.getApiRecommendationEnvironment() != null) {
+                String receiverPort = System.getProperty("receiver.url.port");
+                String authPort = System.getProperty("auth.url.port");
+                adapterParameters.put(APIConstants.RECEIVER_URL, "tcp://localhost:" + receiverPort);
+                adapterParameters.put(APIConstants.AUTHENTICATOR_URL, "ssl://localhost:" + authPort);
+                adapterParameters.put(APIConstants.USERNAME, "admin");
+                adapterParameters.put(APIConstants.PASSWORD, "admin");
+                adapterParameters.put(APIConstants.PROTOCOL, "Binary");
+                adapterParameters.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
+                adapterParameters.put(APIConstants.PUBLISHING_TIME_OUT, "0");
+                adapterConfiguration.setStaticProperties(adapterParameters);
+                try {
+                    ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
+                    log.info("API Recommendation system for dev portal is activated");
+                } catch (OutputEventAdapterException e) {
+                    log.warn("Exception occurred while creating recommendationEventPublisher Adapter. Request Blocking may not work " + "properly", e);
+                }
+            }
+        }
     }
 }
 

@@ -356,22 +356,23 @@ class CommonListing extends React.Component {
                             </ApiContext.Provider>
                         )}
                     </div>
-                    { isRecommendationEnabled && user &&
+                    {isRecommendationEnabled && user &&
                         <div>
                             <div className={classes.recommendationsTitleWrapper} id='recommendationsTitleWrapper'>
                                 <Typography variant='h5' className={classes.recommendationsTitle}>
-                                    <FormattedMessage defaultMessage='Recommended APIs for you' id='Apis.Listing.Listing.apis.main' />
+                                    <FormattedMessage defaultMessage='Recommended APIs for you'
+                                        id='Apis.Listing.Listing.apis.main.recommendation' />
                                 </Typography>
                             </div>
                             {active && allTags && allTags.length > 0 && <ApiBreadcrumbs selectedTag={selectedTag} />}
                             <div className={classes.listContentWrapper}>
                                 {listType === 'grid' && (
-                                    <ApiContext.Provider value={{ apiType, isMonetizationEnabled }}>
+                                    <ApiContext.Provider value={{ isMonetizationEnabled }}>
                                         <Recommendations gridView query={search} />
                                     </ApiContext.Provider>
                                 )}
                                 {listType === 'list' && (
-                                    <ApiContext.Provider value={{ apiType, isMonetizationEnabled }}>
+                                    <ApiContext.Provider value={{ isMonetizationEnabled }}>
                                         <Recommendations gridView query={search} />
                                     </ApiContext.Provider>
                                 )}
