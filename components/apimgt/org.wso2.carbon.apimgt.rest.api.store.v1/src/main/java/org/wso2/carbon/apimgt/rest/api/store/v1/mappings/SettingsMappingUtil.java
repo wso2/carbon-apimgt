@@ -48,16 +48,22 @@ public class SettingsMappingUtil {
             settingsDTO.setApplicationSharingEnabled(APIUtil.isMultiGroupAppSharingEnabled());
             settingsDTO.setMapExistingAuthApps(APIUtil.isMapExistingAuthAppsEnabled());
             Map<String, Environment> environments = APIUtil.getEnvironments();
-            for (Map.Entry<String, Environment> entry : environments.entrySet()) {
-                Environment multipleEnvironment = environments.get(entry.getKey());
-                if (multipleEnvironment.isDefault()) {
-                    settingsDTO.apiGatewayEndpoint(multipleEnvironment.getApiGatewayEndpoint());
-                    break;
+            if (environments.size() == 0) {
+                settingsDTO.apiGatewayEndpoint("http://localhost:8280,https://localhost:8243");
+            } else {
+                for (Map.Entry<String, Environment> entry : environments.entrySet()) {
+                    Environment environment = environments.get(entry.getKey());
+                    if (environment.isDefault()) {
+                        settingsDTO.apiGatewayEndpoint(environment.getApiGatewayEndpoint());
+                        break;
+                    }
+                }
+                if (settingsDTO.getApiGatewayEndpoint() == null) {
+                    Map.Entry<String, Environment> entry = environments.entrySet().iterator().next();
+                    Environment environment = environments.get(entry.getKey());
+                    settingsDTO.apiGatewayEndpoint(environment.getApiGatewayEndpoint());
                 }
             }
-            Map.Entry<String, Environment> entry = environments.entrySet().iterator().next();
-            Environment singleEnvironment = environments.get(entry.getKey());
-            settingsDTO.apiGatewayEndpoint(singleEnvironment.getApiGatewayEndpoint());
         } else {
             settingsDTO.setScopes(GetScopeList());
             settingsDTO.setApplicationSharingEnabled(APIUtil.isMultiGroupAppSharingEnabled());
