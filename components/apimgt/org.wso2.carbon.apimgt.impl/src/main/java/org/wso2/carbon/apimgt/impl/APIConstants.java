@@ -1856,7 +1856,6 @@ public final class APIConstants {
      */
     public static final String API_CATEGORIES_CATEGORY_NAME = "apiCategories_categoryName";
     public static final String API_CATEGORY = "api-category";
-    public static final String API_CATEGORY_IMAGE_LOCATION = API_APPLICATION_DATA_LOCATION + "/category-icons";
 
     // AWS Lambda: Constants for aws lambda
     public static final String AWS_SECRET_KEY = "AWS_SECRET_KEY";

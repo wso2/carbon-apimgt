@@ -789,19 +789,9 @@ public interface APIManager {
 
     /**
      * Get open api definition for the product
-     * @param APIProduct product
+     * @param  product
      * @return openapidoc
      * @throws APIManagementException
      */
     String getAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException;
-
-    /**
-     * Get icon of the API category
-     *
-     * @param categoryName
-     * @param username
-     * @return
-     * @throws APIManagementException
-     */
-    ResourceFile getCategoryIcon(String categoryName, String username) throws APIManagementException;
 }

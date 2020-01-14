@@ -71,7 +71,13 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.*;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
+import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.LoginPostExecutor;
+import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
+import org.wso2.carbon.apimgt.api.PasswordResolver;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
@@ -9881,18 +9887,6 @@ public final class APIUtil {
             }
         }
         return categoryList;
-    }
-
-    /**
-     * Utility method for creating storage path for an category icon.
-     *
-     * @param apiCategoryName APICategory name
-     * @return Icon storage path.
-     */
-    public static String getCategoryIconPath(String apiCategoryName) {
-        String artifactPath = APIConstants.API_CATEGORY_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                apiCategoryName + RegistryConstants.PATH_SEPARATOR;
-        return artifactPath;
     }
 
     /**

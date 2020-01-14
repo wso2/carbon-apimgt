@@ -3416,8 +3416,8 @@ paths:
       security:
         - OAuth2Security: []
       x-wso2-request: |
-              GET https://localhost:9443/api/am/store/v1.0/api-categories
-      x-wso2-curl: "curl -k \"https://localhost:9443/api/am/store/v1.0/api-categories\""
+              GET https://localhost:9443/api/am/store/v1.1/api-categories
+      x-wso2-curl: "curl -k \"https://localhost:9443/api/am/store/v1.1/api-categories\""
       x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\":1,\r\n   \"list\":[\r\n      {\r\n         \"id\":\"463e2c9f-5e99-43c3-a66e-de7e0f367373\",\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n      }\r\n   ]\r\n}"
       summary: Get all API categories
       description: |

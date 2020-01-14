@@ -6394,9 +6394,9 @@ paths:
     get:
       x-scope: apim:api_view
       x-wso2-request: |
-              GET https://localhost:9443/api/am/publisher/v1.0/api-categories
+              GET https://localhost:9443/api/am/publisher/v1.1/api-categories
               Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v1.0/api-categories\""
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v1.1/api-categories\""
       x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\":1,\r\n   \"list\":[\r\n      {\r\n         \"id\":\"463e2c9f-5e99-43c3-a66e-de7e0f367373\",\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n      }\r\n   ]\r\n}"
       summary: Get all API categories
       description: |
