@@ -7779,6 +7779,21 @@ definitions:
         description: |
           The maximum complexity allowed for all queries of this API
         example: 20
+      -list:
+        type: array
+        items:
+          $ref: '#/definitions/GraphQLCustomComplexityInfo'
+
+  #-----------------------------------------------------
+  # The GraphQL Custom Complexity Info resource
+  #-----------------------------------------------------
+  GraphQLCustomComplexityInfo:
+    title: GraphQL Custom Complexity Info
+    required:
+      -type
+      -field
+      -complexityValue
+    properties:
       -type:
         type: string
         description: |
