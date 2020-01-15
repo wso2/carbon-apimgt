@@ -68,10 +68,16 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
     private static final String WSDL11_NAMESPACE = "http://schemas.xmlsoap.org/wsdl/";
     private static final int ENTITY_EXPANSION_LIMIT = 0;
     private ErrorHandler error;
+
+    // root WSDL definition
     private Definition wsdlDefinition;
+
     private static volatile WSDLFactory wsdlFactoryInstance;
+
+    // path of the extracted zip when processing a WSDL archive (.zip)
     private String wsdlArchiveExtractedPath;
 
+    // path of each WSDL is stored here when while processing a WSDL archive (.zip)
     private Map<String, Definition> pathToDefinitionMap;
 
     private static WSDLFactory getWsdlFactoryInstance() throws APIMgtWSDLException {
@@ -95,6 +101,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
 
     @Override
     public boolean init(byte[] wsdlContent) throws APIMgtWSDLException {
+        setMode(Mode.SINGLE);
         WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
 
         // switch off the verbose mode
@@ -118,6 +125,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
 
     @Override
     public boolean init(URL url) throws APIMgtWSDLException {
+        setMode(Mode.SINGLE);
         WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
 
         // switch off the verbose mode
@@ -141,6 +149,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
 
     @Override
     public boolean initPath(String path) throws APIMgtWSDLException {
+        setMode(Mode.ARCHIVE);
         pathToDefinitionMap = new HashMap<>();
         wsdlArchiveExtractedPath = path;
         WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
@@ -161,6 +170,11 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
                 }
                 Definition definition = wsdlReader.readWSDL(path, getSecuredParsedDocumentFromPath(absWSDLPath));
                 pathToDefinitionMap.put(absWSDLPath, definition);
+
+                // set the first found WSDL as wsdlDefinition variable assuming that it is the root WSDL
+                if (wsdlDefinition == null) {
+                    wsdlDefinition = definition;
+                }
             }
             if (foundWSDLFiles.isEmpty()) {
                 setError(ExceptionCodes.NO_WSDL_FOUND_IN_WSDL_ARCHIVE);
@@ -189,7 +203,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
 
     @Override
     public void updateEndpoints(API api, String environmentName, String environmentType) throws APIMgtWSDLException {
-        if (wsdlDefinition != null) {
+        if (Mode.SINGLE.equals(getMode())) {
             updateEndpointsOfSingleWSDL(api, environmentName, environmentType);
         } else {
             updateEndpointsOfWSDLArchive(api, environmentName, environmentType);
@@ -294,7 +308,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
 
     @Override
     public ByteArrayInputStream getWSDL() throws APIMgtWSDLException {
-        if (wsdlDefinition != null) {
+        if (Mode.SINGLE.equals(getMode())) {
             return getSingleWSDL();
         } else {
             return getWSDLArchive(wsdlArchiveExtractedPath);
@@ -359,7 +373,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
      * @throws APIMgtWSDLException if error occurs while reading endpoints
      */
     private Map<String, String> getEndpoints() throws APIMgtWSDLException {
-        if (wsdlDefinition != null) {
+        if (Mode.SINGLE.equals(getMode())) {
             return getEndpoints(wsdlDefinition);
         } else {
             Map<String, String> allEndpointsOfAllWSDLs = new HashMap<>();

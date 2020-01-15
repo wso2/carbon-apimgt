@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.WSDL11SOAPOperationExtractor;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDL20ProcessorImpl;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLOperationParam;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLSOAPOperation;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
@@ -76,139 +77,169 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 public class SOAPOperationBindingUtils {
     private static final Logger log = LoggerFactory.getLogger(SOAPOperationBindingUtils.class);
     /**
-     * Gets soap operations to rest resources mapping
-     * <p>
-     * Note: This method directly called from the jaggery layer
+     * Gets soap operations to rest resources mapping for a WSDL url
      *
      * @param url WSDL URL
-     * @return json string with the soap operation mapping
-     * @throws APIManagementException if an error occurs when getting soap operations from the wsdl
+     * @return swagger json string with the soap operation mapping
+     * @throws APIManagementException if an error occurs when generating swagger
      */
-    public static String getSoapOperationMapping(String url) throws APIManagementException {
+    public static String getSoapOperationMappingForUrl(String url) throws APIManagementException {
         URL wsdlUrl = APIMWSDLReader.getURL(url);
         WSDL11SOAPOperationExtractor processor = APIMWSDLReader.getWSDLSOAPOperationExtractorForUrl(wsdlUrl);
+        WSDLInfo wsdlInfo = processor.getWsdlInfo();
+        return getGeneratedSwaggerFromWSDL(wsdlInfo);
+    }
 
+    /**
+     * Gets soap operations to rest resources mapping for a wsdl byte content
+     *
+     * @param wsdlContent WSDL byte content
+     * @return swagger json string with the soap operation mapping
+     * @throws APIManagementException if an error occurs when generating swagger
+     */
+    public static String getSoapOperationMapping(byte [] wsdlContent) throws APIManagementException {
+        WSDL11SOAPOperationExtractor processor = APIMWSDLReader.getWSDLSOAPOperationExtractor(wsdlContent);
+        WSDLInfo wsdlInfo = processor.getWsdlInfo();
+        return getGeneratedSwaggerFromWSDL(wsdlInfo);
+    }
+
+    /**
+     * Gets soap operations to rest resources mapping for a wsdl archive path
+     *
+     * @param path Path of the extracted WSDL archive
+     * @return swagger json string with the soap operation mapping
+     * @throws APIManagementException if an error occurs when generating swagger
+     */
+    public static String getSoapOperationMapping(String path) throws APIManagementException {
+        WSDL11SOAPOperationExtractor processor = APIMWSDLReader.getWSDLSOAPOperationExtractor(path);
+        WSDLInfo wsdlInfo = processor.getWsdlInfo();
+        return getGeneratedSwaggerFromWSDL(wsdlInfo);
+    }
+
+    /**
+     * Generate the swagger from the WSDL info
+     *
+     * @param wsdlInfo WSDLInfo object which has parsed WSDL data
+     * @return Generated the swagger from the WSDL info
+     * @throws APIManagementException if an error occurs when generating swagger
+     */
+    private static String getGeneratedSwaggerFromWSDL(WSDLInfo wsdlInfo) throws APIManagementException {
         Set<WSDLSOAPOperation> operations;
         Map<String, ModelImpl> paramModelMap;
         String swaggerStr = SOAPToRESTConstants.EMPTY_STRING;
-        try {
-            operations = processor.getWsdlInfo().getSoapBindingOperations();
-            paramModelMap = processor.getWsdlInfo().getParameterModelMap();
-            populateSoapOperationParameters(operations);
-            Swagger swaggerDoc = new Swagger();
+        operations = wsdlInfo.getSoapBindingOperations();
+        paramModelMap = wsdlInfo.getParameterModelMap();
+        populateSoapOperationParameters(operations);
+        Swagger swaggerDoc = new Swagger();
 
-            for (WSDLSOAPOperation operation : operations) {
-
-                Path path = new Path();
-                Operation op = new Operation();
-                List<ModelImpl> inputParameterModel = operation.getInputParameterModel();
-                List<ModelImpl> outputParameterModel = operation.getOutputParameterModel();
-                if (HTTPConstants.HTTP_METHOD_GET.equals(operation.getHttpVerb())) {
-                    for (ModelImpl input : inputParameterModel) {
-                        if (input != null && operation.getName().equalsIgnoreCase(input.getName())) {
-                            Map<String, Property> properties = input.getProperties();
-                            if (properties != null) {
-                                for (String property : properties.keySet()) {
-                                    QueryParameter param = new QueryParameter();
-                                    param.setName(property);
-                                    param.setType(properties.get(property).getType());
-                                    op.addParameter(param);
-                                }
+        for (WSDLSOAPOperation operation : operations) {
+            Path path = new Path();
+            Operation op = new Operation();
+            List<ModelImpl> inputParameterModel = operation.getInputParameterModel();
+            List<ModelImpl> outputParameterModel = operation.getOutputParameterModel();
+            if (HTTPConstants.HTTP_METHOD_GET.equals(operation.getHttpVerb())) {
+                for (ModelImpl input : inputParameterModel) {
+                    if (input != null && operation.getName().equalsIgnoreCase(input.getName())) {
+                        Map<String, Property> properties = input.getProperties();
+                        if (properties != null) {
+                            for (String property : properties.keySet()) {
+                                QueryParameter param = new QueryParameter();
+                                param.setName(property);
+                                param.setType(properties.get(property).getType());
+                                op.addParameter(param);
                             }
-                            inputParameterModel.remove(input);
-                            break;
                         }
-                    }
-                } else {
-                    //adding body parameter
-                    BodyParameter param = new BodyParameter();
-                    param.setName(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME);
-                    param.setIn(APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE);
-                    param.setRequired(true);
-                    RefModel model = new RefModel();
-                    model.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + operation.getName()
-                            + SOAPToRESTConstants.Swagger.INPUT_POSTFIX);
-                    param.setSchema(model);
-                    op.addParameter(param);
-                }
-
-                //adding response
-                Response response = new Response();
-                RefProperty refProperty = new RefProperty();
-                refProperty.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + operation.getName()
-                        + SOAPToRESTConstants.Swagger.OUTPUT_POSTFIX);
-                response.setSchema(refProperty);
-                response.setDescription(SOAPToRESTConstants.EMPTY_STRING);
-                op.addResponse("default", response);
-
-                op.setOperationId(operation.getSoapBindingOpName());
-
-                //setting vendor extensions
-                Map<String, String> extensions = new HashMap<>();
-                extensions.put(SOAPToRESTConstants.Swagger.SOAP_ACTION, operation.getSoapAction());
-                extensions.put(SOAPToRESTConstants.Swagger.SOAP_OPERATION, operation.getSoapBindingOpName());
-                extensions.put(SOAPToRESTConstants.Swagger.NAMESPACE, operation.getTargetNamespace());
-                if (processor.getWsdlInfo().isHasSoap12BindingOperations()) {
-                    extensions.put(SOAPToRESTConstants.Swagger.SOAP_VERSION, SOAPToRESTConstants.SOAP_VERSION_12);
-                } else if (processor.getWsdlInfo().hasSoapBindingOperations()) {
-                    extensions.put(SOAPToRESTConstants.Swagger.SOAP_VERSION, SOAPToRESTConstants.SOAP_VERSION_11);
-                }
-                op.setVendorExtension(SOAPToRESTConstants.Swagger.WSO2_SOAP, extensions);
-
-                if (!HTTPConstants.HTTP_METHOD_GET.equals(operation.getHttpVerb())) {
-                    ModelImpl inputModel = new ModelImpl();
-                    inputModel.setName(operation.getName() + SOAPToRESTConstants.Swagger.INPUT_POSTFIX);
-                    inputModel.setType(ObjectProperty.TYPE);
-                    Map<String, Property> inputPropertyMap = new HashMap<>();
-                    for (ModelImpl input : inputParameterModel) {
-                        RefProperty inputRefProp = new RefProperty();
-                        if (input != null) {
-                            inputRefProp.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + input.getName());
-                            inputPropertyMap.put(input.getName(), inputRefProp);
-                        }
-                    }
-                    inputModel.setProperties(inputPropertyMap);
-                    swaggerDoc
-                            .addDefinition(operation.getName() + SOAPToRESTConstants.Swagger.INPUT_POSTFIX, inputModel);
-                }
-
-                ModelImpl outputModel = new ModelImpl();
-                outputModel.setName(operation.getName() + SOAPToRESTConstants.Swagger.OUTPUT_POSTFIX);
-                outputModel.setType(ObjectProperty.TYPE);
-                Map<String, Property> outputPropertyMap = new HashMap<>();
-                for (ModelImpl output : outputParameterModel) {
-                    RefProperty outputRefProp = new RefProperty();
-                    if (output != null) {
-                        outputRefProp.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + output.getName());
-                        outputPropertyMap.put(output.getName(), outputRefProp);
+                        inputParameterModel.remove(input);
+                        break;
                     }
                 }
-                outputModel.setProperties(outputPropertyMap);
-                swaggerDoc.addDefinition(operation.getName() + SOAPToRESTConstants.Swagger.OUTPUT_POSTFIX, outputModel);
-
-                path.set(operation.getHttpVerb().toLowerCase(), op);
-                swaggerDoc.path("/" + operation.getName(), path);
-                Info info = new Info();
-                info.setVersion(SOAPToRESTConstants.EMPTY_STRING);
-                info.setTitle(SOAPToRESTConstants.EMPTY_STRING);
-                swaggerDoc.info(info);
+            } else {
+                //adding body parameter
+                BodyParameter param = new BodyParameter();
+                param.setName(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME);
+                param.setIn(APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE);
+                param.setRequired(true);
+                RefModel model = new RefModel();
+                model.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + operation.getName()
+                        + SOAPToRESTConstants.Swagger.INPUT_POSTFIX);
+                param.setSchema(model);
+                op.addParameter(param);
             }
-            if (paramModelMap != null) {
-                for (String propertyName : paramModelMap.keySet()) {
-                    swaggerDoc.addDefinition(propertyName, paramModelMap.get(propertyName));
+
+            //adding response
+            Response response = new Response();
+            RefProperty refProperty = new RefProperty();
+            refProperty.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + operation.getName()
+                    + SOAPToRESTConstants.Swagger.OUTPUT_POSTFIX);
+            response.setSchema(refProperty);
+            response.setDescription(SOAPToRESTConstants.EMPTY_STRING);
+            op.addResponse("default", response);
+
+            op.setOperationId(operation.getSoapBindingOpName());
+
+            //setting vendor extensions
+            Map<String, String> extensions = new HashMap<>();
+            extensions.put(SOAPToRESTConstants.Swagger.SOAP_ACTION, operation.getSoapAction());
+            extensions.put(SOAPToRESTConstants.Swagger.SOAP_OPERATION, operation.getSoapBindingOpName());
+            extensions.put(SOAPToRESTConstants.Swagger.NAMESPACE, operation.getTargetNamespace());
+            if (wsdlInfo.isHasSoap12BindingOperations()) {
+                extensions.put(SOAPToRESTConstants.Swagger.SOAP_VERSION, SOAPToRESTConstants.SOAP_VERSION_12);
+            } else if (wsdlInfo.hasSoapBindingOperations()) {
+                extensions.put(SOAPToRESTConstants.Swagger.SOAP_VERSION, SOAPToRESTConstants.SOAP_VERSION_11);
+            }
+            op.setVendorExtension(SOAPToRESTConstants.Swagger.WSO2_SOAP, extensions);
+
+            if (!HTTPConstants.HTTP_METHOD_GET.equals(operation.getHttpVerb())) {
+                ModelImpl inputModel = new ModelImpl();
+                inputModel.setName(operation.getName() + SOAPToRESTConstants.Swagger.INPUT_POSTFIX);
+                inputModel.setType(ObjectProperty.TYPE);
+                Map<String, Property> inputPropertyMap = new HashMap<>();
+                for (ModelImpl input : inputParameterModel) {
+                    RefProperty inputRefProp = new RefProperty();
+                    if (input != null) {
+                        inputRefProp.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + input.getName());
+                        inputPropertyMap.put(input.getName(), inputRefProp);
+                    }
+                }
+                inputModel.setProperties(inputPropertyMap);
+                swaggerDoc
+                        .addDefinition(operation.getName() + SOAPToRESTConstants.Swagger.INPUT_POSTFIX, inputModel);
+            }
+
+            ModelImpl outputModel = new ModelImpl();
+            outputModel.setName(operation.getName() + SOAPToRESTConstants.Swagger.OUTPUT_POSTFIX);
+            outputModel.setType(ObjectProperty.TYPE);
+            Map<String, Property> outputPropertyMap = new HashMap<>();
+            for (ModelImpl output : outputParameterModel) {
+                RefProperty outputRefProp = new RefProperty();
+                if (output != null) {
+                    outputRefProp.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT + output.getName());
+                    outputPropertyMap.put(output.getName(), outputRefProp);
                 }
             }
-            try {
-                swaggerStr = Json.pretty(swaggerDoc);
-            } catch (Exception e) {
-                String msg = "Error occurred while deserialize swagger model.";
-                handleException(msg, e);
+            outputModel.setProperties(outputPropertyMap);
+            swaggerDoc.addDefinition(operation.getName() + SOAPToRESTConstants.Swagger.OUTPUT_POSTFIX, outputModel);
+
+            path.set(operation.getHttpVerb().toLowerCase(), op);
+            swaggerDoc.path("/" + operation.getName(), path);
+            Info info = new Info();
+            info.setVersion(SOAPToRESTConstants.EMPTY_STRING);
+            info.setTitle(SOAPToRESTConstants.EMPTY_STRING);
+            swaggerDoc.info(info);
+        }
+        if (paramModelMap != null) {
+            for (String propertyName : paramModelMap.keySet()) {
+                swaggerDoc.addDefinition(propertyName, paramModelMap.get(propertyName));
             }
-            if (log.isDebugEnabled()) {
-                log.debug(swaggerStr);
-            }
-        } catch (APIMgtWSDLException e) {
-            handleException("Error in soap to rest conversion for wsdl url: " + url, e);
+        }
+        try {
+            swaggerStr = Json.pretty(swaggerDoc);
+        } catch (Exception e) {
+            String msg = "Error occurred while deserialize swagger model.";
+            handleException(msg, e);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug(swaggerStr);
         }
         return swaggerStr;
     }

@@ -303,6 +303,34 @@ public class APIMWSDLReader {
     }
 
     /**
+     * Returns a WSDL11SOAPOperationExtractor for the WSDL byte content {@code content}. Only WSDL 1.1 is supported.
+     *
+     * @param content WSDL byte[] content
+     * @return WSDL11SOAPOperationExtractor for the provided URL
+     * @throws APIManagementException If an error occurs while determining the processor
+     */
+    public static WSDL11SOAPOperationExtractor getWSDLSOAPOperationExtractor(byte[] content)
+            throws APIManagementException {
+        WSDL11SOAPOperationExtractor processor = new WSDL11SOAPOperationExtractor();
+        processor.init(content);
+        return processor;
+    }
+
+    /**
+     * Returns a WSDL11SOAPOperationExtractor for the url {@code url}. Only WSDL 1.1 is supported.
+     *
+     * @param wsdlPath File path containing WSDL files and dependant files
+     * @return WSDL11SOAPOperationExtractor for the provided URL
+     * @throws APIManagementException If an error occurs while determining the processor
+     */
+    public static WSDL11SOAPOperationExtractor getWSDLSOAPOperationExtractor(String wsdlPath)
+            throws APIManagementException {
+        WSDL11SOAPOperationExtractor processor = new WSDL11SOAPOperationExtractor();
+        processor.initPath(wsdlPath);
+        return processor;
+    }
+
+    /**
 	 * Read the wsdl and clean the actual service endpoint instead of that set
 	 * the gateway endpoint.
 	 *
