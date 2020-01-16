@@ -15,6 +15,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
@@ -614,6 +616,70 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
     public Response apisApiIdPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "API object that needs to be added " ,required=true) APIDTO body, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.apisApiIdPut(apiId, body, ifMatch, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/query-analysis/complexity")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get the complexity related details of an API", notes = "This operation can be used to retrieve complexity related details belonging to an API by providing the id of the API. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "GraphQL Query Analysis",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Requested complexity details returned. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested API does not contain any complexity details. ", response = Void.class) })
+    public Response apisApiIdQueryAnalysisComplexityGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.apisApiIdQueryAnalysisComplexityGet(apiId, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/query-analysis/complexity")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Add complexity related details to an API", notes = "This operation can be used to add complexity details belonging to an API by providing the id of the API. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "GraphQL Query Analysis",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Created. Complexity details created successfully. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Bad Request. Complexity detail addition failed. ", response = Void.class) })
+    public Response apisApiIdQueryAnalysisComplexityPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Role-depth mapping that needs to be added " ,required=true) GraphQLQueryComplexityInfoDTO body) throws APIManagementException{
+        return delegate.apisApiIdQueryAnalysisComplexityPost(apiId, body, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/query-analysis/depth")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get the list of role-depth mappings of an API", notes = "This operation can be used to retrieve a list of role-depth mappings belonging to an API by providing the id of the API. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "GraphQL Query Analysis",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Requested role-depth mappings returned. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested API does not contain any role-depth mappings. ", response = Void.class) })
+    public Response apisApiIdQueryAnalysisDepthGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.apisApiIdQueryAnalysisDepthGet(apiId, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/query-analysis/depth")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Add a new role-depth mapping to an API", notes = "This operation can be used to add a role-depth mapping belonging to an API by providing the id of the API. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "GraphQL Query Analysis",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Created. Role-Depth Mapping created successfully. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Bad Request. Role-Depth Mapping creation failed. ", response = Void.class) })
+    public Response apisApiIdQueryAnalysisDepthPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Role-depth mapping that needs to be added " ,required=true) GraphQLQueryDepthInfoDTO body) throws APIManagementException{
+        return delegate.apisApiIdQueryAnalysisDepthPost(apiId, body, securityContext);
     }
 
     @GET
