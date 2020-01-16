@@ -60,11 +60,14 @@
              Token generation the implementation is provided in URLSafeJWTGenerator -->
         <!--<JWTGeneratorImpl>org.wso2.carbon.apimgt.keymgt.token.URLSafeJWTGenerator</JWTGeneratorImpl>-->
         <GatewayJWTGeneration>
-            <ImplClass>org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator</ImplClass>
+            <ImplClass>org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayJWTGeneratorImpl</ImplClass>
             <Configuration>
-                <ClaimURIS>
-                    <Claim></Claim>
-                </ClaimURIS>
+                <ClaimMappings>
+                    <Claim>
+                        <RemoteClaim></RemoteClaim>
+                        <LocalClaim></LocalClaim>
+                    </Claim>
+                </ClaimMappings>
             </Configuration>
         </GatewayJWTGeneration>
     </JWTConfiguration>

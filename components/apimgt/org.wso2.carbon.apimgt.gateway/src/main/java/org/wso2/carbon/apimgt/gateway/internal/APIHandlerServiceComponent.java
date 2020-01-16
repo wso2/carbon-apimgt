@@ -246,10 +246,6 @@ public class APIHandlerServiceComponent {
         return CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
     }
 
-    protected void setConfiguration(APIManagerConfiguration configuration) {
-        this.configuration = configuration;
-    }
-
     protected String getAxis2ClientXmlLocation() {
         String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" + ".clientAxis2XmlLocation");
         return axis2ClientXml;

@@ -73,7 +73,19 @@
         <!-- This parameter specifies which implementation should be used for generating the Token. For URL safe JWT
              Token generation the implementation is provided in URLSafeJWTGenerator -->
         <!--<JWTGeneratorImpl>org.wso2.carbon.apimgt.keymgt.token.URLSafeJWTGenerator</JWTGeneratorImpl>-->
-
+        <GatewayJWTGeneration>
+            <ImplClass>{{apim.jwt.gateway_generator.impl}}</ImplClass>
+            <Configuration>
+                <ClaimMappings>
+                {%- for claim in apim.jwt.gateway_generator.claims -%}
+                    <Claim>
+                    <RemoteClaim>{{claim.remote_claim}}</RemoteClaim>
+                    <LocalClaim>{{claim.local_claim}}</LocalClaim>
+                    </Claim>
+                    {% endfor %}
+                </ClaimMappings>
+            </Configuration>
+        </GatewayJWTGeneration>
     </JWTConfiguration>
 
     <!-- Primary/secondary login configuration for API Developer Portal. If user likes to keep two login attributes in a distributed setup, to login the API Developer Portal,
