@@ -40,7 +40,8 @@ public class SettingsMappingUtil {
 
     private static final Log log = LogFactory.getLog(SettingsMappingUtil.class);
 
-    public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable, Boolean moneatizationEnabled, Boolean recommendationEnabled) throws APIManagementException {
+    public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable, Boolean moneatizationEnabled,
+                                         boolean recommendationEnabled) throws APIManagementException {
         SettingsDTO settingsDTO = new SettingsDTO();
         if (isUserAvailable) {
             settingsDTO.setGrantTypes(APIUtil.getGrantTypes());
