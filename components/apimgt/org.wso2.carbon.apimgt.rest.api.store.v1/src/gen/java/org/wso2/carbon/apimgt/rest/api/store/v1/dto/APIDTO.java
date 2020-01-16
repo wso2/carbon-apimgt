@@ -55,6 +55,7 @@ public class APIDTO   {
     private String avgRating = null;
     private AdvertiseInfoDTO advertiseInfo = null;
     private Boolean isSubscriptionAvailable = null;
+    private List<String> categories = new ArrayList<>();
 
   /**
    * UUID of the api 
@@ -556,6 +557,24 @@ public class APIDTO   {
     this.isSubscriptionAvailable = isSubscriptionAvailable;
   }
 
+  /**
+   * API categories 
+   **/
+  public APIDTO categories(List<String> categories) {
+    this.categories = categories;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "API categories ")
+  @JsonProperty("categories")
+  public List<String> getCategories() {
+    return categories;
+  }
+  public void setCategories(List<String> categories) {
+    this.categories = categories;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -593,12 +612,13 @@ public class APIDTO   {
         Objects.equals(scopes, API.scopes) &&
         Objects.equals(avgRating, API.avgRating) &&
         Objects.equals(advertiseInfo, API.advertiseInfo) &&
-        Objects.equals(isSubscriptionAvailable, API.isSubscriptionAvailable);
+        Objects.equals(isSubscriptionAvailable, API.isSubscriptionAvailable) &&
+        Objects.equals(categories, API.categories);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories);
   }
 
   @Override
@@ -634,6 +654,7 @@ public class APIDTO   {
     sb.append("    avgRating: ").append(toIndentedString(avgRating)).append("\n");
     sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
     sb.append("    isSubscriptionAvailable: ").append(toIndentedString(isSubscriptionAvailable)).append("\n");
+    sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
     sb.append("}");
     return sb.toString();
   }

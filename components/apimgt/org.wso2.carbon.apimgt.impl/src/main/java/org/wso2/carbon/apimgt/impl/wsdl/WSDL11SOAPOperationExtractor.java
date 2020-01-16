@@ -123,6 +123,12 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
         return initModels();
     }
 
+    @Override
+    public boolean initPath(String pathToExtractedZip) throws APIMgtWSDLException {
+        super.initPath(pathToExtractedZip);
+        return initModels();
+    }
+
     /**
      * Initiallize SOAP to REST Operations
      *

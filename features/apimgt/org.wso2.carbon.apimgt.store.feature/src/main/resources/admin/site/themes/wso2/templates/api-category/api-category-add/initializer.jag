@@ -1,0 +1,8 @@
+<%
+jagg.initializer("api-category/api-category-add", {
+      preInitialize:function () {
+        jagg.addHeaderJS("api-category/api-category-add", "jagg", "templates/api-category/api-category-add/js/add.js");
+    }
+});
+%>
+

@@ -191,6 +191,10 @@
       {
         "Name": "apim:tenantInfo",
         "Roles": "admin"
+      },
+      {
+        "Name": "apim:admin_operations",
+        "Roles": "admin"
       }
     ]
   },

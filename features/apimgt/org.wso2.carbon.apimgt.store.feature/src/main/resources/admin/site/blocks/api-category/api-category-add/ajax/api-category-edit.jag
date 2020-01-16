@@ -1,0 +1,74 @@
+<%
+include("/jagg/jagg.jag");
+
+(function () {
+    response.contentType = "application/json; charset=UTF-8";
+    var mod, result, obj, permissionResult,
+    action = request.getParameter("action"),
+    uuid = request.getParameter("uuid"),
+    site = require("/site/conf/site.json"),
+    msg = require("/site/conf/ui-messages.jag");
+
+    if (uuid == null) {
+        uuid = -1;
+    }
+    if (jagg.getUser() == null) {
+        print({
+            error:true,
+            message:'timeout'
+        });
+    } else if (request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()) {
+        print({
+            error:true,
+            message: msg.error.csrfError
+        });
+    } else if (request.getMethod() == 'POST') {
+        if (action == "categoryAction" || action == "update" ) {
+            var categoryName =  request.getParameter("categoryName", "UTF-8");
+            var description =  request.getParameter("description", "UTF-8");
+
+            mod = jagg.module("api-category");
+
+            result = mod.addAPICategory(action, uuid, categoryName, description);
+
+            if (result.error) {
+                obj = {
+                    error:true,
+                    message:result.message
+                };
+            } else {
+                obj = {
+                    error:false,
+                    response:result.valid
+                }
+            }
+            print(obj);
+        } else if (action = "isAPICategoryNameExists") {
+            mod = jagg.module("api-category");
+            var categoryName =  request.getParameter("categoryName", "UTF-8");
+            var uuid =  request.getParameter("uuid", "UTF-8");
+
+            var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+            var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+            var username = jagg.getUser().username;
+            var tenantDomain = MultitenantUtils.getTenantDomain(username);
+            var tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+
+            result = mod.isCategoryNameExists(categoryName, uuid, tenantId);
+            if (result.error) {
+                obj = {
+                    error:true,
+                    message:msg.error.backendError(action)
+                };
+            } else {
+                obj = {
+                    error:false,
+                    exist:result.exist
+                }
+            }
+
+            print(obj);
+        }
+    }
+ }());
+%>

@@ -22,21 +22,28 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.text.SimpleDateFormat;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -279,5 +286,69 @@ public class APIAdminImpl implements APIAdmin {
      */
     public void deleteBotDataEmailList(String uuid) throws APIManagementException, SQLException {
         apiMgtDAO.deleteBotDataEmailList(uuid);
+    }
+
+    public APICategory addCategory(APICategory category, String userName) throws APIManagementException {
+        int tenantID = APIUtil.getTenantId(userName);
+        if (isCategoryNameExists(category.getName(), null, tenantID)) {
+            APIUtil.handleException("Category with name '" + category.getName() + "' already exists");
+        }
+        return apiMgtDAO.addCategory(tenantID, category);
+    }
+
+    public void updateCategory(APICategory apiCategory) throws APIManagementException {
+        apiMgtDAO.updateCategory(apiCategory);
+    }
+
+    public void deleteCategory(String categoryID, String username) throws APIManagementException {
+        APICategory category = getAPICategoryByID(categoryID);
+        int attchedAPICount = isCategoryAttached(category, username);
+        if (attchedAPICount > 0) {
+            APIUtil.handleException("Unable to delete the category. It is attached to API(s)");
+        }
+        apiMgtDAO.deleteCategory(categoryID);
+    }
+
+    public List<APICategory> getAllAPICategoriesOfTenant(int tenantId) throws APIManagementException {
+        return apiMgtDAO.getAllCategories(tenantId);
+    }
+
+    public List<APICategory> getAllAPICategoriesOfTenantForAdminListing(String username) throws APIManagementException{
+        int tenantID = APIUtil.getTenantId(username);
+        List<APICategory> categories = getAllAPICategoriesOfTenant(tenantID);
+        if (categories.size() > 0) {
+            for (APICategory category : categories) {
+                int length = isCategoryAttached(category, username);
+                category.setNumberOfAPIs(length);
+            }
+        }
+        return categories;
+    }
+
+    public boolean isCategoryNameExists(String categoryName, String uuid, int tenantID) throws APIManagementException {
+        return ApiMgtDAO.getInstance().isAPICategoryNameExists(categoryName, uuid, tenantID);
+    }
+
+    public APICategory getAPICategoryByID(String apiCategoryId) throws APIManagementException {
+        APICategory apiCategory = ApiMgtDAO.getInstance().getAPICategoryByID(apiCategoryId);
+        if (apiCategory != null) {
+            return apiCategory;
+        }else {
+            String msg = "Failed to get APICategory. API category corresponding to UUID " + apiCategoryId
+                    + " does not exist";
+            throw new APIMgtResourceNotFoundException(msg);
+        }
+    }
+
+    private int isCategoryAttached(APICategory category, String username) throws APIManagementException {
+        APIProviderImpl apiProvider = new APIProviderImpl(username);
+        //no need to add type prefix here since we need to ge the total number of category associations including both
+        //APIs and API categories
+        String searchQuery = APIConstants.CATEGORY_SEARCH_TYPE_PREFIX + "=*" + category.getName() + "*";
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        Map<String, Object> result = apiProvider
+                .searchPaginatedAPIs(searchQuery, tenantDomain, 0, Integer.MAX_VALUE, true);
+        int length = (Integer) result.get("length");
+        return length;
     }
 }

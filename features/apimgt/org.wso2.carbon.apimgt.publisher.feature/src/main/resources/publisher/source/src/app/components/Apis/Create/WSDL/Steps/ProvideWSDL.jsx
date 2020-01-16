@@ -63,7 +63,6 @@ const useStyles = makeStyles((theme) => ({
 export default function ProvideWSDL(props) {
     const { apiInputs, inputsDispatcher, onValidate } = props;
     const isFileInput = apiInputs.inputType === 'file';
-    const isArchiveInput = apiInputs.inputType === 'archive';
     const isGenerateRESTAPI = apiInputs.type === 'SOAPTOREST';
     const classes = useStyles();
     const [isError, setValidity] = useState(); // If valid value is `null` else an error object will be there
@@ -227,7 +226,7 @@ export default function ProvideWSDL(props) {
                 error={isError && isError.file}
                 onDrop={onDrop}
                 files={apiInputs.inputValue}
-                accept={isArchiveInput ? '.bz,.bz2,.gz,.rar,.tar,.zip,.7z,.wsdl' : '.wsdl'}
+                accept='.bz,.bz2,.gz,.rar,.tar,.zip,.7z,.wsdl'
             >
                 {isValidating ? (<CircularProgress />)
                     : (
@@ -268,18 +267,6 @@ export default function ProvideWSDL(props) {
             </InputAdornment>
         );
     }
-
-    const fileControlLabel = isGenerateRESTAPI ? (
-        <FormattedMessage
-            id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label.wsdl.file'
-            defaultMessage='WSDL File'
-        />
-    ) : (
-        <FormattedMessage
-            id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label.wsdl.file.archive'
-            defaultMessage='WSDL File/Archive'
-        />
-    );
 
     return (
         <>
@@ -365,10 +352,14 @@ option is only available for WSDL URL input type
                                 )}
                             />
                             <FormControlLabel
-                                value={isGenerateRESTAPI ? 'file' : 'archive'}
-                                disabled={isGenerateRESTAPI}
+                                value='file'
                                 control={<Radio color='primary' />}
-                                label={fileControlLabel}
+                                label={(
+                                    <FormattedMessage
+                                        id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label.wsdl.file.archive'
+                                        defaultMessage='WSDL File/Archive'
+                                    />
+                                )}
                             />
                         </RadioGroup>
                     </FormControl>
@@ -387,7 +378,7 @@ option is only available for WSDL URL input type
                         </Grid>
                     )}
                 <Grid item md={11}>
-                    {(isFileInput || isArchiveInput) ? renderFileUpload()
+                    {isFileInput ? renderFileUpload()
                         : (
                             <TextField
                                 autoFocus
