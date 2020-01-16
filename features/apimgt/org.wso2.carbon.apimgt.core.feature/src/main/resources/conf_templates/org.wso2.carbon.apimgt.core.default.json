@@ -15,6 +15,7 @@
   "apim.jwt.claim_dialect": "http://wso2.org/claims",
   "apim.jwt.signing_algorithm": "SHA256withRSA",
   "apim.jwt.claims_extractor_impl": "org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever",
+  "apim.jwt.gateway_generator.impl":"org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayJWTGeneratorImpl",
   "apim.cache.gateway_token.enable": true,
   "apim.cache.resource.enable": true,
   "apim.cache.km_token.enable": false,

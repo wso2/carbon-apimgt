@@ -247,6 +247,7 @@ public class APIManagerComponent {
             //Initialize product REST API token caches
             CacheProvider.createRESTAPITokenCache();
             CacheProvider.createRESTAPIInvalidTokenCache();
+            CacheProvider.createGatewayJWTTokenCache();
             configureRecommendationEventPublisherProperties();
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);

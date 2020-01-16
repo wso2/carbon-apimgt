@@ -398,7 +398,10 @@ public final class APIConstants {
     public static final String GATEWAY_JWT_GENERATOR = "GatewayJWTGeneration";
     public static final String GATEWAY_JWT_GENERATOR_IMPL = "ImplClass";
     public static final String GATEWAY_JWT_CONFIGURATION = "Configuration";
-    public static final String GATEWAY_JWT_GENERATOR_CLAIMS = "Claims";
+    public static final String GATEWAY_JWT_GENERATOR_CLAIM_MAPPING = "ClaimMappings";
+    public static final String GATEWAY_JWT_GENERATOR_CLAIM = "Claim";
+    public static final String GATEWAY_JWT_GENERATOR_LOCAL_CLAIM = "LocalClaim";
+    public static final String GATEWAY_JWT_GENERATOR_REMOTE_CLAIM = "RemoteClaim";
 
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
@@ -907,6 +910,8 @@ public final class APIConstants {
     public static final String GATEWAY_INVALID_TOKEN_CACHE_NAME = "GATEWAY_INVALID_TOKEN_CACHE";
     public static final String REST_API_TOKEN_CACHE_NAME = "RESTAPITokenCache";
     public static final String REST_API_INVALID_TOKEN_CACHE_NAME = "RESTAPIInvalidTokenCache";
+    public static final String GATEWAY_JWT_TOKEN_CACHE = "GatewayJWTTokenCache";
+
     public static final String KEY_CACHE_NAME = "keyCache";
     public static final String API_CONTEXT_CACHE = "apiContextCache";
     public static final String WORKFLOW_CACHE_NAME = "workflowCache";

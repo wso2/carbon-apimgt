@@ -22,14 +22,15 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.opensaml.xmlsec.signature.Q;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.impl.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -1088,53 +1089,70 @@ public class APIManagerConfiguration {
             }
         }
     }
-    private void setJWTConfiguration(OMElement omElement){
-        OMElement jwtConfigurationElement = omElement.getFirstChildWithName(new QName(APIConstants.JWT_CONFIGS));
-        OMElement jwtEnableElement = jwtConfigurationElement.getFirstChildWithName(new QName(APIConstants.ENABLE_JWT_GENERATION));
-        if (jwtEnableElement != null){
+
+    private void setJWTConfiguration(OMElement omElement) {
+
+        OMElement jwtEnableElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_JWT_GENERATION));
+        if (jwtEnableElement != null) {
             jwtConfigurationDto.setEnabled(Boolean.parseBoolean(jwtEnableElement.getText()));
         }
-        OMElement jwtGeneratorImplElement =
-                jwtConfigurationElement.getFirstChildWithName(new QName(APIConstants.TOKEN_GENERATOR_IMPL));
-        if (jwtGeneratorImplElement != null){
-            jwtConfigurationDto.setJwtGeneratorImplClass(jwtGeneratorImplElement.getText());
-        }
-        OMElement dialectUriElement =
-                jwtConfigurationElement.getFirstChildWithName(new QName(APIConstants.CONSUMER_DIALECT_URI));
-        if (dialectUriElement != null){
-            jwtConfigurationDto.setConsumerDialectUri(dialectUriElement.getText());
-        }
-        OMElement signatureElement =
-                jwtConfigurationElement.getFirstChildWithName(new QName(APIConstants.JWT_SIGNATURE_ALGORITHM));
-        if (signatureElement != null){
-            jwtConfigurationDto.setSignatureAlgorithm(signatureElement.getText());
-        }
-        OMElement claimRetrieverImplElement =
-                jwtConfigurationElement.getFirstChildWithName(new QName(APIConstants.CLAIMS_RETRIEVER_CLASS));
-        if (claimRetrieverImplElement != null){
-            jwtConfigurationDto.setClaimRetrieverImplClass(claimRetrieverImplElement.getText());
-        }
-        OMElement jwtHeaderElement =
-                jwtConfigurationElement.getFirstChildWithName(new QName(APIConstants.JWT_HEADER));
-        if (jwtHeaderElement != null){
-            jwtConfigurationDto.setJwtHeader(jwtHeaderElement.getText());
-        }
-        OMElement gatewayJWTConfigurationElement =
-                jwtConfigurationElement.getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR));
-        if (gatewayJWTConfigurationElement != null){
-            OMElement gatewayJWTGeneratorImplElement = gatewayJWTConfigurationElement
-                    .getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR_IMPL));
-            jwtConfigurationDto.setGatewayJWTGeneratorImpl(gatewayJWTGeneratorImplElement.getText());
-            OMElement gatewayJWTConfigurationsElement = gatewayJWTConfigurationElement
-                    .getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_CONFIGURATION));
-            if (gatewayJWTConfigurationsElement != null){
-                OMElement claimsElement = gatewayJWTConfigurationElement
-                        .getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR_CLAIMS));
-                if (claimsElement != null){
-                    Iterator claimElements = claimsElement.getChildElements();
-                    while (claimElements.hasNext()){
-                        OMElement claim = (OMElement) claimElements.next();
-                        jwtConfigurationDto.getClaimConfigurations().add(claim.getText());
+        if (jwtConfigurationDto.isEnabled()) {
+            OMElement jwtGeneratorImplElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.TOKEN_GENERATOR_IMPL));
+            if (jwtGeneratorImplElement != null) {
+                jwtConfigurationDto.setJwtGeneratorImplClass(jwtGeneratorImplElement.getText());
+            }
+            OMElement dialectUriElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.CONSUMER_DIALECT_URI));
+            if (dialectUriElement != null) {
+                jwtConfigurationDto.setConsumerDialectUri(dialectUriElement.getText());
+            }
+            OMElement signatureElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.JWT_SIGNATURE_ALGORITHM));
+            if (signatureElement != null) {
+                jwtConfigurationDto.setSignatureAlgorithm(signatureElement.getText());
+            }
+            OMElement claimRetrieverImplElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.CLAIMS_RETRIEVER_CLASS));
+            if (claimRetrieverImplElement != null) {
+                jwtConfigurationDto.setClaimRetrieverImplClass(claimRetrieverImplElement.getText());
+            }
+            OMElement jwtHeaderElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.JWT_HEADER));
+            if (jwtHeaderElement != null) {
+                jwtConfigurationDto.setJwtHeader(jwtHeaderElement.getText());
+            }
+            OMElement gatewayJWTConfigurationElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR));
+            if (gatewayJWTConfigurationElement != null) {
+                OMElement gatewayJWTGeneratorImplElement = gatewayJWTConfigurationElement
+                        .getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR_IMPL));
+                jwtConfigurationDto.setGatewayJWTGeneratorImpl(gatewayJWTGeneratorImplElement.getText());
+                OMElement gatewayJWTConfigurationsElement = gatewayJWTConfigurationElement
+                        .getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_CONFIGURATION));
+                if (gatewayJWTConfigurationsElement != null) {
+                    OMElement claimsElement = gatewayJWTConfigurationsElement
+                            .getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR_CLAIM_MAPPING));
+                    if (claimsElement != null) {
+                        Iterator claimElements =
+                                claimsElement.getChildrenWithLocalName(APIConstants.GATEWAY_JWT_GENERATOR_CLAIM);
+                        while (claimElements.hasNext()) {
+                            OMElement claim = (OMElement) claimElements.next();
+                            OMElement remoteClaimElement = claim.getFirstChildWithName(
+                                    new QName(APIConstants.GATEWAY_JWT_GENERATOR_REMOTE_CLAIM));
+                            OMElement localClaimElement = claim.getFirstChildWithName(
+                                    new QName(APIConstants.GATEWAY_JWT_GENERATOR_LOCAL_CLAIM));
+                            if (remoteClaimElement != null && localClaimElement != null) {
+                                String remoteClaim = remoteClaimElement.getText();
+                                String localClaim = localClaimElement.getText();
+                                if (StringUtils.isNotEmpty(remoteClaim) &&
+                                        StringUtils.isNotEmpty(localClaim)) {
+                                    jwtConfigurationDto.getClaimConfigurations().add(new ClaimMappingDto(remoteClaim,
+                                            localClaim));
+                                }
+                            }
+                        }
                     }
                 }
             }

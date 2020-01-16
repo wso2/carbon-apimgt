@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -487,7 +488,8 @@ public class OAuthAuthenticator implements Authenticator {
         if (value != null) {
             removeOAuthHeadersFromOutMessage = Boolean.parseBoolean(value);
         }
-        value = config.getFirstProperty(APIConstants.JWT_HEADER);
+        JWTConfigurationDto jwtConfigurationDto = config.getJwtConfigurationDto();
+        value = jwtConfigurationDto.getJwtHeader();
         if (value != null) {
             setSecurityContextHeader(value);
         }
