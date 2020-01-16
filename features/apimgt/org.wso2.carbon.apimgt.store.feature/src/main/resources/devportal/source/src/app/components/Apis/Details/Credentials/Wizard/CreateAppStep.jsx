@@ -16,12 +16,13 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import ApplicationCreateForm from 'AppComponents/Shared/AppsAndKeys/ApplicationCreateForm';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
+import cloneDeep from 'lodash.clonedeep';
 import { injectIntl } from 'react-intl';
 import ButtonPanel from './ButtonPanel';
 
@@ -37,8 +38,11 @@ const createAppStep = (props) => {
         throttlingPolicy: '',
         description: '',
         tokenType: 'JWT',
+        groups: null,
+        attributes: {},
     });
     const [isNameValid, setIsNameValid] = useState(true);
+    const [allAppAttributes, setAllAppAttributes] = useState(null);
     const [notFound, setNotFound] = useState(false);
     const {
         currentStep, setCreatedApp, incrementStep, intl, setStepStatus, stepStatuses, classes,
@@ -54,6 +58,31 @@ const createAppStep = (props) => {
         }
         setIsNameValid({ isNameValid: true });
         return Promise.resolve(true);
+    };
+
+    /**
+     * @param {object} name application attribute name
+     * @returns {void}
+     * @memberof ApplicationFormHandler
+     */
+    const isRequiredAttribute = (name) => {
+        if (allAppAttributes) {
+            for (let i = 0; i < allAppAttributes.length; i++) {
+                if (allAppAttributes[i].attribute === name) {
+                    return allAppAttributes[i].required === 'true';
+                }
+            }
+        }
+        return false;
+    };
+
+    /**
+     * @param {object} name application attribute name
+     * @returns {Object} attribute value
+     * @memberof ApplicationFormHandler
+     */
+    const getAttributeValue = (name) => {
+        return applicationRequest.attributes[name];
     };
 
     const createApplication = () => {
@@ -87,18 +116,66 @@ const createAppStep = (props) => {
             });
     };
 
+    /**
+     * @param {object} name application attribute name
+     * @returns {void}
+     * @memberof ApplicationFormHandler
+     */
+    const handleAttributesChange = (name) => (event) => {
+        const newApplicationRequest = cloneDeep(applicationRequest);
+        newApplicationRequest.attributes[name] = event.target.value;
+        setApplicationRequest(newApplicationRequest);
+    };
+
+    /**
+     * add a new group function
+     * @param {*} chip newly added group
+     * @param {*} appGroups already existing groups
+     */
+    const handleAddChip = (chip, appGroups) => {
+        const newRequest = { ...applicationRequest };
+        let values = appGroups || [];
+        values = values.slice();
+        values.push(chip);
+        newRequest.groups = values;
+        setApplicationRequest(newRequest);
+    };
+
+    /**
+     * remove a group from already existing groups function
+     * @param {*} chip selected group to be removed
+     * @param {*} index selected group index to be removed
+     * @param {*} appGroups already existing groups
+     */
+    const handleDeleteChip = (chip, index, appGroups) => {
+        const newRequest = { ...applicationRequest };
+        let values = appGroups || [];
+        values = values.filter((v) => v !== chip);
+        newRequest.groups = values;
+        setApplicationRequest(newRequest);
+    };
+
     useEffect(() => {
+        // Get all the tiers to populate the drop down.
         const api = new API();
         const promiseTiers = api.getAllTiers('application');
-        promiseTiers
+        const promisedAttributes = api.getAllApplicationAttributes();
+        Promise.all([promiseTiers, promisedAttributes])
             .then((response) => {
-                const newThrottlingPolicyList = response.body.list.map(item => item.name);
+                const [tierResponse, allAttributes] = response;
+                const throttlingPolicyListLocal = tierResponse.body.list.map((item) => item.name);
                 const newRequest = { ...applicationRequest };
-                if (newThrottlingPolicyList.length > 0) {
-                    [newRequest.throttlingPolicy] = newThrottlingPolicyList;
+                if (throttlingPolicyListLocal.length > 0) {
+                    [newRequest.throttlingPolicy] = throttlingPolicyListLocal;
                 }
-                setThrottlingPolicyList(newThrottlingPolicyList);
+                const allAppAttr = [];
+                allAttributes.body.list.map((item) => allAppAttr.push(item));
+                if (allAttributes.length > 0) {
+                    newRequest.attributes = allAppAttr.filter((item) => !item.hidden);
+                }
                 setApplicationRequest(newRequest);
+                setThrottlingPolicyList(throttlingPolicyListLocal);
+                setAllAppAttributes(allAppAttr);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -112,7 +189,7 @@ const createAppStep = (props) => {
     }, []);
 
     return (
-        <React.Fragment>
+        <>
             <Box px={2} display='flex' justifyContent='flex-start'>
                 <Grid item xs={10} md={6}>
                     <ApplicationCreateForm
@@ -121,6 +198,12 @@ const createAppStep = (props) => {
                         updateApplicationRequest={setApplicationRequest}
                         validateName={validateName}
                         isNameValid={isNameValid}
+                        allAppAttributes={allAppAttributes}
+                        handleAttributesChange={handleAttributesChange}
+                        isRequiredAttribute={isRequiredAttribute}
+                        getAttributeValue={getAttributeValue}
+                        handleDeleteChip={handleDeleteChip}
+                        handleAddChip={handleAddChip}
                     />
                 </Grid>
             </Box>
@@ -129,7 +212,7 @@ const createAppStep = (props) => {
                 currentStep={currentStep}
                 handleCurrentStep={createApplication}
             />
-        </React.Fragment>
+        </>
     );
 };
 

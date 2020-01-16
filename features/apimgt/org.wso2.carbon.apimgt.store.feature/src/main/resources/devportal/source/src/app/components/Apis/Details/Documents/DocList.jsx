@@ -151,7 +151,6 @@ function DocList(props) {
     const {
         classes, documentList, apiId, selectedDoc,
     } = props;
-    console.info(selectedDoc);
     const [selectedIndexA, changeSelectedIndexA] = useState(0);
     const [selectedIndexB, changeSelectedIndexB] = useState(0);
     const [width] = useWindowSize();

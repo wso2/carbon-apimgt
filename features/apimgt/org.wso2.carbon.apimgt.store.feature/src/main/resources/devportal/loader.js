@@ -25,8 +25,8 @@ module.exports = function (source, map) {
     let newSource = source;
     if (fs.existsSync(headerPath)) {
         newSource = fs.readFileSync(headerPath, 'utf8');
-        newSource = newSource.replace('AppOverride', this.rootContext + '/override/');
-        
+        newSource = newSource.replace(/AppOverride/g, this.rootContext + '/override/');
+
         this.addDependency(headerPath);
     }
     this.callback(null, newSource, map);

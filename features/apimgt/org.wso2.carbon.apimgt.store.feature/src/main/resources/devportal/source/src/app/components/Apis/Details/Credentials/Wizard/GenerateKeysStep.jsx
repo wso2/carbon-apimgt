@@ -17,15 +17,23 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import Grid from '@material-ui/core/Grid';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
 import KeyConfiguration from 'AppComponents/Shared/AppsAndKeys/KeyConfiguration';
 import Application from 'AppData/Application';
-import { injectIntl } from 'react-intl';
 import API from 'AppData/api';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import { makeStyles } from '@material-ui/core/styles';
 import ButtonPanel from './ButtonPanel';
 
+const useStyles = makeStyles(theme => ({
+    formControl: {
+      margin: theme.spacing(3),
+    },
+  }));
 
 const generateKeysStep = (props) => {
     const keyStates = {
@@ -34,7 +42,7 @@ const generateKeysStep = (props) => {
         CREATED: 'CREATED',
         REJECTED: 'REJECTED',
     };
-    const [tab, setTab] = useState(0);
+    const [selectedType, setSelectedType] = useState('PRODUCTION');
     const [notFound, setNotFound] = useState(false);
     const [nextActive, setNextActive] = useState(true);
     const [isUserOwner, setIsUserOwner] = useState(false);
@@ -48,7 +56,7 @@ const generateKeysStep = (props) => {
 
     const {
         currentStep, createdApp, incrementStep, setCreatedKeyType, intl,
-        setStepStatus, stepStatuses, classes,
+        setStepStatus, stepStatuses,
     } = props;
 
     /**
@@ -56,19 +64,8 @@ const generateKeysStep = (props) => {
     * @param {*} currentTab current tab
     * @memberof Wizard
     */
-    const handleTabChange = (event, currentTab) => {
-        const keyType = currentTab === 0
-            ? intl.formatMessage({
-                defaultMessage: 'PRODUCTION',
-                id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.tabchange.production',
-            })
-            : intl.formatMessage({
-                defaultMessage: 'SANDBOX',
-                id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.tabchange.sandbox',
-            });
-        const newRequest = { ...keyRequest, keyType };
-        setTab(currentTab);
-        setKeyRequest(newRequest);
+    const handleRadioChange = (event) => {
+        setSelectedType(event.target.value);
     };
 
     useEffect(() => {
@@ -79,7 +76,7 @@ const generateKeysStep = (props) => {
             .then((response) => {
                 const newRequest = { ...keyRequest };
                 newRequest.serverSupportedGrantTypes = response.obj.grantTypes;
-                newRequest.supportedGrantTypes = response.obj.grantTypes.filter(item => item !== 'authorization_code'
+                newRequest.supportedGrantTypes = response.obj.grantTypes.filter((item) => item !== 'authorization_code'
                     && item !== 'implicit');
                 setKeyRequest(newRequest);
             })
@@ -89,7 +86,7 @@ const generateKeysStep = (props) => {
                 }
                 const { status } = error;
                 if (status === 404) {
-                    this.setState({ notFound: true });
+                    setNotFound({ notFound: true });
                 }
             });
     }, []);
@@ -119,56 +116,52 @@ const generateKeysStep = (props) => {
             }
         });
     };
+    const classes = useStyles();
 
     return (
-        <React.Fragment>
-            <Tabs
-                value={tab}
-                onChange={handleTabChange}
-                variant='fullWidth'
-                indicatorColor='secondary'
-                textColor='secondary'
-            >
-                <Tab label={intl.formatMessage({
-                    defaultMessage: 'PRODUCTION',
-                    id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.production',
-                })}
+        <>
+            <div className={classes.keyConfigWrapper}>
+                <FormControl component='fieldset' className={classes.formControl}>
+                    <FormLabel component='legend'>
+                        <FormattedMessage
+                            defaultMessage='Key Type'
+                            id='Apis.Details.Credentials.Wizard.GenerateKeysStep.keyType'
+                        />
+                    </FormLabel>
+                    <RadioGroup value={selectedType} onChange={handleRadioChange}>
+                        <FormControlLabel
+                            value='PRODUCTION'
+                            control={<Radio />}
+                            label={intl.formatMessage({
+                                defaultMessage: 'PRODUCTION',
+                                id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.production',
+                            })}
+                        />
+                        <FormControlLabel
+                            value='SANDBOX'
+                            control={<Radio />}
+                            label={intl.formatMessage({
+                                defaultMessage: 'SANDBOX',
+                                id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.sandbox',
+                            })}
+                        />
+                    </RadioGroup>
+                </FormControl>
+                <KeyConfiguration
+                    updateKeyRequest={setKeyRequest}
+                    keyRequest={keyRequest}
+                    keyType={selectedType}
+                    isUserOwner={isUserOwner}
+                    setGenerateEnabled={setNextActive}
                 />
-                <Tab label={intl.formatMessage({
-                    defaultMessage: 'SANDBOX',
-                    id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.sandbox',
-                })}
+                <ButtonPanel
+                    classes={classes}
+                    currentStep={currentStep}
+                    handleCurrentStep={generateKeys}
+                    nextActive={nextActive}
                 />
-            </Tabs>
-            {tab === 0 && (
-                <Grid md={10}>
-                    <KeyConfiguration
-                        updateKeyRequest={setKeyRequest}
-                        keyRequest={keyRequest}
-                        keyType='PRODUCTION'
-                        isUserOwner={isUserOwner}
-                        setGenerateEnabled={setNextActive}
-                    />
-                </Grid>
-            )}
-            {tab === 1 && (
-                <div>
-                    <KeyConfiguration
-                        updateKeyRequest={setKeyRequest}
-                        keyRequest={keyRequest}
-                        keyType='SANDBOX'
-                        isUserOwner={isUserOwner}
-                        setGenerateEnabled={setNextActive}
-                    />
-                </div>
-            )}
-            <ButtonPanel
-                classes={classes}
-                currentStep={currentStep}
-                handleCurrentStep={generateKeys}
-                nextActive={nextActive}
-            />
-        </React.Fragment>
+            </div>
+        </>
     );
 };
 
