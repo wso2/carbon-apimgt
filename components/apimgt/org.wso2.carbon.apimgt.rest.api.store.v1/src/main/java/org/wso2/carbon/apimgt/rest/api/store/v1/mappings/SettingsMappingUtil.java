@@ -48,7 +48,7 @@ public class SettingsMappingUtil {
             settingsDTO.setApplicationSharingEnabled(APIUtil.isMultiGroupAppSharingEnabled());
             settingsDTO.setMapExistingAuthApps(APIUtil.isMapExistingAuthAppsEnabled());
             Map<String, Environment> environments = APIUtil.getEnvironments();
-            if (environments.size() == 0) {
+            if (environments.isEmpty()) {
                 settingsDTO.apiGatewayEndpoint("http://localhost:8280,https://localhost:8243");
             } else {
                 for (Map.Entry<String, Environment> entry : environments.entrySet()) {
