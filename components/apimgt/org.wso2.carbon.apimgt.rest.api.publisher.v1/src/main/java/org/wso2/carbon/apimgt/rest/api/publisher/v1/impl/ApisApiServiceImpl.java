@@ -93,6 +93,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
@@ -125,35 +126,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.Map;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
@@ -758,6 +730,60 @@ public class ApisApiServiceImpl implements ApisApiService {
             String errorMessage = "Error while parsing endpoint config of API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
+        return null;
+    }
+
+    /**
+     * Get complexity details of a given API
+     *
+     * @param apiId apiId
+     * @param messageContext message context
+     * @return Response with complexity details of the GraphQL API
+     * @throws APIManagementException
+     */
+    @Override
+    public Response apisApiIdQueryAnalysisComplexityGet(String apiId, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    /**
+     * Add complexity details to an API
+     *
+     * @param apiId apiId
+     * @param body GraphQLQueryComplexityInfo DTO as request body
+     * @param messageContext message context
+     * @return created GraphQLQueryComplexityInfo DTO as response
+     * @throws APIManagementException
+     */
+    @Override
+    public Response apisApiIdQueryAnalysisComplexityPost(String apiId, GraphQLQueryComplexityInfoDTO body, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    /**
+     * Get role-depth mappings of a given API
+     *
+     * @param apiId apiId
+     * @param messageContext message context
+     * @return Response with role-depth mappings of the GraphQL API
+     * @throws APIManagementException
+     */
+    @Override
+    public Response apisApiIdQueryAnalysisDepthGet(String apiId, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    /**
+     * Add a given role-depth mapping to an API
+     *
+     * @param apiId apiId
+     * @param body GraphQLQueryDepthInfo DTO as request body
+     * @param messageContext message context
+     * @return created GraphQLQueryDepthInfo DTO as response
+     * @throws APIManagementException
+     */
+    @Override
+    public Response apisApiIdQueryAnalysisDepthPost(String apiId, GraphQLQueryDepthInfoDTO body, MessageContext messageContext) throws APIManagementException {
         return null;
     }
 
