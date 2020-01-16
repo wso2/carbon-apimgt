@@ -352,11 +352,6 @@
             <artifactId>graphQL</artifactId>
             <version>${graphql.java.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.analytics-common</groupId>
-            <artifactId>org.wso2.carbon.event.output.adapter.http</artifactId>
-            <version>${carbon.analytics.common.version}</version>
-        </dependency>
     </dependencies>
     <build>
         <plugins>

@@ -2802,7 +2802,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         final boolean isApiProduct = apiTypeWrapper.isAPIProduct();
         String state;
         String apiContext;
-        
+
         if (isApiProduct) {
             product = apiTypeWrapper.getApiProduct();
             state = product.getState();
@@ -5752,7 +5752,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     public String getApiRecommendations(String userName) {
-        if (userName!=null && requestedTenant!=null && recommendationEnvironment!=null) {
+        if (userName != null && requestedTenant != null && recommendationEnvironment != null) {
             String recommendationEndpointURL = recommendationEnvironment.getRecommendationEndpointURL();
             String adminUsername = recommendationEnvironment.getUsername();
             String adminPassword = recommendationEnvironment.getPassword();
@@ -5779,13 +5779,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 while (null != (line = br.readLine())) {
                     content.append(line);
                 }
-                if(log.isDebugEnabled()) {
+                if (log.isDebugEnabled()) {
                     log.debug("Recommendations received for user " + adminUsername + " is " + content.toString());
                 }
                 return content.toString();
 
             } catch (IOException e) {
-                log.error("Connection failure for the recommendation engine",e);
+                log.error("Connection failure for the recommendation engine", e);
                 return null;
             }
         }

@@ -107,7 +107,8 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         }
     }
 
-    @Override public void publishAPIdetails(API api, String tenantDomain) throws IOException {
+    @Override
+    public void publishAPIdetails(API api, String tenantDomain) throws IOException {
         String apiName = api.getId().getApiName();
         String apiStatus = api.getStatus();
         String apiId = api.getUUID();
@@ -152,7 +153,8 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         }
     }
 
-    @Override public void publishNewApplication(Application application, String userId, int applicationId) {
+    @Override
+    public void publishNewApplication(Application application, String userId, int applicationId) {
         String appName = application.getName();
         String appDescription = application.getDescription();
 
@@ -168,7 +170,8 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         publishEvent(payload.toString());
     }
 
-    @Override public void publishUpdatedApplication(Application application) {
+    @Override
+    public void publishUpdatedApplication(Application application) {
         String appName = application.getName();
         String appDescription = application.getDescription();
         int appId = application.getId();
@@ -180,11 +183,12 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
         JSONObject payload = new JSONObject();
         payload.put(APIConstants.ACTION_STRING, APIConstants.UPDATED_APPLICATION);
-        payload.put(APIConstants.PAYLOAD_STRING,obj);
+        payload.put(APIConstants.PAYLOAD_STRING, obj);
         publishEvent(payload.toString());
     }
 
-    @Override public void publishedDeletedApplication(int appId) {
+    @Override
+    public void publishedDeletedApplication(int appId) {
         JSONObject obj = new JSONObject();
         obj.put("appid", appId);
 
@@ -194,7 +198,8 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         publishEvent(payload.toString());
     }
 
-    @Override public void publishClickedApi(ApiTypeWrapper api, String userName) {
+    @Override
+    public void publishClickedApi(ApiTypeWrapper api, String userName) {
         String apiName = api.getName();
         JSONObject obj = new JSONObject();
         obj.put("user", userName);
@@ -206,7 +211,8 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         publishEvent(payload.toString());
     }
 
-    @Override public void publishSearchQueries(String query, String username) {
+    @Override
+    public void publishSearchQueries(String query, String username) {
         query = query.split("&", 2)[0];
         JSONObject obj = new JSONObject();
         obj.put("user", username);
@@ -220,16 +226,16 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     }
 
     public void publishEvent(String payload) {
-        Object[] objects = new Object[] { payload };
+        Object[] objects = new Object[]{payload};
         Event event = new Event(streamID, System.currentTimeMillis(), null, null, objects);
         try {
             startTenantFlow();
             ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
                     .publish("recommendationEventPublisher", Collections.EMPTY_MAP, event);
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("Event Published for recommendation server with payload " + payload);
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("Exception occurred when publishing events to recommendation engine", e);
         } finally {
             if (tenantFlowStarted) {
