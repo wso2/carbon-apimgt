@@ -1865,7 +1865,19 @@ public final class APIConstants {
      *
      * */
     public static final String API_RECOMMENDATION = "APIRecommendations";
-    public static final String RECOMMENDATION_ENDPOINT = API_RECOMMENDATION + ".url";
+    public static final String RECOMMENDATION_ENDPOINT = API_RECOMMENDATION + ".recommendationEndpoint";
+    public static final String EVENT_PUBLISHING_ENDPOINT = API_RECOMMENDATION + ".eventPublishingEndpoint";
     public static final String RECOMMENDATION_USERNAME = API_RECOMMENDATION + ".username";
     public static final String RECOMMENDATION_PASSWORD = API_RECOMMENDATION + ".password";
+    public static final String ADD_API = "ADD_API";
+    public static final String DELETE_API = "DELETE_API";
+    public static final String ADD_NEW_APPLICATION = "ADD_NEW_APPLICATION";
+    public static final String UPDATED_APPLICATION = "UPDATED_APPLICATION";
+    public static final String DELETE_APPLICATION = "DELETE_APPLICATION";
+    public static final String ADD_USER_CLICKED_API = "ADD_USER_CLICKED_API";
+    public static final String ADD_USER_SEARCHED_QUERY = "ADD_USER_SEARCHED_QUERY";
+    public static final String PUBLISHED_STATUS = "PUBLISHED";
+    public static final String DELETED_STATUS = "DELETED";
+    public static final String ACTION_STRING = "action";
+    public static final String PAYLOAD_STRING = "payload";
 }

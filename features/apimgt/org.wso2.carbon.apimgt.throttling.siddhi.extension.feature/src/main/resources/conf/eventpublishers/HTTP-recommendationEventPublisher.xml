@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eventPublisher name="HTTP-recommendationEventPublisher"
+  processing="enable" statistics="disable" trace="disable" xmlns="http://wso2.org/carbon/eventpublisher">
+  <from streamName="org.wso2.apimgt.recommendation.event.stream" version="1.0.0"/>
+  <mapping customMapping="disable" type="json"/>
+  <to eventAdapterType="http">
+    <property encrypted="true" name="http.password">eyJjIjoiUmhPZC83SzEvNnV1VUEwTkVPalFjZTdmZ0VqWmE1aVcxRlY2QVRBNC9FcU56dEs5UE1rcHRwcWk2N1hmMTgrNDhLenpCMksrUjVrblZnNVdFbGFFVW5RVStEOWdNekVER2RxWlRidlIvU0tjTkFTVlA3UFYwMHVlcDI3RWYrQ0dEZXJvQmhCcGpJRzBIOGNnaHRsS1BNdWpVVTRyTThMaXJuUTZXU0ZzRVpTTTUzQjlCVnZxMVNUNXFnQnhTRlNOamVJeStwWUhkeCtjSGx1K0hIK0dnYzB0SGxySnpwQ3NRUGVKNXBWclJTSFpZR1VCa0ZHYWhQRW11TjkwZFllWDZoTUUwZHFDUXBXSVVKRHYvczFoRWFpVDliM2RxTTlVWittaU9iSlhmTExuTkJsQ0pyU1UxSUlCNkJqbU5yc0doTnByV3d5ajN1Y0l2a1VBZEJkQk53XHUwMDNkXHUwMDNkIiwidCI6IlJTQS9FQ0IvT0FFUHdpdGhTSEExYW5kTUdGMVBhZGRpbmciLCJ0cCI6IkY0RkEzMDUyQzlFOTJCMzI4MzQyN0NCMjJCMkNBMzI3QUY1QjI3NEYiLCJ0cGQiOiJTSEEtMSJ9</property>
+    <property name="http.client.method">HttpPost</property>
+    <property name="http.url">https://localhost:8082/events</property>
+    <property name="http.username">admin</property>
+  </to>
+</eventPublisher>

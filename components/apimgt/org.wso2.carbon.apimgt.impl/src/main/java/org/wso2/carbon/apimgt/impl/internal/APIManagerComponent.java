@@ -29,6 +29,7 @@ import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
+import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -654,23 +655,27 @@ public class APIManagerComponent {
         adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
         Map<String, String> adapterParameters = new HashMap<>();
         if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
-            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
             if (configuration.getApiRecommendationEnvironment() != null) {
-                String receiverPort = System.getProperty("receiver.url.port");
-                String authPort = System.getProperty("auth.url.port");
-                adapterParameters.put(APIConstants.RECEIVER_URL, "tcp://localhost:" + receiverPort);
-                adapterParameters.put(APIConstants.AUTHENTICATOR_URL, "ssl://localhost:" + authPort);
-                adapterParameters.put(APIConstants.USERNAME, "admin");
-                adapterParameters.put(APIConstants.PASSWORD, "admin");
-                adapterParameters.put(APIConstants.PROTOCOL, "Binary");
-                adapterParameters.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
-                adapterParameters.put(APIConstants.PUBLISHING_TIME_OUT, "0");
-                adapterConfiguration.setStaticProperties(adapterParameters);
                 try {
+                    String receiverPort = System.getProperty(configuration.RECEIVER_URL_PORT);
+                    String authPort = System.getProperty(configuration.AUTH_URL_PORT);
+                    adapterParameters.put(APIConstants.RECEIVER_URL, "tcp://localhost:" + receiverPort);
+                    adapterParameters.put(APIConstants.AUTHENTICATOR_URL, "ssl://localhost:" + authPort);
+                    adapterParameters.put(APIConstants.USERNAME, APIUtil.getAdminUsername());
+                    adapterParameters.put(APIConstants.PASSWORD, APIUtil.getAdminPassword());
+                    adapterParameters.put(APIConstants.PROTOCOL, "Binary");
+                    adapterParameters.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
+                    adapterParameters.put(APIConstants.PUBLISHING_TIME_OUT, "0");
+                    adapterConfiguration.setStaticProperties(adapterParameters);
                     ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
                     log.info("API Recommendation system for dev portal is activated");
                 } catch (OutputEventAdapterException e) {
-                    log.warn("Exception occurred while creating recommendationEventPublisher Adapter. Request Blocking may not work " + "properly", e);
+                    log.error("Exception occurred while creating recommendationEventPublisher Adapter." +
+                            " Request Blocking may not work properly", e);
+                } catch (APIMgtInternalException e) {
+                    log.error("Exception occurred while reading the admin username and password", e);
                 }
             }
         }

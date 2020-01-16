@@ -3379,8 +3379,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(recommendationEnvironment,
-                    application, userId, applicationId);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application, userId, applicationId);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -3534,8 +3533,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(recommendationEnvironment,
-                    application);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -3711,8 +3709,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(recommendationEnvironment,
-                    applicationId);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(applicationId);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -5731,8 +5728,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public void publishSearchQuery(String query, String username) {
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(recommendationEnvironment, query,
-                    username);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(query, username);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -5740,8 +5736,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public void publishClickedAPI(ApiTypeWrapper clickedApi, String username) {
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(recommendationEnvironment, clickedApi,
-                    username);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(clickedApi, username);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -5757,18 +5752,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     public String getApiRecommendations(String userName) {
-
         if (userName!=null && requestedTenant!=null && recommendationEnvironment!=null) {
-            String URL = recommendationEnvironment.getUrl();
+            String recommendationEndpointURL = recommendationEnvironment.getRecommendationEndpointURL();
             String adminUsername = recommendationEnvironment.getUsername();
             String adminPassword = recommendationEnvironment.getPassword();
             try {
-                URL serverURL = new URL(URL);
+                URL serverURL = new URL(recommendationEndpointURL);
                 int serverPort = serverURL.getPort();
                 String serverProtocol = serverURL.getProtocol();
-                String url = URL + "recommendations";
 
-                HttpGet method = new HttpGet(url);
+                HttpGet method = new HttpGet(recommendationEndpointURL);
                 HttpClient httpClient = APIUtil.getHttpClient(serverPort, serverProtocol);
 
                 byte[] credentials = org.apache.commons.codec.binary.Base64
@@ -5792,12 +5785,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 return content.toString();
 
             } catch (IOException e) {
-                log.error("Connection failure for the recommendation engine"+e);
+                log.error("Connection failure for the recommendation engine",e);
                 return null;
             }
         }
         return null;
-
     }
 
 }

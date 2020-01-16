@@ -20,12 +20,25 @@ package org.wso2.carbon.apimgt.impl.recommendationmgt;
 
 public class RecommendationEnvironment {
 
-    private String url;
+    private String recommendationEndpointURL;
+    private String eventPublishingEndpointURL;
     private String username;
     private String password;
 
-    public void setUrl(String url) {
-        this.url = url;
+    public String getRecommendationEndpointURL() {
+        return recommendationEndpointURL;
+    }
+
+    public void setRecommendationEndpointURL(String recommendationEndpointURL) {
+        this.recommendationEndpointURL = recommendationEndpointURL;
+    }
+
+    public String getEventPublishingEndpointURL() {
+        return eventPublishingEndpointURL;
+    }
+
+    public void setEventPublishingEndpointURL(String eventPublishingEndpointURL) {
+        this.eventPublishingEndpointURL = eventPublishingEndpointURL;
     }
 
     public void setUsername(String username) {
@@ -34,10 +47,6 @@ public class RecommendationEnvironment {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getUrl() {
-        return url;
     }
 
     public String getUsername() {

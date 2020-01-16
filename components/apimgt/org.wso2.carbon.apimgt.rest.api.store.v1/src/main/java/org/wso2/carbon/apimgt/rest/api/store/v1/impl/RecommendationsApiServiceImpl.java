@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
@@ -27,13 +28,12 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.rest.api.store.v1.*;
-import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.rest.api.store.v1.RecommendationsApiService;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
-import javax.ws.rs.core.Response;
 
 public class RecommendationsApiServiceImpl implements RecommendationsApiService {
 
@@ -74,18 +74,19 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
                             recommendedApis.add(apiDetails);
                         }
                     } catch (APIManagementException e) {
-                        log.error("Error occurred when retrieving recommendations through the rest api: " + e);
+                        log.error("Error occurred when retrieving api details for the recommended API", e);
                     }
                 }
                 int count = recommendedApis.size();
                 responseObj.put("count", count);
                 responseObj.put("list", recommendedApis);
                 responseStringObj = String.valueOf(responseObj);
+                return Response.ok().entity(responseStringObj).build();
             }
         } catch (Exception e) {
-            log.error("Error occurred when retrieving recommendations through the rest api: " + e);
+            log.error("Error occurred when retrieving recommendations through the rest api: ", e);
         }
         //todo handle response code handling
-        return Response.ok().entity(responseStringObj).build();
+        return null;
     }
 }

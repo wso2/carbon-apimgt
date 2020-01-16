@@ -498,13 +498,13 @@ public class APIManagerConfiguration {
     }
 
     public RecommendationEnvironment getApiRecommendationEnvironment() {
-        String url = getFirstProperty(APIConstants.RECOMMENDATION_ENDPOINT);
-
-        if (url != null) {
+        String recommendationEndpointURL = getFirstProperty(APIConstants.RECOMMENDATION_ENDPOINT);
+        String eventPublishingEndpointURL = getFirstProperty(APIConstants.EVENT_PUBLISHING_ENDPOINT);
+        if (recommendationEndpointURL != null || eventPublishingEndpointURL !=null ) {
             String username = getFirstProperty(APIConstants.RECOMMENDATION_USERNAME);
             String password = getFirstProperty(APIConstants.RECOMMENDATION_PASSWORD);
-
-            recommendationEnvironment.setUrl(url);
+            recommendationEnvironment.setRecommendationEndpointURL(recommendationEndpointURL);
+            recommendationEnvironment.setEventPublishingEndpointURL(eventPublishingEndpointURL);
             recommendationEnvironment.setUsername(username);
             recommendationEnvironment.setPassword(password);
         } else {

@@ -144,14 +144,6 @@ const styles = (theme) => ({
         marginLeft: 23,
         cursor: 'pointer',
     },
-    recommendationsTitle: {
-        marginLeft: theme.spacing(2),
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
-    },
-    recommendationsTitleWrapper: {
-        flexGrow: 1,
-    },
     recommendationsBar: {
         height: 60,
         background: theme.custom.infoBar.background,
@@ -358,21 +350,15 @@ class CommonListing extends React.Component {
                     </div>
                     {isRecommendationEnabled && user &&
                         <div>
-                            <div className={classes.recommendationsTitleWrapper} id='recommendationsTitleWrapper'>
-                                <Typography variant='h5' className={classes.recommendationsTitle}>
-                                    <FormattedMessage defaultMessage='Recommended APIs for you'
-                                        id='Apis.Listing.Listing.apis.main.recommendation' />
-                                </Typography>
-                            </div>
                             {active && allTags && allTags.length > 0 && <ApiBreadcrumbs selectedTag={selectedTag} />}
                             <div className={classes.listContentWrapper}>
                                 {listType === 'grid' && (
-                                    <ApiContext.Provider value={{ isMonetizationEnabled }}>
+                                    <ApiContext.Provider value={{ isRecommendationEnabled }}>
                                         <Recommendations gridView query={search} />
                                     </ApiContext.Provider>
                                 )}
                                 {listType === 'list' && (
-                                    <ApiContext.Provider value={{ isMonetizationEnabled }}>
+                                    <ApiContext.Provider value={{ isRecommendationEnabled }}>
                                         <Recommendations gridView query={search} />
                                     </ApiContext.Provider>
                                 )}
