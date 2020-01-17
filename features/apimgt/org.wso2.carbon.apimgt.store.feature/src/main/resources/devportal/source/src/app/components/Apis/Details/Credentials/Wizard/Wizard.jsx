@@ -24,11 +24,23 @@ import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import { withStyles } from '@material-ui/core/styles';
 import CreateAppStep from './CreateAppStep';
 import SubscribeToAppStep from './SubscribeToAppStep';
 import GenerateKeysStep from './GenerateKeysStep';
 import GenerateAccessTokenStep from './GenerateAccessTokenStep';
 import CopyAccessTokenStep from './CopyAccessTokenStep';
+
+const styles = (theme) => ({
+    paper: {
+        marginLeft: theme.spacing(3),
+    },
+    titleSub: {
+        marginLeft: theme.spacing(3),
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
+    },
+});
 
 const stepComponents = [CreateAppStep, SubscribeToAppStep, GenerateKeysStep,
     GenerateAccessTokenStep, CopyAccessTokenStep];
@@ -139,64 +151,60 @@ class Wizard extends Component {
         const { currentStep, stepStatus } = this.state;
         const CurrentStepComponent = stepComponents[currentStep];
         return (
-            <Box my={2} mx='auto' display='flex' justifyContent='center'>
-                <Grid item pb={1} xs={12} md={11}>
-                    <Paper elevation={0}>
-                        <Box pt={2} px={3} display='flex' >
-                            <Typography variant='h4'>
-                                <FormattedMessage
-                                    id={'Apis.Details.Credentials.Credentials'
-                             + '.api.credentials.generate'}
-                                    defaultMessage='Subscription &amp; Key Generation Wizard'
+            <>
+                <Typography variant='h4' className={classes.titleSub}>
+                    <FormattedMessage
+                        id={'Apis.Details.Credentials.Credentials'
+                    + '.api.credentials.generate'}
+                        defaultMessage='Subscription &amp; Key Generation Wizard'
+                    />
+                </Typography>
+                <Paper elevation={0} className={classes.paper}>
+                    <Box py={1} mx='auto' display='flex' >
+                        <Grid item xs={12} md={12}>
+                            <Stepper activeStep={currentStep}>
+                                {this.steps.map((label) => {
+                                    return (
+                                        <Step key={label}>
+                                            <StepLabel>{label}</StepLabel>
+                                        </Step>
+                                    );
+                                })}
+                            </Stepper>
+                        </Grid>
+                    </Box>
+                    <Box py={1} mx='auto' display='block' >
+                        {stepStatus === this.stepStatuses.PROCEED && (
+                            <>
+                                <CurrentStepComponent
+                                    {...this.state}
+                                    incrementStep={this.handleNext}
+                                    setStepStatus={this.setStepStatus}
+                                    stepStatuses={this.stepStatuses}
+                                    classes={classes}
+                                    setCreatedApp={this.setCreatedApp}
+                                    setCreatedKeyType={this.setCreatedKeyType}
+                                    setCreatedToken={this.setCreatedToken}
+                                    handleReset={this.handleReset}
                                 />
-                            </Typography>
-                        </Box>
-                        <Box py={1} mx='auto' display='flex' >
-                            <Grid item xs={12} md={12}>
-                                <Stepper activeStep={currentStep}>
-                                    {this.steps.map((label) => {
-                                        return (
-                                            <Step key={label}>
-                                                <StepLabel>{label}</StepLabel>
-                                            </Step>
-                                        );
-                                    })}
-                                </Stepper>
-                            </Grid>
-                        </Box>
-                        <Box py={1} mx='auto' display='block' >
-                            {stepStatus === this.stepStatuses.PROCEED && (
-                                <React.Fragment>
-                                    <CurrentStepComponent
-                                        {...this.state}
-                                        incrementStep={this.handleNext}
-                                        setStepStatus={this.setStepStatus}
-                                        stepStatuses={this.stepStatuses}
-                                        classes={classes}
-                                        setCreatedApp={this.setCreatedApp}
-                                        setCreatedKeyType={this.setCreatedKeyType}
-                                        setCreatedToken={this.setCreatedToken}
-                                        handleReset={this.handleReset}
+                            </>
+                        )}
+                    </Box>
+                    <Box py={1} mb={1} mx='auto' display='flex' >
+                        {stepStatus === this.stepStatuses.BLOCKED && (
+                            <Box pt={2} px={3} display='flex' >
+                                <Typography variant='h5'>
+                                    <FormattedMessage
+                                        id={'Apis.Details.Credentials.Wizard.Wizard.approval.request.'
+                                                + 'for.this.step.has'}
+                                        defaultMessage='A request to register this step has been sent.'
                                     />
-                                </React.Fragment>
-                            )}
-                        </Box>
-                        <Box py={1} mb={1} mx='auto' display='flex' >
-                            {stepStatus === this.stepStatuses.BLOCKED && (
-                                <Box pt={2} px={3} display='flex' >
-                                    <Typography variant='h5'>
-                                        <FormattedMessage
-                                            id={'Apis.Details.Credentials.Wizard.Wizard.approval.request.'
-                                                    + 'for.this.step.has'}
-                                            defaultMessage='A request to register this step has been sent.'
-                                        />
-                                    </Typography>
-                                </Box>
-                            )}
-                        </Box>
-                    </Paper>
-                </Grid>
-            </Box>
+                                </Typography>
+                            </Box>
+                        )}
+                    </Box>
+                </Paper>
+            </>
         );
     }
 }
@@ -216,4 +224,4 @@ Wizard.propTypes = {
     throttlingPolicyList: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
-export default injectIntl(Wizard);
+export default injectIntl(withStyles(styles)(Wizard));
