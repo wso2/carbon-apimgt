@@ -86,7 +86,6 @@ const AppThemes = {
                     { prime: 0x2196f3ff, sub: 0xaeea00ff },
                     { prime: 0xff9700ff, sub: 0xffeb3cff },
                     { prime: 0xff9700ff, sub: 0xfe5722ff },
-                    { prime: 0xffffffff, sub: 0xffffffff },
                 ],
                 document: {
                     icon: 'library_books',

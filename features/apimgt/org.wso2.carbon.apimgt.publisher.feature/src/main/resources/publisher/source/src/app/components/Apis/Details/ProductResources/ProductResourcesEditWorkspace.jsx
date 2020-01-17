@@ -268,17 +268,17 @@ function ProductResourcesEdit(props) {
             });
     };
     const handleSearchTextChange = (event) => {
-        console.info(event);
         const apiPromise = filterAPIs(event.target.value);
         apiPromise
             .then((response) => {
                 const {
                     body: { list },
                 } = response;
-                if (list.length > 0) {
+                const filteredList = list.filter((theApi) => theApi.status !== 'PROTOTYPED');
+                if (filteredList.length > 0) {
                     setSelectedApi(list[0]);
                 }
-                setAllApis(list);
+                setAllApis(filteredList);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') console.log(error);
@@ -412,10 +412,12 @@ function ProductResourcesEdit(props) {
                 const {
                     body: { list },
                 } = response;
-                setAllApis(list);
-                if (list.length > 0) {
-                    setSelectedApi(list[0]);
-                    getApiSwagger(list[0]);
+                const filteredList = list.filter((theApi) => theApi.lifeCycleStatus !== 'PROTOTYPED');
+
+                setAllApis(filteredList);
+                if (filteredList.length > 0) {
+                    setSelectedApi(filteredList[0]);
+                    getApiSwagger(filteredList[0]);
                 }
             })
             .catch((error) => {
