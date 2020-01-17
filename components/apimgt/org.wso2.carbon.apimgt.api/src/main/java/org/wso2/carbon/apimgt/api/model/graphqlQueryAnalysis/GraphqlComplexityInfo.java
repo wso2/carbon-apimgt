@@ -17,14 +17,17 @@
  */
 package org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * This class represents the model for depth info of a GraphQL API
+ * This class represents the model for complexity info of a GraphQL API
  */
-public class GraphqlDepthInfo {
+public class GraphqlComplexityInfo {
 
     private Integer apiId;
-    private String role;
-    private Integer depthValue;
+    private Integer maxComplexity;
+    private List<CustomComplexityDetails> list = new ArrayList<>();
 
     public Integer getApiId() {
         return apiId;
@@ -34,19 +37,19 @@ public class GraphqlDepthInfo {
         this.apiId = apiId;
     }
 
-    public String getRole() {
-        return role;
+    public Integer getMaxComplexity() {
+        return maxComplexity;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setMaxComplexity(Integer maxComplexity) {
+        this.maxComplexity = maxComplexity;
     }
 
-    public Integer getDepthValue() {
-        return depthValue;
+    public List<CustomComplexityDetails> getList() {
+        return list;
     }
 
-    public void setDepthValue(Integer depthValue) {
-        this.depthValue = depthValue;
+    public void setList(List<CustomComplexityDetails> list) {
+        this.list = list;
     }
 }
