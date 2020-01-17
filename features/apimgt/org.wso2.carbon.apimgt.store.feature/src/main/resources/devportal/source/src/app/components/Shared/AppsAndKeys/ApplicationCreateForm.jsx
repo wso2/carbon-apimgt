@@ -23,6 +23,8 @@ import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import ChipInput from 'material-ui-chip-input';
+import Application from 'AppData/Application';
+
 
 /**
  * @inheritdoc
@@ -107,7 +109,6 @@ const ApplicationCreate = (props) => {
         handleAddChip,
         handleDeleteChip,
     } = props;
-    const tokenTypeList = ['JWT', 'OAUTH'];
     return (
         <form noValidate autoComplete='off'>
             <TextField
@@ -126,7 +127,7 @@ const ApplicationCreate = (props) => {
                 })}
                 helperText={intl.formatMessage({
                     defaultMessage:
-                                    `Enter a name to identify the Application. 
+                        `Enter a name to identify the Application.
                                     You will be able to pick this application when subscribing to APIs`,
                     id: 'Shared.AppsAndKeys.ApplicationCreateForm.enter.a.name',
                 })}
@@ -200,9 +201,15 @@ const ApplicationCreate = (props) => {
                 margin='normal'
                 variant='outlined'
             >
+<<<<<<< HEAD
                 {tokenTypeList.map((type) => (
                     <MenuItem key={type} value={type}>
                         {type}
+=======
+                {Object.entries(Application.TOKEN_TYPES).map(([key, value]) => (
+                    <MenuItem key={value.displayName} value={key}>
+                        {value.displayName}
+>>>>>>> fixing https://github.com/wso2/product-apim/issues/7027
                     </MenuItem>
                 ))}
             </TextField>
@@ -218,7 +225,7 @@ const ApplicationCreate = (props) => {
                 })}
                 helperText={intl.formatMessage({
                     defaultMessage:
-                                'Describe the application',
+                        'Describe the application',
                     id: 'Shared.AppsAndKeys.ApplicationCreateForm.describe.the.application.help',
                 })}
                 name='description'
