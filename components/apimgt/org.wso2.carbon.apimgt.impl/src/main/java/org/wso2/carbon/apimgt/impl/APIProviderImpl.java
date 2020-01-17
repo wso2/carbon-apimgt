@@ -2740,54 +2740,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         addResourceFile(api.getId(), APIUtil.getIconPath(newApiId), icon));
             }
             // If the API has custom mediation policy, copy it to new version.
-
-            String inSeqFilePath = APIUtil.getSequencePath(api.getId(), "in");
-
-            if (registry.resourceExists(inSeqFilePath)) {
-
-                APIIdentifier newApiId = new APIIdentifier(api.getId().getProviderName(),
-                        api.getId().getApiName(), newVersion);
-
-                String inSeqNewFilePath = APIUtil.getSequencePath(newApiId, "in");
-                org.wso2.carbon.registry.api.Collection inSeqCollection =
-                        (org.wso2.carbon.registry.api.Collection) registry.get(inSeqFilePath);
-                if (inSeqCollection != null) {
-                    String[] inSeqChildPaths = inSeqCollection.getChildren();
-                    for (String inSeqChildPath : inSeqChildPaths) {
-                        Resource inSequence = registry.get(inSeqChildPath);
-
-                        ResourceFile seqFile = new ResourceFile(inSequence.getContentStream(), inSequence.getMediaType());
-                        OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
-                        String seqFileName = seqElment.getAttributeValue(new QName("name"));
-                        addResourceFile(api.getId(), inSeqNewFilePath + seqFileName, seqFile);
-                    }
-                }
-            }
-
-
-            String outSeqFilePath = APIUtil.getSequencePath(api.getId(), "out");
-
-            if (registry.resourceExists(outSeqFilePath)) {
-
-                APIIdentifier newApiId = new APIIdentifier(api.getId().getProviderName(),
-                        api.getId().getApiName(), newVersion);
-
-                String outSeqNewFilePath = APIUtil.getSequencePath(newApiId, "out");
-                org.wso2.carbon.registry.api.Collection outSeqCollection =
-                        (org.wso2.carbon.registry.api.Collection) registry.get(outSeqFilePath);
-                if (outSeqCollection != null) {
-                    String[] outSeqChildPaths = outSeqCollection.getChildren();
-                    for (String outSeqChildPath : outSeqChildPaths) {
-                        Resource outSequence = registry.get(outSeqChildPath);
-
-                        ResourceFile seqFile = new ResourceFile(outSequence.getContentStream(), outSequence.getMediaType());
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        String seqFileName = seqElment.getAttributeValue(new QName("name"));
-                        addResourceFile(api.getId(), outSeqNewFilePath + seqFileName, seqFile);
-                    }
-                }
-            }
-
+            copySequencesToNewVersion(api, newVersion, "in");
+            copySequencesToNewVersion(api, newVersion, "out");
+            copySequencesToNewVersion(api, newVersion, "fault");
 
             // Here we keep the old context
             String oldContext = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
@@ -2978,6 +2933,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             } catch (RegistryException ex) {
                 handleException("Error while rolling back the transaction for API: " + api.getId(), ex);
+            }
+        }
+    }
+
+    private void copySequencesToNewVersion(API api, String newVersion, String pathFlow) throws Exception {
+        String seqFilePath = APIUtil.getSequencePath(api.getId(), pathFlow);
+
+        if (registry.resourceExists(seqFilePath)) {
+            APIIdentifier newApiId = new APIIdentifier(api.getId().getProviderName(),
+                    api.getId().getApiName(), newVersion);
+
+            String seqNewFilePath = APIUtil.getSequencePath(newApiId, pathFlow);
+            org.wso2.carbon.registry.api.Collection seqCollection =
+                    (org.wso2.carbon.registry.api.Collection) registry.get(seqFilePath);
+
+            if (seqCollection != null) {
+                String[] seqChildPaths = seqCollection.getChildren();
+
+                for (String seqChildPath : seqChildPaths) {
+                    Resource sequence = registry.get(seqChildPath);
+
+                    ResourceFile seqFile = new ResourceFile(sequence.getContentStream(), sequence.getMediaType());
+                    OMElement seqElement = APIUtil.buildOMElement(sequence.getContentStream());
+                    String seqFileName = seqElement.getAttributeValue(new QName("name"));
+                    addResourceFile(api.getId(), seqNewFilePath + seqFileName, seqFile);
+                }
             }
         }
     }
