@@ -206,18 +206,18 @@ const ApplicationCreate = (props) => {
                 value={applicationRequest.description}
                 label={intl.formatMessage({
                     defaultMessage: 'Application Description',
-                    id: 'Shared.AppsAndKeys.ApplicationCreateForm.application.description',
+                    id: 'Shared.AppsAndKeys.ApplicationCreateForm.application.description.label',
                 })}
                 helperText={intl.formatMessage({
                     defaultMessage:
                                 'Describe the application',
-                    id: 'Shared.AppsAndKeys.ApplicationCreateForm.describe.the.application',
+                    id: 'Shared.AppsAndKeys.ApplicationCreateForm.describe.the.application.help',
                 })}
                 name='description'
                 onChange={handleChange}
                 placeholder={intl.formatMessage({
                     defaultMessage: 'My Mobile Application',
-                    id: 'Shared.AppsAndKeys.ApplicationCreateForm.my.mobile.application',
+                    id: 'Shared.AppsAndKeys.ApplicationCreateForm.my.mobile.application.placeholder',
                 })}
             />
             {allAppAttributes && (
@@ -231,8 +231,7 @@ const ApplicationCreate = (props) => {
                             variant='outlined'
                             required={isRequiredAttribute(item[1].attribute)}
                             label={item[1].attribute}
-                            id={configuration.configurationId}
-                            key={configuration.configurationId}
+                            value={getAttributeValue(item[1].attribute)}
                             helperText={item[1].description}
                             fullWidth
                             name={item[1].attribute}

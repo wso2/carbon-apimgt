@@ -1,7 +1,7 @@
 {
     "name": "wso2_apim_developer_portal",
     "version": "1.0.0",
-    "description": "WSO2 API Manager Developer Portal Web App",
+    "description": "WSO2 API Manager Developer Portal Web App Note: reverted the swagger-ui version from 3.24.3 to 3.22.2 as POST was not working within swagger console",
     "main": "app.js",
     "scripts": {
         "test": "jest",
@@ -11,7 +11,7 @@
         "build:dev": "rm -R site/public/dist/; NODE_ENV=development webpack -d --watch ",
         "analysis": "NODE_ENV=development webpack --env.analysis -p --progress",
         "lint": "eslint source/**/*.js source/**/*.jsx source/src/app/**/*.jsx",
-        "i18n": "extract-messages -l=en -d en -o site/public/locales --flat true 'source/src/app/components/**/*.jsx'"
+        "i18n": "extract-messages -l=en -o site/public/locales/ -d en --extractFromFormatMessageCall --flat 'source/src/app/**/*.jsx'"
     },
     "repository": {
         "type": "git",
@@ -58,7 +58,7 @@
         "react-safe-html": "^0.6.1",
         "react-tagcloud": "^1.4.0",
         "react-tap-event-plugin": "^2.0.1",
-        "swagger-client": "3.4.8",
+        "swagger-client": "^3.9.6",
         "swagger-ui": "^3.22.2"
     },
     "devDependencies": {

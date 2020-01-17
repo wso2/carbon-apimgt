@@ -2,14 +2,17 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Grid, Typography } from '@material-ui/core';
-import Checkbox from '@material-ui/core/Checkbox';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Box from '@material-ui/core/Box';
+import CheckIcon from '@material-ui/icons/Check';
+import CloseIcon from '@material-ui/icons/Close';
+import Table from '@material-ui/core/Table';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
 import { withStyles } from '@material-ui/core/styles';
 
 import API from 'AppData/api';
+import Banner from 'AppComponents/Shared/Banner';
 import { Progress } from 'AppComponents/Shared';
-import { classes } from 'istanbul-lib-coverage';
-import { isRestricted } from 'AppData/AuthManager';
 
 const styles = (theme) => ({
     root: {
@@ -27,6 +30,28 @@ const styles = (theme) => ({
         marginTop: '10px',
         paddingRight: '10px',
         paddingBottom: '10px',
+    },
+    box: {
+        display: 'block',
+    },
+    tableCel: {
+        width: 50,
+    },
+    table: {
+        width: '100%',
+        border: 'solid 1px #ccc',
+    },
+    tableHeadCell: {
+        color: 'black',
+        background: theme.palette.grey[200],
+    },
+    stateWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+    },
+    tableHeadTitle: {
+        flex: 1,
+        fontWeight: 'bold',
     },
 });
 
@@ -80,126 +105,102 @@ class BusinessPlans extends Component {
      */
     render() {
         const { policies, monetizedPolices } = this.state;
-        const { api } = this.props;
+        const { classes } = this.props;
         if (monetizedPolices === null) {
             return <Progress />;
         }
         const policiesList = policies.map((policy) => (
-            <Grid item xs={6} spacing={2}>
-                <FormControlLabel
-                    control={(
-                        <Checkbox
-                            id='monetizationStatus'
-                            checked={this.monetizationQuery(policy.name)}
-                            disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
-                            color='primary'
-                        />
-                    )}
-                    label={policy.name}
-                />
-                {
-                    Object.keys(policy.monetizationAttributes).map((key) => {
+            <Grid item xs={12}>
+                <Table className={classes.table}>
+                    <TableRow>
+                        <TableCell variant='head' colSpan={2} className={classes.tableHeadCell}>
+                            <Box display='flex'>
+                                <Typography component='div' className={classes.tableHeadTitle} variant='subtitle1'>
+                                    {policy.name}
+                                </Typography>
+                                {
+                                    this.monetizationQuery(policy.name) ? (
+                                        <div className={classes.stateWrapper}>
+                                            <div><CheckIcon color='primary' /></div>
+                                            <Typography component='div'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Monetization.BusinessPlans.monetized'
+                                                    defaultMessage='Monetized'
+                                                />
+                                            </Typography>
+                                        </div>
+                                    ) : (
+                                        <div className={classes.stateWrapper}>
+                                            <div><CloseIcon color='error' /></div>
+                                            <Typography component='div'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Monetization.BusinessPlans.not.monetized'
+                                                    defaultMessage='Not Monetized'
+                                                />
+                                            </Typography>
+                                        </div>
+                                    )
+                                }
+                            </Box>
+                        </TableCell>
+                    </TableRow>
+                    {Object.keys(policy.monetizationAttributes).map((key) => {
                         if (policy.monetizationAttributes[key] !== null) {
-                            if (key === 'currencyType') {
-                                return (
-                                    <Typography component='p' variant='body1'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Monetization.BusinessPlans.currencyType'
-                                            defaultMessage='Currency Type'
-                                        />
-                                        {' '}
-:
+                            return (
+                                <TableRow>
+                                    <TableCell className={classes.tableCel} align='left'>
+                                        <Typography component='p' variant='subtitle2'>
+                                            {key}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell align='left'>
                                         {policy.monetizationAttributes[key]}
-                                    </Typography>
-                                );
-                            } else if (key === 'billingCycle') {
-                                return (
-                                    <Typography component='p' variant='body1'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Monetization.BusinessPlans.billingCycle'
-                                            defaultMessage='Billing Cycle'
-                                        />
-                                        {' '}
-:
-                                        {policy.monetizationAttributes[key]}
-                                    </Typography>
-                                );
-                            } else if (key === 'fixedPrice') {
-                                return (
-                                    <Typography component='p' variant='body1'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Monetization.BusinessPlans.fixedPrice'
-                                            defaultMessage='Fixed Price'
-                                        />
-                                        {' '}
-:
-                                        {policy.monetizationAttributes[key]}
-                                    </Typography>
-                                );
-                            } else if (key === 'pricePerRequest') {
-                                return (
-                                    <Typography component='p' variant='body1'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Monetization.BusinessPlans.pricePerRequest'
-                                            defaultMessage='Price per Request'
-                                        />
-                                        {' '}
-:
-                                        {policy.monetizationAttributes[key]}
-                                    </Typography>
-                                );
-                            } else {
-                                return (
-                                    <Typography component='p' variant='body1'>
-                                        { key }
-                                        {' '}
-:
-                                        {policy.monetizationAttributes[key]}
-                                    </Typography>
-                                );
-                            }
+                                    </TableCell>
+                                </TableRow>
+                            );
                         } else {
                             return false;
                         }
-                    })
-                }
+                    })}
+
+                </Table>
             </Grid>
         ));
         return (
-            <Grid container className={classes.root}>
-                <Grid className={classes.grid} spacing={2}>
-                    <Grid>
-                        <Typography variant='subtitle' gutterBottom>
-                            <FormattedMessage
-                                id='Apis.Details.Monetization.BusinessPlans.commercial.policies'
-                                defaultMessage='Commercial Policies'
-                            />
-                        </Typography>
-                    </Grid>
-                    {
-                        (policies.length > 0) ? (
-                            <Grid>
-                                <Typography>
-                                    <FormattedMessage
-                                        id='Apis.Details.Monetization.BusinessPlans.unchecked.policies'
-                                        defaultMessage='Unchecked polices are not monetized, click `Save` to monetize'
-                                    />
-                                </Typography>
-                            </Grid>
-                        ) : (
-                            <Grid>
-                                <Typography>
-                                    <FormattedMessage
-                                        id='Apis.Details.Monetization.BusinessPlans.no.commercial.policies.to.monetize'
-                                        defaultMessage='No commercial policies to monetize'
-                                    />
-                                </Typography>
-                            </Grid>
-                        )
-                    }
-                    <Grid container className={classes.root} spacing={2}>
+            <Grid container spacing={1}>
+                <Grid item xs={12}>
+                    <Typography variant='h6'>
+                        <FormattedMessage
+                            id='Apis.Details.Monetization.BusinessPlans.commercial.policies'
+                            defaultMessage='Commercial Policies'
+                        />
+                    </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                    <Grid container direction='row' spacing={3}>
                         {policiesList}
                     </Grid>
+                </Grid>
+                <Grid item xs={12}>
+                    {
+                        (policies.length > 0) ? (
+                            <Banner
+                                disableActions
+                                dense
+                                paperProps={{ elevation: 1 }}
+                                type='info'
+                                message='Click Save to monetize all unmonetized policies'
+                            />
+                        ) : (
+                            <Banner
+                                disableActions
+                                dense
+                                paperProps={{ elevation: 1 }}
+                                type='info'
+                                message='No commercial policies to monetize'
+                            />
+                        )
+                    }
                 </Grid>
             </Grid>
         );

@@ -22,7 +22,7 @@ public class APIProductInfoDTO   {
     private String context = null;
     private String description = null;
     private String provider = null;
-    private String thumbnailUri = null;
+    private Boolean hasThumbnail = null;
 
 @XmlType(name="StateEnum")
 @XmlEnum(String.class)
@@ -150,19 +150,19 @@ public enum StateEnum {
 
   /**
    **/
-  public APIProductInfoDTO thumbnailUri(String thumbnailUri) {
-    this.thumbnailUri = thumbnailUri;
+  public APIProductInfoDTO hasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
     return this;
   }
 
   
-  @ApiModelProperty(example = "/api-products/01234567-0123-0123-0123-012345678901/thumbnail", value = "")
-  @JsonProperty("thumbnailUri")
-  public String getThumbnailUri() {
-    return thumbnailUri;
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("hasThumbnail")
+  public Boolean isHasThumbnail() {
+    return hasThumbnail;
   }
-  public void setThumbnailUri(String thumbnailUri) {
-    this.thumbnailUri = thumbnailUri;
+  public void setHasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
   }
 
   /**
@@ -216,14 +216,14 @@ public enum StateEnum {
         Objects.equals(context, apIProductInfo.context) &&
         Objects.equals(description, apIProductInfo.description) &&
         Objects.equals(provider, apIProductInfo.provider) &&
-        Objects.equals(thumbnailUri, apIProductInfo.thumbnailUri) &&
+        Objects.equals(hasThumbnail, apIProductInfo.hasThumbnail) &&
         Objects.equals(state, apIProductInfo.state) &&
         Objects.equals(securityScheme, apIProductInfo.securityScheme);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, securityScheme);
+    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, securityScheme);
   }
 
   @Override
@@ -236,7 +236,7 @@ public enum StateEnum {
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
-    sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
+    sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("}");

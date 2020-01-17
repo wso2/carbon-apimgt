@@ -519,6 +519,12 @@ public class OAS3Parser extends APIDefinition {
         return Json.pretty(openAPI);
     }
 
+    @Override
+    public String getOASVersion(String oasDefinition) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(oasDefinition);
+        return openAPI.getInfo().getVersion();
+    }
+
     /**
      * Gets a list of scopes using the security requirements
      *
@@ -741,9 +747,12 @@ public class OAS3Parser extends APIDefinition {
         }
         operation.addExtension(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
         operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
-        // AWS Lambda: set arn to swagger
+        // AWS Lambda: set arn & timeout to swagger
         if (resource.getAmznResourceName() != null) {
             operation.addExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME, resource.getAmznResourceName());
+        }
+        if (resource.getAmznResourceTimeout() != 0) {
+            operation.addExtension(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT, resource.getAmznResourceTimeout());
         }
         updateLegacyScopesFromOperation(resource, operation);
         List<SecurityRequirement> security = operation.getSecurity();

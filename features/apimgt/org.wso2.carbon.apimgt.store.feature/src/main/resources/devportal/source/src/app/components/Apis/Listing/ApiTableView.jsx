@@ -37,7 +37,7 @@ import DocThumb from './DocThumb';
 import { ApiContext } from '../Details/ApiContext';
 import NoApi from './NoApi';
 
-const styles = theme => ({
+const styles = (theme) => ({
     rowImageOverride: {
         '& .material-icons': {
             marginTop: 5,
@@ -168,9 +168,9 @@ class ApiTableView extends React.Component {
     componentDidUpdate(prevProps) {
         const { query, selectedTag } = this.props;
         if (
-            this.apiType !== this.context.apiType ||
-            query !== prevProps.query ||
-            prevProps.selectedTag !== selectedTag
+            this.apiType !== this.context.apiType
+            || query !== prevProps.query
+            || prevProps.selectedTag !== selectedTag
         ) {
             this.apiType = this.context.apiType;
             this.getData();
@@ -259,7 +259,8 @@ class ApiTableView extends React.Component {
      * @memberof ApiTableView
      */
     render() {
-        const { intl, gridView } = this.props;
+        const { intl, gridView, theme } = this.props;
+        const { custom: { social: { showRating } } } = theme;
         const { loading } = this.state;
         const columns = [
             {
@@ -311,7 +312,8 @@ class ApiTableView extends React.Component {
                                                 <FormattedMessage
                                                     id='Apis.Listing.TableView.TableView.doc.flag'
                                                     defaultMessage='[Doc] '
-                                                />{' '}
+                                                />
+                                                {' '}
                                                 {apiName}
                                             </span>
                                         </Link>
@@ -402,6 +404,7 @@ class ApiTableView extends React.Component {
                         }
                     },
                     sort: false,
+                    display: showRating ? 'true' : 'excluded',
                 },
             },
             {

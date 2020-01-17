@@ -116,7 +116,7 @@ class DeleteApiButton extends React.Component {
                 history.push(redirectURL);
             }).catch((error) => {
                 if (error.status === 409) {
-                    Alert.error(error.response.body.description);
+                    Alert.error('[ ' + api.name + ' ] : ' + error.response.body.description);
                 } else {
                     Alert.error('Something went wrong while deleting the API Product!');
                 }
@@ -133,7 +133,7 @@ class DeleteApiButton extends React.Component {
                 history.push(redirectURL);
             }).catch((error) => {
                 if (error.status === 409) {
-                    Alert.error(error.response.body.description);
+                    Alert.error('[ ' + api.name + ' ] : ' + error.response.body.description);
                 } else {
                     Alert.error('Something went wrong while deleting the API!');
                 }

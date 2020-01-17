@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.keymgt.issuers;
 
 import org.json.simple.JSONObject;
-import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.Assertion;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.user.core.service.RealmService;

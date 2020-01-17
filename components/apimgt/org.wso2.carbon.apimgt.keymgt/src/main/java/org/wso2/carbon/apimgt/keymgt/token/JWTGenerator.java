@@ -112,9 +112,10 @@ public class JWTGenerator extends AbstractJWTGenerator {
     @Override
     public Map<String, String> populateCustomClaims(TokenValidationContext validationContext)
             throws APIManagementException {
+
         ClaimsRetriever claimsRetriever = getClaimsRetriever();
         if (claimsRetriever != null) {
-            Map<ClaimMapping, String> customClaimsWithMapping;
+            Map<ClaimMapping, String> customClaimsWithMapping = new HashMap<>();
             Map<String, String> customClaims;
             //fix for https://github.com/wso2/product-apim/issues/4112
             String accessToken = validationContext.getAccessToken();
@@ -122,21 +123,18 @@ public class JWTGenerator extends AbstractJWTGenerator {
             if (accessToken != null) {
                 AuthorizationGrantCacheEntry cacheEntry = AuthorizationGrantCache.getInstance()
                         .getValueFromCacheByToken(new AuthorizationGrantCacheKey(accessToken));
-                if (cacheEntry == null) {
-                    return new HashMap<>();
+                if (cacheEntry != null) {
+                    customClaimsWithMapping.putAll(cacheEntry.getUserAttributes());
                 }
-                customClaimsWithMapping = cacheEntry.getUserAttributes();
             } else if (authCode != null) {
                 AuthorizationGrantCacheEntry cacheEntry = AuthorizationGrantCache.getInstance()
                         .getValueFromCacheByCode(new AuthorizationGrantCacheKey(authCode));
-                if (cacheEntry == null) {
-                    return new HashMap<>();
+                if (cacheEntry != null) {
+                    customClaimsWithMapping.putAll(cacheEntry.getUserAttributes());
                 }
-                customClaimsWithMapping = cacheEntry.getUserAttributes();
             } else {
-                customClaimsWithMapping = validationContext.getUser().getUserAttributes();
+                customClaimsWithMapping.putAll(validationContext.getUser().getUserAttributes());
             }
-
             customClaims = convertClaimMap(customClaimsWithMapping);
 
             if (isNotEmpty(customClaims)) {

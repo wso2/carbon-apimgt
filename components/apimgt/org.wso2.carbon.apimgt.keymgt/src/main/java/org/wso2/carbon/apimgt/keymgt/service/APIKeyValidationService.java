@@ -441,4 +441,19 @@ public class APIKeyValidationService extends AbstractAdmin {
         }
         return null;
     }
+
+    /**
+     * Validates the subscriptions of a particular API.
+     *
+     * @param context     Requested context
+     * @param version Version of the API
+     * @param consumerKey Consumer Key
+     * @return APIKeyValidationInfoDTO with authorization info and tier info if authorized. If it is not
+     * authorized, tier information will be <pre>null</pre>
+     * @throws APIKeyMgtException Error occurred when accessing the underlying database or registry.
+     */
+    public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey)
+            throws APIKeyMgtException, APIManagementException  {
+        return keyValidationHandler.validateSubscription(context, version, consumerKey);
+    }
 }

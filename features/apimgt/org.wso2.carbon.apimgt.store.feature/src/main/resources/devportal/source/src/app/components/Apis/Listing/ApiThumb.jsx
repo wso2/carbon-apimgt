@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -249,7 +250,7 @@ class ApiThumb extends React.Component {
         const {
             api, classes, theme, customWidth, customHeight, showInfo,
         } = this.props;
-        const { thumbnail } = theme.custom;
+        const { custom: { thumbnail, social: { showRating } } } = theme;
         const { name, version, context } = api;
 
         let { provider } = api;
@@ -358,7 +359,7 @@ class ApiThumb extends React.Component {
                             </div>
                         </div>
                         <div className={classes.thumbInfo}>
-                            <div className={classes.thumbLeft}>
+                            {showRating && <div className={classes.thumbLeft}>
                                 <Typography
                                     variant='subtitle1'
                                     gutterBottom
@@ -372,7 +373,7 @@ class ApiThumb extends React.Component {
                                         showSummary={false}
                                     />
                                 </Typography>
-                            </div>
+                            </div>}
                             <div className={classes.thumbRight}>
                                 <Typography
                                     variant='subtitle1'

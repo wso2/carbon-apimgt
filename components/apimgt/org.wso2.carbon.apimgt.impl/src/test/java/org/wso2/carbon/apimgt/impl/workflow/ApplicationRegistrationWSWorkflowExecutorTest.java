@@ -293,7 +293,7 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
     @Test
     public void testGetWorkflowDetails() {
         try {
-            applicationRegistrationWSWorkflowExecutor.getWorkflowDetails(Mockito.anyString());
+            applicationRegistrationWSWorkflowExecutor.getWorkflowDetails("random_string");
         } catch (WorkflowException e) {
             Assert.fail("Unexpected exception occurred while retriving workflow details");
         }

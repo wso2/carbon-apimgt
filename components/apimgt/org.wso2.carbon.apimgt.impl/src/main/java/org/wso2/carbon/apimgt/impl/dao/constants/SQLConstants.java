@@ -428,19 +428,14 @@ public class SQLConstants {
             " VALUES (?,?,?,?,?,?,?)";
 
     public static final String ADD_MONETIZATION_USAGE_PUBLISH_INFO =
-            " INSERT" +
-                    " INTO AM_MONETIZATION_USAGE (ID, STATE, STATUS, STARTED_TIME, PUBLISHED_TIME) " +
-                    " VALUES (?,?,?,?,?)";
+            " INSERT INTO AM_MONETIZATION_USAGE (ID, STATE, STATUS, STARTED_TIME, PUBLISHED_TIME) VALUES (?,?,?,?,?)";
 
     public static final String UPDATE_MONETIZATION_USAGE_PUBLISH_INFO =
-            " UPDATE AM_MONETIZATION_USAGE SET" +
-                    " STATE = ?, STATUS = ?, STARTED_TIME = ?, PUBLISHED_TIME = ?" +
+            " UPDATE AM_MONETIZATION_USAGE SET STATE = ?, STATUS = ?, STARTED_TIME = ?, PUBLISHED_TIME = ?" +
                     " WHERE ID = ?";
 
     public static final String GET_MONETIZATION_USAGE_PUBLISH_INFO =
-            " SELECT " +
-                    "ID, STATE, STATUS, STARTED_TIME, PUBLISHED_TIME " +
-                    "FROM AM_MONETIZATION_USAGE";
+            " SELECT ID, STATE, STATUS, STARTED_TIME, PUBLISHED_TIME FROM AM_MONETIZATION_USAGE";
 
     public static final String UPDATE_SUBSCRIBER_SQL =
             " UPDATE AM_SUBSCRIBER " +
@@ -1732,8 +1727,12 @@ public class SQLConstants {
 
     public static final String GET_AUDIT_UUID_SQL =
             "SELECT MAP.AUDIT_UUID FROM AM_SECURITY_AUDIT_UUID_MAPPING MAP WHERE MAP.API_ID = ?";
+
     public static final String ADD_SECURITY_AUDIT_MAP_SQL =
             "INSERT INTO AM_SECURITY_AUDIT_UUID_MAPPING (API_ID, AUDIT_UUID) VALUES (?,?)";
+
+    public static final String REMOVE_SECURITY_AUDIT_MAP_SQL =
+            "DELETE FROM AM_SECURITY_AUDIT_UUID_MAPPING WHERE API_ID = ?";
 
     public static final String ADD_API_LIFECYCLE_EVENT_SQL =
             " INSERT INTO AM_API_LC_EVENT (API_ID, PREVIOUS_STATE, NEW_STATE, USER_ID, TENANT_ID, EVENT_DATE)" +
@@ -2772,7 +2771,7 @@ public class SQLConstants {
                     "  NAME IN (";
 
     public static final String GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_SUFFIX =
-            ") AND TENANT_ID =? ;";
+            ") AND TENANT_ID =?";
 
     public static final String GET_GLOBAL_POLICIES =
             " SELECT " +
@@ -3081,10 +3080,44 @@ public class SQLConstants {
             + "API_TIER, CREATED_BY, CREATED_TIME, API_TYPE) VALUES (?,?,?,?,?,?,?,?)";
 
     public static final String GET_RESOURCES_OF_PRODUCT = 
-            "SELECT API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, "
-            + "API_UM.THROTTLING_TIER, API.API_PROVIDER, API.API_NAME, API.API_VERSION, API.CONTEXT, PRO_UM.API_ID "
-            + "FROM AM_API_URL_MAPPING AS API_UM, AM_API_PRODUCT_MAPPING AS PRO_UM, AM_API AS API "
-            + "WHERE API_UM.URL_MAPPING_ID = PRO_UM.URL_MAPPING_ID AND API_UM.API_ID = API.API_ID AND PRO_UM.API_ID = ?";
+            "SELECT API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, " +
+                "API_UM.THROTTLING_TIER, API.API_PROVIDER, API.API_NAME, API.API_VERSION, API.CONTEXT " +
+            "FROM AM_API_URL_MAPPING API_UM " +
+            "INNER JOIN AM_API API " +
+                "ON API.API_ID = API_UM.API_ID " +
+            "INNER JOIN AM_API_PRODUCT_MAPPING PROD_MAP " +
+                "ON PROD_MAP.URL_MAPPING_ID = API_UM.URL_MAPPING_ID " +
+            "WHERE PROD_MAP.API_ID = ?";
+
+    public static final String GET_SCOPES_BY_RESOURCE_PATHS =
+            "SELECT SCOPE.NAME, SCOPE.DISPLAY_NAME, SCOPE.DESCRIPTION, SCOPE.SCOPE_ID , BINDING.SCOPE_BINDING " +
+            "FROM IDN_OAUTH2_SCOPE SCOPE " +
+            "INNER JOIN IDN_OAUTH2_SCOPE_BINDING BINDING " +
+                "ON BINDING.SCOPE_ID = SCOPE.SCOPE_ID " +
+            "INNER JOIN IDN_OAUTH2_RESOURCE_SCOPE RES_SCOPE " +
+                "ON RES_SCOPE.SCOPE_ID = SCOPE.SCOPE_ID " +
+            "WHERE RES_SCOPE.RESOURCE_PATH = ?";
+
+    /** API Categories related constants **/
+
+    public static final String ADD_CATEGORY_SQL = "INSERT INTO AM_API_CATEGORIES "
+            + "(UUID, NAME, DESCRIPTION, TENANT_ID) VALUES (?,?,?,?)";
+
+    public static final String GET_CATEGORIES_BY_TENANT_ID_SQL = "SELECT * FROM AM_API_CATEGORIES WHERE TENANT_ID = ?";
+
+    public static final String IS_API_CATEGORY_NAME_EXISTS = "SELECT COUNT(UUID) AS API_CATEGORY_COUNT FROM "
+            + "AM_API_CATEGORIES WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String IS_API_CATEGORY_NAME_EXISTS_FOR_ANOTHER_UUID = "SELECT COUNT(UUID) AS API_CATEGORY_COUNT FROM "
+            + "AM_API_CATEGORIES WHERE NAME = ? AND TENANT_ID = ? AND UUID != ?";
+
+    public static final String GET_API_CATEGORY_BY_ID = "SELECT * FROM AM_API_CATEGORIES WHERE UUID = ?";
+
+    public static final String GET_API_CATEGORY_BY_NAME = "SELECT * FROM AM_API_CATEGORIES WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String UPDATE_API_CATEGORY = "UPDATE AM_API_CATEGORIES SET DESCRIPTION = ?, NAME = ? WHERE UUID = ?";
+
+    public static final String DELETE_API_CATEGORY = "DELETE FROM AM_API_CATEGORIES WHERE UUID = ?";
 
     /** Throttle related constants**/
 

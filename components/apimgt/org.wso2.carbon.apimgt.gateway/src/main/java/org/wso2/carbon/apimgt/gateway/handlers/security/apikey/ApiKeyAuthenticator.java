@@ -50,13 +50,13 @@ import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
-import javax.cache.Cache;
-import javax.cache.Caching;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.cache.Cache;
+import javax.cache.Caching;
 
 public class ApiKeyAuthenticator implements Authenticator {
 
@@ -309,7 +309,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                     log.debug("Api Key authentication successful.");
                 }
                 AuthenticationContext authenticationContext;
-                authenticationContext = GatewayUtils.generateAuthenticationContext(tokenSignature, payload, api, getApiLevelPolicy(), false);
+                authenticationContext = GatewayUtils.generateAuthenticationContext(tokenSignature, payload, api, null, getApiLevelPolicy(), false);
                 APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, null);
                 if (log.isDebugEnabled()) {
                     log.debug("User is authorized to access the resource using Api Key.");

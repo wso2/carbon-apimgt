@@ -28,23 +28,16 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
-import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO.TypeEnum;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SubscriptionMappingUtil;
@@ -83,7 +76,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return matched subscriptions as a list of SubscriptionDTOs
      */
     @Override
-    public Response subscriptionsGet(String apiId, String applicationId, String apiType, String groupId,
+    public Response subscriptionsGet(String apiId, String applicationId, String groupId,
                                      String xWSO2Tenant, Integer offset, Integer limit, String ifNoneMatch,
                                      MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
@@ -176,37 +169,18 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIConsumer apiConsumer;
-        Identifier identifier;
+
         try {
             apiConsumer = RestApiUtil.getConsumer(username);
             String applicationId = body.getApplicationId();
             
             //check whether user is permitted to access the API. If the API does not exist, 
             // this will throw a APIMgtResourceNotFoundException
-            if (body.getType() != null && TypeEnum.API == body.getType() && body.getApiId() != null) {
+            if (body.getApiId() != null) {
                 if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(body.getApiId(), tenantDomain)) {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, body.getApiId(), log);
                 }
-                identifier = RestAPIStoreUtils.getAPIIdentifierFromUUID(body.getApiId(), tenantDomain);
-            } else if (body.getType() != null && TypeEnum.API_PRODUCT == body.getType()
-                    && body.getApiId() != null) {
-
-                String uuid = body.getApiId();
-                APIProduct product = apiConsumer.getAPIProductbyUUID(uuid, tenantDomain);
-                if(product == null) {
-                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, uuid, log);
-                    return null;
-                }
-                if (!RestAPIStoreUtils.isUserAccessAllowedForAPIProduct(product)) {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API_PRODUCT, uuid, log);
-                }
-
-                APIProductIdentifier prodIdentifier = new APIProductIdentifier(product.getId().getProviderName(),
-                        product.getId().getName(), product.getId().getVersion());
-                prodIdentifier.setUUID(uuid);
-                prodIdentifier.setProductId(product.getProductId());
-                identifier = prodIdentifier;
-            } else {
+            }  else {
                 RestApiUtil.handleBadRequest(
                         "Request must contain either apiIdentifier or apiProductIdentifier and the relevant type", log);
                 return null;
@@ -246,14 +220,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             // the message of the exception e
             RestApiUtil.handleAuthorizationFailure(e.getMessage(), e, log);
         } catch (SubscriptionAlreadyExistingException e) {
-            String id =  "";
-            if(TypeEnum.API == body.getType()){
-               id = "API " + body.getApiId(); 
-            } else if (TypeEnum.API_PRODUCT == body.getType()) {
-                id = "Product " + body.getApiId();
-            }
             RestApiUtil.handleResourceAlreadyExistsError(
-                    "Specified subscription already exists for " + id + " for application "
+                    "Specified subscription already exists for API " + body.getApiId() + ", for application "
                             + body.getApplicationId(), e, log);
         } catch (APIManagementException | URISyntaxException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {

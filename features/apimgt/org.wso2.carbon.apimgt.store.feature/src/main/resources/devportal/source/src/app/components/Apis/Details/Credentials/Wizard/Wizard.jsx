@@ -147,7 +147,7 @@ class Wizard extends Component {
                                 <FormattedMessage
                                     id={'Apis.Details.Credentials.Credentials'
                              + '.api.credentials.generate'}
-                                    defaultMessage='Key Generation Wizard'
+                                    defaultMessage='Subscription &amp; Key Generation Wizard'
                                 />
                             </Typography>
                         </Box>
@@ -156,7 +156,7 @@ class Wizard extends Component {
                                 <Stepper activeStep={currentStep}>
                                     {this.steps.map((label) => {
                                         return (
-                                            <Step key={label} key={label}>
+                                            <Step key={label}>
                                                 <StepLabel>{label}</StepLabel>
                                             </Step>
                                         );

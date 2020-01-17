@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -2143,22 +2144,27 @@ public abstract class AbstractAPIManager implements APIManager {
                 String[] searchKeys = query.split("=");
 
                 if (searchKeys.length >= 2) {
-                    //prevent api-meta. getting prefixed to labelName and restrict label serach to exact match only
-                    if (APIConstants.LABEL.equals(searchKeys[0])) {
-                        searchKeys[0] = APIConstants.API_LABELS_GATEWAY_LABELS;
-                        if (searchKeys[1].startsWith("*")) {
-                            searchKeys[1] = searchKeys[1].substring(1, searchKeys[1].length());
-                        }
-                        if (searchKeys[1].endsWith("*")) {
-                            searchKeys[1] = searchKeys[1].substring(0, searchKeys[1].length() - 1);
-                        }
-                    } else if (!Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(searchKeys[0].toLowerCase())) {
+                    if (!Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(searchKeys[0].toLowerCase())) {
                         if (log.isDebugEnabled()) {
                             log.debug(searchKeys[0] + " does not match with any of the reserved key words. Hence"
                                     + " appending " + APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + " as prefix");
                         }
                         searchKeys[0] = (APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + searchKeys[0]);
                     }
+
+                    // Ideally query keys for label and  category searchs are as below
+                    //      label -> labels_labelName
+                    //      category -> apiCategories_categoryName
+                    // Since these are not user friendly we allow to use prefixes label and api-category. And label and
+                    // category search should only return results that exactly match.
+                    if (searchKeys[0].equals(APIConstants.LABEL_SEARCH_TYPE_PREFIX)) {
+                        searchKeys[0] = APIConstants.API_LABELS_GATEWAY_LABELS;
+                        searchKeys[1] = searchKeys[1].replace("*", "");
+                    } else if (searchKeys[0].equals(APIConstants.CATEGORY_SEARCH_TYPE_PREFIX)) {
+                        searchKeys[0] = APIConstants.API_CATEGORIES_CATEGORY_NAME;
+                        searchKeys[1] = searchKeys[1].replace("*", "");
+                    }
+
                     if (filteredQuery.length() == 0) {
                         filteredQuery.append(searchKeys[0]).append("=").append(searchKeys[1]);
                     } else {
@@ -3587,5 +3593,4 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiDocContent;
 
     }
-
 }

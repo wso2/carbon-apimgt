@@ -21,14 +21,17 @@ package org.wso2.carbon.apimgt.impl;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.axis2.AxisFault;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
@@ -99,8 +102,7 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     }
 
     @Override
-    protected void invalidateResourceCache(String apiContext, String apiVersion, String resourceURLContext,
-                                           String httpVerb, Environment environment) throws AxisFault {
+    protected void invalidateResourceCache(String apiContext, String apiVersion, Set<URITemplate> uriTemplates)  {
         //do nothing
     }
 
@@ -111,6 +113,12 @@ public class APIProviderImplWrapper extends APIProviderImpl {
         ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
         policyBuilder.setPolicyTemplateLocation(POLICY_LOCATION);
         return policyBuilder;
+    }
+
+
+    @Override
+    public JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException {
+        return super.getSecurityAuditAttributesFromConfig(userId);
     }
     
     @Override

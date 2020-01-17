@@ -37,6 +37,10 @@ public interface WSDLProcessor {
     int ENTITY_EXPANSION_LIMIT = 0;
     Logger log = LoggerFactory.getLogger(WSDLProcessor.class);
 
+    enum Mode {
+        SINGLE, ARCHIVE;
+    }
+
     boolean init(URL url) throws APIMgtWSDLException;
 
     /**
@@ -100,4 +104,6 @@ public interface WSDLProcessor {
     boolean canProcess(URL url);
 
     ErrorHandler getError();
+
+    Mode getMode();
 }

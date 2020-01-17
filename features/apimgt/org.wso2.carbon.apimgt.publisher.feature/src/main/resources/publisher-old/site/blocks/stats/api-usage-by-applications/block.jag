@@ -1,5 +1,0 @@
-<%
-jagg.block("stats/api-usage-by-applications", {
-    initializer:function (data) {}
-});
-%>

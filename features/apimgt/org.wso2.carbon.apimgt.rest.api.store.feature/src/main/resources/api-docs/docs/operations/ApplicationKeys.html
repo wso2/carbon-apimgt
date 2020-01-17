@@ -3,54 +3,18 @@
 
             <hr/>
             <h4 class="operation-heading"><a name="applicationsApplicationIdKeysKeyTypeGet"></a>Get key details of a given type
-</h4> <code>GET https://apis.wso2.com/api/am/store/v0.15/applications/{applicationId}/keys/{keyType}</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v0.16/applications/{applicationId}/keys/{keyType}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve key details of an individual application specifying the key type in the URI.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:subscribe</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:subscribe' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+                <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-applicationsApplicationIdKeysKeyTypeGet">
-                <h4 class="section-heading">
-                    Request
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-
-                <div id="request-applicationsApplicationIdKeysKeyTypeGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.15/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION
-Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-</code></div>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-applicationsApplicationIdKeysKeyTypeGet">
-                <h4 class="section-heading">
-                    Response
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-                <div id="response-applicationsApplicationIdKeysKeyTypeGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Content-Type: application/json
-
- {
-      &quot;consumerKey&quot;: &quot;QwEtRHd4NJkcFuRUfAT5af8XEEoa&quot;,
-      &quot;consumerSecret&quot;: &quot;7Fairfeu321ENjOR9w2xgJl3i70a&quot;,
-       &quot;supportedGrantTypes&quot;: [
-        &quot;refresh_token&quot;,
-        &quot;urn:ietf:params:oauth:grant-type:saml2-bearer&quot;,
-        &quot;password&quot;,
-        &quot;client_credentials&quot;,
-        &quot;iwa:ntlm&quot;
-      ],
-      &quot;callbackUrl&quot;: &quot;http://sample/com/callback&quot;,
-      &quot;keyState&quot;: &quot;COMPLETED&quot;,
-      &quot;keyType&quot;: &quot;PRODUCTION&quot;}
-</code></div>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://localhost:9443/api/am/store/v0.15/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION&quot;</code></div>
-
-
+            <h4 class="section-heading">
+                Examples
+            </h4>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -72,17 +36,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>applicationId</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -100,17 +64,17 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>keyType</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -134,16 +98,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
+                            
                             <span class="param-in">Query </span>
-
-
-
+                            
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>groupId</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -162,16 +126,16 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -237,64 +201,18 @@ Content-Type: application/json
             </table>
             <hr/>
             <h4 class="operation-heading"><a name="applicationsApplicationIdKeysKeyTypePut"></a>Update grant types and callback url of an application
-</h4> <code>PUT https://apis.wso2.com/api/am/store/v0.15/applications/{applicationId}/keys/{keyType}</code>
+</h4> <code>PUT https://apis.wso2.com/api/am/store/v0.16/applications/{applicationId}/keys/{keyType}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to update grant types and callback url of an application. (Consumer Key and Consumer Secret are ignored) Upon succesfull you will retrieve the updated key details as the response.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:subscribe</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:subscribe' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+                <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-applicationsApplicationIdKeysKeyTypePut">
-                <h4 class="section-heading">
-                    Request
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-
-                <div id="request-applicationsApplicationIdKeysKeyTypePut"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/store/v0.15/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/SANDBOX
-Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-{
-   &quot;supportedGrantTypes&quot;: [
-     &quot;refresh_token&quot;,
-     &quot;urn:ietf:params:oauth:grant-type:saml2-bearer&quot;,
-     &quot;password&quot;,
-     &quot;client_credentials&quot;,
-     &quot;iwa:ntlm&quot;
-   ],
-   &quot;callbackUrl&quot;: &quot;http://sample/com/callback&quot;
- }
-</code></div>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-applicationsApplicationIdKeysKeyTypePut">
-                <h4 class="section-heading">
-                    Response
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-                <div id="response-applicationsApplicationIdKeysKeyTypePut" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Content-Type: application/json
-
- {
-      &quot;consumerKey&quot;: &quot;QwEtRHd4NJkcFuRUfAT5af8XEEoa&quot;,
-      &quot;consumerSecret&quot;: &quot;7Fairfeu321ENjOR9w2xgJl3i70a&quot;,
-       &quot;supportedGrantTypes&quot;: [
-        &quot;refresh_token&quot;,
-        &quot;urn:ietf:params:oauth:grant-type:saml2-bearer&quot;,
-        &quot;password&quot;,
-        &quot;client_credentials&quot;,
-        &quot;iwa:ntlm&quot;
-      ],
-      &quot;callbackUrl&quot;: &quot;http://sample/com/callback&quot;,
-      &quot;keyState&quot;: &quot;COMPLETED&quot;,
-      &quot;keyType&quot;: &quot;PRODUCTION&quot;}
-</code></div>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X PUT -d @data.json &quot;https://localhost:9443/api/am/store/v0.15/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524/keys/SANDBOX&quot;</code></div>
-
-
+            <h4 class="section-heading">
+                Examples
+            </h4>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -316,17 +234,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>applicationId</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -344,17 +262,17 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>keyType</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -378,17 +296,17 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
-
+                            
+                            
+                            
+                            
                             <span class="param-in">Body </span>
                         </td>
                         <td class="param-name">
                             <p>body</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>

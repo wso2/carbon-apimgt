@@ -45,7 +45,7 @@ const styles = theme => ({
         paddingRight: theme.spacing(2),
     },
     contentWrapper: {
-        paddingLeft: theme.spacing(2),
+        paddingLeft: theme.spacing(3),
         paddingTop: theme.spacing.unig,
     },
     contentWrapperOverview: {

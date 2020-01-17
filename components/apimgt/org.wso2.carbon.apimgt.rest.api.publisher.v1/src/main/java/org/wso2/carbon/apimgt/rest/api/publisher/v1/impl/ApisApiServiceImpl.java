@@ -75,7 +75,6 @@ import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
@@ -84,7 +83,6 @@ import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -318,6 +316,13 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             API apiToAdd = prepareToCreateAPIByDTO(body);
             validateScopes(apiToAdd);
+            //validate API categories
+            List<APICategory> apiCategories = apiToAdd.getApiCategories();
+            if (apiCategories != null && apiCategories.size() >0) {
+                if (!APIUtil.validateAPICategories(apiCategories, RestApiUtil.getLoggedInUserTenantDomain())) {
+                    RestApiUtil.handleBadRequest("Invalid API Category name(s) defined", log);
+                }
+            }
             //adding the api
             apiProvider.addAPI(apiToAdd);
 
@@ -731,6 +736,16 @@ public class ApisApiServiceImpl implements ApisApiService {
                     apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
                 }
             }
+            apiToUpdate.setWsdlUrl(body.getWsdlUrl());
+
+            //validate API categories
+            List<APICategory> apiCategories = apiToUpdate.getApiCategories();
+            if (apiCategories != null && apiCategories.size() >0) {
+                if (!APIUtil.validateAPICategories(apiCategories, RestApiUtil.getLoggedInUserTenantDomain())) {
+                    RestApiUtil.handleBadRequest("Invalid API Category name(s) defined", log);
+                }
+            }
+
             apiProvider.manageAPI(apiToUpdate);
 
             API updatedApi = apiProvider.getAPI(apiIdentifier);
@@ -844,15 +859,21 @@ public class ApisApiServiceImpl implements ApisApiService {
             JSONObject securityAuditPropertyObject = apiProvider.getSecurityAuditAttributesFromConfig(username);
             String apiToken = (String) securityAuditPropertyObject.get("apiToken");
             String collectionId = (String) securityAuditPropertyObject.get("collectionId");
+            String baseUrl = (String) securityAuditPropertyObject.get("baseUrl");
+
+            if (baseUrl == null) {
+                baseUrl = APIConstants.BASE_AUDIT_URL;
+            }
             // Retrieve the uuid from the database
             String auditUuid = ApiMgtDAO.getInstance().getAuditApiId(apiIdentifier);
             if (auditUuid != null) {
-                updateAuditApi(apiDefinition, apiToken, auditUuid, isDebugEnabled);
+                updateAuditApi(apiDefinition, apiToken, auditUuid, baseUrl, isDebugEnabled);
             } else {
-                auditUuid = createAuditApi(collectionId, apiToken, apiIdentifier, apiDefinition, isDebugEnabled);
+                auditUuid = createAuditApi(collectionId, apiToken, apiIdentifier, apiDefinition, baseUrl,
+                        isDebugEnabled);
             }
             // Logic for the HTTP request
-            String getUrl = APIConstants.BASE_AUDIT_URL + "/" + auditUuid + APIConstants.ASSESSMENT_REPORT;
+            String getUrl = baseUrl + "/" + auditUuid + APIConstants.ASSESSMENT_REPORT;
             URL getReportUrl = new URL(getUrl);
             try (CloseableHttpClient getHttpClient = (CloseableHttpClient) APIUtil
                     .getHttpClient(getReportUrl.getPort(), getReportUrl.getProtocol())) {
@@ -903,14 +924,15 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    private void updateAuditApi(String apiDefinition, String apiToken, String auditUuid, boolean isDebugEnabled)
+    private void updateAuditApi(String apiDefinition, String apiToken, String auditUuid, String baseUrl,
+            boolean isDebugEnabled)
             throws IOException, APIManagementException {
         // Set the property to be attached in the body of the request
         // Attach API Definition to property called specfile to be sent in the request
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("specfile", Base64Utils.encode(apiDefinition.getBytes("UTF-8")));
         // Logic for HTTP Request
-        String putUrl = APIConstants.BASE_AUDIT_URL + "/" + auditUuid;
+        String putUrl = baseUrl + "/" + auditUuid;
         URL updateApiUrl = new URL(putUrl);
         try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil
                 .getHttpClient(updateApiUrl.getPort(), updateApiUrl.getProtocol())) {
@@ -927,8 +949,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
                 if (!(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)) {
                     throw new APIManagementException(
-                            "Error while sending data to the API Security Audit Feature. Found http status " + response
-                                    .getStatusLine());
+                            "Error while sending data to the API Security Audit Feature. Found http status " +
+                                    response.getStatusLine());
                 }
             } finally {
                 httpPut.releaseConnection();
@@ -937,13 +959,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     private String createAuditApi(String collectionId, String apiToken, APIIdentifier apiIdentifier,
-            String apiDefinition, boolean isDebugEnabled)
+            String apiDefinition, String baseUrl, boolean isDebugEnabled)
             throws IOException, APIManagementException, ParseException {
         HttpURLConnection httpConn;
         OutputStream outputStream;
         PrintWriter writer;
         String auditUuid = null;
-        URL url = new URL(APIConstants.BASE_AUDIT_URL);
+        URL url = new URL(baseUrl);
         httpConn = (HttpURLConnection) url.openConnection();
         httpConn.setUseCaches(false);
         httpConn.setDoOutput(true); // indicates POST method
@@ -3321,7 +3343,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String additionalProperties, String implementationType, MessageContext messageContext)
             throws APIManagementException {
         try {
-            validateWSDLAndReset(fileInputStream, fileDetail, url);
+            WSDLValidationResponse validationResponse = validateWSDLAndReset(fileInputStream, fileDetail, url);
 
             if (StringUtils.isEmpty(implementationType)) {
                 implementationType = APIDTO.TypeEnum.SOAP.toString();
@@ -3330,7 +3352,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             boolean isSoapToRestConvertedAPI = APIDTO.TypeEnum.SOAPTOREST.toString().equals(implementationType);
             boolean isSoapAPI = APIDTO.TypeEnum.SOAP.toString().equals(implementationType);
 
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             APIDTO additionalPropertiesAPI = null;
             APIDTO createdApiDTO;
             URI createdApiUri;
@@ -3345,7 +3366,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (isSoapAPI) {
                 createdApi = importSOAPAPI(fileInputStream, fileDetail, url, apiToAdd);
             } else if (isSoapToRestConvertedAPI) {
-                createdApi = importSOAPToRESTAPI(fileInputStream, fileDetail, url, apiToAdd);
+                String wsdlArchiveExtractedPath = null;
+                if (validationResponse.getWsdlArchiveInfo() != null) {
+                    wsdlArchiveExtractedPath = validationResponse.getWsdlArchiveInfo().getLocation()
+                            + File.separator + APIConstants.API_WSDL_EXTRACTED_DIRECTORY;
+                }
+                createdApi = importSOAPToRESTAPI(fileInputStream, fileDetail, url, wsdlArchiveExtractedPath, apiToAdd);
             } else {
                 RestApiUtil.handleBadRequest("Invalid implementationType parameter", log);
             }
@@ -3367,7 +3393,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param url WSDL url
      * @throws APIManagementException when error occurred during the operation
      */
-    private void validateWSDLAndReset(InputStream fileInputStream, Attachment fileDetail, String url)
+    private WSDLValidationResponse validateWSDLAndReset(InputStream fileInputStream, Attachment fileDetail, String url)
             throws APIManagementException {
         Map validationResponseMap = validateWSDL(url, fileInputStream, fileDetail);
         WSDLValidationResponse validationResponse =
@@ -3393,6 +3419,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         "input stream.");
             }
         }
+        return validationResponse;
     }
 
     /**
@@ -3422,7 +3449,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //add the generated swagger definition to SOAP
             APIDefinition oasParser = new OAS2Parser();
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
-            String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
+            String apiDefinition = generateSOAPAPIDefinition(oasParser.generateAPIDefinition(swaggerData));
             apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition);
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
@@ -3435,6 +3462,26 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
+     * Add soap parameters to the default soap api resource.
+     *
+     * @param apiDefinition The API definition string.
+     * @return Modified api definition.
+     * */
+    private String generateSOAPAPIDefinition(String apiDefinition) throws APIManagementException {
+        JSONParser jsonParser = new JSONParser();
+        JSONObject apiJson;
+        JSONObject paths;
+        try {
+            apiJson = (JSONObject) jsonParser.parse(apiDefinition);
+            paths = (JSONObject) jsonParser.parse(RestApiPublisherUtils.getSOAPOperation());
+            apiJson.replace("paths", paths);
+            return apiJson.toJSONString();
+        } catch (ParseException e) {
+            throw new APIManagementException("Error while parsing the api definition.", e);
+        }
+    }
+
+    /**
      * Import an API from WSDL as a SOAP-to-REST API
      *
      * @param fileInputStream file data as input stream
@@ -3443,7 +3490,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param apiToAdd API object to be added to the system (which is not added yet)
      * @return API added api
      */
-    private API importSOAPToRESTAPI(InputStream fileInputStream, Attachment fileDetail, String url, API apiToAdd) {
+    private API importSOAPToRESTAPI(InputStream fileInputStream, Attachment fileDetail, String url,
+            String wsdlArchiveExtractedPath, API apiToAdd) throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             //adding the api
@@ -3452,19 +3500,26 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
             API createdApi = apiProvider.getAPI(createdApiId);
-
-
-            String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(url);
-
+            String swaggerStr = "";
+            if (StringUtils.isNotBlank(url)) {
+                swaggerStr = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(url);
+            } else if (fileInputStream != null) {
+                String filename = fileDetail.getContentDisposition().getFilename();
+                if (filename.endsWith(".zip")) {
+                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlArchiveExtractedPath);;
+                } else if (filename.endsWith(".wsdl")) {
+                    byte[] wsdlContent = APIUtil.toByteArray(fileInputStream);
+                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlContent);
+                } else {
+                    throw new APIManagementException(ExceptionCodes.UNSUPPORTED_WSDL_FILE_EXTENSION);
+                }
+            }
             String updatedSwagger = updateSwagger(createdApi.getUUID(), swaggerStr);
             SequenceGenerator.generateSequencesFromSwagger(updatedSwagger, apiToAdd.getId());
-
             return createdApi;
-        } catch (APIManagementException | FaultGatewaysException e) {
-            RestApiUtil.handleInternalServerError("Error while importing WSDL to create a SOAP-to-REST API",
-                    e, log);
+        } catch (FaultGatewaysException | IOException e) {
+            throw new APIManagementException("Error while importing WSDL to create a SOAP-to-REST API", e);
         }
-        return null;
     }
 
     /**

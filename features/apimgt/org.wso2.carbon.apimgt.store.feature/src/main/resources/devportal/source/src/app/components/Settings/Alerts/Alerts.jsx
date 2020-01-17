@@ -125,7 +125,7 @@ const Alerts = (props) => {
             },
             5: {
                 name: intl.formatMessage({
-                    id: 'Settings.Alerts.Alerts.api.health.monitor',
+                    id: 'Settings.Alerts.Alerts.numusual.ip',
                     defaultMessage: 'Unusual IP Access',
                 }),
                 displayName: 'UnusualIPAccess',
@@ -139,7 +139,7 @@ const Alerts = (props) => {
             },
             6: {
                 name: intl.formatMessage({
-                    id: 'Settings.Alerts.Alerts.api.health.monitor',
+                    id: 'Settings.Alerts.Alerts.frequent.tier',
                     defaultMessage: 'Frequent Tier Limit Hitting',
                 }),
                 displayName: 'FrequentTierLimitHitting',

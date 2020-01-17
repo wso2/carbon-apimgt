@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -1265,29 +1266,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (gatewayExists && isAPIPublished && !oldApi.getUriTemplates().equals(api.getUriTemplates())) {
                 Set<URITemplate> resourceVerbs = api.getUriTemplates();
 
-                Map<String, Environment> gatewayEns = config.getApiGatewayEnvironments();
-                for (Environment environment : gatewayEns.values()) {
-                    try {
-                        if (resourceVerbs != null) {
-                            for (URITemplate resourceVerb : resourceVerbs) {
-                                String resourceURLContext = resourceVerb.getUriTemplate();
-                                invalidateResourceCache(api.getContext(), api.getId().getVersion(),
-                                        resourceURLContext, resourceVerb.getHTTPVerb(), environment);
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Calling invalidation cache");
-                                }
+
+                    if (resourceVerbs != null) {
+                            invalidateResourceCache(api.getContext(), api.getId().getVersion(),resourceVerbs);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Calling invalidation cache");
                             }
-                        }
-                    } catch (AxisFault ex) {
-                             /*
-                            didn't throw this exception to handle multiple gateway publishing feature therefore
-                            this didn't break invalidating cache from the all the gateways if one gateway is
-                            unreachable
-                             */
-                        log.error("Error while invalidating from environment " +
-                                environment.getName(), ex);
                     }
-                }
 
             }
 
@@ -1437,6 +1422,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                         artifactPath, registry);
+            }
+            //attaching api categories to the API
+            List<APICategory> attachedApiCategories = api.getApiCategories();
+            artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
+            if (attachedApiCategories != null) {
+                for (APICategory category : attachedApiCategories) {
+                    artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
+                }
             }
             registry.commitTransaction();
             transactionCommitted = true;
@@ -5716,25 +5709,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 policyLevel = PolicyConstants.POLICY_LEVEL_API;
 
                 APIManagerConfiguration config = getAPIManagerConfiguration();
-                Map<String, Environment> gatewayEns = config.getApiGatewayEnvironments();
-                for (Environment environment : gatewayEns.values()) {
-                    try {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Calling invalidation cache for API Policy for tenant ");
-                        }
-                        String policyContext = APIConstants.POLICY_CACHE_CONTEXT + "/t/" + apiPolicy.getTenantDomain()
-                                + "/";
-                        invalidateResourceCache(policyContext, null, null, null, environment);
-
-                    } catch (AxisFault ex) {
-                        /*
-                         * didn't throw this exception to handle multiple gateway publishing feature therefore
-                         * this didn't break invalidating cache from the all the gateways if one gateway is
-                         * unreachable
-                         */
-                        log.error("Error while invalidating from environment " + environment.getName(), ex);
+                if (log.isDebugEnabled()) {
+                        log.debug("Calling invalidation cache for API Policy for tenant ");
                     }
-                }
+                    String policyContext = APIConstants.POLICY_CACHE_CONTEXT + "/t/" + apiPolicy.getTenantDomain()
+                            + "/";
+                    invalidateResourceCache(policyContext, null, Collections.EMPTY_SET);
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
@@ -6478,10 +6458,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     }
 
-    protected void invalidateResourceCache(String apiContext, String apiVersion, String resourceURLContext,
-                                           String httpVerb, Environment environment) throws AxisFault {
-        APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
-        client.invalidateResourceCache(apiContext, apiVersion, resourceURLContext, httpVerb);
+    protected void invalidateResourceCache(String apiContext, String apiVersion,Set<URITemplate> uriTemplates) {
+        APIAuthenticationAdminClient client = new APIAuthenticationAdminClient();
+        client.invalidateResourceCache(apiContext, apiVersion, uriTemplates);
     }
 
     protected ThrottlePolicyTemplateBuilder getThrottlePolicyTemplateBuilder() {
@@ -7767,12 +7746,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String apiToken = configuration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_API_TOKEN);
         String collectionId = configuration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_CID);
+        String baseUrl = configuration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_BASE_URL);
         boolean isGlobal = Boolean.parseBoolean(configuration.getFirstProperty(APIConstants.API_SECURITY_AUDIT_GLOBAL));
         JSONObject configProperties = new JSONObject();
 
         if (StringUtils.isNotEmpty(apiToken) && StringUtils.isNotEmpty(collectionId)) {
             configProperties.put(APIConstants.SECURITY_AUDIT_API_TOKEN, apiToken);
             configProperties.put(APIConstants.SECURITY_AUDIT_COLLECTION_ID, collectionId);
+            configProperties.put(APIConstants.SECURITY_AUDIT_BASE_URL, baseUrl);
             if (isGlobal || "carbon.super".equals(tenantDomain)) {
                 return configProperties;
             } else {

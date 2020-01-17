@@ -2,7 +2,7 @@
     <h1><a name="Validation"></a>Validation</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="apisValidateGraphqlSchemaPost"></a>Validate GraphQL API definition and retrieve a summary</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/validate-graphql-schema</code>
+            <h4 class="operation-heading"><a name="apisValidateGraphqlSchemaPost"></a>Validate GraphQL API definition and retrieve a summary</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1/apis/validate-graphql-schema</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to validate a graphQL definition and retrieve a summary.
@@ -108,7 +108,7 @@
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="validateAPI"></a>Check given API attibute name is already exist.</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/validate</code>
+            <h4 class="operation-heading"><a name="validateAPI"></a>Check given API attibute name is already exist.</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1/apis/validate</code>
             <p class="marked"></p>
 
             <p class="marked">Using this operation, you can check a given API context is already used. You need to provide the context name you want to check.
@@ -129,7 +129,7 @@
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-validateAPI"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate?query&#x3D;name:PizzaShackAPI HTTP/1.1
+                    <div id="request-validateAPI"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1/apis/validate?query&#x3D;name:PizzaShackAPI HTTP/1.1
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -145,7 +145,7 @@ Content-Length: 0</code></div>
 
                 <h5 class="section-heading">CURL</h5>
                     <div class="pre"><code class="bash">curl -k -X POST -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot;
-https://localhost:9443/api/am/publisher/v1.0/apis/validate?query&#x3D;name:PizzaShackAPI
+https://localhost:9443/api/am/publisher/v1/apis/validate?query&#x3D;name:PizzaShackAPI
 </code></div>
 
 
@@ -282,7 +282,7 @@ variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="validateEndpoint"></a>Check whether given endpoint url is valid</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/validate-endpoint</code>
+            <h4 class="operation-heading"><a name="validateEndpoint"></a>Check whether given endpoint url is valid</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1/apis/validate-endpoint</code>
             <p class="marked"></p>
 
             <p class="marked">Using this operation, it is possible check whether the given API endpoint url is a valid url
@@ -415,7 +415,7 @@ variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="validateOpenAPIDefinition"></a>Validate an OpenAPI Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/validate-openapi</code>
+            <h4 class="operation-heading"><a name="validateOpenAPIDefinition"></a>Validate an OpenAPI Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1/apis/validate-openapi</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to validate an OpenAPI definition and retrieve a summary. Provide either &#x60;url&#x60;
@@ -437,7 +437,7 @@ or &#x60;file&#x60; to specify the definition.
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-validateOpenAPIDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-openapi?returnContent&#x3D;true HTTP/1.1
+                    <div id="request-validateOpenAPIDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1/apis/validate-openapi?returnContent&#x3D;true HTTP/1.1
 Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_0_771605626.1563876237955&quot;
 Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a
 Content-Length: 1504
@@ -514,7 +514,7 @@ Transfer-Encoding: chunked
 </code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a&quot; -F file&#x3D;@petstore.v3.yaml  -X POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-openapi?returnContent&#x3D;true
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a&quot; -F file&#x3D;@petstore.v3.yaml  -X POST https://localhost:9443/api/am/publisher/v1/apis/validate-openapi?returnContent&#x3D;true
 </code></div>
 
             <h4 class="section-heading">
@@ -526,7 +526,7 @@ Transfer-Encoding: chunked
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-validateOpenAPIDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-openapi HTTP/1.1
+                    <div id="request-validateOpenAPIDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1/apis/validate-openapi HTTP/1.1
 Accept-Encoding: gzip,deflate
 Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_7_1998017516.1563885449948&quot;
 Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a
@@ -668,7 +668,7 @@ Transfer-Encoding: chunked
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a&quot; -F file&#x3D;@petstore.v3-invalid.yaml  -X POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-openapi?returnContent&#x3D;true
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a&quot; -F file&#x3D;@petstore.v3-invalid.yaml  -X POST https://localhost:9443/api/am/publisher/v1/apis/validate-openapi?returnContent&#x3D;true
 </code></div>
 
 
@@ -821,7 +821,7 @@ applicable when using url based validation
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="validateWSDLDefinition"></a>Validate a WSDL Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/validate-wsdl</code>
+            <h4 class="operation-heading"><a name="validateWSDLDefinition"></a>Validate a WSDL Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1/apis/validate-wsdl</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to validate a WSDL definition and retrieve a summary. Provide either &#x60;url&#x60;
@@ -843,7 +843,7 @@ or &#x60;file&#x60; to specify the definition.
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-validateWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl HTTP/1.1
+                    <div id="request-validateWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1/apis/validate-wsdl HTTP/1.1
 Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_3_453576421.1568033260795&quot;
 MIME-Version: 1.0
 Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -889,7 +889,7 @@ Content-Type: application/json
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F url&#x3D;&#39;https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl&#39; -X POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F url&#x3D;&#39;https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl&#39; -X POST https://localhost:9443/api/am/publisher/v1/apis/validate-wsdl
 </code></div>
 
             <h4 class="section-heading">
@@ -901,7 +901,7 @@ Content-Type: application/json
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-validateWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl HTTP/1.1
+                    <div id="request-validateWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1/apis/validate-wsdl HTTP/1.1
 Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_5_1281400982.1568033585941&quot;
 MIME-Version: 1.0
 Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -987,7 +987,7 @@ Content-Type: application/json
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockquote.wsdl -X POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockquote.wsdl -X POST https://localhost:9443/api/am/publisher/v1/apis/validate-wsdl
 </code></div>
 
             <h4 class="section-heading">
@@ -999,7 +999,7 @@ Content-Type: application/json
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-validateWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl HTTP/1.1
+                    <div id="request-validateWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1/apis/validate-wsdl HTTP/1.1
 Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_10_60710863.1568033977152&quot;
 MIME-Version: 1.0
 Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -1049,7 +1049,7 @@ Content-Type: application/json
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockquote.zip -X POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockquote.zip -X POST https://localhost:9443/api/am/publisher/v1/apis/validate-wsdl
 </code></div>
 
             <h4 class="section-heading">
@@ -1061,7 +1061,7 @@ Content-Type: application/json
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-validateWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl HTTP/1.1
+                    <div id="request-validateWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1/apis/validate-wsdl HTTP/1.1
 Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_17_807981233.1568034538839&quot;
 MIME-Version: 1.0
 Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
@@ -1106,7 +1106,7 @@ Content-Type: application/json
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockQuote-invalid.wsdl -X POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockQuote-invalid.wsdl -X POST https://localhost:9443/api/am/publisher/v1/apis/validate-wsdl
 </code></div>
 
 

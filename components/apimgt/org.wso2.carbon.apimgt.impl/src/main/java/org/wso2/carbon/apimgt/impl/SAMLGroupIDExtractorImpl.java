@@ -20,18 +20,18 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opensaml.Configuration;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Attribute;
-import org.opensaml.saml2.core.AttributeStatement;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.io.Unmarshaller;
-import org.opensaml.xml.io.UnmarshallerFactory;
-import org.opensaml.xml.io.UnmarshallingException;
-import org.opensaml.xml.schema.XSString;
-import org.opensaml.xml.schema.impl.XSAnyImpl;
-import org.opensaml.saml2.core.Response;
-import org.opensaml.saml2.core.Subject;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.Attribute;
+import org.opensaml.saml.saml2.core.AttributeStatement;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.io.Unmarshaller;
+import org.opensaml.core.xml.io.UnmarshallerFactory;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.core.xml.schema.XSString;
+import org.opensaml.core.xml.schema.impl.XSAnyImpl;
+import org.opensaml.saml.saml2.core.Response;
+import org.opensaml.saml.saml2.core.Subject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
@@ -49,6 +49,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -79,7 +80,7 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
             docBuilder = builderFactory.newDocumentBuilder();
             Document document = docBuilder.parse(samlResponseStream);
             Element element = document.getDocumentElement();
-            UnmarshallerFactory unmarshallerFactory = Configuration.getUnmarshallerFactory();
+            UnmarshallerFactory unmarshallerFactory = XMLObjectProviderRegistrySupport.getUnmarshallerFactory();
             Unmarshaller unmarshaller = unmarshallerFactory.getUnmarshaller(element);
             Response response = (Response) unmarshaller.unmarshall(element);
             List<Assertion> assertions = response.getAssertions();
@@ -160,7 +161,7 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
      * @return Organization list from the assertion
      */
     private String getOrganizationFromSamlAssertion(List<Assertion> assertions) {
-        String attributeValueString = null;
+        List<String> attributeValueArray = new ArrayList<>();
         String organizationAttributeName = getOrganizationClaim();
 
         for (Assertion assertion : assertions) {
@@ -170,13 +171,11 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
                     List<Attribute> attributesList = statement.getAttributes();
                     for (Attribute attribute : attributesList) {
                         String attributeName = attribute.getName();
-                        if (attributeName != null && organizationAttributeName.equals(attributeName)) {
+                        if (organizationAttributeName.equals(attributeName)) {
                             List<XMLObject> attributeValues = attribute.getAttributeValues();
                             if (attributeValues != null) {
-                                attributeValueString = getAttributeValue(attributeValues.get(0));
-
-                                if (log.isDebugEnabled()) {
-                                    log.debug(", AttributeValue : " + attributeValueString);
+                                for (XMLObject attributeValue : attributeValues) {
+                                    attributeValueArray.add(getAttributeValue(attributeValue));
                                 }
                             }
                         }
@@ -185,10 +184,10 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug("Organization list found for assertion: " + attributeValueString );
+            log.debug("Organization list found in assertion: " + attributeValueArray);
         }
 
-        return attributeValueString;
+        return String.join(",", attributeValueArray);
     }
 
     /**
@@ -260,7 +259,7 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
             docBuilder = builderFactory.newDocumentBuilder();
             Document document = docBuilder.parse(samlResponseStream);
             Element element = document.getDocumentElement();
-            UnmarshallerFactory unmarshallerFactory = Configuration.getUnmarshallerFactory();
+            UnmarshallerFactory unmarshallerFactory = XMLObjectProviderRegistrySupport.getUnmarshallerFactory();
             Unmarshaller unmarshaller = unmarshallerFactory.getUnmarshaller(element);
             Response response = (Response) unmarshaller.unmarshall(element);
             List<Assertion> assertions = response.getAssertions();

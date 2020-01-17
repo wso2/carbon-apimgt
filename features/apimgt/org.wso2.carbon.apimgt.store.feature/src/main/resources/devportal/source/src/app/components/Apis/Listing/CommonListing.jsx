@@ -30,9 +30,10 @@ import ApiBreadcrumbs from './ApiBreadcrumbs';
 import ApiTableView from './ApiTableView';
 import { ApiContext } from '../Details/ApiContext';
 import TagCloudListingTags from './TagCloudListingTags';
+import CategoryListingCategories from './CategoryListingCategories';
 import ApiTagCloud from './ApiTagCloud';
 
-const styles = theme => ({
+const styles = (theme) => ({
     rightIcon: {
         marginLeft: theme.spacing(1),
     },
@@ -177,6 +178,7 @@ class CommonListing extends React.Component {
     setListType = (value) => {
         this.setState({ listType: value });
     };
+
     /**
      *
      * Get all tags
@@ -192,10 +194,19 @@ class CommonListing extends React.Component {
             .catch((error) => {
                 console.log(error);
             });
+        const promisedCategories = restApiClient.apiCategories();
+            promisedCategories
+                .then((response) => {
+                    this.setState({ allCategories: response.body.list });
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
         this.isMonetizationEnabled();
     }
+
     toggleLeftMenu = () => {
-        this.setState(prevState => ({ showLeftMenu: !prevState.showLeftMenu }));
+        this.setState((prevState) => ({ showLeftMenu: !prevState.showLeftMenu }));
     };
 
     /**
@@ -215,7 +226,6 @@ class CommonListing extends React.Component {
      */
     render() {
         const {
-            apiType,
             theme,
             classes,
             location: { search },
@@ -226,7 +236,9 @@ class CommonListing extends React.Component {
                 tagCloud: { active: tagCloudActive },
             },
         } = theme;
-        const { listType, allTags, showLeftMenu, isMonetizationEnabled } = this.state;
+        const {
+            listType, allTags, showLeftMenu, isMonetizationEnabled, allCategories,
+        } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
         const searchParam = new URLSearchParams(search);
         const searchQuery = searchParam.get('query');
@@ -246,18 +258,20 @@ class CommonListing extends React.Component {
             }
         }
         const tagPaneVisible = allTags && allTags.length > 0 && (tagCloudActive || active);
+        const categoryPaneVisible = allCategories && allCategories.length > 0;
         return (
-            <React.Fragment>
-                {tagPaneVisible && showLeftMenu && (
+            <>
+                {(categoryPaneVisible || tagPaneVisible) && showLeftMenu && (
                     <div className={classes.LeftMenu}>
                         <div className={classes.sliderButton} onClick={this.toggleLeftMenu}>
                             <Icon>keyboard_arrow_left</Icon>
                         </div>
-                        {active && <TagCloudListingTags allTags={allTags} />}
-                        {tagCloudActive && <ApiTagCloud allTags={allTags} />}
+                        {categoryPaneVisible && <CategoryListingCategories allCategories={allCategories} />}
+                        {tagPaneVisible && active && <TagCloudListingTags allTags={allTags} />}
+                        {tagPaneVisible && tagCloudActive && <ApiTagCloud allTags={allTags} />}
                     </div>
                 )}
-                {tagPaneVisible && !showLeftMenu && (
+                {(categoryPaneVisible || tagPaneVisible) && !showLeftMenu && (
                     <div className={classes.LeftMenuForSlider}>
                         <div className={classes.sliderButton} onClick={this.toggleLeftMenu}>
                             <Icon>keyboard_arrow_right</Icon>
@@ -312,18 +326,18 @@ class CommonListing extends React.Component {
                     {active && allTags && allTags.length > 0 && <ApiBreadcrumbs selectedTag={selectedTag} />}
                     <div className={classes.listContentWrapper}>
                         {listType === 'grid' && (
-                            <ApiContext.Provider value={{ apiType, isMonetizationEnabled }}>
+                            <ApiContext.Provider value={{ isMonetizationEnabled }}>
                                 <ApiTableView gridView query={search} />
                             </ApiContext.Provider>
                         )}
                         {listType === 'list' && (
-                            <ApiContext.Provider value={{ apiType, isMonetizationEnabled }}>
+                            <ApiContext.Provider value={{ isMonetizationEnabled }}>
                                 <ApiTableView gridView={false} query={search} />
                             </ApiContext.Provider>
                         )}
                     </div>
                 </main>
-            </React.Fragment>
+            </>
         );
     }
 }
@@ -331,7 +345,6 @@ class CommonListing extends React.Component {
 CommonListing.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
-    apiType: PropTypes.string.isRequired,
     location: PropTypes.shape({
         search: PropTypes.string,
     }),

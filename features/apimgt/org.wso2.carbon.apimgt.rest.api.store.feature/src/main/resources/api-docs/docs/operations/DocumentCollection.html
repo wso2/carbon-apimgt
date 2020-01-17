@@ -3,7 +3,7 @@
 
             <hr/>
             <h4 class="operation-heading"><a name="apisApiIdDocumentsGet"></a>Get a list of documents of an API
-</h4> <code>GET https://apis.wso2.com/api/am/store/v0.15/apis/{apiId}/documents</code>
+</h4> <code>GET https://apis.wso2.com/api/am/store/v0.16/apis/{apiId}/documents</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrive a list of documents belonging to an API by providing the id of the API.
@@ -17,66 +17,9 @@
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
                 <p>Not required</p>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdDocumentsGet">
-                <h4 class="section-heading">
-                    Request
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-
-                <div id="request-apisApiIdDocumentsGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.15/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents
-</code></div>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdDocumentsGet">
-                <h4 class="section-heading">
-                    Response
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                </h4>
-            </div>
-                <div id="response-apisApiIdDocumentsGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-   &quot;previous&quot;: &quot;&quot;,
-   &quot;list&quot;:    [
-            {
-         &quot;sourceType&quot;: &quot;INLINE&quot;,
-         &quot;sourceUrl&quot;: null,
-         &quot;otherTypeName&quot;: null,
-         &quot;documentId&quot;: &quot;850a4f34-db2c-4d23-9d85-3f95fbfb082c&quot;,
-         &quot;summary&quot;: &quot;This is a sample documentation for v1.0.0&quot;,
-         &quot;name&quot;: &quot;PhoneVerification API Documentation&quot;,
-         &quot;type&quot;: &quot;HOWTO&quot;
-      },
-            {
-         &quot;sourceType&quot;: &quot;URL&quot;,
-         &quot;sourceUrl&quot;: &quot;http://wiki.cdyne.com/index.php/Phone_Verification&quot;,
-         &quot;otherTypeName&quot;: null,
-         &quot;documentId&quot;: &quot;98e18be8-5861-43c7-ba26-8cbbccd3a76f&quot;,
-         &quot;summary&quot;: &quot;This is the URL for online documentation&quot;,
-         &quot;name&quot;: &quot;Online Documentation&quot;,
-         &quot;type&quot;: &quot;SAMPLES&quot;
-      },
-            {
-         &quot;sourceType&quot;: &quot;FILE&quot;,
-         &quot;sourceUrl&quot;: null,
-         &quot;otherTypeName&quot;: null,
-         &quot;documentId&quot;: &quot;b66451ff-c6c2-4f6a-b91d-3821dc119b04&quot;,
-         &quot;summary&quot;: &quot;This is a sample documentation pdf&quot;,
-         &quot;name&quot;: &quot;Introduction to PhoneVerification API PDF&quot;,
-         &quot;type&quot;: &quot;HOWTO&quot;
-      }
-   ],
-   &quot;count&quot;: 3,
-   &quot;next&quot;: &quot;&quot;
-}</code></div>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl https://localhost:9443/api/am/store/v0.15/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents</code></div>
-
-            <h4 class="section-heading">Sample CURL - for tenant</h4>
-            <div class="pre"><code class="bash">curl -k -H &quot;X-WSO2-Tenant:test.com&quot; https://localhost:9443/api/am/store/v0.15/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents</code></div>
-
+            <h4 class="section-heading">
+                Examples
+            </h4>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -98,17 +41,17 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
-
-
+                            
+                            
                             <span class="param-in">Path </span>
-
-
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>apiId</p>
                             <p class="param-required">
                                 required
-
+                                
                             </p>
                         </td>
                         <td>
@@ -128,16 +71,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
+                            
                             <span class="param-in">Query </span>
-
-
-
+                            
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>limit</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -156,16 +99,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
+                            
                             <span class="param-in">Query </span>
-
-
-
+                            
+                            
+                            
                         </td>
                         <td class="param-name">
                             <p>offset</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -184,16 +127,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>X-WSO2-Tenant</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -213,16 +156,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -241,16 +184,16 @@ Should be formatted as **provider-name-version**.
                     </tr>
                     <tr>
                         <td class="parameter">
-
-
-
+                            
+                            
+                            
                             <span class="param-in">Header </span>
-
+                            
                         </td>
                         <td class="param-name">
                             <p>If-None-Match</p>
                             <p class="param-required">
-
+                                
                                 optional
                             </p>
                         </td>
@@ -300,7 +243,7 @@ variant of the resource.
                         <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
-
+                                    
                             </span>
                         </td>
                     </tr>

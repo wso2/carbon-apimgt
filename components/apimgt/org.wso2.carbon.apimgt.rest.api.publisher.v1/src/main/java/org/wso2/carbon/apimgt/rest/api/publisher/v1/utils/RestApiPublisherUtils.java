@@ -335,4 +335,14 @@ public class RestApiPublisherUtils {
         return true;
     }
 
+    /**
+     * This method is to get the default SOAP API Resource definition. (SOAPAction, SOAP Request)
+     * @return String
+     * */
+    public static String getSOAPOperation() {
+        return "{\"/*\":{\"post\":{\"parameters\":[{\"schema\":{\"type\":\"string\"},\"description\":\"SOAP request.\","
+            + "\"name\":\"SOAP Request\",\"required\":true,\"in\":\"body\"},"
+                + "{\"description\":\"SOAPAction header for soap 1.1\",\"name\":\"SOAPAction\",\"type\":\"string\","
+                + "\"required\":false,\"in\":\"header\"}],\"responses\":{\"200\":{\"description\":\"OK\"}}}}}";
+    }
 }

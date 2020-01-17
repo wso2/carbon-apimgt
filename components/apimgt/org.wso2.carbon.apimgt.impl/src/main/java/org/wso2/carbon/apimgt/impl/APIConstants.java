@@ -215,11 +215,13 @@ public final class APIConstants {
     public static final String API_SECURITY_AUDIT = "APISecurityAudit.";
     public static final String API_SECURITY_AUDIT_API_TOKEN = API_SECURITY_AUDIT + "APIToken";
     public static final String API_SECURITY_AUDIT_CID = API_SECURITY_AUDIT + "CollectionID";
+    public static final String API_SECURITY_AUDIT_BASE_URL = API_SECURITY_AUDIT + "BaseUrl";
     public static final String API_SECURITY_AUDIT_GLOBAL = API_SECURITY_AUDIT + "Global";
 
     public static final String SECURITY_AUDIT_CONFIGURATION = "SecurityAuditConfig";
     public static final String SECURITY_AUDIT_API_TOKEN = "apiToken";
     public static final String SECURITY_AUDIT_COLLECTION_ID = "collectionId";
+    public static final String SECURITY_AUDIT_BASE_URL = "baseUrl";
     public static final String SECURITY_AUDIT_OVERRIDE_GLOBAL = "overrideGlobal";
     // For HTTP requests
     public static final String HEADER_ACCEPT = "Accept";
@@ -479,6 +481,7 @@ public final class APIConstants {
     public static final String BLOCKING_CONDITIONS_STREAM_ID = "org.wso2.blocking.request.stream:1.0.0";
     public static final String TOKEN_REVOCATION_STREAM_ID = "org.wso2.apimgt.token.revocation.stream:1.0.0";
     public static final String KEY_TEMPLATE_STREM_ID = "org.wso2.keytemplate.request.stream:1.0.0";
+    public static final String CACHE_INVALIDATION_STREAM_ID = "org.wso2.apimgt.cache.invalidation.stream:1.0.0";
 
     //Property for enabling scope sharing between APIs
     public static final String ENABLE_API_SCOPES_SHARING = "enable-api-scopes-sharing";
@@ -492,6 +495,7 @@ public final class APIConstants {
     public static final String TOKEN_TYPE_JWT = "JWT";
 
     public static final String PASSWORD_RESOLVER_IMPL_CLASS = "PasswordResolverImpl";
+    public static final String CACHE_INVALIDATION_TYPE = "type";
 
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
@@ -684,6 +688,10 @@ public final class APIConstants {
     public static final String AUTH_MANAGER_PASSWORD = AUTH_MANAGER + "Password";
     public static final String ENABLE_MTLS_FOR_APIS = "EnableMTLSForAPIs";
 
+    public static final String IDENTITY_PROVIDER = "IdentityProvider.";
+    public static final String IDENTITY_PROVIDER_AUTHORIZE_ENDPOINT = IDENTITY_PROVIDER + "AuthorizeEndpoint";
+    public static final String IDENTITY_PROVIDER_OIDC_LOGOUT_ENDPOINT = IDENTITY_PROVIDER + "OIDCLogoutEndpoint";
+
     public static final String SELF_SIGN_UP = "SelfSignUp.";
     public static final String SELF_SIGN_UP_ENABLED = SELF_SIGN_UP + "Enabled";
     public static final String SELF_SIGN_UP_ROLE = SELF_SIGN_UP + "SubscriberRoleName";
@@ -823,6 +831,7 @@ public final class APIConstants {
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
     public static final String BLOCKING_EVENT_PUBLISHER = "blockingEventPublisher";
     public static final String TOKEN_REVOCATION_EVENT_PUBLISHER = "tokenRevocationPublisher";
+    public static final String CACHE_INVALIDATION_EVENT_PUBLISHER = "cacheInvalidationEventPublisher";
 
     public static final int AM_CREATOR_APIMGT_EXECUTION_ID = 200;
     public static final int AM_CREATOR_GOVERNANCE_EXECUTION_ID = 201;
@@ -1181,6 +1190,7 @@ public final class APIConstants {
     //Swagger v2.0 constants
     public static final String SWAGGER_X_SCOPE = "x-scope";
     public static final String SWAGGER_X_AMZN_RESOURCE_NAME = "x-amzn-resource-name";
+    public static final String SWAGGER_X_AMZN_RESOURCE_TIMEOUT = "x-amzn-resource-timeout";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
     public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
     public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
@@ -1307,6 +1317,7 @@ public final class APIConstants {
     public static final String REST_API_SCOPE_NAME = "Name";
     public static final String REST_API_SCOPE_ROLE = "Roles";
     public static final String REST_API_SCOPES_CONFIG = "RESTAPIScopes";
+    public static final String APIM_SUBSCRIBE_SCOPE = "apim:subscribe";
 
     public static final String HTTPS_PROTOCOL = "https";
     public static final String HTTPS_PROTOCOL_URL_PREFIX = "https://";
@@ -1456,6 +1467,8 @@ public final class APIConstants {
     private static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
     public static final String CONTENT_SEARCH_TYPE_PREFIX = "content";
     public static final String TYPE_SEARCH_TYPE_PREFIX = "type";
+    public static final String LABEL_SEARCH_TYPE_PREFIX = "label";
+    public static final String CATEGORY_SEARCH_TYPE_PREFIX = "api-category";
 
     //api-product related constants
     public static final String API_PRODUCT_VERSION = "1.0.0";
@@ -1583,6 +1596,8 @@ public final class APIConstants {
         public static final String APPLICATION_OWNER = "owner";
         public static final String KEY_TYPE = "keytype";
         public static final String CONSUMER_KEY = "consumerKey";
+        public static final String AUTHORIZED_PARTY = "azp";
+        public static final String KEY_ID = "kid";
         public static final String SUBJECT = "sub";
         public static final String SUBSCRIPTION_TIER = "subscriptionTier";
         public static final String SUBSCRIBER_TENANT_DOMAIN = "subscriberTenantDomain";
@@ -1659,7 +1674,8 @@ public final class APIConstants {
     public static final String[] API_SEARCH_PREFIXES = { DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
             NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
             VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
-            API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX };
+            API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX,
+            CATEGORY_SEARCH_TYPE_PREFIX };
     // Prefix for registry attributes.
     public static final String OVERVIEW_PREFIX = "overview_";
     /**
@@ -1797,11 +1813,13 @@ public final class APIConstants {
     public static class RestApiConstants {
         public static final String STORE_CONTEXT = "/store";
         public static final String REST_API_PUBLISHER_VERSION_1 = "v1.0";
+        public static final String REST_API_DEFAULT_VERSION = "v1";
+        public static final String REST_API_OLD_VERSION = "v0.16";
         public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
         public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
                 REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_1;
         public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
-        public static final String REST_API_ADMIN_VERSION = "v0.15";
+        public static final String REST_API_ADMIN_VERSION = "v0.16";
         public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION;
         public static final String REST_API_ADMIN_IMPORT_API_RESOURCE = "/import/api";
         public static final String IMPORT_API_PRESERVE_PROVIDER = "preserveProvider";
@@ -1832,12 +1850,23 @@ public final class APIConstants {
     public static final String API_KEY_REVOKE_PATH = "/apikey/revoke";
 
     public static final String SKIP_ROLES_BY_REGEX = "skipRolesByRegex";
+    
+    /**
+     * API categories related constants
+     */
+    public static final String API_CATEGORIES_CATEGORY_NAME = "apiCategories_categoryName";
+    public static final String API_CATEGORY = "api-category";
 
     // AWS Lambda: Constants for aws lambda
     public static final String AWS_SECRET_KEY = "AWS_SECRET_KEY";
     public static final int AWS_ENCRYPTED_SECRET_KEY_LENGTH = 620;
+    public static final int AWS_DEFAULT_CONNECTION_TIMEOUT = 50000;
     public static final String AMZN_ACCESS_KEY = "amznAccessKey";
     public static final String AMZN_SECRET_KEY = "amznSecretKey";
     public static final String NO_ENTITY_BODY = "NO_ENTITY_BODY";
+
+    public static final String JWT_AUTHENTICATION_CONFIG = "JWTAuthentication";
+    public static final String JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION =
+            JWT_AUTHENTICATION_CONFIG + ".EnableSubscriptionValidationViaKeyManager";
 
 }

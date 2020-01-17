@@ -303,6 +303,8 @@ function Properties(props) {
                     apiAdditionalProperties={additionalProperties}
                     {...props}
                     setEditing={setEditing}
+                    isRestricted={isRestricted}
+                    api={api}
                 />);
             }
         }

@@ -170,6 +170,7 @@ public enum ExceptionCodes implements ErrorHandler {
     URL_NOT_RECOGNIZED_AS_WSDL(900683, "Invalid WSDL URL", 400, "Provided URL is not recognized as a WSDL"),
     NO_WSDL_AVAILABLE_FOR_API(900684, "WSDL Not Found", 404, "No WSDL Available for the API %s:%s"),
     CORRUPTED_STORED_WSDL(900685, "Corrupted Stored WSDL", 500, "The WSDL of the API %s is corrupted."),
+    UNSUPPORTED_WSDL_FILE_EXTENSION(900686, "Unsupported WSDL File Extension", 400, "Unsupported extension. Only supported extensions are .wsdl and .zip"),
 
 
     //OpenAPI/Swagger related codes [900750 900???)

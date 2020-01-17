@@ -1448,6 +1448,7 @@ public class RestApiUtil {
 
             for (int i = 0; i < uriList.size(); i++) {
                 String uri = uriList.get(i);
+                uri = uri.replace("/{version}", "");
                 try {
                     org.wso2.uri.template.URITemplate uriTemplate = new org.wso2.uri.template.URITemplate(uri);
                     String methodsForUri = methodsList.get(i);

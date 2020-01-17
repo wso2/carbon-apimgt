@@ -105,6 +105,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -406,7 +407,7 @@ public class APIUtilTest {
         Mockito.when(registry.get(artifactPath)).thenReturn(resource);
         Mockito.when(resource.getLastModified()).thenReturn(expectedAPI.getLastUpdated());
 
-        DateFormat df = new SimpleDateFormat("E MMM dd HH:mm:ss zzz yyyy");
+        DateFormat df = new SimpleDateFormat("E MMM dd HH:mm:ss zzz yyyy", Locale.US);
         Date createdTime = df.parse(expectedAPI.getCreatedTime());
         Mockito.when(resource.getCreatedTime()).thenReturn(createdTime);
 

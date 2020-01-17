@@ -103,6 +103,23 @@ export default class API extends Resource {
     }
 
     /**
+     * Get the Documents of an API
+     * @param {string} apiId api id.
+     * @param {string} documentId document id.
+     * @returns {promise} promise to get the document.
+     */
+    getDocumentByDocId(apiId, documentId) {
+        const promiseGet = this.client.then((client) => {
+            const payload = {
+                apiId,
+                documentId,
+            };
+            return client.apis['Documents'].get_apis__apiId__documents__documentId_(payload, this._requestMetaData());
+        });
+        return promiseGet;
+    }
+
+    /**
      * Get the Document content of an API by document Id
      * @param api_id {String} UUID of the API in which the document needed
      * @param docId {String} UUID of the Document need to view
@@ -303,7 +320,7 @@ export default class API extends Resource {
     addComment(apiId, comment) {
         return this.client.then((client) => {
             const payload = { apiId, body: comment };
-            return client.apis['Comments'].addCommentToAPI(payload, this._requestMetaData());
+            return client.apis.Comments.addCommentToAPI(payload, this._requestMetaData());
         });
     }
 
@@ -313,7 +330,7 @@ export default class API extends Resource {
      */
     getAllComments(apiId) {
         return this.client.then((client) => {
-            return client.apis['Comments'].getAllCommentsOfAPI({ apiId }, this._requestMetaData());
+            return client.apis.Comments.getAllCommentsOfAPI({ apiId }, this._requestMetaData());
         });
     }
 
@@ -324,7 +341,7 @@ export default class API extends Resource {
      */
     deleteComment(apiId, commentId) {
         return this.client.then((client) => {
-            return client.apis['Comments'].deleteComment({ apiId, commentId }, this._requestMetaData());
+            return client.apis.Comments.deleteComment({ apiId, commentId }, this._requestMetaData());
         });
     }
 
@@ -465,7 +482,7 @@ export default class API extends Resource {
 
     generateApiKey(applicationId, keyType, validityPeriod) {
         const promiseGet = this.client.then((client) => {
-            const payload = { applicationId: applicationId, keyType: keyType, body: {validityPeriod: validityPeriod} };
+            const payload = { applicationId, keyType, body: { validityPeriod } };
             return client.apis['API Keys'].post_applications__applicationId__api_keys__keyType__generate(
                 payload,
                 this._requestMetaData(),
@@ -500,23 +517,17 @@ export default class API extends Resource {
      * @param {string} apiId id of the API that needs to be subscribed
      * @param {string} applicationId id of the application that needs to be subscribed
      * @param {string} policy throttle policy applicable for the subscription
-     * @param {string} apiType API type
      * @param {function} callback callback url
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    subscribe(apiId, applicationId, policy, apiType = CONSTS.API_TYPE, callback = null) {
+    subscribe(apiId, applicationId, policy, callback = null) {
         const promiseCreateSubscription = this.client.then((client) => {
             let subscriptionData = null;
 
-            if (apiType === CONSTS.API_TYPE) {
-                subscriptionData = {
-                    apiId, applicationId, throttlingPolicy: policy, type: apiType,
-                };
-            } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
-                subscriptionData = {
-                    apiProductId: apiId, applicationId, throttlingPolicy: policy, type: apiType,
-                };
-            }
+            subscriptionData = {
+                apiId, applicationId, throttlingPolicy: policy,
+            };
+
             const payload = { body: subscriptionData };
             return client.apis.Subscriptions.post_subscriptions(payload, { 'Content-Type': 'application/json' });
         });
@@ -572,9 +583,10 @@ export default class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getTierByName(name, level, callback = null) {
+        const payload = { policyId: name, policyLevel: level };
         const promiseGet = this.client.then((client) => {
             return client.apis['Throttling Policies'].get_throttling_policies__policyLevel___policyId_(
-                { policyId: name, policyLevel: level },
+                payload,
                 this._requestMetaData(),
             );
         });
@@ -651,6 +663,8 @@ export default class API extends Resource {
 
     /**
      * method to get store settings such as grant types, scopes, application sharing settings etc
+     * Settings API can be invoked with and without access token, When a token is not present it will return the public
+     * settings info, when a valid token is present it will return all the settings info.
      * @returns {Promise} promise object return from SwaggerClient-js
      * @memberof API
      */
@@ -690,7 +704,7 @@ export default class API extends Resource {
      * */
     subscribeAlerts(alerts) {
         return this.client.then((client) => {
-            return client.apis['Alert Subscriptions'].subscribeToAlerts({body: alerts}, this._requestMetaData());
+            return client.apis['Alert Subscriptions'].subscribeToAlerts({ body: alerts }, this._requestMetaData());
         });
     }
 
@@ -759,6 +773,18 @@ export default class API extends Resource {
                 },
                 this._requestMetaData(),
             );
+        });
+    }
+
+    /**
+     * @static
+     * Get all API Categories of the given tenant
+     * @return {Promise}
+     * */
+    apiCategories(params) {
+        return this.client.then((client) => {
+            return client.apis['API Category (Collection)'].get_api_categories(
+                params, this._requestMetaData());
         });
     }
 }

@@ -1,8 +1,0 @@
-<%
-jagg.block("stats/apis-list", {
-    initializer:function (data) {
-
-    }
-
-});
-%>

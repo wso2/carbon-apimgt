@@ -2207,6 +2207,20 @@ class API extends Resource {
             );
         });
     }
+
+    /**
+     * @static
+     * Get all API Categories of the given tenant
+     * @return {Promise}
+     * */
+    static apiCategories() {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis["API Category (Collection)"].get_api_categories(
+                this._requestMetaData(),
+            );
+        });
+    }
 }
 
 
