@@ -3114,6 +3114,41 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ######################################################
+  # The "Recommendations" resource API
+  ######################################################
+  /recommendations:
+  #-----------------------------------------------------
+  # Get recommendations for a user
+  #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+      summary:
+        Give API recommendations for a user
+      description:
+        This API can be used to get recommended APIs for a user who logs into the API store
+      tags:
+        - Recommendations
+      responses:
+        200:
+          description: |
+            OK.
+            Requested recommendations are returned
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests
+              type: string
+          schema:
+            $ref: '#/definitions/Recommendations'
+        404:
+            description: |
+              Recommendations not Found.
+            schema:
+              $ref: '#/definitions/Error'
+
   ####################################################
   # Store Alerts management REST API
   ####################################################
@@ -5104,6 +5139,9 @@ definitions:
       monetizationEnabled:
         type: boolean
         default: false
+      recommendationEnabled:
+        type: boolean
+        default: false
       IsUnlimitedTierPaid:
         type: boolean
         default: false
@@ -5365,6 +5403,39 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/APICategory'
+
+  #-----------------------------------------------------
+  # The Recommendations resource
+  #-----------------------------------------------------
+  Recommendations:
+    title: API recommendations
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of APIs returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/recommendedAPI'
+
+  #-----------------------------------------------------
+  # The Recommended API resource
+  #-----------------------------------------------------
+  recommendedAPI:
+    title: Recommended API
+    properties:
+      id:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        example: CalculatorAPI
+      avgRating:
+        type: string
+        description: Average rating of the API
+        example: 4.5
 
 #-----------------------------------------------------
 # END-OF-FILE
