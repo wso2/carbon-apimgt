@@ -2306,7 +2306,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         try {
             isSubscribed = apiMgtDAO.isSubscribedToApp(apiIdentifier, userId, applicationId);
         } catch (APIManagementException e) {
-            String msg = "Failed to check if user(" + userId + ") with appId " + applicationId + "has subscribed to "
+            String msg = "Failed to check if user(" + userId + ") with appId " + applicationId + " has subscribed to "
                     + apiIdentifier;
             log.error(msg, e);
             throw new APIManagementException(msg, e);
