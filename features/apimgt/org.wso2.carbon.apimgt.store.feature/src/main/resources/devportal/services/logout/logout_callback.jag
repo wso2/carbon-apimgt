@@ -33,6 +33,8 @@
     response.addCookie(cookie);
     cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P1', 'value':'', 'path': site.context + "/services/logout", "secure": true, "maxAge": 2};
     response.addCookie(cookie);
+    cookie = {'name': 'WSO2_AM_REFRESH_TOKEN_1_Default', 'value':'', 'path': site.context + "/", "secure": true, "maxAge": 2};
+    response.addCookie(cookie);
 
     log.debug("redirecting to logout");
     response.sendRedirect(site.context + "/logout");
