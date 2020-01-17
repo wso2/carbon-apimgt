@@ -201,15 +201,9 @@ const ApplicationCreate = (props) => {
                 margin='normal'
                 variant='outlined'
             >
-<<<<<<< HEAD
-                {tokenTypeList.map((type) => (
-                    <MenuItem key={type} value={type}>
-                        {type}
-=======
                 {Object.entries(Application.TOKEN_TYPES).map(([key, value]) => (
                     <MenuItem key={value.displayName} value={key}>
                         {value.displayName}
->>>>>>> fixing https://github.com/wso2/product-apim/issues/7027
                     </MenuItem>
                 ))}
             </TextField>
