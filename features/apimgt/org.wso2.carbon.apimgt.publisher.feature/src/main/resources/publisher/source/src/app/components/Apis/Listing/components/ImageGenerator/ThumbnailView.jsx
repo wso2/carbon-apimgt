@@ -167,6 +167,7 @@ const styles = (theme) => ({
         cursor: 'pointer',
         marginRight: 10,
         display: 'inline-block',
+        border: 'solid 1px #ccc',
     },
     actionBox: {
         boxShadow:
