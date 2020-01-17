@@ -15,14 +15,14 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class GraphQLQueryDepthInfoDTO   {
   
-    private String apiId = null;
+    private Integer apiId = null;
     private String role = null;
     private Integer depthValue = null;
 
   /**
    * The API id to which a role-depth mapping is being specified 
    **/
-  public GraphQLQueryDepthInfoDTO apiId(String apiId) {
+  public GraphQLQueryDepthInfoDTO apiId(Integer apiId) {
     this.apiId = apiId;
     return this;
   }
@@ -31,10 +31,10 @@ public class GraphQLQueryDepthInfoDTO   {
   @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", required = true, value = "The API id to which a role-depth mapping is being specified ")
   @JsonProperty("apiId")
   @NotNull
-  public String getApiId() {
+  public Integer getApiId() {
     return apiId;
   }
-  public void setApiId(String apiId) {
+  public void setApiId(Integer apiId) {
     this.apiId = apiId;
   }
 

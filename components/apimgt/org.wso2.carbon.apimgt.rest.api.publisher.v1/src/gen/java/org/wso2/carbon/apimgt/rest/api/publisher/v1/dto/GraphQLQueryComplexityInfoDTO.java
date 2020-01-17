@@ -18,14 +18,14 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class GraphQLQueryComplexityInfoDTO   {
   
-    private String apiId = null;
+    private Integer apiId = null;
     private Integer maxComplexity = null;
     private List<GraphQLCustomComplexityInfoDTO> list = new ArrayList<>();
 
   /**
    * The API id to which complexity related data is being specified 
    **/
-  public GraphQLQueryComplexityInfoDTO apiId(String apiId) {
+  public GraphQLQueryComplexityInfoDTO apiId(Integer apiId) {
     this.apiId = apiId;
     return this;
   }
@@ -33,10 +33,10 @@ public class GraphQLQueryComplexityInfoDTO   {
   
   @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "The API id to which complexity related data is being specified ")
   @JsonProperty("-apiId")
-  public String getApiId() {
+  public Integer getApiId() {
     return apiId;
   }
-  public void setApiId(String apiId) {
+  public void setApiId(Integer apiId) {
     this.apiId = apiId;
   }
 
