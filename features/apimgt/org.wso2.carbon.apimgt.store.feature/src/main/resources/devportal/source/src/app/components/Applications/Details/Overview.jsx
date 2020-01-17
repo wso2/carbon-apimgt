@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Table from '@material-ui/core/Table';
@@ -21,7 +21,7 @@ import { app } from 'Settings';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import API from 'AppData/api';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import Application from 'AppData/Application';
 import TokenManager from 'AppComponents/Shared/AppsAndKeys/TokenManager';
 
 
@@ -89,7 +89,6 @@ const useStyles = makeStyles((theme) => ({
  */
 function Overview(props) {
     const classes = useStyles();
-    const theme = useTheme();
     const [application, setApplication] = useState(null);
     const [tierDescription, setTierDescription] = useState(null);
     const [notFound, setNotFound] = useState(false);
@@ -189,7 +188,7 @@ function Overview(props) {
                                 </div>
                             </TableCell>
                             <TableCell>
-                                {application.tokenType}
+                                {Application.TOKEN_TYPES[application.tokenType].displayName}
                             </TableCell>
                         </TableRow>
                         <TableRow>
