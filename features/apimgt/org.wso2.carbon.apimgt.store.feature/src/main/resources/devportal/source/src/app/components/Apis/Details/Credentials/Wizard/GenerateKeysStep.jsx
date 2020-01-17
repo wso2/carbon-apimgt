@@ -27,13 +27,17 @@ import Application from 'AppData/Application';
 import API from 'AppData/api';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
+import cloneDeep from 'lodash.clonedeep';
 import ButtonPanel from './ButtonPanel';
 
-const useStyles = makeStyles(theme => ({
-    formControl: {
-      margin: theme.spacing(3),
+const useStyles = makeStyles((theme) => ({
+    keyConfigWrapper: {
+        paddingLeft: theme.spacing(4),
     },
-  }));
+    radioWrapper: {
+        flexDirection: 'row',
+    },
+}));
 
 const generateKeysStep = (props) => {
     const keyStates = {
@@ -65,7 +69,11 @@ const generateKeysStep = (props) => {
     * @memberof Wizard
     */
     const handleRadioChange = (event) => {
-        setSelectedType(event.target.value);
+        const newKeyType = event.target.value;
+        setSelectedType(newKeyType);
+        const newKeyRequest = cloneDeep(keyRequest);
+        newKeyRequest.keyType = newKeyType;
+        setKeyRequest(newKeyRequest);
     };
 
     useEffect(() => {
@@ -74,7 +82,7 @@ const generateKeysStep = (props) => {
         const promisedSettings = api.getSettings();
         promisedSettings
             .then((response) => {
-                const newRequest = { ...keyRequest };
+                const newRequest = cloneDeep(keyRequest);
                 newRequest.serverSupportedGrantTypes = response.obj.grantTypes;
                 newRequest.supportedGrantTypes = response.obj.grantTypes.filter((item) => item !== 'authorization_code'
                     && item !== 'implicit');
@@ -128,7 +136,7 @@ const generateKeysStep = (props) => {
                             id='Apis.Details.Credentials.Wizard.GenerateKeysStep.keyType'
                         />
                     </FormLabel>
-                    <RadioGroup value={selectedType} onChange={handleRadioChange}>
+                    <RadioGroup value={selectedType} onChange={handleRadioChange} classes={{ root: classes.radioWrapper }}>
                         <FormControlLabel
                             value='PRODUCTION'
                             control={<Radio />}
@@ -154,13 +162,13 @@ const generateKeysStep = (props) => {
                     isUserOwner={isUserOwner}
                     setGenerateEnabled={setNextActive}
                 />
-                <ButtonPanel
-                    classes={classes}
-                    currentStep={currentStep}
-                    handleCurrentStep={generateKeys}
-                    nextActive={nextActive}
-                />
             </div>
+            <ButtonPanel
+                classes={classes}
+                currentStep={currentStep}
+                handleCurrentStep={generateKeys}
+                nextActive={nextActive}
+            />
         </>
     );
 };

@@ -24,7 +24,14 @@ import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import cloneDeep from 'lodash.clonedeep';
 import { injectIntl } from 'react-intl';
+import { makeStyles } from '@material-ui/core/styles';
 import ButtonPanel from './ButtonPanel';
+
+const useStyles = makeStyles((theme) => ({
+    appCreateFormWrapper: {
+        paddingLeft: theme.spacing(2),
+    },
+}));
 
 const createAppStep = (props) => {
     const APPLICATION_STATES = {
@@ -45,7 +52,7 @@ const createAppStep = (props) => {
     const [allAppAttributes, setAllAppAttributes] = useState(null);
     const [notFound, setNotFound] = useState(false);
     const {
-        currentStep, setCreatedApp, incrementStep, intl, setStepStatus, stepStatuses, classes,
+        currentStep, setCreatedApp, incrementStep, intl, setStepStatus, stepStatuses,
     } = props;
 
     const validateName = (value) => {
@@ -188,8 +195,10 @@ const createAppStep = (props) => {
             });
     }, []);
 
+    const classes = useStyles();
+
     return (
-        <>
+        <div className={classes.appCreateFormWrapper}>
             <Box px={2} display='flex' justifyContent='flex-start'>
                 <Grid item xs={10} md={6}>
                     <ApplicationCreateForm
@@ -212,7 +221,7 @@ const createAppStep = (props) => {
                 currentStep={currentStep}
                 handleCurrentStep={createApplication}
             />
-        </>
+        </div>
     );
 };
 

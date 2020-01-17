@@ -32,20 +32,22 @@ import ViewSecret from './ViewSecret';
  *
  * @param {*} theme
  */
-const styles = theme => ({
+const styles = (theme) => ({
     bootstrapRoot: {
         padding: 0,
         'label + &': {
             marginTop: theme.spacing(3),
         },
+        flex: 1,
+        marginRight: theme.spacing(1),
     },
     bootstrapInput: {
         borderRadius: 4,
         backgroundColor: theme.palette.common.white,
         border: '1px solid #ced4da',
         padding: '5px 12px',
-        width: 350,
         height: 100,
+        width: '100%',
         transition: theme.transitions.create(['border-color', 'box-shadow']),
         fontFamily: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"',
             'Arial', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"'].join(','),
@@ -67,6 +69,7 @@ const styles = theme => ({
         marginRight: 10,
         width: 100,
         'text-align-last': 'center',
+        whiteSpace: 'nowrap',
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth - theme.custom.leftMenu.width,
@@ -91,7 +94,7 @@ class ViewToken extends React.Component {
      *
      * @memberof ViewToken
      */
-    onCopy = name => () => {
+    onCopy = (name) => () => {
         this.setState({
             [name]: true,
         });
@@ -138,16 +141,18 @@ class ViewToken extends React.Component {
                 )}
                 <InlineMessage type='warn'>
                     <Typography variant='h5' component='h3'>
-                        {(token.isOauth) && <FormattedMessage
-                            id='Shared.AppsAndKeys.ViewToken.please.copy'
-                            defaultMessage='Please Copy the Access Token'
-                        />
-                        }
-                        {(!token.isOauth) && <FormattedMessage
-                            id='Shared.AppsAndKeys.ViewToken.please.copy.apikey'
-                            defaultMessage='Please Copy the API Key'
-                        />
-                        }
+                        {(token.isOauth) && (
+                            <FormattedMessage
+                                id='Shared.AppsAndKeys.ViewToken.please.copy'
+                                defaultMessage='Please Copy the Access Token'
+                            />
+                        )}
+                        {(!token.isOauth) && (
+                            <FormattedMessage
+                                id='Shared.AppsAndKeys.ViewToken.please.copy.apikey'
+                                defaultMessage='Please Copy the API Key'
+                            />
+                        )}
                     </Typography>
                     <Typography component='p'>
                         <FormattedMessage
@@ -160,21 +165,24 @@ class ViewToken extends React.Component {
                 </InlineMessage>
                 <div className={classes.epWrapper}>
                     <Typography className={classes.prodLabel}>
-                        {(token.isOauth) && <FormattedMessage
-                            id='Shared.AppsAndKeys.ViewToken.access.token'
-                            defaultMessage='Access Token'
-                        />
-                        }
-                        {(!token.isOauth) && <FormattedMessage
-                            id='Shared.AppsAndKeys.ViewToken.apikey'
-                            defaultMessage='API Key'
-                        />
-                        }
+                        {(token.isOauth) && (
+                            <FormattedMessage
+                                id='Shared.AppsAndKeys.ViewToken.access.token'
+                                defaultMessage='Access Token'
+                            />
+                        )}
+                        {(!token.isOauth) && (
+                            <FormattedMessage
+                                id='Shared.AppsAndKeys.ViewToken.apikey'
+                                defaultMessage='API Key'
+                            />
+                        )}
                     </Typography>
                     <TextField
                         defaultValue={token.accessToken}
                         id='bootstrap-input'
                         multiline
+                        fullWidth
                         rows={4}
                         InputProps={{
                             disableUnderline: true,
@@ -204,17 +212,20 @@ class ViewToken extends React.Component {
                         id='Shared.AppsAndKeys.ViewToken.info.second'
                         defaultMessage=' seconds'
                     />
-                    {token.isOauth && <FormattedMessage
-                        id='Shared.AppsAndKeys.ViewToken.info.third'
-                        defaultMessage=' and the token has ('
-                    />
-                    }
+                    {token.isOauth && (
+                        <FormattedMessage
+                            id='Shared.AppsAndKeys.ViewToken.info.third'
+                            defaultMessage=' and the token has ('
+                        />
+                    )}
                     {this.getTokeScopesString(token.tokenScopes)}
-                    {token.isOauth && <FormattedMessage
-                        id='Shared.AppsAndKeys.ViewToken.info.fourth'
-                        defaultMessage=') scopes'
-                    />
-                    }.
+                    {token.isOauth && (
+                        <FormattedMessage
+                            id='Shared.AppsAndKeys.ViewToken.info.fourth'
+                            defaultMessage=') scopes'
+                        />
+                    )}
+.
                 </FormHelperText>
             </div>
         );
