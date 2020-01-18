@@ -1734,6 +1734,47 @@ public class SQLConstants {
     public static final String REMOVE_SECURITY_AUDIT_MAP_SQL =
             "DELETE FROM AM_SECURITY_AUDIT_UUID_MAPPING WHERE API_ID = ?";
 
+    public static final String ADD_COMPLEXITY_DETAILS_SQL =
+            "INSERT INTO AM_GRAPHQL_QUERY_ANALYSIS (API_ID, COMPLEXITY_ENABLED, MAX_COMPLEXITY) VALUES (?,?,?)";
+
+    public static final String ADD_CUSTOM_COMPLEXITY_DETAILS_SQL =
+            "INSERT INTO AM_GRAPHQL_COMPLEXITY (UUID, API_ID, TYPE, FIELD, COMPLEXITY_VALUE) VALUES (?,?,?,?,?)";
+
+    public static final String GET_COMPLEXITY_DETAILS_SQL =
+            " SELECT" +
+            "   API_ID," +
+            "   MAX_COMPLEXITY" +
+            " FROM" +
+            "   AM_GRAPHQL_QUERY_ANALYSIS " +
+            " WHERE" +
+            "   API_ID = ?";
+
+    public static final String GET_CUSTOM_COMPLEXITY_DETAILS_SQL =
+            " SELECT" +
+            "   TYPE," +
+            "   FIELD," +
+            "   COMPLEXITY_VALUE," +
+            " FROM" +
+            "   AM_GRAPHQL_COMPLEXITY " +
+            " WHERE" +
+            "   API_ID = ?";
+
+    public static final String UPDATE_COMPLEXITY_DETAILS_SQL =
+            " UPDATE AM_GRAPHQL_QUERY_ANALYSIS " +
+            " SET " +
+            "   MAX_COMPLEXITY = ?" +
+            " WHERE " +
+            "    API_ID = ?";
+
+    public static final String UPDATE_CUSTOM_COMPLEXITY_DETAILS_SQL =
+            " UPDATE AM_GRAPHQL_COMPLEXITY " +
+            " SET " +
+            "   COMPLEXITY_VALUE = ? " +
+            " WHERE " +
+            "    API_ID = ?" +
+            "    AND TYPE = ? " +
+            "    AND FIELD = ?";
+
     public static final String ADD_API_LIFECYCLE_EVENT_SQL =
             " INSERT INTO AM_API_LC_EVENT (API_ID, PREVIOUS_STATE, NEW_STATE, USER_ID, TENANT_ID, EVENT_DATE)" +
             " VALUES (?,?,?,?,?,?)";
