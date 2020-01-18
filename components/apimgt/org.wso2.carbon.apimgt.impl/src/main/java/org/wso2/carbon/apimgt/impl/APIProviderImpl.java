@@ -157,12 +157,12 @@ import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleBean
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.Property;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.common.CommonConstants;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.ActionConstants;
+import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.CollectionImpl;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
@@ -203,7 +203,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
@@ -1595,6 +1594,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 api.setEndpointUTUsername(oldApi.getEndpointUTUsername());
                 api.setEndpointUTPassword(oldApi.getEndpointUTPassword());
+
                 if (log.isDebugEnabled()) {
                     log.debug("Using the previous username and password for endpoint security");
                 }
@@ -1622,6 +1622,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         StringUtils.isBlank(endpointSecurity.getPassword())) {
                                     endpointSecurity.setUsername(oldEndpointSecurity.getUsername());
                                     endpointSecurity.setPassword(oldEndpointSecurity.getPassword());
+                                    if (endpointSecurity.getType().equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
+                                        endpointSecurity.setUniqueIdentifier(oldEndpointSecurity.getUniqueIdentifier());
+                                        endpointSecurity.setGrantType(oldEndpointSecurity.getGrantType());
+                                        endpointSecurity.setTokenUrl(oldEndpointSecurity.getTokenUrl());
+                                        endpointSecurity.setClientId(oldEndpointSecurity.getClientId());
+                                        endpointSecurity.setClientSecret(oldEndpointSecurity.getClientSecret());
+                                        endpointSecurity.setCustomParameters(oldEndpointSecurity.getCustomParameters());
+                                    }
                                 }
                                 endpointSecurityJson.replace(APIConstants.ENDPOINT_SECURITY_PRODUCTION, new JSONParser()
                                         .parse(new ObjectMapper().writeValueAsString(endpointSecurity)));
@@ -1639,6 +1647,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         StringUtils.isBlank(endpointSecurity.getPassword())) {
                                     endpointSecurity.setUsername(oldEndpointSecurity.getUsername());
                                     endpointSecurity.setPassword(oldEndpointSecurity.getPassword());
+                                    if (endpointSecurity.getType().equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
+                                        endpointSecurity.setUniqueIdentifier(oldEndpointSecurity.getUniqueIdentifier());
+                                        endpointSecurity.setGrantType(oldEndpointSecurity.getGrantType());
+                                        endpointSecurity.setTokenUrl(oldEndpointSecurity.getTokenUrl());
+                                        endpointSecurity.setClientId(oldEndpointSecurity.getClientId());
+                                        endpointSecurity.setClientSecret(oldEndpointSecurity.getClientSecret());
+                                        endpointSecurity.setCustomParameters(oldEndpointSecurity.getCustomParameters());
+                                    }
                                 }
                                 endpointSecurityJson.replace(APIConstants.ENDPOINT_SECURITY_SANDBOX,
                                         new JSONParser()
