@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.Wsdl;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.registry.api.Resource;
 
@@ -235,6 +236,25 @@ public interface APIManager {
      * @throws APIManagementException if the asking documentation content is unavailable
      */
     String getDocumentationContent(Identifier identifier, String documentationName) throws APIManagementException;
+
+    /**
+     * Returns the GraphqlComplexityInfo object for a given API ID
+     *
+     * @param apiId,        API ID
+     * @return GraphqlComplexityInfo object
+     * @throws APIManagementException if failed to retrieve complexity details of the given API
+     */
+    GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiId) throws APIManagementException;
+
+    /**
+     * Add complexity details given the GraphqlComplexityInfo object
+     *
+     *
+     * @param apiIdentifier
+     * @param graphqlComplexityInfo   GraphqlComplexityInfo object
+     * @throws APIManagementException if failed to add complexity details
+     */
+    void addComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException;
 
     /**
      * Retrieves the subscriber from the given access token
