@@ -60,6 +60,8 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.CustomComplexityDetails;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -14189,6 +14191,157 @@ public class ApiMgtDAO {
             handleException("Error while getting audit api id: ", e);
         }
         return auditUuid;
+    }
+
+    /**
+     * Add complexity details
+     *
+     *
+     * @param apiIdentifier APIIdentifier object to retrieve API ID
+     * @param graphqlComplexityInfo GraphqlComplexityDetails object
+     * @throws APIManagementException
+     */
+    public void addComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps1 = null;
+        PreparedStatement ps2 = null;
+        PreparedStatement ps3 = null;
+        PreparedStatement ps4 = null;
+        PreparedStatement ps5 = null;
+        String checkEntry = SQLConstants.GET_COMPLEXITY_DETAILS_SQL;
+        String addComplexityDetails = SQLConstants.ADD_COMPLEXITY_DETAILS_SQL;
+        String addCustomComplexityDetails = SQLConstants.ADD_CUSTOM_COMPLEXITY_DETAILS_SQL;
+        String updateComplexityDetails = SQLConstants.UPDATE_COMPLEXITY_DETAILS_SQL;
+        String updateCustomComplexityDetails = SQLConstants.UPDATE_CUSTOM_COMPLEXITY_DETAILS_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            int apiId = getAPIID(apiIdentifier, conn);
+            ps1 = conn.prepareStatement(checkEntry);
+            ps1.setInt(1, apiId);
+            rs = ps1.executeQuery();
+            if (rs != null) {
+                // Entries already exists for this API_ID. Hence an update is performed.
+                try {
+                    ps2 = conn.prepareStatement(updateComplexityDetails);
+                    ps2.setInt(1, graphqlComplexityInfo.getMaxComplexity());
+                    ps2.setInt(2, apiId);
+                    ps2.executeUpdate();
+                } catch (SQLException e) {
+                    handleException("Error while updating complexity details: ", e);
+                }
+                try {
+                    ps3 = conn.prepareStatement(updateCustomComplexityDetails);
+                    for (CustomComplexityDetails customComplexity : graphqlComplexityInfo.getList()) {
+                        ps3.setInt(1, customComplexity.getComplexityValue());
+                        ps3.setInt(2, apiId);
+                        ps3.setString(3, customComplexity.getType());
+                        ps3.setString(4, customComplexity.getField());
+                        ps3.executeUpdate();
+                    }
+                } catch (SQLException e) {
+                    handleException("Error while updating custom complexity details: ", e);
+                }
+            } else {
+                // No entries found for this API_ID. Hence an insert is performed.
+                try {
+                    ps4 = conn.prepareStatement(addComplexityDetails);
+                    ps4.setInt(1, apiId);
+                    ps4.setBoolean(2, true);
+                    ps4.setInt(3, graphqlComplexityInfo.getMaxComplexity());
+                    ps4.executeUpdate();
+                } catch (SQLException e) {
+                    handleException("Error while adding complexity details: ", e);
+                }
+                try {
+                    ps5 = conn.prepareStatement(addCustomComplexityDetails);
+                    for (CustomComplexityDetails customComplexity : graphqlComplexityInfo.getList()) {
+                        UUID uuid = UUID.randomUUID();
+                        String randomUUIDString = uuid.toString();
+                        ps5.setString(1, randomUUIDString);
+                        ps5.setInt(2, apiId);
+                        ps5.setString(3, customComplexity.getType());
+                        ps5.setString(4, customComplexity.getField());
+                        ps5.setInt(5, customComplexity.getComplexityValue());
+                        ps5.executeUpdate();
+                    }
+                } catch (SQLException e) {
+                    handleException("Error while adding custom complexity details: ", e);
+                }
+            }
+        } catch (SQLException ex) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e) {
+                    log.error("Error while rolling back the failed operation", e);
+                }
+            }
+            handleException("Error while adding complexity details: ", ex);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps1, conn, rs);
+            APIMgtDBUtil.closeAllConnections(ps2, null, null);
+            APIMgtDBUtil.closeAllConnections(ps3, null, null);
+            APIMgtDBUtil.closeAllConnections(ps4, null, null);
+            APIMgtDBUtil.closeAllConnections(ps5, null, null);
+        }
+    }
+
+    /**
+     * Get complexity details
+     *
+     * @param apiIdentifier APIIdentifier object to retrieve API ID
+     * @return info about the complexity details
+     * @throws APIManagementException
+     */
+    public GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiIdentifier) throws APIManagementException {
+        GraphqlComplexityInfo graphqlComplexityInfo = new GraphqlComplexityInfo();
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps1 = null;
+        PreparedStatement ps2 = null;
+        String getComplexityDetails = SQLConstants.GET_COMPLEXITY_DETAILS_SQL;
+        String getCustomComplexityDetails = SQLConstants.GET_CUSTOM_COMPLEXITY_DETAILS_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            int apiId = getAPIID(apiIdentifier, conn);
+            ps1 = conn.prepareStatement(getComplexityDetails);
+            ps1.setInt(1, apiId);
+            rs = ps1.executeQuery();
+            if (rs.next()) {
+                graphqlComplexityInfo.setApiId(rs.getInt("API_ID"));
+                graphqlComplexityInfo.setMaxComplexity(rs.getInt("MAX_COMPLEXITY"));
+                List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<CustomComplexityDetails>();
+                try {
+                    ps2 = conn.prepareStatement(getCustomComplexityDetails);
+                    ps2.setInt(1, apiId);
+                    rs = ps2.executeQuery();
+                    while (rs.next()) {
+                        CustomComplexityDetails customComplexityDetails = new CustomComplexityDetails();
+                        customComplexityDetails.setType(rs.getString("TYPE"));
+                        customComplexityDetails.setField(rs.getString("FIELD"));
+                        customComplexityDetails.setComplexityValue(rs.getInt("COMPLEXITY_VALUE"));
+                        customComplexityDetailsList.add(customComplexityDetails);
+                    }
+                    graphqlComplexityInfo.setList(customComplexityDetailsList);
+                } catch (SQLException e) {
+                    handleException("Error while retrieving custom complexity details: ", e);
+                }
+            }
+        } catch (SQLException ex) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e) {
+                    log.error("Error while rolling back the failed operation", e);
+                }
+            }
+            handleException("Error while retrieving complexity details: ", ex);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps1, conn, rs);
+            APIMgtDBUtil.closeAllConnections(ps2, null, null);
+        }
+        return graphqlComplexityInfo;
     }
 
     /**
