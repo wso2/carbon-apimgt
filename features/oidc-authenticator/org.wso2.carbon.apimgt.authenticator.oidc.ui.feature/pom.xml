@@ -70,7 +70,7 @@
                                 </bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.ui:${carbon.kernel.feature.version}
+                                <importFeatureDef>org.wso2.carbon.core.ui:compatible:${carbon.kernel.feature.version}
                                 </importFeatureDef>
                             </importFeatures>
                         </configuration>
