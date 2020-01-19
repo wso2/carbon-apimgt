@@ -14309,7 +14309,6 @@ public class ApiMgtDAO {
             ps1.setInt(1, apiId);
             rs = ps1.executeQuery();
             if (rs.next()) {
-                graphqlComplexityInfo.setApiId(rs.getInt("API_ID"));
                 graphqlComplexityInfo.setMaxComplexity(rs.getInt("MAX_COMPLEXITY"));
                 List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<CustomComplexityDetails>();
                 try {

@@ -1742,7 +1742,6 @@ public class SQLConstants {
 
     public static final String GET_COMPLEXITY_DETAILS_SQL =
             " SELECT" +
-            "   API_ID," +
             "   MAX_COMPLEXITY" +
             " FROM" +
             "   AM_GRAPHQL_QUERY_ANALYSIS " +
