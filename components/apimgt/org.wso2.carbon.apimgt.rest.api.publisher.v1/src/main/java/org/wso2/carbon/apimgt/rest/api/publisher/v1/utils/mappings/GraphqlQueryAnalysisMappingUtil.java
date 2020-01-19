@@ -40,7 +40,6 @@ public class GraphqlQueryAnalysisMappingUtil {
     public static GraphQLQueryComplexityInfoDTO fromGraphqlComplexityInfotoDTO(GraphqlComplexityInfo graphqlComplexityInfo) {
         GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO = new GraphQLQueryComplexityInfoDTO();
         List<GraphQLCustomComplexityInfoDTO> graphQLCustomComplexityInfoDTOList = new ArrayList<GraphQLCustomComplexityInfoDTO>();
-        graphQLQueryComplexityInfoDTO.setApiId(graphqlComplexityInfo.getApiId());
         graphQLQueryComplexityInfoDTO.setMaxComplexity(graphqlComplexityInfo.getMaxComplexity());
         for (CustomComplexityDetails customComplexityDetails : graphqlComplexityInfo.getList()) {
             GraphQLCustomComplexityInfoDTO graphQLCustomComplexityInfoDTO = new GraphQLCustomComplexityInfoDTO();
@@ -62,7 +61,6 @@ public class GraphqlQueryAnalysisMappingUtil {
     public static GraphqlComplexityInfo fromDTOtoGraphqlComplexityInfo(GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO) {
         GraphqlComplexityInfo graphqlComplexityInfo = new GraphqlComplexityInfo();
         List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<CustomComplexityDetails>();
-        graphqlComplexityInfo.setApiId(graphQLQueryComplexityInfoDTO.getApiId());
         graphqlComplexityInfo.setMaxComplexity(graphQLQueryComplexityInfoDTO.getMaxComplexity());
         for (GraphQLCustomComplexityInfoDTO graphQLCustomComplexityInfoDTO : graphQLQueryComplexityInfoDTO.getList()) {
             CustomComplexityDetails customComplexityDetails = new CustomComplexityDetails();
