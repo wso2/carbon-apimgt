@@ -15,28 +15,8 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class GraphQLQueryDepthInfoDTO   {
   
-    private Integer apiId = null;
     private String role = null;
     private Integer depthValue = null;
-
-  /**
-   * The API id to which a role-depth mapping is being specified 
-   **/
-  public GraphQLQueryDepthInfoDTO apiId(Integer apiId) {
-    this.apiId = apiId;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", required = true, value = "The API id to which a role-depth mapping is being specified ")
-  @JsonProperty("apiId")
-  @NotNull
-  public Integer getApiId() {
-    return apiId;
-  }
-  public void setApiId(Integer apiId) {
-    this.apiId = apiId;
-  }
 
   /**
    * The user role to which the allowed maximum depth is being specified 
@@ -84,14 +64,13 @@ public class GraphQLQueryDepthInfoDTO   {
       return false;
     }
     GraphQLQueryDepthInfoDTO graphQLQueryDepthInfo = (GraphQLQueryDepthInfoDTO) o;
-    return Objects.equals(apiId, graphQLQueryDepthInfo.apiId) &&
-        Objects.equals(role, graphQLQueryDepthInfo.role) &&
+    return Objects.equals(role, graphQLQueryDepthInfo.role) &&
         Objects.equals(depthValue, graphQLQueryDepthInfo.depthValue);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiId, role, depthValue);
+    return Objects.hash(role, depthValue);
   }
 
   @Override
@@ -99,7 +78,6 @@ public class GraphQLQueryDepthInfoDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class GraphQLQueryDepthInfoDTO {\n");
     
-    sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("    role: ").append(toIndentedString(role)).append("\n");
     sb.append("    depthValue: ").append(toIndentedString(depthValue)).append("\n");
     sb.append("}");

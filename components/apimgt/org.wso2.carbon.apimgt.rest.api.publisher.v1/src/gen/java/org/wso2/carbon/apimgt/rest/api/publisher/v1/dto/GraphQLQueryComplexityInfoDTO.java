@@ -18,27 +18,8 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class GraphQLQueryComplexityInfoDTO   {
   
-    private Integer apiId = null;
     private Integer maxComplexity = null;
     private List<GraphQLCustomComplexityInfoDTO> list = new ArrayList<>();
-
-  /**
-   * The API id to which complexity related data is being specified 
-   **/
-  public GraphQLQueryComplexityInfoDTO apiId(Integer apiId) {
-    this.apiId = apiId;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "The API id to which complexity related data is being specified ")
-  @JsonProperty("-apiId")
-  public Integer getApiId() {
-    return apiId;
-  }
-  public void setApiId(Integer apiId) {
-    this.apiId = apiId;
-  }
 
   /**
    * The maximum complexity allowed for all queries of this API 
@@ -85,14 +66,13 @@ public class GraphQLQueryComplexityInfoDTO   {
       return false;
     }
     GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfo = (GraphQLQueryComplexityInfoDTO) o;
-    return Objects.equals(apiId, graphQLQueryComplexityInfo.apiId) &&
-        Objects.equals(maxComplexity, graphQLQueryComplexityInfo.maxComplexity) &&
+    return Objects.equals(maxComplexity, graphQLQueryComplexityInfo.maxComplexity) &&
         Objects.equals(list, graphQLQueryComplexityInfo.list);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiId, maxComplexity, list);
+    return Objects.hash(maxComplexity, list);
   }
 
   @Override
@@ -100,7 +80,6 @@ public class GraphQLQueryComplexityInfoDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class GraphQLQueryComplexityInfoDTO {\n");
     
-    sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("    maxComplexity: ").append(toIndentedString(maxComplexity)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
     sb.append("}");
