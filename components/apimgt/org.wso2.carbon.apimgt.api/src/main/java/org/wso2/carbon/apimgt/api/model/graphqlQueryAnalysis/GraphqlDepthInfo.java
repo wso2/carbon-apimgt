@@ -22,17 +22,8 @@ package org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis;
  */
 public class GraphqlDepthInfo {
 
-    private Integer apiId;
     private String role;
     private Integer depthValue;
-
-    public Integer getApiId() {
-        return apiId;
-    }
-
-    public void setApiId(Integer apiId) {
-        this.apiId = apiId;
-    }
 
     public String getRole() {
         return role;

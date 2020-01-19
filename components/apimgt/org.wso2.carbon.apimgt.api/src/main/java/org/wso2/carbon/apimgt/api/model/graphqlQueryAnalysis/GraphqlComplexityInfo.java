@@ -25,17 +25,8 @@ import java.util.List;
  */
 public class GraphqlComplexityInfo {
 
-    private Integer apiId;
     private Integer maxComplexity;
     private List<CustomComplexityDetails> list = new ArrayList<>();
-
-    public Integer getApiId() {
-        return apiId;
-    }
-
-    public void setApiId(Integer apiId) {
-        this.apiId = apiId;
-    }
 
     public Integer getMaxComplexity() {
         return maxComplexity;
