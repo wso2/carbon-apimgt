@@ -76,6 +76,9 @@ public enum ExceptionCodes implements ErrorHandler {
     API_PRODUCT_RESOURCE_ENDPOINT_UNDEFINED(900342,
             "Cannot create API Product, due to resources with undefined endpoints in their parent APIs",
             409, "Cannot create API Product %s, due to resources with undefined endpoints in their parent APIs %s"),
+    API_PRODUCT_WITH_UNSUPPORTED_LIFECYCLE_API(900343,
+            "Cannot create API Product, due to resources parent API being in an unsupported Life Cycle state",
+            409, "Cannot create API Product, due to resources parent API being in an unsupported Life Cycle state: %s"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),

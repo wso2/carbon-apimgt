@@ -6901,7 +6901,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateApiProductInfo(product);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
-        createAPIProduct(product);
 
         if (log.isDebugEnabled()) {
             log.debug("API Product details successfully added to the registry. API Product Name: " + product.getId().getName()
@@ -6925,6 +6924,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 continue;
             }
             if (api != null) {
+                validateApiLifeCycleForApiProducts(api);
+
                 api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
                 if (!apiToProductResourceMapping.containsKey(api)) {
                     apiToProductResourceMapping.put(api, new ArrayList<>());
@@ -6964,6 +6965,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         product.setProductResources(validResources);
         //now we have validated APIs and it's resources inside the API product. Add it to database
 
+        // Create registry artifact
+        createAPIProduct(product);
+
+        // Add to database
         apiMgtDAO.addAPIProduct(product, tenantDomain);
 
         return apiToProductResourceMapping;
@@ -7226,6 +7231,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException {
         return apiMgtDAO.getResourcePathsOfAPI(apiId);
+    }
+
+    private void validateApiLifeCycleForApiProducts(API api) throws APIManagementException {
+        String status = api.getStatus();
+
+        if (APIConstants.BLOCKED.equals(status) ||
+            APIConstants.PROTOTYPED.equals(status) ||
+            APIConstants.DEPRECATED.equals(status) ||
+            APIConstants.RETIRED.equals(status)) {
+            throw new APIManagementException("Cannot create API Product using API with following status: " + status,
+                    ExceptionCodes.from(ExceptionCodes.API_PRODUCT_WITH_UNSUPPORTED_LIFECYCLE_API, status));
+        }
     }
 
     /**
