@@ -3173,6 +3173,53 @@ public class ApiMgtDAO {
     }
 
     /**
+     *
+     * @param apiIdentifier
+     * @param userId
+     * @param applicationId
+     * @return true if user app subscribed for given APIIdentifier
+     * @throws APIManagementException if failed to check subscribed or not
+     */
+    public boolean isSubscribedToApp(APIIdentifier apiIdentifier, String userId, int applicationId)
+            throws APIManagementException {
+        boolean isSubscribed = false;
+        String loginUserName = getLoginUserName(userId);
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery = SQLConstants.GET_APP_SUBSCRIPTION_TO_API_SQL;
+
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_APP_SUBSCRIPTION_TO_API_CASE_INSENSITIVE_SQL;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+            ps.setString(2, apiIdentifier.getApiName());
+            ps.setString(3, apiIdentifier.getVersion());
+            ps.setString(4, loginUserName);
+            int tenantId;
+            tenantId = APIUtil.getTenantId(loginUserName);
+            ps.setInt(5, tenantId);
+            ps.setInt(6, applicationId);
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                isSubscribed = true;
+            }
+        } catch (SQLException e) {
+            handleException("Error while checking if user has subscribed to the API ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return isSubscribed;
+    }
+
+    /**
      * @param providerName Name of the provider
      * @return UserApplicationAPIUsage of given provider
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get

@@ -189,6 +189,8 @@
   "Apis.Listing.Listing.apis.main": "APIs",
   "Apis.Listing.NoApi.nodata.content": "There are no APIs to display right now.",
   "Apis.Listing.NoApi.nodata.title": "No APIs Available",
+  "Apis.Listing.Recommendations.name": "Name",
+  "Apis.Listing.Recommendations.rating": "Rating",
   "Apis.Listing.StarRatingBar.not.rated": "Not Rated",
   "Apis.Listing.StarRatingBar.user": "user",
   "Apis.Listing.StarRatingBar.users": "users",

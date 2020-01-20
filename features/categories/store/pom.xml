@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>feature-categories</artifactId>
-        <version>6.6.9-SNAPSHOT</version>
+        <version>6.6.11-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -106,7 +106,7 @@
                                 </importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.registry.community:${carbon.registry.version}
                                 </importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.registry.core:${carbon.kernel.version}
+                                <importFeatureDef>org.wso2.carbon.registry.core:compatible:${carbon.kernel.version}
                                 </importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.registry.extensions:${carbon.governance.version}
                                 </importFeatureDef>

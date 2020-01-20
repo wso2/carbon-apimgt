@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,21 +37,10 @@ public class OAuthAuthenticatorTest {
         OAuthAuthenticator oauthAuthenticator = new OauthAuthenticatorWrapper(apiManagerConfiguration);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE))
                 .thenReturn("true");
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.JWT_HEADER))
-                .thenReturn("true");
+        Mockito.when(apiManagerConfiguration.getJwtConfigurationDto()).thenReturn(new JWTConfigurationDto());
         oauthAuthenticator.initOAuthParams();
     }
 
-    @Test
-    public void initOAuthParamsWhileConfigIsCommented() throws Exception {
-        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
-        OAuthAuthenticator oauthAuthenticator = new OauthAuthenticatorWrapper(apiManagerConfiguration);
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE))
-                .thenReturn("false");
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.JWT_HEADER))
-                .thenReturn(null);
-        oauthAuthenticator.initOAuthParams();
-    }
 
     @Test
     public void authenticate() throws Exception {

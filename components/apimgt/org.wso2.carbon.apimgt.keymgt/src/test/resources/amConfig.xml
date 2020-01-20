@@ -10,7 +10,7 @@
         <minIdle>5</minIdle>
     </Database>
     <JWTConfiguration>
-        <EnableJWTGeneration>false</EnableJWTGeneration>
+        <EnableJWTGeneration>true</EnableJWTGeneration>
 	    <SignatureAlgorithm>NONE</SignatureAlgorithm>
     </JWTConfiguration>
     <APIUsageTracking>

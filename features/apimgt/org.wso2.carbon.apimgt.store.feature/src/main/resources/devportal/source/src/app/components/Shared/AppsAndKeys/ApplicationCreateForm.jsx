@@ -23,12 +23,14 @@ import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import ChipInput from 'material-ui-chip-input';
+import Application from 'AppData/Application';
+
 
 /**
  * @inheritdoc
  * @param {*} theme theme object
  */
-const styles = theme => ({
+const styles = (theme) => ({
     FormControl: {
         padding: theme.spacing(2),
         width: '100%',
@@ -107,7 +109,6 @@ const ApplicationCreate = (props) => {
         handleAddChip,
         handleDeleteChip,
     } = props;
-    const tokenTypeList = ['JWT', 'OAUTH'];
     return (
         <form noValidate autoComplete='off'>
             <TextField
@@ -126,7 +127,7 @@ const ApplicationCreate = (props) => {
                 })}
                 helperText={intl.formatMessage({
                     defaultMessage:
-                                    `Enter a name to identify the Application. 
+                        `Enter a name to identify the Application.
                                     You will be able to pick this application when subscribing to APIs`,
                     id: 'Shared.AppsAndKeys.ApplicationCreateForm.enter.a.name',
                 })}
@@ -136,7 +137,7 @@ const ApplicationCreate = (props) => {
                     defaultMessage: 'My Application',
                     id: 'Shared.AppsAndKeys.ApplicationCreateForm.my.mobile.application',
                 })}
-                onBlur={e => validateName(e.target.value)}
+                onBlur={(e) => validateName(e.target.value)}
                 error={!isNameValid}
                 inputProps={{ maxLength: 70 }}
             />
@@ -148,24 +149,28 @@ const ApplicationCreate = (props) => {
                 fullWidth
                 id='outlined-select-currency'
                 select
-                label={<FormattedMessage
-                    defaultMessage='Per Token Quota.'
-                    id='Shared.AppsAndKeys.ApplicationCreateForm.per.token.quota'
-                />}
+                label={(
+                    <FormattedMessage
+                        defaultMessage='Per Token Quota.'
+                        id='Shared.AppsAndKeys.ApplicationCreateForm.per.token.quota'
+                    />
+                )}
                 value={applicationRequest.throttlingPolicy}
                 name='throttlingPolicy'
                 onChange={handleChange}
-                helperText={<FormattedMessage
-                    defaultMessage={`Assign API request quota per access token.
+                helperText={(
+                    <FormattedMessage
+                        defaultMessage={`Assign API request quota per access token.
                             Allocated quota will be shared among all
                             the subscribed APIs of the application.`}
-                    id='Shared.AppsAndKeys.ApplicationCreateForm.assign.api.request'
-                />}
+                        id='Shared.AppsAndKeys.ApplicationCreateForm.assign.api.request'
+                    />
+                )}
                 margin='normal'
                 variant='outlined'
             >
-                {throttlingPolicyList.map(policy => (
-                    <MenuItem key={policy} value={policy} >
+                {throttlingPolicyList.map((policy) => (
+                    <MenuItem key={policy} value={policy}>
                         {policy}
                     </MenuItem>
                 ))}
@@ -178,23 +183,27 @@ const ApplicationCreate = (props) => {
                 fullWidth
                 id='outlined-select-currency'
                 select
-                label={<FormattedMessage
-                    defaultMessage='Token Type'
-                    id='Shared.AppsAndKeys.ApplicationCreateForm.token.type'
-                />}
+                label={(
+                    <FormattedMessage
+                        defaultMessage='Token Type'
+                        id='Shared.AppsAndKeys.ApplicationCreateForm.token.type'
+                    />
+                )}
                 value={applicationRequest.tokenType}
                 name='tokenType'
                 onChange={handleChange}
-                helperText={<FormattedMessage
-                    defaultMessage='Select token type'
-                    id='Shared.AppsAndKeys.ApplicationCreateForm.select.token.type'
-                />}
+                helperText={(
+                    <FormattedMessage
+                        defaultMessage='Select token type'
+                        id='Shared.AppsAndKeys.ApplicationCreateForm.select.token.type'
+                    />
+                )}
                 margin='normal'
                 variant='outlined'
             >
-                {tokenTypeList.map(type => (
-                    <MenuItem key={type} value={type} >
-                        {type}
+                {Object.entries(Application.TOKEN_TYPES).map(([key, value]) => (
+                    <MenuItem key={value.displayName} value={key}>
+                        {value.displayName}
                     </MenuItem>
                 ))}
             </TextField>
@@ -210,7 +219,7 @@ const ApplicationCreate = (props) => {
                 })}
                 helperText={intl.formatMessage({
                     defaultMessage:
-                                'Describe the application',
+                        'Describe the application',
                     id: 'Shared.AppsAndKeys.ApplicationCreateForm.describe.the.application.help',
                 })}
                 name='description'
@@ -221,7 +230,7 @@ const ApplicationCreate = (props) => {
                 })}
             />
             {allAppAttributes && (
-                Object.entries(allAppAttributes).map(item => (
+                Object.entries(allAppAttributes).map((item) => (
                     item[1].hidden !== 'true' ? (
                         <TextField
                             classes={{
@@ -243,10 +252,12 @@ const ApplicationCreate = (props) => {
             )}
             {isApplicationSharingEnabled && (
                 <ChipInput
-                    label={<FormattedMessage
-                        defaultMessage='Application Groups'
-                        id='Shared.AppsAndKeys.ApplicationCreateForm.add.groups.label'
-                    />}
+                    label={(
+                        <FormattedMessage
+                            defaultMessage='Application Groups'
+                            id='Shared.AppsAndKeys.ApplicationCreateForm.add.groups.label'
+                        />
+                    )}
                     helperText={intl.formatMessage({
                         defaultMessage: 'Type a group and enter',
                         id: 'Shared.AppsAndKeys.ApplicationCreateForm.type.a.group.and.enter',
@@ -256,7 +267,7 @@ const ApplicationCreate = (props) => {
                     fullWidth
                     {...applicationRequest}
                     value={applicationRequest.groups || []}
-                    onAdd={chip => handleAddChip(chip, applicationRequest.groups)}
+                    onAdd={(chip) => handleAddChip(chip, applicationRequest.groups)}
                     onDelete={(chip, index) => handleDeleteChip(
                         chip,
                         index, applicationRequest.groups,
@@ -266,9 +277,9 @@ const ApplicationCreate = (props) => {
         </form>
     );
 };
-ApplicationCreate.defaultProps ={
+ApplicationCreate.defaultProps = {
     ApplicationCreate: null,
-}
+};
 ApplicationCreate.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     applicationRequest: PropTypes.shape({}).isRequired,

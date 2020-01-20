@@ -388,13 +388,21 @@ public final class APIConstants {
     public static final String EXP = "exp";
     public static final String JWT = "JWT";
     public static final String JWT_DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
-    public static final String JWT_CONFIGS = "JWTConfiguration.";
-    public static final String JWT_HEADER = JWT_CONFIGS + "JWTHeader";
-    public static final String TOKEN_GENERATOR_IMPL = JWT_CONFIGS + "JWTGeneratorImpl";
-    public static final String ENABLE_JWT_GENERATION = JWT_CONFIGS + "EnableJWTGeneration";
-    public static final String CLAIMS_RETRIEVER_CLASS = JWT_CONFIGS + "ClaimsRetrieverImplClass";
-    public static final String CONSUMER_DIALECT_URI = JWT_CONFIGS + "ConsumerDialectURI";
-    public static final String JWT_SIGNATURE_ALGORITHM = JWT_CONFIGS + "SignatureAlgorithm";
+    public static final String JWT_CONFIGS = "JWTConfiguration";
+    public static final String JWT_HEADER = "JWTHeader";
+    public static final String TOKEN_GENERATOR_IMPL = "JWTGeneratorImpl";
+    public static final String ENABLE_JWT_GENERATION = "EnableJWTGeneration";
+    public static final String CLAIMS_RETRIEVER_CLASS = "ClaimsRetrieverImplClass";
+    public static final String CONSUMER_DIALECT_URI =  "ConsumerDialectURI";
+    public static final String JWT_SIGNATURE_ALGORITHM = "SignatureAlgorithm";
+    public static final String GATEWAY_JWT_GENERATOR = "GatewayJWTGeneration";
+    public static final String GATEWAY_JWT_GENERATOR_IMPL = "ImplClass";
+    public static final String GATEWAY_JWT_CONFIGURATION = "Configuration";
+    public static final String GATEWAY_JWT_GENERATOR_CLAIM_MAPPING = "ClaimMappings";
+    public static final String GATEWAY_JWT_GENERATOR_CLAIM = "Claim";
+    public static final String GATEWAY_JWT_GENERATOR_LOCAL_CLAIM = "LocalClaim";
+    public static final String GATEWAY_JWT_GENERATOR_REMOTE_CLAIM = "RemoteClaim";
+
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
     public static final String API_SECURITY = "APISecurity";
@@ -902,6 +910,8 @@ public final class APIConstants {
     public static final String GATEWAY_INVALID_TOKEN_CACHE_NAME = "GATEWAY_INVALID_TOKEN_CACHE";
     public static final String REST_API_TOKEN_CACHE_NAME = "RESTAPITokenCache";
     public static final String REST_API_INVALID_TOKEN_CACHE_NAME = "RESTAPIInvalidTokenCache";
+    public static final String GATEWAY_JWT_TOKEN_CACHE = "GatewayJWTTokenCache";
+
     public static final String KEY_CACHE_NAME = "keyCache";
     public static final String API_CONTEXT_CACHE = "apiContextCache";
     public static final String WORKFLOW_CACHE_NAME = "workflowCache";
@@ -1869,4 +1879,24 @@ public final class APIConstants {
     public static final String JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION =
             JWT_AUTHENTICATION_CONFIG + ".EnableSubscriptionValidationViaKeyManager";
 
+    /**
+     * Constants for the recommendation system
+     *
+     * */
+    public static final String API_RECOMMENDATION = "APIRecommendations";
+    public static final String RECOMMENDATION_ENDPOINT = API_RECOMMENDATION + ".recommendationEndpoint";
+    public static final String EVENT_PUBLISHING_ENDPOINT = API_RECOMMENDATION + ".eventPublishingEndpoint";
+    public static final String RECOMMENDATION_USERNAME = API_RECOMMENDATION + ".username";
+    public static final String RECOMMENDATION_PASSWORD = API_RECOMMENDATION + ".password";
+    public static final String ADD_API = "ADD_API";
+    public static final String DELETE_API = "DELETE_API";
+    public static final String ADD_NEW_APPLICATION = "ADD_NEW_APPLICATION";
+    public static final String UPDATED_APPLICATION = "UPDATED_APPLICATION";
+    public static final String DELETE_APPLICATION = "DELETE_APPLICATION";
+    public static final String ADD_USER_CLICKED_API = "ADD_USER_CLICKED_API";
+    public static final String ADD_USER_SEARCHED_QUERY = "ADD_USER_SEARCHED_QUERY";
+    public static final String PUBLISHED_STATUS = "PUBLISHED";
+    public static final String DELETED_STATUS = "DELETED";
+    public static final String ACTION_STRING = "action";
+    public static final String PAYLOAD_STRING = "payload";
 }

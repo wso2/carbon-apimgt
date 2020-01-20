@@ -212,7 +212,7 @@ public class JWTValidatorTest {
                 "            }\n");
 
             AuthenticationContext authenticationContext = GatewayUtils.generateAuthenticationContext(splitToken[2],
-                    payload, api, null, APIConstants.UNLIMITED_TIER, true);
+                    payload, api, null, APIConstants.UNLIMITED_TIER, null,true);
 
         Assert.assertTrue(authenticationContext.isAuthenticated());
         Assert.assertEquals(splitToken[2], authenticationContext.getApiKey());

@@ -275,6 +275,17 @@ public interface APIConsumer extends APIManager {
     boolean isSubscribed(APIIdentifier apiIdentifier, String userId) throws APIManagementException;
 
     /**
+     * Returns true if a given user has subscribed to the API
+     *
+     * @param apiIdentifier APIIdentifier
+     * @param applicationId application Id
+     * @param userId userId
+     * @return true, if giving api identifier is already subscribed
+     * @throws APIManagementException if failed to check the subscribed state
+     */
+    boolean isSubscribedToApp(APIIdentifier apiIdentifier, String userId, int applicationId) throws APIManagementException;
+
+    /**
      * Returns the number of subscriptions for the given subscriber and app.
      *
      * @param subscriber Subscriber
@@ -917,6 +928,12 @@ public interface APIConsumer extends APIManager {
     boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException;
 
     /**
+     * Checks whether the API recommendation feature is enabled.
+     * @throws APIManagementException if an error occurs while reading configs
+     */
+    boolean isRecommendationEnabled() throws APIManagementException;
+
+    /**
      * This methods loads the monetization implementation class
      *
      * @return monetization implementation class
@@ -964,4 +981,30 @@ public interface APIConsumer extends APIManager {
     Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException;
 
     void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Updates the details of the specified user application.
+     *
+     * @param query Search query typed by the user at the devportal
+     * @param username Name of the user typing the search query
+     * @throws APIManagementException If an error occurs while updating the application
+     */
+    void publishSearchQuery(String query, String username) throws APIManagementException;
+
+    /**
+     * Publish the clicked APIs for the use of API recommendation system.
+     *
+     * @param api API clicked by the user
+     * @param username Name of the user who clicked the API
+     * @throws APIManagementException If an error occurs while publishing clicked API
+     */
+    void publishClickedAPI(ApiTypeWrapper api, String username) throws APIManagementException;
+
+    /**
+     * Get API recommendations for a given user..
+     *
+     * @param userName API clicked by the user
+     * @throws APIManagementException If an error occurs while publishing clicked API
+     */
+    String getApiRecommendations(String userName) throws APIManagementException;
 }

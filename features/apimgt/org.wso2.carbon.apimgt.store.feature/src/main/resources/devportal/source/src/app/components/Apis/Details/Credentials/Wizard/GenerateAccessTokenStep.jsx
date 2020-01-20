@@ -17,12 +17,22 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import Grid from '@material-ui/core/Grid';
 import Tokens from 'AppComponents/Shared/AppsAndKeys/Tokens';
 import Application from 'AppData/Application';
+import { makeStyles } from '@material-ui/core/styles';
+import { injectIntl, defineMessages } from 'react-intl';
+import Typography from '@material-ui/core/Typography';
 import ButtonPanel from './ButtonPanel';
+
+const useStyles = makeStyles((theme) => ({
+    tokenWrapper: {
+        paddingLeft: theme.spacing(3),
+        paddingRight: theme.spacing(7),
+    },
+    title: {
+        paddingLeft: theme.spacing(2),
+    },
+}));
 
 const generateAccessTokenStep = (props) => {
     const [keyType, setKeyType] = useState('PRODUCTION');
@@ -35,7 +45,7 @@ const generateAccessTokenStep = (props) => {
         keyType: '',
     });
     const {
-        currentStep, createdApp, setCreatedToken, incrementStep, createdKeyType, classes,
+        currentStep, createdApp, setCreatedToken, incrementStep, createdKeyType, intl,
     } = props;
 
     useEffect(() => {
@@ -87,31 +97,33 @@ const generateAccessTokenStep = (props) => {
                 }
             });
     };
+    const classes = useStyles();
+    const messages = defineMessages({
+        dataInfo: {
+            id: 'Apis.Details.Credentials.Wizard.GenerateAccessTokenStep',
+            defaultMessage: 'Generate Access Toke for {keyType} environment',
+        },
+    });
 
     return (
         <>
-            <Tabs
-                value={0}
-                variant='fullWidth'
-                indicatorColor='secondary'
-                textColor='secondary'
-            >
-                <Tab label={keyType} />
-            </Tabs>
-            <Grid md={10}>
+            <div className={classes.tokenWrapper}>
+                <Typography variant='subtitle1' component='div' className={classes.title}>
+                    {intl.formatMessage(messages.dataInfo, { keyType })}
+                </Typography>
                 <Tokens
                     updateAccessTokenRequest={setAccessTokenRequest}
                     accessTokenRequest={accessTokenRequest}
                     subscriptionScopes={subscriptionScopes}
                 />
-            </Grid>
-            <ButtonPanel
-                classes={classes}
-                currentStep={currentStep}
-                handleCurrentStep={generateAccessToken}
-            />
+                <ButtonPanel
+                    classes={classes}
+                    currentStep={currentStep}
+                    handleCurrentStep={generateAccessToken}
+                />
+            </div>
         </>
     );
 };
 
-export default generateAccessTokenStep;
+export default injectIntl(generateAccessTokenStep);

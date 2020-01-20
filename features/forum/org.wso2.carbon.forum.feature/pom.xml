@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>forum-feature</artifactId>
-        <version>6.6.9-SNAPSHOT</version>
+        <version>6.6.11-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -56,7 +56,7 @@
                             <id>org.wso2.carbon.forum</id>
                             <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:${carbon.kernel.feature.version}
+                                <importFeatureDef>org.wso2.carbon.core:compatible:${carbon.kernel.feature.version}
                                 </importFeatureDef>
                             </importFeatures>
                             <includedFeatures>

@@ -73,7 +73,19 @@
         <!-- This parameter specifies which implementation should be used for generating the Token. For URL safe JWT
              Token generation the implementation is provided in URLSafeJWTGenerator -->
         <!--<JWTGeneratorImpl>org.wso2.carbon.apimgt.keymgt.token.URLSafeJWTGenerator</JWTGeneratorImpl>-->
-
+        <GatewayJWTGeneration>
+            <ImplClass>{{apim.jwt.gateway_generator.impl}}</ImplClass>
+            <Configuration>
+                <ClaimMappings>
+                {%- for claim in apim.jwt.gateway_generator.claims -%}
+                    <Claim>
+                    <RemoteClaim>{{claim.remote_claim}}</RemoteClaim>
+                    <LocalClaim>{{claim.local_claim}}</LocalClaim>
+                    </Claim>
+                    {% endfor %}
+                </ClaimMappings>
+            </Configuration>
+        </GatewayJWTGeneration>
     </JWTConfiguration>
 
     <!-- Primary/secondary login configuration for API Developer Portal. If user likes to keep two login attributes in a distributed setup, to login the API Developer Portal,
@@ -880,7 +892,7 @@
             <!-- Configure supported languages/Frameworks as comma separated values,
              Supported Languages/Frameworks : android, java, scala, csharp, dart, flash, groovy, javascript, jmeter,
              nodejs, perl, php, python, ruby, swift, clojure, asyncScala, csharpDotNet2-->
-            <SupportedLanguages>{{apim.sdk.supported_languages}}</SupportedLanguages>
+            <SupportedLanguages>{{apim.sdk.supported_languages.toList()|join(',')}}</SupportedLanguages>
         </ClientGeneration>
     </SwaggerCodegen>
 
@@ -906,6 +918,15 @@
             </AdditionalAttributes>
         {% endif %}
     </Monetization>
+
+    {% if apim.devportal.recommendations is defined %}
+    <APIRecommendations>
+        <recommendationEndpoint>{{apim.devportal.recommendations.recommendations_endpoint}}</recommendationEndpoint>
+        <eventPublishingEndpoint>{{apim.devportal.recommendations.event_publishing_endpoint}}</eventPublishingEndpoint>
+        <username>{{apim.devportal.recommendations.username}}</username>
+        <password>{{apim.devportal.recommendations.password}}</password>
+    </APIRecommendations>
+    {% endif %}
 
     <OpenTracer>
         <RemoteTracer>

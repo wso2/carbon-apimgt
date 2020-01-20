@@ -6,7 +6,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>6.6.9-SNAPSHOT</version>
+    <version>6.6.11-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>http://wso2.org</url>
 
@@ -661,7 +661,7 @@
             </dependency>
 
             <dependency>
-                <groupId>commons-codec.wso2</groupId>
+                <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>${commons-codec.version}</version>
             </dependency>
@@ -1605,30 +1605,30 @@
 
         <!-- APIM Component Version -->
         <hamcrest.version>1.3</hamcrest.version>
-        <carbon.apimgt.version>6.6.9-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>6.6.11-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <carbon.analytics.common.version>5.2.18</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.2.20</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.5.2</carbon.kernel.version>
-        <carbon.kernel.feature.version>4.5.2</carbon.kernel.feature.version>
+        <carbon.kernel.version>4.6.0-alpha3</carbon.kernel.version>
+        <carbon.kernel.feature.version>4.6.0-alpha3</carbon.kernel.feature.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
-        <carbon.commons.version>4.7.18</carbon.commons.version>
-        <carbon.registry.version>4.7.19</carbon.registry.version>
-        <carbon.mediation.version>4.7.26</carbon.mediation.version>
+        <carbon.commons.version>4.7.21</carbon.commons.version>
+        <carbon.registry.version>4.7.28</carbon.registry.version>
+        <carbon.mediation.version>4.7.32</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
-        <carbon.identity.version>5.15.0</carbon.identity.version>
-        <carbon.identity.governance.version>1.3.21</carbon.identity.governance.version>
-        <carbon.identity-inbound-auth-oauth.version>6.2.55</carbon.identity-inbound-auth-oauth.version>
-        <carbon.identity-oauth2-grant-jwt.version>1.0.23</carbon.identity-oauth2-grant-jwt.version>
-        <carbon.identity-user-ws.version>5.3.3</carbon.identity-user-ws.version>
-        <carbon.identity-inbound-auth-saml2.version>5.4.5</carbon.identity-inbound-auth-saml2.version>
-        <carbon.identity-inbound-auth-openid.version>5.4.3</carbon.identity-inbound-auth-openid.version>
-        <carbon.identity-local-auth-basicauth.version>6.2.5</carbon.identity-local-auth-basicauth.version>
-        <carbon.identity-outbound-auth-samlsso.version>5.2.8</carbon.identity-outbound-auth-samlsso.version>
-        <carbon.identity-data-publisher-application-authentication.version>5.3.8</carbon.identity-data-publisher-application-authentication.version>
+        <carbon.identity.version>5.16.24</carbon.identity.version>
+        <carbon.identity.governance.version>1.3.39</carbon.identity.governance.version>
+        <carbon.identity-inbound-auth-oauth.version>6.2.111</carbon.identity-inbound-auth-oauth.version>
+        <carbon.identity-oauth2-grant-jwt.version>1.0.24</carbon.identity-oauth2-grant-jwt.version>
+        <carbon.identity-user-ws.version>5.3.6</carbon.identity-user-ws.version>
+        <carbon.identity-inbound-auth-saml2.version>5.4.6</carbon.identity-inbound-auth-saml2.version>
+        <carbon.identity-inbound-auth-openid.version>5.4.5</carbon.identity-inbound-auth-openid.version>
+        <carbon.identity-local-auth-basicauth.version>6.2.7</carbon.identity-local-auth-basicauth.version>
+        <carbon.identity-outbound-auth-samlsso.version>5.3.2</carbon.identity-outbound-auth-samlsso.version>
+        <carbon.identity-data-publisher-application-authentication.version>5.3.9</carbon.identity-data-publisher-application-authentication.version>
 
         <!--SAML Common Utils Version-->
         <saml.common.util.version>1.0.3</saml.common.util.version>
@@ -1636,9 +1636,9 @@
 
         <graphql.java.version>13.0.wso2v1</graphql.java.version>
 
-        <carbon.governance.version>4.8.10</carbon.governance.version>
-        <carbon.deployment.version>4.9.13</carbon.deployment.version>
-        <carbon.multitenancy.version>4.7.13</carbon.multitenancy.version>
+        <carbon.governance.version>4.8.12</carbon.governance.version>
+        <carbon.deployment.version>4.9.17</carbon.deployment.version>
+        <carbon.multitenancy.version>4.7.16</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
         <apimserver.version>1.10.0</apimserver.version>
         <siddhi.version>3.2.6</siddhi.version>
@@ -1660,7 +1660,7 @@
         <carbon.commons.imp.pkg.version>[4.7.0, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!-- Carbon platform version comes here-->
-        <carbon.platform.package.import.version.range>[4.4.0, 4.6.0)</carbon.platform.package.import.version.range>
+        <carbon.platform.package.import.version.range>[4.6.0, 4.7.0)</carbon.platform.package.import.version.range>
         <carbon.ntask.import.version.range>[4.6.0, 4.7.0)</carbon.ntask.import.version.range>
 
         <!-- Wsdl4j version comes here-->
@@ -1698,7 +1698,7 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-        <synapse.version>2.1.7-wso2v137</synapse.version>
+        <synapse.version>2.1.7-wso2v143</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
@@ -1730,7 +1730,7 @@
         <commons-httpclient.version>3.1</commons-httpclient.version>
         <google.code.gson.version>2.8.6</google.code.gson.version>
         <httpcomponents.version>4.5.10</httpcomponents.version>
-        <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
+        <commons-codec.version>1.12</commons-codec.version>
         <com.nimbusds.wso2.version>7.3.0.wso2v1</com.nimbusds.wso2.version>
         <json-smart.version>2.3</json-smart.version>
         <org.apache.velocity.version>1.7</org.apache.velocity.version>
@@ -1767,7 +1767,7 @@
         <!-- apache pdfbox version -->
         <pdfbox.version>1.8.16</pdfbox.version>
 
-        <event.processor.stub.version>2.2.9</event.processor.stub.version>
+        <event.processor.stub.version>2.2.11</event.processor.stub.version>
         <swagger.codegen.version>2.3.1.wso2v2</swagger.codegen.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
         <swagger.parser.version>1.0.32.wso2v1</swagger.parser.version>

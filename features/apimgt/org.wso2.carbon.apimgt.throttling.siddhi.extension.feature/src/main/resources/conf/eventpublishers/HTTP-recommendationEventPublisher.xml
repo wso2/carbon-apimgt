@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eventPublisher name="HTTP-recommendationEventPublisher"
+  processing="enable" statistics="disable" trace="disable" xmlns="http://wso2.org/carbon/eventpublisher">
+  <from streamName="org.wso2.apimgt.recommendation.event.stream" version="1.0.0"/>
+  <mapping customMapping="disable" type="json"/>
+  <to eventAdapterType="http">
+    <property name="http.url">https://localhost:8082/events</property>
+    <property name="http.username">admin</property>
+    <property name="http.password">admin</property>
+    <property name="http.client.method">HttpPost</property>
+  </to>
+</eventPublisher>
