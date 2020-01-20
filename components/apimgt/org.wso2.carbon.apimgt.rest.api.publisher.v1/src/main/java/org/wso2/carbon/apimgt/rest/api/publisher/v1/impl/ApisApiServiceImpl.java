@@ -749,9 +749,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(apiIdentifier);
-            GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO = GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
-            return Response.ok().entity(graphQLQueryComplexityInfoDTO).build();
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(apiIdentifier);
+                GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO = GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
+                return Response.ok().entity(graphQLQueryComplexityInfoDTO).build();
+            } else {
+                throw new APIManagementException("This API is not a GraphQL API");
+            }
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -787,8 +792,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             GraphqlComplexityInfo graphqlComplexityInfo = GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlComplexityInfo(body);
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            apiProvider.addComplexityDetails(apiIdentifier, graphqlComplexityInfo);
-//            return Response.created().build();
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                apiProvider.addComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+//                return Response.created().build();
+            } else {
+                throw new APIManagementException("This API is not a GraphQL API");
+            }
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
