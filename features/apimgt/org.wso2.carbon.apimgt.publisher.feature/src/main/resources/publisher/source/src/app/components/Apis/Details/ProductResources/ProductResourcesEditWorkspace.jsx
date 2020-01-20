@@ -82,6 +82,9 @@ const useStyles = makeStyles((theme) => ({
             border: '2px solid' + theme.palette.common.white,
             backgroundColor: theme.palette.grey[400],
         },
+        '& .frame.rightFrame': {
+            height: 369,
+        },
     },
     SelectedResourceWrapper: {
         overflowY: 'auto',
@@ -599,7 +602,11 @@ function ProductResourcesEdit(props) {
                                                     const methodObj = path[innerKey];
                                                     return (
                                                         CONSTS.HTTP_METHODS.includes(innerKey) && (
-                                                            <ListItem key={`${innerKey} - ${key}`} role={undefined} dense>
+                                                            <ListItem
+                                                                key={`${innerKey} - ${key}`}
+                                                                role={undefined}
+                                                                dense
+                                                            >
                                                                 <ListItemIcon style={{ minWidth: 35 }}>
                                                                     <Checkbox
                                                                         edge='start'
@@ -688,7 +695,7 @@ function ProductResourcesEdit(props) {
                                     </>
                                 )}
                                 <div className={classes.ResourceWrapper}>
-                                    <div className='frame'>
+                                    <div className='frame rightFrame'>
                                         {allApis.length > 0 && apiResources && apiResources.length === 0 && (
                                             <div className={classes.messageWrapper}>
                                                 <Typography component='p'>
@@ -712,7 +719,10 @@ function ProductResourcesEdit(props) {
                                                             const operation = apiResource.operations[innerKey];
                                                             const { target, verb } = operation;
                                                             return (
-                                                                <div key={verb} className={classes.treeItem}>
+                                                                <div
+                                                                    key={`${apiResource.apiId}_${verb}_${target}`}
+                                                                    className={classes.treeItem}
+                                                                >
                                                                     <MethodView
                                                                         method={verb}
                                                                         className={classes.methodView}
