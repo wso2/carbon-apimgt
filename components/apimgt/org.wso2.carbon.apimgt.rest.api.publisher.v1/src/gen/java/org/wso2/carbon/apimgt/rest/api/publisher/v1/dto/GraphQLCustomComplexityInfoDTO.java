@@ -28,8 +28,9 @@ public class GraphQLCustomComplexityInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "Country", value = "The type found within the schema of the API ")
-  @JsonProperty("-type")
+  @ApiModelProperty(example = "Country", required = true, value = "The type found within the schema of the API ")
+  @JsonProperty("type")
+  @NotNull
   public String getType() {
     return type;
   }
@@ -46,8 +47,9 @@ public class GraphQLCustomComplexityInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "name", value = "The field which is found under the type within the schema of the API ")
-  @JsonProperty("-field")
+  @ApiModelProperty(example = "name", required = true, value = "The field which is found under the type within the schema of the API ")
+  @JsonProperty("field")
+  @NotNull
   public String getField() {
     return field;
   }
@@ -64,8 +66,9 @@ public class GraphQLCustomComplexityInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "1", value = "The complexity value allocated for the associated field under the specified type ")
-  @JsonProperty("-complexityValue")
+  @ApiModelProperty(example = "1", required = true, value = "The complexity value allocated for the associated field under the specified type ")
+  @JsonProperty("complexityValue")
+  @NotNull
   public Integer getComplexityValue() {
     return complexityValue;
   }

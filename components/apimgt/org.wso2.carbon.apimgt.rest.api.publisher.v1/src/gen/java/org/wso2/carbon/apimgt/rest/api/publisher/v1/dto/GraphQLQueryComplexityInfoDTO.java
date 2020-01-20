@@ -30,8 +30,9 @@ public class GraphQLQueryComplexityInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "20", value = "The maximum complexity allowed for all queries of this API ")
-  @JsonProperty("-maxComplexity")
+  @ApiModelProperty(example = "20", required = true, value = "The maximum complexity allowed for all queries of this API ")
+  @JsonProperty("maxComplexity")
+  @NotNull
   public Integer getMaxComplexity() {
     return maxComplexity;
   }
@@ -48,7 +49,7 @@ public class GraphQLQueryComplexityInfoDTO   {
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("-list")
+  @JsonProperty("list")
   public List<GraphQLCustomComplexityInfoDTO> getList() {
     return list;
   }

@@ -624,7 +624,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the complexity related details of an API", notes = "This operation can be used to retrieve complexity related details belonging to an API by providing the id of the API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
     }, tags={ "GraphQL Query Analysis",  })
     @ApiResponses(value = { 
@@ -640,7 +641,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add complexity related details to an API", notes = "This operation can be used to add complexity details belonging to an API by providing the id of the API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
     }, tags={ "GraphQL Query Analysis",  })
     @ApiResponses(value = { 
@@ -656,7 +657,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the list of role-depth mappings of an API", notes = "This operation can be used to retrieve a list of role-depth mappings belonging to an API by providing the id of the API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
     }, tags={ "GraphQL Query Analysis",  })
     @ApiResponses(value = { 
@@ -672,7 +674,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add a new role-depth mapping to an API", notes = "This operation can be used to add a role-depth mapping belonging to an API by providing the id of the API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
     }, tags={ "GraphQL Query Analysis",  })
     @ApiResponses(value = { 

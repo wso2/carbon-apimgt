@@ -15,8 +15,26 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class GraphQLQueryDepthInfoDTO   {
   
+    private String uuid = null;
     private String role = null;
     private Integer depthValue = null;
+
+  /**
+   **/
+  public GraphQLQueryDepthInfoDTO uuid(String uuid) {
+    this.uuid = uuid;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("uuid")
+  public String getUuid() {
+    return uuid;
+  }
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
+  }
 
   /**
    * The user role to which the allowed maximum depth is being specified 
@@ -64,13 +82,14 @@ public class GraphQLQueryDepthInfoDTO   {
       return false;
     }
     GraphQLQueryDepthInfoDTO graphQLQueryDepthInfo = (GraphQLQueryDepthInfoDTO) o;
-    return Objects.equals(role, graphQLQueryDepthInfo.role) &&
+    return Objects.equals(uuid, graphQLQueryDepthInfo.uuid) &&
+        Objects.equals(role, graphQLQueryDepthInfo.role) &&
         Objects.equals(depthValue, graphQLQueryDepthInfo.depthValue);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(role, depthValue);
+    return Objects.hash(uuid, role, depthValue);
   }
 
   @Override
@@ -78,6 +97,7 @@ public class GraphQLQueryDepthInfoDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class GraphQLQueryDepthInfoDTO {\n");
     
+    sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
     sb.append("    role: ").append(toIndentedString(role)).append("\n");
     sb.append("    depthValue: ").append(toIndentedString(depthValue)).append("\n");
     sb.append("}");
