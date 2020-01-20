@@ -22,8 +22,17 @@ package org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis;
  */
 public class GraphqlDepthInfo {
 
+    private String uuid;
     private String role;
     private Integer depthValue;
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public String getRole() {
         return role;
