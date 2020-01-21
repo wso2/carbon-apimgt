@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.common;
 
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.apache.axis2.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -26,6 +27,7 @@ import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 public class APIMgtLatencyStatsHandler extends AbstractHandler {
@@ -43,16 +45,20 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
     }
 
     public boolean handleRequest(MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MsgContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+
         if (messageContext.getProperty(APIMgtGatewayConstants.REQUEST_EXECUTION_START_TIME) == null) {
             messageContext.setProperty(APIMgtGatewayConstants.REQUEST_EXECUTION_START_TIME, Long.toString(System
                     .currentTimeMillis()));
+            String method = (String) (axis2MsgContext.getProperty(
+                    Constants.Configuration.HTTP_METHOD));
+            messageContext.setProperty(APIMgtGatewayConstants.HTTP_METHOD, method);
         }
         /*
         * The axis2 message context is set here so that the method level logging can access the transport headers
         */
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
-                .getAxis2MessageContext();
-        org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MC);
+        org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MsgContext);
         long currentTime = System.currentTimeMillis();
         messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
         setSwaggerToMessageContext(messageContext);
