@@ -168,7 +168,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
         String version = (String) message.get(RestApiConstants.API_VERSION);
 
         //get all the URI templates of the REST API from the base path
-        Set<URITemplate> uriTemplates = RestApiUtil.getURITemplatesForBasePath(basePath + "/" + version);
+        Set<URITemplate> uriTemplates = RestApiUtil.getURITemplatesForBasePath(basePath + version);
         if (uriTemplates.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("No matching scopes found for request with path: " + basePath
