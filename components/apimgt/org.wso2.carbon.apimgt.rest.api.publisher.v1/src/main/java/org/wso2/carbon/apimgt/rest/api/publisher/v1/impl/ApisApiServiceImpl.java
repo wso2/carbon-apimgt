@@ -864,6 +864,35 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response apisApiIdQueryAnalysisDepthPost(String apiId, GraphQLQueryDepthInfoDTO body, MessageContext messageContext) throws APIManagementException {
+        try {
+            if (StringUtils.isBlank(apiId)) {
+                String errorMessage = "API ID cannot be empty or null.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            GraphqlDepthInfo graphqlDepthInfo = GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlDepthInfo(body);
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                apiProvider.addRoleDepthMapping(apiIdentifier, graphqlDepthInfo);
+                return Response.ok().build();
+            } else {
+                throw new APIManagementException("This API is not a GraphQL API");
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil
+                        .handleAuthorizationFailure("Authorization failure while adding complexity details of API : " + apiId, e,
+                                log);
+            } else {
+                String errorMessage = "Error while adding the role-depth mapping for API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
         return null;
     }
 

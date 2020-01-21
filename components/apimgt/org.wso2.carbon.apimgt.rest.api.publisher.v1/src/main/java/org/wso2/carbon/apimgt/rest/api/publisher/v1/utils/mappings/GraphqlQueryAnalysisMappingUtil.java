@@ -76,6 +76,12 @@ public class GraphqlQueryAnalysisMappingUtil {
         return graphqlComplexityInfo;
     }
 
+    /**
+     * Converts a list of GraphqlDepthInfo objects into a DTO object
+     *
+     * @param graphqlDepthInfoList List<GraphqlDepthInfo>
+     * @return a new GraphQLQueryDepthInfoListDTO object corresponding to given list of GraphqlDepthInfo objects
+     */
     public static GraphQLQueryDepthInfoListDTO fromGraphqlDepthInfoListtoDTO(List<GraphqlDepthInfo> graphqlDepthInfoList) {
         GraphQLQueryDepthInfoListDTO graphQLQueryDepthInfoListDTO = new GraphQLQueryDepthInfoListDTO();
         List<GraphQLQueryDepthInfoDTO> graphQLQueryDepthInfoDTOList = new ArrayList<GraphQLQueryDepthInfoDTO>();
@@ -88,5 +94,18 @@ public class GraphqlQueryAnalysisMappingUtil {
         }
         graphQLQueryDepthInfoListDTO.setList(graphQLQueryDepthInfoDTOList);
         return graphQLQueryDepthInfoListDTO;
+    }
+
+    /**
+     * Converts a GraphQLQueryDepthInfo DTO object into a GraphqlDepthInfo object
+     *
+     * @param graphQLQueryDepthInfoDTO GraphQLQueryDepthInfoDTO object
+     * @return a new GraphqlDepthInfo object corresponding to given GraphQLQueryDepthInfoDTO object
+     */
+    public static GraphqlDepthInfo fromDTOtoGraphqlDepthInfo(GraphQLQueryDepthInfoDTO graphQLQueryDepthInfoDTO) {
+        GraphqlDepthInfo graphqlDepthInfo = new GraphqlDepthInfo();
+        graphqlDepthInfo.setRole(graphQLQueryDepthInfoDTO.getRole());
+        graphqlDepthInfo.setDepthValue(graphQLQueryDepthInfoDTO.getDepthValue());
+        return graphqlDepthInfo;
     }
 }
