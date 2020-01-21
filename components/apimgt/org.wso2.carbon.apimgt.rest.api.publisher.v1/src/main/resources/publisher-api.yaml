@@ -3322,6 +3322,14 @@ paths:
           description: |
             OK.
             Requested role-depth mappings returned.
+          headers:
+            Content-Type:
+              description: |
+                The content of the body.
+              default: application/json
+              type: string
+          schema:
+            $ref: '#/definitions/GraphQLQueryDepthInfoList'
         404:
           description: |
             Not Found.
@@ -7768,6 +7776,17 @@ definitions:
         description: |
           The depth value allocated for the associated role
         example: 20
+
+  #-----------------------------------------------------
+  # The GraphQL Query Depth Info List resource
+  #-----------------------------------------------------
+  GraphQLQueryDepthInfoList:
+    title: GraphQL Query Depth Info List
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/GraphQLQueryDepthInfo'
 
   #-----------------------------------------------------
   # The GraphQL Query Complexity Info resource

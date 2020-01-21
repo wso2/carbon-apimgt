@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -14220,27 +14221,54 @@ public class ApiMgtDAO {
             ps1 = conn.prepareStatement(checkEntry);
             ps1.setInt(1, apiId);
             rs = ps1.executeQuery();
-            if (rs != null) {
-                // Entries already exists for this API_ID. Hence an update is performed.
-                try {
-                    ps2 = conn.prepareStatement(updateComplexityDetails);
-                    ps2.setInt(1, graphqlComplexityInfo.getMaxComplexity());
-                    ps2.setInt(2, apiId);
-                    ps2.executeUpdate();
-                } catch (SQLException e) {
-                    handleException("Error while updating complexity details: ", e);
-                }
-                try {
-                    ps3 = conn.prepareStatement(updateCustomComplexityDetails);
-                    for (CustomComplexityDetails customComplexity : graphqlComplexityInfo.getList()) {
-                        ps3.setInt(1, customComplexity.getComplexityValue());
-                        ps3.setInt(2, apiId);
-                        ps3.setString(3, customComplexity.getType());
-                        ps3.setString(4, customComplexity.getField());
-                        ps3.executeUpdate();
+            if (rs.next()) {
+                if (rs.getInt("MAX_COMPLEXITY") == 0) {
+                    // Update query analysis table entries and add query complexity table entries
+                    try {
+                        ps2 = conn.prepareStatement(updateComplexityDetails);
+                        ps2.setInt(1, graphqlComplexityInfo.getMaxComplexity());
+                        ps2.setInt(2, apiId);
+                        ps2.executeUpdate();
+                    } catch (SQLException e) {
+                        handleException("Error while updating complexity details: ", e);
                     }
-                } catch (SQLException e) {
-                    handleException("Error while updating custom complexity details: ", e);
+                    try {
+                        ps5 = conn.prepareStatement(addCustomComplexityDetails);
+                        for (CustomComplexityDetails customComplexity : graphqlComplexityInfo.getList()) {
+                            UUID uuid = UUID.randomUUID();
+                            String randomUUIDString = uuid.toString();
+                            ps5.setString(1, randomUUIDString);
+                            ps5.setInt(2, apiId);
+                            ps5.setString(3, customComplexity.getType());
+                            ps5.setString(4, customComplexity.getField());
+                            ps5.setInt(5, customComplexity.getComplexityValue());
+                            ps5.executeUpdate();
+                        }
+                    } catch (SQLException e) {
+                        handleException("Error while adding custom complexity details: ", e);
+                    }
+                } else {
+                    // Entries already exists for this API_ID. Hence an update is performed.
+                    try {
+                        ps2 = conn.prepareStatement(updateComplexityDetails);
+                        ps2.setInt(1, graphqlComplexityInfo.getMaxComplexity());
+                        ps2.setInt(2, apiId);
+                        ps2.executeUpdate();
+                    } catch (SQLException e) {
+                        handleException("Error while updating complexity details: ", e);
+                    }
+                    try {
+                        ps3 = conn.prepareStatement(updateCustomComplexityDetails);
+                        for (CustomComplexityDetails customComplexity : graphqlComplexityInfo.getList()) {
+                            ps3.setInt(1, customComplexity.getComplexityValue());
+                            ps3.setInt(2, apiId);
+                            ps3.setString(3, customComplexity.getType());
+                            ps3.setString(4, customComplexity.getField());
+                            ps3.executeUpdate();
+                        }
+                    } catch (SQLException e) {
+                        handleException("Error while updating custom complexity details: ", e);
+                    }
                 }
             } else {
                 // No entries found for this API_ID. Hence an insert is performed.
@@ -14341,6 +14369,121 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps2, null, null);
         }
         return graphqlComplexityInfo;
+    }
+
+    /**
+     * Get role-depth mappings of a given API
+     *
+     * @param apiIdentifier APIIdentifier object to retrieve API ID
+     * @return list of GraphqlDepthInfo objects which contains depth related information
+     * @throws APIManagementException
+     */
+    public List<GraphqlDepthInfo> getDepthDetails(APIIdentifier apiIdentifier) throws APIManagementException {
+        List<GraphqlDepthInfo> graphqlDepthInfoList = new ArrayList<GraphqlDepthInfo>();
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        String getRoleDepthMappings = SQLConstants.GET_DEPTH_DETAILS_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            int apiId = getAPIID(apiIdentifier, conn);
+            ps = conn.prepareStatement(getRoleDepthMappings);
+            ps.setInt(1, apiId);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                GraphqlDepthInfo graphqlDepthInfo = new GraphqlDepthInfo();
+                graphqlDepthInfo.setUuid(rs.getString("UUID"));
+                graphqlDepthInfo.setRole(rs.getString("ROLE"));
+                graphqlDepthInfo.setDepthValue(rs.getInt("DEPTH_VALUE"));
+                graphqlDepthInfoList.add(graphqlDepthInfo);
+            }
+        } catch (SQLException ex) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e) {
+                    log.error("Error while rolling back the failed operation", e);
+                }
+            }
+            handleException("Error while retrieving role-depth mappings: ", ex);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return graphqlDepthInfoList;
+    }
+
+    /**
+     * Get a particular role-depth mapping given the UUID
+     *
+     * @param uuid uuid of the role-depth mapping
+     * @return GraphqlDepthInfo object which contains depth related information
+     * @throws APIManagementException
+     */
+    public GraphqlDepthInfo getRoleDepthMapping(String uuid) throws APIManagementException {
+        GraphqlDepthInfo graphqlDepthInfo = new GraphqlDepthInfo();
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        String getRoleDepthMapping = SQLConstants.GET_ROLE_DEPTH_MAPPING_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getRoleDepthMapping);
+            ps.setString(1, uuid);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                graphqlDepthInfo.setRole(rs.getString("ROLE"));
+                graphqlDepthInfo.setDepthValue(rs.getInt("DEPTH_VALUE"));
+            }
+        } catch (SQLException ex) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e) {
+                    log.error("Error while rolling back the failed operation", e);
+                }
+            }
+            handleException("Error while retrieving role-depth mapping: ", ex);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return graphqlDepthInfo;
+    }
+
+    /**
+     * Add a role-depth mapping
+     *
+     * @param apiIdentifier APIIdentifier object to retrieve API ID
+     * @param graphqlDepthInfo GraphqlDepthInfo object
+     * @throws APIManagementException
+     */
+    public void addRoleDepthMapping(APIIdentifier apiIdentifier, GraphqlDepthInfo graphqlDepthInfo) throws APIManagementException {
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        String query = SQLConstants.ADD_ROLE_DEPTH_MAPPING_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            int apiId = getAPIID(apiIdentifier, conn);
+            ps = conn.prepareStatement(query);
+            UUID uuid = UUID.randomUUID();
+            String randomUUIDString = uuid.toString();
+            ps.setString(1, randomUUIDString );
+            ps.setInt(2, apiId);
+            ps.setString(3, graphqlDepthInfo.getRole());
+            ps.setInt(4, graphqlDepthInfo.getDepthValue());
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e) {
+                    log.error("Error while rolling back the failed operation", e);
+                }
+            }
+            handleException("Error while adding role depth mapping: ", ex);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
     }
 
     /**

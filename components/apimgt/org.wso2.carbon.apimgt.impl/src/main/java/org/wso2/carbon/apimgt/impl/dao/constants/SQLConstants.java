@@ -1740,6 +1740,9 @@ public class SQLConstants {
     public static final String ADD_CUSTOM_COMPLEXITY_DETAILS_SQL =
             "INSERT INTO AM_GRAPHQL_COMPLEXITY (UUID, API_ID, TYPE, FIELD, COMPLEXITY_VALUE) VALUES (?,?,?,?,?)";
 
+//    public static final String CHECK_COMPLEXITY_DETAILS_EXISTS =
+//            "SELECT COUNT(*) AS count FROM AM_GRAPHQL_QUERY_ANALYSIS WHERE API_ID = ?";
+
     public static final String GET_COMPLEXITY_DETAILS_SQL =
             " SELECT" +
             "   MAX_COMPLEXITY" +
@@ -1773,6 +1776,28 @@ public class SQLConstants {
             "    API_ID = ?" +
             "    AND TYPE = ? " +
             "    AND FIELD = ?";
+
+    public static final String ADD_ROLE_DEPTH_MAPPING_SQL =
+            "INSERT INTO AM_GRAPHQL_DEPTH (UUID, API_ID, ROLE, DEPTH_VALUE) VALUES (?,?,?,?)";
+
+    public static final String GET_DEPTH_DETAILS_SQL =
+            "SELECT" +
+            "   UUID," +
+            "   ROLE," +
+            "   DEPTH_VALUE," +
+            " FROM" +
+            "   AM_GRAPHQL_DEPTH " +
+            " WHERE" +
+            "   API_ID = ?";
+
+    public static final String GET_ROLE_DEPTH_MAPPING_SQL =
+            "SELECT" +
+            "   ROLE," +
+            "   DEPTH_VALUE," +
+            " FROM" +
+            "   AM_GRAPHQL_DEPTH " +
+            " WHERE" +
+            "   UUID = ?";
 
     public static final String ADD_API_LIFECYCLE_EVENT_SQL =
             " INSERT INTO AM_API_LC_EVENT (API_ID, PREVIOUS_STATE, NEW_STATE, USER_ID, TENANT_ID, EVENT_DATE)" +

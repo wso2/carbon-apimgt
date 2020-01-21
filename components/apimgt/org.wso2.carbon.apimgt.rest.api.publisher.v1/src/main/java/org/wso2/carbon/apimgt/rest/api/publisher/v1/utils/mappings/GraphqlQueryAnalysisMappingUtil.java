@@ -19,8 +19,11 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthInfo;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLCustomComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoListDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,5 +74,19 @@ public class GraphqlQueryAnalysisMappingUtil {
         }
         graphqlComplexityInfo.setList(customComplexityDetailsList);
         return graphqlComplexityInfo;
+    }
+
+    public static GraphQLQueryDepthInfoListDTO fromGraphqlDepthInfoListtoDTO(List<GraphqlDepthInfo> graphqlDepthInfoList) {
+        GraphQLQueryDepthInfoListDTO graphQLQueryDepthInfoListDTO = new GraphQLQueryDepthInfoListDTO();
+        List<GraphQLQueryDepthInfoDTO> graphQLQueryDepthInfoDTOList = new ArrayList<GraphQLQueryDepthInfoDTO>();
+        for (GraphqlDepthInfo graphqlDepthInfo :  graphqlDepthInfoList) {
+            GraphQLQueryDepthInfoDTO graphQLQueryDepthInfoDTO = new GraphQLQueryDepthInfoDTO();
+            graphQLQueryDepthInfoDTO.setUuid(graphqlDepthInfo.getUuid());
+            graphQLQueryDepthInfoDTO.setRole(graphqlDepthInfo.getRole());
+            graphQLQueryDepthInfoDTO.setDepthValue(graphqlDepthInfo.getDepthValue());
+            graphQLQueryDepthInfoDTOList.add(graphQLQueryDepthInfoDTO);
+        }
+        graphQLQueryDepthInfoListDTO.setList(graphQLQueryDepthInfoDTOList);
+        return graphQLQueryDepthInfoListDTO;
     }
 }

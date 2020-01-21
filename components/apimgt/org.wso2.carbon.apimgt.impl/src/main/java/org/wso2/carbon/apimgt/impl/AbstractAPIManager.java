@@ -64,6 +64,7 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.Wsdl;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -1578,6 +1579,14 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public void addComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
         apiMgtDAO.addComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+    }
+
+    public List<GraphqlDepthInfo> getDepthDetails(APIIdentifier apiIdentifier) throws APIManagementException {
+        return apiMgtDAO.getDepthDetails(apiIdentifier);
+    }
+
+    public void addRoleDepthMapping(APIIdentifier apiIdentifier, GraphqlDepthInfo graphqlDepthInfo) throws APIManagementException {
+        apiMgtDAO.addRoleDepthMapping(apiIdentifier, graphqlDepthInfo);
     }
 
     public Subscriber getSubscriberById(String accessToken) throws APIManagementException {

@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.Wsdl;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.registry.api.Resource;
 
@@ -240,7 +241,7 @@ public interface APIManager {
     /**
      * Returns the GraphqlComplexityInfo object for a given API ID
      *
-     * @param apiId,        API ID
+     * @param apiId        API ID
      * @return GraphqlComplexityInfo object
      * @throws APIManagementException if failed to retrieve complexity details of the given API
      */
@@ -249,12 +250,29 @@ public interface APIManager {
     /**
      * Add complexity details given the GraphqlComplexityInfo object
      *
-     *
      * @param apiIdentifier
      * @param graphqlComplexityInfo   GraphqlComplexityInfo object
      * @throws APIManagementException if failed to add complexity details
      */
     void addComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException;
+
+    /**
+     * Returns a list of GraphqlDepthInfo objects for a given API ID
+     *
+     * @param apiIdentifier APIIdentifier
+     * @return List<GraphqlDepthInfo>
+     * @throws APIManagementException if failed to retrieve depth related details of the given API
+     */
+    List<GraphqlDepthInfo> getDepthDetails(APIIdentifier apiIdentifier) throws APIManagementException;
+
+    /**
+     * Add complexity details given the GraphqlComplexityInfo object
+     *
+     * @param apiIdentifier
+     * @param graphqlDepthInfo   GraphqlDepthInfo object
+     * @throws APIManagementException if failed to add role-depth mapping
+     */
+    void addRoleDepthMapping(APIIdentifier apiIdentifier, GraphqlDepthInfo graphqlDepthInfo) throws APIManagementException;
 
     /**
      * Retrieves the subscriber from the given access token

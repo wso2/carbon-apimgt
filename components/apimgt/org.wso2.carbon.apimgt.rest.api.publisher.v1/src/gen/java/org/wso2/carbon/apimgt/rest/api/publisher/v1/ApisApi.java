@@ -17,6 +17,7 @@ import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
@@ -655,14 +656,14 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/query-analysis/depth")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get the list of role-depth mappings of an API", notes = "This operation can be used to retrieve a list of role-depth mappings belonging to an API by providing the id of the API. ", response = Void.class, authorizations = {
+    @ApiOperation(value = "Get the list of role-depth mappings of an API", notes = "This operation can be used to retrieve a list of role-depth mappings belonging to an API by providing the id of the API. ", response = GraphQLQueryDepthInfoListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
     }, tags={ "GraphQL Query Analysis",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Requested role-depth mappings returned. ", response = Void.class),
+        @ApiResponse(code = 200, message = "OK. Requested role-depth mappings returned. ", response = GraphQLQueryDepthInfoListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested API does not contain any role-depth mappings. ", response = Void.class) })
     public Response apisApiIdQueryAnalysisDepthGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
         return delegate.apisApiIdQueryAnalysisDepthGet(apiId, securityContext);

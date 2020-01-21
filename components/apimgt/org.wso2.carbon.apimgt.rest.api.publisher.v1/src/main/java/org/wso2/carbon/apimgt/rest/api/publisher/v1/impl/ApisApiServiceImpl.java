@@ -72,6 +72,7 @@ import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -795,7 +796,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 apiProvider.addComplexityDetails(apiIdentifier, graphqlComplexityInfo);
-//                return Response.created().build();
+                return Response.ok().build();
             } else {
                 throw new APIManagementException("This API is not a GraphQL API");
             }
@@ -825,6 +826,30 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response apisApiIdQueryAnalysisDepthGet(String apiId, MessageContext messageContext) throws APIManagementException {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                List<GraphqlDepthInfo> graphqlDepthInfoList = apiProvider.getDepthDetails(apiIdentifier);
+                GraphQLQueryDepthInfoListDTO graphQLQueryDepthInfoListDTO = GraphqlQueryAnalysisMappingUtil.fromGraphqlDepthInfoListtoDTO(graphqlDepthInfoList);
+                return Response.ok().entity(graphQLQueryDepthInfoListDTO).build();
+            } else {
+                throw new APIManagementException("This API is not a GraphQL API");
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving complexity details of API : " + apiId, e, log);
+            } else {
+                String msg = "Error while retrieving role-depth mappings of API " + apiId;
+                RestApiUtil.handleInternalServerError(msg, e, log);
+            }
+        }
         return null;
     }
 
