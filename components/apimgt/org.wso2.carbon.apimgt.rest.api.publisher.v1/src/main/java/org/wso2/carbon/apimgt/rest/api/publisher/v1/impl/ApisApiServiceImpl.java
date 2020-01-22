@@ -3844,6 +3844,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIIdentifier createdApiId = apiToAdd.getId();
             apiProvider.saveGraphqlSchemaDefinition(apiToAdd, schema);
 
+            //adding default query analysis info
+            apiProvider.addQueryAnalysisInfo(createdApiId);
+
             //Retrieve the newly added API to send in the response payload
             API createdApi = apiProvider.getAPI(createdApiId);
 

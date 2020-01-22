@@ -14195,6 +14195,40 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Add complexity and depth as disabled at API creation
+     *
+     * @param apiIdentifier APIIdentifier object to retrieve API ID
+     * @throws APIManagementException
+     */
+    public void addQueryAnalysisInfo(APIIdentifier apiIdentifier) throws APIManagementException {
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        String query = SQLConstants.ADD_INITIAL_QUERY_ANALYSIS_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            int apiId = getAPIID(apiIdentifier, conn);
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, apiId);
+            ps.setBoolean(2, false);
+            ps.setBoolean(3, false);
+            ps.setInt(4, 0);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e) {
+                    log.error("Error while rolling back the failed operation", e);
+                }
+            }
+            handleException("Error while adding query analysis info: ", ex);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+    }
+
+    /**
      * Add complexity details
      *
      *

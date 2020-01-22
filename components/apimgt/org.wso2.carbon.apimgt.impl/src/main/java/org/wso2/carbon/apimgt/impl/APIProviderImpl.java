@@ -845,6 +845,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
+     * Adds query analysis basic info. This method is used to set depth and complexity as false at API creation
+     *
+     * @param apiIdentifier
+     * @throws APIManagementException
+     */
+    public void addQueryAnalysisInfo(APIIdentifier apiIdentifier) throws APIManagementException {
+        apiMgtDAO.addQueryAnalysisInfo(apiIdentifier);
+    }
+
+    /**
      * Validates the name and version of api against illegal characters.
      *
      * @param api API info object
