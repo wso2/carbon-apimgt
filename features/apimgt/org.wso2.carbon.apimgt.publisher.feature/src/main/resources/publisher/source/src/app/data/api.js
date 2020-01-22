@@ -185,6 +185,25 @@ class API extends Resource {
     }
 
     /**
+     * 
+     */
+    exportApi(name, version, provider, format) {
+        const apiZip = this.client.then((client) => {
+            return client.apis['API (Individual)'].get_export_api({
+                name:name,
+            version:version,
+            providerName:provider,
+            format:format,
+
+            }    ,this._requestMetaData(
+                { 'Content-Type': 'multipart/form-data'}
+            )
+            );
+        });
+        return apiZip;
+    }
+
+    /**
      * Get detailed policy information of the API
      * @returns {Promise} Promise containing policy detail request calls for all the available policies
      * @memberof API

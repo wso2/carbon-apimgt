@@ -1,9 +1,13 @@
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
+import Utils from 'AppData/Utils';
 import { FormattedMessage } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
+import { isRestricted } from 'AppData/AuthManager';
+import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
+import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
@@ -11,8 +15,10 @@ import { useAppContext } from 'AppComponents/Shared/AppContext';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import GoTo from 'AppComponents/Apis/Details/GoTo/GoTo';
+import API from 'AppData/api';
 import DeleteApiButton from './DeleteApiButton';
 import CreateNewVersionButton from './CreateNewVersionButton';
+
 
 const styles = (theme) => ({
     root: {
@@ -60,6 +66,15 @@ const styles = (theme) => ({
         whiteSpace: 'nowrap',
     },
 });
+
+
+// eslint-disable-next-line require-jsdoc
+async function exportAPI(name, version, provider, format) {
+    const restApi = new API();
+    const zipFile = await restApi.exportApi(name, version, provider, format);
+    return Utils.forceDownload(zipFile);
+}
+
 
 const APIDetailsTopMenu = (props) => {
     const {
@@ -136,6 +151,23 @@ const APIDetailsTopMenu = (props) => {
                 </a>
             )}
             {isAPIProduct ? null : <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />}
+            {(isVisibleInStore || isAPIProduct) && <VerticalDivider height={70} />}
+            {(isVisibleInStore || isAPIProduct) && (
+                <Button
+                    size='small'
+                    className={classes.button}
+                    // eslint-disable-next-line no-underscore-dangle
+                    onClick={() => exportAPI(api._data.name, api._data.version, api._data.provider, 'YAML')}
+                    disabled={isRestricted(['apim:api_publish'], api)}
+                >
+                    <div>
+                        <Typography variant='h4' align='center'><CloudDownloadRounded /></Typography>
+                        <Typography variant='caption' align='left'>
+                    Export API
+                        </Typography>
+                    </div>
+                </Button>
+            )}
             <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />
         </div>
     );
@@ -148,5 +180,6 @@ APIDetailsTopMenu.propTypes = {
     isAPIProduct: PropTypes.bool.isRequired,
     imageUpdate: PropTypes.number.isRequired,
 };
+
 
 export default withStyles(styles, { withTheme: true })(APIDetailsTopMenu);
