@@ -1868,9 +1868,9 @@
         <com.amazonaws.version>1.11.253</com.amazonaws.version>
         <software.amazon.ion.version>1.0.2</software.amazon.ion.version>
         <org.wso2.orbit.com.amazonaws.version>1.11.253.wso2v1</org.wso2.orbit.com.amazonaws.version>
-        <io.fabric8.kubernetes.client.version>4.6.0</io.fabric8.kubernetes.client.version>
+        <io.fabric8.kubernetes.client.version>4.6.4</io.fabric8.kubernetes.client.version>
         <io.fabric8.kuberenetes.api.version>3.0.12</io.fabric8.kuberenetes.api.version>
-        <io.fabric8.openshift.client.version>4.5.2</io.fabric8.openshift.client.version>
+        <io.fabric8.openshift.client.version>4.6.4</io.fabric8.openshift.client.version>
         <org.apache.commons.compress.version>1.18</org.apache.commons.compress.version>
         <com.squareup.okhttp3.okhttp.version>4.2.0</com.squareup.okhttp3.okhttp.version>
         <com.squareup.okio.version>2.4.0</com.squareup.okio.version>

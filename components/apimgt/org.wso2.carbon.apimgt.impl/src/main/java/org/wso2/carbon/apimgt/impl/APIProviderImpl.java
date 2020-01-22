@@ -185,6 +185,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
@@ -3600,9 +3601,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             List<String> clusterNames = new ArrayList<String>();
             //clusterNames.add("cluster1");
 
-            if (clusterNames.size()!=0) {
+            if (clusterNames.size() != 0) {
 
-                for (String name: clusterNames) {
+                for (String name : clusterNames) {
 
                     ContainerManager containerManager = getContainerManagerInstance();
 
@@ -5009,7 +5010,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     Map<String, Map<String, String>> allClusters = APIUtil.getClusterInfoFromConfig(tenantConf);
                     List<String> clusterNames = new ArrayList<String>();
                     //clusterNames.add("cluster1");
-                    if (clusterNames.size() !=0) {
+                    if (clusterNames.size() != 0) {
                         for (String name : clusterNames) {
                             Map<String, String> clusterProperties = allClusters.get(name);
                             ContainerManager containerManager = getContainerManagerInstance();
@@ -7828,13 +7829,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             log.info("Publishing the [API] " + apiIdentifier.getApiName() + " in Kubernetes");
             for (String clusterName : clusterNames) {
-
-                Map<String, String> clusterInfo = allClusters.get(clusterName);
+                Map<String, Map<String, String>> clusterDetails = allClusters.entrySet().stream()
+                        .filter(val -> val.getKey().equals(clusterName))
+                        .collect(Collectors.toMap(map -> map.getKey(), map -> map.getValue()));
                 ContainerManager containerManager = getContainerManagerInstance();
-                Map<String, Map<String, String>> selectedClusterInfo =  new HashMap<String, Map<String, String>>();
-                selectedClusterInfo.put(clusterName,clusterInfo);
-                   containerManager.initManager(selectedClusterInfo);
-//                containerManager.initManager(clusterInfo);
+                containerManager.initManager(clusterDetails);
+
+                //how to change the LC state when have multiple clusters to deploy
                 containerManager.changeLCStateCreatedToPublished(api, apiIdentifier);
             }
         }
