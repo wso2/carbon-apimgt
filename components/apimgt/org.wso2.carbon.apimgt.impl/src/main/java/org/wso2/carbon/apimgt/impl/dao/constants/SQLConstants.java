@@ -1740,9 +1740,6 @@ public class SQLConstants {
     public static final String ADD_CUSTOM_COMPLEXITY_DETAILS_SQL =
             "INSERT INTO AM_GRAPHQL_COMPLEXITY (UUID, API_ID, TYPE, FIELD, COMPLEXITY_VALUE) VALUES (?,?,?,?,?)";
 
-//    public static final String CHECK_COMPLEXITY_DETAILS_EXISTS =
-//            "SELECT COUNT(*) AS count FROM AM_GRAPHQL_QUERY_ANALYSIS WHERE API_ID = ?";
-
     public static final String GET_COMPLEXITY_DETAILS_SQL =
             " SELECT" +
             "   MAX_COMPLEXITY" +
@@ -1755,7 +1752,7 @@ public class SQLConstants {
             " SELECT" +
             "   TYPE," +
             "   FIELD," +
-            "   COMPLEXITY_VALUE," +
+            "   COMPLEXITY_VALUE" +
             " FROM" +
             "   AM_GRAPHQL_COMPLEXITY " +
             " WHERE" +
@@ -1784,7 +1781,7 @@ public class SQLConstants {
             "SELECT" +
             "   UUID," +
             "   ROLE," +
-            "   DEPTH_VALUE," +
+            "   DEPTH_VALUE" +
             " FROM" +
             "   AM_GRAPHQL_DEPTH " +
             " WHERE" +
@@ -1793,7 +1790,7 @@ public class SQLConstants {
     public static final String GET_ROLE_DEPTH_MAPPING_SQL =
             "SELECT" +
             "   ROLE," +
-            "   DEPTH_VALUE," +
+            "   DEPTH_VALUE" +
             " FROM" +
             "   AM_GRAPHQL_DEPTH " +
             " WHERE" +
