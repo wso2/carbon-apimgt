@@ -40,6 +40,19 @@ public class ExportApiServiceImpl implements ExportApiService {
     private static final String PRODUCTION = "PRODUCTION";
     private static final String SANDBOX = "SANDBOX";
 
+    /**
+     * Exports an API from API Manager for a given API ID. Meta information, API icon, documentation, WSDL
+     * and sequences are exported. This service generates a zipped archive which contains all the above mentioned
+     * resources for a given API.
+     *
+     * @param name           Name of the API that needs to be exported
+     * @param version        Version of the API that needs to be exported
+     * @param providerName   Provider name of the API that needs to be exported
+     * @param format         Format of output documents. Can be YAML or JSON
+     * @param preserveStatus Preserve API status on export
+     * @return Zipped file containing exported API
+     */
+
       public Response exportApiGet(String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) {
           ExportFormat exportFormat;
           API api;

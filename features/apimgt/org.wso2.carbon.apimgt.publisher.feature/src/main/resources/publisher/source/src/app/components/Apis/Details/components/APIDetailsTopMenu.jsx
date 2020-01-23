@@ -67,7 +67,6 @@ const styles = (theme) => ({
     },
 });
 
-
 // eslint-disable-next-line require-jsdoc
 async function exportAPI(name, version, provider, format) {
     const restApi = new API();
@@ -75,12 +74,12 @@ async function exportAPI(name, version, provider, format) {
     return Utils.forceDownload(zipFile);
 }
 
-
 const APIDetailsTopMenu = (props) => {
     const {
         classes, theme, api, isAPIProduct, imageUpdate,
     } = props;
     const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
+    const isDownlodable = ['API'].includes(api.apiType) && !(isRestricted(['apim:api_publish'], api));
     const { settings, user } = useAppContext();
     let apiType = 'API';
     if (isAPIProduct) {
@@ -151,8 +150,8 @@ const APIDetailsTopMenu = (props) => {
                 </a>
             )}
             {isAPIProduct ? null : <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />}
-            {(isVisibleInStore || isAPIProduct) && <VerticalDivider height={70} />}
-            {(isVisibleInStore || isAPIProduct) && (
+            {(isDownlodable) && <VerticalDivider height={70} />}
+            {(isDownlodable) && (
                 <Button
                     size='small'
                     className={classes.button}
