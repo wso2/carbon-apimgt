@@ -7,7 +7,6 @@ import LaunchIcon from '@material-ui/icons/Launch';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import { isRestricted } from 'AppData/AuthManager';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
-import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
@@ -45,6 +44,7 @@ const styles = (theme) => ({
     },
     viewInStoreLauncher: {
         display: 'flex',
+        height: 70,
         flexDirection: 'column',
         color: theme.palette.getContrastText(theme.palette.background.paper),
         textAlign: 'center',
@@ -65,6 +65,15 @@ const styles = (theme) => ({
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
     },
+    downloadApi: {
+        display: 'flex',
+        flexDirection: 'column',
+        textAlign: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        height: 70,
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+    },
 });
 
 // eslint-disable-next-line require-jsdoc
@@ -74,12 +83,13 @@ async function exportAPI(name, version, provider, format) {
     return Utils.forceDownload(zipFile);
 }
 
+
 const APIDetailsTopMenu = (props) => {
     const {
         classes, theme, api, isAPIProduct, imageUpdate,
     } = props;
     const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
-    const isDownlodable = ['API'].includes(api.apiType) && !(isRestricted(['apim:api_publish'], api));
+    const isDownlod = ['API'].includes(api.apiType) && !((isRestricted(['apim:api_create', 'apim:api_publish'], api)));
     const { settings, user } = useAppContext();
     let apiType = 'API';
     if (isAPIProduct) {
@@ -150,23 +160,22 @@ const APIDetailsTopMenu = (props) => {
                 </a>
             )}
             {isAPIProduct ? null : <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />}
-            {(isDownlodable) && <VerticalDivider height={70} />}
-            {(isDownlodable) && (
-                <Button
-                    size='small'
-                    className={classes.button}
-                    // eslint-disable-next-line no-underscore-dangle
-                    onClick={() => exportAPI(api._data.name, api._data.version, api._data.provider, 'YAML')}
-                    disabled={isRestricted(['apim:api_publish'], api)}
-                >
-                    <div>
-                        <Typography variant='h4' align='center'><CloudDownloadRounded /></Typography>
-                        <Typography variant='caption' align='left'>
-                    Export API
-                        </Typography>
-                    </div>
-                </Button>
-            )}
+            {(isDownlod) && <VerticalDivider height={70} />}
+            <div className={classes.downloadApi}>
+                {(isDownlod) && (
+                    <a
+                        onClick={() => exportAPI(api.name, api.version, api.provider, 'YAML')}
+                        onKeyDown='null'
+                    >
+                        <div>
+                            <Typography variant='h4' align='center'><CloudDownloadRounded /></Typography>
+                            <Typography variant='caption' align='left'>
+                    Download API
+                            </Typography>
+                        </div>
+                    </a>
+                )}
+            </div>
             <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />
         </div>
     );
