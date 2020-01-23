@@ -29,6 +29,7 @@ import AuthManager from 'AppData/AuthManager';
 import withSettings from 'AppComponents/Shared/withSettingsContext';
 import Alert from 'AppComponents/Shared/Alert';
 import classNames from 'classnames';
+import { Helmet } from 'react-helmet';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { ResourceNotFound } from '../../Base/Errors/index';
@@ -305,6 +306,9 @@ class Details extends React.Component {
                 apiDetailPages: {
                     showCredentials, showComments, showTryout, showDocuments, showSdks,
                 },
+                title: {
+                    prefix, sufix,
+                }
             },
         } = theme;
         const globalStyle = 'body{ font-family: ' + theme.typography.fontFamily + '}';
@@ -315,6 +319,9 @@ class Details extends React.Component {
 
         return api ? (
             <ApiContext.Provider value={this.state}>
+                <Helmet>
+                    <title>{`${prefix} ${api.name}${sufix}`}</title>
+                </Helmet>
                 <style>{globalStyle}</style>
                 <div
                     className={classNames(
