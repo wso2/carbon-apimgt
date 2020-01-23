@@ -45,6 +45,8 @@ const Configurations = {
                     logoHeight: 19,
                     logoWidth: 208,
                     background: '#6093c1',
+                    searchInputBackground: '#fff',
+                    searchInputActiveBackground: '#fff',
                     activeBackground: '#3f6a9f',
                     showSearch: true,
                     drawerWidth: 200,
