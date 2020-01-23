@@ -55,7 +55,6 @@ const AppThemes = {
             logo: '/site/public/images/logo.svg',
             logoHeight: 40,
             logoWidth: 222,
-            title: 'WSO2 APIM Publisher',
             defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
             showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
             leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
@@ -105,6 +104,10 @@ const AppThemes = {
                 backgroundChip: '#5aebf9',
             },
             warningColor: '#ffc439',
+            title: {
+                prefix: '[Devportal]',
+                sufix: '- WSO2 APIM',
+            },
         },
     },
 };

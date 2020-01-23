@@ -4008,16 +4008,32 @@ public final class APIUtil {
                 }
             }
             log.debug("Adding/updating tenant-conf.json to the registry of tenant " + tenantID);
-            Resource resource = registry.newResource();
-            resource.setMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            resource.setContent(data);
-            registry.put(APIConstants.API_TENANT_CONF_LOCATION, resource);
+            updateTenantConf(registry, data);
             log.debug("Successfully added/updated tenant-conf.json of tenant  " + tenantID);
         } catch (RegistryException e) {
             throw new APIManagementException("Error while saving tenant conf to the registry of tenant " + tenantID, e);
         } catch (IOException e) {
             throw new APIManagementException("Error while reading tenant conf file content of tenant " + tenantID, e);
         }
+    }
+
+    public static void updateTenantConf(String tenantConfString, String tenantDomain) throws APIManagementException {
+        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
+        try {
+            UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
+            updateTenantConf(registry, tenantConfString.getBytes());
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error while saving tenant conf to the registry of tenant "
+                    + tenantDomain, e);
+        }
+    }
+
+    private static void updateTenantConf(UserRegistry registry, byte[] data) throws RegistryException {
+        Resource resource = registry.newResource();
+        resource.setMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+        resource.setContent(data);
+        registry.put(APIConstants.API_TENANT_CONF_LOCATION, resource);
     }
 
     /**
@@ -4036,10 +4052,7 @@ public final class APIUtil {
             }
             byte[] data = getLocalTenantConfFileData();
             log.debug("Adding tenant config to the registry");
-            Resource resource = registry.newResource();
-            resource.setMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            resource.setContent(data);
-            registry.put(APIConstants.API_TENANT_CONF_LOCATION, resource);
+            updateTenantConf(registry, data);
         } catch (RegistryException e) {
             throw new APIManagementException("Error while saving tenant conf to the registry", e);
         } catch (IOException e) {
@@ -7074,6 +7087,11 @@ public final class APIUtil {
             }
         }
         return restAPIConfigJSON;
+    }
+
+    public static JSONObject getTenantConfig(String tenantDomain) throws APIManagementException {
+        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
+        return getTenantConfig(tenantId);
     }
 
     /**

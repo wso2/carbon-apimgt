@@ -1,0 +1,29 @@
+<%
+    include("/jagg/jagg.jag");
+
+jagg.block("settings/scope-mapping", {
+    initializer: function (data) { },
+
+    getInputs: function () {
+        return {
+
+        }
+    },
+
+    getOutputs: function (inputs) {
+        user = jagg.getUser();
+        var applications, result;
+        if (user) {
+            result = jagg.module("scope-mapping").getTenantConfig();
+        }
+        return {
+            "conf": result
+        };
+    }
+
+
+
+});
+
+
+%>
