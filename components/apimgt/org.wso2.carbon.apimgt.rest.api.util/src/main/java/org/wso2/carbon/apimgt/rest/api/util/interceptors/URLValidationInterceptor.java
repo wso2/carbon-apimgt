@@ -26,6 +26,7 @@ import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;
@@ -57,6 +58,7 @@ public class URLValidationInterceptor extends AbstractPhaseInterceptor<Message> 
                     replace(latestVersion + pathSeparator, ""));
             message.put(REQUEST_URL, message.get(REQUEST_URL).toString().
                     replace(latestVersion + pathSeparator, ""));
+            message.put(RestApiConstants.API_VERSION, latestVersion);
         }
         if (message.get(PATH_INFO).toString()
                 .contains(message.get(BASE_PATH).toString().concat(majorVersion + pathSeparator))) {
@@ -66,6 +68,7 @@ public class URLValidationInterceptor extends AbstractPhaseInterceptor<Message> 
                     .replace(majorVersion + pathSeparator, ""));
             message.put(REQUEST_URL, message.get(REQUEST_URL).toString()
                     .replace(majorVersion + pathSeparator, ""));
+            message.put(RestApiConstants.API_VERSION, majorVersion);
         }
 
     }

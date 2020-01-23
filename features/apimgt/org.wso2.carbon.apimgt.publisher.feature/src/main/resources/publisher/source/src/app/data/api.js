@@ -114,7 +114,7 @@ class API extends Resource {
         return promisedCreate;
     }
 
-    importOpenAPIByUrl(openAPIUrl, callback = null) {
+    importOpenAPIByUrl(openAPIUrl) {
         let payload, promise_create;
 
         promise_create = this.client.then(client => {
@@ -154,14 +154,14 @@ class API extends Resource {
         return promisedValidate;
     }
 
-    static validateOpenAPIByUrl(url, callback = null) {
+    static validateOpenAPIByUrl(url, params = { returnContent: false }) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
-        let payload, promise_validate;
-        payload = {
+        const payload = {
             url: url,
             'Content-Type': 'multipart/form-data',
+            ...params
         };
-        promise_validate = apiClient.then(client => {
+        return apiClient.then(client => {
             return client.apis['Validation'].validateOpenAPIDefinition(
                 payload,
                 this._requestMetaData({
@@ -169,11 +169,7 @@ class API extends Resource {
                 }),
             );
         });
-        if (callback) {
-            return promise_validate.then(callback);
-        } else {
-            return promise_validate;
-        }
+
     }
 
     /**

@@ -127,7 +127,7 @@ class AppErrorBoundary extends React.Component {
                                 <div className={classes.errorDisplayContent}>
                                     <a href={Configurations.app.context}>
                                         <img
-                                            src={theme.custom.logo}
+                                            src={Configurations.app.context + theme.custom.logo}
                                             alt={theme.custom.title}
                                             style={{ height: theme.custom.logoHeight, width: theme.custom.logoWidth }}
                                         />

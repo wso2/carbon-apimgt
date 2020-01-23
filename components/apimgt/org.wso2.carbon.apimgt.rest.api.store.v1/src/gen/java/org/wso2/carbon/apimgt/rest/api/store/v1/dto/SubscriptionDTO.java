@@ -57,6 +57,7 @@ public enum StatusEnum {
 }
 
     private StatusEnum status = null;
+    private String redirectionParams = null;
 
   /**
    * The UUID of the subscription
@@ -182,6 +183,24 @@ public enum StatusEnum {
     this.status = status;
   }
 
+  /**
+   * A url and other parameters the subscriber can be redirected.
+   **/
+  public SubscriptionDTO redirectionParams(String redirectionParams) {
+    this.redirectionParams = redirectionParams;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "A url and other parameters the subscriber can be redirected.")
+  @JsonProperty("redirectionParams")
+  public String getRedirectionParams() {
+    return redirectionParams;
+  }
+  public void setRedirectionParams(String redirectionParams) {
+    this.redirectionParams = redirectionParams;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -198,12 +217,13 @@ public enum StatusEnum {
         Objects.equals(apiInfo, subscription.apiInfo) &&
         Objects.equals(applicationInfo, subscription.applicationInfo) &&
         Objects.equals(throttlingPolicy, subscription.throttlingPolicy) &&
-        Objects.equals(status, subscription.status);
+        Objects.equals(status, subscription.status) &&
+        Objects.equals(redirectionParams, subscription.redirectionParams);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionId, applicationId, apiId, apiInfo, applicationInfo, throttlingPolicy, status);
+    return Objects.hash(subscriptionId, applicationId, apiId, apiInfo, applicationInfo, throttlingPolicy, status, redirectionParams);
   }
 
   @Override
@@ -218,6 +238,7 @@ public enum StatusEnum {
     sb.append("    applicationInfo: ").append(toIndentedString(applicationInfo)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
+    sb.append("    redirectionParams: ").append(toIndentedString(redirectionParams)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -268,7 +268,7 @@ var validIPRange = function (startIP, endIP) {
     var startIp = 0;
     var endIp = 0;
     for (var i = 0; i < 4; i++) {
-        startIp = startIp + startIPBlocks[i]* Math.pow(256, 3-i);
+        startIp = startIp + startIPBlocks[i] * Math.pow(256, 3-i);
     }
     for (var i = 0; i < 4; i++) {
         endIp = endIp + endIPBlocks[i] * Math.pow(256, 3-i);
