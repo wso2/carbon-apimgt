@@ -1777,6 +1777,15 @@ public class SQLConstants {
             "    AND TYPE = ? " +
             "    AND FIELD = ?";
 
+    public static final String REMOVE_FROM_GRAPHQL_QUERY_ANALYSIS_SQL =
+            "DELETE FROM AM_GRAPHQL_QUERY_ANALYSIS WHERE API_ID = ?";
+
+    public static final String REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL =
+            "DELETE FROM AM_GRAPHQL_COMPLEXITY WHERE API_ID = ?";
+
+    public static final String REMOVE_FROM_GRAPHQL_DEPTH_SQL =
+            "DELETE FROM AM_GRAPHQL_DEPTH WHERE API_ID = ?";
+
     public static final String ADD_ROLE_DEPTH_MAPPING_SQL =
             "INSERT INTO AM_GRAPHQL_DEPTH (UUID, API_ID, ROLE, DEPTH_VALUE) VALUES (?,?,?,?)";
 
@@ -1798,6 +1807,15 @@ public class SQLConstants {
             "   AM_GRAPHQL_DEPTH " +
             " WHERE" +
             "   UUID = ?";
+
+    public static final String GET_QUERY_ANALYSIS_INFO_SQL =
+            "SELECT" +
+            "   DEPTH_ENABLED," +
+            "   COMPLEXITY_ENABLED" +
+            " FROM" +
+            "   AM_GRAPHQL_QUERY_ANALYSIS " +
+            " WHERE" +
+            "   API_ID = ?";
 
     public static final String ADD_API_LIFECYCLE_EVENT_SQL =
             " INSERT INTO AM_API_LC_EVENT (API_ID, PREVIOUS_STATE, NEW_STATE, USER_ID, TENANT_ID, EVENT_DATE)" +

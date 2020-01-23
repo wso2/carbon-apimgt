@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlPolicyDefinition;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
@@ -106,7 +107,7 @@ public class GraphQLSchemaDefinition {
      * @param api api object
      * @return schemaDefinition
      */
-    public String buildSchemaWithScopesAndRoles(API api) {
+    public String buildSchemaWithAdditionalInfo(API api, GraphqlPolicyDefinition graphqlPolicyDefinition) {
         Swagger swagger = null;
         Map<String, String> scopeRoleMap = new HashMap<>();
         Map<String, String> operationScopeMap = new HashMap<>();

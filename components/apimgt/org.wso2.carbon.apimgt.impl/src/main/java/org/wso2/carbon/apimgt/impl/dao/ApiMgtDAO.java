@@ -63,6 +63,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthInfo;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -7224,6 +7225,9 @@ public class ApiMgtDAO {
         String deleteExternalAPIStoresQuery = SQLConstants.REMOVE_FROM_EXTERNAL_STORES_SQL;
         String deleteAPIQuery = SQLConstants.REMOVE_FROM_API_SQL;
         String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
+        String deleteGraphqlQueryAnalysisQuery = SQLConstants.REMOVE_FROM_GRAPHQL_QUERY_ANALYSIS_SQL;
+        String deleteGraphqlComplexityQuery = SQLConstants.REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL;
+        String deleteGraphqlDepthQuery = SQLConstants.REMOVE_FROM_GRAPHQL_DEPTH_SQL;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -7241,6 +7245,22 @@ public class ApiMgtDAO {
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
             prepStmt = connection.prepareStatement(deleteSubscriptionQuery);
+            prepStmt.setInt(1, id);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            //Delete all graphql query analysis related details associated with given API
+            prepStmt = connection.prepareStatement(deleteGraphqlQueryAnalysisQuery);
+            prepStmt.setInt(1, id);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            prepStmt = connection.prepareStatement(deleteGraphqlComplexityQuery);
+            prepStmt.setInt(1, id);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            prepStmt = connection.prepareStatement(deleteGraphqlDepthQuery);
             prepStmt.setInt(1, id);
             prepStmt.execute();
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
@@ -14518,6 +14538,39 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
+    }
+
+    public GraphqlPolicyDefinition getPolicyDefinition (APIIdentifier apiIdentifier) throws APIManagementException {
+        GraphqlPolicyDefinition graphqlPolicyDefinition = new GraphqlPolicyDefinition();
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        String query = SQLConstants.GET_QUERY_ANALYSIS_INFO_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            int apiId = getAPIID(apiIdentifier, conn);
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, apiId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                graphqlPolicyDefinition.setDepthEnabled(rs.getBoolean("DEPTH_ENABLED"));
+                graphqlPolicyDefinition.setRoleDepthMappings(getDepthDetails(apiIdentifier));
+                graphqlPolicyDefinition.setComplexityEnabled(rs.getBoolean("COMPLEXITY_ENABLED"));
+                graphqlPolicyDefinition.setGraphqlComplexityInfo(getComplexityDetails(apiIdentifier));
+            }
+        } catch (SQLException ex) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e) {
+                    log.error("Error while rolling back the failed operation", e);
+                }
+            }
+            handleException("Error while retrieving query analysis info: ", ex);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return graphqlPolicyDefinition;
     }
 
     /**
