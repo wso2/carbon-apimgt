@@ -1663,7 +1663,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (api != null) {
                 String currentStatus = api.getStatus();
 
-                if (!currentStatus.equals(newStatus)) {
+                if (APIConstants.PUBLISHED.equals(newStatus) || !currentStatus.equals(newStatus)) {
                     api.setStatus(newStatus);
 
                     APIManagerConfiguration config = getAPIManagerConfiguration();

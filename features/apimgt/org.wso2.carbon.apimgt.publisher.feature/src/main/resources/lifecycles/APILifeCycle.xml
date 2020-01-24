@@ -87,6 +87,9 @@
                             <execution forEvent="Deploy as a Prototype"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
+                            <execution forEvent="Publish"
+                                       class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
+                            </execution>
 
                         </data>
                     </datamodel>
