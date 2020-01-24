@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Utils from 'AppData/Utils';
+import Alert from 'AppComponents/Shared/Alert';
 import { FormattedMessage } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
@@ -44,10 +45,11 @@ const styles = (theme) => ({
     },
     viewInStoreLauncher: {
         display: 'flex',
-        height: 70,
         flexDirection: 'column',
         color: theme.palette.getContrastText(theme.palette.background.paper),
         textAlign: 'center',
+        justifyContent: 'center',
+        height: 70,
     },
     linkText: {
         fontSize: theme.typography.fontSize,
@@ -74,13 +76,22 @@ const styles = (theme) => ({
         height: 70,
         color: theme.palette.getContrastText(theme.palette.background.paper),
     },
+    downloadApiFlex: {
+        display: 'flex',
+        flexDirection: 'column',
+    },
 });
 
 // eslint-disable-next-line require-jsdoc
 async function exportAPI(name, version, provider, format) {
-    const restApi = new API();
-    const zipFile = await restApi.exportApi(name, version, provider, format);
-    return Utils.forceDownload(zipFile);
+    try {
+        const restApi = new API();
+        const zipFile = await restApi.exportApi(name, version, provider, format);
+        return Utils.forceDownload(zipFile);
+    } catch (err) {
+        Alert.error('Something went wrong while Downloding the API');
+        return null;
+    }
 }
 
 
@@ -166,13 +177,14 @@ const APIDetailsTopMenu = (props) => {
                     <a
                         onClick={() => exportAPI(api.name, api.version, api.provider, 'YAML')}
                         onKeyDown='null'
+                        className={classes.downloadApiFlex}
                     >
                         <div>
-                            <Typography variant='h4' align='center'><CloudDownloadRounded /></Typography>
-                            <Typography variant='caption' align='left'>
-                    Download API
-                            </Typography>
+                            <CloudDownloadRounded />
                         </div>
+                        <Typography variant='caption' align='left'>
+                    Download API
+                        </Typography>
                     </a>
                 )}
             </div>
