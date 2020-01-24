@@ -32,10 +32,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.entity.ContentType;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthInfo;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlPolicyDefinition;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -120,6 +122,7 @@ public class GraphQLSchemaDefinition {
         StringBuilder scopeRoleMappingBuilder = new StringBuilder();
         StringBuilder operationAuthSchemeMappingBuilder = new StringBuilder();
         StringBuilder operationThrottlingMappingBuilder = new StringBuilder();
+        StringBuilder policyBuilder = new StringBuilder();
 
         String swaggerDef = api.getSwaggerDefinition();
         OpenAPI openAPI = null;
@@ -237,6 +240,18 @@ public class GraphQLSchemaDefinition {
                     operationAuthSchemeMappingBuilder.append(operationAuthSchemeType);
                 }
                 schemaDefinitionBuilder.append(operationAuthSchemeMappingBuilder.toString());
+            }
+
+            if (operationAuthSchemeMap.size() > 0) {
+                // Constructing the policy definition
+                JSONObject policyDefinition = new JSONObject();
+                Map depthObject = new LinkedHashMap(graphqlPolicyDefinition.getRoleDepthMappings().size()+1);
+                depthObject.put("enabled", graphqlPolicyDefinition.isDepthEnabled());
+                for (GraphqlDepthInfo graphqlDepthInfo : graphqlPolicyDefinition.getRoleDepthMappings()) {
+                    depthObject.put(graphqlDepthInfo.getRole(), graphqlDepthInfo.getDepthValue());
+                }
+                policyDefinition.put("DEPTH", depthObject);
+                log.info("JSON OBJECT : " + policyDefinition);
             }
         }
         return schemaDefinitionBuilder.toString();
