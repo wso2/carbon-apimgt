@@ -16,9 +16,28 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class ScopeDTO   {
   
+    private String id = null;
     private String name = null;
     private String description = null;
     private ScopeBindingsDTO bindings = null;
+
+  /**
+   * UUID of the Scope 
+   **/
+  public ScopeDTO id(String id) {
+    this.id = id;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the Scope ")
+  @JsonProperty("id")
+  public String getId() {
+    return id;
+  }
+  public void setId(String id) {
+    this.id = id;
+  }
 
   /**
    * name of Scope 
@@ -29,8 +48,9 @@ public class ScopeDTO   {
   }
 
   
-  @ApiModelProperty(example = "apim:api_view", value = "name of Scope ")
+  @ApiModelProperty(example = "apim:api_view", required = true, value = "name of Scope ")
   @JsonProperty("name")
+  @NotNull
   public String getName() {
     return name;
   }
@@ -83,14 +103,15 @@ public class ScopeDTO   {
       return false;
     }
     ScopeDTO scope = (ScopeDTO) o;
-    return Objects.equals(name, scope.name) &&
+    return Objects.equals(id, scope.id) &&
+        Objects.equals(name, scope.name) &&
         Objects.equals(description, scope.description) &&
         Objects.equals(bindings, scope.bindings);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, description, bindings);
+    return Objects.hash(id, name, description, bindings);
   }
 
   @Override
@@ -98,6 +119,7 @@ public class ScopeDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ScopeDTO {\n");
     
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    bindings: ").append(toIndentedString(bindings)).append("\n");
