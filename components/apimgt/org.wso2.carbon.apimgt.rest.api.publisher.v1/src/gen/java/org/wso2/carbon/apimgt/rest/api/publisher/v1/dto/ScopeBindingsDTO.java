@@ -29,7 +29,7 @@ public class ScopeBindingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "Type of binding role / permission ")
+  @ApiModelProperty(example = "ROLE", value = "Type of binding role / permission ")
   @JsonProperty("type")
   public String getType() {
     return type;
@@ -46,7 +46,7 @@ public class ScopeBindingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[\"admin\",\"Internal/creator\",\"Internal/publisher\"]", value = "")
   @JsonProperty("values")
   public List<String> getValues() {
     return values;

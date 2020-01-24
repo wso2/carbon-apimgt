@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeListListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import javax.validation.constraints.*;
 
 
@@ -16,21 +16,21 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
-public class ScopeListDTO   {
+public class GlobalScopeListDTO   {
   
     private Integer count = null;
-    private List<ScopeListListDTO> list = new ArrayList<>();
+    private List<ScopeDTO> list = new ArrayList<>();
 
   /**
-   * Number of Scopes returned. 
+   * Number of Global Scopes returned. 
    **/
-  public ScopeListDTO count(Integer count) {
+  public GlobalScopeListDTO count(Integer count) {
     this.count = count;
     return this;
   }
 
   
-  @ApiModelProperty(example = "1", value = "Number of Scopes returned. ")
+  @ApiModelProperty(example = "1", value = "Number of Global Scopes returned. ")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -41,7 +41,7 @@ public class ScopeListDTO   {
 
   /**
    **/
-  public ScopeListDTO list(List<ScopeListListDTO> list) {
+  public GlobalScopeListDTO list(List<ScopeDTO> list) {
     this.list = list;
     return this;
   }
@@ -49,10 +49,10 @@ public class ScopeListDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<ScopeListListDTO> getList() {
+  public List<ScopeDTO> getList() {
     return list;
   }
-  public void setList(List<ScopeListListDTO> list) {
+  public void setList(List<ScopeDTO> list) {
     this.list = list;
   }
 
@@ -65,9 +65,9 @@ public class ScopeListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ScopeListDTO scopeList = (ScopeListDTO) o;
-    return Objects.equals(count, scopeList.count) &&
-        Objects.equals(list, scopeList.list);
+    GlobalScopeListDTO globalScopeList = (GlobalScopeListDTO) o;
+    return Objects.equals(count, globalScopeList.count) &&
+        Objects.equals(list, globalScopeList.list);
   }
 
   @Override
@@ -78,7 +78,7 @@ public class ScopeListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ScopeListDTO {\n");
+    sb.append("class GlobalScopeListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
