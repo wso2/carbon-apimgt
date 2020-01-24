@@ -1,0 +1,47 @@
+<%
+var log = new Log();
+var getTenantConfig = function() {
+    try {
+        var gson = com.google.gson.Gson();
+        var provider = jagg.getUser().username;
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var tenantDomain = MultitenantUtils.getTenantDomain(provider);
+
+        var tenantConfig = APIUtil.getTenantConfig(tenantDomain);
+        var tenantConfigObject = JSON.parse(gson.toJson(tenantConfig));
+        return {
+            error:false,
+            tenantConfig:tenantConfigObject
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while retreiving tenant configuration of " + tenantDomain;
+        log.error(ex);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }        
+};
+var updateTenantConf = function(tenantConfString) {
+    try {
+        var gson = com.google.gson.Gson();
+        var provider = jagg.getUser().username;
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var tenantDomain = MultitenantUtils.getTenantDomain(provider);
+
+        APIUtil.updateTenantConf(tenantConfString, tenantDomain);
+        return {
+            error:false
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while updating tenant configuration of " + tenantDomain;
+        log.error(ex);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }        
+};
+%>

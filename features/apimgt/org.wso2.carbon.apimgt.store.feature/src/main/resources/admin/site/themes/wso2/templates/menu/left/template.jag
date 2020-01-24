@@ -118,6 +118,11 @@
               onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
               <i class="fw fw-user"></i><%= i18n.localize("Applications") %></a>
             </li>
+            <li <%if (reqUrl.match("scopeMapping")){%> class="active" <% } %>><a
+              href="<%= jagg.url("/scopeMapping") %>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-user"></i><%= i18n.localize("Scope Mapping") %></a>
+            </li>
           </ul>
         </li>
         <li class="nav-header">
