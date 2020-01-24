@@ -14280,8 +14280,9 @@ public class ApiMgtDAO {
                     // Update query analysis table entries and add query complexity table entries
                     try {
                         ps2 = conn.prepareStatement(updateComplexityDetails);
-                        ps2.setInt(1, graphqlComplexityInfo.getMaxComplexity());
-                        ps2.setInt(2, apiId);
+                        ps2.setBoolean(1, true);
+                        ps2.setInt(2, graphqlComplexityInfo.getMaxComplexity());
+                        ps2.setInt(3, apiId);
                         ps2.executeUpdate();
                     } catch (SQLException e) {
                         handleException("Error while updating complexity details: ", e);
@@ -14305,8 +14306,9 @@ public class ApiMgtDAO {
                     // Entries already exists for this API_ID. Hence an update is performed.
                     try {
                         ps2 = conn.prepareStatement(updateComplexityDetails);
-                        ps2.setInt(1, graphqlComplexityInfo.getMaxComplexity());
-                        ps2.setInt(2, apiId);
+                        ps2.setBoolean(1, true);
+                        ps2.setInt(2, graphqlComplexityInfo.getMaxComplexity());
+                        ps2.setInt(3, apiId);
                         ps2.executeUpdate();
                     } catch (SQLException e) {
                         handleException("Error while updating complexity details: ", e);

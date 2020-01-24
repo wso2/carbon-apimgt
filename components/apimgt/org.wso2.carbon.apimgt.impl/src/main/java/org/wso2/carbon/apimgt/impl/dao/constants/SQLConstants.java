@@ -1764,6 +1764,7 @@ public class SQLConstants {
     public static final String UPDATE_COMPLEXITY_DETAILS_SQL =
             " UPDATE AM_GRAPHQL_QUERY_ANALYSIS " +
             " SET " +
+            "   COMPLEXITY_ENABLED = ?," +
             "   MAX_COMPLEXITY = ?" +
             " WHERE " +
             "    API_ID = ?";
