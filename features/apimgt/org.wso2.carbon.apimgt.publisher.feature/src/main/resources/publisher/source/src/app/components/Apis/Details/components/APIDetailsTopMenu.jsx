@@ -82,7 +82,14 @@ const styles = (theme) => ({
     },
 });
 
-// eslint-disable-next-line require-jsdoc
+/**
+ * The component for advanced endpoint configurations.
+ * @param {string} name The name of the
+ * @param {string} version Version of the API
+ * @param {string} provider Provider of the API
+ * @param {string} format Weather to recive files in YALM of JSON format
+ * @returns {zip} Zpi file containing the API directory.
+ */
 async function exportAPI(name, version, provider, format) {
     try {
         const restApi = new API();
@@ -93,7 +100,6 @@ async function exportAPI(name, version, provider, format) {
         return null;
     }
 }
-
 
 const APIDetailsTopMenu = (props) => {
     const {
