@@ -3367,6 +3367,102 @@ paths:
             Role-Depth Mapping creation failed.
 
   ######################################################
+  # GraphQL "Individual Role Depth" resource APIs
+  ######################################################
+  /apis/{apiId}/query-analysis/depth/{roleDepthMappingId}:
+
+    #-----------------------------------------------------
+    # Retrieve a particular role-depth mapping of an API
+    #-----------------------------------------------------
+    get:
+      summary: Get a particular role-depth mapping of an API
+      security:
+        - OAuth2Security:
+          - apim:api_create
+          - apim:api_publish
+      description: |
+        This operation can be used to retrieve a paticular role-depth mapping by providing the API id and uuid.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/roleDepthMappingId'
+      tags:
+        - GraphQL Query Analysis
+      responses:
+        200:
+          description: |
+            OK.
+            Requested role-depth mapping returned.
+          headers:
+            Content-Type:
+              description: |
+                The content of the body.
+              default: application/json
+              type: string
+          schema:
+            $ref: '#/definitions/GraphQLQueryDepthInfo'
+        404:
+          description: |
+            Not Found.
+            Requested role-depth mapping does not exist.
+
+    #-----------------------------------------------------
+    # Update a particular role-depth mapping of an API
+    #-----------------------------------------------------
+    put:
+      summary: Update a given role-depth mapping of an API
+      security:
+        - OAuth2Security:
+          - apim:api_create
+      description: |
+        This operation can be used to update a role-depth mapping belonging to an API by providing the API id and uuid.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/roleDepthMappingId'
+        - in: body
+          name: body
+          description: |
+            Role-depth mapping that needs to be updated
+          required: true
+          schema:
+            $ref: '#/definitions/GraphQLQueryDepthInfo'
+      tags:
+        - GraphQL Query Analysis
+      responses:
+        200:
+          description: |
+            OK.
+            Role-Depth Mapping updated successfully.
+        404:
+          description: |
+            Bad Request.
+            Role-Depth Mapping updation failed.
+
+    #-----------------------------------------------------
+    # Delete a particular role-depth mapping of an API
+    #-----------------------------------------------------
+    delete:
+      summary: Delete a given role-depth mapping of an API
+      security:
+        - OAuth2Security:
+          - apim:api_create
+      description: |
+        This operation can be used to delete a role-depth mapping belonging to an API by providing the API id and uuid.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/roleDepthMappingId'
+      tags:
+        - GraphQL Query Analysis
+      responses:
+        200:
+          description: |
+            OK.
+            Role-Depth Mapping deleted successfully.
+        404:
+          description: |
+            Bad Request.
+            Role-Depth Mapping deletion failed.
+
+  ######################################################
   # GraphQL "Query Analysis" resource APIs for "Query Complexity"
   ######################################################
   /apis/{apiId}/query-analysis/complexity:
@@ -3381,7 +3477,7 @@ paths:
             - apim:api_create
             - apim:api_publish
       description: |
-        This operation can be used to retrieve complexity related details belonging to an API by providing the id of the API.
+        This operation can be used to retrieve complexity related details belonging to an API by providing the API id.
       parameters:
         - $ref: '#/parameters/apiId'
       tags:
@@ -6828,6 +6924,17 @@ parameters:
     in: path
     required: true
     description: The alert configuration id.
+
+  # Role-depth mapping Identifier
+  # Specified as part of the path expression
+  roleDepthMappingId:
+    name: roleDepthMappingId
+    in: path
+    description: |
+      Role-depth mapping identifier
+    required: true
+    type: string
+
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
