@@ -85,6 +85,9 @@ public interface ApisApiService {
       public Response apisApiIdQueryAnalysisComplexityPost(String apiId, GraphQLQueryComplexityInfoDTO body, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdQueryAnalysisDepthGet(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdQueryAnalysisDepthPost(String apiId, GraphQLQueryDepthInfoDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdQueryAnalysisDepthRoleDepthMappingIdDelete(String apiId, String roleDepthMappingId, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdQueryAnalysisDepthRoleDepthMappingIdGet(String apiId, String roleDepthMappingId, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdQueryAnalysisDepthRoleDepthMappingIdPut(String apiId, String roleDepthMappingId, GraphQLQueryDepthInfoDTO body, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdResourcePathsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdResourcePoliciesGet(String apiId, String sequenceType, String resourcePath, String verb, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdResourcePoliciesResourcePolicyIdGet(String apiId, String resourcePolicyId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;

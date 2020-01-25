@@ -623,7 +623,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/query-analysis/complexity")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get the complexity related details of an API", notes = "This operation can be used to retrieve complexity related details belonging to an API by providing the id of the API. ", response = Void.class, authorizations = {
+    @ApiOperation(value = "Get the complexity related details of an API", notes = "This operation can be used to retrieve complexity related details belonging to an API by providing the API id. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_create", description = "Create API")
@@ -683,6 +683,55 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Bad Request. Role-Depth Mapping creation failed. ", response = Void.class) })
     public Response apisApiIdQueryAnalysisDepthPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Role-depth mapping that needs to be added " ,required=true) GraphQLQueryDepthInfoDTO body) throws APIManagementException{
         return delegate.apisApiIdQueryAnalysisDepthPost(apiId, body, securityContext);
+    }
+
+    @DELETE
+    @Path("/{apiId}/query-analysis/depth/{roleDepthMappingId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete a given role-depth mapping of an API", notes = "This operation can be used to delete a role-depth mapping belonging to an API by providing the API id and uuid. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "GraphQL Query Analysis",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Role-Depth Mapping deleted successfully. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Bad Request. Role-Depth Mapping deletion failed. ", response = Void.class) })
+    public Response apisApiIdQueryAnalysisDepthRoleDepthMappingIdDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Role-depth mapping identifier ",required=true) @PathParam("roleDepthMappingId") String roleDepthMappingId) throws APIManagementException{
+        return delegate.apisApiIdQueryAnalysisDepthRoleDepthMappingIdDelete(apiId, roleDepthMappingId, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/query-analysis/depth/{roleDepthMappingId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get a particular role-depth mapping of an API", notes = "This operation can be used to retrieve a paticular role-depth mapping by providing the API id and uuid. ", response = GraphQLQueryDepthInfoDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "GraphQL Query Analysis",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Requested role-depth mapping returned. ", response = GraphQLQueryDepthInfoDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested role-depth mapping does not exist. ", response = Void.class) })
+    public Response apisApiIdQueryAnalysisDepthRoleDepthMappingIdGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Role-depth mapping identifier ",required=true) @PathParam("roleDepthMappingId") String roleDepthMappingId) throws APIManagementException{
+        return delegate.apisApiIdQueryAnalysisDepthRoleDepthMappingIdGet(apiId, roleDepthMappingId, securityContext);
+    }
+
+    @PUT
+    @Path("/{apiId}/query-analysis/depth/{roleDepthMappingId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update a given role-depth mapping of an API", notes = "This operation can be used to update a role-depth mapping belonging to an API by providing the API id and uuid. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "GraphQL Query Analysis",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Role-Depth Mapping updated successfully. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Bad Request. Role-Depth Mapping updation failed. ", response = Void.class) })
+    public Response apisApiIdQueryAnalysisDepthRoleDepthMappingIdPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Role-depth mapping identifier ",required=true) @PathParam("roleDepthMappingId") String roleDepthMappingId, @ApiParam(value = "Role-depth mapping that needs to be updated " ,required=true) GraphQLQueryDepthInfoDTO body) throws APIManagementException{
+        return delegate.apisApiIdQueryAnalysisDepthRoleDepthMappingIdPut(apiId, roleDepthMappingId, body, securityContext);
     }
 
     @GET

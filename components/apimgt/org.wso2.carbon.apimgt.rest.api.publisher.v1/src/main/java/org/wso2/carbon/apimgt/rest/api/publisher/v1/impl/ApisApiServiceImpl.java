@@ -896,6 +896,21 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    @Override
+    public Response apisApiIdQueryAnalysisDepthRoleDepthMappingIdDelete(String apiId, String roleDepthMappingId, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdQueryAnalysisDepthRoleDepthMappingIdGet(String apiId, String roleDepthMappingId, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdQueryAnalysisDepthRoleDepthMappingIdPut(String apiId, String roleDepthMappingId, GraphQLQueryDepthInfoDTO body, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
     // AWS Lambda: rest api operation to get ARNs
     @Override
     public Response apisApiIdAmznResourceNamesGet(String apiId, MessageContext messageContext) {
