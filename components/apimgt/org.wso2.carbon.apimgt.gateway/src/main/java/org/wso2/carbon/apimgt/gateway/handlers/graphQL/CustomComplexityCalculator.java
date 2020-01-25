@@ -39,7 +39,9 @@ public class CustomComplexityCalculator implements FieldComplexityCalculator {
             int value = ((Long)((JSONObject)policyDefinition.get(parentType)).get(fieldName)).intValue();
             return value; // Returns custom complexity value
         } catch (NullPointerException e) {
-            log.error("No custom complexity value was assigned for " + fieldName + " under type " + parentType);
+            if (log.isDebugEnabled()) {
+                log.debug("No custom complexity value was assigned for " + fieldName + " under type " + parentType);
+            }
             return 1; // Returns default complexity value
         }
     }
