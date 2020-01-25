@@ -37,6 +37,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.CustomComplexityDetails;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthInfo;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlPolicyDefinition;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -52,11 +54,9 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -244,17 +244,71 @@ public class GraphQLSchemaDefinition {
 
             if (operationAuthSchemeMap.size() > 0) {
                 // Constructing the policy definition
-                JSONObject policyDefinition = new JSONObject();
-                Map depthObject = new LinkedHashMap(graphqlPolicyDefinition.getRoleDepthMappings().size()+1);
-                depthObject.put("enabled", graphqlPolicyDefinition.isDepthEnabled());
-                for (GraphqlDepthInfo graphqlDepthInfo : graphqlPolicyDefinition.getRoleDepthMappings()) {
-                    depthObject.put(graphqlDepthInfo.getRole(), graphqlDepthInfo.getDepthValue());
-                }
-                policyDefinition.put("DEPTH", depthObject);
-                log.info("JSON OBJECT : " + policyDefinition);
+                JSONObject jsonPolicyDefinition = policyDefinitionToJson(graphqlPolicyDefinition);
+                String base64EncodedPolicyDefinition = Base64.getUrlEncoder().withoutPadding().
+                        encodeToString(jsonPolicyDefinition.toJSONString().getBytes(Charset.defaultCharset()));
+                //
+                String temp = jsonPolicyDefinition.toJSONString();
+                //
+                String policyDefinition = "type GraphQLAccessControlPolicy_WSO2 {\n" +
+                        base64EncodedPolicyDefinition + ": String\n}\n";
+                policyBuilder.append(policyDefinition);
+                schemaDefinitionBuilder.append(policyBuilder.toString());
             }
         }
         return schemaDefinitionBuilder.toString();
+    }
+
+    /**
+     * Method to convert GraphqlPolicyDefinition object to a JSONObject
+     *
+     * @param graphqlPolicyDefinition GraphqlPolicyDefinition object
+     * @return json object which contains the policy definition
+     */
+    public JSONObject policyDefinitionToJson(GraphqlPolicyDefinition graphqlPolicyDefinition) {
+        HashMap<String, HashMap<String, Integer>> customComplexityMap = new HashMap<>();
+        List<CustomComplexityDetails> list = graphqlPolicyDefinition.getGraphqlComplexityInfo().getList();
+        for (CustomComplexityDetails customComplexityDetails : list) {
+            String type = customComplexityDetails.getType();
+            String field = customComplexityDetails.getField();
+            int complexityValue = customComplexityDetails.getComplexityValue();
+            if (customComplexityMap.containsKey(type)) {
+                customComplexityMap.get(type).put(field, complexityValue);
+            } else {
+                HashMap<String, Integer> complexityValueMap = new HashMap<>();
+                complexityValueMap.put(field, complexityValue);
+                customComplexityMap.put(type, complexityValueMap);
+            }
+        }
+
+        JSONObject policyDefinition = new JSONObject();
+        Map depthObject = new LinkedHashMap(graphqlPolicyDefinition.getRoleDepthMappings().size()+1);
+        depthObject.put("enabled", graphqlPolicyDefinition.isDepthEnabled());
+        for (GraphqlDepthInfo graphqlDepthInfo : graphqlPolicyDefinition.getRoleDepthMappings()) {
+            depthObject.put(graphqlDepthInfo.getRole(), graphqlDepthInfo.getDepthValue());
+        }
+        Map complexityObject = new LinkedHashMap(3);
+        Map customComplexityObject = new LinkedHashMap(customComplexityMap.size());
+        for (HashMap.Entry<String, HashMap<String, Integer>> entry : customComplexityMap.entrySet()) {
+            HashMap<String, Integer> fieldValueMap = entry.getValue();
+            String type = entry.getKey();
+            Map fieldValueObject = new LinkedHashMap(fieldValueMap.size());
+            for (HashMap.Entry<String, Integer> subEntry : fieldValueMap.entrySet()) {
+                String field =  subEntry.getKey();
+                int complexityValue = subEntry.getValue();
+                fieldValueObject.put(field, complexityValue);
+            }
+            customComplexityObject.put(type, fieldValueObject);
+        }
+        GraphqlComplexityInfo graphqlComplexityInfo = graphqlPolicyDefinition.getGraphqlComplexityInfo();
+        complexityObject.put("enabled", graphqlPolicyDefinition.isComplexityEnabled());
+        complexityObject.put("max_query_complexity", graphqlComplexityInfo.getMaxComplexity());
+        complexityObject.put("custom_complexity_values", customComplexityObject);
+
+        policyDefinition.put("DEPTH", depthObject);
+        policyDefinition.put("COMPLEXITY", complexityObject);
+
+        return policyDefinition;
     }
 
     /**
