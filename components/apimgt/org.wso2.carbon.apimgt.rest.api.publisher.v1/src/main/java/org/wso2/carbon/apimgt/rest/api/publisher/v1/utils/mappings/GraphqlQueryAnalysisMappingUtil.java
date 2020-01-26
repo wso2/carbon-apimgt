@@ -108,4 +108,17 @@ public class GraphqlQueryAnalysisMappingUtil {
         graphqlDepthInfo.setDepthValue(graphQLQueryDepthInfoDTO.getDepthValue());
         return graphqlDepthInfo;
     }
+
+    /**
+     * Converts a GraphqlDepthInfo object into a DTO object
+     *
+     * @param graphqlDepthInfo GraphqlDepthInfo object
+     * @return a new GraphQLQueryDepthInfoDTO object corresponding to given GraphqlDepthInfo object
+     */
+    public static GraphQLQueryDepthInfoDTO fromGraphqlDepthInfotoDTO(GraphqlDepthInfo graphqlDepthInfo) {
+        GraphQLQueryDepthInfoDTO graphQLQueryDepthInfoDTO = new GraphQLQueryDepthInfoDTO();
+        graphQLQueryDepthInfoDTO.setRole(graphqlDepthInfo.getRole());
+        graphQLQueryDepthInfoDTO.setDepthValue(graphqlDepthInfo.getDepthValue());
+        return graphQLQueryDepthInfoDTO;
+    }
 }

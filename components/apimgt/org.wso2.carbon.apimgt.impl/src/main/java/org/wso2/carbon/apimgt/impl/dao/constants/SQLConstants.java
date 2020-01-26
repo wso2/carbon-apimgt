@@ -1790,6 +1790,16 @@ public class SQLConstants {
     public static final String ADD_ROLE_DEPTH_MAPPING_SQL =
             "INSERT INTO AM_GRAPHQL_DEPTH (UUID, API_ID, ROLE, DEPTH_VALUE) VALUES (?,?,?,?)";
 
+    public static final String UPDATE_ROLE_DEPTH_MAPPING_SQL =
+            " UPDATE AM_GRAPHQL_DEPTH " +
+            " SET " +
+            "   DEPTH_VALUE = ? " +
+            " WHERE" +
+            "   UUID = ? ";
+
+    public static final String REMOVE_ROLE_DEPTH_MAPPING_SQL  =
+            "DELETE FROM AM_GRAPHQL_DEPTH WHERE UUID = ?";
+
     public static final String GET_DEPTH_DETAILS_SQL =
             "SELECT" +
             "   UUID," +

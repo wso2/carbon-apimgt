@@ -14514,7 +14514,6 @@ public class ApiMgtDAO {
      */
     public void addRoleDepthMapping(APIIdentifier apiIdentifier, GraphqlDepthInfo graphqlDepthInfo) throws APIManagementException {
         Connection conn = null;
-        ResultSet rs = null;
         PreparedStatement ps = null;
         String query = SQLConstants.ADD_ROLE_DEPTH_MAPPING_SQL;
         try {
@@ -14538,10 +14537,80 @@ public class ApiMgtDAO {
             }
             handleException("Error while adding role depth mapping: ", ex);
         } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
     }
 
+    /**
+     * Updates a given role-depth mapping
+     *
+     * @param uuid UUID of role-depth mapping which needs to be updated
+     * @param graphqlDepthInfo GraphqlDepthInfo object
+     * @throws APIManagementException
+     */
+    public void updateRoleDepthMapping(String uuid, GraphqlDepthInfo graphqlDepthInfo) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        String query = SQLConstants.UPDATE_ROLE_DEPTH_MAPPING_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, graphqlDepthInfo.getDepthValue());
+            ps.setString(2, uuid);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    log.error("Error while rolling back the failed operation", ex);
+                }
+            }
+            handleException("Error in updating the role-depth mapping: " + e.getMessage(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
+    /**
+     * Deletes a given role-depth mapping
+     *
+     * @param uuid UUID of role-depth mapping which needs to be deleted
+     * @return true if successfully deleted
+     * @throws APIManagementException
+     */
+    public boolean deleteRoleDepthMapping(String uuid) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        String query = SQLConstants.REMOVE_ROLE_DEPTH_MAPPING_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(query);
+            ps.setString(1, uuid);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    log.error("Error while rolling back the failed operation", ex);
+                }
+            }
+            handleException("Error while deleting the role-depth mapping: " + e.getMessage(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+        return false;
+    }
+
+    /**
+     * Get the policy definition for a particular API
+     *
+     * @param apiIdentifier APIIdentifier object to retrieve API ID
+     * @return a new GraphqlPolicyDefinition object
+     * @throws APIManagementException
+     */
     public GraphqlPolicyDefinition getPolicyDefinition (APIIdentifier apiIdentifier) throws APIManagementException {
         GraphqlPolicyDefinition graphqlPolicyDefinition = new GraphqlPolicyDefinition();
         Connection conn = null;

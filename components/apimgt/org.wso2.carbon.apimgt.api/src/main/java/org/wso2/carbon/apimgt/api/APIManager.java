@@ -266,13 +266,39 @@ public interface APIManager {
     List<GraphqlDepthInfo> getDepthDetails(APIIdentifier apiIdentifier) throws APIManagementException;
 
     /**
-     * Add complexity details given the GraphqlComplexityInfo object
+     * Returns a GraphqlDepthInfo object for a given uuid
+     *
+     * @param uuid Role Depth Mapping Identifier
+     * @return GraphqlDepthInfo GraphqlDepthInfo object
+     * @throws APIManagementException if failed to retrieve role-depth mapping
+     */
+    GraphqlDepthInfo getRoleDepthMapping(String uuid) throws APIManagementException;
+
+    /**
+     * Add role-depth mapping given the GraphqlDepthInfo object
      *
      * @param apiIdentifier
      * @param graphqlDepthInfo   GraphqlDepthInfo object
      * @throws APIManagementException if failed to add role-depth mapping
      */
     void addRoleDepthMapping(APIIdentifier apiIdentifier, GraphqlDepthInfo graphqlDepthInfo) throws APIManagementException;
+
+    /**
+     * Updates the role-depth mapping of a given uuid
+     *
+     * @param uuid Role Depth Mapping Identifier
+     * @throws APIManagementException if failed to update role-depth mapping
+     */
+    void updateRoleDepthMapping(String uuid, GraphqlDepthInfo graphqlDepthInfo) throws APIManagementException;
+
+    /**
+     * Delete role-depth mapping given the uuid
+     *
+     * @param uuid Role Depth Mapping Identifier
+     * @return True, if deletion successful
+     * @throws APIManagementException if failed to delete role-depth mapping
+     */
+    boolean deleteRoleDepthMapping(String uuid) throws APIManagementException;
 
     /**
      * Retrieves the subscriber from the given access token

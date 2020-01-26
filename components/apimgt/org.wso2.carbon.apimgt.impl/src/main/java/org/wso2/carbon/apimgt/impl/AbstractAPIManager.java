@@ -1589,6 +1589,18 @@ public abstract class AbstractAPIManager implements APIManager {
         apiMgtDAO.addRoleDepthMapping(apiIdentifier, graphqlDepthInfo);
     }
 
+    public GraphqlDepthInfo getRoleDepthMapping(String uuid) throws APIManagementException {
+        return apiMgtDAO.getRoleDepthMapping(uuid);
+    }
+
+    public void updateRoleDepthMapping(String uuid, GraphqlDepthInfo graphqlDepthInfo) throws APIManagementException {
+        apiMgtDAO.updateRoleDepthMapping(uuid, graphqlDepthInfo);
+    }
+
+    public boolean deleteRoleDepthMapping(String uuid) throws APIManagementException {
+        return apiMgtDAO.deleteRoleDepthMapping(uuid);
+    }
+
     public Subscriber getSubscriberById(String accessToken) throws APIManagementException {
         return null;
     }
