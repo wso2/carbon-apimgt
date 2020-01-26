@@ -18,8 +18,29 @@
  */
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const path = require('path');
+const fs = require('fs');
+const webpackDevServerBeforeHandler = require('./services/login/dev_login_callback');
 
 const config = {
+    devServer: {
+        before: webpackDevServerBeforeHandler,
+        proxy:
+            [{
+                context: ['/api/am', '/publisher/services'],
+                target: 'https://localhost:9443',
+                secure: false,
+            }, {
+                context: ['/publisher'],
+                bypass(req, res, proxyOptions) {
+                    if (fs.existsSync(path.join(__dirname, '../', req.path))) {
+                        return req.path.split('/publisher')[1];
+                    } else if (!req.path.startsWith('/publisher/services')) {
+                        return '/index.html';
+                    }
+                },
+            }]
+        ,
+    },
     entry: { index: './source/index.jsx' },
     output: {
         path: path.resolve(__dirname, 'site/public/dist'),

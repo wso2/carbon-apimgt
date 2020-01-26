@@ -86,7 +86,7 @@ class AuthManager {
             return new Promise((resolve, reject) => reject(new Error(CONSTS.errorCodes.NO_TOKEN_FOUND)));
         }
         const introspectUrl = Configurations.app.context + Utils.CONST.INTROSPECT;
-        const promisedResponse = fetch(introspectUrl, { credentials: 'same-origin' });
+        const promisedResponse = fetch(introspectUrl, { credentials: 'include' });
         return promisedResponse
             .then((response) => response.json())
             .then((data) => {
