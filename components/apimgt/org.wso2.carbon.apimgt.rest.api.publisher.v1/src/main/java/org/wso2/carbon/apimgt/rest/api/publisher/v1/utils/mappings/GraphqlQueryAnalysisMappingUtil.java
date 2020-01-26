@@ -17,13 +17,8 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
-import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.CustomComplexityDetails;
-import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlComplexityInfo;
-import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthInfo;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLCustomComplexityInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoListDTO;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +35,8 @@ public class GraphqlQueryAnalysisMappingUtil {
      * @param graphqlComplexityInfo GraphqlComplexityInfo object
      * @return a new GraphQLQueryComplexityInfoDTO object corresponding to given GraphqlComplexityInfo object
      */
-    public static GraphQLQueryComplexityInfoDTO fromGraphqlComplexityInfotoDTO(GraphqlComplexityInfo graphqlComplexityInfo) {
+    public static GraphQLQueryComplexityInfoDTO fromGraphqlComplexityInfotoDTO(
+            GraphqlComplexityInfo graphqlComplexityInfo) {
         GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO = new GraphQLQueryComplexityInfoDTO();
         List<GraphQLCustomComplexityInfoDTO> graphQLCustomComplexityInfoDTOList = new ArrayList<GraphQLCustomComplexityInfoDTO>();
         graphQLQueryComplexityInfoDTO.setMaxComplexity(graphqlComplexityInfo.getMaxComplexity());
@@ -61,7 +57,8 @@ public class GraphqlQueryAnalysisMappingUtil {
      * @param graphQLQueryComplexityInfoDTO GraphQLQueryComplexityInfoDTO object
      * @return a new GraphqlComplexityInfo object corresponding to given GraphQLQueryComplexityInfoDTO object
      */
-    public static GraphqlComplexityInfo fromDTOtoGraphqlComplexityInfo(GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO) {
+    public static GraphqlComplexityInfo fromDTOtoGraphqlComplexityInfo(
+            GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO) {
         GraphqlComplexityInfo graphqlComplexityInfo = new GraphqlComplexityInfo();
         List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<CustomComplexityDetails>();
         graphqlComplexityInfo.setMaxComplexity(graphQLQueryComplexityInfoDTO.getMaxComplexity());
@@ -82,7 +79,8 @@ public class GraphqlQueryAnalysisMappingUtil {
      * @param graphqlDepthInfoList List<GraphqlDepthInfo>
      * @return a new GraphQLQueryDepthInfoListDTO object corresponding to given list of GraphqlDepthInfo objects
      */
-    public static GraphQLQueryDepthInfoListDTO fromGraphqlDepthInfoListtoDTO(List<GraphqlDepthInfo> graphqlDepthInfoList) {
+    public static GraphQLQueryDepthInfoListDTO fromGraphqlDepthInfoListtoDTO(
+            List<GraphqlDepthInfo> graphqlDepthInfoList) {
         GraphQLQueryDepthInfoListDTO graphQLQueryDepthInfoListDTO = new GraphQLQueryDepthInfoListDTO();
         List<GraphQLQueryDepthInfoDTO> graphQLQueryDepthInfoDTOList = new ArrayList<GraphQLQueryDepthInfoDTO>();
         for (GraphqlDepthInfo graphqlDepthInfo :  graphqlDepthInfoList) {
@@ -120,5 +118,32 @@ public class GraphqlQueryAnalysisMappingUtil {
         graphQLQueryDepthInfoDTO.setRole(graphqlDepthInfo.getRole());
         graphQLQueryDepthInfoDTO.setDepthValue(graphqlDepthInfo.getDepthValue());
         return graphQLQueryDepthInfoDTO;
+    }
+
+    /**
+     * Converts a GraphqlDepthComplexityStatus object into a DTO object
+     *
+     * @param graphqlDepthComplexityStatus GraphqlDepthComplexityStatus object
+     * @return a new GraphQLDepthComplexityStatusDTO object corresponding to given GraphqlDepthComplexityStatus object
+     */
+    public static GraphQLDepthComplexityStatusDTO fromGraphqlDepthComplexityStatustoDTO(
+            GraphqlDepthComplexityStatus graphqlDepthComplexityStatus) {
+        GraphQLDepthComplexityStatusDTO graphQLDepthComplexityStatusDTO = new GraphQLDepthComplexityStatusDTO();
+        graphQLDepthComplexityStatusDTO.setDepthEnabled(graphqlDepthComplexityStatus.getDepthEnabled());
+        graphQLDepthComplexityStatusDTO.setComplexityEnabled(graphqlDepthComplexityStatus.getComplexityEnabled());
+        return graphQLDepthComplexityStatusDTO;
+    }
+
+    /**
+     * Converts a GraphQLLimitationStatusDTO object into a GraphqlLimitationStatus object
+     *
+     * @param body GraphQLLimitationStatusDTO object
+     * @return a new GraphqlLimitationStatus object corresponding to given GraphQLLimitationStatusDTO object
+     */
+    public static GraphqlLimitationStatus fromDTOtoGraphqlLimitationStatus(GraphQLLimitationStatusDTO body) {
+        GraphqlLimitationStatus graphqlLimitationStatus = new GraphqlLimitationStatus();
+        graphqlLimitationStatus.setLimitationType(body.getLimitationType());
+        graphqlLimitationStatus.setEnabled(body.isEnabled());
+        return graphqlLimitationStatus;
     }
 }

@@ -15,6 +15,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLDepthComplexityStatusDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLLimitationStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoListDTO;
@@ -732,6 +734,39 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Bad Request. Role-Depth Mapping updation failed. ", response = Void.class) })
     public Response apisApiIdQueryAnalysisDepthRoleDepthMappingIdPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Role-depth mapping identifier ",required=true) @PathParam("roleDepthMappingId") String roleDepthMappingId, @ApiParam(value = "Role-depth mapping that needs to be updated " ,required=true) GraphQLQueryDepthInfoDTO body) throws APIManagementException{
         return delegate.apisApiIdQueryAnalysisDepthRoleDepthMappingIdPut(apiId, roleDepthMappingId, body, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/query-analysis/enabled")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Check if depth and complexity limitations are enabled or disabled", notes = "This operation can be used to check if depth and complexity limitations are enabled/disabled by providing the API id. ", response = GraphQLDepthComplexityStatusDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "GraphQL Query Analysis",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Status of depth limitation and complexity limitation returned successfully. ", response = GraphQLDepthComplexityStatusDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Retrieving limitation status failed. ", response = Void.class) })
+    public Response apisApiIdQueryAnalysisEnabledGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.apisApiIdQueryAnalysisEnabledGet(apiId, securityContext);
+    }
+
+    @PUT
+    @Path("/{apiId}/query-analysis/enabled")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update the specified limitation", notes = "This operation can be used to enable/disable the depth/complexity limitation by providing the API id. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "GraphQL Query Analysis",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Created. Limitation updated successfully. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Bad Request. Limitation updation failed. ", response = Void.class) })
+    public Response apisApiIdQueryAnalysisEnabledPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Limitation that needs to be enabled/disabled " ,required=true) GraphQLLimitationStatusDTO body) throws APIManagementException{
+        return delegate.apisApiIdQueryAnalysisEnabledPut(apiId, body, securityContext);
     }
 
     @GET

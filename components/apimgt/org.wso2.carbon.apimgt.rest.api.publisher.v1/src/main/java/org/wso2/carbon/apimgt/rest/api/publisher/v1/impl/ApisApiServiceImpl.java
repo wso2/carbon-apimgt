@@ -72,7 +72,9 @@ import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthComplexityStatus;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthInfo;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlLimitationStatus;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -1014,6 +1016,84 @@ public class ApisApiServiceImpl implements ApisApiService {
                                 roleDepthMappingId, e, log);
             } else {
                 String msg = "Error while updating the role-depth mapping with uuid " + roleDepthMappingId;
+                RestApiUtil.handleInternalServerError(msg, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get depth and complexity limitation status
+     *
+     * @param apiId apiId
+     * @param messageContext message context
+     * @return Response with depth limitation status and complexity limitation status
+     * @throws APIManagementException
+     */
+    @Override
+    public Response apisApiIdQueryAnalysisEnabledGet(String apiId,
+                       MessageContext messageContext) throws APIManagementException {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                GraphqlDepthComplexityStatus graphqlDepthComplexityStatus = apiProvider.getLimitationStatus(apiIdentifier);
+                GraphQLDepthComplexityStatusDTO graphQLDepthComplexityStatusDTO =
+                        GraphqlQueryAnalysisMappingUtil.fromGraphqlDepthComplexityStatustoDTO(graphqlDepthComplexityStatus);
+                return Response.ok().entity(graphQLDepthComplexityStatusDTO).build();
+            } else {
+                throw new APIManagementException("This API is not a GraphQL API");
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving limitation status of API : " + apiId, e, log);
+            } else {
+                String msg = "Error while retrieving limitation status of API " + apiId;
+                RestApiUtil.handleInternalServerError(msg, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Update limitation status
+     *
+     * @param apiId apiId
+     * @param body GraphQLLimitationStatus DTO as request body
+     * @param messageContext message context
+     * @return Response
+     * @throws APIManagementException
+     */
+    @Override
+    public Response apisApiIdQueryAnalysisEnabledPut(String apiId, GraphQLLimitationStatusDTO body,
+                       MessageContext messageContext) throws APIManagementException {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            GraphqlLimitationStatus graphqlLimitationStatus = GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlLimitationStatus(body);
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                apiProvider.updateLimitationStatus(apiIdentifier, graphqlLimitationStatus);
+                return Response.ok().build();
+            } else {
+                throw new APIManagementException("This API is not a GraphQL API");
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while updating limitation status of API : " + apiId, e, log);
+            } else {
+                String msg = "Error while updating limitation status of API " + apiId;
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
         }

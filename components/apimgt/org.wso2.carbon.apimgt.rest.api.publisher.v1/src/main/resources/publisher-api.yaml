@@ -3524,6 +3524,75 @@ paths:
             Complexity detail addition failed.
 
   ######################################################
+  # GraphQL "Query Analysis Enable/Disable" resource APIs
+  ######################################################
+  /apis/{apiId}/query-analysis/enabled:
+
+    #-----------------------------------------------------
+    # Check if depth and complexity limitation enabled/disabled
+    #-----------------------------------------------------
+    get:
+      summary: Check if depth and complexity limitations are enabled or disabled
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_publish
+      description: |
+        This operation can be used to check if depth and complexity limitations are enabled/disabled by providing the API id.
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - GraphQL Query Analysis
+      responses:
+        200:
+          description: |
+            OK.
+            Status of depth limitation and complexity limitation returned successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content of the body.
+              default: application/json
+              type: string
+          schema:
+            $ref: '#/definitions/GraphQLDepthComplexityStatus'
+        404:
+          description: |
+            Not Found.
+            Retrieving limitation status failed.
+
+    #-----------------------------------------------------
+    # Enable/Disable limitation
+    #-----------------------------------------------------
+    put:
+      summary: Update the specified limitation
+      security:
+        - OAuth2Security:
+            - apim:api_create
+      description: |
+        This operation can be used to enable/disable the depth/complexity limitation by providing the API id.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: body
+          name: body
+          description: |
+            Limitation that needs to be enabled/disabled
+          required: true
+          schema:
+            $ref: '#/definitions/GraphQLLimitationStatus'
+      tags:
+        - GraphQL Query Analysis
+      responses:
+        200:
+          description: |
+            Created.
+            Limitation updated successfully.
+        404:
+          description: |
+            Bad Request.
+            Limitation updation failed.
+
+  ######################################################
   # The "Resource Paths" resource
   ######################################################
   /apis/{apiId}/resource-paths:
@@ -7938,6 +8007,39 @@ definitions:
         description: |
           The complexity value allocated for the associated field under the specified type
         example: 1
+
+
+  #-----------------------------------------------------
+  # The GraphQL Limitation Status resource
+  #-----------------------------------------------------
+  GraphQLLimitationStatus:
+    title: Limitation status
+    properties:
+      limitationType:
+        type: string
+        description: |
+          Type of the limitation
+        example: "depth"
+      enabled:
+        type: boolean
+        description: |
+          Indicates if limitation type is enabled
+        example: true
+
+  #-----------------------------------------------------
+  # The GraphQL Depth Complexity Status resource
+  #-----------------------------------------------------
+  GraphQLDepthComplexityStatus:
+    title: Depth limitation and Complexity limitation status
+    properties:
+      depthEnabled:
+        type: boolean
+        description: |
+          Indicates if depth check is enabled
+      complexityEnabled:
+        type: boolean
+        description: |
+          Indicates if complexity check is enabled
 
   #-----------------------------------------------------
   # The Mediation List resource

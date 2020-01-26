@@ -24,6 +24,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLDepthComplexityStatusDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLLimitationStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoListDTO;
@@ -88,6 +90,8 @@ public interface ApisApiService {
       public Response apisApiIdQueryAnalysisDepthRoleDepthMappingIdDelete(String apiId, String roleDepthMappingId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdQueryAnalysisDepthRoleDepthMappingIdGet(String apiId, String roleDepthMappingId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdQueryAnalysisDepthRoleDepthMappingIdPut(String apiId, String roleDepthMappingId, GraphQLQueryDepthInfoDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdQueryAnalysisEnabledGet(String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdQueryAnalysisEnabledPut(String apiId, GraphQLLimitationStatusDTO body, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdResourcePathsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdResourcePoliciesGet(String apiId, String sequenceType, String resourcePath, String verb, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdResourcePoliciesResourcePolicyIdGet(String apiId, String resourcePolicyId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;

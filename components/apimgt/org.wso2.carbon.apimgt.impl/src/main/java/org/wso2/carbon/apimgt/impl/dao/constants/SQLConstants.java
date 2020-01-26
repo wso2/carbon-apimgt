@@ -1828,6 +1828,15 @@ public class SQLConstants {
             " WHERE" +
             "   API_ID = ?";
 
+    public static final String GET_DEPTH_COMPLEXITY_ENABLED_SQL =
+            "SELECT DEPTH_ENABLED, COMPLEXITY_ENABLED FROM AM_GRAPHQL_QUERY_ANALYSIS WHERE API_ID = ?";
+
+    public static final String UPDATE_DEPTH_ENABLED_SQL =
+            "UPDATE AM_GRAPHQL_QUERY_ANALYSIS SET DEPTH_ENABLED = ? WHERE API_ID = ?";
+
+    public static final String UPDATE_COMPLEXITY_ENABLED_SQL =
+            "UPDATE AM_GRAPHQL_QUERY_ANALYSIS SET COMPLEXITY_ENABLED = ? WHERE API_ID = ?";
+
     public static final String ADD_API_LIFECYCLE_EVENT_SQL =
             " INSERT INTO AM_API_LC_EVENT (API_ID, PREVIOUS_STATE, NEW_STATE, USER_ID, TENANT_ID, EVENT_DATE)" +
             " VALUES (?,?,?,?,?,?)";

@@ -36,7 +36,9 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.Wsdl;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthComplexityStatus;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthInfo;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlLimitationStatus;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.registry.api.Resource;
 
@@ -269,7 +271,7 @@ public interface APIManager {
      * Returns a GraphqlDepthInfo object for a given uuid
      *
      * @param uuid Role Depth Mapping Identifier
-     * @return GraphqlDepthInfo GraphqlDepthInfo object
+     * @return GraphqlDepthInfo object
      * @throws APIManagementException if failed to retrieve role-depth mapping
      */
     GraphqlDepthInfo getRoleDepthMapping(String uuid) throws APIManagementException;
@@ -299,6 +301,25 @@ public interface APIManager {
      * @throws APIManagementException if failed to delete role-depth mapping
      */
     boolean deleteRoleDepthMapping(String uuid) throws APIManagementException;
+
+    /**
+     * Returns a GraphqlDepthComplexityStatus object for a given API ID
+     *
+     * @param apiIdentifier APIIdentifier
+     * @return GraphqlDepthComplexityStatus object
+     * @throws APIManagementException if failed to retrieve limitation status of the given API
+     */
+    GraphqlDepthComplexityStatus getLimitationStatus(APIIdentifier apiIdentifier) throws APIManagementException;
+
+    /**
+     * Updates the limitation status of the given API
+     *
+     * @param apiIdentifier APIIdentifier
+     * @param graphqlLimitationStatus GraphqlLimitationStatus object
+     * @throws APIManagementException if failed to update limitation status of the given API
+     */
+    void updateLimitationStatus(APIIdentifier apiIdentifier, GraphqlLimitationStatus graphqlLimitationStatus)
+            throws APIManagementException;
 
     /**
      * Retrieves the subscriber from the given access token

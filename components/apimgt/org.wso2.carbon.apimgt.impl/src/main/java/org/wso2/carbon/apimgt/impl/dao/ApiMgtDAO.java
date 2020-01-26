@@ -60,10 +60,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.CustomComplexityDetails;
-import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlComplexityInfo;
-import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthInfo;
-import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -14602,6 +14599,87 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
         return false;
+    }
+
+    /**
+     * Get depth enabled status and complexity enabled status
+     *
+     * @param apiIdentifier APIIdentifier object to retrieve API ID
+     * @return GraphqlDepthComplexityStatus object which states if depth check and complexity check is enabled
+     * @throws APIManagementException
+     */
+    public GraphqlDepthComplexityStatus getLimitationStatus(APIIdentifier apiIdentifier) throws APIManagementException {
+        GraphqlDepthComplexityStatus graphqlDepthComplexityStatus = new GraphqlDepthComplexityStatus();
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        String query = SQLConstants.GET_DEPTH_COMPLEXITY_ENABLED_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            int apiId = getAPIID(apiIdentifier, conn);
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, apiId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                graphqlDepthComplexityStatus.setDepthEnabled(rs.getBoolean("DEPTH_ENABLED"));
+                graphqlDepthComplexityStatus.setComplexityEnabled(rs.getBoolean("COMPLEXITY_ENABLED"));
+            }
+        } catch (SQLException ex) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e) {
+                    log.error("Error while rolling back the failed operation", e);
+                }
+            }
+            handleException("Error while retrieving depth enabled status and complexity enabled status: ", ex);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return graphqlDepthComplexityStatus;
+    }
+
+    /**
+     * Updates the depth enabled status or the complexity enabled status
+     *
+     * @param apiIdentifier APIIdentifier object to retrieve API ID
+     * @param graphqlLimitationStatus GraphqlLimitationStatus object
+     * @throws APIManagementException
+     */
+    public void updateLimitationStatus(APIIdentifier apiIdentifier, GraphqlLimitationStatus graphqlLimitationStatus)
+            throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps1 = null;
+        PreparedStatement ps2 = null;
+        String updateDepthEnabled = SQLConstants.UPDATE_DEPTH_ENABLED_SQL;
+        String updateComplexityEnabled = SQLConstants.UPDATE_COMPLEXITY_ENABLED_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            int apiId = getAPIID(apiIdentifier, conn);
+            if (graphqlLimitationStatus.getLimitationType() == "depth") {
+                ps1 = conn.prepareStatement(updateDepthEnabled);
+                ps1.setBoolean(1, graphqlLimitationStatus.getEnabled());
+                ps1.setInt(2, apiId);
+                ps1.executeUpdate();
+            } else if (graphqlLimitationStatus.getLimitationType() == "complexity"){
+                ps2 = conn.prepareStatement(updateComplexityEnabled);
+                ps2.setBoolean(1, graphqlLimitationStatus.getEnabled());
+                ps2.setInt(2, apiId);
+                ps2.executeUpdate();
+            }
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    log.error("Error while rolling back the failed operation", ex);
+                }
+            }
+            handleException("Error in updating the limitation status: " + e.getMessage(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps1, conn, null);
+            APIMgtDBUtil.closeAllConnections(ps2, null, null);
+        }
     }
 
     /**

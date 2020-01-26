@@ -64,7 +64,9 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.Wsdl;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthComplexityStatus;
 import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthInfo;
+import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlLimitationStatus;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -1599,6 +1601,15 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public boolean deleteRoleDepthMapping(String uuid) throws APIManagementException {
         return apiMgtDAO.deleteRoleDepthMapping(uuid);
+    }
+
+    public GraphqlDepthComplexityStatus getLimitationStatus(APIIdentifier apiIdentifier) throws APIManagementException {
+        return apiMgtDAO.getLimitationStatus(apiIdentifier);
+    }
+
+    public void updateLimitationStatus(APIIdentifier apiIdentifier, GraphqlLimitationStatus graphqlLimitationStatus)
+            throws APIManagementException {
+        apiMgtDAO.updateLimitationStatus(apiIdentifier, graphqlLimitationStatus);
     }
 
     public Subscriber getSubscriberById(String accessToken) throws APIManagementException {
