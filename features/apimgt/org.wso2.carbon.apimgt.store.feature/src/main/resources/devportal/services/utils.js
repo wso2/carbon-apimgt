@@ -71,7 +71,7 @@ var isPerTenantServiceProviderEnabled = function(){
 };
 
 var getTenantDomain = function(){
-    
+
     var tenantDomain = request.getParameter("tenant");
     if (tenantDomain == null) {
         tenantDomain = request.getHeader("X-WSO2-Tenant");

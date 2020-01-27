@@ -22,7 +22,7 @@
     var app = require("/site/public/theme/settings.js").Settings.app;
     app.context = appUtils.getTenantBaseStoreContext();
     var tenantDomain;
-     if (appUtils.isPerTenantServiceProviderEnabled()) {
+     if(appUtils.isPerTenantServiceProviderEnabled()){
         tenantDomain = appUtils.getTenantDomain();
       }
     var log = new Log();
