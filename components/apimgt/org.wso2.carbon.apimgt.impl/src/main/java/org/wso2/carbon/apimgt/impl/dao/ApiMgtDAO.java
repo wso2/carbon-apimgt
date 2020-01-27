@@ -14656,12 +14656,12 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             int apiId = getAPIID(apiIdentifier, conn);
-            if (graphqlLimitationStatus.getLimitationType() == "depth") {
+            if (graphqlLimitationStatus.getLimitationType().equals("depth")) {
                 ps1 = conn.prepareStatement(updateDepthEnabled);
                 ps1.setBoolean(1, graphqlLimitationStatus.getEnabled());
                 ps1.setInt(2, apiId);
                 ps1.executeUpdate();
-            } else if (graphqlLimitationStatus.getLimitationType() == "complexity"){
+            } else if (graphqlLimitationStatus.getLimitationType().equals("complexity")){
                 ps2 = conn.prepareStatement(updateComplexityEnabled);
                 ps2.setBoolean(1, graphqlLimitationStatus.getEnabled());
                 ps2.setInt(2, apiId);
