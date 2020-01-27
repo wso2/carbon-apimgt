@@ -31,7 +31,7 @@ import API from 'AppData/api.js';
 import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import CircularProgress from '@material-ui/core/CircularProgress';
-
+import ProvideWSDL from 'AppComponents/Apis/Create/WSDL/Steps/ProvideWSDL';
 import ProvideOpenAPI from '../../Create/OpenAPI/Steps/ProvideOpenAPI';
 import ProvideGraphQL from '../../Create/GraphQL/Steps/ProvideGraphQL';
 
@@ -60,6 +60,7 @@ export default function ImportDefinition(props) {
     const [api] = useAPI();
     const intl = useIntl();
     const isGraphQL = api.isGraphql();
+    const isSOAP = api.isSOAP();
 
     const handleAPIDefinitionImportOpen = () => {
         setOpenAPIDefinitionImport(true);
@@ -88,10 +89,11 @@ export default function ImportDefinition(props) {
     }
 
     const [apiInputs, inputsDispatcher] = useReducer(apiInputsReducer, {
-        type: 'ImportDefinition',
+        type: '',
         inputType: 'url',
         inputValue: '',
         formValidity: false,
+        mode: 'update',
     });
 
     /**
@@ -189,6 +191,37 @@ export default function ImportDefinition(props) {
             });
     }
 
+    /**
+     * Updates WSDL definition
+     */
+    function updateWSDL() {
+        const {
+            inputType, inputValue,
+        } = apiInputs;
+        const isFileInput = inputType === 'file';
+        let promisedAPI;
+        if (isFileInput) {
+            promisedAPI = api.updateWSDLByFileOrArchive(api.id, inputValue);
+        } else {
+            promisedAPI = api.updateWSDLByUrl(api.id, inputValue);
+        }
+        promisedAPI
+            .then(() => {
+                Alert.success(intl.formatMessage({
+                    id: 'Apis.Details.APIDefinition.ImportDefinition.WSDL.updated.successfully',
+                    defaultMessage: 'WSDL Updated Successfully',
+                }));
+                setOpenAPIDefinitionImport(false);
+                setSchemaDefinition(isFileInput && inputValue.type === 'application/zip');
+            })
+            .catch((err) => {
+                console.log(err);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.APIDefinition.ImportDefinition.error.updating.WSDL',
+                    defaultMessage: 'Error while updating WSDL',
+                }));
+            });
+    }
 
     /**
      * Handles API definition import
@@ -196,6 +229,8 @@ export default function ImportDefinition(props) {
     function importDefinition() {
         if (isGraphQL) {
             updateGraphQLSchema();
+        } if (isSOAP) {
+            updateWSDL();
         } else {
             updateOASDefinition();
         }
@@ -213,6 +248,62 @@ export default function ImportDefinition(props) {
         });
     }
 
+    let dialogTitle = (
+        <FormattedMessage
+            id='Apis.Details.APIDefinition.APIDefinition.import.definition.oas'
+            defaultMessage='Import OpenAPI Definition'
+        />
+    );
+    let dialogContent = (
+        <ProvideOpenAPI
+            onValidate={handleOnValidate}
+            apiInputs={apiInputs}
+            inputsDispatcher={inputsDispatcher}
+        />
+    );
+    let btnText = (
+        <FormattedMessage
+            id='Apis.Details.APIDefinition.APIDefinition.import.definition'
+            defaultMessage='Import Definition'
+        />
+    );
+    if (isGraphQL) {
+        dialogTitle = (
+            <FormattedMessage
+                id='Apis.Details.APIDefinition.APIDefinition.import.definition.graphql'
+                defaultMessage='Import GraphQL Schema Definition'
+            />
+        );
+        dialogContent = (
+            <ProvideGraphQL
+                onValidate={handleOnValidate}
+                apiInputs={apiInputs}
+                inputsDispatcher={inputsDispatcher}
+            />
+        );
+    }
+    if (isSOAP) {
+        dialogTitle = (
+            <FormattedMessage
+                id='Apis.Details.APIDefinition.APIDefinition.import.definition.wsdl'
+                defaultMessage='Import WSDL'
+            />
+        );
+        dialogContent = (
+            <ProvideWSDL
+                onValidate={handleOnValidate}
+                apiInputs={apiInputs}
+                inputsDispatcher={inputsDispatcher}
+            />
+        );
+        btnText = (
+            <FormattedMessage
+                id='Apis.Details.APIDefinition.APIDefinition.import.wsdl'
+                defaultMessage='Import WSDL'
+            />
+        );
+    }
+
     return (
         <>
             <Button
@@ -222,44 +313,16 @@ export default function ImportDefinition(props) {
                 disabled={isRestricted(['apim:api_create'], api)}
             >
                 <CloudUploadRounded className={classes.buttonIcon} />
-                <FormattedMessage
-                    id='Apis.Details.APIDefinition.APIDefinition.import.definition'
-                    defaultMessage='Import Definition'
-                />
+                {btnText}
             </Button>
             <Dialog onBackdropClick={setOpenAPIDefinitionImport} open={openAPIDefinitionImport}>
                 <DialogTitle>
                     <Typography className={classes.importDefinitionDialogHeader}>
-                        {isGraphQL ? (
-                            <FormattedMessage
-                                id='Apis.Details.APIDefinition.APIDefinition.import.definition.graphql'
-                                defaultMessage='Import GraphQL Schema Definition'
-                            />
-                        )
-                            : (
-                                <FormattedMessage
-                                    id='Apis.Details.APIDefinition.APIDefinition.import.definition.oas'
-                                    defaultMessage='Import OpenAPI Definition'
-                                />
-                            )}
+                        {dialogTitle}
                     </Typography>
                 </DialogTitle>
                 <DialogContent>
-                    {isGraphQL ? (
-                        <ProvideGraphQL
-                            onValidate={handleOnValidate}
-                            apiInputs={apiInputs}
-                            inputsDispatcher={inputsDispatcher}
-                        />
-                    ) : (
-
-                        <ProvideOpenAPI
-                            onValidate={handleOnValidate}
-                            apiInputs={apiInputs}
-                            inputsDispatcher={inputsDispatcher}
-                        />
-                    )}
-
+                    {dialogContent}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleAPIDefinitionImportCancel}>
