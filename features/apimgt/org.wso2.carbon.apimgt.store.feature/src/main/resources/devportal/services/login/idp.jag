@@ -103,7 +103,7 @@
 
                 log.debug("Client ID = " + clientId);
 
-                var addApplicationKey = systemApplicationDAO.addApplicationKey(STORE_CLIENT_APP_NAME, clientId,clientSecret,tenantDomain);
+                var addApplicationKey = systemApplicationDAO.addApplicationKey(STORE_CLIENT_APP_NAME, clientId,clientSecret,serviceProviderTenantDomain);
                 if (!addApplicationKey) {
                     log.error("Error while persisting application information in system application DB table!!");
                     log.error("Client ID = " + clientId);
