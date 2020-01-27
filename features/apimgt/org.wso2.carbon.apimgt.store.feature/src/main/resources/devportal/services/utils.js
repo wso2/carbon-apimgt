@@ -41,7 +41,7 @@ var getTenantBaseStoreContext = function() {
 var getTenantBasedLoginCallBack = function() {
     var tenantDomain = getTenantDomain();
     var storeDomainMapping = utils.getTenantBasedStoreDomainMapping(tenantDomain);
-    if(storeDomainMapping != null){
+    if (storeDomainMapping != null) {
        if (storeDomainMapping.get('login') != null) {
         return storeDomainMapping.get('login');
        }
