@@ -133,6 +133,9 @@ public final class APIConstants {
     //domain mapping app keys
     public static final String API_DOMAIN_MAPPINGS_GATEWAY = "gateway";
     public static final String API_DOMAIN_MAPPINGS_STORE = "store";
+    public static final String API_DOMAIN_MAPPINGS_CONTEXT = "context";
+    public static final String API_DOMAIN_MAPPINGS_LOGIN_CALLBACK = "login";
+    public static final String API_DOMAIN_MAPPINGS_LOGOUT_CALLBACK = "logout";
 
 
     public static final String API_IMAGE_LOCATION = API_APPLICATION_DATA_LOCATION + "/icons";
@@ -1002,7 +1005,7 @@ public final class APIConstants {
     }
 
     public static final String EXTENSION_HANDLER_POSITION = "ExtensionHandlerPosition";
-
+    public static final String PER_TENANT_SERVICE_PROVIDER = "PerTenantServiceProvider";
     public static final String GATEWAY_ENV_TYPE_HYBRID = "hybrid";
     public static final String GATEWAY_ENV_TYPE_PRODUCTION = "production";
     public static final String GATEWAY_ENV_TYPE_SANDBOX = "sandbox";
