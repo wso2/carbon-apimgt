@@ -31,7 +31,7 @@ var getLoopbackOrigin = function() {
 var getTenantBaseStoreContext = function() {
     var tenantDomain = getTenantDomain();
     var tenantContext = utils.getTenantBasedDevPortalContext(tenantDomain);
-    if(tenantContext != null){
+    if (tenantContext != null) {
         return tenantContext
     }else{
         return app.context;
