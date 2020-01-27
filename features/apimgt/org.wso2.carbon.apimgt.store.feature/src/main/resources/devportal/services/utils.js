@@ -73,7 +73,7 @@ var isPerTenantServiceProviderEnabled = function(){
 var getTenantDomain = function(){
     
     var tenantDomain = request.getParameter("tenant");
-    if(tenantDomain == null){
+    if (tenantDomain == null) {
         tenantDomain = request.getHeader("X-WSO2-Tenant");
         if (tenantDomain == null) {
             tenantDomain = "carbon.super";
