@@ -33,7 +33,7 @@ var getTenantBaseStoreContext = function() {
     var tenantContext = utils.getTenantBasedDevPortalContext(tenantDomain);
     if (tenantContext != null) {
         return tenantContext
-    }else{
+    } else {
         return app.context;
     }
 };
