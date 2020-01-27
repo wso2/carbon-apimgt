@@ -251,6 +251,10 @@ const Configurations = {
                     background: '#000',
                     color: '#fff',
                 },
+                title: {
+                    prefix: '[Devportal]',
+                    sufix: '- WSO2 APIM',
+                },
             },
         },
     },
