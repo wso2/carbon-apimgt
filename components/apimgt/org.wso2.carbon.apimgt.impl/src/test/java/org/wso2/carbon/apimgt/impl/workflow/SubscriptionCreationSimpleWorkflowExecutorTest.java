@@ -83,7 +83,7 @@ public class SubscriptionCreationSimpleWorkflowExecutorTest {
     @Test
     public void testGetWorkflowDetails(){
         try {
-            subscriptionCreationSimpleWorkflowExecutor.getWorkflowDetails(Mockito.anyString());
+            subscriptionCreationSimpleWorkflowExecutor.getWorkflowDetails("random_string");
         } catch (WorkflowException e) {
             Assert.fail("Unexpected exception occurred while retriving workflow details");
         }

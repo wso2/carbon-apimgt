@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -27,6 +27,8 @@ import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Icon from '@material-ui/core/Icon';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Loading from 'AppComponents/Base/Loading/Loading';
+import CircularProgress from '@material-ui/core/CircularProgress';
+
 import Alert from 'AppComponents/Shared/Alert';
 import ProvideOAuthKeys from 'AppComponents/Shared/AppsAndKeys/ProvideOAuthKeys';
 import Application from 'AppData/Application';
@@ -37,8 +39,10 @@ import KeyConfiguration from './KeyConfiguration';
 import ViewKeys from './ViewKeys';
 import WaitingForApproval from './WaitingForApproval';
 import { ScopeValidation, resourceMethods, resourcePaths } from '../ScopeValidation';
+import TokenMangerSummary from './TokenManagerSummary';
+import Progress from '../Progress';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         padding: theme.spacing(3),
     },
@@ -88,6 +92,7 @@ class TokenManager extends React.Component {
         super(props);
         const { selectedApp, keyType } = this.props;
         this.state = {
+            isLoading: false,
             keys: null,
             isKeyJWT: false,
             keyRequest: {
@@ -131,6 +136,7 @@ class TokenManager extends React.Component {
     setGenerateEnabled = (state) => {
         this.setState({ generateEnabled: state });
     }
+
     /**
      * get supported grant types from the settings api
      */
@@ -142,7 +148,7 @@ class TokenManager extends React.Component {
                 const { keyRequest } = this.state;
                 const newKeyRequest = { ...keyRequest };
                 newKeyRequest.serverSupportedGrantTypes = response.obj.grantTypes;
-                newKeyRequest.supportedGrantTypes = response.obj.grantTypes.filter(item => item !== 'authorization_code'
+                newKeyRequest.supportedGrantTypes = response.obj.grantTypes.filter((item) => item !== 'authorization_code'
                     && item !== 'implicit');
                 this.setState({ keyRequest: newKeyRequest });
             })
@@ -164,7 +170,7 @@ class TokenManager extends React.Component {
         this.getserverSupportedGrantTypes();
         if (this.appId) {
             this.application
-                .then(application => application.getKeys())
+                .then((application) => application.getKeys())
                 .then((keys) => {
                     const { keyType } = this.props;
                     const { keyRequest } = this.state;
@@ -204,6 +210,7 @@ class TokenManager extends React.Component {
      */
     generateKeys() {
         const { keyRequest, keys } = this.state;
+        this.setState({ isLoading: true });
         const {
             keyType, updateSubscriptionData, selectedApp: { tokenType, hashEnabled }, intl,
         } = this.props;
@@ -241,7 +248,7 @@ class TokenManager extends React.Component {
                     id: 'Shared.AppsAndKeys.TokenManager.key.generate.error',
                     defaultMessage: 'Error occurred when generating application keys',
                 }));
-            });
+            }).finally(() => this.setState({ isLoading: false }));
     }
 
     /**
@@ -249,6 +256,7 @@ class TokenManager extends React.Component {
      * @memberof KeyConfiguration
      */
     updateKeys() {
+        this.setState({ isLoading: true });
         const { keys, keyRequest } = this.state;
         const { keyType, intl } = this.props;
         const applicationKey = keys.get(keyType);
@@ -282,7 +290,7 @@ class TokenManager extends React.Component {
                     id: 'Shared.AppsAndKeys.TokenManager.key.update.error',
                     defaultMessage: 'Error occurred when updating application keys',
                 }));
-            });
+            }).finally(() => this.setState({ isLoading: false }));
     }
 
     /**
@@ -364,10 +372,10 @@ class TokenManager extends React.Component {
      */
     render() {
         const {
-            classes, selectedApp, keyType,
+            classes, selectedApp, keyType, summary,
         } = this.props;
         const {
-            keys, keyRequest, notFound, isKeyJWT, providedConsumerKey,
+            keys, keyRequest, isLoading, isKeyJWT, providedConsumerKey,
             providedConsumerSecret, generateEnabled,
         } = this.state;
         if (!keys) {
@@ -383,9 +391,26 @@ class TokenManager extends React.Component {
         if (key && key.token) {
             keyRequest.validityTime = key.token.validityTime;
         }
+        if (summary) {
+            if (keys) {
+                return (
+                    <TokenMangerSummary
+                        keys={keys}
+                        key={key}
+                        keyStates={this.keyStates}
+                        selectedApp={selectedApp}
+                        keyType={keyType}
+                        isKeyJWT={isKeyJWT}
+                        isUserOwner={isUserOwner}
+                    />
+                );
+            } else {
+                return (<Progress />);
+            }
+        }
         if (keys.size > 0 && key && key.keyState === 'APPROVED' && !key.consumerKey) {
             return (
-                <Fragment>
+                <>
                     <Typography className={classes.cleanUpInfoText} variant='subtitle1'>
                         <FormattedMessage
                             id='Shared.AppsAndKeys.TokenManager.cleanup.text'
@@ -404,7 +429,7 @@ class TokenManager extends React.Component {
                             id='Shared.AppsAndKeys.TokenManager.cleanup'
                         />
                     </Button>
-                </Fragment>
+                </>
             );
         }
         if (key && (key.keyState === this.keyStates.CREATED || key.keyState === this.keyStates.REJECTED)) {
@@ -474,16 +499,18 @@ class TokenManager extends React.Component {
                             resourceMethod={resourceMethods.POST}
                         >
                             {!isUserOwner ? (
-                                <Fragment>
+                                <>
                                     <Button
                                         variant='contained'
                                         color='primary'
                                         className={classes.button}
                                         onClick={
-                                            keys.size > 0 && keys.get(keyType) ? this.updateKeys : this.generateKeys}
-                                        disabled={!isUserOwner}
+                                            keys.size > 0 && keys.get(keyType) ? this.updateKeys : this.generateKeys
+                                        }
+                                        disabled={!isUserOwner || isLoading}
                                     >
                                         {keys.size > 0 && keys.get(keyType) ? 'Update keys' : 'Generate Keys'}
+                                        {isLoading && <CircularProgress size={20} />}
                                     </Button>
                                     <Typography variant='caption'>
                                         <FormattedMessage
@@ -491,16 +518,17 @@ class TokenManager extends React.Component {
                                             id='Shared.AppsAndKeys.TokenManager.key.and.user.owner'
                                         />
                                     </Typography>
-                                </Fragment>
+                                </>
                             ) : (
                                 <Button
                                     variant='contained'
                                     color='primary'
                                     className={classes.button}
                                     onClick={keys.size > 0 && keys.get(keyType) ? this.updateKeys : this.generateKeys}
-                                    disabled={!generateEnabled}
+                                    disabled={!generateEnabled || isLoading}
                                 >
                                     {keys.size > 0 && keys.get(keyType) ? 'Update' : 'Generate Keys'}
+                                    {isLoading && <CircularProgress size={20} />}
                                 </Button>
                             )}
                         </ScopeValidation>
@@ -533,7 +561,7 @@ class TokenManager extends React.Component {
                                     resourceMethod={resourceMethods.POST}
                                 >
                                     {!isUserOwner ? (
-                                        <Fragment>
+                                        <>
                                             <Button
                                                 variant='contained'
                                                 color='primary'
@@ -565,7 +593,7 @@ class TokenManager extends React.Component {
                                                     id='Shared.AppsAndKeys.TokenManager.key.provide.user.owner'
                                                 />
                                             </Typography>
-                                        </Fragment>
+                                        </>
                                     ) : (
                                         <Button
                                             variant='contained'
@@ -603,6 +631,7 @@ class TokenManager extends React.Component {
 }
 TokenManager.defaultProps = {
     updateSubscriptionData: () => {},
+    summary: false,
 };
 TokenManager.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
@@ -616,6 +645,7 @@ TokenManager.propTypes = {
     keyType: PropTypes.string.isRequired,
     updateSubscriptionData: PropTypes.func,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
+    summary: PropTypes.bool,
 };
 
 export default injectIntl(withStyles(styles)(TokenManager));

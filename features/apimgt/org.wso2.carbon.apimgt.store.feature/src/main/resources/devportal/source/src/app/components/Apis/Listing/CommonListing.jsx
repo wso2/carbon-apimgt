@@ -30,7 +30,10 @@ import ApiBreadcrumbs from './ApiBreadcrumbs';
 import ApiTableView from './ApiTableView';
 import { ApiContext } from '../Details/ApiContext';
 import TagCloudListingTags from './TagCloudListingTags';
+import CategoryListingCategories from './CategoryListingCategories';
 import ApiTagCloud from './ApiTagCloud';
+import Recommendations from './Recommendations';
+import AuthManager from '../../../data/AuthManager';
 
 const styles = (theme) => ({
     rightIcon: {
@@ -142,6 +145,15 @@ const styles = (theme) => ({
         marginLeft: 23,
         cursor: 'pointer',
     },
+    recommendationsBar: {
+        height: 60,
+        background: theme.custom.infoBar.background,
+        color: theme.palette.getContrastText(theme.custom.infoBar.background),
+        borderBottom: 'solid 1px ' + theme.palette.grey.A200,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
 });
 
 /**
@@ -165,6 +177,7 @@ class CommonListing extends React.Component {
             allTags: null,
             showLeftMenu: false,
             isMonetizationEnabled: false,
+            isRecommendationEnabled: false,
         };
     }
 
@@ -193,7 +206,16 @@ class CommonListing extends React.Component {
             .catch((error) => {
                 console.log(error);
             });
+        const promisedCategories = restApiClient.apiCategories();
+            promisedCategories
+                .then((response) => {
+                    this.setState({ allCategories: response.body.list });
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
         this.isMonetizationEnabled();
+        this.isRecommendationEnabled();
     }
 
     toggleLeftMenu = () => {
@@ -210,6 +232,15 @@ class CommonListing extends React.Component {
     }
 
     /**
+     * retrieve Settings from the context and check whether recommendation is enabled
+     */
+    isRecommendationEnabled = () => {
+        const settingsContext = this.context;
+        const enabled = settingsContext.settings.recommendationEnabled;
+        this.setState({ isRecommendationEnabled: enabled });
+    }
+
+    /**
      *
      * @inheritdoctheme
      * @returns {React.Component} @inheritdoc
@@ -221,6 +252,7 @@ class CommonListing extends React.Component {
             classes,
             location: { search },
         } = this.props;
+        const user = AuthManager.getUser();
         const {
             custom: {
                 tagWise: { key, active, style },
@@ -228,7 +260,7 @@ class CommonListing extends React.Component {
             },
         } = theme;
         const {
-            listType, allTags, showLeftMenu, isMonetizationEnabled,
+            listType, allTags, showLeftMenu, isMonetizationEnabled, allCategories, isRecommendationEnabled
         } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
         const searchParam = new URLSearchParams(search);
@@ -249,18 +281,20 @@ class CommonListing extends React.Component {
             }
         }
         const tagPaneVisible = allTags && allTags.length > 0 && (tagCloudActive || active);
+        const categoryPaneVisible = allCategories && allCategories.length > 0;
         return (
             <>
-                {tagPaneVisible && showLeftMenu && (
+                {(categoryPaneVisible || tagPaneVisible) && showLeftMenu && (
                     <div className={classes.LeftMenu}>
                         <div className={classes.sliderButton} onClick={this.toggleLeftMenu}>
                             <Icon>keyboard_arrow_left</Icon>
                         </div>
-                        {active && <TagCloudListingTags allTags={allTags} />}
-                        {tagCloudActive && <ApiTagCloud allTags={allTags} />}
+                        {categoryPaneVisible && <CategoryListingCategories allCategories={allCategories} />}
+                        {tagPaneVisible && active && <TagCloudListingTags allTags={allTags} />}
+                        {tagPaneVisible && tagCloudActive && <ApiTagCloud allTags={allTags} />}
                     </div>
                 )}
-                {tagPaneVisible && !showLeftMenu && (
+                {(categoryPaneVisible || tagPaneVisible) && !showLeftMenu && (
                     <div className={classes.LeftMenuForSlider}>
                         <div className={classes.sliderButton} onClick={this.toggleLeftMenu}>
                             <Icon>keyboard_arrow_right</Icon>
@@ -325,6 +359,23 @@ class CommonListing extends React.Component {
                             </ApiContext.Provider>
                         )}
                     </div>
+                    {isRecommendationEnabled && user &&
+                        <div>
+                            {active && allTags && allTags.length > 0 && <ApiBreadcrumbs selectedTag={selectedTag} />}
+                            <div className={classes.listContentWrapper}>
+                                {listType === 'grid' && (
+                                    <ApiContext.Provider value={{ isRecommendationEnabled }}>
+                                        <Recommendations gridView query={search} />
+                                    </ApiContext.Provider>
+                                )}
+                                {listType === 'list' && (
+                                    <ApiContext.Provider value={{ isRecommendationEnabled }}>
+                                        <Recommendations gridView query={search} />
+                                    </ApiContext.Provider>
+                                )}
+                            </div>
+                        </div>
+                    }
                 </main>
             </>
         );

@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -86,6 +87,9 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
@@ -130,9 +134,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Caching;
 import javax.wsdl.Definition;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -173,6 +175,7 @@ import java.util.regex.Pattern;
 public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     private static final Log log = LogFactory.getLog(APIConsumerImpl.class);
+    private RecommendationEnvironment recommendationEnvironment;
 
     private static final Log audit = CarbonConstants.AUDIT_LOG;
     public static final char COLON_CHAR = ':';
@@ -209,6 +212,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         userNameWithoutChange = username;
         readTagCacheConfigs();
         this.apimRegistryService = apimRegistryService;
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        recommendationEnvironment = config.getApiRecommendationEnvironment();
     }
 
     private void readTagCacheConfigs() {
@@ -2299,6 +2306,21 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return filterMultipleVersionedAPIs(searchResults);
     }
 
+    @Override
+    public boolean isSubscribedToApp(APIIdentifier apiIdentifier, String userId, int applicationId) throws
+            APIManagementException {
+        boolean isSubscribed;
+        try {
+            isSubscribed = apiMgtDAO.isSubscribedToApp(apiIdentifier, userId, applicationId);
+        } catch (APIManagementException e) {
+            String msg = "Failed to check if user(" + userId + ") with appId " + applicationId + " has subscribed to "
+                    + apiIdentifier;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return isSubscribed;
+    }
+
     /**
 	 * Pagination API search based on solr indexing
 	 *
@@ -2795,7 +2817,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         final boolean isApiProduct = apiTypeWrapper.isAPIProduct();
         String state;
         String apiContext;
-        
+
         if (isApiProduct) {
             product = apiTypeWrapper.getApiProduct();
             state = product.getState();
@@ -3370,6 +3392,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             log.debug("Application Name: " + application.getName() +" added successfully.");
         }
 
+        // Extracting API details for the recommendation system
+        if (recommendationEnvironment != null) {
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application, userId, applicationId);
+            Thread recommendationThread = new Thread(extractor);
+            recommendationThread.start();
+        }
         return applicationId;
     }
 
@@ -3516,6 +3544,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (APIManagementException ignore) {
             //Log and ignore since we do not want to throw exceptions to the front end due to cache invalidation failure.
             log.warn("Failed to invalidate Gateway Cache " + ignore.getMessage(), ignore);
+        }
+
+        // Extracting API details for the recommendation system
+        if (recommendationEnvironment != null) {
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application);
+            Thread recommendationThread = new Thread(extractor);
+            recommendationThread.start();
         }
     }
 
@@ -3685,6 +3720,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (log.isDebugEnabled()) {
             String logMessage = "Application Name: " + application.getName() + " successfully removed";
             log.debug(logMessage);
+        }
+
+        // Extracting API details for the recommendation system
+        if (recommendationEnvironment != null) {
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(applicationId);
+            Thread recommendationThread = new Thread(extractor);
+            recommendationThread.start();
         }
     }
 
@@ -5698,4 +5740,71 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return basePath;
     }
+
+    public void publishSearchQuery(String query, String username) {
+        if (recommendationEnvironment != null) {
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(query, username);
+            Thread recommendationThread = new Thread(extractor);
+            recommendationThread.start();
+        }
+    }
+
+    public void publishClickedAPI(ApiTypeWrapper clickedApi, String username) {
+        if (recommendationEnvironment != null) {
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(clickedApi, username);
+            Thread recommendationThread = new Thread(extractor);
+            recommendationThread.start();
+        }
+    }
+
+    public boolean isRecommendationEnabled() {
+        boolean recommendationEnabled = false;
+
+        if (recommendationEnvironment != null) {
+            recommendationEnabled = true;
+        }
+        return recommendationEnabled;
+    }
+
+    public String getApiRecommendations(String userName) {
+        if (userName != null && requestedTenant != null && recommendationEnvironment != null) {
+            String recommendationEndpointURL = recommendationEnvironment.getRecommendationEndpointURL();
+            String adminUsername = recommendationEnvironment.getUsername();
+            String adminPassword = recommendationEnvironment.getPassword();
+            try {
+                URL serverURL = new URL(recommendationEndpointURL);
+                int serverPort = serverURL.getPort();
+                String serverProtocol = serverURL.getProtocol();
+
+                HttpGet method = new HttpGet(recommendationEndpointURL);
+                HttpClient httpClient = APIUtil.getHttpClient(serverPort, serverProtocol);
+
+                byte[] credentials = org.apache.commons.codec.binary.Base64
+                        .encodeBase64((adminUsername + ":" + adminPassword).getBytes(StandardCharsets.UTF_8));
+
+                method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
+                method.setHeader("User", userName);
+                method.setHeader("Account", requestedTenant);
+
+                HttpResponse httpResponse = httpClient.execute(method);
+
+                BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
+                StringBuilder content = new StringBuilder();
+                String line;
+                while (null != (line = br.readLine())) {
+                    content.append(line);
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Recommendations received for user " + adminUsername + " is " + content.toString());
+                }
+                return content.toString();
+
+            } catch (IOException e) {
+                log.error("Connection failure for the recommendation engine", e);
+                return null;
+            }
+        }
+        return null;
+    }
+
 }

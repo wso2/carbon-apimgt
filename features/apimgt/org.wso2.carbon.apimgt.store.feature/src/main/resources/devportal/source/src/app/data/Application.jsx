@@ -72,7 +72,7 @@ export default class Application extends Resource {
      * @returns {promise} Set the fetched CS/CK into current instance and return keys array as Promise object
      */
     getKeys(keyType) {
-        return this.client.then(client => client.apis['Application Keys']
+        return this.client.then((client) => client.apis['Application Keys']
             .get_applications__applicationId__keys({ applicationId: this.applicationId }))
             .then((keysResponse) => {
                 const keys = keysResponse.obj.list;
@@ -147,7 +147,7 @@ export default class Application extends Resource {
      * received as Promise object
      */
     cleanUpKeys(keyType) {
-        return this.client.then(client => client.apis['Application Keys']
+        return this.client.then((client) => client.apis['Application Keys']
             .post_applications__applicationId__keys__keyType__clean_up({ applicationId: this.id, keyType }))
             .then((response) => {
                 this.keys = new Map();
@@ -245,7 +245,7 @@ export default class Application extends Resource {
                 limit, offset, sortOrder, sortBy,
             }, this._requestMetaData());
         });
-        return promisedAll.then(response => response.obj);
+        return promisedAll.then((response) => response.obj);
     }
 
     static deleteApp(id) {
@@ -256,11 +256,16 @@ export default class Application extends Resource {
                 this._requestMetaData(),
             );
         });
-        return promisedDelete.then(response => response.ok);
+        return promisedDelete.then((response) => response.ok);
     }
 }
 
 Application.KEY_TYPES = {
     PRODUCTION: 'PRODUCTION',
     SANDBOX: 'SANDBOX',
+};
+
+Application.TOKEN_TYPES = {
+    JWT: { key: 'JWT', displayName: 'Self-contained (JWT)' },
+    OAUTH: { key: 'OAUTH', displayName: 'Reference (Opaque)' },
 };

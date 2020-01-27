@@ -1,0 +1,73 @@
+<div class="main-content">
+    <h1><a name="Recommendations"></a>Recommendations</h1>
+
+            <hr/>
+            <h4 class="operation-heading"><a name="recommendationsGet"></a>Give API recommendations for a user</h4> <code>GET https://apis.wso2.com/api/am/store/v1/recommendations</code>
+            <p class="marked"></p>
+
+            <p class="marked">This API can be used to get recommended APIs for a user who logs into the API store</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:subscribe</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Requested recommendations are returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Recommendations">Recommendations</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Recommendations not Found. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+</div>

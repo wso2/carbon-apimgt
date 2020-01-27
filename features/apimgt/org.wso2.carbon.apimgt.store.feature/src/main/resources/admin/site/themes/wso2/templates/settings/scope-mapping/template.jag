@@ -1,0 +1,76 @@
+<% jagg.template("settings/scope-mapping", function(inputs, outputs, jagg) {
+    var mappings = outputs.conf.tenantConfig.RESTAPIScopes.Scope;
+%>
+<div id="listing">
+    <div class="page-header">
+        <h2><%=i18n.localize("Scope Mapping")%></h2>
+       <h2></h2>
+    </div>
+    <div class="content-section shadow-up">
+    <div class="content-data">
+    <table class="table table-responsive table-striped" id="get-app">
+        <thead>
+            <tr>
+                <th width="200"><%=i18n.localize("Name")%></th>
+                <th><%=i18n.localize("Roles")%></th>
+                <th width="300"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <% for(var i=0; i < mappings.length ; i++ ){
+                %>
+                <tr data-name="<%=mappings[i]['Name']%>" data-roles="<%=mappings[i]['Roles']%>">
+                    <td style="vertical-align: middle;"><%=mappings[i]['Name']%></td>
+                    <td style="vertical-align: middle;">
+                        <span class="mappingRolesView"><%=mappings[i]['Roles']%></span>
+                        <input 
+                            class="mappingRolesEdit hidden" 
+                            type="text" 
+                            value="<%=mappings[i]['Roles']%>" 
+                            style="width: 100%; line-height: 30px" 
+                        />
+                    </td>
+                    <td class="text-left">
+                        <a class="btn padding-reduce-on-grid-view mappingEditBtn">
+                            <span class="fw-stack">
+                                <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                <i class="fw fw-edit fw-stack-1x"></i>
+                            </span>
+                            <span class="hidden-xs"><%=i18n.localize("Edit")%></span>
+                        </a>
+                        <a class="btn padding-reduce-on-grid-view mappingSaveBtn hidden">
+                            <span class="fw-stack">
+                                <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                <i class="fw fw-save fw-stack-1x"></i>
+                            </span>
+                            <span class="hidden-xs"><%=i18n.localize("Save")%></span>
+                        </a>
+                        <a class="btn padding-reduce-on-grid-view mappingCancelBtn hidden">
+                            <span class="fw-stack">
+                                <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                <i class="fw fw-cancel fw-stack-1x"></i>
+                            </span>
+                            <span class="hidden-xs"><%=i18n.localize("Cancel")%></span>
+                        </a>
+                    </td>
+                </tr>
+                <%
+            }%>
+        </tbody>
+    </table>
+    </div>
+    </div>
+</div>
+<script id="application-actions" type="text/x-handlebars-template" >
+<div class="text-right">
+  <a title="Edit" href="<%=jagg.url("/site/pages/changeOwner.jag?name={{ name }}&owner={{ owner }}&uuid={{ uuid }}&action=changeOwner")%>" class="btn  btn-sm padding-reduce-on-grid-view">
+      <span class="fw-stack">
+          <i class="fw fw-ring fw-stack-2x"></i>
+          <i class="fw fw-edit fw-stack-1x"></i>
+      </span>
+      <span class="hidden-xs"><%=i18n.localize("Edit")%></span>
+  </a>
+  </div>
+</script>
+
+<% }); %>

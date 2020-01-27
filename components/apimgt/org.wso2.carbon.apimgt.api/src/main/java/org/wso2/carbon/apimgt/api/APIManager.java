@@ -874,7 +874,7 @@ public interface APIManager {
 
     /**
      * Get open api definition for the product
-     * @param APIProduct product
+     * @param  product
      * @return openapidoc
      * @throws APIManagementException
      */

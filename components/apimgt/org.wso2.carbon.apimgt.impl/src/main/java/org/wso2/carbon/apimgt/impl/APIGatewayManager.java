@@ -47,6 +47,9 @@ import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
@@ -58,15 +61,9 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+import java.util.*;
 
 public class APIGatewayManager {
 
@@ -75,6 +72,7 @@ public class APIGatewayManager {
 	private static APIGatewayManager instance;
 
     private Map<String, Environment> environments;
+    private RecommendationEnvironment recommendationEnvironment;
 
 	private boolean debugEnabled = log.isDebugEnabled();
 
@@ -85,12 +83,13 @@ public class APIGatewayManager {
     private static final String PRODUCT_PREFIX = "prod";
     private static final String PRODUCT_VERSION = "1.0.0";
 
-	private APIGatewayManager() {
-		APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-		                                                       .getAPIManagerConfigurationService()
-		                                                       .getAPIManagerConfiguration();
-		environments = config.getApiGatewayEnvironments();
-	}
+    private APIGatewayManager() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        environments = config.getApiGatewayEnvironments();
+        this.recommendationEnvironment = config.getApiRecommendationEnvironment();
+
+    }
 
 	public synchronized static APIGatewayManager getInstance() {
 		if (instance == null) {
@@ -263,6 +262,14 @@ public class APIGatewayManager {
             }
         }
         updateRemovedClientCertificates(api, tenantDomain);
+
+        // Extracting API details for the recommendation system
+        if (recommendationEnvironment != null) {
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(api, tenantDomain);
+            Thread recommendationThread = new Thread(extractor);
+            recommendationThread.start();
+        }
+
         return failedEnvironmentsMap;
     }
 
@@ -558,6 +565,14 @@ public class APIGatewayManager {
             }
             updateRemovedClientCertificates(api, tenantDomain);
         }
+
+        // Extracting API details for the recommendation system
+        if (recommendationEnvironment != null) {
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(api, tenantDomain);
+            Thread recommendationThread = new Thread(extractor);
+            recommendationThread.start();
+        }
+
         return failedEnvironmentsMap;
     }
 

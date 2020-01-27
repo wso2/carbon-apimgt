@@ -212,7 +212,7 @@ public class UserSignUpSimpleWorkflowExecutorTest {
     @Test
     public void testGetWorkflowDetails(){
         try {
-            userSignUpSimpleWorkflowExecutor.getWorkflowDetails(Mockito.anyString());
+            userSignUpSimpleWorkflowExecutor.getWorkflowDetails("random_string");
         } catch (WorkflowException e) {
             Assert.fail("Unexpected exception occurred while retriving workflow details");
         }

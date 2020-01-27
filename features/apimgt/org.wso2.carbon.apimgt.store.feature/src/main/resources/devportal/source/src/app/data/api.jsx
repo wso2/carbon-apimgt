@@ -103,6 +103,23 @@ export default class API extends Resource {
     }
 
     /**
+     * Get the Documents of an API
+     * @param {string} apiId api id.
+     * @param {string} documentId document id.
+     * @returns {promise} promise to get the document.
+     */
+    getDocumentByDocId(apiId, documentId) {
+        const promiseGet = this.client.then((client) => {
+            const payload = {
+                apiId,
+                documentId,
+            };
+            return client.apis['Documents'].get_apis__apiId__documents__documentId_(payload, this._requestMetaData());
+        });
+        return promiseGet;
+    }
+
+    /**
      * Get the Document content of an API by document Id
      * @param api_id {String} UUID of the API in which the document needed
      * @param docId {String} UUID of the Document need to view
@@ -566,9 +583,10 @@ export default class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getTierByName(name, level, callback = null) {
+        const payload = { policyId: name, policyLevel: level };
         const promiseGet = this.client.then((client) => {
             return client.apis['Throttling Policies'].get_throttling_policies__policyLevel___policyId_(
-                { policyId: name, policyLevel: level },
+                payload,
                 this._requestMetaData(),
             );
         });
@@ -645,6 +663,8 @@ export default class API extends Resource {
 
     /**
      * method to get store settings such as grant types, scopes, application sharing settings etc
+     * Settings API can be invoked with and without access token, When a token is not present it will return the public
+     * settings info, when a valid token is present it will return all the settings info.
      * @returns {Promise} promise object return from SwaggerClient-js
      * @memberof API
      */
@@ -754,5 +774,29 @@ export default class API extends Resource {
                 this._requestMetaData(),
             );
         });
+    }
+
+    /**
+     * @static
+     * Get all API Categories of the given tenant
+     * @return {Promise}
+     * */
+    apiCategories(params) {
+        return this.client.then((client) => {
+            return client.apis['API Category (Collection)'].get_api_categories(
+                params, this._requestMetaData());
+        });
+    }
+
+    /**
+     * Get API recommendations for a given user.
+     * @param {string} userId The username.
+     * @return {Promise}
+     * */
+    getApiRecommendations(params = {}) {
+        const promiseGet = this.client.then((client) => {
+            return client.apis.Recommendations.get_recommendations(params, this._requestMetaData());
+        });
+        return promiseGet;
     }
 }

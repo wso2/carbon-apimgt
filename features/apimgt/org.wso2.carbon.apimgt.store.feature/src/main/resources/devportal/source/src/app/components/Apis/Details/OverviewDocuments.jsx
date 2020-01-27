@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -17,19 +18,25 @@
  */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useHistory } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import Icon from '@material-ui/core/Icon';
 import { withStyles } from '@material-ui/core/styles';
-import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
-import API from '../../../data/api';
+import API from 'AppData/api';
 
 /**
- *
- *
- * @param {*} theme
+ * Add two numbers.
+ * @param {JSON} theme The second number.
+ * @returns {JSON} The theme object.
  */
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         padding: theme.spacing(3),
         maxWidth: theme.custom.contentAreaWidth,
@@ -77,14 +84,31 @@ const styles = theme => ({
         padding: theme.spacing(2),
         marginTop: 50,
     },
+    listWrapper: {
+        padding: 0,
+        margin: 0,
+        width: '100%',
+    },
+    listItemStyle: {
+        padding: 0,
+        marging: 0,
+    },
 });
 
+/**
+ * Add two numbers.
+ * @param {number} props The second number.
+ * @returns {JSX} jsx.
+ */
 function OverviewDocuments(props) {
     const [docs, setDocs] = useState([]);
-
+    const { apiId, setDocsCount } = props;
+    const history = useHistory();
+    const truncateString = (n, str) => {
+        return (str.length > n) ? str.substr(0, n - 1) + '...' : str;
+    };
     useEffect(() => {
         const restApi = new API();
-        const { apiId, setDocsCount } = props;
         const promisedApi = restApi.getDocumentsByAPIId(apiId);
         promisedApi
             .then((response) => {
@@ -98,12 +122,16 @@ function OverviewDocuments(props) {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
                     Alert.error('Error occured');
                 }
             });
     }, []);
+
+    const gotoDoc = (documentId) => {
+        history.push('/apis/' + apiId + '/documents/' + documentId);
+    };
     /**
      *
      *
@@ -111,58 +139,86 @@ function OverviewDocuments(props) {
      * @memberof Overview
      */
 
-    const { classes, apiId } = props;
+    const { classes } = props;
     if (docs.length === 0) {
         return (
-            <Grid item xs={12}>
-                <div className={classes.emptyBox}>
-                    <Typography variant='body2'>
-                        <FormattedMessage
-                            id='Apis.Details.Overview.documents.no.content'
-                            defaultMessage='No Documents Available'
-                        />
-                    </Typography>
-                </div>
+            <Grid container className={classes.root} spacing={2}>
+                <Grid item xs={12}>
+                    <div className={classes.emptyBox}>
+                        <Typography variant='body2'>
+                            <FormattedMessage
+                                id='Apis.Details.Overview.documents.no.content'
+                                defaultMessage='No Documents Available'
+                            />
+                        </Typography>
+                    </div>
+                </Grid>
             </Grid>
         );
     }
 
     return (
-        <React.Fragment>
-            <Grid item xs={12}>
-                <div className={classes.subscriptionTop}>
-                    <div className={classes.boxBadge}>{docs.length}</div>
-                    <Link to={'/apis/' + apiId + '/documents'} className={classes.linkStyle}>
-                        <FormattedMessage id='Apis.Details.Overview.documents.count.sufix' defaultMessage='Documents' />
-                    </Link>
-                </div>
-            </Grid>
-            <Grid item xs={12}>
-                <Typography variant='subtitle2'>
-                    <FormattedMessage id='Apis.Details.Overview.documents.last.updated' defaultMessage='Last Updated' />
-                </Typography>
-                {docs.length > 0 && (
-                    <div className={classes.subscriptionBox}>
-                        <Link to={'/apis/' + apiId + '/documents'} className={classes.linkStyle}>
-                            {docs[0].name}
-                        </Link>
-                        {/* <Typography variant='caption'>
+        docs.length > 0 && (
+            <List
+                component='nav'
+                aria-labelledby='nested-list-subheader'
+                subheader={(
+                    <ListSubheader component='div' id='nested-list-subheader' className={classes.listItemStyle}>
                         <FormattedMessage
-                            id='Apis.Details.Overview.documents.last.updated'
-                            defaultMessage='Last Updated'
+                            id='Apis.Details.Overview.documents.list.title.prefix'
+                            defaultMessage='Showing '
                         />
-                        21 minutes ago
-                    </Typography> */}
-                    </div>
+                        {docs.length === 1 && (
+                            <>
+                                1
+                                <FormattedMessage
+                                    id='Apis.Details.Overview.documents.list.title.sufix.document'
+                                    defaultMessage=' Document'
+                                />
+                            </>
+                        )}
+                        {docs.length === 2 && (
+                            <>
+                                2
+                                <FormattedMessage
+                                    id='Apis.Details.Overview.documents.list.title.sufix.documents'
+                                    defaultMessage=' Documents'
+                                />
+                            </>
+                        )}
+                        {docs.length > 2 && (
+                            <>
+                                3
+                                <FormattedMessage
+                                    id='Apis.Details.Overview.documents.list.title.sufix.documents.multiple'
+                                    defaultMessage=' Documents out of '
+                                />
+                                {docs.length}
+                            </>
+                        )}
+                    </ListSubheader>
                 )}
-            </Grid>
-        </React.Fragment>
+                className={classes.listWrapper}
+            >
+                {docs.map((doc, index) => (
+                    index <= 2
+                    && (
+                        <ListItem button onClick={() => gotoDoc(doc.documentId)} className={classes.listItemStyle} key={doc.name}>
+                            <ListItemIcon>
+                                <Icon>insert_drive_file</Icon>
+                            </ListItemIcon>
+                            <ListItemText primary={doc.name} secondary={truncateString(100, doc.summary)} />
+                        </ListItem>
+                    )
+                ))}
+            </List>
+        )
     );
 }
 
 OverviewDocuments.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(OverviewDocuments);

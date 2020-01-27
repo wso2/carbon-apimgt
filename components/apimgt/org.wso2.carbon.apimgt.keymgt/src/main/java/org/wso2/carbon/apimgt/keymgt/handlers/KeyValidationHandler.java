@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 
@@ -35,6 +36,15 @@ public interface KeyValidationHandler {
      */
     boolean validateSubscription(TokenValidationContext tokenValidationContext)
             throws APIKeyMgtException;
+
+    /**
+     * Validate Subscriptions by API context, API version and consumer key
+     *
+     * @param apiContext
+     * @param apiVersion
+     * @param consumerKey
+     */
+    APIKeyValidationInfoDTO validateSubscription(String apiContext, String apiVersion, String consumerKey);
     /**
      * Validate Scopes  by oAuth2TokenValidationMessageContext
      *

@@ -123,6 +123,12 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
         return initModels();
     }
 
+    @Override
+    public boolean initPath(String pathToExtractedZip) throws APIMgtWSDLException {
+        super.initPath(pathToExtractedZip);
+        return initModels();
+    }
+
     /**
      * Initiallize SOAP to REST Operations
      *
@@ -722,7 +728,8 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
                                     if (getPropertyFromDataType(part.getTypeName().getLocalPart()) instanceof RefProperty) {
                                         RefProperty property = (RefProperty) getPropertyFromDataType(part.getTypeName()
                                                 .getLocalPart());
-                                        property.set$ref("#/definitions/" + part.getTypeName().getLocalPart());
+                                        property.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT
+                                                + part.getTypeName().getLocalPart());
                                         model.addProperty(part.getName(), property);
                                     } else {
                                         model.addProperty(part.getName(),
@@ -776,7 +783,8 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
                                     if (getPropertyFromDataType(part.getTypeName().getLocalPart()) instanceof RefProperty) {
                                         RefProperty property = (RefProperty) getPropertyFromDataType(part.getTypeName()
                                                 .getLocalPart());
-                                        property.set$ref("#/definitions/" + part.getTypeName().getLocalPart());
+                                        property.set$ref(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT +
+                                                part.getTypeName().getLocalPart());
                                         model.addProperty(part.getName(), property);
                                     } else {
                                         model.addProperty(part.getName(),

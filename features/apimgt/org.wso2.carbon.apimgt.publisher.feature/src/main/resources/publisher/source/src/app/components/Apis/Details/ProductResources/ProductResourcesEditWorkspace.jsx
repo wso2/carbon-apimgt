@@ -60,8 +60,31 @@ const useStyles = makeStyles((theme) => ({
         height: 349,
     },
     ResourceWrapper: {
-        overflowY: 'auto',
-        height: 298,
+        marginLeft: theme.spacing(2),
+        marginRight: theme.spacing(2),
+        '& .frame': {
+            overflowY: 'auto',
+            height: 328,
+            border: '1px solid ' + theme.palette.grey[400],
+            borderRadius: theme.spacing(1),
+        },
+        '& .frame::-webkit-scrollbar': {
+            '-webkit-appearance': 'none',
+        },
+        '& .frame::-webkit-scrollbar:vertical': {
+            width: 11,
+        },
+        '& .frame::-webkit-scrollbar:horizontal': {
+            height: 11,
+        },
+        '& .frame::-webkit-scrollbar-thumb': {
+            borderRadius: theme.spacing(1),
+            border: '2px solid' + theme.palette.common.white,
+            backgroundColor: theme.palette.grey[400],
+        },
+        '& .frame.rightFrame': {
+            height: 369,
+        },
     },
     SelectedResourceWrapper: {
         overflowY: 'auto',
@@ -268,17 +291,17 @@ function ProductResourcesEdit(props) {
             });
     };
     const handleSearchTextChange = (event) => {
-        console.info(event);
         const apiPromise = filterAPIs(event.target.value);
         apiPromise
             .then((response) => {
                 const {
                     body: { list },
                 } = response;
-                if (list.length > 0) {
+                const filteredList = list.filter((theApi) => theApi.status !== 'PROTOTYPED');
+                if (filteredList.length > 0) {
                     setSelectedApi(list[0]);
                 }
-                setAllApis(list);
+                setAllApis(filteredList);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') console.log(error);
@@ -412,10 +435,12 @@ function ProductResourcesEdit(props) {
                 const {
                     body: { list },
                 } = response;
-                setAllApis(list);
-                if (list.length > 0) {
-                    setSelectedApi(list[0]);
-                    getApiSwagger(list[0]);
+                const filteredList = list.filter((theApi) => theApi.lifeCycleStatus !== 'PROTOTYPED');
+
+                setAllApis(filteredList);
+                if (filteredList.length > 0) {
+                    setSelectedApi(filteredList[0]);
+                    getApiSwagger(filteredList[0]);
                 }
             })
             .catch((error) => {
@@ -534,11 +559,9 @@ function ProductResourcesEdit(props) {
                                     />
                                 </div>
                                 {selectedApi && (
-                                    <React.Fragment className={classes.ResourceWrapper}>
-                                        <Typography variant='h5' className={classes.selectedTitle}>
-                                            {selectedApi.name}
-                                        </Typography>
-                                    </React.Fragment>
+                                    <Typography variant='h5' className={classes.selectedTitle}>
+                                        {selectedApi.name}
+                                    </Typography>
                                 )}
                                 <div className={classes.tootBar}>
                                     <a
@@ -570,85 +593,91 @@ function ProductResourcesEdit(props) {
                                     </a>
                                 </div>
                                 <div className={classes.ResourceWrapper}>
-                                    <List dense>
-                                        {Object.keys(selectedApiPaths).map((key) => {
-                                            const path = selectedApiPaths[key];
-                                            const labelId = `checkbox-list-label-${key}`;
-                                            return Object.keys(path).map((innerKey) => {
-                                                const methodObj = path[innerKey];
-                                                return (
-                                                    CONSTS.HTTP_METHODS.includes(innerKey) && (
-                                                        <ListItem key={`${innerKey} - ${key}`} role={undefined} dense>
-                                                            <ListItemIcon style={{ minWidth: 35 }}>
-                                                                <Checkbox
-                                                                    edge='start'
-                                                                    checked={methodObj.checked}
-                                                                    tabIndex={-1}
-                                                                    disableRipple
-                                                                    onChange={() => updateCheckBox(key, innerKey)}
-                                                                    color='primary'
-                                                                    disabled={methodObj.allreadyAdded}
-                                                                />
-                                                            </ListItemIcon>
-                                                            <ListItemText
-                                                                id={labelId}
-                                                                primary={(
-                                                                    <div>
-                                                                        <MethodView
-                                                                            method={innerKey}
-                                                                            className={classes.methodView}
-                                                                        />
-                                                                        <span>{key}</span>
-                                                                    </div>
-                                                                )}
-                                                                secondary={
-                                                                    methodObj['x-auth-type']
+                                    <div className='frame'>
+                                        <List dense>
+                                            {Object.keys(selectedApiPaths).map((key) => {
+                                                const path = selectedApiPaths[key];
+                                                const labelId = `checkbox-list-label-${key}`;
+                                                return Object.keys(path).map((innerKey) => {
+                                                    const methodObj = path[innerKey];
+                                                    return (
+                                                        CONSTS.HTTP_METHODS.includes(innerKey) && (
+                                                            <ListItem
+                                                                key={`${innerKey} - ${key}`}
+                                                                role={undefined}
+                                                                dense
+                                                            >
+                                                                <ListItemIcon style={{ minWidth: 35 }}>
+                                                                    <Checkbox
+                                                                        edge='start'
+                                                                        checked={methodObj.checked}
+                                                                        tabIndex={-1}
+                                                                        disableRipple
+                                                                        onChange={() => updateCheckBox(key, innerKey)}
+                                                                        color='primary'
+                                                                        disabled={methodObj.allreadyAdded}
+                                                                    />
+                                                                </ListItemIcon>
+                                                                <ListItemText
+                                                                    id={labelId}
+                                                                    primary={(
+                                                                        <div>
+                                                                            <MethodView
+                                                                                method={innerKey}
+                                                                                className={classes.methodView}
+                                                                            />
+                                                                            <span>{key}</span>
+                                                                        </div>
+                                                                    )}
+                                                                    secondary={
+                                                                        methodObj['x-auth-type']
                                                                     && methodObj['x-throttling-tier']
                                                                     && `${methodObj['x-auth-type']} - ${
                                                                         methodObj['x-throttling-tier']
                                                                     }`
-                                                                }
-                                                                onClick={() => updateResourceTree(
-                                                                    {
-                                                                        target: key,
-                                                                        verb: innerKey,
-                                                                        apiId: selectedApi.id,
-                                                                        name: selectedApi.name,
-                                                                    },
-                                                                    'add',
-                                                                )}
-                                                                className={classes.middleText}
-                                                            />
-                                                            <ListItemSecondaryAction>
-                                                                {methodObj.allreadyAdded && (
-                                                                    <Icon className={classes.inactiveIcon}>
+                                                                    }
+                                                                    onClick={() => updateResourceTree(
+                                                                        {
+                                                                            target: key,
+                                                                            verb: innerKey,
+                                                                            apiId: selectedApi.id,
+                                                                            name: selectedApi.name,
+                                                                        },
+                                                                        'add',
+                                                                    )}
+                                                                    className={classes.middleText}
+                                                                />
+                                                                <ListItemSecondaryAction>
+                                                                    {methodObj.allreadyAdded && (
+                                                                        <Icon className={classes.inactiveIcon}>
                                                                         chevron_right
-                                                                    </Icon>
-                                                                )}
-                                                                {!methodObj.allreadyAdded && (
-                                                                    <IconButton
-                                                                        edge='end'
-                                                                        aria-label='comments'
-                                                                        onClick={() => updateResourceTree(
-                                                                            {
-                                                                                target: key,
-                                                                                verb: innerKey,
-                                                                                apiId: selectedApi.id,
-                                                                                name: selectedApi.name,
-                                                                            },
-                                                                            'add',
-                                                                        )}
-                                                                    >
-                                                                        <Icon>chevron_right</Icon>
-                                                                    </IconButton>
-                                                                )}
-                                                            </ListItemSecondaryAction>
-                                                        </ListItem>
-                                                    )
-                                                );
-                                            });
-                                        })}
-                                    </List>
+                                                                        </Icon>
+                                                                    )}
+                                                                    {!methodObj.allreadyAdded && (
+                                                                        <IconButton
+                                                                            edge='end'
+                                                                            aria-label='comments'
+                                                                            onClick={() => updateResourceTree(
+                                                                                {
+                                                                                    target: key,
+                                                                                    verb: innerKey,
+                                                                                    apiId: selectedApi.id,
+                                                                                    name: selectedApi.name,
+                                                                                },
+                                                                                'add',
+                                                                            )}
+                                                                        >
+                                                                            <Icon>chevron_right</Icon>
+                                                                        </IconButton>
+                                                                    )}
+                                                                </ListItemSecondaryAction>
+                                                            </ListItem>
+                                                        )
+                                                    );
+                                                });
+                                            })}
+                                        </List>
+                                    </div>
                                 </div>
                             </Paper>
                         </Grid>
@@ -659,25 +688,26 @@ function ProductResourcesEdit(props) {
                             <Paper className={classes.paper}>
                                 <div className={classes.colTitle} />
                                 {api.name && (
-                                    <React.Fragment className={classes.ResourceWrapper}>
+                                    <>
                                         <Typography variant='h5' className={classes.selectedTitle}>
                                             {api.name}
                                         </Typography>
-                                    </React.Fragment>
+                                    </>
                                 )}
-                                <div className={classes.SelectedResourceWrapper}>
-                                    {allApis.length > 0 && apiResources && apiResources.length === 0 && (
-                                        <div className={classes.messageWrapper}>
-                                            <Typography component='p'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.ProductResources.ProductResourcesWorkspace.
+                                <div className={classes.ResourceWrapper}>
+                                    <div className='frame rightFrame'>
+                                        {allApis.length > 0 && apiResources && apiResources.length === 0 && (
+                                            <div className={classes.messageWrapper}>
+                                                <Typography component='p'>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.ProductResources.ProductResourcesWorkspace.
                                                     empty.title'
-                                                    defaultMessage='Use the left side panel to add resources'
-                                                />
-                                            </Typography>
-                                        </div>
-                                    )}
-                                    {apiResources
+                                                        defaultMessage='Use the left side panel to add resources'
+                                                    />
+                                                </Typography>
+                                            </div>
+                                        )}
+                                        {apiResources
                                         && apiResources.length > 0
                                         && Object.keys(apiResources).map((key) => {
                                             const apiResource = apiResources[key];
@@ -689,7 +719,10 @@ function ProductResourcesEdit(props) {
                                                             const operation = apiResource.operations[innerKey];
                                                             const { target, verb } = operation;
                                                             return (
-                                                                <div key={verb} className={classes.treeItem}>
+                                                                <div
+                                                                    key={`${apiResource.apiId}_${verb}_${target}`}
+                                                                    className={classes.treeItem}
+                                                                >
                                                                     <MethodView
                                                                         method={verb}
                                                                         className={classes.methodView}
@@ -716,6 +749,7 @@ function ProductResourcesEdit(props) {
                                                 </div>
                                             );
                                         })}
+                                    </div>
                                 </div>
                             </Paper>
                         </Grid>

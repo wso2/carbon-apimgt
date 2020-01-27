@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useReducer } from 'react';
+import React, { useReducer, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
@@ -30,8 +30,9 @@ import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api.js';
 import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-import ProvideOpenAPI from '../../Create/OpenAPI/Steps/ProvideOpenAPI';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
+import ProvideOpenAPI from '../../Create/OpenAPI/Steps/ProvideOpenAPI';
 import ProvideGraphQL from '../../Create/GraphQL/Steps/ProvideGraphQL';
 
 
@@ -44,10 +45,18 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
+/**
+ *
+ *
+ * @export
+ * @param {*} props
+ * @returns
+ */
 export default function ImportDefinition(props) {
     const { setSchemaDefinition } = props;
     const classes = useStyles();
-    const [openAPIDefinitionImport, setOpenAPIDefinitionImport] = React.useState(false);
+    const [openAPIDefinitionImport, setOpenAPIDefinitionImport] = useState(false);
+    const [isImporting, setIsImporting] = useState(false);
     const [api] = useAPI();
     const intl = useIntl();
     const isGraphQL = api.isGraphql();
@@ -63,13 +72,7 @@ export default function ImportDefinition(props) {
     function apiInputsReducer(currentState, inputAction) {
         const { action, value } = inputAction;
         switch (action) {
-            case 'type':
             case 'inputValue':
-            case 'name':
-            case 'version':
-            case 'endpoint':
-            case 'context':
-            case 'policies':
             case 'isFormValid':
                 return { ...currentState, [action]: value };
             case 'inputType':
@@ -77,9 +80,7 @@ export default function ImportDefinition(props) {
             case 'preSetAPI':
                 return {
                     ...currentState,
-                    name: value.name.replace(/[&/\\#,+()$~%.'":*?<>{}\s]/g, ''),
-                    version: value.version,
-                    context: value.context,
+                    content: value.content,
                 };
             default:
                 return currentState;
@@ -97,12 +98,21 @@ export default function ImportDefinition(props) {
      * Updates OpenAPI definition
      */
     function updateOASDefinition() {
+        setIsImporting(true);
         const {
-            inputValue, inputType,
+            inputValue, inputType, content,
         } = apiInputs;
-
+        const isFileInput = inputType === 'file';
+        if (isFileInput) {
+            const reader = new FileReader();
+            const contentType = inputValue.type.includes('yaml') ? 'yaml ' : 'json';
+            reader.onloadend = (event) => {
+                setSchemaDefinition(event.currentTarget.result, contentType);
+            };
+            reader.readAsText(inputValue);
+        }
         const newAPI = new API();
-        const promisedResponse = inputType === 'file' ? newAPI.updateAPIDefinitionByFile(api.id, inputValue)
+        const promisedResponse = isFileInput ? newAPI.updateAPIDefinitionByFile(api.id, inputValue)
             : newAPI.updateAPIDefinitionByUrl(api.id, inputValue);
         promisedResponse
             .then(() => {
@@ -111,7 +121,12 @@ export default function ImportDefinition(props) {
                     defaultMessage: 'API Definition Updated Successfully',
                 }));
                 setOpenAPIDefinitionImport(false);
-                setSchemaDefinition(inputValue);
+                if (!isFileInput) {
+                    // Test to starting the content with'{' character ignoring white spaces
+                    const isJSONRegex = RegExp(/^\s*{/); // TODO: not a solid test need to support from REST API ~tmkb
+                    const contentType = isJSONRegex.test(content) ? 'json' : 'yaml';
+                    setSchemaDefinition(content, contentType);
+                }
             })
             .catch((error) => {
                 console.error(error);
@@ -119,7 +134,7 @@ export default function ImportDefinition(props) {
                     id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
                     defaultMessage: 'Error while updating the API Definition',
                 }));
-            });
+            }).finally(() => setIsImporting(false));
     }
 
     /**
@@ -136,7 +151,7 @@ export default function ImportDefinition(props) {
                     defaultMessage: 'Schema Definition Updated Successfully',
                 }));
                 setOpenAPIDefinitionImport(false);
-                setSchemaDefinition(null, graphQLSchema);
+                setSchemaDefinition(graphQLSchema);
             })
             .catch((err) => {
                 console.log(err);
@@ -257,12 +272,13 @@ export default function ImportDefinition(props) {
                         onClick={importDefinition}
                         variant='contained'
                         color='primary'
-                        disabled={!apiInputs.isFormValid}
+                        disabled={!apiInputs.isFormValid || isImporting}
                     >
                         <FormattedMessage
                             id='Apis.Details.APIDefinition.APIDefinition.import.definition.import'
                             defaultMessage='Import'
                         />
+                        {isImporting && <CircularProgress size={20} />}
                     </Button>
                 </DialogActions>
             </Dialog>

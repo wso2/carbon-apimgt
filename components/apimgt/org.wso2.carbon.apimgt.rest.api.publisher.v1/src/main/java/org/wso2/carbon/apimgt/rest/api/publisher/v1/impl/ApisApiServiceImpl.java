@@ -79,7 +79,6 @@ import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
@@ -88,7 +87,6 @@ import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -295,6 +293,13 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             API apiToAdd = prepareToCreateAPIByDTO(body);
             validateScopes(apiToAdd);
+            //validate API categories
+            List<APICategory> apiCategories = apiToAdd.getApiCategories();
+            if (apiCategories != null && apiCategories.size() >0) {
+                if (!APIUtil.validateAPICategories(apiCategories, RestApiUtil.getLoggedInUserTenantDomain())) {
+                    RestApiUtil.handleBadRequest("Invalid API Category name(s) defined", log);
+                }
+            }
             //adding the api
             apiProvider.addAPI(apiToAdd);
 
@@ -709,6 +714,15 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
             apiToUpdate.setWsdlUrl(body.getWsdlUrl());
+
+            //validate API categories
+            List<APICategory> apiCategories = apiToUpdate.getApiCategories();
+            if (apiCategories != null && apiCategories.size() >0) {
+                if (!APIUtil.validateAPICategories(apiCategories, RestApiUtil.getLoggedInUserTenantDomain())) {
+                    RestApiUtil.handleBadRequest("Invalid API Category name(s) defined", log);
+                }
+            }
+
             apiProvider.manageAPI(apiToUpdate);
 
             API updatedApi = apiProvider.getAPI(apiIdentifier);
@@ -3668,7 +3682,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String additionalProperties, String implementationType, MessageContext messageContext)
             throws APIManagementException {
         try {
-            validateWSDLAndReset(fileInputStream, fileDetail, url);
+            WSDLValidationResponse validationResponse = validateWSDLAndReset(fileInputStream, fileDetail, url);
 
             if (StringUtils.isEmpty(implementationType)) {
                 implementationType = APIDTO.TypeEnum.SOAP.toString();
@@ -3677,7 +3691,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             boolean isSoapToRestConvertedAPI = APIDTO.TypeEnum.SOAPTOREST.toString().equals(implementationType);
             boolean isSoapAPI = APIDTO.TypeEnum.SOAP.toString().equals(implementationType);
 
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             APIDTO additionalPropertiesAPI = null;
             APIDTO createdApiDTO;
             URI createdApiUri;
@@ -3692,7 +3705,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (isSoapAPI) {
                 createdApi = importSOAPAPI(fileInputStream, fileDetail, url, apiToAdd);
             } else if (isSoapToRestConvertedAPI) {
-                createdApi = importSOAPToRESTAPI(fileInputStream, fileDetail, url, apiToAdd);
+                String wsdlArchiveExtractedPath = null;
+                if (validationResponse.getWsdlArchiveInfo() != null) {
+                    wsdlArchiveExtractedPath = validationResponse.getWsdlArchiveInfo().getLocation()
+                            + File.separator + APIConstants.API_WSDL_EXTRACTED_DIRECTORY;
+                }
+                createdApi = importSOAPToRESTAPI(fileInputStream, fileDetail, url, wsdlArchiveExtractedPath, apiToAdd);
             } else {
                 RestApiUtil.handleBadRequest("Invalid implementationType parameter", log);
             }
@@ -3714,7 +3732,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param url WSDL url
      * @throws APIManagementException when error occurred during the operation
      */
-    private void validateWSDLAndReset(InputStream fileInputStream, Attachment fileDetail, String url)
+    private WSDLValidationResponse validateWSDLAndReset(InputStream fileInputStream, Attachment fileDetail, String url)
             throws APIManagementException {
         Map validationResponseMap = validateWSDL(url, fileInputStream, fileDetail);
         WSDLValidationResponse validationResponse =
@@ -3740,6 +3758,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         "input stream.");
             }
         }
+        return validationResponse;
     }
 
     /**
@@ -3810,7 +3829,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param apiToAdd API object to be added to the system (which is not added yet)
      * @return API added api
      */
-    private API importSOAPToRESTAPI(InputStream fileInputStream, Attachment fileDetail, String url, API apiToAdd) {
+    private API importSOAPToRESTAPI(InputStream fileInputStream, Attachment fileDetail, String url,
+            String wsdlArchiveExtractedPath, API apiToAdd) throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             //adding the api
@@ -3819,19 +3839,26 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
             API createdApi = apiProvider.getAPI(createdApiId);
-
-
-            String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(url);
-
+            String swaggerStr = "";
+            if (StringUtils.isNotBlank(url)) {
+                swaggerStr = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(url);
+            } else if (fileInputStream != null) {
+                String filename = fileDetail.getContentDisposition().getFilename();
+                if (filename.endsWith(".zip")) {
+                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlArchiveExtractedPath);;
+                } else if (filename.endsWith(".wsdl")) {
+                    byte[] wsdlContent = APIUtil.toByteArray(fileInputStream);
+                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlContent);
+                } else {
+                    throw new APIManagementException(ExceptionCodes.UNSUPPORTED_WSDL_FILE_EXTENSION);
+                }
+            }
             String updatedSwagger = updateSwagger(createdApi.getUUID(), swaggerStr);
             SequenceGenerator.generateSequencesFromSwagger(updatedSwagger, apiToAdd.getId());
-
             return createdApi;
-        } catch (APIManagementException | FaultGatewaysException e) {
-            RestApiUtil.handleInternalServerError("Error while importing WSDL to create a SOAP-to-REST API",
-                    e, log);
+        } catch (FaultGatewaysException | IOException e) {
+            throw new APIManagementException("Error while importing WSDL to create a SOAP-to-REST API", e);
         }
-        return null;
     }
 
     /**

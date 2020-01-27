@@ -51,6 +51,7 @@ import javax.xml.parsers.ParserConfigurationException;
 abstract class AbstractWSDLProcessor implements WSDLProcessor {
 
     protected static final int MAX_URL_READ_LINES = 100;
+    private Mode mode;
 
     /**
      * Returns an "XXE safe" built DOM XML object by reading the content from the provided URL.
@@ -184,5 +185,13 @@ abstract class AbstractWSDLProcessor implements WSDLProcessor {
             throw new APIMgtWSDLException("General error occurred while creating WSDL archive", e,
                     ExceptionCodes.ERROR_WHILE_CREATING_WSDL_ARCHIVE);
         }
+    }
+
+    void setMode(Mode mode) {
+        this.mode = mode;
+    }
+
+    public Mode getMode() {
+        return this.mode;
     }
 }

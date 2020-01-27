@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.gateway.internal;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -31,8 +32,8 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
-import org.wso2.carbon.apimgt.gateway.handlers.security.service.APIAuthenticationService;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService;
@@ -48,6 +49,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.base.api.ServerConfigurationService;
@@ -56,7 +58,6 @@ import org.wso2.carbon.localentry.service.LocalEntryAdmin;
 import org.wso2.carbon.mediation.security.vault.MediationSecurityAdminService;
 import org.wso2.carbon.rest.api.service.RestApiAdmin;
 import org.wso2.carbon.sequences.services.SequenceAdmin;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -127,12 +128,22 @@ public class APIHandlerServiceComponent {
                     }
                 }
 
+                // Set APIM Gateway JWT Generator
 
+                JWTConfigurationDto jwtConfigurationDto = configuration.getJwtConfigurationDto();
+                if (jwtConfigurationDto.isEnabled()){
+                    if (StringUtils.isNotEmpty(jwtConfigurationDto.getGatewayJWTGeneratorImpl())) {
+                        AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator =
+                                (AbstractAPIMgtGatewayJWTGenerator) Class
+                                        .forName(jwtConfigurationDto.getGatewayJWTGeneratorImpl()).newInstance();
+                        ServiceReferenceHolder.getInstance().setApiMgtGatewayJWTGenerator(apiMgtGatewayJWTGenerator);
+                    }
+                }
                 // Start JWT revoked map cleaner.
                 RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
                 revokedJWTMapCleaner.startJWTRevokedMapCleaner();
             }
-        } catch (AxisFault | APIManagementException e) {
+        } catch (AxisFault | APIManagementException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             log.error("Error while initializing the API Gateway (APIHandlerServiceComponent) component", e);
         }
         // Create caches for the super tenant
@@ -235,10 +246,6 @@ public class APIHandlerServiceComponent {
         return CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
     }
 
-    protected void setConfiguration(APIManagerConfiguration configuration) {
-        this.configuration = configuration;
-    }
-
     protected String getAxis2ClientXmlLocation() {
         String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" + ".clientAxis2XmlLocation");
         return axis2ClientXml;
@@ -263,22 +270,7 @@ public class APIHandlerServiceComponent {
         ServiceReferenceHolder.getInstance().setTracingService(null);
     }
 
-    @Reference(
-             name = "user.realm.service", 
-             service = org.wso2.carbon.user.core.service.RealmService.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
-             unbind = "unsetRealmService")
-    protected void setRealmService(RealmService realmService) {
-        if (realmService != null && log.isDebugEnabled()) {
-            log.debug("Realm service initialized");
-        }
-        ServiceReferenceHolder.getInstance().setRealmService(realmService);
-    }
 
-    protected void unsetRealmService(RealmService realmService) {
-        ServiceReferenceHolder.getInstance().setRealmService(null);
-    }
 
     @Reference(
             name = "restapi.admin.service.component",
