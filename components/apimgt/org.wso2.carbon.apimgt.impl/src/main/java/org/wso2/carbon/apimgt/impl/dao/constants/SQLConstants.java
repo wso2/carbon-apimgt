@@ -3396,15 +3396,17 @@ public class SQLConstants {
     public static class SystemApplicationConstants {
 
         public static final String INSERT_SYSTEM_APPLICATION =
-                "INSERT INTO AM_SYSTEM_APPS " + "(NAME,CONSUMER_KEY,CONSUMER_SECRET,CREATED_TIME) VALUES (?,?,?,?)";
+                "INSERT INTO AM_SYSTEM_APPS " + "(NAME,CONSUMER_KEY,CONSUMER_SECRET,TENANT_DOMAIN,CREATED_TIME) " +
+                        "VALUES (?,?,?,?,?)";
 
         public static final String GET_CLIENT_CREDENTIALS_FOR_APPLICATION =
-                "SELECT CONSUMER_KEY,CONSUMER_SECRET FROM " + "AM_SYSTEM_APPS WHERE NAME = ?";
+                "SELECT CONSUMER_KEY,CONSUMER_SECRET FROM " + "AM_SYSTEM_APPS WHERE NAME = ? AND TENANT_DOMAIN = ?";
 
-        public static final String DELETE_SYSTEM_APPLICATION = "DELETE FROM AM_SYSTEM_APPS WHERE NAME = ?";
+        public static final String DELETE_SYSTEM_APPLICATION = "DELETE FROM AM_SYSTEM_APPS WHERE NAME = ? AND " +
+                "TENANT_DOMAIN = ?";
 
         public static final String CHECK_CLIENT_CREDENTIALS_EXISTS = "SELECT CONSUMER_KEY,CONSUMER_SECRET " +
-                "FROM AM_SYSTEM_APPS WHERE NAME = ?";
+                "FROM AM_SYSTEM_APPS WHERE NAME = ? AND TENANT_DOMAIN = ?";
     }
 
     public static class BotDataConstants {

@@ -5463,7 +5463,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             //todo: use get api by id, so no need to set scopes or uri templates
             api.setScopes(oasParser.getScopes(definition));
             api.setUriTemplates(oasParser.getURITemplates(definition));
-            apiTenantDomain = MultitenantUtils.getTenantDomain(api.getId().getProviderName());
+            apiTenantDomain = MultitenantUtils.getTenantDomain(
+                    APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             hostsWithSchemes = getHostWithSchemeMappingForEnvironment(apiTenantDomain, environmentName);
             api.setContext(getBasePath(apiTenantDomain, api.getContext()));
             updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
