@@ -84,7 +84,7 @@ var getTenantDomain = function(){
 
 var getServiceProviderTenantDomain = function(){
     var tenantDomain = getTenantDomain();
-    if(isPerTenantServiceProviderEnabled()){
+    if (isPerTenantServiceProviderEnabled()) {
         return tenantDomain;
     } else {
         return "carbon.super";
