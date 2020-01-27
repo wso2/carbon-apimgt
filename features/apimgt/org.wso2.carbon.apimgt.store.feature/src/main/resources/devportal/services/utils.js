@@ -58,7 +58,7 @@ var getTenantBasedLogoutCallBack = function() {
         return storeDomainMapping.get('logout');
        }
         return "https://"+storeDomainMapping.get('customUrl')+LOGOUT_CALLBACK_URL_SUFFIX;
-    }else{
+    } else {
     return null;
     }
 };
