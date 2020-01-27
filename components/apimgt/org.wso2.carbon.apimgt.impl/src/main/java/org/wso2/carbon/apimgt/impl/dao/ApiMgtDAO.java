@@ -7289,11 +7289,6 @@ public class ApiMgtDAO {
             prepStmt.execute();
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
-            prepStmt = connection.prepareStatement(deleteSubscriptionQuery);
-            prepStmt.setInt(1, id);
-            prepStmt.execute();
-            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
-
             //Delete all graphql query analysis related details associated with given API
             prepStmt = connection.prepareStatement(deleteGraphqlQueryAnalysisQuery);
             prepStmt.setInt(1, id);
@@ -7306,6 +7301,11 @@ public class ApiMgtDAO {
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
             prepStmt = connection.prepareStatement(deleteGraphqlDepthQuery);
+            prepStmt.setInt(1, id);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            prepStmt = connection.prepareStatement(deleteSubscriptionQuery);
             prepStmt.setInt(1, id);
             prepStmt.execute();
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
