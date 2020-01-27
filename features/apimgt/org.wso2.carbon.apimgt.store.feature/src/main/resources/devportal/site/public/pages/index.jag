@@ -19,7 +19,9 @@
 
 <html lang="en">
 <%
-    var settings = require("/site/public/theme/settings.js");
+   var appUtils = require("/services/utils.js");
+   var settings = require("/site/public/theme/settings.js");
+   settings.Settings.app.context = appUtils.getTenantBaseStoreContext();
 %>
 <head>
   <base href="<%= settings.Settings.app.context %>/" />
@@ -39,7 +41,7 @@
     <div class="apim-dual-ring"></div>
   </div>
   <script type="text/javascript" src="<%= settings.Settings.app.context %>/site/public/theme/defaultTheme.js"></script>
-  <script type="text/javascript" src="<%= settings.Settings.app.context %>/site/public/theme/settings.js"></script>
+  <script type="text/javascript" src="<%= settings.Settings.app.context %>/services/settings/settings.js"></script>
   <script src="<%= settings.Settings.app.context %>/site/public/fonts/iconfont/MaterialIcons.js"></script>
   <script src="<%= settings.Settings.app.context %>/site/public/dist/index.bundle.js"></script>
   <link rel="stylesheet" href="<%= settings.Settings.app.context %>/site/public/fonts/iconfont/material-icons.css">

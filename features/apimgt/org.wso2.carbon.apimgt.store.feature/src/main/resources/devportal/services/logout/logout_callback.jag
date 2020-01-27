@@ -20,7 +20,8 @@
     var log = new Log("Logout Callback Function");
     var site = require("/site/public/theme/settings.js").Settings.app;
     include("/services/constants.jag");
-
+    var appUtils = require("/services/utils.js");
+    site.context = appUtils.getTenantBaseStoreContext();
     var cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': '', 'path': site.context + "/", "httpOnly": true, "secure": true, "maxAge": 2};
     response.addCookie(cookie);
     cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': '', 'path': "/api/am/store/", "httpOnly": true, "secure": true, "maxAge": 2};
