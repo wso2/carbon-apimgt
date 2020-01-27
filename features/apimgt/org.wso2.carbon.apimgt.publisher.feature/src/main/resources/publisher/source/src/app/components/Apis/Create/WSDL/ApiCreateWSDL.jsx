@@ -75,6 +75,7 @@ export default function ApiCreateWSDL(props) {
         inputType: 'url',
         inputValue: '',
         formValidity: false,
+        mode: 'create',
     });
 
     /**
