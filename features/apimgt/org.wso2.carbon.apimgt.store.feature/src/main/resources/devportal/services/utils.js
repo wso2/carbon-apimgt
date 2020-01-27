@@ -42,7 +42,7 @@ var getTenantBasedLoginCallBack = function() {
     var tenantDomain = getTenantDomain();
     var storeDomainMapping = utils.getTenantBasedStoreDomainMapping(tenantDomain);
     if(storeDomainMapping != null){
-       if(storeDomainMapping.get('login') != null){
+       if (storeDomainMapping.get('login') != null) {
         return storeDomainMapping.get('login');
        }
         return "https://"+storeDomainMapping.get('customUrl')+LOGIN_CALLBACK_URL_SUFFIX;
