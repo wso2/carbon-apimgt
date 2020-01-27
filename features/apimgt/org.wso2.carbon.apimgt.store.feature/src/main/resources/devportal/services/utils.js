@@ -54,7 +54,7 @@ var getTenantBasedLogoutCallBack = function() {
     var tenantDomain = getTenantDomain();
     var storeDomainMapping = utils.getTenantBasedStoreDomainMapping(tenantDomain);
     if(storeDomainMapping != null){
-       if(storeDomainMapping.get('logout') != null){
+       if (storeDomainMapping.get('logout') != null) {
         return storeDomainMapping.get('logout');
        }
         return "https://"+storeDomainMapping.get('customUrl')+LOGOUT_CALLBACK_URL_SUFFIX;
