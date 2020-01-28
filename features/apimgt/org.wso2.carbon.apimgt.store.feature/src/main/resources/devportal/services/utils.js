@@ -50,6 +50,7 @@ var getTenantBasedLoginCallBack = function() {
     return null;
     }
 };
+
 var getTenantBasedLogoutCallBack = function() {
     var tenantDomain = getTenantDomain();
     var storeDomainMapping = utils.getTenantBasedStoreDomainMapping(tenantDomain);
