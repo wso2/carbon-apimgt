@@ -105,6 +105,5 @@ public class ExportApiServiceImpl implements ExportApiService {
               RestApiUtil.handleInternalServerError("Error while exporting " + RestApiConstants.RESOURCE_API, e, log);
           }
           return null;
-
   }
 }

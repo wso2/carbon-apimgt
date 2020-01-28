@@ -196,7 +196,7 @@ class API extends Resource {
                 providerName:provider,
                 format:format,
             },  this._requestMetaData({ 
-                    'Content-Type': 'multipart/form-data'
+                    'accept': 'application/zip'
                 })
             );
         });
