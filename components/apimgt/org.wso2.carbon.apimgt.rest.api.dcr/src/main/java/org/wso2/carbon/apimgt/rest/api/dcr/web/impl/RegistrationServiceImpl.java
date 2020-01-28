@@ -142,7 +142,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 appRequest.setOAuthApplicationInfo(oauthApplicationInfo);
                 if (!authUserName.equals(owner)){
                     loggedInUserTenantDomain = MultitenantUtils.getTenantDomain(owner);
-                } else {
+                }else{
                     loggedInUserTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
                 }
                 String userId = (String) oauthApplicationInfo.getParameter(OAUTH_CLIENT_USERNAME);

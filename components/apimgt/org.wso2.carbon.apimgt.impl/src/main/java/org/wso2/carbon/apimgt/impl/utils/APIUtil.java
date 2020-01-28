@@ -10006,15 +10006,12 @@ public final class APIUtil {
             }
         } catch (RegistryException e) {
             String msg = "Error while retrieving gateway domain mappings from registry";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (ClassCastException e) {
             String msg = "Invalid JSON found in the gateway tenant domain mappings";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (ParseException e) {
             String msg = "Malformed JSON found in the gateway tenant domain mappings";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return context;
@@ -10038,15 +10035,12 @@ public final class APIUtil {
             }
         } catch (RegistryException e) {
             String msg = "Error while retrieving gateway domain mappings from registry";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (ClassCastException e) {
             String msg = "Invalid JSON found in the gateway tenant domain mappings";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (ParseException e) {
             String msg = "Malformed JSON found in the gateway tenant domain mappings";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return null;
@@ -10061,7 +10055,6 @@ public final class APIUtil {
         }
         return false;
     }
-
     public static String getTenantAdminUserName(String tenantDomain) throws APIManagementException {
         try {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
