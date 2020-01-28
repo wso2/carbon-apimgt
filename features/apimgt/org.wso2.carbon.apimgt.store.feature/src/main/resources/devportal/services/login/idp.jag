@@ -66,7 +66,7 @@
     var systemApplicationDAO = new SystemApplicationDAO();
     var clientId ;
     var serviceProviderTenantDomain = appUtils.getServiceProviderTenantDomain();
-    log.info(serviceProviderTenantDomain);
+    log.debug(serviceProviderTenantDomain);
     // this is to support migration from admin_store to admin_devportal
     systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME,serviceProviderTenantDomain);
     if (systemApplicationDTO === null) {
@@ -76,7 +76,7 @@
     var lock = SystemApplicationDAO.getLock();
     if (systemApplicationDTO  !== null) {
         clientId = systemApplicationDTO.getConsumerKey();
-        log.info("clientid::"+clientId);
+        log.debug("clientid::"+clientId);
     } else {
         try {
             lock.acquire();
@@ -93,7 +93,7 @@
                     "grantType": "authorization_code refresh_token",
                     "saasApp": true
                 };
-                log.info(dcrRequestData);
+                log.debug(dcrRequestData);
                 var result = post(dcrUrl, JSON.stringify(dcrRequestData) , {
                     "Authorization": authorizationHeader,
                     "Content-Type": "application/json"
