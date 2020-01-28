@@ -67,4 +67,8 @@ export default class Resource {
     isSOAPToREST() {
         return this.type === 'SOAPTOREST';
     }
+
+    isSOAP() {
+        return this.type === 'SOAP';
+    }
 }

@@ -303,40 +303,6 @@ class API extends Resource {
             return new API(response.body);
         });
     }
-    /**
-     * Create an API from WSDL with the given parameters and call the callback method given optional.
-     * @param {Object} api_data - API data which need to fill the placeholder values in the @get_template
-     * @param {function} callback - An optional callback method
-     * @returns {Promise} Promise after creating and optionally calling the callback method.
-     */
-    importWSDL(api_data, callback = null) {
-        let payload;
-        let promise_create;
-        payload = {
-            type: 'WSDL',
-            additionalProperties: api_data.additionalProperties,
-            implementationType: api_data.implementationType,
-            'Content-Type': 'multipart/form-data',
-        };
-        if (api_data.url) {
-            payload.url = api_data.url;
-        } else {
-            payload.file = api_data.file;
-        }
-        promise_create = this.client.then(client => {
-            return client.apis['APIs'].post_apis_import_definition(
-                payload,
-                this._requestMetaData({
-                    'Content-Type': 'multipart/form-data',
-                }),
-            );
-        });
-        if (callback) {
-            return promise_create.then(callback);
-        } else {
-            return promise_create;
-        }
-    }
 
     /**
      * Get details of a given API
@@ -1181,38 +1147,6 @@ class API extends Resource {
         return promise_labels;
     }
 
-    validateWSDLUrl(wsdlUrl) {
-        const promised_validationResponse = this.client.then(client => {
-            return client.apis['Validation'].post_apis_validate_definition(
-                {
-                    type: 'WSDL',
-                    url: wsdlUrl,
-                    'Content-Type': 'multipart/form-data',
-                },
-                this._requestMetaData({
-                    'Content-Type': 'multipart/form-data',
-                }),
-            );
-        });
-        return promised_validationResponse;
-    }
-
-    validateWSDLFile(file) {
-        const promised_validationResponse = this.client.then(client => {
-            return client.apis['Validation'].post_apis_validate_definition(
-                {
-                    type: 'WSDL',
-                    file,
-                    'Content-Type': 'multipart/form-data',
-                },
-                this._requestMetaData({
-                    'Content-Type': 'multipart/form-data',
-                }),
-            );
-        });
-        return promised_validationResponse;
-    }
-
     /**
      * Create an API from GraphQL with the given parameters and call the callback method given optional.
      * @param {Object} api_data - API data which need to fill the placeholder values in the @get_template
@@ -1261,15 +1195,75 @@ class API extends Resource {
         return promised_validationResponse;
     }
 
+    /**
+     * Downloads the WSDL of an API
+     * 
+     * @param {string} apiId Id (UUID) of the API
+     */
     getWSDL(apiId) {
         const promised_wsdlResponse = this.client.then(client => {
-            return client.apis['Validation'].get_apis__apiId__wsdl(
+            return client.apis['APIs'].getWSDLOfAPI(
                 {
                     apiId,
                 },
+                this._requestMetaData(),
+            );
+        });
+        return promised_wsdlResponse;
+    }
+
+    /**
+     * Get WSDL meta info of an API - indicates whether the WSDL is a ZIP or a single file.
+     * 
+     * @param {string} apiId Id (UUID) of the API
+     */
+    getWSDLInfo(apiId) {
+        const promised_wsdlResponse = this.client.then(client => {
+            return client.apis['APIs'].getWSDLInfoOfAPI(
+                {
+                    apiId,
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promised_wsdlResponse;
+    }
+
+    /**
+     * Updates the API's WSDL with the WSDL of the provided URL
+     * 
+     * @param {string} apiId Id (UUID) of the API 
+     * @param {string} url WSDL url
+     */
+    updateWSDLByUrl(apiId, url) {
+        const promised_wsdlResponse = this.client.then(client => {
+            return client.apis['APIs'].updateWSDLOfAPI(
+                {
+                    apiId,
+                    url,
+                },
                 this._requestMetaData({
-                    Accept: 'application/octet-stream',
+                    'Content-Type': 'multipart/form-data',
                 }),
+            );
+        });
+        return promised_wsdlResponse;
+    }
+
+    /**
+     * Updates the API's WSDL with the WSDL of the provided file (zip or .wsdl)
+     * 
+     * @param {string} apiId Id (UUID) of the API 
+     * @param {*} file WSDL file (zip or .wsdl)
+     */
+    updateWSDLByFileOrArchive(apiId, file) {
+        const promised_wsdlResponse = this.client.then(client => {
+            return client.apis['APIs'].updateWSDLOfAPI(
+                {
+                    apiId,
+                    file,
+                },
+                this._requestMetaData(),
             );
         });
         return promised_wsdlResponse;
