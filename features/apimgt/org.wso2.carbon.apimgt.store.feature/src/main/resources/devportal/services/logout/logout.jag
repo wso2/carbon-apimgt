@@ -42,7 +42,7 @@
     var postLogoutRedirectURI = appUtils.getTenantBasedLogoutCallBack();
     if (postLogoutRedirectURI == null) {
          postLogoutRedirectURI = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
-     }
+    }
     var url = logoutEndpoint + '?id_token_hint=' + idToken + '&post_logout_redirect_uri=' + postLogoutRedirectURI;
 
     log.debug("Redirecting to = " + url);
