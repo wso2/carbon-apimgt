@@ -99,6 +99,7 @@ public class SystemApplicationDAO {
         boolean result = false;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
+
         String addCertQuery = SQLConstants.SystemApplicationConstants.INSERT_SYSTEM_APPLICATION;
 
         try {
@@ -109,7 +110,7 @@ public class SystemApplicationDAO {
             preparedStatement.setString(1, appName);
             preparedStatement.setString(2, consumerKey);
             preparedStatement.setString(3, consumerSecret);
-            preparedStatement.setString(4,tenantDomain);
+            preparedStatement.setString(4, tenantDomain);
             preparedStatement.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()),
                     Calendar.getInstance(TimeZone.getTimeZone("UTC")));
             result = preparedStatement.executeUpdate() >= 1;
@@ -174,7 +175,7 @@ public class SystemApplicationDAO {
      * @return boolean
      * @throws APIMgtDAOException
      */
-    public boolean removeConsumerKeyForApplication(String appName,String tenantDomain) throws APIMgtDAOException {
+    public boolean removeConsumerKeyForApplication(String appName, String tenantDomain) throws APIMgtDAOException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         boolean result = false;
@@ -185,7 +186,7 @@ public class SystemApplicationDAO {
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(deleteApplicationKeyQuery);
             preparedStatement.setString(1, appName);
-            preparedStatement.setString(2,tenantDomain);
+            preparedStatement.setString(2, tenantDomain);
             result = preparedStatement.executeUpdate() == 1;
             connection.commit();
         } catch (SQLException e) {
@@ -205,7 +206,8 @@ public class SystemApplicationDAO {
      * @return boolean
      * @throws APIMgtDAOException
      */
-    public boolean isClientCredentialsExistForApplication(String appName,String tenantDomain) throws APIMgtDAOException {
+    public boolean isClientCredentialsExistForApplication(String appName, String tenantDomain)
+            throws APIMgtDAOException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         boolean result = false;

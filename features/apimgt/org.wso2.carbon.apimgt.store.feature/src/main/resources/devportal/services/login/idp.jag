@@ -45,7 +45,7 @@
         loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
     }
     var logoutCallbackUrl = appUtils.getTenantBasedLogoutCallBack();
-    if(logoutCallbackUrl = null){
+    if(logoutCallbackUrl == null){
          logoutCallbackUrl = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
      }
     var callbackUrl = "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";
@@ -66,7 +66,7 @@
     var systemApplicationDAO = new SystemApplicationDAO();
     var clientId ;
     var serviceProviderTenantDomain = appUtils.getServiceProviderTenantDomain();
-
+    log.info(serviceProviderTenantDomain);
     // this is to support migration from admin_store to admin_devportal
     systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME,serviceProviderTenantDomain);
     if (systemApplicationDTO === null) {
@@ -76,6 +76,7 @@
     var lock = SystemApplicationDAO.getLock();
     if (systemApplicationDTO  !== null) {
         clientId = systemApplicationDTO.getConsumerKey();
+        log.info("clientid::"+clientId);
     } else {
         try {
             lock.acquire();
@@ -88,11 +89,11 @@
                 var dcrRequestData = {
                     "callbackUrl": callbackUrl,
                     "clientName": STORE_CLIENT_APP_NAME,
-                    "owner": String(utils.getAdminUsername()),
+                    "owner": String(utils.getTenantAdminUserName(serviceProviderTenantDomain)),
                     "grantType": "authorization_code refresh_token",
                     "saasApp": true
                 };
-
+                log.info(dcrRequestData);
                 var result = post(dcrUrl, JSON.stringify(dcrRequestData) , {
                     "Authorization": authorizationHeader,
                     "Content-Type": "application/json"
