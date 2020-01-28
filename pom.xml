@@ -959,7 +959,7 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
                 <artifactId>org.wso2.carbon.identity.oauth</artifactId>
@@ -1743,7 +1743,6 @@
         <swagger-jaxrs.version>1.5.23</swagger-jaxrs.version>
         <junit.version>4.12</junit.version>
         <opensaml3.version>3.3.1</opensaml3.version>
-        <shibboleth.version>7.3.0</shibboleth.version>
         <openapi.generator.version>4.0.1.wso2v2</openapi.generator.version>
         <openapitools.swagger.parser.version>2.0.13.OpenAPITools.wso2v1</openapitools.swagger.parser.version>
 
