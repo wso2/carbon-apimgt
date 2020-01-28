@@ -24,7 +24,7 @@
     var tenantDomain;
      if(appUtils.isPerTenantServiceProviderEnabled()){
         tenantDomain = appUtils.getTenantDomain();
-      }
+     }
     var log = new Log();
     var cookieToken = request.getCookie("AM_REF_TOKEN_DEFAULT_P2");
     var tokenParam = request.getParameter("refresh_token", "UTF-8")
