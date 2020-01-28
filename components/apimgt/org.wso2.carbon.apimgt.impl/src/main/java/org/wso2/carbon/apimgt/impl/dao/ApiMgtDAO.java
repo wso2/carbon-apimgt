@@ -14290,7 +14290,6 @@ public class ApiMgtDAO {
         PreparedStatement ps4 = null;
         PreparedStatement ps5 = null;
         String checkEntry = SQLConstants.GET_COMPLEXITY_DETAILS_SQL;
-        String addComplexityDetails = SQLConstants.ADD_COMPLEXITY_DETAILS_SQL;
         String addCustomComplexityDetails = SQLConstants.ADD_CUSTOM_COMPLEXITY_DETAILS_SQL;
         String updateComplexityDetails = SQLConstants.UPDATE_COMPLEXITY_DETAILS_SQL;
         String updateCustomComplexityDetails = SQLConstants.UPDATE_CUSTOM_COMPLEXITY_DETAILS_SQL;
@@ -14350,32 +14349,6 @@ public class ApiMgtDAO {
                     } catch (SQLException e) {
                         handleException("Error while updating custom complexity details: ", e);
                     }
-                }
-            } else {
-                // No entries found for this API_ID. Hence an insert is performed.
-                try {
-                    ps4 = conn.prepareStatement(addComplexityDetails);
-                    ps4.setInt(1, apiId);
-                    ps4.setBoolean(2, true);
-                    ps4.setInt(3, graphqlComplexityInfo.getMaxComplexity());
-                    ps4.executeUpdate();
-                } catch (SQLException e) {
-                    handleException("Error while adding complexity details: ", e);
-                }
-                try {
-                    ps5 = conn.prepareStatement(addCustomComplexityDetails);
-                    for (CustomComplexityDetails customComplexity : graphqlComplexityInfo.getList()) {
-                        UUID uuid = UUID.randomUUID();
-                        String randomUUIDString = uuid.toString();
-                        ps5.setString(1, randomUUIDString);
-                        ps5.setInt(2, apiId);
-                        ps5.setString(3, customComplexity.getType());
-                        ps5.setString(4, customComplexity.getField());
-                        ps5.setInt(5, customComplexity.getComplexityValue());
-                        ps5.executeUpdate();
-                    }
-                } catch (SQLException e) {
-                    handleException("Error while adding custom complexity details: ", e);
                 }
             }
         } catch (SQLException ex) {
