@@ -36,6 +36,7 @@ import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.Signer;
+import org.opensaml.xmlsec.signature.support.SignerProvider;
 import org.opensaml.xmlsec.signature.X509Certificate;
 import org.opensaml.xmlsec.signature.X509Data;
 import net.shibboleth.utilities.java.support.codec.Base64Support;
@@ -126,6 +127,8 @@ public class AuthReqBuilder {
      */
     public static AuthnRequest setSignature(AuthnRequest authnRequest, String signatureAlgorithm,
             X509Credential cred) throws SSOHostObjectException {
+        Thread thread = Thread.currentThread();
+        ClassLoader originalClassLoader = thread.getContextClassLoader();
         try {
             Signature signature = (Signature) Util.buildXMLObject(Signature.DEFAULT_ELEMENT_NAME);
             signature.setSigningCredential(cred);
@@ -151,6 +154,7 @@ public class AuthReqBuilder {
 
             marshaller.marshall(authnRequest);
             
+            thread.setContextClassLoader(SignerProvider.class.getClassLoader());
             Signer.signObjects(signatureList);
             return authnRequest;
         } catch (CertificateEncodingException e) {
@@ -161,6 +165,8 @@ public class AuthReqBuilder {
             handleException("Error while signing the SAML Request message", e);
         } catch (SSOHostObjectException e) {
             handleException("Error while signing the SAML Request message", e);
+        }  finally {
+            thread.setContextClassLoader(originalClassLoader);
         }
         return null;
     }
