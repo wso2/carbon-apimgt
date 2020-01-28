@@ -15,26 +15,26 @@
  *  limitations under the License.
  * /
  */
-package org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis;
+package org.wso2.carbon.apimgt.api.model.graphql.queryanalysis;
 
-public class GraphqlDepthComplexityStatus {
+public class GraphqlLimitationStatus {
 
-    private Boolean depthEnabled = null;
-    private Boolean complexityEnabled = null;
+    private String limitationType = null;
+    private Boolean enabled = null;
 
-    public Boolean getDepthEnabled() {
-        return depthEnabled;
+    public String getLimitationType() {
+        return limitationType;
     }
 
-    public void setDepthEnabled(Boolean depthEnabled) {
-        this.depthEnabled = depthEnabled;
+    public void setLimitationType(String limitationType) {
+        this.limitationType = limitationType;
     }
 
-    public Boolean getComplexityEnabled() {
-        return complexityEnabled;
+    public Boolean getEnabled() {
+        return enabled;
     }
 
-    public void setComplexityEnabled(Boolean complexityEnabled) {
-        this.complexityEnabled = complexityEnabled;
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 }

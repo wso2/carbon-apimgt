@@ -15,32 +15,26 @@
  *  limitations under the License.
  * /
  */
-package org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis;
+package org.wso2.carbon.apimgt.api.model.graphql.queryanalysis;
 
-import java.util.ArrayList;
-import java.util.List;
+public class GraphqlDepthComplexityStatus {
 
-/**
- * This class represents the model for complexity info of a GraphQL API
- */
-public class GraphqlComplexityInfo {
+    private Boolean depthEnabled = null;
+    private Boolean complexityEnabled = null;
 
-    private Integer maxComplexity;
-    private List<CustomComplexityDetails> list = new ArrayList<>();
-
-    public Integer getMaxComplexity() {
-        return maxComplexity;
+    public Boolean getDepthEnabled() {
+        return depthEnabled;
     }
 
-    public void setMaxComplexity(Integer maxComplexity) {
-        this.maxComplexity = maxComplexity;
+    public void setDepthEnabled(Boolean depthEnabled) {
+        this.depthEnabled = depthEnabled;
     }
 
-    public List<CustomComplexityDetails> getList() {
-        return list;
+    public Boolean getComplexityEnabled() {
+        return complexityEnabled;
     }
 
-    public void setList(List<CustomComplexityDetails> list) {
-        this.list = list;
+    public void setComplexityEnabled(Boolean complexityEnabled) {
+        this.complexityEnabled = complexityEnabled;
     }
 }

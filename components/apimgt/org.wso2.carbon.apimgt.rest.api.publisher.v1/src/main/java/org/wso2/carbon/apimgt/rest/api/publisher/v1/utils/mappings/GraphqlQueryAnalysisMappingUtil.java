@@ -17,7 +17,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
-import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.*;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
 import java.util.ArrayList;

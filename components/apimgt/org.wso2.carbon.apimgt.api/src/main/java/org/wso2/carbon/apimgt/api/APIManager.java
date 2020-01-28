@@ -35,10 +35,10 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.Wsdl;
-import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlComplexityInfo;
-import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthComplexityStatus;
-import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlDepthInfo;
-import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlLimitationStatus;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlDepthComplexityStatus;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlDepthInfo;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlLimitationStatus;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.registry.api.Resource;
 

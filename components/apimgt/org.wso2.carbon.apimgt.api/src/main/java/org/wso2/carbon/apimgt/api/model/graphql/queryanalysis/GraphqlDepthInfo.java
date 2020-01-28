@@ -15,26 +15,38 @@
  *  limitations under the License.
  * /
  */
-package org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis;
+package org.wso2.carbon.apimgt.api.model.graphql.queryanalysis;
 
-public class GraphqlLimitationStatus {
+/**
+ * This class represents the model for depth info of a GraphQL API
+ */
+public class GraphqlDepthInfo {
 
-    private String limitationType = null;
-    private Boolean enabled = null;
+    private String uuid = null;
+    private String role = null;
+    private Integer depthValue = null;
 
-    public String getLimitationType() {
-        return limitationType;
+    public String getUuid() {
+        return uuid;
     }
 
-    public void setLimitationType(String limitationType) {
-        this.limitationType = limitationType;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
-    public Boolean getEnabled() {
-        return enabled;
+    public String getRole() {
+        return role;
     }
 
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public Integer getDepthValue() {
+        return depthValue;
+    }
+
+    public void setDepthValue(Integer depthValue) {
+        this.depthValue = depthValue;
     }
 }

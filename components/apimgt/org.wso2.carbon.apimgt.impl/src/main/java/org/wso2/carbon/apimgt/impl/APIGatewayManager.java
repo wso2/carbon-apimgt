@@ -38,7 +38,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.GraphqlPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlPolicyDefinition;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.apimgt.gateway.dto.stub.ResourceData;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;

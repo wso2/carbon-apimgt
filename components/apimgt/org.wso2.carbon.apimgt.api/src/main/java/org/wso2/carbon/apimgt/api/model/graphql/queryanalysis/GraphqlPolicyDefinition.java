@@ -15,7 +15,7 @@
  *  limitations under the License.
  *
  */
-package org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis;
+package org.wso2.carbon.apimgt.api.model.graphql.queryanalysis;
 
 import java.util.ArrayList;
 import java.util.List;

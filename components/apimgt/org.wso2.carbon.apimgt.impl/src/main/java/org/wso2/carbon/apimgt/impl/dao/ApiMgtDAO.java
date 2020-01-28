@@ -61,7 +61,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.graphqlQueryAnalysis.*;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -14260,36 +14260,22 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void addQueryAnalysisInfo(APIIdentifier apiIdentifier) throws APIManagementException {
-        Connection conn = null;
-        ResultSet rs = null;
-        PreparedStatement ps = null;
         String query = SQLConstants.ADD_INITIAL_QUERY_ANALYSIS_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
+        try (Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = conn.prepareStatement(query)) {
             int apiId = getAPIID(apiIdentifier, conn);
-            ps = conn.prepareStatement(query);
             ps.setInt(1, apiId);
             ps.setBoolean(2, false);
             ps.setBoolean(3, false);
             ps.setInt(4, 0);
             ps.executeUpdate();
         } catch (SQLException ex) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException e) {
-                    log.error("Error while rolling back the failed operation", e);
-                }
-            }
             handleException("Error while adding query analysis info: ", ex);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
     }
 
     /**
      * Add complexity details
-     *
      *
      * @param apiIdentifier APIIdentifier object to retrieve API ID
      * @param graphqlComplexityInfo GraphqlComplexityDetails object
