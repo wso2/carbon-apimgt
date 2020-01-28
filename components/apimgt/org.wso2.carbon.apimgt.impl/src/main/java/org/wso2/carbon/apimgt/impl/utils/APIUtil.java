@@ -10061,6 +10061,7 @@ public final class APIUtil {
         }
         return false;
     }
+
     public static String getTenantAdminUserName(String tenantDomain) throws APIManagementException {
         try {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
