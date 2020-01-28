@@ -1998,23 +1998,23 @@ public final class APIUtil {
 
             APIMWSDLReader wsdlReader = new APIMWSDLReader();
             OMElement wsdlContentEle;
-            String wsdRegistryPath;
+            String wsdlRegistryPath;
 
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             if (org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
                     .equalsIgnoreCase(tenantDomain)) {
-                wsdRegistryPath =
+                wsdlRegistryPath =
                         RegistryConstants.PATH_SEPARATOR + "registry" + RegistryConstants.PATH_SEPARATOR + "resource"
                                 + absoluteWSDLResourcePath;
             } else {
-                wsdRegistryPath = "/t/" + tenantDomain + RegistryConstants.PATH_SEPARATOR + "registry"
+                wsdlRegistryPath = "/t/" + tenantDomain + RegistryConstants.PATH_SEPARATOR + "registry"
                         + RegistryConstants.PATH_SEPARATOR + "resource" + absoluteWSDLResourcePath;
             }
 
             Resource wsdlResource = registry.newResource();
             // isWSDL2Document(api.getWsdlUrl()) method only understands http or file system urls.
             // Hence if this is a registry url, should not go in to the following if block
-            if (!api.getWsdlUrl().matches(wsdRegistryPath) && (api.getWsdlUrl().startsWith("http:") || api.getWsdlUrl()
+            if (!api.getWsdlUrl().matches(wsdlRegistryPath) && (api.getWsdlUrl().startsWith("http:") || api.getWsdlUrl()
                     .startsWith("https:") || api.getWsdlUrl().startsWith("file:") || api.getWsdlUrl().startsWith("/t"))) {
                 URL wsdlUrl;
                 try {
@@ -2057,7 +2057,7 @@ public final class APIUtil {
             //set the wsdl resource permlink as the wsdlURL.
             api.setWsdlUrl(getRegistryResourceHTTPPermlink(absoluteWSDLResourcePath));
 
-            return wsdlResourcePath;
+            return wsdlRegistryPath;
 
         } catch (RegistryException e) {
             String msg = "Failed to add WSDL " + api.getWsdlUrl() + " to the registry";
@@ -6193,7 +6193,7 @@ public final class APIUtil {
     public static boolean isValidWSDLURL(String wsdlURL, boolean required) {
         if (wsdlURL != null && !"".equals(wsdlURL)) {
             if (wsdlURL.startsWith("http:") || wsdlURL.startsWith("https:") ||
-                    wsdlURL.startsWith("file:") || (wsdlURL.startsWith("/registry") || wsdlURL.startsWith("/t") && !wsdlURL.endsWith(".zip"))) {
+                    wsdlURL.startsWith("file:") || (wsdlURL.startsWith("/t") && !wsdlURL.endsWith(".zip"))) {
                 return true;
             }
         } else if (!required) {
