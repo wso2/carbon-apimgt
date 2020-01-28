@@ -247,9 +247,6 @@ public class GraphQLSchemaDefinition {
                 JSONObject jsonPolicyDefinition = policyDefinitionToJson(graphqlPolicyDefinition);
                 String base64EncodedPolicyDefinition = Base64.getUrlEncoder().withoutPadding().
                         encodeToString(jsonPolicyDefinition.toJSONString().getBytes(Charset.defaultCharset()));
-                //
-                String temp = jsonPolicyDefinition.toJSONString();
-                //
                 String policyDefinition = "type GraphQLAccessControlPolicy_WSO2 {\n" +
                         base64EncodedPolicyDefinition + ": String\n}\n";
                 policyBuilder.append(policyDefinition);
