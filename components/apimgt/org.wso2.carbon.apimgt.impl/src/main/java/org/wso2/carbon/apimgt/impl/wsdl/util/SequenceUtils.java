@@ -604,7 +604,11 @@ public class SequenceUtils {
 
         for (int i = 0; i < json.length(); i++) {
             Object data = json.get(i);
-            listObject(parent + ",array", data, parameterJsonPathMapping);
+            if (data instanceof org.json.JSONObject) {
+                listObject(parent, data, parameterJsonPathMapping);
+            } else {
+                listObject(parent + ",array", data, parameterJsonPathMapping);
+            }
         }
     }
 
