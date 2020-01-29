@@ -183,7 +183,7 @@ public class RestAPIStoreUtilsTestCase {
     private Set<Scope> getScopes() {
         Set<Scope> scopeSet = new LinkedHashSet<>();
         Scope scope = new Scope();
-        scope.setId(1);
+        scope.setId("1");
         scope.setDescription("");
         scope.setKey("test");
         scope.setName("test");
