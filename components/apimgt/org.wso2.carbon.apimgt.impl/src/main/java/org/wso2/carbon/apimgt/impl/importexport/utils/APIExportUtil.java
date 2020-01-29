@@ -33,6 +33,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
@@ -58,6 +61,8 @@ import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -597,7 +602,7 @@ public class APIExportUtil {
      */
     private static void exportMetaInformation(String archivePath, API apiToReturn, Registry registry,
                                               ExportFormat exportFormat, APIProvider apiProvider)
-            throws APIImportExportException {
+            throws APIImportExportException, APIManagementException {
 
         CommonUtil.createDirectory(archivePath + File.separator + APIImportExportConstants.META_INFO_DIRECTORY);
         //Remove unnecessary data from exported Api
@@ -684,14 +689,17 @@ public class APIExportUtil {
      *
      * @param api API to be exported
      */
-    private static void cleanApiDataToExport(API api) {
+    private static void cleanApiDataToExport(API api) throws APIManagementException {
         // Thumbnail will be set according to the importing environment. Therefore current URL is removed
         api.setThumbnailUrl(null);
         // WSDL file path will be set according to the importing environment. Therefore current path is removed
         api.setWsdlUrl(null);
-        // Secure endpoint password is removed, as it causes security issues. When importing need to add it manually,
-        // if Secure Endpoint is enabled.
-        if (api.getEndpointUTPassword() != null) {
+        // If Secure Endpoint is enabled and "ExposeEndpointPassword" is 'false' in tenant-conf.json in registry,
+        // secure endpoint password is removed, as it causes security issues. Need to add it manually when importing.
+        String tenantDomain = MultitenantUtils
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+        if (api.isEndpointSecured() && api.getEndpointUTPassword() != null && !isExposeEndpointPasswordEnabled(
+                tenantDomain)) {
             api.setEndpointUTPassword(StringUtils.EMPTY);
         }
     }
@@ -843,6 +851,50 @@ public class APIExportUtil {
         }
         return urls;
     }
+
+    /**
+     * This method used to check whether the config for exposing endpoint security password when getting API is enabled
+     * or not in tenant-conf.json in registry.
+     *
+     * @return boolean as config enabled or not
+     * @throws APIManagementException
+     */
+    private static boolean isExposeEndpointPasswordEnabled(String tenantDomainName)
+            throws APIManagementException {
+        org.json.simple.JSONObject apiTenantConfig;
+        try {
+            APIMRegistryServiceImpl apimRegistryService = new APIMRegistryServiceImpl();
+            String content = apimRegistryService.getConfigRegistryResourceContent(tenantDomainName,
+                    APIConstants.API_TENANT_CONF_LOCATION);
+            if (content != null) {
+                JSONParser parser = new JSONParser();
+                apiTenantConfig = (org.json.simple.JSONObject) parser.parse(content);
+                if (apiTenantConfig != null) {
+                    Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_EXPOSE_ENDPOINT_PASSWORD);
+                    if (value != null) {
+                        return Boolean.parseBoolean(value.toString());
+                    }
+                }
+            }
+        } catch (UserStoreException e) {
+            String msg = "UserStoreException thrown when getting API tenant config from registry while reading " +
+                    "ExposeEndpointPassword config";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.registry.core.exceptions.RegistryException e) {
+            String msg = "RegistryException thrown when getting API tenant config from registry while reading " +
+                    "ExposeEndpointPassword config";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (ParseException e) {
+            String msg = "ParseException thrown when parsing API tenant config from registry while reading " +
+                    "ExposeEndpointPassword config";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return false;
+    }
+
 
     /**
      * Get Certificate MetaData and Certificate detail and build JSON list.
