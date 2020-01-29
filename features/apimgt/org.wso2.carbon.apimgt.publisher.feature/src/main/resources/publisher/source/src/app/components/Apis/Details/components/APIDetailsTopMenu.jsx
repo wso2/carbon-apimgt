@@ -6,7 +6,6 @@ import Alert from 'AppComponents/Shared/Alert';
 import { FormattedMessage } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
-import { isRestricted } from 'AppData/AuthManager';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
@@ -106,7 +105,7 @@ const APIDetailsTopMenu = (props) => {
         classes, theme, api, isAPIProduct, imageUpdate,
     } = props;
     const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
-    const isDownlod = ['API'].includes(api.apiType) && !((isRestricted(['apim:api_create', 'apim:api_publish'], api)));
+    const isDownlodable = ['API'].includes(api.apiType);
     const { settings, user } = useAppContext();
     let apiType = 'API';
     if (isAPIProduct) {
@@ -177,9 +176,9 @@ const APIDetailsTopMenu = (props) => {
                 </a>
             )}
             {isAPIProduct ? null : <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />}
-            {(isDownlod) && <VerticalDivider height={70} />}
+            {(isDownlodable) && <VerticalDivider height={70} />}
             <div className={classes.downloadApi}>
-                {(isDownlod) && (
+                {(isDownlodable) && (
                     <a
                         onClick={() => exportAPI(api.name, api.version, api.provider, 'YAML')}
                         onKeyDown='null'
