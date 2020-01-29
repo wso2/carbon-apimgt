@@ -1637,7 +1637,9 @@ public abstract class AbstractAPIManager implements APIManager {
             subscriber.setTenantId(tenantId);
             apiMgtDAO.addSubscriber(subscriber, groupingId);
             //Add a default application once subscriber is added
-            addDefaultApplicationForSubscriber(subscriber);
+            if (!APIUtil.isDefaultApplicationCreationDisabledForTenant(tenantId)){
+                addDefaultApplicationForSubscriber(subscriber);
+            }
         } catch (APIManagementException e) {
             String msg = "Error while adding the subscriber " + subscriber.getName();
             log.error(msg, e);
