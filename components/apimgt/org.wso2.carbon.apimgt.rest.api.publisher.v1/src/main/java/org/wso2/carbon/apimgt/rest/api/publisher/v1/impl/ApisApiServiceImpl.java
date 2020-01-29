@@ -2297,6 +2297,32 @@ public class ApisApiServiceImpl implements ApisApiService {
                 ExternalStoreMappingUtil.fromAPIExternalStoreCollectionToDTO(publishedStores);
         return Response.ok().entity(apiExternalStoreListDTO).build();
     }
+
+    /**
+     * Retrieves the WSDL meta information of the given API. The API must be a SOAP API.
+     *
+     * @param apiId Id of the API
+     * @param messageContext CXF Message Context
+     * @return WSDL meta information of the API
+     * @throws APIManagementException when error occurred while retrieving API WSDL meta info.
+     *  eg: when API doesn't exist, API exists but it is not a SOAP API.
+     */
+    @Override
+    public Response getWSDLInfoOfAPI(String apiId, MessageContext messageContext)
+            throws APIManagementException {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        API api = apiProvider.getLightweightAPIByUUID(apiId, tenantDomain);
+        WSDLInfoDTO wsdlInfoDTO = APIMappingUtil.getWsdlInfoDTO(api);
+        if (wsdlInfoDTO == null) {
+            throw new APIManagementException(
+                    ExceptionCodes.from(ExceptionCodes.NO_WSDL_AVAILABLE_FOR_API,
+                            api.getId().getApiName(), api.getId().getVersion()));
+        } else {
+            return Response.ok().entity(wsdlInfoDTO).build();
+        }
+    }
+
     /**
      * Retrieves API Lifecycle history information
      *
