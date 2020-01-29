@@ -75,6 +75,7 @@ import java.util.Vector;
 
 import static org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants.COMPLEX_TYPE_NODE_NAME;
 import static org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants.SIMPLE_TYPE_NODE_NAME;
+import static org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants.TARGET_NAMESPACE_ATTRIBUTE;
 
 /**
  * Class that reads wsdl soap operations and maps with the types.
@@ -172,7 +173,8 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
                                             boolean isInlineSchema = false;
                                             for (Object aSchema : typeList) {
                                                 if (schemaUrl.equalsIgnoreCase(
-                                                        ((Schema) aSchema).getElement().getAttribute(SOAPToRESTConstants.TARGET_NAMESPACE_ATTRIBUTE))) {
+                                                        ((Schema) aSchema).getElement()
+                                                                .getAttribute(TARGET_NAMESPACE_ATTRIBUTE))) {
                                                     isInlineSchema = true;
                                                     break;
                                                 }
