@@ -132,7 +132,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
         wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
         wsdlReader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
         try {
-            wsdlDefinition = wsdlReader.readWSDL(null, getSecuredParsedDocumentFromURL(url));
+            wsdlDefinition = wsdlReader.readWSDL(url.toString(), getSecuredParsedDocumentFromURL(url));
             if (log.isDebugEnabled()) {
                 log.debug("Successfully initialized an instance of " + this.getClass().getSimpleName()
                         + " with a single WSDL.");
