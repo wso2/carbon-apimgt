@@ -30,7 +30,6 @@ import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
 import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
-import ArrowForwardIosRoundedIcon from '@material-ui/icons/ArrowForwardIosRounded';
 import Tooltip from '@material-ui/core/Tooltip';
 import Button from '@material-ui/core/Button';
 import ApiContext, { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
@@ -428,7 +427,11 @@ export default function CustomizedSteppers() {
                                             />
                                         </Typography>
                                         <Link to={'/apis/' + api.id + '/endpoints'}>
-                                            <LaunchIcon style={{ marginLeft: '5px' }} color='primary' fontSize='small' />
+                                            <LaunchIcon
+                                                style={{ marginLeft: '5px' }}
+                                                color='primary'
+                                                fontSize='small'
+                                            />
                                         </Link>
                                     </Grid>
                                 </Tooltip>
@@ -449,7 +452,11 @@ export default function CustomizedSteppers() {
                                             />
                                         </Typography>
                                         <Link to={'/apis/' + api.id + '/subscriptions'}>
-                                            <LaunchIcon style={{ marginLeft: '5px' }} color='primary' fontSize='small' />
+                                            <LaunchIcon
+                                                style={{ marginLeft: '5px' }}
+                                                color='primary'
+                                                fontSize='small'
+                                            />
                                         </Link>
                                     </Grid>
                                 </Tooltip>
