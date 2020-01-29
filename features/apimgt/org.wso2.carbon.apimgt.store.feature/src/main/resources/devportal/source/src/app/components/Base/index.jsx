@@ -46,6 +46,7 @@ import { app } from 'Settings';
 import AuthManager from '../../data/AuthManager';
 import ConfigManager from '../../data/ConfigManager';
 import EnvironmentMenu from './Header/EnvironmentMenu';
+import LanuageSelector from './Header/LanuageSelector';
 import GlobalNavBar from './Header/GlobalNavbar';
 import Utils from '../../data/Utils';
 import VerticalDivider from '../Shared/VerticalDivider';
@@ -278,6 +279,7 @@ class Layout extends React.Component {
                 footer: {
                     active: footerActive, text: footerText,
                 },
+                languageSwitch: { active: languageSwitchActive },
             },
         } = theme;
         const { openNavBar, openUserMenu, environments } = this.state;
@@ -394,6 +396,7 @@ class Layout extends React.Component {
                                     handleEnvironmentChange={this.handleEnvironmentChange}
                                     id='environmentMenu'
                                 />
+                                {languageSwitchActive && <LanuageSelector />}
                                 {user ? (
                                     <>
                                         <Link to='/settings' id='settingsLink'>
