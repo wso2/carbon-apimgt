@@ -1005,7 +1005,8 @@ public final class APIConstants {
     }
 
     public static final String EXTENSION_HANDLER_POSITION = "ExtensionHandlerPosition";
-    public static final String PER_TENANT_SERVICE_PROVIDER = "PerTenantServiceProvider";
+    public static final String ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION = "EnablePerTenantServiceProviderCreation";
+    public static final String DISABLE_DEFAULT_APPLICATION_CREATION = "DisableDefaultApplicationCreation";
     public static final String GATEWAY_ENV_TYPE_HYBRID = "hybrid";
     public static final String GATEWAY_ENV_TYPE_PRODUCTION = "production";
     public static final String GATEWAY_ENV_TYPE_SANDBOX = "sandbox";

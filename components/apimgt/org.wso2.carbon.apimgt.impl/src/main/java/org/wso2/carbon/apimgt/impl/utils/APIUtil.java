@@ -34,7 +34,6 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -159,7 +158,6 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
-import org.wso2.carbon.governance.registry.extensions.utils.APIUtils;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -10050,8 +10048,8 @@ public final class APIUtil {
 
         int tenantId = getTenantIdFromTenantDomain(tenantDomain);
         JSONObject tenantConfig = getTenantConfig(tenantId);
-        if (tenantConfig.containsKey(APIConstants.PER_TENANT_SERVICE_PROVIDER)) {
-            return (boolean) tenantConfig.get(APIConstants.PER_TENANT_SERVICE_PROVIDER);
+        if (tenantConfig.containsKey(APIConstants.ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION)) {
+            return (boolean) tenantConfig.get(APIConstants.ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION);
         }
         return false;
     }
@@ -10073,5 +10071,20 @@ public final class APIUtil {
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
+    }
+
+    public static boolean isDefaultApplicationCreationDisabledForTenant(int tenantId) {
+
+        boolean state = false;
+        try {
+            JSONObject tenantConfig = getTenantConfig(tenantId);
+            if (tenantConfig.containsKey(APIConstants.DISABLE_DEFAULT_APPLICATION_CREATION)) {
+                state = (boolean) tenantConfig.get(APIConstants.DISABLE_DEFAULT_APPLICATION_CREATION);
+            }
+        } catch (APIManagementException e) {
+            log.error("Error while reading tenant-config.json for tenant " + tenantId, e);
+            state = false;
+        }
+        return state;
     }
 }
