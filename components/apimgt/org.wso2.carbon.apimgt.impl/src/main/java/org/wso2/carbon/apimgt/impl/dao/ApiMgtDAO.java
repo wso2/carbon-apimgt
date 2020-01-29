@@ -6260,17 +6260,17 @@ public class ApiMgtDAO {
                 if (uriTemplate.getScope() != null) {
                     scopePrepStmt.setString(1, APIUtil.getResourceKey(api, uriTemplate));
 
-                    if (uriTemplate.getScope().getId() == 0) {
+                    if (Integer.parseInt(uriTemplate.getScope().getId()) == 0) {
                         String scopeKey = uriTemplate.getScope().getKey();
                         Scope scopeByKey = APIUtil.findScopeByKey(api.getScopes(), scopeKey);
                         if (scopeByKey != null) {
-                            if (scopeByKey.getId() > 0) {
+                            if (Integer.parseInt(scopeByKey.getId()) > 0) {
                                 uriTemplate.getScopes().setId(scopeByKey.getId());
                             }
                         }
                     }
 
-                    scopePrepStmt.setInt(2, uriTemplate.getScope().getId());
+                    scopePrepStmt.setInt(2, Integer.parseInt(uriTemplate.getScope().getId()));
                     scopePrepStmt.setInt(3, APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(api.getId()
                             .getProviderName())));
                     scopePrepStmt.addBatch();
@@ -8973,14 +8973,14 @@ public class ApiMgtDAO {
                         ps.execute();
                         rs = ps.getGeneratedKeys();
                         if (rs.next()) {
-                            uriTemplate.getScope().setId(rs.getInt(1));
+                            uriTemplate.getScope().setId(String.valueOf(rs.getInt(1)));
                         }
 
                         String roles = uriTemplate.getScope().getRoles();
                         //Adding scope bindings
                         List<String> roleList = Lists.newArrayList(Splitter.on(",").trimResults().split(roles));
                         for (String role : roleList) {
-                            ps3.setInt(1, uriTemplate.getScope().getId());
+                            ps3.setInt(1, Integer.parseInt(uriTemplate.getScope().getId()));
                             ps3.setString(2, role);
                             ps3.setString(3, APIConstants.DEFAULT_BINDING_TYPE);
                             ps3.addBatch();
@@ -8988,7 +8988,7 @@ public class ApiMgtDAO {
                         ps3.executeBatch();
 
                         ps2.setInt(1, apiID);
-                        ps2.setInt(2, uriTemplate.getScope().getId());
+                        ps2.setInt(2, Integer.parseInt(uriTemplate.getScope().getId()));
                         ps2.execute();
                         conn.commit();
                     } else if (object instanceof Scope) {
@@ -9005,7 +9005,7 @@ public class ApiMgtDAO {
                         ps.execute();
                         rs = ps.getGeneratedKeys();
                         if (rs.next()) {
-                            scope.setId(rs.getInt(1));
+                            scope.setId(String.valueOf(rs.getInt(1)));
                         }
 
                         String roles = scope.getRoles();
@@ -9018,14 +9018,14 @@ public class ApiMgtDAO {
                         }
 
                         for (String role : roleList) {
-                            ps3.setInt(1, scope.getId());
+                            ps3.setInt(1, Integer.parseInt(scope.getId()));
                             ps3.setString(2, role);
                             ps3.setString(3, APIConstants.DEFAULT_BINDING_TYPE);
                             ps3.addBatch();
                         }
                         ps3.executeBatch();
                         ps2.setInt(1, apiID);
-                        ps2.setInt(2, scope.getId());
+                        ps2.setInt(2, Integer.parseInt(scope.getId()));
                         ps2.execute();
                         conn.commit();
                     }
@@ -9084,7 +9084,7 @@ public class ApiMgtDAO {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
-        HashMap<Integer, Scope> scopeHashMap = new HashMap<>();
+        HashMap<String, Scope> scopeHashMap = new HashMap<>();
         int apiId;
         try {
             conn = APIMgtDBUtil.getConnection();
@@ -9100,7 +9100,7 @@ public class ApiMgtDAO {
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 Scope scope;
-                int scopeId = resultSet.getInt(1);
+                String scopeId = String.valueOf(resultSet.getInt(1));
                 if (scopeHashMap.containsKey(scopeId)) {
                     // scope already exists append roles.
                     scope = scopeHashMap.get(scopeId);
@@ -9128,7 +9128,7 @@ public class ApiMgtDAO {
             throws APIManagementException {
         PreparedStatement ps = null;
         ResultSet rs = null;
-        List<Integer> scopeIds = new ArrayList<Integer>();
+        List<String> scopeIds = new ArrayList<>();
         String scopeEntry = SQLConstants.ADD_SCOPE_ENTRY_SQL;
         try {
             String scopeId = "SCOPE_ID";
@@ -9151,7 +9151,7 @@ public class ApiMgtDAO {
                         ps.execute();
                         rs = ps.getGeneratedKeys();
                         if (rs.next()) {
-                            int scopeIdValue = rs.getInt(1);
+                            String scopeIdValue = String.valueOf(rs.getInt(1));
                             uriTemplate.getScope().setId(scopeIdValue);
                             scopeIds.add(scopeIdValue);
                         }
@@ -9165,7 +9165,7 @@ public class ApiMgtDAO {
                         ps.execute();
                         rs = ps.getGeneratedKeys();
                         if (rs.next()) {
-                            int scopeIdValue = rs.getInt(1);
+                            String scopeIdValue = String.valueOf(rs.getInt(1));
                             scope.setId(scopeIdValue);
                             scopeIds.add(scopeIdValue);
                         }
@@ -9180,15 +9180,15 @@ public class ApiMgtDAO {
         }
     }
 
-    private void addScopeLinks(Connection connection, List<Integer> scopeIds, int apiId) throws APIManagementException {
+    private void addScopeLinks(Connection connection, List<String> scopeIds, int apiId) throws APIManagementException {
         String scopeLink = SQLConstants.ADD_SCOPE_LINK_SQL;
         PreparedStatement ps = null;
         try {
             if (scopeIds != null) {
                 ps = connection.prepareStatement(scopeLink);
-                for (Integer scopeId : scopeIds) {
+                for (String scopeId : scopeIds) {
                     ps.setInt(1, apiId);
-                    ps.setInt(2, scopeId);
+                    ps.setInt(2, Integer.parseInt(scopeId));
                     ps.addBatch();
                 }
                 ps.executeBatch();
@@ -9242,7 +9242,7 @@ public class ApiMgtDAO {
 
                 String apiId = resultSet.getString(1);
                 Scope scope = new Scope();
-                scope.setId(resultSet.getInt(2));
+                scope.setId(String.valueOf(resultSet.getInt(2)));
                 scope.setName(resultSet.getString(3));
                 scope.setDescription(resultSet.getString(4));
 
@@ -9321,7 +9321,7 @@ public class ApiMgtDAO {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
-        HashMap<Integer, Scope> scopeHashMap = new HashMap<>();
+        HashMap<String, Scope> scopeHashMap = new HashMap<>();
         try {
             String sqlQuery = SQLConstants.GET_SCOPES_BY_SCOPE_KEY_SQL;
             conn = APIMgtDBUtil.getConnection();
@@ -9332,7 +9332,7 @@ public class ApiMgtDAO {
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 Scope scope;
-                int scopeId = resultSet.getInt(1);
+                String scopeId = String.valueOf(resultSet.getInt(1));
                 if (scopeHashMap.containsKey(scopeId)) {
                     // scope already exists append roles.
                     scope = scopeHashMap.get(scopeId);
@@ -9367,7 +9367,7 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         List<String> inputScopeList = Arrays.asList(scopeKeys.split(" "));
         StringBuilder placeHolderBuilder = new StringBuilder();
-        HashMap<Integer, Scope> scopeHashMap = new HashMap<>();
+        HashMap<String, Scope> scopeHashMap = new HashMap<>();
         for (int i = 0; i < inputScopeList.size(); i++) {
             placeHolderBuilder.append("?, ");
         }
@@ -9392,7 +9392,7 @@ public class ApiMgtDAO {
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 Scope scope;
-                int scopeId = resultSet.getInt(1);
+                String scopeId = String.valueOf(resultSet.getInt(1));
                 if (scopeHashMap.containsKey(scopeId)) {
                     // scope already exists append roles.
                     scope = scopeHashMap.get(scopeId);
@@ -9569,7 +9569,7 @@ public class ApiMgtDAO {
         PreparedStatement prepStmt = null;
         PreparedStatement deleteOauth2ResourceScopePrepStmt = null;
         PreparedStatement deleteOauth2ScopePrepStmt = null;
-        int scopeId;
+        String scopeId;
         int apiId = -1;
 
         String deleteAPIScopeQuery = SQLConstants.REMOVE_FROM_API_SCOPES_SQL;
@@ -9590,10 +9590,10 @@ public class ApiMgtDAO {
                 for (Scope scope : scopes) {
                     scopeId = scope.getId();
 
-                    deleteOauth2ResourceScopePrepStmt.setInt(1, scopeId);
+                    deleteOauth2ResourceScopePrepStmt.setInt(1, Integer.parseInt(scopeId));
                     deleteOauth2ResourceScopePrepStmt.addBatch();
 
-                    deleteOauth2ScopePrepStmt.setInt(1, scopeId);
+                    deleteOauth2ScopePrepStmt.setInt(1, Integer.parseInt(scopeId));
                     deleteOauth2ScopePrepStmt.addBatch();
                 }
                 deleteOauth2ResourceScopePrepStmt.executeBatch();
@@ -14304,7 +14304,7 @@ public class ApiMgtDAO {
                                     Scope scope = new Scope();
                                     scope.setKey(scopesResult.getString("NAME"));
                                     scope.setDescription(scopesResult.getString("DESCRIPTION"));
-                                    scope.setId(scopesResult.getInt("SCOPE_ID"));
+                                    scope.setId(String.valueOf(scopesResult.getInt("SCOPE_ID")));
                                     scope.setName(scopesResult.getString("DISPLAY_NAME"));
                                     scope.setRoles(scopesResult.getString("SCOPE_BINDING"));
                                     uriTemplate.setScope(scope);
@@ -14464,7 +14464,7 @@ public class ApiMgtDAO {
      * Persist revoked jwt signatures to database.
      *
      * @param jwtSignature signature of jwt token.
-     * @param tenantDomain tenant domain of the jwt subject.
+     * @param tenantId tenant id of the jwt subject.
      * @param expiryTime   expiry time of the token.
      */
     public void addRevokedJWTSignature(String jwtSignature, String type ,
