@@ -625,12 +625,12 @@ public class APIExportUtil {
                     Set<URITemplate> uriTemplates = apiToReturn.getUriTemplates();
                     for (URITemplate uriTemplate : uriTemplates) {
                         if (uriTemplate.getScope() != null) {
-                            uriTemplate.getScope().setId(0);
+                            uriTemplate.getScope().setId("0");
                         }
                     }
                     if (apiToReturn.getScopes() != null) {
                         for (Scope scope : apiToReturn.getScopes()) {
-                            scope.setId(0);
+                            scope.setId("0");
                         }
                     }
                 } else {
