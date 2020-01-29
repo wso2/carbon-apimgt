@@ -345,7 +345,7 @@ public class SequenceGenerator {
                         } else {
                             element = doc.createElementNS(null, parameterTreeNode);
                         }
-                        String xPathOfNode = "";
+                        String xPathOfNode = StringUtils.EMPTY;
                         if (doc.getElementsByTagName(element.getTagName()).getLength() > 0) {
                             xPathOfNode = getXpath(doc.getElementsByTagName(element.getTagName()).item(0));
                             xPathOfNode = xPathOfNode.replaceAll("/+", ".");
