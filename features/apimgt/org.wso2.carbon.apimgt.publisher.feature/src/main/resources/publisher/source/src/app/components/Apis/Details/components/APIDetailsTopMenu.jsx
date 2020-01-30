@@ -81,7 +81,31 @@ const styles = (theme) => ({
     },
 });
 
-/**
+// /**
+//  * The component for advanced endpoint configurations.
+//  * @param {string} name The name of the
+//  * @param {string} version Version of the API
+//  * @param {string} provider Provider of the API
+//  * @param {string} format Weather to recive files in YALM of JSON format
+//  * @returns {zip} Zpi file containing the API directory.
+//  */
+// async function exportAPI(name, version, provider, format) {
+//     try {
+//         const restApi = new API();
+//         const zipFile = await restApi.exportApi(name, version, provider, format);
+//         return Utils.forceDownload(zipFile);
+//     } catch (err) {
+//         Alert.error('Something went wrong while Downloding the API');
+//         return null;
+//     }
+// }
+
+const APIDetailsTopMenu = (props) => {
+    const {
+        classes, theme, api, isAPIProduct, imageUpdate,
+    } = props;
+    const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
+    /**
  * The component for advanced endpoint configurations.
  * @param {string} name The name of the
  * @param {string} version Version of the API
@@ -89,22 +113,22 @@ const styles = (theme) => ({
  * @param {string} format Weather to recive files in YALM of JSON format
  * @returns {zip} Zpi file containing the API directory.
  */
-async function exportAPI(name, version, provider, format) {
-    try {
-        const restApi = new API();
-        const zipFile = await restApi.exportApi(name, version, provider, format);
-        return Utils.forceDownload(zipFile);
-    } catch (err) {
-        Alert.error('Something went wrong while Downloding the API');
-        return null;
+    async function exportAPI() {
+        try {
+            const restApi = new API();
+            const zipFile = await restApi.exportApi(api.name, api.version, api.provider, 'YAML');
+            return Utils.forceDownload(zipFile);
+        } catch (error) {
+            if (error.response) {
+                Alert.error(error.response.body.description);
+            } else {
+                const message = 'Something went wrong while downloding the API';
+                Alert.error(message);
+            }
+            console.error(error);
+            return null;
+        }
     }
-}
-
-const APIDetailsTopMenu = (props) => {
-    const {
-        classes, theme, api, isAPIProduct, imageUpdate,
-    } = props;
-    const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
     const isDownlodable = ['API'].includes(api.apiType);
     const { settings, user } = useAppContext();
     let apiType = 'API';
@@ -175,12 +199,14 @@ const APIDetailsTopMenu = (props) => {
                     </Typography>
                 </a>
             )}
+            {/* Page error banner */}
+            {/* end of Page error banner */}
             {isAPIProduct ? null : <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />}
             {(isDownlodable) && <VerticalDivider height={70} />}
             <div className={classes.downloadApi}>
                 {(isDownlodable) && (
                     <a
-                        onClick={() => exportAPI(api.name, api.version, api.provider, 'YAML')}
+                        onClick={exportAPI}
                         onKeyDown='null'
                         className={classes.downloadApiFlex}
                     >

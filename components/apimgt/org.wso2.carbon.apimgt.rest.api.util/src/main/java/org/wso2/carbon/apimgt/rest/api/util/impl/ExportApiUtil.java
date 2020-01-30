@@ -1,3 +1,20 @@
+/*
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.apimgt.rest.api.util.impl;
 
 import org.apache.commons.lang3.StringUtils;
@@ -7,19 +24,19 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportManager;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.apimgt.impl.importexport.utils.APIExportUtil;
 
 import javax.ws.rs.core.Response;
 import java.io.File;
 
-public class ExportApi {
-    private static final Log log = LogFactory.getLog(ExportApi.class);
+public class ExportApiUtil {
+    private static final Log log = LogFactory.getLog(ExportApiUtil.class);
     private static final String APPLICATION_EXPORT_DIR_PREFIX = "exported-app-archives-";
     private static final String DEFAULT_APPLICATION_EXPORT_DIR = "exported-application";
     private static final String PRODUCTION = "PRODUCTION";
@@ -47,6 +64,8 @@ public class ExportApi {
         APIProvider apiProvider;
         String apiDomain;
         String apiRequesterDomain;
+        File file;
+        APIExportUtil apiExportUtil;
         //If not specified status is preserved by default
         boolean isStatusPreserved = preserveStatus == null || preserveStatus;
 
@@ -79,14 +98,12 @@ public class ExportApi {
                 RestApiUtil.handleResourceNotFoundError(errorMessage, log);
             }
 
-            api = apiProvider.getAPI(apiIdentifier);
-            apiImportExportManager = new APIImportExportManager(apiProvider, userName);
-            File file = apiImportExportManager.exportAPIArchive(api, isStatusPreserved, exportFormat);
+            file = APIExportUtil.exprotApi(apiProvider, apiIdentifier, userName, exportFormat, preserveStatus);
             return Response.ok(file)
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + file.getName() + "\"")
                     .build();
-        } catch (APIManagementException | APIImportExportException e) {
+        } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while exporting " + RestApiConstants.RESOURCE_API, e, log);
         }
         return null;

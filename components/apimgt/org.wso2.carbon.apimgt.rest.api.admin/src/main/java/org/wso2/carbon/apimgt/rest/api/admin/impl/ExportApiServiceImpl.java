@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.rest.api.admin.ExportApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.FileBasedApplicationImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.impl.ExportApi;
+import org.wso2.carbon.apimgt.rest.api.util.impl.ExportApiUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -63,7 +63,7 @@ public class ExportApiServiceImpl extends ExportApiService {
     @Override
     public Response exportApiGet(String name, String version, String providerName, String format,
                                  Boolean preserveStatus) {
-        ExportApi exportApi=new ExportApi();
+        ExportApiUtil exportApi=new ExportApiUtil();
         return exportApi.exportApiGet(name,version,providerName,format,preserveStatus);
     }
 

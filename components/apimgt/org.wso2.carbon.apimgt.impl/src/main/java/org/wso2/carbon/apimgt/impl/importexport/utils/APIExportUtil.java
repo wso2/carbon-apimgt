@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.CertificateDetail;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportManager;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Collection;
@@ -892,5 +893,28 @@ public class APIExportUtil {
             }
         });
         return certificateDetails;
+    }
+    /**
+     * Exports an API from API Manager for a given API ID. Meta information, API icon, documentation, WSDL
+     * and sequences are exported. This service generates a zipped archive which contains all the above mentioned
+     * resources for a given API.
+     *
+     * @param preserveStatus Preserve API status on export
+     * @return Zipped file containing exported API
+     */
+
+    public static File exprotApi (APIProvider apiProvider, APIIdentifier apiIdentifier, String userName, ExportFormat exportFormat, Boolean preserveStatus) {
+        API api;
+        APIImportExportManager apiImportExportManager;
+        boolean isStatusPreserved = preserveStatus == null || preserveStatus;
+        try {
+            api = apiProvider.getAPI(apiIdentifier);
+            apiImportExportManager = new APIImportExportManager(apiProvider, userName);
+            File files = apiImportExportManager.exportAPIArchive(api, isStatusPreserved, exportFormat);
+            return files;
+        } catch (APIImportExportException | APIManagementException e) {
+            log.error("Error while exporting te API");
+            return null;
+        }
     }
 }
