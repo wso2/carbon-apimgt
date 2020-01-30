@@ -6452,6 +6452,7 @@ paths:
       description: |
         This operation can be used to export the details of a particular API as a zip file.
       parameters:
+        -
         - name: name
           in: query
           description: |

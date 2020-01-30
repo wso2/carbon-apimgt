@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
-import org.wso2.carbon.apimgt.rest.api.util.impl.ExportApi;
+import org.wso2.carbon.apimgt.rest.api.util.impl.ExportApiUtil;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import javax.ws.rs.core.Response;
@@ -23,7 +23,7 @@ public class ExportApiServiceImpl implements ExportApiService {
      */
 
     public Response exportApiGet(String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException {
-        ExportApi exportApi = new ExportApi();
-        return exportApi.exportApiGet(name, version, providerName, format, preserveStatus);
+        ExportApiUtil exportApiUtil = new ExportApiUtil();
+        return exportApiUtil.exportApiGet(name, version, providerName, format, preserveStatus);
     }
 }
