@@ -22,15 +22,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportManager;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.utils.APIExportUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.apimgt.impl.importexport.utils.APIExportUtil;
 
 import javax.ws.rs.core.Response;
 import java.io.File;
@@ -55,17 +54,14 @@ public class ExportApiUtil {
      * @return Zipped file containing exported API
      */
 
-    public Response exportApiGet(String name, String version, String providerName, String format, Boolean preserveStatus) {
+    public Response exportApiByParams(String name, String version, String providerName, String format, Boolean preserveStatus) {
         ExportFormat exportFormat;
-        API api;
-        APIImportExportManager apiImportExportManager;
         String userName;
         APIIdentifier apiIdentifier;
         APIProvider apiProvider;
         String apiDomain;
         String apiRequesterDomain;
         File file;
-        APIExportUtil apiExportUtil;
         //If not specified status is preserved by default
         boolean isStatusPreserved = preserveStatus == null || preserveStatus;
 
@@ -98,14 +94,33 @@ public class ExportApiUtil {
                 RestApiUtil.handleResourceNotFoundError(errorMessage, log);
             }
 
-            file = APIExportUtil.exprotApi(apiProvider, apiIdentifier, userName, exportFormat, preserveStatus);
+            file = APIExportUtil.exportApi(apiProvider, apiIdentifier, userName, exportFormat, preserveStatus);
             return Response.ok(file)
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + file.getName() + "\"")
                     .build();
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | APIImportExportException e) {
             RestApiUtil.handleInternalServerError("Error while exporting " + RestApiConstants.RESOURCE_API, e, log);
         }
+        return null;
+    }
+    public Response exportApiById(APIIdentifier apiIdentifier ,Boolean preserveStatus) {
+        ExportFormat exportFormat;
+        APIProvider apiProvider;
+        String userName;
+        File file;
+        try {
+            exportFormat=ExportFormat.YAML;
+            apiProvider = RestApiUtil.getLoggedInUserProvider();
+            userName = RestApiUtil.getLoggedInUsername();
+            file = APIExportUtil.exportApi(apiProvider, apiIdentifier ,userName,exportFormat,preserveStatus);
+            return Response.ok(file)
+                    .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
+                            + file.getName() + "\"")
+                    .build();
+        } catch (APIManagementException | APIImportExportException e) {
+        RestApiUtil.handleInternalServerError("Error while exporting " + RestApiConstants.RESOURCE_API, e, log);
+    }
         return null;
     }
 }

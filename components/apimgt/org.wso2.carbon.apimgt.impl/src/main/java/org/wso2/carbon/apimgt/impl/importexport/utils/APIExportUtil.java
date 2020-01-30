@@ -764,7 +764,7 @@ public class APIExportUtil {
      * 
      * @param api          API to be exported
      * @param tenantId     tenant id of the user
-     * @param apiProvider  api Provider
+     * @param provider  api Provider
      * @param exportFormat Export format of file
      * @throws APIImportExportException
      */
@@ -903,18 +903,13 @@ public class APIExportUtil {
      * @return Zipped file containing exported API
      */
 
-    public static File exprotApi (APIProvider apiProvider, APIIdentifier apiIdentifier, String userName, ExportFormat exportFormat, Boolean preserveStatus) {
+    public static File exportApi (APIProvider apiProvider, APIIdentifier apiIdentifier, String userName, ExportFormat exportFormat, Boolean preserveStatus) throws APIImportExportException, APIManagementException {
         API api;
         APIImportExportManager apiImportExportManager;
         boolean isStatusPreserved = preserveStatus == null || preserveStatus;
-        try {
-            api = apiProvider.getAPI(apiIdentifier);
-            apiImportExportManager = new APIImportExportManager(apiProvider, userName);
-            File files = apiImportExportManager.exportAPIArchive(api, isStatusPreserved, exportFormat);
-            return files;
-        } catch (APIImportExportException | APIManagementException e) {
-            log.error("Error while exporting te API");
-            return null;
-        }
+        api = apiProvider.getAPI(apiIdentifier);
+        apiImportExportManager = new APIImportExportManager(apiProvider, userName);
+        return apiImportExportManager.exportAPIArchive(api, isStatusPreserved, exportFormat);
     }
+
 }

@@ -92,6 +92,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.util.impl.ExportApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
@@ -3683,6 +3684,21 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    @Override
+    public Response apisExportGet(String apiId, String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException {
+        if(apiId == null) {
+            ExportApiUtil exportApiUtil = new ExportApiUtil();
+            return exportApiUtil.exportApiByParams(name, version, providerName, format, preserveStatus);
+        }
+        else {
+            // To Do: add check wether api is available under the uuid
+            ExportApiUtil exportApiUtil =new ExportApiUtil();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            return exportApiUtil.exportApiById(apiIdentifier,preserveStatus);
+        }
     }
 
     /**

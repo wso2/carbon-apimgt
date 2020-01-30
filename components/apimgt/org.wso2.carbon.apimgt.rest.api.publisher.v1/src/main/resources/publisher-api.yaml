@@ -6403,7 +6403,7 @@ paths:
   ######################################################
   # Export Resource API
   ######################################################
-  '/export/api':
+  'apis/export':
     #--------------------------------------------------------
     # Get an API as a Zip File
     #--------------------------------------------------------
@@ -6423,24 +6423,28 @@ paths:
       description: |
         This operation can be used to export the details of a particular API as a zip file.
       parameters:
-        -
+        - in: query
+          name: apiId
+          required: false
+          type: string
+          description: UUID of the API
         - name: name
           in: query
           description: |
             API Name
-          required: true
+          required: false
           type: string
         - name: version
           in: query
           description: |
             Version of the API
-          required: true
+          required: false
           type: string
         - name: providerName
           in: query
           description: |
             Provider name of the API
-          required: true
+          required: false
           type: string
         - name: format
           in: query
@@ -6450,7 +6454,7 @@ paths:
           enum:
             - JSON
             - YAML
-          required: true
+          required: false
         - name: preserveStatus
           in: query
           description: |
@@ -6458,7 +6462,7 @@ paths:
           required: false
           type: boolean
       tags:
-        - API (Individual)
+        - APIs (Individual)
       responses:
         200:
           description: |
