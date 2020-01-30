@@ -3125,6 +3125,51 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ################################################################
+  # The WSDL meta info resource of "APIs" resource APIs
+  ################################################################
+
+  /apis/{apiId}/wsdl-info:
+    #-----------------------------------------------------
+    # Retrieve the API's WSDL
+    #-----------------------------------------------------
+    get:
+      produces:
+        - application/json
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      operationId: getWSDLInfoOfAPI
+      summary: Get WSDL definition
+      description: |
+        This operation can be used to retrieve the WSDL meta information of an API. It states whether the API is a SOAP
+        API. If the API is a SOAP API, it states whether it has a single WSDL or a WSDL archive.
+      x-examples:
+        $ref: docs/examples/apis/wsdl/apiId_wsdl_info_get.yaml
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - APIs
+      responses:
+        200:
+          description: |
+            OK.
+            Requested WSDL meta information of the API is returned
+          schema:
+            $ref: '#/definitions/WSDLInfo'
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist or the API is not a SOAP API.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
 ################################################################
 # The WSDL resource of "Individual API" resource APIs
 ################################################################
@@ -3209,7 +3254,7 @@ paths:
           name: file
           description: WSDL file or archive to upload
           type: file
-          required: true
+          required: false
         - in: formData
           name: url
           description: WSDL Definition url
@@ -6940,14 +6985,7 @@ definitions:
         type: string
         example: CREATED
       wsdlInfo:
-        description: WSDL information of the API. This is only available if the API is a SOAP API.
-        properties:
-          type:
-            type: string
-            description: Indicates whether the WSDL is a single WSDL or an archive in ZIP format
-            enum:
-              - WSDL
-              - ZIP
+        $ref: '#/definitions/WSDLInfo'
       wsdlUrl:
         type: string
         example: /apimgt/applicationdata/wsdls/admin--soap1.wsdl
@@ -9133,6 +9171,15 @@ definitions:
       baseUrl:
         type: string
 
+  WSDLInfo:
+    title: WSDL information of the API. This is only available if the API is a SOAP API.
+    properties:
+      type:
+        type: string
+        description: Indicates whether the WSDL is a single WSDL or an archive in ZIP format
+        enum:
+          - WSDL
+          - ZIP
 
 #-----------------------------------------------------
 # The pagination resource

@@ -59,9 +59,9 @@
     var SystemApplicationDAO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
     var systemApplicationDAO = new SystemApplicationDAO();
     var clientId;
-    systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME);
+    systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME, SUPER_TENANT_DOMAIN);
     if (systemApplicationDTO === null) {
-        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD);
+        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD, SUPER_TENANT_DOMAIN);
     }
     var lock = SystemApplicationDAO.getLock();
     if (systemApplicationDTO !== null) {
@@ -69,9 +69,9 @@
     } else {
         try {
             lock.acquire();
-            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME);
+            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME, SUPER_TENANT_DOMAIN);
             if (systemApplicationDTO === null) {
-                systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD);
+                systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD, SUPER_TENANT_DOMAIN);
             }
             if (systemApplicationDTO == null) {
                 var dcrRequestData = {
@@ -90,7 +90,7 @@
                 var clientSecret = result.data.clientSecret;
 
                 var addApplicationKey = systemApplicationDAO
-                                                .addApplicationKey(PUBLISHER_CLIENT_APP_NAME, clientId, clientSecret);
+                                                .addApplicationKey(PUBLISHER_CLIENT_APP_NAME, clientId, clientSecret, SUPER_TENANT_DOMAIN);
                 if (!addApplicationKey) {
                     log.error("Error while persisting application information in system application DB table!!");
                     log.error("Client ID = " + clientId);

@@ -67,6 +67,7 @@ import Comments from './Comments/Comments';
 import Scope from './Scopes';
 import Security from './Security';
 import APIDefinition from './APIDefinition/APIDefinition';
+import WSDL from './APIDefinition/WSDL';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
 import BusinessInformation from './BusinessInformation/BusinessInformation';
 import Properties from './Properties/Properties';
@@ -283,11 +284,27 @@ class Details extends Component {
             });
     }
 
+    /**
+     *
+     * @returns
+     * @memberof Details
+     */
     getLeftMenuItemForDefinitionByType(apiType) {
         const { isAPIProduct } = this.state;
         const { intl, match } = this.props;
         const uuid = match.params.apiUUID || match.params.api_uuid || match.params.apiProdUUID;
         const pathPrefix = '/' + (isAPIProduct ? 'api-products' : 'apis') + '/' + uuid + '/';
+        const apiDefinitionMenuItem = (
+            <LeftMenuItem
+                text={intl.formatMessage({
+                    id: 'Apis.Details.index.api.definition2',
+                    defaultMessage: 'API definition',
+                })}
+                route='api definition'
+                to={pathPrefix + 'api definition'}
+                Icon={<CodeIcon />}
+            />
+        );
 
         switch (apiType) {
             case 'GRAPHQL':
@@ -306,18 +323,25 @@ class Details extends Component {
                 );
             case 'WS':
                 return '';
+            case 'SOAP':
+                return (
+                    <>
+                        {apiDefinitionMenuItem}
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.wsdl.definition',
+                                defaultMessage: 'WSDL Definition',
+                            })}
+                            route='wsdl'
+                            to={pathPrefix + 'wsdl'}
+                            Icon={<CodeIcon />}
+                        />
+                    </>
+                );
             default:
                 return (
                     <>
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.api.definition2',
-                                defaultMessage: 'API definition',
-                            })}
-                            route='api definition'
-                            to={pathPrefix + 'api definition'}
-                            Icon={<CodeIcon />}
-                        />
+                        {apiDefinitionMenuItem}
                     </>
                 );
         }
@@ -630,6 +654,10 @@ class Details extends Component {
                                     component={() => <APIDefinition api={api} />}
                                 />
                                 <Route
+                                    path={Details.subPaths.WSDL}
+                                    component={() => <WSDL api={api} />}
+                                />
+                                <Route
                                     path={Details.subPaths.API_DEFINITION_PRODUCT}
                                     component={() => <APIDefinition api={api} />}
                                 />
@@ -738,6 +766,7 @@ Details.subPaths = {
     OVERVIEW: '/apis/:api_uuid/overview',
     OVERVIEW_PRODUCT: '/api-products/:apiprod_uuid/overview',
     API_DEFINITION: '/apis/:api_uuid/api definition',
+    WSDL: '/apis/:api_uuid/wsdl',
     API_DEFINITION_PRODUCT: '/api-products/:apiprod_uuid/api definition',
     SCHEMA_DEFINITION: '/apis/:api_uuid/schema definition',
     LIFE_CYCLE: '/apis/:api_uuid/lifecycle',

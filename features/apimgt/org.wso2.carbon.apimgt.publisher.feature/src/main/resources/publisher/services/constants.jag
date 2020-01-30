@@ -29,4 +29,5 @@ var LOGOUT_CALLBACK_URL_SUFFIX = "/services/auth/callback/logout"
 
 var PUBLISHER_CLIENT_APP_NAME_OLD = "admin_publisher";
 var PUBLISHER_CLIENT_APP_NAME = "apim_publisher";
+var SUPER_TENANT_DOMAIN = "carbon.super";
 %>

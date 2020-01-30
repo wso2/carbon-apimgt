@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.6.20-SNAPSHOT</version>
+        <version>6.6.26-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -145,18 +145,8 @@
                         </goals>
                         <configuration>
                             <outputDirectory>src/main/resources</outputDirectory>
+                            <overwrite>true</overwrite>
                             <resources>
-                                <resource>
-                                    <directory>resources</directory>
-                                    <includes>
-                                        <include>conf/api-manager.xml</include>
-                                        <include>conf/master-datasources.xml</include>
-                                        <include>conf/WSO2AM_DB.h2.db</include>
-                                        <include>**/*.sql</include>
-                                        <include>p2.inf</include>
-                                        <include>build.properties</include>
-                                    </includes>
-                                </resource>
                                 <resource>
                                     <directory>
                                         ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/resources

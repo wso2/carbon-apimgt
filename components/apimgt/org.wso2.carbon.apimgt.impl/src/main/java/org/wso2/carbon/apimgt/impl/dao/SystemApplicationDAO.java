@@ -43,7 +43,6 @@ public class SystemApplicationDAO {
 
     private static final Logger log = LoggerFactory.getLogger(SystemApplicationDAO.class);
     private static final String SYSTEM_APP_TABLE_NAME = "AM_SYSTEM_APPS";
-    private static boolean initialAutoCommit = false;
     private static Semaphore semaphore = new Semaphore(1);
 
     /**
@@ -95,23 +94,24 @@ public class SystemApplicationDAO {
      * @return boolean
      * @throws APIMgtDAOException
      */
-    public boolean addApplicationKey(String appName, String consumerKey, String consumerSecret)
+    public boolean addApplicationKey(String appName, String consumerKey, String consumerSecret,String tenantDomain)
             throws APIMgtDAOException {
         boolean result = false;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
+
         String addCertQuery = SQLConstants.SystemApplicationConstants.INSERT_SYSTEM_APPLICATION;
 
         try {
             connection = APIMgtDBUtil.getConnection();
-            initialAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
 
             preparedStatement = connection.prepareStatement(addCertQuery);
             preparedStatement.setString(1, appName);
             preparedStatement.setString(2, consumerKey);
             preparedStatement.setString(3, consumerSecret);
-            preparedStatement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()),
+            preparedStatement.setString(4, tenantDomain);
+            preparedStatement.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()),
                     Calendar.getInstance(TimeZone.getTimeZone("UTC")));
             result = preparedStatement.executeUpdate() >= 1;
             connection.commit();
@@ -123,7 +123,6 @@ public class SystemApplicationDAO {
             }
             handleException("Error while persisting client credentials to SYSTEM_APPS table ", e);
         } finally {
-            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
         }
         return result;
@@ -136,7 +135,8 @@ public class SystemApplicationDAO {
      * @return SystemApplicationDTO which hold the retrieved client credentials
      * @throws APIMgtDAOException
      */
-    public SystemApplicationDTO getClientCredentialsForApplication(String appName) throws APIMgtDAOException {
+    public SystemApplicationDTO getClientCredentialsForApplication(String appName, String tenantDomain)
+            throws APIMgtDAOException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -145,11 +145,11 @@ public class SystemApplicationDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
-            initialAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
             connection.commit();
             preparedStatement = connection.prepareStatement(getCredentialsQuery);
             preparedStatement.setString(1, appName);
+            preparedStatement.setString(2, tenantDomain);
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
@@ -163,7 +163,6 @@ public class SystemApplicationDAO {
             }
             handleException("Error while retrieving client credentials for application: " + appName, e);
         } finally {
-            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
         }
         return systemApplicationDTO;
@@ -176,7 +175,7 @@ public class SystemApplicationDAO {
      * @return boolean
      * @throws APIMgtDAOException
      */
-    public boolean removeConsumerKeyForApplication(String appName) throws APIMgtDAOException {
+    public boolean removeConsumerKeyForApplication(String appName, String tenantDomain) throws APIMgtDAOException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         boolean result = false;
@@ -184,17 +183,16 @@ public class SystemApplicationDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
-            initialAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(deleteApplicationKeyQuery);
             preparedStatement.setString(1, appName);
+            preparedStatement.setString(2, tenantDomain);
             result = preparedStatement.executeUpdate() == 1;
             connection.commit();
         } catch (SQLException e) {
             handleConnectionRollBack(connection);
             handleException("Error while deleting System Application. ", e);
         } finally {
-            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             APIMgtDBUtil.closeStatement(preparedStatement);
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
         }
@@ -208,7 +206,8 @@ public class SystemApplicationDAO {
      * @return boolean
      * @throws APIMgtDAOException
      */
-    public boolean isClientCredentialsExistForApplication(String appName) throws APIMgtDAOException {
+    public boolean isClientCredentialsExistForApplication(String appName, String tenantDomain)
+            throws APIMgtDAOException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         boolean result = false;
@@ -216,17 +215,16 @@ public class SystemApplicationDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
-            initialAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(checkClientCredentialsExistsQuery);
             preparedStatement.setString(1, appName);
+            preparedStatement.setString(2, tenantDomain);
             result = preparedStatement.executeUpdate() == 1;
             connection.commit();
         } catch (SQLException e) {
             handleConnectionRollBack(connection);
             handleException("Error while checking for System Application. ", e);
         } finally {
-            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             APIMgtDBUtil.closeStatement(preparedStatement);
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
         }

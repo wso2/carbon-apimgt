@@ -158,19 +158,19 @@
       },
       {
         "Name": "apim_analytics:product_manager",
-        "Roles": "Internal/creator,Internal/publisher,Internal/subscriber"
+        "Roles": "admin,Internal/creator,Internal/publisher,Internal/subscriber"
       },
       {
         "Name": "apim_analytics:api_developer",
-        "Roles": "Internal/creator,Internal/publisher"
+        "Roles": "admin,Internal/creator,Internal/publisher"
       },
       {
         "Name": "apim_analytics:app_developer",
-        "Roles": "Internal/subscriber"
+        "Roles": "admin,Internal/subscriber"
       },
       {
         "Name": "apim_analytics:devops_engineer",
-        "Roles": "Internal/creator,Internal/publisher,Internal/subscriber"
+        "Roles": "admin,Internal/creator,Internal/publisher,Internal/subscriber"
       },
       {
         "Name": "apim_analytics:analytics_viewer",

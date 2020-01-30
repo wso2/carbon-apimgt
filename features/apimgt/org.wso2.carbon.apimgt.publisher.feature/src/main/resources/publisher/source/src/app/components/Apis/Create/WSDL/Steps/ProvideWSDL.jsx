@@ -21,7 +21,6 @@ import Radio from '@material-ui/core/Radio';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import RadioGroup from '@material-ui/core/RadioGroup';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
@@ -67,6 +66,7 @@ export default function ProvideWSDL(props) {
     const classes = useStyles();
     const [isError, setValidity] = useState(); // If valid value is `null` else an error object will be there
     const [isValidating, setIsValidating] = useState(false);
+    const isCreateMode = apiInputs.mode === 'create';
 
     /**
      * Handles WSDL validation response and returns the state.
@@ -271,59 +271,56 @@ export default function ProvideWSDL(props) {
     return (
         <>
             <Grid container spacing={5}>
-                <Grid item md={12}>
-                    <FormControl component='fieldset'>
-                        <FormLabel component='legend'>
-                            <>
-                                <sup className={classes.mandatoryStar}>*</sup>
-                                {' '}
-                                <FormattedMessage
-                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.implementation.type'
-                                    defaultMessage='Implementation Type'
-                                />
-                            </>
-                        </FormLabel>
-                        <RadioGroup
-                            aria-label='Implementation type'
-                            value={apiInputs.type}
-                            onChange={
-                                (event) => {
-                                    inputsDispatcher({ action: 'type', value: event.target.value });
-                                    inputsDispatcher({ action: 'isFormValid', value: false });
-                                    inputsDispatcher({ action: 'inputValue', value: null });
-                                    inputsDispatcher({ action: 'inputType', value: 'url' });
+                {isCreateMode
+                && (
+                    <Grid item md={12}>
+                        <FormControl component='fieldset'>
+                            <FormLabel component='legend'>
+                                <>
+                                    <sup className={classes.mandatoryStar}>*</sup>
+                                    {' '}
+                                    <FormattedMessage
+                                        id='Apis.Create.WSDL.Steps.ProvideWSDL.implementation.type'
+                                        defaultMessage='Implementation Type'
+                                    />
+                                </>
+                            </FormLabel>
+                            <RadioGroup
+                                aria-label='Implementation type'
+                                value={apiInputs.type ? apiInputs.type : 'SOAP'}
+                                onChange={
+                                    (event) => {
+                                        inputsDispatcher({ action: 'type', value: event.target.value });
+                                        inputsDispatcher({ action: 'isFormValid', value: false });
+                                        inputsDispatcher({ action: 'inputValue', value: null });
+                                        inputsDispatcher({ action: 'inputType', value: 'url' });
+                                    }
                                 }
-                            }
-                        >
-                            <FormControlLabel
-                                value='SOAP'
-                                control={<Radio color='primary' />}
-                                label={(
-                                    <FormattedMessage
-                                        id='Apis.Create.WSDL.Steps.ProvideWSDL.passthrough.label'
-                                        defaultMessage='Pass Through'
-                                    />
-                                )}
-                            />
-                            <FormControlLabel
-                                value='SOAPTOREST'
-                                control={<Radio color='primary' />}
-                                label={(
-                                    <FormattedMessage
-                                        id='Apis.Create.WSDL.Steps.ProvideWSDL.SOAPtoREST.label'
-                                        defaultMessage='Generate REST APIs'
-                                    />
-                                )}
-                            />
-                        </RadioGroup>
-                        <FormHelperText>
-                            <sup>*</sup>
-                            <b>Generate REST APIs</b>
-                            {' '}
-option is only available for WSDL URL input type
-                        </FormHelperText>
-                    </FormControl>
-                </Grid>
+                            >
+                                <FormControlLabel
+                                    value='SOAP'
+                                    control={<Radio color='primary' />}
+                                    label={(
+                                        <FormattedMessage
+                                            id='Apis.Create.WSDL.Steps.ProvideWSDL.passthrough.label'
+                                            defaultMessage='Pass Through'
+                                        />
+                                    )}
+                                />
+                                <FormControlLabel
+                                    value='SOAPTOREST'
+                                    control={<Radio color='primary' />}
+                                    label={(
+                                        <FormattedMessage
+                                            id='Apis.Create.WSDL.Steps.ProvideWSDL.SOAPtoREST.label'
+                                            defaultMessage='Generate REST APIs'
+                                        />
+                                    )}
+                                />
+                            </RadioGroup>
+                        </FormControl>
+                    </Grid>
+                )}
                 <Grid item md={12}>
                     <FormControl component='fieldset'>
                         <FormLabel component='legend'>
@@ -420,6 +417,7 @@ ProvideWSDL.propTypes = {
     apiInputs: PropTypes.shape({
         type: PropTypes.string,
         inputType: PropTypes.string,
+        mode: PropTypes.string,
     }).isRequired,
     inputsDispatcher: PropTypes.func.isRequired,
     onValidate: PropTypes.func,
