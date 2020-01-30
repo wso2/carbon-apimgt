@@ -81,24 +81,6 @@ const styles = (theme) => ({
     },
 });
 
-// /**
-//  * The component for advanced endpoint configurations.
-//  * @param {string} name The name of the
-//  * @param {string} version Version of the API
-//  * @param {string} provider Provider of the API
-//  * @param {string} format Weather to recive files in YALM of JSON format
-//  * @returns {zip} Zpi file containing the API directory.
-//  */
-// async function exportAPI(name, version, provider, format) {
-//     try {
-//         const restApi = new API();
-//         const zipFile = await restApi.exportApi(name, version, provider, format);
-//         return Utils.forceDownload(zipFile);
-//     } catch (err) {
-//         Alert.error('Something went wrong while Downloding the API');
-//         return null;
-//     }
-// }
 
 const APIDetailsTopMenu = (props) => {
     const {

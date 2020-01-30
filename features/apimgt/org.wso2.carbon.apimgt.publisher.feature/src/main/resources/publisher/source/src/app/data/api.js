@@ -190,7 +190,7 @@ class API extends Resource {
      */
     exportApi(name, version, provider, format) {
         const apiZip = this.client.then((client) => {
-            return client.apis['API (Individual)'].get_export_api({
+            return client.apis['APIs (Individual)'].get_apis_export({
                 name:name,
                 version:version,
                 providerName:provider,
