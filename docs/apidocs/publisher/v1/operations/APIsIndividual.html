@@ -1,8 +1,8 @@
 <div class="main-content">
-    <h1><a name="API (Individual)"></a>API (Individual)</h1>
+    <h1><a name="APIs (Individual)"></a>APIs (Individual)</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="exportApiGet"></a>Export an API</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1/export/api</code>
+            <h4 class="operation-heading"><a name="apisExportGet"></a>Export an API</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1apis/export</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to export the details of a particular API as a zip file.
@@ -43,10 +43,37 @@
                             
                         </td>
                         <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">UUID of the API</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
                             <p>name</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td>
@@ -73,8 +100,8 @@
                         <td class="param-name">
                             <p>version</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td>
@@ -101,8 +128,8 @@
                         <td class="param-name">
                             <p>providerName</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td>
@@ -129,8 +156,8 @@
                         <td class="param-name">
                             <p>format</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td>

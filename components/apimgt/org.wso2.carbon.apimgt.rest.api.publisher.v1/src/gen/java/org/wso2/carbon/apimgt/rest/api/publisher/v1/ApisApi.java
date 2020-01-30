@@ -835,6 +835,24 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @GET
+    @Path("apis/export")
+    @Consumes({ "application/json" })
+    @Produces({ "application/zip" })
+    @ApiOperation(value = "Export an API", notes = "This operation can be used to export the details of a particular API as a zip file. ", response = File.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "APIs (Individual)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Export Successful. ", response = File.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error. Error in exporting API. ", response = ErrorDTO.class) })
+    public Response apisExportGet( @ApiParam(value = "UUID of the API")  @QueryParam("apiId") String apiId,  @ApiParam(value = "API Name ")  @QueryParam("name") String name,  @ApiParam(value = "Version of the API ")  @QueryParam("version") String version,  @ApiParam(value = "Provider name of the API ")  @QueryParam("providerName") String providerName,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format,  @ApiParam(value = "Preserve API Status on export ")  @QueryParam("preserveStatus") Boolean preserveStatus) throws APIManagementException{
+        return delegate.apisExportGet(apiId, name, version, providerName, format, preserveStatus, securityContext);
+    }
+
+    @GET
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
