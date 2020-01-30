@@ -19,23 +19,16 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
-//import io.swagger.inflector.examples.ExampleBuilder;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import io.swagger.models.Contact;
-import io.swagger.models.HttpMethod;
-import io.swagger.models.Info;
-import io.swagger.models.Operation;
-import io.swagger.models.Path;
-import io.swagger.models.RefModel;
-import io.swagger.models.RefPath;
-import io.swagger.models.RefResponse;
-import io.swagger.models.Response;
-import io.swagger.models.Scheme;
-import io.swagger.models.SecurityRequirement;
-import io.swagger.models.Swagger;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import io.swagger.inflector.examples.ExampleBuilder;
+import io.swagger.inflector.examples.models.Example;
+import io.swagger.inflector.processors.JsonNodeExampleSerializer;
+import io.swagger.models.*;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.parameters.PathParameter;
@@ -43,13 +36,13 @@ import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -63,17 +56,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Models API definition using OAS (swagger 2.0) parser
@@ -85,13 +68,51 @@ public class OAS2Parser extends APIDefinition {
 
 
     @Override
-    public String genExample(String apiDefinition) {
+    public String generateExample(String swaggerDef) {
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(swaggerDef);
+        Swagger swagger = parseAttemptForV2.getSwagger();
+        for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
+            String path = entry.getKey();
+            Map<String, Model> definitions = swagger.getDefinitions();
+                List<Operation> operations = swagger.getPaths().get(path).getOperations();
+                for (Operation op : operations) {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    int finalResponseEntry = 200;
+                    stringBuilder.append("########## Generated Code (Do not Modify) ##########\n");
+                    for (String responseEntry : op.getResponses().keySet()) {
+                        if(op.getResponses().get(responseEntry).getResponseSchema()!=null){
+                            Model model = op.getResponses().get(responseEntry).getResponseSchema();
+                            String example = getJsonExample("Model", model, definitions, new HashSet<String>());
+                            stringBuilder.append("var response" + responseEntry + "json = " + example + ";\n");
+                            int currentResponseEntry = Integer.parseInt(responseEntry);
+                            if (finalResponseEntry > currentResponseEntry) {
+                                finalResponseEntry = currentResponseEntry;
+                            }
+                        }
+                    }
+                    stringBuilder.append("############## End Of Generated Code ##################\n\n\t"
+                            +"mc.setProperty('CONTENT_TYPE', 'application/json');\n\t"
+                            +"mc.setPayloadJSON(response"+finalResponseEntry+"json);");
 
-
-
-
-        return null;
+                    op.setVendorExtension("x-mediation-script",stringBuilder.toString());
+                }
+        }
+        return Json.pretty(swagger);
     }
+    /**
+     * This method retrieves the examples of each operation in the swagger file
+     * @param model
+     * @param definitions
+     * @return
+     */
+    public String getJsonExample(String string, Model model, Map<String, Model> definitions, HashSet<String> strings){
+        Example example = ExampleBuilder.fromModel("Model", model, definitions, new HashSet<String>());
+        SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
+        Json.mapper().registerModule(simpleModule);
+        return Json.pretty(example);
+    }
+
 
     /**
      * This method returns URI templates according to the given swagger file

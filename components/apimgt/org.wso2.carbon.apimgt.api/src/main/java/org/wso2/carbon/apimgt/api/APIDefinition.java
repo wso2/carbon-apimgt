@@ -49,7 +49,7 @@ public abstract class APIDefinition {
      * @return
      */
 
-    public abstract String genExample(String apiDefinition);
+    public abstract String generateExample(String apiDefinition);
 
     /**
      * This method extracts the URI templates from the API definition
