@@ -2820,6 +2820,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
         try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            boolean isSoapToRestConvertedAPI = SOAPOperationBindingUtils.isSOAPToRESTApi(apiIdentifier.getApiName(),
+                    apiIdentifier.getVersion(), apiIdentifier.getProviderName());
             //Handle URL and file based definition imports
             if(url != null || fileInputStream != null) {
                 validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, true);
@@ -2828,6 +2832,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiDefinition = validationResponse.getJsonContent();
             }
             String updatedSwagger = updateSwagger(apiId, apiDefinition);
+            if (isSoapToRestConvertedAPI) {
+                SequenceGenerator.generateSequencesFromSwagger(updatedSwagger, apiIdentifier);
+            }
             return Response.ok().entity(updatedSwagger).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
