@@ -31,6 +31,7 @@ public class SOAPToRESTConstants {
     public static final String TYPE_ATTRIBUTE = "type";
     public static final String NAME_ATTRIBUTE = "name";
     public static final String REF_ATTRIBUTE = "ref";
+    public static final String TARGET_NAMESPACE_ATTRIBUTE = "targetNamespace";
     public static final String MAX_OCCURS_ATTRIBUTE = "maxOccurs";
     public static final String UNBOUNDED = "unbounded";
     public static final String METHOD = "method";
