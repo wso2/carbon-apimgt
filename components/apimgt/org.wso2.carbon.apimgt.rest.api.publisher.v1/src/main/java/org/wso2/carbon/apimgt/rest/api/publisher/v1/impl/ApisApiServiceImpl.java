@@ -3689,36 +3689,45 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    /**
+     * Exports an API from API Manager for a given API using the ApiId. ID. Meta information, API icon, documentation,
+     * WSDL and sequences are exported. This service generates a zipped archive which contains all the above mentioned
+     * resources for a given API.
+     *
+     * @param apiId          UUID of an API
+     * @param name           Name of the API that needs to be exported
+     * @param version        Version of the API that needs to be exported
+     * @param providerName   Provider name of the API that needs to be exported
+     * @param format         Format of output documents. Can be YAML or JSON
+     * @param preserveStatus Preserve API status on export
+     * @return
+     */
     @Override
-    public Response apisExportGet(String apiId, String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException {
-            ExportApiUtil exportApiUtil = new ExportApiUtil();
-            if (apiId == null) {
-                return exportApiUtil.exportApiByParams(name, version, providerName, format, preserveStatus);
-            } else {
-                try {
-                    String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-                    APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-                    // String userName = RestApiUtil.getLoggedInUsername();
-                    // APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-                    ExportFormat exportFormat= ExportFormat.YAML;
-                    // File file= APIExportUtil.exportApiById(apiProvider,apiId,userName,tenantDomain ,exportFormat,preserveStatus);
-                    // log.info(file);
-                    return exportApiUtil.exportApiById(apiIdentifier, preserveStatus);
-                }
-                catch (APIManagementException  e){
-                    String errorMessage = "API id is invalid" ;
-                    RestApiUtil.handleBadRequest(errorMessage,log);
+    public Response apisExportGet(String apiId, String name, String version, String providerName, String format,
+                                  Boolean preserveStatus, MessageContext messageContext)
+            throws APIManagementException {
+        ExportApiUtil exportApiUtil = new ExportApiUtil();
+        if (apiId == null) {
+
+            return exportApiUtil.exportApiByParams(name, version, providerName, format, preserveStatus);
+        } else {
+            try {
+                String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+                return exportApiUtil.exportApiById(apiIdentifier, preserveStatus);
+            } catch (APIManagementException e) {
+                if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                } else if (isAuthorizationFailure(e)) {
+                    RestApiUtil.handleAuthorizationFailure(
+                            "Authorization failure while exporting the  API " + apiId, e, log);
+                } else {
+                    RestApiUtil.handleInternalServerError("Error while exporting the API " + apiId, e, log);
                 }
             }
-            return null;
+        }
+        return null;
     }
-
-//    @Override
-//    public Response apisExportGet(String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) {
-//        ExportApiUtil exportApi=new ExportApiUtil();
-//        return exportApi.exportApiByParams(name,version,providerName,format,preserveStatus);
-//    }
-
 
     /**
      * Import a GraphQL Schema

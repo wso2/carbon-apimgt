@@ -894,16 +894,21 @@ public class APIExportUtil {
         });
         return certificateDetails;
     }
+
     /**
      * Exports an API from API Manager for a given API ID. Meta information, API icon, documentation, WSDL
      * and sequences are exported. This service generates a zipped archive which contains all the above mentioned
      * resources for a given API.
      *
+     * @param apiIdentifier
+     * @param apiProvider
      * @param preserveStatus Preserve API status on export
      * @return Zipped file containing exported API
      */
 
-    public static File exportApi (APIProvider apiProvider, APIIdentifier apiIdentifier, String userName, ExportFormat exportFormat, Boolean preserveStatus) throws APIImportExportException, APIManagementException {
+    public static File exportApi(APIProvider apiProvider, APIIdentifier apiIdentifier, String userName,
+                                 ExportFormat exportFormat, Boolean preserveStatus)
+            throws APIImportExportException, APIManagementException {
         API api;
         APIImportExportManager apiImportExportManager;
         boolean isStatusPreserved = preserveStatus == null || preserveStatus;
@@ -911,14 +916,5 @@ public class APIExportUtil {
         apiImportExportManager = new APIImportExportManager(apiProvider, userName);
         return apiImportExportManager.exportAPIArchive(api, isStatusPreserved, exportFormat);
     }
-
-//    public static File exportApiById (APIProvider apiProvider, String uuid, String userName, String requestedTenantDomain, ExportFormat exportFormat, Boolean preserveStatus) throws APIImportExportException, APIManagementException {
-//        API api;
-//        APIImportExportManager apiImportExportManager;
-//        boolean isStatusPreserved = preserveStatus == null || preserveStatus;
-//        api = apiProvider.getAPIbyUUID(uuid,requestedTenantDomain);
-//        apiImportExportManager = new APIImportExportManager(apiProvider, userName);
-//        return apiImportExportManager.exportAPIArchive(api, isStatusPreserved, exportFormat);
-//    }
 
 }
