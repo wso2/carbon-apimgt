@@ -47,6 +47,7 @@ const AppThemes = {
             goToSearch: 2,
         },
         custom: {
+            wrapperBackground: '#f9f9f9',
             starColor: '#f2c73a',
             disableColor: '#D3D3D3',
             leftMenuWidth: 210,
@@ -76,6 +77,14 @@ const AppThemes = {
                 query: '#b3e6fe',
                 mutation: '#c1dea0',
                 subscription: '#ffcc80',
+            },
+            overviewStepper: {
+                backgrounds: {
+                    completed: '#eeeeee',
+                    active: '#fff',
+                    inactive: '#e0e0e0',
+                },
+                iconSize: 32,
             },
             thumbnail: {
                 backgrounds: [ // These backgrounds are use to generate the thumbnails.
