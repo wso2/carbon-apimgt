@@ -6483,8 +6483,6 @@ paths:
             Not Found.
             Requested role name does not exist.
 
-
-
   ####################################################
   # The "Label" resource API
   ######################################################
@@ -6540,8 +6538,6 @@ paths:
             Categories returned
           schema:
             $ref: '#/definitions/APICategoryList'
-
-
 
 ######################################################
 # Parameters - required by some of the APIs above
