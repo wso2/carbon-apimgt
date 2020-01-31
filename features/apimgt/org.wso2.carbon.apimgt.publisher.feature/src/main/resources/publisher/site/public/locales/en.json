@@ -920,5 +920,6 @@
   "unblock": "Unblock",
   "upload.image": "Click or drag the image to upload.",
   "version": "Version",
-  "welcome.to.wso2.api.manager": "Welcome to WSO2 API Manager"
+  "welcome.to.wso2.api.manager": "Welcome to WSO2 API Manager",
+  "Apis.Details.components.APIDetailsTopMenu.error": "Something went wrong while downloading the API."
 }
