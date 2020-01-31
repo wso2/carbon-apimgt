@@ -63,8 +63,8 @@ public class ExportApiServiceImpl extends ExportApiService {
     @Override
     public Response exportApiGet(String name, String version, String providerName, String format,
                                  Boolean preserveStatus) {
-        ExportApiUtil exportApi=new ExportApiUtil();
-        return exportApi.exportApiByParams(name,version,providerName,format,preserveStatus);
+        ExportApiUtil exportApi = new ExportApiUtil();
+        return exportApi.exportApiByParams(name, version, providerName, format, preserveStatus);
     }
 
     /**

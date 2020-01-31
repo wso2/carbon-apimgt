@@ -66,7 +66,7 @@ public class ExportApiUtil {
         boolean isStatusPreserved = preserveStatus == null || preserveStatus;
 
         if (name == null || version == null || providerName == null) {
-            RestApiUtil.handleBadRequest("Invalid API Information ", log);
+            RestApiUtil.handleBadRequest("None of 'name', 'version' or 'provider' should not be null", log);
         }
 
         try {
@@ -82,7 +82,7 @@ public class ExportApiUtil {
             if (!StringUtils.equals(apiDomain, apiRequesterDomain)) {
                 //not authorized to export requested API
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API +
-                        " name:" + name + " version:" + version + " provider:" + providerName, (String) null, log);
+                        " name:" + name + " version:" + version + " provider:" + providerName, log);
             }
 
             apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), name, version);
@@ -104,23 +104,33 @@ public class ExportApiUtil {
         }
         return null;
     }
-    public Response exportApiById(APIIdentifier apiIdentifier ,Boolean preserveStatus) {
+
+    /**
+     * Exports an API from API Manager for a given API using the ApiId. ID. Meta information, API icon, documentation,
+     * WSDL and sequences are exported. This service generates a zipped archive which contains all the above mentioned
+     * resources for a given API.
+     *
+     * @param apiIdentifier
+     * @param preserveStatus Preserve API status on export
+     * @return Zipped file containing exported API
+     */
+    public Response exportApiById(APIIdentifier apiIdentifier, Boolean preserveStatus) {
         ExportFormat exportFormat;
         APIProvider apiProvider;
         String userName;
         File file;
         try {
-            exportFormat=ExportFormat.YAML;
+            exportFormat = ExportFormat.YAML;
             apiProvider = RestApiUtil.getLoggedInUserProvider();
             userName = RestApiUtil.getLoggedInUsername();
-            file = APIExportUtil.exportApi(apiProvider, apiIdentifier ,userName,exportFormat,preserveStatus);
+            file = APIExportUtil.exportApi(apiProvider, apiIdentifier, userName, exportFormat, preserveStatus);
             return Response.ok(file)
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + file.getName() + "\"")
                     .build();
         } catch (APIManagementException | APIImportExportException e) {
-        RestApiUtil.handleInternalServerError("Error while exporting " + RestApiConstants.RESOURCE_API, e, log);
-    }
+            RestApiUtil.handleInternalServerError("Error while exporting " + RestApiConstants.RESOURCE_API, e, log);
+        }
         return null;
     }
 }
