@@ -95,12 +95,11 @@ const APIDetailsTopMenu = (props) => {
  * @param {string} format Weather to recive files in YALM of JSON format
  * @returns {zip} Zpi file containing the API directory.
  */
-    async function exportAPI() {
-        try {
-            const restApi = new API();
-            const zipFile = await restApi.exportApi(api.id);
+    function exportAPI() {
+        const restApi = new API();
+        return restApi.exportApi(api.id).then((zipFile) => {
             return Utils.forceDownload(zipFile);
-        } catch (error) {
+        }).catch((error) => {
             if (error.response) {
                 Alert.error(error.response.body.description);
             } else {
@@ -108,9 +107,9 @@ const APIDetailsTopMenu = (props) => {
                 Alert.error(message);
             }
             console.error(error);
-            return null;
-        }
+        });
     }
+
     const isDownlodable = ['API'].includes(api.apiType);
     const { settings, user } = useAppContext();
     let apiType = 'API';
