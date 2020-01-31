@@ -188,13 +188,10 @@ class API extends Resource {
      * export an API Directory as A Zpi file
      * @returns {promise} Promise Containing the ZPI file of the selected API 
      */
-    exportApi(name, version, provider, format) {
+    exportApi(apiId) {
         const apiZip = this.client.then((client) => {
             return client.apis['APIs (Individual)'].get_apis_export({
-                name:name,
-                version:version,
-                providerName:provider,
-                format:format,
+                apiId: apiId
             },  this._requestMetaData({ 
                     'accept': 'application/zip'
                 })

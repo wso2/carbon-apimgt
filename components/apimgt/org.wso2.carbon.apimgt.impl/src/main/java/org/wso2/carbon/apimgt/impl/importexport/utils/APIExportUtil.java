@@ -912,4 +912,13 @@ public class APIExportUtil {
         return apiImportExportManager.exportAPIArchive(api, isStatusPreserved, exportFormat);
     }
 
+//    public static File exportApiById (APIProvider apiProvider, String uuid, String userName, String requestedTenantDomain, ExportFormat exportFormat, Boolean preserveStatus) throws APIImportExportException, APIManagementException {
+//        API api;
+//        APIImportExportManager apiImportExportManager;
+//        boolean isStatusPreserved = preserveStatus == null || preserveStatus;
+//        api = apiProvider.getAPIbyUUID(uuid,requestedTenantDomain);
+//        apiImportExportManager = new APIImportExportManager(apiProvider, userName);
+//        return apiImportExportManager.exportAPIArchive(api, isStatusPreserved, exportFormat);
+//    }
+
 }

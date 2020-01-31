@@ -83,6 +83,9 @@ import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.utils.APIExportUtil;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -3687,10 +3690,34 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisExportGet(String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) {
-        ExportApiUtil exportApi=new ExportApiUtil();
-        return exportApi.exportApiByParams(name,version,providerName,format,preserveStatus);
+    public Response apisExportGet(String apiId, String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException {
+            ExportApiUtil exportApiUtil = new ExportApiUtil();
+            if (apiId == null) {
+                return exportApiUtil.exportApiByParams(name, version, providerName, format, preserveStatus);
+            } else {
+                try {
+                    String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+                    APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+                    // String userName = RestApiUtil.getLoggedInUsername();
+                    // APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+                    ExportFormat exportFormat= ExportFormat.YAML;
+                    // File file= APIExportUtil.exportApiById(apiProvider,apiId,userName,tenantDomain ,exportFormat,preserveStatus);
+                    // log.info(file);
+                    return exportApiUtil.exportApiById(apiIdentifier, preserveStatus);
+                }
+                catch (APIManagementException  e){
+                    String errorMessage = "API id is invalid" ;
+                    RestApiUtil.handleBadRequest(errorMessage,log);
+                }
+            }
+            return null;
     }
+
+//    @Override
+//    public Response apisExportGet(String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) {
+//        ExportApiUtil exportApi=new ExportApiUtil();
+//        return exportApi.exportApiByParams(name,version,providerName,format,preserveStatus);
+//    }
 
 
     /**
