@@ -36,7 +36,7 @@
   <link href="<%= settings.Settings.app.context %>/site/public/css/main.css" type="text/css" rel="stylesheet" />
 </head>
 
-<body>
+<body dir="ltr">
   <div id="react-root">
     <div class="apim-dual-ring"></div>
   </div>
