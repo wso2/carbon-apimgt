@@ -105,8 +105,8 @@ const APIDetailsTopMenu = (props) => {
                 Alert.error(error.response.body.description);
             } else {
                 Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.error',
-                    defaultMessage: 'Something went wrong while adding the certificate.',
+                    id: 'Apis.Details.components.APIDetailsTopMenu.error',
+                    defaultMessage: 'Something went wrong while downloading the API.',
                 }));
             }
             console.error(error);
