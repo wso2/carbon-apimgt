@@ -1642,32 +1642,24 @@
                 <groupId>org.wso2.orbit.io.jaeger</groupId>
                 <artifactId>jaeger-client</artifactId>
                 <version>${jaeger.client.version}</version>
-
-                <groupId>io.fabric8</groupId>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.io.fabric8</groupId>
                 <artifactId>kubernetes-client</artifactId>
-                <version>${io.fabric8.kubernetes.client.version}</version>
+                <version>${org.wso2.orbit.io.fabric8.kubernetes.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>kubernetes-api</artifactId>
-                <version>${io.fabric8.kuberenetes.api.version}</version>
+                <groupId>org.wso2.orbit.com.squareup.okio</groupId>
+                <artifactId>okio</artifactId>
+                <version>${org.wso2.orbit.com.squareup.okio.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>openshift-client</artifactId>
-                <version>${io.fabric8.openshift.client.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.commons</groupId>
+                <groupId>org.wso2.orbit.org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
-                <version>${org.apache.commons.compress.version}</version>
+                <version>${org.wso2.orbit.org.apache.commons.compress.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>com.squareup.okhttp3</groupId>
+                <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
                 <artifactId>okhttp</artifactId>
                 <version>${com.squareup.okhttp3.okhttp.version}</version>
             </dependency>
