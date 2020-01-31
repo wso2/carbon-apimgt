@@ -98,7 +98,7 @@ const APIDetailsTopMenu = (props) => {
     async function exportAPI() {
         try {
             const restApi = new API();
-            const zipFile = await restApi.exportApi(api.name, api.version, api.provider, 'YAML');
+            const zipFile = await restApi.exportApi(api.id);
             return Utils.forceDownload(zipFile);
         } catch (error) {
             if (error.response) {
