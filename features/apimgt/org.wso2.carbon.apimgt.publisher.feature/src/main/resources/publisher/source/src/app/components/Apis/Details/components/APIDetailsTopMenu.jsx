@@ -1,9 +1,10 @@
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
+
 import Utils from 'AppData/Utils';
 import Alert from 'AppComponents/Shared/Alert';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
@@ -84,7 +85,7 @@ const styles = (theme) => ({
 
 const APIDetailsTopMenu = (props) => {
     const {
-        classes, theme, api, isAPIProduct, imageUpdate,
+        classes, theme, api, isAPIProduct, imageUpdate, intl,
     } = props;
     const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
     /**
@@ -103,8 +104,10 @@ const APIDetailsTopMenu = (props) => {
             if (error.response) {
                 Alert.error(error.response.body.description);
             } else {
-                const message = 'Something went wrong while downloding the API';
-                Alert.error(message);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.error',
+                    defaultMessage: 'Something went wrong while adding the certificate.',
+                }));
             }
             console.error(error);
         });
@@ -195,7 +198,10 @@ const APIDetailsTopMenu = (props) => {
                             <CloudDownloadRounded />
                         </div>
                         <Typography variant='caption' align='left'>
-                    Download API
+                            <FormattedMessage
+                                id='Apis.Details.APIDetailsTopMenu.download.api'
+                                defaultMessage='Download API'
+                            />
                         </Typography>
                     </a>
                 )}
@@ -214,4 +220,6 @@ APIDetailsTopMenu.propTypes = {
 };
 
 
-export default withStyles(styles, { withTheme: true })(APIDetailsTopMenu);
+// export default withStyles(styles, { withTheme: true })(APIDetailsTopMenu);
+
+export default injectIntl(withStyles(styles, { withTheme: true })(APIDetailsTopMenu));
