@@ -83,6 +83,9 @@ import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.utils.APIExportUtil;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -92,6 +95,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.util.impl.ExportApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
@@ -3681,6 +3685,46 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location of " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Exports an API from API Manager for a given API using the ApiId. ID. Meta information, API icon, documentation,
+     * WSDL and sequences are exported. This service generates a zipped archive which contains all the above mentioned
+     * resources for a given API.
+     *
+     * @param apiId          UUID of an API
+     * @param name           Name of the API that needs to be exported
+     * @param version        Version of the API that needs to be exported
+     * @param providerName   Provider name of the API that needs to be exported
+     * @param format         Format of output documents. Can be YAML or JSON
+     * @param preserveStatus Preserve API status on export
+     * @return
+     */
+    @Override
+    public Response apisExportGet(String apiId, String name, String version, String providerName, String format,
+                                  Boolean preserveStatus, MessageContext messageContext)
+            throws APIManagementException {
+        ExportApiUtil exportApiUtil = new ExportApiUtil();
+        if (apiId == null) {
+
+            return exportApiUtil.exportApiByParams(name, version, providerName, format, preserveStatus);
+        } else {
+            try {
+                String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+                return exportApiUtil.exportApiById(apiIdentifier, preserveStatus);
+            } catch (APIManagementException e) {
+                if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                } else if (isAuthorizationFailure(e)) {
+                    RestApiUtil.handleAuthorizationFailure(
+                            "Authorization failure while exporting the  API " + apiId, e, log);
+                } else {
+                    RestApiUtil.handleInternalServerError("Error while exporting the API " + apiId, e, log);
+                }
+            }
         }
         return null;
     }

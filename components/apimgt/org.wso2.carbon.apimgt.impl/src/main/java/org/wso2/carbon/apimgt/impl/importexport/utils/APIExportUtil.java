@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.CertificateDetail;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportManager;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Collection;
@@ -771,7 +772,7 @@ public class APIExportUtil {
      * 
      * @param api          API to be exported
      * @param tenantId     tenant id of the user
-     * @param apiProvider  api Provider
+     * @param provider  api Provider
      * @param exportFormat Export format of file
      * @throws APIImportExportException
      */
@@ -945,4 +946,27 @@ public class APIExportUtil {
         });
         return certificateDetails;
     }
+
+    /**
+     * Exports an API from API Manager for a given API ID. Meta information, API icon, documentation, WSDL
+     * and sequences are exported. This service generates a zipped archive which contains all the above mentioned
+     * resources for a given API.
+     *
+     * @param apiIdentifier
+     * @param apiProvider
+     * @param preserveStatus Preserve API status on export
+     * @return Zipped file containing exported API
+     */
+
+    public static File exportApi(APIProvider apiProvider, APIIdentifier apiIdentifier, String userName,
+                                 ExportFormat exportFormat, Boolean preserveStatus)
+            throws APIImportExportException, APIManagementException {
+        API api;
+        APIImportExportManager apiImportExportManager;
+        boolean isStatusPreserved = preserveStatus == null || preserveStatus;
+        api = apiProvider.getAPI(apiIdentifier);
+        apiImportExportManager = new APIImportExportManager(apiProvider, userName);
+        return apiImportExportManager.exportAPIArchive(api, isStatusPreserved, exportFormat);
+    }
+
 }

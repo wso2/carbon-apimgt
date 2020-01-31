@@ -185,6 +185,22 @@ class API extends Resource {
     }
 
     /**
+     * export an API Directory as A Zpi file
+     * @returns {promise} Promise Containing the ZPI file of the selected API 
+     */
+    exportApi(apiId) {
+        const apiZip = this.client.then((client) => {
+            return client.apis['Import Export'].get_apis_export({
+                apiId: apiId
+            },  this._requestMetaData({ 
+                    'accept': 'application/zip'
+                })
+            );
+        });
+        return apiZip;
+    }
+
+    /**
      * Get detailed policy information of the API
      * @returns {Promise} Promise containing policy detail request calls for all the available policies
      * @memberof API
