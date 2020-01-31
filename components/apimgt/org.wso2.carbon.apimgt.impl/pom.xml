@@ -353,28 +353,24 @@
             <version>${graphql.java.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.fabric8</groupId>
+            <groupId>org.wso2.orbit.io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
+            <version>${org.wso2.orbit.io.fabric8.kubernetes.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.fabric8</groupId>
-            <artifactId>kubernetes-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.fabric8</groupId>
-            <artifactId>openshift-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okio</groupId>
+            <groupId>org.wso2.orbit.com.squareup.okio</groupId>
             <artifactId>okio</artifactId>
+            <version>${org.wso2.orbit.com.squareup.okio.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>${org.wso2.orbit.org.apache.commons.compress.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${org.wso2.orbit.com.squareup.okhttp.version}</version>
         </dependency>
     </dependencies>
     <build>
@@ -498,15 +494,6 @@
                             !org.wso2.carbon.apimgt.impl.dto.xsd;version="${carbon.apimgt.version}",
                             org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.version}",
                             !org.apache.commons.collections4.*,
-                            io.fabric8.kubernetes.client.*,
-                            io.fabric8.kubernetes.api.*,
-                            io.fabric8.kubernetes.internal.*,
-                            okhttp3.*,
-                            kotlin.*,
-                            okio.*,
-                            org.apache.commons.compress.*,
-                            io.fabric8.openshift.client.*,
-                            com.fasterxml.jackson.*
                         </Export-Package>
                         <Import-Package>
                             org.wso2.carbon.governance.api.*,
@@ -574,6 +561,13 @@
                             org.wso2.carbon.apimgt.localentry.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.securevault.*,
                             org.wso2.carbon.registry.*;version="${carbon.registry.imp.pkg.version}",
+                            io.fabric8.kubernetes.client.*;version="${org.wso2.orbit.io.fabric8.kubernetes.version}",
+                            io.fabric8.kubernetes.api.*;version="${org.wso2.orbit.io.fabric8.kubernetes.version}",
+                            io.fabric8.kubernetes.internal.*;version="${org.wso2.orbit.io.fabric8.kubernetes.version}",
+                            io.fabric8.openshift.client.*;version="${org.wso2.orbit.io.fabric8.kubernetes.version}",
+                            okio.*;version="${org.wso2.orbit.com.squareup.okio.version}",
+                            org.apache.commons.compress.*;version="${org.wso2.orbit.org.apache.commons.compress.version}",
+                            okhttp3.*;version="${org.wso2.orbit.com.squareup.okhttp.version}"
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
