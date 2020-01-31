@@ -20,7 +20,12 @@ npm install
 translate.key = 'your-api-key'; 
 const lanuageCode = 'fr'; // lanuage code without region code
 ```
-4. Run the following command to convert the en.json to your language.
+4. Open a terminal and navigate to **devportal/site/public/locales/converter** folder. Build the node js project by running the following command.
+```
+npm install
+```
+
+5. Run the following commands to convert the en.json to your language.
 ```js
 node i18nconverter.js 
 ```

@@ -1,6 +1,7 @@
 const Configurations = {
     themes: {
         light: {
+            direction: 'ltr',
             palette: {
                 primary: {
                     // light: will be calculated from palette.primary.main,
@@ -44,8 +45,8 @@ const Configurations = {
                     logo: '/site/public/images/logo.svg', // You can set the url to an external image also ( ex: https://dummyimage.com/208x19/66aad1/ffffff&text=testlogo)
                     logoHeight: 19,
                     logoWidth: 208,
-                    background: '#6093c1',
-                    activeBackground: '#3f6a9f',
+                    background: '#253451',
+                    activeBackground: '#dc4748',
                     showSearch: true,
                     drawerWidth: 200,
                 },
@@ -56,7 +57,7 @@ const Configurations = {
                     leftMenuTextStyle: 'uppercase',
                     width: 180,
                     background: '#222',
-                    leftMenuActive: '#254061',
+                    leftMenuActive: '#50a4da',
                     leftMenuActiveSubmenu: '#0d1723',
                     activeBackground: '#191e46',
                     rootIconVisible: true,
@@ -194,6 +195,9 @@ const Configurations = {
                             },
                         ],
                     },
+                    contact: {
+                        active: true,
+                    },
                 },
                 tagWise: {
                     active: false,
@@ -254,6 +258,32 @@ const Configurations = {
                 title: {
                     prefix: '[Devportal]',
                     sufix: '- WSO2 APIM',
+                },
+                languageSwitch: { // Country flags are downloaded from https://dribbble.com/shots/1211759-Free-195-Flat-Flags
+                    active: false,
+                    languages: [
+                        {
+                            key: 'en',
+                            image: '/site/public/images/flags/en.png',
+                            imageWidth: 24, // in pixles
+                            text: 'English',
+                        },
+                        {
+                            key: 'si',
+                            image: '/site/public/images/flags/si.png',
+                            imageWidth: 24, // in pixles
+                            text: 'Sinhala',
+                        },
+                        {
+                            key: 'fr',
+                            image: '/site/public/images/flags/fr.png',
+                            imageWidth: 24, // in pixles
+                            text: 'French',
+                        },
+                    ],
+                    showFlag: true,
+                    showText: true,
+                    minWidth: 60, // Width of the language switcher in pixles
                 },
             },
         },

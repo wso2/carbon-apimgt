@@ -171,6 +171,7 @@ class ApiThumb extends React.Component {
             backgroundIndex: null,
             imageObj: null,
             isHover: false,
+            imageLoaded: false,
         };
         this.toggleMouseOver = this.toggleMouseOver.bind(this);
     }
@@ -201,7 +202,9 @@ class ApiThumb extends React.Component {
                     this.setState({ imageObj: url });
                 }
             }
-        });
+        }).finally(() => {
+            this.setState({ imageLoaded: true })
+        })
     }
 
     /**
@@ -241,7 +244,7 @@ class ApiThumb extends React.Component {
      */
     render() {
         const {
-            imageObj, selectedIcon, color, backgroundIndex, category, isHover,
+            imageObj, selectedIcon, color, backgroundIndex, category, isHover, imageLoaded,
         } = this.state;
         const path = this.getPathPrefix();
         const { isMonetizationEnabled } = this.context;
@@ -269,7 +272,12 @@ class ApiThumb extends React.Component {
         const defaultImage = thumbnail.defaultApiImage;
 
         let ImageView;
-        if (imageObj) {
+        if (!imageLoaded) {
+            ImageView = (<div class="image-load-frame">
+                <div class="image-load-animation1"></div>
+                <div class="image-load-animation2"></div>
+            </div>)
+        } else if (imageObj) {
             ImageView = (
                 <img
                     height={imageHeight}

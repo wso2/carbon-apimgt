@@ -48,7 +48,6 @@ const styles = theme => ({
     },
     links: {
         display: 'flex',
-        height: 64,
     },
     selected: {
         background: theme.custom.appBar.activeBackground,
