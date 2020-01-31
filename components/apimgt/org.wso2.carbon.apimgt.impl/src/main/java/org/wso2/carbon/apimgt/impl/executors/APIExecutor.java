@@ -270,8 +270,8 @@ public class APIExecutor implements Execution {
             }
             List<String> clusters = new ArrayList<String>();
             //getting clusters to publish API from the publisher UI
-            clusters.add("gke_apim-kube_us-central1-a_privatejet-mode-test");
-//            clusters.add("docker-desktop");
+//            clusters.add("gke_apim-kube_us-central1-a_privatejet-mode-test");
+            clusters.add("docker-desktop");
 //            clusters.add("minikube");
             if (publishInPrivateJet) {
                 apiProvider.publishInPrivateJet(api, api.getId(), clusters);

@@ -1615,36 +1615,32 @@
                 <version>${org.wso2.orbit.com.amazonaws.version}</version>
             </dependency>
             <dependency>
+<<<<<<< HEAD
                 <groupId>org.wso2.orbit.io.jaeger</groupId>
                 <artifactId>jaeger-client</artifactId>
                 <version>${jaeger.client.version}</version>
 
                 <groupId>io.fabric8</groupId>
+=======
+                <groupId>org.wso2.orbit.io.fabric8</groupId>
+>>>>>>> adding osgi bundling of kubernetes dependencies
                 <artifactId>kubernetes-client</artifactId>
-                <version>${io.fabric8.kubernetes.client.version}</version>
+                <version>${org.wso2.orbit.io.fabric8.kubernetes.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>kubernetes-api</artifactId>
-                <version>${io.fabric8.kuberenetes.api.version}</version>
+                <groupId>org.wso2.orbit.com.squareup.okio</groupId>
+                <artifactId>okio</artifactId>
+                <version>${org.wso2.orbit.com.squareup.okio.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>openshift-client</artifactId>
-                <version>${io.fabric8.openshift.client.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.commons</groupId>
+                <groupId>org.wso2.orbit.org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
-                <version>${org.apache.commons.compress.version}</version>
+                <version>${org.wso2.orbit.org.apache.commons.compress.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>com.squareup.okhttp3</groupId>
+                <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
                 <artifactId>okhttp</artifactId>
+<<<<<<< HEAD
                 <version>${com.squareup.okhttp3.okhttp.version}</version>
             </dependency>
 
@@ -1653,6 +1649,9 @@
                 <artifactId>okio</artifactId>
                 <version>${com.squareup.okio.version}</version>
 
+=======
+                <version>${org.wso2.orbit.com.squareup.okhttp.version}</version>
+>>>>>>> adding osgi bundling of kubernetes dependencies
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity.framework</groupId>
@@ -1922,12 +1921,10 @@
         <okhttp.wso2.version>4.2.0.wso2v1</okhttp.wso2.version>
         <okio.wso2.version>2.4.0.wso2v1</okio.wso2.version>
 
-        <io.fabric8.kubernetes.client.version>4.6.4</io.fabric8.kubernetes.client.version>
+        <org.wso2.orbit.io.fabric8.kubernetes.version>4.6.4.wso2v1</org.wso2.orbit.io.fabric8.kubernetes.version>
+        <org.wso2.orbit.com.squareup.okio.version>2.4.0.wso2v1</org.wso2.orbit.com.squareup.okio.version>
+        <org.wso2.orbit.org.apache.commons.compress.version>1.18.0.wso2v1</org.wso2.orbit.org.apache.commons.compress.version>
+        <org.wso2.orbit.com.squareup.okhttp.version>4.2.0.wso2v1</org.wso2.orbit.com.squareup.okhttp.version>
 
-        <io.fabric8.kuberenetes.api.version>3.0.12</io.fabric8.kuberenetes.api.version>
-        <io.fabric8.openshift.client.version>4.6.4</io.fabric8.openshift.client.version>
-        <org.apache.commons.compress.version>1.18</org.apache.commons.compress.version>
-        <com.squareup.okhttp3.okhttp.version>4.2.0</com.squareup.okhttp3.okhttp.version>
-        <com.squareup.okio.version>2.4.0</com.squareup.okio.version>
     </properties>
 </project>
