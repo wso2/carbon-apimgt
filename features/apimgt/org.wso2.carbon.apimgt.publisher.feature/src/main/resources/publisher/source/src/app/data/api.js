@@ -190,7 +190,7 @@ class API extends Resource {
      */
     exportApi(apiId) {
         const apiZip = this.client.then((client) => {
-            return client.apis['APIs (Individual)'].get_apis_export({
+            return client.apis['Import Export'].get_apis_export({
                 apiId: apiId
             },  this._requestMetaData({ 
                     'accept': 'application/zip'

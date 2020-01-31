@@ -36,11 +36,6 @@ import java.io.File;
 
 public class ExportApiUtil {
     private static final Log log = LogFactory.getLog(ExportApiUtil.class);
-    private static final String APPLICATION_EXPORT_DIR_PREFIX = "exported-app-archives-";
-    private static final String DEFAULT_APPLICATION_EXPORT_DIR = "exported-application";
-    private static final String PRODUCTION = "PRODUCTION";
-    private static final String SANDBOX = "SANDBOX";
-
     /**
      * Exports an API from API Manager for a given API ID. Meta information, API icon, documentation, WSDL
      * and sequences are exported. This service generates a zipped archive which contains all the above mentioned
@@ -66,7 +61,7 @@ public class ExportApiUtil {
         boolean isStatusPreserved = preserveStatus == null || preserveStatus;
 
         if (name == null || version == null || providerName == null) {
-            RestApiUtil.handleBadRequest("None of 'name', 'version' or 'provider' should not be null", log);
+            RestApiUtil.handleBadRequest("'name', 'version' or 'provider' should not be null", log);
         }
 
         try {

@@ -843,7 +843,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
-    }, tags={ "APIs (Individual)",  })
+    }, tags={ "Import Export",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Export Successful. ", response = File.class),
         @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
