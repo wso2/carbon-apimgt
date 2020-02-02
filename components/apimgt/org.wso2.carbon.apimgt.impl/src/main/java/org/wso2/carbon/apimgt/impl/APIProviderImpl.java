@@ -320,18 +320,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             Association[] associations = registry.getAssociations(providerPath, APIConstants.PROVIDER_ASSOCIATION);
             for (Association association : associations) {
                 String apiPath = association.getDestinationPath();
-                Resource resource = registry.get(apiPath);
-                String apiArtifactId = resource.getUUID();
-                if (apiArtifactId != null) {
-                    GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
-                    if (apiArtifact != null) {
-                        String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
-                        if (!APIConstants.API_PRODUCT.equals(type)) {
-                            apiSortedList.add(getAPI(apiArtifact));
+                if (registry.resourceExists(apiPath)) {
+                    Resource resource = registry.get(apiPath);
+                    String apiArtifactId = resource.getUUID();
+                    if (apiArtifactId != null) {
+                        GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
+                        if (apiArtifact != null) {
+                            String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
+                            if (!APIConstants.API_PRODUCT.equals(type)) {
+                                apiSortedList.add(getAPI(apiArtifact));
+                            }
                         }
+                    } else {
+                        throw new GovernanceException("artifact id is null of " + apiPath);
                     }
-                } else {
-                    throw new GovernanceException("artifact id is null of " + apiPath);
                 }
             }
 
@@ -1663,7 +1665,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (api != null) {
                 String currentStatus = api.getStatus();
 
-                if (!currentStatus.equals(newStatus)) {
+                if (APIConstants.PUBLISHED.equals(newStatus) || !currentStatus.equals(newStatus)) {
                     api.setStatus(newStatus);
 
                     APIManagerConfiguration config = getAPIManagerConfiguration();
@@ -6901,7 +6903,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateApiProductInfo(product);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
-        createAPIProduct(product);
 
         if (log.isDebugEnabled()) {
             log.debug("API Product details successfully added to the registry. API Product Name: " + product.getId().getName()
@@ -6925,6 +6926,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 continue;
             }
             if (api != null) {
+                validateApiLifeCycleForApiProducts(api);
+
                 api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
                 if (!apiToProductResourceMapping.containsKey(api)) {
                     apiToProductResourceMapping.put(api, new ArrayList<>());
@@ -6964,6 +6967,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         product.setProductResources(validResources);
         //now we have validated APIs and it's resources inside the API product. Add it to database
 
+        // Create registry artifact
+        createAPIProduct(product);
+
+        // Add to database
         apiMgtDAO.addAPIProduct(product, tenantDomain);
 
         return apiToProductResourceMapping;
@@ -7226,6 +7233,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException {
         return apiMgtDAO.getResourcePathsOfAPI(apiId);
+    }
+
+    private void validateApiLifeCycleForApiProducts(API api) throws APIManagementException {
+        String status = api.getStatus();
+
+        if (APIConstants.BLOCKED.equals(status) ||
+            APIConstants.PROTOTYPED.equals(status) ||
+            APIConstants.DEPRECATED.equals(status) ||
+            APIConstants.RETIRED.equals(status)) {
+            throw new APIManagementException("Cannot create API Product using API with following status: " + status,
+                    ExceptionCodes.from(ExceptionCodes.API_PRODUCT_WITH_UNSUPPORTED_LIFECYCLE_API, status));
+        }
     }
 
     /**

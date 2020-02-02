@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.hostobjects;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jaggeryjs.hostobjects.file.FileHostObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -115,6 +116,9 @@ public class TenantManagerHostObject extends ScriptableObject {
                 if(!folder.mkdirs()){
                     handleException("Unable to create tenant theme directory");
                 }
+            } else {
+                //remove existing files inside the directory
+                FileUtils.cleanDirectory(folder);
             }
 
             //get the zip file content

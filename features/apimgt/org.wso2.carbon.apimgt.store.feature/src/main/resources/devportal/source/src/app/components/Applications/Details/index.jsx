@@ -35,6 +35,7 @@ import TokenManager from 'AppComponents/Shared/AppsAndKeys/TokenManager';
 import ApiKeyManager from 'AppComponents/Shared/AppsAndKeys/ApiKeyManager';
 import classNames from 'classnames';
 import Paper from '@material-ui/core/Paper';
+import { Helmet } from 'react-helmet';
 import Subscriptions from './Subscriptions';
 import InfoBar from './InfoBar';
 import Overview from './Overview';
@@ -226,6 +227,9 @@ class Details extends Component {
                 leftMenu: {
                     rootIconSize, rootIconTextVisible, rootIconVisible, position,
                 },
+                title: {
+                    prefix, sufix,
+                },
             },
         } = theme;
         if (notFound) {
@@ -235,6 +239,9 @@ class Details extends Component {
         }
         return (
             <>
+                <Helmet>
+                    <title>{`${prefix} ${application.name}${sufix}`}</title>
+                </Helmet>
                 <div
                     className={classNames(
                         classes.LeftMenu,

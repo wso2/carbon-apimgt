@@ -45,7 +45,10 @@ import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
+import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.user.core.UserStoreException;
+import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -99,7 +102,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             String authUserName = RestApiUtil.getLoggedInUsername();
 
             //Validates if the application owner and logged in username is same.
-            if (authUserName != null && authUserName.equals(owner)) {
+            if (authUserName != null && ((authUserName.equals(owner))|| isUserSuperAdmin(authUserName))) {
                 if (!isUserAccessAllowed(authUserName)) {
                     String errorMsg = "You do not have enough privileges to create an OAuth app";
                     log.error("User " + authUserName +
@@ -137,8 +140,11 @@ public class RegistrationServiceImpl implements RegistrationService {
                 oauthApplicationInfo.setIsSaasApplication(profile.isSaasApp());
                 oauthApplicationInfo.setTokenType(tokenType);
                 appRequest.setOAuthApplicationInfo(oauthApplicationInfo);
-
-                loggedInUserTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+                if (!authUserName.equals(owner)){
+                    loggedInUserTenantDomain = MultitenantUtils.getTenantDomain(owner);
+                }else{
+                    loggedInUserTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+                }
                 String userId = (String) oauthApplicationInfo.getParameter(OAUTH_CLIENT_USERNAME);
                 String userNameForSP = MultitenantUtils.getTenantAwareUsername(userId);
                 // Replace domain separator by "_" if user is coming from a secondary userstore.
@@ -482,5 +488,17 @@ public class RegistrationServiceImpl implements RegistrationService {
             it.remove();
         }
         return updatingApp;
+    }
+
+    private boolean isUserSuperAdmin(String username) {
+
+        try {
+            RealmConfiguration realmConfig = new RealmConfigXMLProcessor().buildRealmConfigurationFromFile();
+            String adminUserName = realmConfig.getAdminUserName();
+            return adminUserName.equalsIgnoreCase(username);
+        } catch (UserStoreException e) {
+            log.error("Error while retrieving super admin username", e);
+            return false;
+        }
     }
 }

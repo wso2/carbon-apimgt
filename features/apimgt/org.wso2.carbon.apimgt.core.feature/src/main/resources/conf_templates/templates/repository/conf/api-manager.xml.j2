@@ -334,6 +334,9 @@
         <!-- Specifies the implementation to be used for KeyValidationHandler. Steps for validating a token can be controlled by plugging in a
              custom KeyValidation Handler -->
         <KeyValidationHandlerClassName>{{apim.key_manager.key_validation_handler_impl}}</KeyValidationHandlerClassName>
+       {% if apim.jwt.expiry_time is defined %}
+        <JWTExpiryTime>{{apim.jwt.expiry_time}}</JWTExpiryTime>
+       {% endif %}
     </APIKeyValidator>
 
     <!-- Uncomment this section only if you are going to have an instance other than KeyValidator as your KeyManager.

@@ -18,6 +18,7 @@
 
 import React, { Suspense, lazy } from 'react';
 import { Route, Switch } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 import Configurations from 'Config';
 import Settings from 'Settings';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
@@ -26,7 +27,6 @@ import Progress from './app/components/Shared/Progress';
 import { SettingsProvider } from './app/components/Shared/SettingsContext';
 import API from './app/data/api';
 import BrowserRouter from './app/components/Base/CustomRouter/BrowserRouter';
-
 const protectedApp = lazy(() => import('./app/ProtectedApp' /* webpackChunkName: "ProtectedApp" */));
 
 /**
@@ -144,6 +144,22 @@ class DevPortal extends React.Component {
     }
 
     /**
+     * Add two numbers.
+     * @param {object} theme object.
+     * @returns {JSX} link dom tag.
+     */
+    getTitle(theme) {
+        const {
+            custom: {
+                title: {
+                    prefix, sufix,
+                },
+            },
+        } = theme;
+        return (prefix + sufix);
+    }
+
+    /**
      * Reners the DevPortal component
      * @returns {JSX} this is the description
      * @memberof DevPortal
@@ -160,6 +176,9 @@ class DevPortal extends React.Component {
                     setTenantDomain: this.setTenantDomain,
                 }}
                 >
+                    <Helmet>
+                        <title>{this.getTitle(theme)}</title>
+                    </Helmet>
                     <MuiThemeProvider theme={createMuiTheme(theme)}>
                         {this.loadCustomCSS(theme)}
                         <BrowserRouter basename={context}>

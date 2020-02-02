@@ -49,8 +49,8 @@ const styles = (theme) => ({
         top: 0,
     },
     leftLInk: {
-        paddingTop: theme.spacing(1),
-        paddingBottom: theme.spacing(1),
+        paddingTop: theme.spacing(0.6),
+        paddingBottom: theme.spacing(0.6),
         paddingLeft: theme.spacing(0.5),
         paddingRight: 0,
         fontSize: theme.typography.caption.fontSize,

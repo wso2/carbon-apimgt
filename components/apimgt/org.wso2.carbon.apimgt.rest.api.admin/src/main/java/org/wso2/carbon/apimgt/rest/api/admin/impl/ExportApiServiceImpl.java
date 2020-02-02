@@ -20,33 +20,25 @@
 package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportManager;
-import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.ExportApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.FileBasedApplicationImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.impl.ExportApiUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.UUID;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 public class ExportApiServiceImpl extends ExportApiService {
 
@@ -71,58 +63,8 @@ public class ExportApiServiceImpl extends ExportApiService {
     @Override
     public Response exportApiGet(String name, String version, String providerName, String format,
                                  Boolean preserveStatus) {
-
-        ExportFormat exportFormat;
-        API api;
-        APIImportExportManager apiImportExportManager;
-        String userName;
-        APIIdentifier apiIdentifier;
-        APIProvider apiProvider;
-        String apiDomain;
-        String apiRequesterDomain;
-        //If not specified status is preserved by default
-        boolean isStatusPreserved = preserveStatus == null || preserveStatus;
-
-        if (name == null || version == null || providerName == null) {
-            RestApiUtil.handleBadRequest("Invalid API Information ", log);
-        }
-
-        try {
-            //Default export format is YAML
-            exportFormat = StringUtils.isNotEmpty(format) ? ExportFormat.valueOf(format.toUpperCase()) :
-                    ExportFormat.YAML;
-
-            userName = RestApiUtil.getLoggedInUsername();
-            //provider names with @ signs are only accepted
-            apiDomain = MultitenantUtils.getTenantDomain(providerName);
-            apiRequesterDomain = RestApiUtil.getLoggedInUserTenantDomain();
-
-            if (!StringUtils.equals(apiDomain, apiRequesterDomain)) {
-                //not authorized to export requested API
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API +
-                        " name:" + name + " version:" + version + " provider:" + providerName, (String) null, log);
-            }
-
-            apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), name, version);
-            apiProvider = RestApiUtil.getLoggedInUserProvider();
-            // Checking whether the API exists
-            if (!apiProvider.isAPIAvailable(apiIdentifier)) {
-                String errorMessage = "Error occurred while exporting. API: " + name + " version: " + version
-                        + " not found";
-                RestApiUtil.handleResourceNotFoundError(errorMessage, log);
-            }
-
-            api = apiProvider.getAPI(apiIdentifier);
-            apiImportExportManager = new APIImportExportManager(apiProvider, userName);
-            File file = apiImportExportManager.exportAPIArchive(api, isStatusPreserved, exportFormat);
-            return Response.ok(file)
-                    .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
-                            + file.getName() + "\"")
-                    .build();
-        } catch (APIManagementException | APIImportExportException e) {
-            RestApiUtil.handleInternalServerError("Error while exporting " + RestApiConstants.RESOURCE_API, e, log);
-        }
-        return null;
+        ExportApiUtil exportApi = new ExportApiUtil();
+        return exportApi.exportApiByParams(name, version, providerName, format, preserveStatus);
     }
 
     /**

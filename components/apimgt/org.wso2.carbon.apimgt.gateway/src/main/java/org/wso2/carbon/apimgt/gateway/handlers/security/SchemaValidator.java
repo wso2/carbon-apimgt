@@ -85,8 +85,17 @@ public class SchemaValidator extends AbstractHandler {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             rootNode = objectMapper.readTree(swagger.getBytes());
-            requestMethod = messageContext.getProperty(APIMgtGatewayConstants.
-                    ELECTED_REQUEST_METHOD).toString();
+            Object reqMethod = messageContext.getProperty(APIMgtGatewayConstants.
+                    ELECTED_REQUEST_METHOD);
+            if (reqMethod == null) {
+                Object method = axis2MC.getProperty(APIMgtGatewayConstants.HTTP_REQUEST_METHOD);
+                if (method == null) {
+                    return true;
+                }
+                requestMethod = method.toString();
+            } else {
+                requestMethod = reqMethod.toString();
+            }
             if (objContentType == null) {
                 return true;
             }
@@ -337,9 +346,17 @@ public class SchemaValidator extends AbstractHandler {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
                 messageContext).getAxis2MessageContext();
         String electedResource = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE).toString();
-        String reqMethod = messageContext.getProperty(APIMgtGatewayConstants.ELECTED_REQUEST_METHOD).toString();
-        String responseStatus = axis2MC.getProperty(APIMgtGatewayConstants.HTTP_SC).toString();
+        String reqMethod;
 
+        Object method = messageContext.getProperty(APIMgtGatewayConstants.
+                ELECTED_REQUEST_METHOD);
+        if (method == null) {
+            reqMethod = axis2MC.getProperty(APIMgtGatewayConstants.HTTP_REQUEST_METHOD).toString();
+        } else {
+            reqMethod = method.toString();
+        }
+
+        String responseStatus = axis2MC.getProperty(APIMgtGatewayConstants.HTTP_SC).toString();
         StringBuilder responseSchemaPath = new StringBuilder();
         responseSchemaPath.append(APIMgtGatewayConstants.PATHS).append(electedResource).
                 append(APIMgtGatewayConstants.JSONPATH_SEPARATE).append(reqMethod.toLowerCase()).
