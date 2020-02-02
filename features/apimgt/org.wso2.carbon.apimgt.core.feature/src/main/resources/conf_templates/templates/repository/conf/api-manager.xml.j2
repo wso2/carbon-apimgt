@@ -1043,5 +1043,11 @@
     <JWTAuthentication>
         <EnableSubscriptionValidationViaKeyManager>{{apim.jwt_authenitcation.subscription_validation_via_km}}</EnableSubscriptionValidationViaKeyManager>
     </JWTAuthentication>
-
+    <CertificateReLoaderConfiguration>
+        <Period>{{apim.certificate_reloader.period}}</Period>
+    </CertificateReLoaderConfiguration>
+        <MutualSSL>
+            <ClientCertificateHeader>{{apimgt.mutual_ssl.certificate_header}}</ClientCertificateHeader>
+            <EnableClientCertificateValidation>{{apimgt.mutual_ssl.enable_client_validation}}</EnableClientCertificateValidation>
+        </MutualSSL>
 </APIManager>
