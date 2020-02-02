@@ -41,8 +41,6 @@ import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
 
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,6 +57,9 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 
 /**
  * Global API Manager configuration. This is generally populated from a special XML descriptor
@@ -423,6 +424,8 @@ public class APIManagerConfiguration {
                 }
             }else if (APIConstants.JWT_CONFIGS.equals(localName)){
                 setJWTConfiguration(element);
+            } else if (APIConstants.API_RECOMMENDATION.equals(localName)){
+                setRecommendationConfigurations(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -504,18 +507,6 @@ public class APIManagerConfiguration {
     }
 
     public RecommendationEnvironment getApiRecommendationEnvironment() {
-        String recommendationEndpointURL = getFirstProperty(APIConstants.RECOMMENDATION_ENDPOINT);
-        String eventPublishingEndpointURL = getFirstProperty(APIConstants.EVENT_PUBLISHING_ENDPOINT);
-        if (recommendationEndpointURL != null || eventPublishingEndpointURL !=null ) {
-            String username = getFirstProperty(APIConstants.RECOMMENDATION_USERNAME);
-            String password = getFirstProperty(APIConstants.RECOMMENDATION_PASSWORD);
-            recommendationEnvironment.setRecommendationEndpointURL(recommendationEndpointURL);
-            recommendationEnvironment.setEventPublishingEndpointURL(eventPublishingEndpointURL);
-            recommendationEnvironment.setUsername(username);
-            recommendationEnvironment.setPassword(password);
-        } else {
-            return null;
-        }
         return recommendationEnvironment;
     }
 
@@ -1200,6 +1191,65 @@ public class APIManagerConfiguration {
             }
             monetizationAttribute.put(APIConstants.Monetization.IS_ATTRIBITE_REQUIRED, isRequired);
             monetizationAttributes.add(monetizationAttribute);
+        }
+    }
+
+    /**
+     * To populate recommendation related configurations
+     * @param element
+     */
+    private void setRecommendationConfigurations(OMElement element) {
+        OMElement apiRecommendationsConfigurationElement = element
+                .getFirstChildWithName(new QName(APIConstants.API_RECOMMENDATION));
+        if (apiRecommendationsConfigurationElement != null) {
+            OMElement recommendationSeverEndpointElement = apiRecommendationsConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.RECOMMENDATION_ENDPOINT));
+            if (recommendationSeverEndpointElement != null) {
+                recommendationEnvironment.setRecommendationServerURL(recommendationSeverEndpointElement.getText());
+            }
+
+            OMElement oauthEndpointElement = apiRecommendationsConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.AUTHENTICATION_ENDPOINT));
+            if (oauthEndpointElement != null) {
+                recommendationEnvironment.setOauthURL(oauthEndpointElement.getText());
+            }
+            OMElement consumerKeyElement = apiRecommendationsConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.RECOMMENDATION_API_CONSUMER_KEY));
+            if (consumerKeyElement != null) {
+                if (secretResolver.isInitialized()
+                        && secretResolver.isTokenProtected("APIManager.Recommendations.ConsumerKey")) {
+                    recommendationEnvironment.setConsumerKey(secretResolver
+                            .resolve("APIManager.Recommendations.ConsumerKey"));
+                } else {
+                    recommendationEnvironment.setConsumerKey(consumerKeyElement.getText());
+                }
+            }
+            OMElement consumerSecretElement = apiRecommendationsConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.RECOMMENDATION_API_CONSUMER_SECRET));
+            if (consumerSecretElement != null) {
+                if (secretResolver.isInitialized()
+                        && secretResolver.isTokenProtected("APIManager.Recommendations.ConsumerSecret")) {
+                    recommendationEnvironment.setConsumerSecret(secretResolver
+                            .resolve("APIManager.Recommendations.ConsumerSecret"));
+                } else {
+                    recommendationEnvironment.setConsumerSecret(consumerKeyElement.getText());
+                }
+            }
+            OMElement applyForAllTenantsElement = apiRecommendationsConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.APPLY_RECOMMENDATIONS_FOR_ALL_APIS));
+            if (applyForAllTenantsElement != null) {
+                recommendationEnvironment.setApplyForAllTenants(JavaUtils.isTrueExplicitly(applyForAllTenantsElement
+                        .getText()));
+            } else {
+                log.debug("Apply For All Tenants Element is not set. Set to default true");
+            }
+            OMElement maxRecommendationsElement = apiRecommendationsConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.MAX_RECOMMENDATIONS));
+            if (maxRecommendationsElement != null) {
+                recommendationEnvironment.setMaxRecommendations(Integer.parseInt(maxRecommendationsElement.getText()));
+            } else {
+                log.debug("Max recommendations is not set. Set to default 5");
+            }
         }
     }
 

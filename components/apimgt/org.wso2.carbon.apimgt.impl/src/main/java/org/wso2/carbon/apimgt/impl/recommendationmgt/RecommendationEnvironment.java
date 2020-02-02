@@ -20,41 +20,61 @@ package org.wso2.carbon.apimgt.impl.recommendationmgt;
 
 public class RecommendationEnvironment {
 
-    private String recommendationEndpointURL;
-    private String eventPublishingEndpointURL;
-    private String username;
-    private String password;
+    private String recommendationServerURL;
+    private String oauthURL;
+    private String consumerKey;
+    private String consumerSecret;
+    private int maxRecommendations = 5;
+    private boolean applyForAllTenants = true;
 
-    public String getRecommendationEndpointURL() {
-        return recommendationEndpointURL;
+    public String getRecommendationServerURL() {
+        return recommendationServerURL;
     }
 
-    public void setRecommendationEndpointURL(String recommendationEndpointURL) {
-        this.recommendationEndpointURL = recommendationEndpointURL;
+    public void setRecommendationServerURL(String recommendationServerURL) {
+        this.recommendationServerURL = recommendationServerURL;
     }
 
-    public String getEventPublishingEndpointURL() {
-        return eventPublishingEndpointURL;
+    public String getOauthURL() {
+
+        return oauthURL;
     }
 
-    public void setEventPublishingEndpointURL(String eventPublishingEndpointURL) {
-        this.eventPublishingEndpointURL = eventPublishingEndpointURL;
+    public void setOauthURL(String oauthURL) {
+
+        this.oauthURL = oauthURL;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public String getConsumerKey() {
+        return consumerKey;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setConsumerKey(String consumerKey) {
+        this.consumerKey = consumerKey;
     }
 
-    public String getUsername() {
-        return username;
+    public String getConsumerSecret() {
+        return consumerSecret;
     }
 
-    public String getPassword() {
-        return password;
+    public void setConsumerSecret(String consumerSecret) {
+        this.consumerSecret = consumerSecret;
+    }
+
+    public int getMaxRecommendations() {
+        return maxRecommendations;
+    }
+
+    public void setMaxRecommendations(int maxRecommendations) {
+        this.maxRecommendations = maxRecommendations;
+    }
+
+    public boolean isApplyForAllTenants() {
+        return applyForAllTenants;
+    }
+
+    public void setApplyForAllTenants(boolean applyForAllTenants) {
+        this.applyForAllTenants = applyForAllTenants;
     }
 }
 

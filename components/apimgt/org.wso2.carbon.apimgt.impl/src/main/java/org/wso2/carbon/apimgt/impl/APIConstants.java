@@ -18,12 +18,13 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.xml.namespace.QName;
 
 /**
  * This class represents the constants that are used for APIManager implementation
@@ -1884,10 +1885,12 @@ public final class APIConstants {
      *
      * */
     public static final String API_RECOMMENDATION = "APIRecommendations";
-    public static final String RECOMMENDATION_ENDPOINT = API_RECOMMENDATION + ".recommendationEndpoint";
-    public static final String EVENT_PUBLISHING_ENDPOINT = API_RECOMMENDATION + ".eventPublishingEndpoint";
-    public static final String RECOMMENDATION_USERNAME = API_RECOMMENDATION + ".username";
-    public static final String RECOMMENDATION_PASSWORD = API_RECOMMENDATION + ".password";
+    public static final String RECOMMENDATION_ENDPOINT = "recommendationSeverEndpoint";
+    public static final String AUTHENTICATION_ENDPOINT = "authenticationEndpoint";
+    public static final String RECOMMENDATION_API_CONSUMER_KEY = "consumerKey";
+    public static final String RECOMMENDATION_API_CONSUMER_SECRET = "consumerSecret";
+    public static final String MAX_RECOMMENDATIONS = "maxRecommendations";
+    public static final String APPLY_RECOMMENDATIONS_FOR_ALL_APIS = "applyForAllTenants";
     public static final String ADD_API = "ADD_API";
     public static final String DELETE_API = "DELETE_API";
     public static final String ADD_NEW_APPLICATION = "ADD_NEW_APPLICATION";
@@ -1899,4 +1902,10 @@ public final class APIConstants {
     public static final String DELETED_STATUS = "DELETED";
     public static final String ACTION_STRING = "action";
     public static final String PAYLOAD_STRING = "payload";
+    public static final String API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY = "EnableRecommendation";
+    public static final String RECOMMENDATIONS_WSO2_EVENT_PUBLISHER = "recommendationEventPublisher";
+    public static final String RECOMMENDATIONS_GET_RESOURCE = "/getRecommendations";
+    public static final String RECOMMENDATIONS_PUBLISH_RESOURCE = "/getRecommendations";
+    public static final String RECOMMENDATIONS_USER_HEADER = "User";
+    public static final String RECOMMENDATIONS_ACCOUNT_HEADER = "Account";
 }

@@ -35,6 +35,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -90,8 +91,11 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
 
-import javax.cache.Cache;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -100,6 +104,8 @@ import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.cache.Cache;
 
 @Component(
          name = "org.wso2.apimgt.impl.services",
@@ -248,6 +254,7 @@ public class APIManagerComponent {
             CacheProvider.createRESTAPITokenCache();
             CacheProvider.createRESTAPIInvalidTokenCache();
             CacheProvider.createGatewayJWTTokenCache();
+            //Initialize Recommendation wso2event output publisher
             configureRecommendationEventPublisherProperties();
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
@@ -336,6 +343,20 @@ public class APIManagerComponent {
 
     protected void unsetListenerManager(ListenerManager listenerManager) {
         log.debug("Listener manager unbound from the API manager component");
+    }
+
+    @Reference(
+            name = "output.http.extended.AdapterService.component",
+            service = AccessTokenGenerator.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAccessTokenGenerator"
+    )
+    protected void setAccessTokenGenerator(AccessTokenGenerator accessTokenGenerator) {
+        ServiceReferenceHolder.getInstance().setAccessTokenGenerator(accessTokenGenerator);
+    }
+    protected void unsetAccessTokenGenerator(AccessTokenGenerator accessTokenGenerator){
+        ServiceReferenceHolder.getInstance().setAccessTokenGenerator(null);
     }
 
     private void addRxtConfigs() throws APIManagementException {
@@ -662,7 +683,7 @@ public class APIManagerComponent {
 
     private void configureRecommendationEventPublisherProperties() {
         OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
-        adapterConfiguration.setName("recommendationEventPublisher");
+        adapterConfiguration.setName(APIConstants.RECOMMENDATIONS_WSO2_EVENT_PUBLISHER);
         adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
         adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
         Map<String, String> adapterParameters = new HashMap<>();

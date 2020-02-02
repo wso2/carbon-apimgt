@@ -186,6 +186,11 @@
             <artifactId>org.wso2.carbon.event.core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth</artifactId>
+            <version>${carbon.apimgt.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.carbon.registry</groupId>
             <artifactId>org.wso2.carbon.registry.indexing</artifactId>
         </dependency>
@@ -541,6 +546,7 @@
                             org.wso2.carbon.apimgt.localentry.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.securevault.*,
                             org.wso2.carbon.registry.*;version="${carbon.registry.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth.*;version="${carbon.apimgt.version}",
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>

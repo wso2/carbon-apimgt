@@ -33,6 +33,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -132,9 +133,9 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.cache.Caching;
-import javax.wsdl.Definition;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -160,6 +161,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.cache.Caching;
+import javax.wsdl.Definition;
 
 /**
  * This class provides the core API store functionality. It is implemented in a very
@@ -5757,54 +5761,92 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-    public boolean isRecommendationEnabled() {
-        boolean recommendationEnabled = false;
+    /**
+     * To check whether the API recommendation is enabled. It can be either enabled globally or tenant vice.
+     *
+     * @param tenantDomain Tenant domain
+     * @return whether recommendation is enabled or not
+     */
+
+    public boolean isRecommendationEnabled(String tenantDomain) {
 
         if (recommendationEnvironment != null) {
-            recommendationEnabled = true;
+            if (recommendationEnvironment.isApplyForAllTenants()) {
+                return true;
+            } else {
+                JSONObject apiTenantConfig = null;
+                try {
+                    String content = apimRegistryService
+                            .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+                    if (content != null) {
+                        JSONParser parser = new JSONParser();
+                        apiTenantConfig = (JSONObject) parser.parse(content);
+                    }
+                    return getTenantConfigValue(tenantDomain, apiTenantConfig,
+                            APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
+                } catch (UserStoreException e) {
+                    log.error("UserStoreException thrown when getting API tenant config from registry", e);
+                } catch (RegistryException e) {
+                    log.error("RegistryException thrown when getting API tenant config from registry", e);
+                } catch (ParseException e) {
+                    log.error("ParseException thrown when passing API tenant config from registry", e);
+                } catch (APIManagementException e) {
+                    log.error("APIManagementException thrown when passing API tenant config from registry", e);
+                }
+            }
         }
-        return recommendationEnabled;
+        return false;
     }
 
-    public String getApiRecommendations(String userName) {
-        if (userName != null && requestedTenant != null && recommendationEnvironment != null) {
-            String recommendationEndpointURL = recommendationEnvironment.getRecommendationEndpointURL();
-            String adminUsername = recommendationEnvironment.getUsername();
-            String adminPassword = recommendationEnvironment.getPassword();
+    /**
+     * Get recommendations for the user by connecting with the recommendation engine.
+     *
+     * @param userName     User's Name
+     * @param tenantDomain tenantDomain
+     * @return List of APIs recommended for the user
+     */
+    public String getApiRecommendations(String userName, String tenantDomain) {
+
+        if (isRecommendationEnabled(tenantDomain)) {
+            String recommendationEndpointURL = recommendationEnvironment.getRecommendationServerURL()
+                    + APIConstants.RECOMMENDATIONS_GET_RESOURCE;
+
+            String authUrl = recommendationEnvironment.getOauthURL();
+            String consumerKey = recommendationEnvironment.getConsumerKey();
+            String consumerSecret = recommendationEnvironment.getConsumerSecret();
+
             try {
+                String accessToken = ServiceReferenceHolder.getInstance().getAccessTokenGenerator()
+                                .getAccessToken(authUrl, consumerKey, consumerSecret);
+                String userID = apiMgtDAO.getUserID(userName);
                 URL serverURL = new URL(recommendationEndpointURL);
                 int serverPort = serverURL.getPort();
                 String serverProtocol = serverURL.getProtocol();
 
                 HttpGet method = new HttpGet(recommendationEndpointURL);
                 HttpClient httpClient = APIUtil.getHttpClient(serverPort, serverProtocol);
-
-                byte[] credentials = org.apache.commons.codec.binary.Base64
-                        .encodeBase64((adminUsername + ":" + adminPassword).getBytes(StandardCharsets.UTF_8));
-
-                method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
-                method.setHeader("User", userName);
-                method.setHeader("Account", requestedTenant);
+                method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, "Bearer " + accessToken);
+                method.setHeader(APIConstants.RECOMMENDATIONS_USER_HEADER, userID);
+                method.setHeader(APIConstants.RECOMMENDATIONS_ACCOUNT_HEADER, tenantDomain);
 
                 HttpResponse httpResponse = httpClient.execute(method);
-
-                BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
-                StringBuilder content = new StringBuilder();
-                String line;
-                while (null != (line = br.readLine())) {
-                    content.append(line);
+                if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                    String contentString = EntityUtils.toString(httpResponse.getEntity());
+                    if (log.isDebugEnabled()) {
+                        log.debug("Recommendations received for user " + userName + " is " + contentString);
+                    }
+                    return contentString;
+                } else {
+                    //TODO:handle if the response code is 401
+                    log.warn("Error getting recommendations from server. Server responded with "
+                            + httpResponse.getStatusLine().getStatusCode());
                 }
-                if (log.isDebugEnabled()) {
-                    log.debug("Recommendations received for user " + adminUsername + " is " + content.toString());
-                }
-                return content.toString();
-
             } catch (IOException e) {
                 log.error("Connection failure for the recommendation engine", e);
-                return null;
+            } catch (APIManagementException e) {
+                log.error("Error while getting recommendations for user " + userName, e);
             }
         }
         return null;
     }
-
 }

@@ -21,11 +21,13 @@ package org.wso2.carbon.apimgt.impl.recommendationmgt;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -41,6 +43,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     private static final Logger log = LoggerFactory.getLogger(RecommenderDetailsExtractor.class);
     private static String streamID = "org.wso2.apimgt.recommendation.event.stream:1.0.0";
     private boolean tenantFlowStarted = false;
+    protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
     private int applicationId;
     private API api;
@@ -154,12 +157,13 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     }
 
     @Override
-    public void publishNewApplication(Application application, String userId, int applicationId) {
+    public void publishNewApplication(Application application, String userName, int applicationId) {
         String appName = application.getName();
         String appDescription = application.getDescription();
+        String userID = getUserId(userName);
 
         JSONObject obj = new JSONObject();
-        obj.put("user", userId);
+        obj.put("user", userID);
         obj.put("application_id", applicationId);
         obj.put("application_name", appName);
         obj.put("application_description", appDescription);
@@ -172,6 +176,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
     @Override
     public void publishUpdatedApplication(Application application) {
+        //TODO:application id might be same in two orgs
         String appName = application.getName();
         String appDescription = application.getDescription();
         int appId = application.getId();
@@ -189,6 +194,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
     @Override
     public void publishedDeletedApplication(int appId) {
+        //TODO: appid is not unique
         JSONObject obj = new JSONObject();
         obj.put("appid", appId);
 
@@ -200,9 +206,10 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
     @Override
     public void publishClickedApi(ApiTypeWrapper api, String userName) {
+        String userID = getUserId(userName);
         String apiName = api.getName();
         JSONObject obj = new JSONObject();
-        obj.put("user", userName);
+        obj.put("user", userID);
         obj.put("api_name", apiName);
 
         JSONObject payload = new JSONObject();
@@ -213,9 +220,10 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
     @Override
     public void publishSearchQueries(String query, String username) {
+        String userID = getUserId(userName);
         query = query.split("&", 2)[0];
         JSONObject obj = new JSONObject();
-        obj.put("user", username);
+        obj.put("user", userID);
         obj.put("search_query", query);
 
         JSONObject payload = new JSONObject();
@@ -253,5 +261,15 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         PrivilegedCarbonContext.getThreadLocalCarbonContext().
                 setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
         tenantFlowStarted = true;
+    }
+
+    private String getUserId(String userName){
+        String userID = null;
+        try {
+            userID = apiMgtDAO.getUserID(userName);
+        } catch (APIManagementException e) {
+            log.error("Error occurred when getting the userID for user " + userName, e);
+        }
+        return  userID;
     }
 }

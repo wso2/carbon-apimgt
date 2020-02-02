@@ -28,31 +28,39 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.rest.api.store.v1.RecommendationsApiService;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.ws.rs.core.Response;
 
 public class RecommendationsApiServiceImpl implements RecommendationsApiService {
 
     private static final Log log = LogFactory.getLog(RecommendationsApiService.class);
 
     public Response recommendationsGet(MessageContext messageContext) {
-        String responseStringObj = "{}";
-        String recommendations;
-        APIConsumer apiConsumer;
+        RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
         try {
             String userName = RestApiUtil.getLoggedInUsername();
-            apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            recommendations = apiConsumer.getApiRecommendations(userName);
+            String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            if(apiConsumer.isRecommendationEnabled(tenantDomain)){
+
+            }
+            int maxRecommendations = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration().getApiRecommendationEnvironment().getMaxRecommendations();
+            String recommendations = apiConsumer.getApiRecommendations(userName, tenantDomain);
 
             if (recommendations != null) {
                 JSONObject jsonResponse = new JSONObject(recommendations);
                 JSONArray apiList = jsonResponse.getJSONArray("userRecommendations");
                 String requestedTenant = jsonResponse.getString("requestedTenantDomain");
-                String userId = jsonResponse.getString("user");
                 JSONObject responseObj = new JSONObject();
                 List<JSONObject> recommendedApis = new ArrayList<>();
 
@@ -63,14 +71,12 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
                         ApiTypeWrapper apiWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenant);
                         API api = apiWrapper.getApi();
                         APIIdentifier apiIdentifier = api.getId();
-                        boolean isApiSubscribed = apiConsumer.isSubscribed(apiIdentifier, userId);
-
-                        if (!isApiSubscribed) {
+                        boolean isApiSubscribed = apiConsumer.isSubscribed(apiIdentifier, userName);
+                        if (!isApiSubscribed && recommendedApis.size() <= maxRecommendations) {
                             JSONObject apiDetails = new JSONObject();
                             apiDetails.put("id", apiId);
                             apiDetails.put("name", apiWrapper.getName());
                             apiDetails.put("avgRating", api.getRating());
-
                             recommendedApis.add(apiDetails);
                         }
                     } catch (APIManagementException e) {
@@ -80,13 +86,12 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
                 int count = recommendedApis.size();
                 responseObj.put("count", count);
                 responseObj.put("list", recommendedApis);
-                responseStringObj = String.valueOf(responseObj);
+                String responseStringObj = String.valueOf(responseObj);
                 return Response.ok().entity(responseStringObj).build();
             }
         } catch (Exception e) {
             log.error("Error occurred when retrieving recommendations through the rest api: ", e);
         }
-        //todo handle response code handling
         return null;
     }
 }

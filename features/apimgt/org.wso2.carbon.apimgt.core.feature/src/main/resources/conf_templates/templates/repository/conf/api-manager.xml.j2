@@ -921,10 +921,12 @@
 
     {% if apim.devportal.recommendations is defined %}
     <APIRecommendations>
-        <recommendationEndpoint>{{apim.devportal.recommendations.recommendations_endpoint}}</recommendationEndpoint>
-        <eventPublishingEndpoint>{{apim.devportal.recommendations.event_publishing_endpoint}}</eventPublishingEndpoint>
-        <username>{{apim.devportal.recommendations.username}}</username>
-        <password>{{apim.devportal.recommendations.password}}</password>
+        <recommendationSeverEndpoint>{{apim.devportal.recommendations.recommendations_server}}</recommendationSeverEndpoint>
+        <authenticationEndpoint>{{apim.devportal.recommendations.oauth_endpoint}}</authenticationEndpoint>
+        <consumerKey>{{apim.devportal.recommendations.consumer_key}}</consumerKey>
+        <consumerSecret>{{apim.devportal.recommendations.consumer_secret}}</consumerSecret>
+        <maxRecommendations>{{apim.devportal.recommendations.max_recommendations}}</maxRecommendations>
+        <applyForAllTenants>{{apim.devportal.recommendations.apply_for_all_tenants}}</applyForAllTenants>
     </APIRecommendations>
     {% endif %}
 
