@@ -44,6 +44,9 @@ import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.impl.clients.scopemgt.ScopeMgtServiceClient;
+import org.wso2.carbon.apimgt.impl.clients.scopemgt.ScopeMgtServiceClientFactory;
+import org.wso2.carbon.apimgt.impl.clients.scopemgt.dto.ScopeBinding;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -722,6 +725,23 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public void registerScope(Scope scope, String tenantDomain) throws APIManagementException {
 
+        org.wso2.carbon.apimgt.impl.clients.scopemgt.dto.Scope scopeDTO =
+                new org.wso2.carbon.apimgt.impl.clients.scopemgt.dto.Scope();
+        List<ScopeBinding> scopeBindingListDTO = new ArrayList<>();
+        ScopeBinding scopeBindingDTO = new ScopeBinding();
+        scopeDTO.setName(scope.getName());
+        scopeDTO.setDisplayName(scope.getName());
+        scopeDTO.setDescription(scope.getDescription());
+        scopeBindingDTO.setBindingType("ROLE");
+        if (scope.getRoles() != null) {
+            scopeBindingDTO.setBinding(Arrays.asList(scope.getRoles().split(",")));
+        }
+        scopeBindingListDTO.add(scopeBindingDTO);
+        scopeDTO.setScopeBindings(scopeBindingListDTO);
+
+        ScopeMgtServiceClient scopeMgtServiceClient =
+                ScopeMgtServiceClientFactory.getScopeMgtServiceClient(configuration, tenantDomain);
+        scopeMgtServiceClient.registerScope(scopeDTO);
     }
 
 

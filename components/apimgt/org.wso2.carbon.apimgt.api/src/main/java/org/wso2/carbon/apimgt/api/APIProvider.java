@@ -1334,9 +1334,10 @@ public interface APIProvider extends APIManager {
      * Add a global scope
      * @param scope Global Scope
      * @param tenantDomain Tenant domain
+     * @return Added Global Scope object
      * @throws APIManagementException if failed to add a scope
      */
-    void addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException;
+    Scope addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException;
 
     /**
      * Get all available global scopes
