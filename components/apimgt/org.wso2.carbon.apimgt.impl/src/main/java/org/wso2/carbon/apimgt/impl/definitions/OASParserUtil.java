@@ -90,6 +90,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1101,5 +1102,23 @@ public class OASParserUtil {
         if (extensions.containsKey(APIConstants.X_WSO2_TRANSPORTS)) {
             extensions.remove(APIConstants.X_WSO2_TRANSPORTS);
         }
+    }
+
+    /**
+     * Get Application level security
+     * @param security string
+     * @return List of api security
+     */
+    public static List<String> getAPISecurity(String security){
+        List<String> apiSecurityList = new ArrayList<>();
+        if (security != null) {
+            String[] securityList = security.split(",");
+            for (String s : securityList) {
+                if (APIConstants.APPLICATION_LEVEL_SECURITY.contains(s)) {
+                    apiSecurityList.add(s);
+                }
+            }
+        }
+        return apiSecurityList;
     }
 }

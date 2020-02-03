@@ -516,6 +516,7 @@ public class OAS3Parser extends APIDefinition {
         if (api.getTransports() != null) {
             openAPI.addExtension(APIConstants.X_WSO2_TRANSPORTS, api.getTransports().split(","));
         }
+        openAPI.addExtension(APIConstants.SWAGGER_X_WSO2_API_SECURITY, OASParserUtil.getAPISecurity(api.getApiSecurity()));
         return Json.pretty(openAPI);
     }
 
