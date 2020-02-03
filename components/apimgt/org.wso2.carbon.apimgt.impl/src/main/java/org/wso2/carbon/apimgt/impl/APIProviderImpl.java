@@ -80,6 +80,7 @@ import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -928,7 +929,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Matcher matcher = pattern.matcher(toExamine);
         return matcher.find();
     }
-    
+
 
     /**
      * Check whether the provided information exceeds the maximum length
@@ -7952,6 +7953,45 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
         return getGraphqlSchemaDefinition(apiId);
+    }
+
+    @Override
+    public void addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException {
+
+        KeyManagerHolder.getKeyManagerInstance().registerScope(scope, tenantDomain);
+        //TODO: Add it AM_GLOBAL_SCOPE_TABLE and set scopeUUID inside
+    }
+
+    @Override
+    public List<Scope> getAllGlobalScopes(String tenantDomain) throws APIManagementException {
+
+        List<Scope>  allScopes = KeyManagerHolder.getKeyManagerInstance().getAllScopes(tenantDomain);
+
+        Map<String, String> globalScopeMapping = new HashMap<>();
+        //TODO: Get from AM_GLOBAL_SCOPESTABLE
+        for (Scope scope: allScopes) {
+            scope.setId(globalScopeMapping.get(scope.getKey()));
+        }
+        return allScopes;
+    }
+    @Override
+    public Scope getGlobalScopeByUUID(String globalScopeId, String tenantDomain) throws APIManagementException {
+        String scopeName = null;
+        //TODO: get scope name from AMDB
+
+        return KeyManagerHolder.getKeyManagerInstance().getScopeByName(scopeName,tenantDomain);
+    }
+
+    @Override
+    public void deleteGlobalScope(String globalScopeId, String tenantDomain) throws APIManagementException {
+        //TODO: call KeyManager and delete
+        //TODO: remove from global scope table
+    }
+
+    @Override
+    public Scope updateGlobalScope(Scope globalScope, String tenantDomain) throws APIManagementException {
+        //TODO: call key Manager and update scope role bindings
+        return null;
     }
 
     /**
