@@ -65,6 +65,7 @@ export default function Resources(props) {
     const [openAPISpec, setOpenAPISpec] = useState({});
     const [apiThrottlingPolicy, setApiThrottlingPolicy] = useState(api.apiThrottlingPolicy);
     const [arns, setArns] = useState([]);
+    const regexPattern = /.*\{.*\}.*/;
 
     /**
      *
@@ -435,6 +436,13 @@ export default function Resources(props) {
                                     alignItems='stretch'
                                 >
                                     {Object.entries(verbObject).map(([verb, operation]) => {
+                                        let resourcePathName = target.slice(1);
+                                        if (regexPattern.test(resourcePathName)) {
+                                            [resourcePathName] = resourcePathName.split('{');
+                                            if (resourcePathName.endsWith('/')) {
+                                                resourcePathName = resourcePathName.slice(0, -1);
+                                            }
+                                        }
                                         return (
                                             <Grid key={`${target}/${verb}`} item>
                                                 <Operation
@@ -444,8 +452,8 @@ export default function Resources(props) {
                                                     resourcePoliciesDispatcher={resourcePoliciesDispatcher}
                                                     resourcePolicy={
                                                         resourcePolicies
-                                                        && resourcePolicies[target.slice(1)]
-                                                        && resourcePolicies[target.slice(1)][verb]
+                                                        && resourcePolicies[resourcePathName]
+                                                        && resourcePolicies[resourcePathName][verb]
                                                     }
                                                     operationsDispatcher={operationsDispatcher}
                                                     spec={openAPISpec}
