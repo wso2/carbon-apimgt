@@ -384,7 +384,7 @@ class TokenManager extends React.Component {
         const username = AuthManager.getUser().name;
         let isUserOwner = false;
 
-        if (selectedApp.owner && username === selectedApp.owner) {
+        if (selectedApp.owner && username.toLowerCase() === selectedApp.owner.toLowerCase()) {
             isUserOwner = true;
         }
         const key = keys.get(keyType);
