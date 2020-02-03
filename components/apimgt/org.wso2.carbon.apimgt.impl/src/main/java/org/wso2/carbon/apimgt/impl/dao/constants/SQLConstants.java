@@ -3451,4 +3451,7 @@ public class SQLConstants {
                 "EXPIRY_TIMESTAMP, TENANT_ID, TOKEN_TYPE) VALUES(?,?,?,?,?)";
         public static final String DELETE_REVOKED_JWT = "DELETE FROM AM_REVOKED_JWT WHERE EXPIRY_TIMESTAMP < ?";
     }
+
+    //Global Scopes related constants
+    public static final String ADD_GLOBAL_SCOPE = "INSERT INTO AM_GLOBAL_SCOPE (NAME, UUID, TENANT_ID) VALUES(???)";
 }
