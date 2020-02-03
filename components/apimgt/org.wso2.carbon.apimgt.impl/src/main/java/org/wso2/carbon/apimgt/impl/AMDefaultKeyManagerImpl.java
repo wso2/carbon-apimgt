@@ -712,6 +712,67 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         return scopes;
     }
 
+    /**
+     * This method will be used to register a Scope in the authorization server.
+     *
+     * @param scope Scope to register
+     * @param tenantDomain tenant domain to add scope
+     * @throws APIManagementException if there is an error while registering a new scope.
+     */
+    @Override
+    public void registerScope(Scope scope, String tenantDomain) throws APIManagementException {
+
+    }
+
+
+    /**
+     * This method will be used to retrieve details of a Scope in the authorization server.
+     *
+     * @param scopeName Scope Name to retrieve
+     * @return  Scope object
+     * @param tenantDomain tenant domain to retrieve scope from
+     * @throws APIManagementException if an error while retrieving scope
+     */
+    @Override
+    public Scope getScopeByName(String scopeName, String tenantDomain) throws APIManagementException {
+
+        return null;
+    }
+
+    /**
+     * This method will be used to retrieve all the scopes available in the authorization server for the given tenant
+     * domain.
+     *
+     * @param tenantDomain tenant domain to retrieve scopes from
+     * @return Scope object list
+     * @throws APIManagementException if an error occurs while getting scopes list
+     */
+    @Override
+    public List<Scope> getAllScopes(String tenantDomain) throws APIManagementException {
+
+        List<Scope> allScopes = new ArrayList<>();
+
+
+
+
+
+        return allScopes;
+    }
+
+    /**
+     * This method will be used to attach a Scope in the authorization server to a API resource
+     *
+     * @param scope Scope to attach
+     * @param tenantDomain tenant domain
+     * @return true if successfully attached, false if there is
+     * @throws APIManagementException
+     */
+    @Override
+    public Boolean attachScopeToResource(Scope scope, String tenantDomain) throws APIManagementException {
+
+        return null;
+    }
+
     protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo createOAuthApplicationbyApplicationInfo(
                       org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToCreate) throws Exception {
         SubscriberKeyMgtClient keyMgtClient = null;

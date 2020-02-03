@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api.model;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -230,4 +231,42 @@ public interface KeyManager {
      * @throws APIManagementException
      */
     Map<String,Set<Scope>> getScopesForAPIS(String apiIdsString) throws  APIManagementException;
+
+    /**
+     * This method will be used to register a Scope in the authorization server.
+     *
+     * @param scope Scope to register
+     * @param tenantDomain tenant domain to add scope
+     * @throws APIManagementException if an error occurs while registering scope
+     */
+    void registerScope(Scope scope, String tenantDomain) throws APIManagementException;
+
+    /**
+     * This method will be used to retrieve details of a Scope in the authorization server.
+     *
+     * @param scopeName Scope Name to retrieve
+     * @param tenantDomain tenant domain to retrieve scope from
+     * @return  Scope object
+     * @throws APIManagementException if an error while retrieving scope
+     */
+    Scope getScopeByName(String scopeName, String tenantDomain) throws APIManagementException;
+
+    /**
+     * This method will be used to retrieve all the scopes available in the authorization server for the given tenant
+     * domain.
+     * @param tenantDomain  tenant domain to retrieve scopes from
+     * @return  Scope object list
+     * @throws APIManagementException   if an error occurs while getting scopes list
+     */
+    List<Scope> getAllScopes(String tenantDomain) throws APIManagementException;
+
+    /**
+     * This method will be used to attach a Scope in the authorization server to a API resource.
+     *
+     * @param scope Scope to attach
+     * @param tenantDomain tenant domain to add scope
+     * @return true if successfully attached, false if there is an error while attaching a scope to a resource.
+     * @throws APIManagementException
+     */
+    Boolean attachScopeToResource(Scope scope, String tenantDomain) throws APIManagementException;
 }
