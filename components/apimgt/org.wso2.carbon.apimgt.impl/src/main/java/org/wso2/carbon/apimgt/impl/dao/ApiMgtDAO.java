@@ -14699,7 +14699,7 @@ public class ApiMgtDAO {
         }
         return userID;
     }
-    
+
     /**
      * Get names of the tiers which has bandwidth as the quota type
      * @param tenantId id of the tenant
@@ -14868,6 +14868,40 @@ public class ApiMgtDAO {
         }
         return false;
     }
+    /**
+     * Add global scope
+     * @param scope Scope Object to add
+     * @param tenantDomain  Tenant domain
+     * @return  Scope object with UUID
+     * @throws APIManagementException   if an error occurs while adding global scope
+     */
+    public Scope addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException {
+
+        String uuid = UUID.randomUUID().toString();
+        scope.setId(uuid);
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_GLOBAL_SCOPE)) {
+            try {
+                initialAutoCommit = connection.getAutoCommit();
+                connection.setAutoCommit(false);
+                statement.setString(1, scope.getName());
+                statement.setString(2, uuid);
+                statement.setInt(3, tenantId);
+                statement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to add Global Scope : " + scope.getName(), e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Faled to add Global Scope: " + scope.getName(), e);
+        }
+        return scope;
+    }
+
 
     /**
      * Returns details of all Endpoint Registries belong to a given tenant
