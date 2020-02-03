@@ -67,9 +67,8 @@ public class GlobalScopesApiServiceImpl implements GlobalScopesApiService {
                 RestApiUtil.handleBadRequest("Scope Name cannot be empty or null", log);
             }
             Scope scope = GlobalScopeMappingUtil.fromDTOToScope(body);
-            apiProvider.addGlobalScope(scope, tenantDomain);
+            scope = apiProvider.addGlobalScope(scope, tenantDomain);
 
-            scope = apiProvider.getGlobalScopeByUUID(scope.getId(), tenantDomain);
             ScopeDTO createdScopeDTO = GlobalScopeMappingUtil.fromScopeToDTO(scope);
             String createdScopeURIString = RestApiConstants.RESOURCE_PATH_GLOBAL_SCOPES_SCOPE_ID
                     .replace(RestApiConstants.GLOBAL_SCOPE_ID_PARAM, createdScopeDTO.getId());
