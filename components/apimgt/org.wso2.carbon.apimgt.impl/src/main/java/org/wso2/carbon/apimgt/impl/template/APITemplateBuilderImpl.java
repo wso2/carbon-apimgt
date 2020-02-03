@@ -309,9 +309,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                     + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_OUT_RESOURCE;
             UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantId);
             configcontext = SequenceUtils.getSequenceTemplateConfigContext(registry, resourceInPath,
-                    SOAPToRESTConstants.Template.IN_SEQUENCES, configcontext);
+                    SOAPToRESTConstants.Template.IN_SEQUENCES, configcontext, api);
             configcontext = SequenceUtils.getSequenceTemplateConfigContext(registry, resourceOutPath,
-                    SOAPToRESTConstants.Template.OUT_SEQUENCES, configcontext);
+                    SOAPToRESTConstants.Template.OUT_SEQUENCES, configcontext, api);
         }
 
         return configcontext;

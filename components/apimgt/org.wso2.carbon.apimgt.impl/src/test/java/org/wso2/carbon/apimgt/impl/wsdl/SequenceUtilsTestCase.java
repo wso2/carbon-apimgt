@@ -28,6 +28,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
@@ -161,9 +163,12 @@ public class SequenceUtilsTestCase {
         Mockito.when(userRegistry.get(INSEQUENCE_RESOURCES)).thenReturn(collection);
         Mockito.when(userRegistry.get(INSEQUENCE_RESOURCES + "checkPhoneNumber_post.xml")).thenReturn(resource);
         PowerMockito.when(RegistryUtils.decodeBytes(Mockito.any(byte[].class))).thenReturn(content);
+        APIIdentifier apiIdentifier = new APIIdentifier("SoapToRest", "SoapToRest", "V1.0.0");
+        apiIdentifier.setTier("T1");
+        API api = new API(apiIdentifier);
         try {
             ConfigContext context = SequenceUtils
-                    .getSequenceTemplateConfigContext(userRegistry, INSEQUENCE_RESOURCES, seqType, configContext);
+                    .getSequenceTemplateConfigContext(userRegistry, INSEQUENCE_RESOURCES, seqType, configContext, api);
             Assert.assertNotNull(context);
         } catch (RegistryException e) {
             Assert.fail("Failed to get the sequences from the registry");

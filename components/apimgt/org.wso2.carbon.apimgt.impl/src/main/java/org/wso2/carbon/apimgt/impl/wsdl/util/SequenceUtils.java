@@ -26,7 +26,9 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.wsdl.template.SOAPToRESTAPIConfigContext;
@@ -51,6 +53,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -402,13 +407,15 @@ public class SequenceUtils {
      * @throws org.wso2.carbon.registry.api.RegistryException throws when getting registry resource content
      */
     public static ConfigContext getSequenceTemplateConfigContext(UserRegistry registry, String resourcePath,
-            String seqType, ConfigContext configContext) throws org.wso2.carbon.registry.api.RegistryException {
+                                                                 String seqType, ConfigContext configContext, API api) throws org.wso2.carbon.registry.api.RegistryException {
         Resource regResource;
         if (registry.resourceExists(resourcePath)) {
             regResource = registry.get(resourcePath);
             String[] resources = ((Collection) regResource).getChildren();
             JSONObject pathObj = new JSONObject();
             if (resources != null) {
+                Pattern pattern = Pattern.compile("[{}]");
+                Set<URITemplate> uriTemplates = api.getUriTemplates();
                 for (String path : resources) {
                     Resource resource = registry.get(path);
                     String method = resource.getProperty(SOAPToRESTConstants.METHOD);
@@ -419,6 +426,13 @@ public class SequenceUtils {
                             .replaceAll(SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method,
                                     SOAPToRESTConstants.EMPTY_STRING);
                     resourceName = SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR + resourceName;
+                    for (URITemplate uriTemplate : uriTemplates) {
+                        Matcher hasSpecialCharacters = pattern.matcher(uriTemplate.getUriTemplate());
+                        if (hasSpecialCharacters.find() && uriTemplate.getUriTemplate().contains(resourceName
+                                + SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR)) {
+                            resourceName = uriTemplate.getUriTemplate();
+                        }
+                    }
                     String content = RegistryUtils.decodeBytes((byte[]) resource.getContent());
                     JSONObject contentObj = new JSONObject();
                     contentObj.put(method, content);
