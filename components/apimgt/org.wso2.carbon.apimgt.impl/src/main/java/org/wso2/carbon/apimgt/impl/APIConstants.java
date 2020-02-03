@@ -638,6 +638,7 @@ public final class APIConstants {
     public static final String KEY_MANAGER_USERNAME = "Username";
     public static final String KEY_MANAGER_PASSWORD = "Password";
     public static final String AUTHSERVER_URL = "ServerURL";
+    public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH = "/api/identity/oauth2/v1.0/scopes";
 
     public static final String TOKEN_URL = "TokenURL";
     public static final String REVOKE_URL = "RevokeURL";

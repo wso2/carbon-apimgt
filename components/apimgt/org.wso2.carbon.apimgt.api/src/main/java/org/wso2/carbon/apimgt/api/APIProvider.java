@@ -1328,4 +1328,47 @@ public interface APIProvider extends APIManager {
      * @return List of removed resources that are reused among API Products
      */
     List<APIResource> getRemovedProductResources(Set<URITemplate> updatedUriTemplates, API existingAPI);
+
+
+    /**
+     * Add a global scope
+     * @param scope Global Scope
+     * @param tenantDomain Tenant domain
+     * @throws APIManagementException if failed to add a scope
+     */
+    void addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Get all available global scopes
+     * @param tenantDomain  tenant domain
+     * @return  Global Scope list
+     * @throws APIManagementException if failed to get the scope list
+     */
+    List<Scope> getAllGlobalScopes(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Get global scope by UUID
+     * @param globalScopeId  Global scope Id
+     * @param tenantDomain  tenant domain
+     * @return  Global Scope
+     * @throws APIManagementException If failed to get the scope
+     */
+    Scope getGlobalScopeByUUID(String globalScopeId, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Delete global scope
+     * @param globalScopeId Global Scope Id
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException   If failed to delete the scope
+     */
+    void deleteGlobalScope(String globalScopeId, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Update a global scope
+     * @param globalScope Global Scope
+     * @param tenantDomain tenant domain
+     * @return  updated Global Scope
+     * @throws APIManagementException   If failed to update
+     */
+    Scope updateGlobalScope(Scope globalScope, String tenantDomain) throws APIManagementException;
 }
