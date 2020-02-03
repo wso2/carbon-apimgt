@@ -7956,10 +7956,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException {
+    /**
+     * Add Global Scope by registering it in the KM and adding the scope as a Global Scope in AM DB.
+     * @param scope Global Scope
+     * @param tenantDomain Tenant domain
+     * @return Added Global Scope object
+     * @throws APIManagementException if failed to add a scope
+     */
+    public Scope addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException {
 
         KeyManagerHolder.getKeyManagerInstance().registerScope(scope, tenantDomain);
-        //TODO: Add it AM_GLOBAL_SCOPE_TABLE and set scopeUUID inside
+        return ApiMgtDAO.getInstance().addGlobalScope(scope, tenantDomain);
     }
 
     @Override
