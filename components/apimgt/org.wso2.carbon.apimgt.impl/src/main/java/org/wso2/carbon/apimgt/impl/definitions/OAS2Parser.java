@@ -527,7 +527,8 @@ public class OAS2Parser extends APIDefinition {
         if (api.getTransports() != null) {
             swagger.setVendorExtension(APIConstants.X_WSO2_TRANSPORTS, api.getTransports().split(","));
         }
-        swagger.setVendorExtension(APIConstants.SWAGGER_X_WSO2_API_SECURITY, OASParserUtil.getAPISecurity(api.getApiSecurity()));
+        swagger.setVendorExtension(APIConstants.SWAGGER_X_WSO2_API_SECURITY,
+                OASParserUtil.getAPISecurity(api.getApiSecurity()));
         return getSwaggerJsonString(swagger);
     }
 

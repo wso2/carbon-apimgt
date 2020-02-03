@@ -1109,13 +1109,13 @@ public class OASParserUtil {
      * @param security string
      * @return List of api security
      */
-    public static List<String> getAPISecurity(String security){
+    public static List<String> getAPISecurity(String security) {
         List<String> apiSecurityList = new ArrayList<>();
         if (security != null) {
             String[] securityList = security.split(",");
-            for (String s : securityList) {
-                if (APIConstants.APPLICATION_LEVEL_SECURITY.contains(s)) {
-                    apiSecurityList.add(s);
+            for (String securityType : securityList) {
+                if (APIConstants.APPLICATION_LEVEL_SECURITY.contains(securityType)) {
+                    apiSecurityList.add(securityType);
                 }
             }
         }
