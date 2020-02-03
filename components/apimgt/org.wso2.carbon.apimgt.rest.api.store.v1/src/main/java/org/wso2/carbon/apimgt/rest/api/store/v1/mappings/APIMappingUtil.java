@@ -299,6 +299,11 @@ public class APIMappingUtil {
             tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         }
 
+        //set the monetization status of this API (enabled or disabled)
+        APIMonetizationInfoDTO monetizationInfoDTO = new APIMonetizationInfoDTO();
+        monetizationInfoDTO.enabled(model.getMonetizationStatus());
+        dto.setMonetization(monetizationInfoDTO);
+
         Set<String> deniedTiers = apiConsumer.getDeniedTiers(tenantId);
         for (org.wso2.carbon.apimgt.api.model.Tier currentTier : apiTiers) {
             if (!deniedTiers.contains(currentTier.getName())) {
