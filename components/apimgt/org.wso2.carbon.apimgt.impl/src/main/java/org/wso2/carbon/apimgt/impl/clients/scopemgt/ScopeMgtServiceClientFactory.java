@@ -31,7 +31,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 /**
  * Factory class to create Scope Management Service Clients
  */
-//
 public class ScopeMgtServiceClientFactory {
 
     /**
@@ -73,6 +72,7 @@ public class ScopeMgtServiceClientFactory {
                 .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
+                .errorDecoder(new ScopeErrorDecoder())
                 .client(new ApacheHttpClient())
                 .target(ScopeMgtServiceClient.class, scopeMgtEndpoint);
     }
