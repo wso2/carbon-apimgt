@@ -2807,7 +2807,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param apiDefinition     Swagger definition
      * @param url               Swagger definition URL
      * @param fileInputStream   Swagger definition input file content
-     * @param fileDetail
+     * @param fileDetail        file meta information as Attachment
      * @param ifMatch           If-match header value
      * @return updated swagger document of the API
      */
@@ -2818,14 +2818,15 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
         try {
+            APIDefinitionValidationResponse validationResponse;
             //Handle URL and file based definition imports
-            if(url != null || fileInputStream != null) {
-                validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, true);
-                APIDefinitionValidationResponse validationResponse = (APIDefinitionValidationResponse) validationResponseMap
-                        .get(RestApiConstants.RETURN_MODEL);
-                apiDefinition = validationResponse.getJsonContent();
+            validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, true);
+            validationResponse = (APIDefinitionValidationResponse) validationResponseMap
+                    .get(RestApiConstants.RETURN_MODEL);
+            if (!validationResponse.isValid()) {
+                RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
             }
-            String updatedSwagger = updateSwagger(apiId, apiDefinition);
+            String updatedSwagger = updateSwagger(apiId, validationResponse);
             return Response.ok().entity(updatedSwagger).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
@@ -2848,12 +2849,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
-     * update swagger definition of the given api
-     * @param apiId apiid
+     * update swagger definition of the given api. The swagger will be validated before updating.
+     *
+     * @param apiId API Id
      * @param apiDefinition swagger definition
      * @return updated swagger definition
-     * @throws APIManagementException
-     * @throws FaultGatewaysException
+     * @throws APIManagementException when error occurred updating swagger
+     * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
     private String updateSwagger(String apiId, String apiDefinition)
             throws APIManagementException, FaultGatewaysException {
@@ -2862,11 +2864,26 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (!response.isValid()) {
             RestApiUtil.handleBadRequest(response.getErrorItems(), log);
         }
+        return updateSwagger(apiId, response);
+    }
+
+    /**
+     * update swagger definition of the given api
+     *
+     * @param apiId API Id
+     * @param response response of a swagger definition validation call
+     * @return updated swagger definition
+     * @throws APIManagementException when error occurred updating swagger
+     * @throws FaultGatewaysException when error occurred publishing API to the gateway
+     */
+    private String updateSwagger(String apiId, APIDefinitionValidationResponse response)
+            throws APIManagementException, FaultGatewaysException {
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         //this will fail if user does not have access to the API or the API does not exist
         API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIDefinition oasParser = response.getParser();
+        String apiDefinition = response.getJsonContent();
         Set<URITemplate> uriTemplates = null;
         try {
             uriTemplates = oasParser.getURITemplates(apiDefinition);
@@ -3900,7 +3917,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     private Map validateOpenAPIDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
            Boolean returnContent) throws APIManagementException {
+        //validate inputs
         handleInvalidParams(fileInputStream, fileDetail, url);
+
         OpenAPIDefinitionValidationResponseDTO responseDTO;
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         if (url != null) {
