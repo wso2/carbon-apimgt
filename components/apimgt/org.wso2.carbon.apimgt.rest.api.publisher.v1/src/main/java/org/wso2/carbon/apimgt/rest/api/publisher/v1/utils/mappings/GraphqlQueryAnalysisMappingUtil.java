@@ -83,7 +83,7 @@ public class GraphqlQueryAnalysisMappingUtil {
             List<GraphqlDepthInfo> graphqlDepthInfoList) {
         GraphQLQueryDepthInfoListDTO graphQLQueryDepthInfoListDTO = new GraphQLQueryDepthInfoListDTO();
         List<GraphQLQueryDepthInfoDTO> graphQLQueryDepthInfoDTOList = new ArrayList<GraphQLQueryDepthInfoDTO>();
-        for (GraphqlDepthInfo graphqlDepthInfo :  graphqlDepthInfoList) {
+        for (GraphqlDepthInfo graphqlDepthInfo : graphqlDepthInfoList) {
             GraphQLQueryDepthInfoDTO graphQLQueryDepthInfoDTO = new GraphQLQueryDepthInfoDTO();
             graphQLQueryDepthInfoDTO.setUuid(graphqlDepthInfo.getUuid());
             graphQLQueryDepthInfoDTO.setRole(graphqlDepthInfo.getRole());

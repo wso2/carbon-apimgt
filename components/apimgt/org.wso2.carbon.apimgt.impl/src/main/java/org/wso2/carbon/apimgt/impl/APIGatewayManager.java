@@ -141,7 +141,7 @@ public class APIGatewayManager {
                 String operation;
                 client = new APIGatewayAdminClient(environment);
                 if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
-                    //Build schema with scopes and roles
+                    //Build schema with additional info
                     GraphqlPolicyDefinition graphqlPolicyDefinition = APIUtil.getPolicyDefinition(api);
                     GraphQLSchemaDefinition schemaDefinition = new GraphQLSchemaDefinition();
                     definition = schemaDefinition.buildSchemaWithAdditionalInfo(api, graphqlPolicyDefinition);

@@ -1072,6 +1072,8 @@ public final class APIConstants {
     public static final String GRAPHQL_PAYLOAD = "GRAPHQL_PAYLOAD";
     public static final String GRAPHQL_SCHEMA = "GRAPHQL_SCHEMA";
     public static final String GRAPHQL_ACCESS_CONTROL_POLICY = "GraphQLAccessControlPolicy";
+    public static final String QUERY_ANALYSIS_DEPTH_ = "depth";
+    public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
 
     //URI Authentication Schemes
     public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =
