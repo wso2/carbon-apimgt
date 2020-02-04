@@ -1855,6 +1855,7 @@ public class SQLConstants {
 
     public static final String GET_ROLE_DEPTH_MAPPING_SQL =
             "SELECT" +
+            "   UUID," +
             "   ROLE," +
             "   DEPTH_VALUE" +
             " FROM" +

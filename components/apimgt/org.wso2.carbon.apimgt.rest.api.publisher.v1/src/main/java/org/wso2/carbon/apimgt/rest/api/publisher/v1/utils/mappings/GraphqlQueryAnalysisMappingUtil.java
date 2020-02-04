@@ -115,6 +115,7 @@ public class GraphqlQueryAnalysisMappingUtil {
      */
     public static GraphQLQueryDepthInfoDTO fromGraphqlDepthInfotoDTO(GraphqlDepthInfo graphqlDepthInfo) {
         GraphQLQueryDepthInfoDTO graphQLQueryDepthInfoDTO = new GraphQLQueryDepthInfoDTO();
+        graphQLQueryDepthInfoDTO.setUuid(graphqlDepthInfo.getUuid());
         graphQLQueryDepthInfoDTO.setRole(graphqlDepthInfo.getRole());
         graphQLQueryDepthInfoDTO.setDepthValue(graphqlDepthInfo.getDepthValue());
         return graphQLQueryDepthInfoDTO;

@@ -50,6 +50,7 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -263,6 +264,7 @@ public class GraphQLSchemaDefinition {
      * @return json object which contains the policy definition
      */
     public JSONObject policyDefinitionToJson(GraphqlPolicyDefinition graphqlPolicyDefinition) {
+        JSONObject policyDefinition = new JSONObject();
         HashMap<String, HashMap<String, Integer>> customComplexityMap = new HashMap<>();
         List<CustomComplexityDetails> list = graphqlPolicyDefinition.getGraphqlComplexityInfo().getList();
         for (CustomComplexityDetails customComplexityDetails : list) {
@@ -278,20 +280,20 @@ public class GraphQLSchemaDefinition {
             }
         }
 
-        JSONObject policyDefinition = new JSONObject();
-        Map depthObject = new LinkedHashMap(graphqlPolicyDefinition.getRoleDepthMappings().size()+1);
+        Map<String, Serializable> depthObject = new LinkedHashMap<>(graphqlPolicyDefinition.getRoleDepthMappings().size() + 1);
         depthObject.put("enabled", graphqlPolicyDefinition.isDepthEnabled());
         for (GraphqlDepthInfo graphqlDepthInfo : graphqlPolicyDefinition.getRoleDepthMappings()) {
             depthObject.put(graphqlDepthInfo.getRole(), graphqlDepthInfo.getDepthValue());
         }
-        Map complexityObject = new LinkedHashMap(3);
-        Map customComplexityObject = new LinkedHashMap(customComplexityMap.size());
+
+        Map<String, Object> complexityObject = new LinkedHashMap<>(3);
+        Map<String, Map<String, Object>> customComplexityObject = new LinkedHashMap<>(customComplexityMap.size());
         for (HashMap.Entry<String, HashMap<String, Integer>> entry : customComplexityMap.entrySet()) {
             HashMap<String, Integer> fieldValueMap = entry.getValue();
             String type = entry.getKey();
-            Map fieldValueObject = new LinkedHashMap(fieldValueMap.size());
+            Map<String, Object> fieldValueObject = new LinkedHashMap<>(fieldValueMap.size());
             for (HashMap.Entry<String, Integer> subEntry : fieldValueMap.entrySet()) {
-                String field =  subEntry.getKey();
+                String field = subEntry.getKey();
                 int complexityValue = subEntry.getValue();
                 fieldValueObject.put(field, complexityValue);
             }
@@ -302,8 +304,8 @@ public class GraphQLSchemaDefinition {
         complexityObject.put("max_query_complexity", graphqlComplexityInfo.getMaxComplexity());
         complexityObject.put("custom_complexity_values", customComplexityObject);
 
-        policyDefinition.put("DEPTH", depthObject);
-        policyDefinition.put("COMPLEXITY", complexityObject);
+        policyDefinition.put(APIConstants.QUERY_ANALYSIS_DEPTH_, depthObject);
+        policyDefinition.put(APIConstants.QUERY_ANALYSIS_COMPLEXITY, complexityObject);
 
         return policyDefinition;
     }

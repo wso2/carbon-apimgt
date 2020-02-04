@@ -115,13 +115,13 @@ public class GraphQLAPIHandler extends AbstractHandler {
                         if (log.isDebugEnabled()) {
                             log.debug("Invalid query parameter " + queryParams[0]);
                         }
-                        handleFailure(messageContext, APISecurityConstants.GRAPHQL_INVALID_QUERY_MESSAGE, "Invalid query parameter");
+                        handleFailure(messageContext, "Invalid query parameter");
                         return false;
                     }
                 }
                 messageContext.setProperty(APIConstants.GRAPHQL_PAYLOAD, payload);
             } else {
-                handleFailure(messageContext, APISecurityConstants.GRAPHQL_INVALID_QUERY_MESSAGE, "Request path cannot be empty");
+                handleFailure(messageContext, "Request path cannot be empty");
                 return false;
             }
 
@@ -149,7 +149,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                             return true;
                         }
                     } else {
-                        handleFailure(messageContext, APISecurityConstants.GRAPHQL_INVALID_QUERY_MESSAGE,"Operation definition cannot be empty");
+                        handleFailure(messageContext, "Operation definition cannot be empty");
                         return false;
                     }
                 }
@@ -158,7 +158,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
             }
         } catch (IOException | XMLStreamException | InvalidSyntaxException e) {
             log.error(e.getMessage());
-            handleFailure(messageContext, APISecurityConstants.GRAPHQL_INVALID_QUERY_MESSAGE, e.getMessage());
+            handleFailure(messageContext, e.getMessage());
         }
         return false;
     }
@@ -251,7 +251,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
         HashMap<String, Boolean> operationAuthSchemeMappingList = new HashMap<>();
         HashMap<String, String> operationScopeMappingList = new HashMap<>();
         HashMap<String, ArrayList<String>> scopeRoleMappingList = new HashMap<>();
-        String GraphQLAccessControlPolicy = null;
+        String graphQLAccessControlPolicy = null;
 
         if (schema != null) {
             Set<GraphQLType> additionalTypes = schema.getAdditionalTypes();
@@ -292,8 +292,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                             }
 
                         }  else if (additionalType.getName().contains(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY)) {
-                            String base64DecodedPolicy = new String(Base64.getUrlDecoder().decode(type.getName()));
-                            GraphQLAccessControlPolicy = base64DecodedPolicy;
+                            graphQLAccessControlPolicy = new String(Base64.getUrlDecoder().decode(type.getName()));
                         }
                     }
                     if (!roleArrayList.isEmpty()) {
@@ -311,7 +310,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
         messageContext.setProperty(APIConstants.SCOPE_OPERATION_MAPPING, operationScopeMappingList);
         messageContext.setProperty(APIConstants.OPERATION_THROTTLING_MAPPING, operationThrottlingMappingList);
         messageContext.setProperty(APIConstants.OPERATION_AUTH_SCHEME_MAPPING, operationAuthSchemeMappingList);
-        messageContext.setProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY, GraphQLAccessControlPolicy);
+        messageContext.setProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY, graphQLAccessControlPolicy);
         messageContext.setProperty(APIConstants.API_TYPE, GRAPHQL_API);
         messageContext.setProperty(APIConstants.GRAPHQL_SCHEMA, schema);
     }
@@ -350,7 +349,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 validationErrorMessageList.add(error.getDescription());
             }
             validationErrorMessage = String.join(",", validationErrorMessageList);
-            handleFailure(messageContext, APISecurityConstants.GRAPHQL_INVALID_QUERY_MESSAGE, validationErrorMessage);
+            handleFailure(messageContext, validationErrorMessage);
             return false;
         }
         return true;
@@ -360,10 +359,10 @@ public class GraphQLAPIHandler extends AbstractHandler {
      * This method handle the failure
      *
      * @param messageContext message context of the request
-     * @param errorMessage   error message of the failure
+     * @param errorDescription description of the error
      */
-    private void handleFailure(MessageContext messageContext, String errorMessage, String errorDescription) {
-        OMElement payload = getFaultPayload(errorMessage, errorDescription);
+    private void handleFailure(MessageContext messageContext, String errorDescription) {
+        OMElement payload = getFaultPayload(errorDescription);
         Utils.setFaultPayload(messageContext, payload);
         Mediator sequence = messageContext.getSequence(APISecurityConstants.GRAPHQL_API_FAILURE_HANDLER);
         if (sequence != null && !sequence.mediate(messageContext)) {
@@ -373,10 +372,10 @@ public class GraphQLAPIHandler extends AbstractHandler {
     }
 
     /**
-     * @param message fault message
+     * @param description description of the error
      * @return the OMElement
      */
-    private OMElement getFaultPayload(String message, String description) {
+    private OMElement getFaultPayload(String description) {
         OMFactory fac = OMAbstractFactory.getOMFactory();
         OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS,
                 APISecurityConstants.API_SECURITY_NS_PREFIX);
@@ -385,7 +384,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
         OMElement errorCode = fac.createOMElement("code", ns);
         errorCode.setText(APISecurityConstants.GRAPHQL_INVALID_QUERY + "");
         OMElement errorMessage = fac.createOMElement("message", ns);
-        errorMessage.setText(message);
+        errorMessage.setText(APISecurityConstants.GRAPHQL_INVALID_QUERY_MESSAGE);
         OMElement errorDetail = fac.createOMElement("description", ns);
         errorDetail.setText(description);
 
