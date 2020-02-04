@@ -2814,19 +2814,22 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String url, InputStream fileInputStream,
             Attachment fileDetail, String ifMatch, MessageContext messageContext) {
-
-        // Validate and retrieve the OpenAPI definition
-        Map validationResponseMap = null;
         try {
-            APIDefinitionValidationResponse validationResponse;
+            String updatedSwagger;
             //Handle URL and file based definition imports
-            validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, true);
-            validationResponse = (APIDefinitionValidationResponse) validationResponseMap
-                    .get(RestApiConstants.RETURN_MODEL);
-            if (!validationResponse.isValid()) {
-                RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
+            if(url != null || fileInputStream != null) {
+                // Validate and retrieve the OpenAPI definition
+                Map validationResponseMap = validateOpenAPIDefinition(url, fileInputStream,
+                        fileDetail, true);
+                APIDefinitionValidationResponse validationResponse =
+                        (APIDefinitionValidationResponse) validationResponseMap .get(RestApiConstants.RETURN_MODEL);
+                if (!validationResponse.isValid()) {
+                    RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
+                }
+                updatedSwagger = updateSwagger(apiId, validationResponse);
+            } else {
+                updatedSwagger = updateSwagger(apiId, apiDefinition);
             }
-            String updatedSwagger = updateSwagger(apiId, validationResponse);
             return Response.ok().entity(updatedSwagger).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
