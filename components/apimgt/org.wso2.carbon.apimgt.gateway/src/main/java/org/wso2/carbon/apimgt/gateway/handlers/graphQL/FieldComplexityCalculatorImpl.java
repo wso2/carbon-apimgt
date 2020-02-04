@@ -10,19 +10,19 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-public class CustomComplexityCalculator implements FieldComplexityCalculator {
-    private static final Log log = LogFactory.getLog(CustomComplexityCalculator.class);
+public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator {
+    private static final Log log = LogFactory.getLog(FieldComplexityCalculatorImpl.class);
     JSONParser jsonParser = new JSONParser();
     JSONObject policyDefinition;
 
-    public CustomComplexityCalculator(MessageContext messageContext) {
+    public FieldComplexityCalculatorImpl(MessageContext messageContext) {
         try {
-            String GraphQLAccessControlPolicy = (String) messageContext.getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY);
-            JSONObject jsonObject = (JSONObject) jsonParser.parse(GraphQLAccessControlPolicy);
-            Object complexityObject = jsonObject.get("COMPLEXITY");
+            String graphQLAccessControlPolicy = (String) messageContext.getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY);
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(graphQLAccessControlPolicy);
+            Object complexityObject = jsonObject.get(APIConstants.QUERY_ANALYSIS_COMPLEXITY);
             policyDefinition = (JSONObject) ((JSONObject) complexityObject).get("custom_complexity_values");
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("Policy definition parsing failed. " + e.getMessage(), e);
         }
     }
 
@@ -35,10 +35,10 @@ public class CustomComplexityCalculator implements FieldComplexityCalculator {
     }
 
     private int getCustomComplexity(String fieldName, String parentType, JSONObject policyDefinition) {
-        try {
-            int value = ((Long)((JSONObject)policyDefinition.get(parentType)).get(fieldName)).intValue();
-            return value; // Returns custom complexity value
-        } catch (NullPointerException e) {
+        Object customComplexity = ((JSONObject) policyDefinition.get(parentType)).get(fieldName);
+        if (customComplexity != null) {
+            return (int) customComplexity; // Returns custom complexity value
+        } else {
             if (log.isDebugEnabled()) {
                 log.debug("No custom complexity value was assigned for " + fieldName + " under type " + parentType);
             }
