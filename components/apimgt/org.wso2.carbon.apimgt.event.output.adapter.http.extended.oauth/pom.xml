@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.6.11-SNAPSHOT</version>
+        <version>6.6.33-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -29,7 +29,7 @@
     <artifactId>org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth</artifactId>
 
     <packaging>bundle</packaging>
-    <name>WSO2 Carbon - Event Output HTTP adapter Module</name>
+    <name>WSO2 Carbon - Event Output Extended HTTP adapter Module</name>
     <description>org.wso2.carbon.event.output.adapter.http.extended.oauth provides the back-end functionality of http event adapter
     </description>
     <url>http://wso2.org</url>
@@ -82,13 +82,13 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.wso2.carbon.event.output.adapter.recommendationevent.internal,
-                            org.wso2.carbon.event.output.adapter.recommendationevent.internal.*
+                            org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth.internal,
+                            org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth.internal.*
                         </Private-Package>
                         <Export-Package>
-                            !org.wso2.carbon.event.output.adapter.recommendationevent.internal,
-                            !org.wso2.carbon.event.output.adapter.recommendationevent.internal.*,
-                            org.wso2.carbon.event.output.adapter.recommendationevent.*
+                            !org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth.internal,
+                            !org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth.internal.*,
+                            org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth.*
                         </Export-Package>
                         <Import-Package>
                             javax.xml.namespace; version=0.0.0,

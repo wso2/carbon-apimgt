@@ -1889,7 +1889,7 @@ public final class APIConstants {
      *
      * */
     public static final String API_RECOMMENDATION = "APIRecommendations";
-    public static final String RECOMMENDATION_ENDPOINT = "recommendationSeverEndpoint";
+    public static final String RECOMMENDATION_ENDPOINT = "recommendationAPI";
     public static final String AUTHENTICATION_ENDPOINT = "authenticationEndpoint";
     public static final String RECOMMENDATION_API_CONSUMER_KEY = "consumerKey";
     public static final String RECOMMENDATION_API_CONSUMER_SECRET = "consumerSecret";
@@ -1909,7 +1909,7 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY = "EnableRecommendation";
     public static final String RECOMMENDATIONS_WSO2_EVENT_PUBLISHER = "recommendationEventPublisher";
     public static final String RECOMMENDATIONS_GET_RESOURCE = "/getRecommendations";
-    public static final String RECOMMENDATIONS_PUBLISH_RESOURCE = "/getRecommendations";
+    public static final String RECOMMENDATIONS_PUBLISH_RESOURCE = "/publishEvents";
     public static final String RECOMMENDATIONS_USER_HEADER = "User";
     public static final String RECOMMENDATIONS_ACCOUNT_HEADER = "Account";
 }

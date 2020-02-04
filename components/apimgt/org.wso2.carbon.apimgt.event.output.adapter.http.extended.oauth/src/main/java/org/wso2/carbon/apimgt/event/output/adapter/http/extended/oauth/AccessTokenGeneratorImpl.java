@@ -57,13 +57,15 @@ public class AccessTokenGeneratorImpl implements AccessTokenGenerator{
     private static final Log log = LogFactory.getLog(AccessTokenGeneratorImpl.class);
 
     private static volatile AccessTokenGeneratorImpl accessTokenGenerator = null;
-    Long generatedTime = Long.valueOf(0);
-    Long validityPeriod = Long.valueOf(3600000);
+    long generatedTime = 0;
+    long validityPeriod = 3600000;
     String accessToken = null;
     public static final String STRICT = "Strict";
     public static final String ALLOW_ALL = "AllowAll";
-    public static final String DEFAULT_AND_LOCALHOST = "DefaultAndLocalhost";
     public static final String HOST_NAME_VERIFIER = "httpclient.hostnameVerifier";
+    String oauthUrl = null;
+    String consumerKey = null;
+    String consumerSecret = null;
 
     public AccessTokenGeneratorImpl() {
     }
@@ -83,14 +85,17 @@ public class AccessTokenGeneratorImpl implements AccessTokenGenerator{
     @Override
     public String getAccessToken(String oauthUrl, String consumerKey, String consumerSecret) {
 
-        Long currentTime = System.currentTimeMillis();
-        Long gen = this.generatedTime;
-        Long val = this.validityPeriod;
-        String access = this.accessToken;
-        if (currentTime > gen + val || access == null) {
-            return generateNewAccessToken(oauthUrl, consumerKey, consumerSecret);
+        if(this.oauthUrl == oauthUrl && this.consumerKey == consumerKey && this.consumerSecret == consumerSecret) {
+            if (System.currentTimeMillis() > this.generatedTime + this.validityPeriod || this.accessToken == null) {
+                return generateNewAccessToken(oauthUrl, consumerKey, consumerSecret);
+            } else {
+                return this.accessToken;
+            }
         } else {
-            return this.accessToken;
+            this.oauthUrl = oauthUrl;
+            this.consumerKey = consumerKey;
+            this.consumerSecret = consumerSecret;
+            return generateNewAccessToken(oauthUrl, consumerKey, consumerSecret);
         }
     }
 
@@ -119,13 +124,15 @@ public class AccessTokenGeneratorImpl implements AccessTokenGenerator{
                     String payload = EntityUtils.toString(httpResponse.getEntity());
                     JSONObject response = new JSONObject(payload);
                     this.accessToken = (String) response.get("access_token");
-                    this.validityPeriod = (long) ((int) response.get("expires_in") * 1000);
+                    this.validityPeriod = (long) response.get("expires_in") * 1000;
                     this.generatedTime = System.currentTimeMillis();
                     return (String) response.get("access_token");
                 } else {
+                    log.error("Error occurred when generating a new Access token. Server responded with "
+                            + httpResponse.getStatusLine().getStatusCode());
                 }
             } catch (IOException e) {
-
+                log.error("Error occurred when generating a new Access token", e);
             }
         }
         return null;
