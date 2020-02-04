@@ -24,7 +24,7 @@ public class CustomComplexityDetails {
 
     private String type;
     private String field;
-    private Integer complexityValue;
+    private int complexityValue;
 
     public String getType() {
         return type;
@@ -42,11 +42,11 @@ public class CustomComplexityDetails {
         this.field = field;
     }
 
-    public Integer getComplexityValue() {
+    public int getComplexityValue() {
         return complexityValue;
     }
 
-    public void setComplexityValue(Integer complexityValue) {
+    public void setComplexityValue(int complexityValue) {
         this.complexityValue = complexityValue;
     }
 }

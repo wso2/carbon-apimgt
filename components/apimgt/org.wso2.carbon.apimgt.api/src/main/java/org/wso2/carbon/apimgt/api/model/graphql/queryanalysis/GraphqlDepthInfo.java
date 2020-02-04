@@ -22,9 +22,9 @@ package org.wso2.carbon.apimgt.api.model.graphql.queryanalysis;
  */
 public class GraphqlDepthInfo {
 
-    private String uuid = null;
-    private String role = null;
-    private Integer depthValue = null;
+    private String uuid;
+    private String role;
+    private int depthValue;
 
     public String getUuid() {
         return uuid;
@@ -42,11 +42,11 @@ public class GraphqlDepthInfo {
         this.role = role;
     }
 
-    public Integer getDepthValue() {
+    public int getDepthValue() {
         return depthValue;
     }
 
-    public void setDepthValue(Integer depthValue) {
+    public void setDepthValue(int depthValue) {
         this.depthValue = depthValue;
     }
 }

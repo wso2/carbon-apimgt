@@ -19,22 +19,22 @@ package org.wso2.carbon.apimgt.api.model.graphql.queryanalysis;
 
 public class GraphqlDepthComplexityStatus {
 
-    private Boolean depthEnabled = null;
-    private Boolean complexityEnabled = null;
+    private boolean depthEnabled;
+    private boolean complexityEnabled;
 
-    public Boolean getDepthEnabled() {
+    public boolean getDepthEnabled() {
         return depthEnabled;
     }
 
-    public void setDepthEnabled(Boolean depthEnabled) {
+    public void setDepthEnabled(boolean depthEnabled) {
         this.depthEnabled = depthEnabled;
     }
 
-    public Boolean getComplexityEnabled() {
+    public boolean getComplexityEnabled() {
         return complexityEnabled;
     }
 
-    public void setComplexityEnabled(Boolean complexityEnabled) {
+    public void setComplexityEnabled(boolean complexityEnabled) {
         this.complexityEnabled = complexityEnabled;
     }
 }

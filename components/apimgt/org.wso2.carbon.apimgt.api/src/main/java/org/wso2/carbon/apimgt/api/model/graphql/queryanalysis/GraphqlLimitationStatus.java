@@ -19,8 +19,8 @@ package org.wso2.carbon.apimgt.api.model.graphql.queryanalysis;
 
 public class GraphqlLimitationStatus {
 
-    private String limitationType = null;
-    private Boolean enabled = null;
+    private String limitationType;
+    private boolean enabled;
 
     public String getLimitationType() {
         return limitationType;
@@ -30,11 +30,11 @@ public class GraphqlLimitationStatus {
         this.limitationType = limitationType;
     }
 
-    public Boolean getEnabled() {
+    public boolean getEnabled() {
         return enabled;
     }
 
-    public void setEnabled(Boolean enabled) {
+    public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
 }
