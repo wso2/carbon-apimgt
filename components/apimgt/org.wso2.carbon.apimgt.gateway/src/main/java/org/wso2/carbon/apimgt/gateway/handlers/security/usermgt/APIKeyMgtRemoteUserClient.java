@@ -37,16 +37,14 @@ public class APIKeyMgtRemoteUserClient {
     private static final Log log = LogFactory.getLog(APIKeyMgtRemoteUserClient.class);
 
     private APIKeyMgtRemoteUserStoreMgtServiceStub apiKeyMgtRemoteUserStoreMgtServiceStub;
-    private String username;
-    private String password;
 
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "PRMC_POSSIBLY_REDUNDANT_METHOD_CALLS",
             justification = "It is required to set two options on the Options object")
     public APIKeyMgtRemoteUserClient() throws APISecurityException {
         ConfigurationContext configurationContext = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-        username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-        password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+        String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+        String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
         String serviceURL = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
         if (serviceURL == null) {
            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,

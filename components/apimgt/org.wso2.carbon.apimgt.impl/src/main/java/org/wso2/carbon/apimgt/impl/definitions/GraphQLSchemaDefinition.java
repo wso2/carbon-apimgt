@@ -304,7 +304,7 @@ public class GraphQLSchemaDefinition {
         complexityObject.put("max_query_complexity", graphqlComplexityInfo.getMaxComplexity());
         complexityObject.put("custom_complexity_values", customComplexityObject);
 
-        policyDefinition.put(APIConstants.QUERY_ANALYSIS_DEPTH_, depthObject);
+        policyDefinition.put(APIConstants.QUERY_ANALYSIS_DEPTH, depthObject);
         policyDefinition.put(APIConstants.QUERY_ANALYSIS_COMPLEXITY, complexityObject);
 
         return policyDefinition;
