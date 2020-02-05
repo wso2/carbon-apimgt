@@ -102,7 +102,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
             for (String role : userRoles) {
                 Object depth = ((JSONObject) depthObject).get(role);
                 if (depth != null) {
-                    allocatedDepths.add((int) depth);
+                    allocatedDepths.add(((Long) depth).intValue());
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug("No depth limitation value was assigned for " + role + " role");
@@ -112,7 +112,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
             if (allocatedDepths.isEmpty()) {
                 Object defaultDepth = ((JSONObject) depthObject).get("default");
                 if (defaultDepth != null) {
-                    return ((int) defaultDepth);
+                    return ((Long) defaultDepth).intValue();
                 } else {
                     log.error("No default depth was allocated");
                     return -1;
@@ -289,7 +289,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
         if (complexityCheckEnabled) {
             Object maxQueryComplexity = ((JSONObject) complexityObject).get("max_query_complexity");
             if (maxQueryComplexity != null) {
-                return ((int) maxQueryComplexity);
+                return ((Long) maxQueryComplexity).intValue();
             } else {
                 log.error("Maximum query complexity was not allocated");
                 return -1;
