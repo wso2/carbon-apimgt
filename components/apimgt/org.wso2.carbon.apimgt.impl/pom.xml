@@ -28,10 +28,6 @@
             <artifactId>org.wso2.carbon.event.output.adapter.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.event.output.adapter.email</artifactId>
             <exclusions>
@@ -545,7 +541,6 @@
                             org.wso2.carbon.apimgt.localentry.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.securevault.*,
                             org.wso2.carbon.registry.*;version="${carbon.registry.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth.*;version="${carbon.apimgt.version}",
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>

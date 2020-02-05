@@ -35,7 +35,6 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
-import org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -53,6 +52,8 @@ import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.observers.TenantLoadMessageSender;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGeneratorImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
@@ -161,6 +162,7 @@ public class APIManagerComponent {
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), signupObserver, null);
             TenantLoadMessageSender tenantLoadMessageSender = new TenantLoadMessageSender();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), tenantLoadMessageSender, null);
+            bundleContext.registerService(AccessTokenGenerator.class, AccessTokenGeneratorImpl.getInstance(), null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
@@ -343,20 +345,6 @@ public class APIManagerComponent {
 
     protected void unsetListenerManager(ListenerManager listenerManager) {
         log.debug("Listener manager unbound from the API manager component");
-    }
-
-    @Reference(
-            name = "output.http.extended.AdapterService.component",
-            service = AccessTokenGenerator.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetAccessTokenGenerator"
-    )
-    protected void setAccessTokenGenerator(AccessTokenGenerator accessTokenGenerator) {
-        ServiceReferenceHolder.getInstance().setAccessTokenGenerator(accessTokenGenerator);
-    }
-    protected void unsetAccessTokenGenerator(AccessTokenGenerator accessTokenGenerator){
-        ServiceReferenceHolder.getInstance().setAccessTokenGenerator(null);
     }
 
     private void addRxtConfigs() throws APIManagementException {

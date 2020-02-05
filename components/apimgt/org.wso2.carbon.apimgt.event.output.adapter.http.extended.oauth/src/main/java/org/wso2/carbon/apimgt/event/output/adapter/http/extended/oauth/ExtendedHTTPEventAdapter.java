@@ -1,20 +1,20 @@
 /*
- *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
+
 package org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth;
 
 import org.apache.axiom.om.util.Base64;
@@ -30,6 +30,7 @@ import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.conn.params.ConnRoutePNames;
+import org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth.internal.ds.ServiceReferenceHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.output.adapter.core.EventAdapterUtil;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapter;
@@ -155,20 +156,20 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
         String url = dynamicProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_MESSAGE_URL);
         String username = dynamicProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_USERNAME);
         String password = dynamicProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_PASSWORD);
-        String oauthUrl = dynamicProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_USERNAME);
-        String consumerKey = dynamicProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_USERNAME);
-        String consumerSecret = dynamicProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_PASSWORD);
+        String oauthUrl = dynamicProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_URL);
+        String consumerKey = dynamicProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_CONSUMER_KEY);
+        String consumerSecret = dynamicProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_CONSUMER_SECRET);
 
         Map<String, String> headers = this
                 .extractHeaders(dynamicProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_HEADERS));
         String payload = message.toString();
-        AccessTokenGeneratorImpl accessTokenGeneratorImpl = AccessTokenGeneratorImpl.getInstance();
 
         try {
             if (username != null && password != null) {
                 executorService.submit(new HTTPSender(url, payload, username, password, headers, httpClient));
             } else if(oauthUrl != null && consumerKey != null && consumerSecret != null ) {
-                String accessToken = accessTokenGeneratorImpl.getAccessToken(oauthUrl,consumerKey,consumerSecret);
+                String accessToken = ServiceReferenceHolder.getInstance().getAccessTokenGenerator().getAccessToken(oauthUrl,consumerKey,
+                        consumerSecret);
                 executorService.submit(new HTTPSender(url, payload, accessToken, headers, httpClient));
             }
         } catch (RejectedExecutionException e) {
