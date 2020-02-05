@@ -291,7 +291,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                                         + isSecurityEnabled);
                             }
 
-                        }  else if (additionalType.getName().contains(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY)) {
+                        } else if (additionalType.getName().contains(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY)) {
                             graphQLAccessControlPolicy = new String(Base64.getUrlDecoder().decode(type.getName()));
                         }
                     }
@@ -358,7 +358,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
     /**
      * This method handle the failure
      *
-     * @param messageContext message context of the request
+     * @param messageContext   message context of the request
      * @param errorDescription description of the error
      */
     private void handleFailure(MessageContext messageContext, String errorDescription) {

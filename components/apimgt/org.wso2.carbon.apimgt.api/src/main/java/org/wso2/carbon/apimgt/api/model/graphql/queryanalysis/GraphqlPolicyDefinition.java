@@ -32,7 +32,7 @@ public class GraphqlPolicyDefinition {
      * Complexity related details
      */
     private boolean complexityEnabled = false;
-    private GraphqlComplexityInfo  graphqlComplexityInfo;
+    private GraphqlComplexityInfo graphqlComplexityInfo;
 
     public boolean isDepthEnabled() {
         return depthEnabled;

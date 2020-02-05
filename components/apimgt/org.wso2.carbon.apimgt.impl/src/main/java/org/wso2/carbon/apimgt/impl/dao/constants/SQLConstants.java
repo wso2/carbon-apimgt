@@ -1840,7 +1840,7 @@ public class SQLConstants {
             " WHERE" +
             "   UUID = ? ";
 
-    public static final String REMOVE_ROLE_DEPTH_MAPPING_SQL  =
+    public static final String REMOVE_ROLE_DEPTH_MAPPING_SQL =
             "DELETE FROM AM_GRAPHQL_DEPTH WHERE UUID = ?";
 
     public static final String GET_DEPTH_DETAILS_SQL =

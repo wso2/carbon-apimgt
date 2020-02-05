@@ -35,9 +35,9 @@ public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator 
     }
 
     private int getCustomComplexity(String fieldName, String parentType, JSONObject policyDefinition) {
-        Object customComplexity = ((JSONObject) policyDefinition.get(parentType)).get(fieldName);
-        if (customComplexity != null) {
-            return ((Long) customComplexity).intValue(); // Returns custom complexity value
+        JSONObject customComplexity = (JSONObject) policyDefinition.get(parentType);
+        if (customComplexity != null && customComplexity.get(fieldName) != null) {
+            return ((Long) customComplexity.get(fieldName)).intValue(); // Returns custom complexity value
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("No custom complexity value was assigned for " + fieldName + " under type " + parentType);

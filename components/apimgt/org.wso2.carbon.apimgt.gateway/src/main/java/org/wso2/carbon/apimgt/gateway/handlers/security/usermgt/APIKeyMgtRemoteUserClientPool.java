@@ -25,7 +25,7 @@ import org.apache.commons.pool.impl.StackObjectPool;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 
 public class APIKeyMgtRemoteUserClientPool {
-    private static  final Log log = LogFactory.getLog(APIKeyMgtRemoteUserClientPool.class);
+    private static final Log log = LogFactory.getLog(APIKeyMgtRemoteUserClientPool.class);
 
     private static final APIKeyMgtRemoteUserClientPool instance = new APIKeyMgtRemoteUserClientPool();
 

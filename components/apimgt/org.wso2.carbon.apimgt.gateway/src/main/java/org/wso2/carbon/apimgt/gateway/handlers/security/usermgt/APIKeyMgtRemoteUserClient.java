@@ -47,8 +47,8 @@ public class APIKeyMgtRemoteUserClient {
         String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
         String serviceURL = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
         if (serviceURL == null) {
-           throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                   "API key manager URL unspecified");
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "API key manager URL unspecified");
         }
         try {
             apiKeyMgtRemoteUserStoreMgtServiceStub = new APIKeyMgtRemoteUserStoreMgtServiceStub(configurationContext, serviceURL +
@@ -64,7 +64,6 @@ public class APIKeyMgtRemoteUserClient {
     }
 
     public String[] getUserRoles(String username) throws RemoteException, APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException {
-        String[] userRoles = apiKeyMgtRemoteUserStoreMgtServiceStub.getUserRoles(username);
-        return  userRoles;
+        return apiKeyMgtRemoteUserStoreMgtServiceStub.getUserRoles(username);
     }
 }

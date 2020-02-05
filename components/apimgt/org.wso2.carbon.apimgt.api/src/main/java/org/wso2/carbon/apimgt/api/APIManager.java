@@ -243,7 +243,7 @@ public interface APIManager {
     /**
      * Returns the GraphqlComplexityInfo object for a given API ID
      *
-     * @param apiId        API ID
+     * @param apiId API ID
      * @return GraphqlComplexityInfo object
      * @throws APIManagementException if failed to retrieve complexity details of the given API
      */
@@ -252,8 +252,8 @@ public interface APIManager {
     /**
      * Add complexity details given the GraphqlComplexityInfo object
      *
-     * @param apiIdentifier
-     * @param graphqlComplexityInfo   GraphqlComplexityInfo object
+     * @param apiIdentifier         APIIdentifier
+     * @param graphqlComplexityInfo GraphqlComplexityInfo object
      * @throws APIManagementException if failed to add complexity details
      */
     void addComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException;
@@ -279,8 +279,8 @@ public interface APIManager {
     /**
      * Add role-depth mapping given the GraphqlDepthInfo object
      *
-     * @param apiIdentifier
-     * @param graphqlDepthInfo   GraphqlDepthInfo object
+     * @param apiIdentifier    APIIdentifier
+     * @param graphqlDepthInfo GraphqlDepthInfo object
      * @throws APIManagementException if failed to add role-depth mapping
      */
     void addRoleDepthMapping(APIIdentifier apiIdentifier, GraphqlDepthInfo graphqlDepthInfo) throws APIManagementException;
@@ -314,7 +314,7 @@ public interface APIManager {
     /**
      * Updates the limitation status of the given API
      *
-     * @param apiIdentifier APIIdentifier
+     * @param apiIdentifier           APIIdentifier
      * @param graphqlLimitationStatus GraphqlLimitationStatus object
      * @throws APIManagementException if failed to update limitation status of the given API
      */
