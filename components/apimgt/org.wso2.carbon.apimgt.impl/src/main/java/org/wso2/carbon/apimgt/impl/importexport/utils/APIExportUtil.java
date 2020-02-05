@@ -568,7 +568,7 @@ public class APIExportUtil {
             String sequenceFileName = sequenceDetails.getKey();
             OMElement sequenceConfig = sequenceDetails.getValue();
             CommonUtil.createDirectory(pathToExportedSequence);
-            String exportedSequenceFile = pathToExportedSequence + sequenceFileName;
+            String exportedSequenceFile = pathToExportedSequence + sequenceFileName + APIConstants.XML_EXTENSION;
             try (OutputStream outputStream = new FileOutputStream(exportedSequenceFile)) {
                 sequenceConfig.serialize(outputStream);
                 if (log.isDebugEnabled()) {
