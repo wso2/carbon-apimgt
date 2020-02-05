@@ -2402,7 +2402,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     authProperties);
 
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLSecurityHandler", Collections.<String, String>emptyMap());
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLQueryAnalysisHandler", Collections.<String, String>emptyMap());
             }
 
             Map<String, String> properties = new HashMap<String, String>();

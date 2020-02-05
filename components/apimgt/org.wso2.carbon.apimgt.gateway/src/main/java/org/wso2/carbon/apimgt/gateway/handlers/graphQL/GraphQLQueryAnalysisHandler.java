@@ -50,9 +50,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class GraphQLSecurityHandler extends AbstractHandler {
+public class GraphQLQueryAnalysisHandler extends AbstractHandler {
 
-    private static final Log log = LogFactory.getLog(GraphQLSecurityHandler.class);
+    private static final Log log = LogFactory.getLog(GraphQLQueryAnalysisHandler.class);
     private GraphQLSchema schema = null;
 
     public boolean handleRequest(MessageContext messageContext) {
@@ -75,7 +75,7 @@ public class GraphQLSecurityHandler extends AbstractHandler {
      */
     private String[] getUserRoles(String username) throws APISecurityException {
         String[] userRoles;
-        APIKeyMgtRemoteUserClient client = null;
+        APIKeyMgtRemoteUserClient client;
         try {
             APIKeyMgtRemoteUserClientPool clientPool = APIKeyMgtRemoteUserClientPool.getInstance();
             client = clientPool.get();
@@ -108,7 +108,7 @@ public class GraphQLSecurityHandler extends AbstractHandler {
                     }
                 }
             }
-            if (allocatedDepths.size() == 0) {
+            if (allocatedDepths.isEmpty()) {
                 Object defaultDepth = ((JSONObject) depthObject).get("default");
                 if (defaultDepth != null) {
                     return ((int) defaultDepth);
@@ -204,7 +204,7 @@ public class GraphQLSecurityHandler extends AbstractHandler {
                 return true; // No depth limitation check
             }
         } catch (APISecurityException e) {
-            log.error("APISecurityException:  " + e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return false;
     }
