@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
@@ -43,6 +44,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.util.DeserializationUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -386,7 +388,12 @@ public class OAS3Parser extends APIDefinition {
                     info.getTitle(), info.getVersion(), null, info.getDescription());
             validationResponse.setParser(this);
             if (returnJsonContent) {
-                validationResponse.setJsonContent(Json.pretty(parseAttemptForV3.getOpenAPI()));
+                if (!apiDefinition.trim().startsWith("{")) { // not a json (it is yaml)
+                    JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition);
+                    validationResponse.setJsonContent(jsonNode.toString());
+                } else {
+                    validationResponse.setJsonContent(apiDefinition);
+                }
             }
         }
         return validationResponse;
@@ -516,6 +523,8 @@ public class OAS3Parser extends APIDefinition {
         if (api.getTransports() != null) {
             openAPI.addExtension(APIConstants.X_WSO2_TRANSPORTS, api.getTransports().split(","));
         }
+        openAPI.addExtension(APIConstants.SWAGGER_X_WSO2_API_SECURITY,
+                OASParserUtil.getAPISecurity(api.getApiSecurity()));
         return Json.pretty(openAPI);
     }
 

@@ -787,4 +787,16 @@ export default class API extends Resource {
                 params, this._requestMetaData());
         });
     }
+
+    /**
+     * Get API recommendations for a given user.
+     * @param {string} userId The username.
+     * @return {Promise}
+     * */
+    getApiRecommendations(params = {}) {
+        const promiseGet = this.client.then((client) => {
+            return client.apis.Recommendations.get_recommendations(params, this._requestMetaData());
+        });
+        return promiseGet;
+    }
 }

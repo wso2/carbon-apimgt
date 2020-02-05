@@ -20,7 +20,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import SubscribeToApi from 'AppComponents/Shared/AppsAndKeys/SubscribeToApi';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
-import cloneDeep from 'lodash.clonedeep';
 import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
 import { injectIntl } from 'react-intl';
 import ButtonPanel from './ButtonPanel';
@@ -82,7 +81,7 @@ const subscribeToAppStep = (props) => {
     }, [createdApp]);
 
     return (
-        <React.Fragment>
+        <>
             <SubscribeToApi
                 throttlingPolicyList={throttlingPolicyList}
                 applicationsAvailable={[newApp]}
@@ -94,7 +93,7 @@ const subscribeToAppStep = (props) => {
                 currentStep={currentStep}
                 handleCurrentStep={subscribeToApplication}
             />
-        </React.Fragment>
+        </>
     );
 };
 

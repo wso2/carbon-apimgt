@@ -22,20 +22,28 @@ import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
 import { Box } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import { useHistory } from 'react-router-dom';
+import { makeStyles } from '@material-ui/core/styles';
 import ButtonPanel from './ButtonPanel';
+
+const useStyles = makeStyles((theme) => ({
+    tokenWrapper: {
+        paddingLeft: theme.spacing(2),
+    },
+}));
 
 const copyAccessTokenStep = (props) => {
     const {
-        currentStep, createdToken, classes, handleReset, handleRedirectTest,
+        currentStep, createdToken, handleReset, handleRedirectTest,
     } = props;
     const history = useHistory();
     const { api, updateSubscriptionData } = useContext(ApiContext);
     const completeStep = () => {
         updateSubscriptionData(history.push(`/apis/${api.id}/credentials`));
     };
+    const classes = useStyles();
 
     return (
-        <React.Fragment>
+        <div className={classes.tokenWrapper}>
             <Grid md={10}>
                 <Box my={1} mx={2}>
                     <ViewToken token={{ ...createdToken, isOauth: true }} />
@@ -47,7 +55,7 @@ const copyAccessTokenStep = (props) => {
                 handleCurrentStep={completeStep}
                 handleReset={handleReset}
             />
-        </React.Fragment>
+        </div>
     );
 };
 

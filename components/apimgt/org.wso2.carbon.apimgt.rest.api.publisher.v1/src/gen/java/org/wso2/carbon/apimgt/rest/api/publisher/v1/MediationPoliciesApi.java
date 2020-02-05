@@ -42,7 +42,8 @@ MediationPoliciesApiService delegate = new MediationPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all global level mediation policies ", notes = "This operation provides you a list of available all global level mediation policies. ", response = MediationListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies")
+            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies"),
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={ "Global Mediation Policies",  })
     @ApiResponses(value = { 
@@ -59,6 +60,7 @@ MediationPoliciesApiService delegate = new MediationPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Downloadt specific global mediation policy", notes = "This operation can be used to download a particular global mediation policy. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies"),
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={ "Global Mediation Policy" })

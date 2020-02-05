@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -35,6 +36,7 @@ import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
+import org.wso2.carbon.apimgt.impl.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
@@ -211,9 +213,14 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             SubscribedAPI addedSubscribedAPI = apiConsumer
                     .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
             SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI);
-            return Response.created(
-                    new URI(RestApiConstants.RESOURCE_PATH_SUBSCRIPTIONS + "/" + addedSubscribedAPI.getUUID())).entity(
-                    addedSubscriptionDTO).build();
+            WorkflowResponse workflowResponse = subscriptionResponse.getWorkflowResponse();
+            if (workflowResponse instanceof HttpWorkflowResponse) {
+                String payload = workflowResponse.getJSONPayload();
+                addedSubscriptionDTO.setRedirectionParams(payload);
+            }
+
+            return Response.created(new URI(RestApiConstants.RESOURCE_PATH_SUBSCRIPTIONS + "/" +
+                    addedSubscribedAPI.getUUID())).entity(addedSubscriptionDTO).build();
 
         } catch (APIMgtAuthorizationFailedException e) {
             //this occurs when the api:application:tier mapping is not allowed. The reason for the message is taken from

@@ -40,9 +40,9 @@
 
         var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
         var systemApplicationDAO = new SystemApplicationDTO();
-        var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME);
+        var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME,SUPER_TENANT_DOMAIN);
         if (systemApplicationDTO === null) {
-            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD);
+            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD,SUPER_TENANT_DOMAIN);
         }
         if (systemApplicationDTO == null) {
             log.error("Oauth application details not found for 'publisher'");

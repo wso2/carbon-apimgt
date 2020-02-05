@@ -59,7 +59,17 @@
         <!-- This parameter specifies which implementation should be used for generating the Token. For URL safe JWT
              Token generation the implementation is provided in URLSafeJWTGenerator -->
         <!--<JWTGeneratorImpl>org.wso2.carbon.apimgt.keymgt.token.URLSafeJWTGenerator</JWTGeneratorImpl>-->
-
+        <GatewayJWTGeneration>
+            <ImplClass>org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayJWTGeneratorImpl</ImplClass>
+            <Configuration>
+                <ClaimMappings>
+                    <Claim>
+                        <RemoteClaim></RemoteClaim>
+                        <LocalClaim></LocalClaim>
+                    </Claim>
+                </ClaimMappings>
+            </Configuration>
+        </GatewayJWTGeneration>
     </JWTConfiguration>
 
     <!-- Primary/secondary login configuration for APIstore. If user likes to keep two login attributes in a distributed setup, to login the APIstore,
@@ -704,7 +714,7 @@
     	<ServerPassword>${admin.password}</ServerPassword>
     	<WorkflowCallbackAPI>https://localhost:${mgt.transport.https.port}/api/am/publisher/v0.16/workflows/update-workflow-status</WorkflowCallbackAPI>
         <TokenEndPoint>https://localhost:${https.nio.port}/token</TokenEndPoint>
-        <DCREndPoint>https://localhost:${mgt.transport.https.port}/client-registration/v0.15/register</DCREndPoint>
+        <DCREndPoint>https://localhost:${mgt.transport.https.port}/client-registration/v0.16/register</DCREndPoint>
         <DCREndPointUser>${admin.username}</DCREndPointUser>
         <DCREndPointPassword>${admin.password}</DCREndPointPassword>
     </WorkflowConfigurations>

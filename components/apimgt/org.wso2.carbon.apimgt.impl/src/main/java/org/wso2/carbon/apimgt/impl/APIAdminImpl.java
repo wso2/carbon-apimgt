@@ -109,11 +109,9 @@ public class APIAdminImpl implements APIAdmin {
      */
     public boolean isLableNameExists(String tenantDomain, Label label) throws APIManagementException {
         List<Label> ExistingLables = apiMgtDAO.getAllLabels(tenantDomain);
-        if (!ExistingLables.isEmpty()) {
-            for (Label labels : ExistingLables) {
-                if (labels.getName().equalsIgnoreCase(label.getName())) {
-                    return true;
-                }
+        for (Label labels : ExistingLables) {
+            if (labels.getName().equalsIgnoreCase(label.getName())) {
+                return true;
             }
         }
         return false;

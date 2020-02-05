@@ -49,6 +49,7 @@ import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xmlsec.keyinfo.impl.StaticKeyInfoCredentialResolver;
 import org.opensaml.xmlsec.signature.Signature;
+import org.opensaml.xmlsec.signature.support.SignatureValidationProvider;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import net.shibboleth.utilities.java.support.codec.Base64Support;
 import org.opensaml.xmlsec.signature.support.SignatureException;
@@ -279,6 +280,8 @@ public class Util {
             String alias, int tenantId, String tenantDomain)
             throws SignatureVerificationException, SignatureVerificationFailure {
         boolean isSigValid = false;
+        Thread thread = Thread.currentThread();
+        ClassLoader originalClassLoader = thread.getContextClassLoader();
         try {
             KeyStore keyStore = null;
             java.security.cert.X509Certificate cert = null;
@@ -308,6 +311,8 @@ public class Util {
                 return false;
             }
             X509CredentialImpl credentialImpl = new X509CredentialImpl(cert);
+
+            thread.setContextClassLoader(SignatureValidationProvider.class.getClassLoader());
             SignatureValidator.validate(signature, credentialImpl);
             isSigValid = true;
             return isSigValid;
@@ -340,6 +345,8 @@ public class Util {
             //keyStoreManager.getKeyStore throws a generic 'Exception'
             log.error("Error when getting key store of tenant " + tenantDomain, e);
             throw new SignatureVerificationException(e.getMessage(), e);
+        } finally {
+            thread.setContextClassLoader(originalClassLoader);
         }
     }
 
