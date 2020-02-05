@@ -144,6 +144,7 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.namespace.QName;
 
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
@@ -2357,7 +2358,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 fileName = fileDetail.getDataHandler().getName();
                 //Constructing mediation resource path
                 mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR +
-                        type + RegistryConstants.PATH_SEPARATOR + fileName;
+                        type + RegistryConstants.PATH_SEPARATOR;
                 String fileContentType = URLConnection.guessContentTypeFromName(fileName);
 
                 if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
@@ -2370,7 +2371,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
                 OMElement seqElement = APIUtil.buildOMElement(new ByteArrayInputStream(sequenceBytes));
                 String localName = seqElement.getLocalName();
-                checkMediationPolicy(apiProvider,mediationResourcePath);
+                fileName = seqElement.getAttributeValue(new QName("name"));
+                //Constructing mediation resource path
+                mediationResourcePath = mediationResourcePath + fileName;
+                checkMediationPolicy(apiProvider, mediationResourcePath);
                 if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
                     ResourceFile contentFile = new ResourceFile(inSequenceStream, fileContentType);
                     //Adding api specific mediation policy
