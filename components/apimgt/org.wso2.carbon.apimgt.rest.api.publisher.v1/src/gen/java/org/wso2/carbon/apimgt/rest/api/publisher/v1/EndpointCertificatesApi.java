@@ -45,7 +45,8 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
     @Produces({ "application/json" })
     @ApiOperation(value = "Download a certificate.", notes = "This operation can be used to download a certificate which matches the given alias. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates")
+            @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates"),
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
@@ -63,6 +64,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a certificate.", notes = "This operation can be used to delete an uploaded certificate. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:ep_certificates_update", description = "Update and delete backend endpoint certificates")
         })
     }, tags={ "Endpoint Certificates",  })
@@ -81,7 +83,8 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the certificate information.", notes = "This operation can be used to get the information about a certificate. ", response = CertificateInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates")
+            @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates"),
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
@@ -99,6 +102,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
     @Produces({ "application/json" })
     @ApiOperation(value = "Update a certificate.", notes = "This operation can be used to update an uploaded certificate. ", response = CertMetadataDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:ep_certificates_update", description = "Update and delete backend endpoint certificates")
         })
     }, tags={ "Endpoint Certificates",  })
@@ -117,7 +121,8 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve/Search uploaded certificates.", notes = "This operation can be used to retrieve and search the uploaded certificates. ", response = CertificatesDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates")
+            @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates"),
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
@@ -135,7 +140,8 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
     @Produces({ "application/json" })
     @ApiOperation(value = "Upload a new Certificate.", notes = "This operation can be used to upload a new certificate for an endpoint. ", response = CertMetadataDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:ep_certificates_add", description = "Add backend endpoint certificates")
+            @AuthorizationScope(scope = "apim:ep_certificates_add", description = "Add backend endpoint certificates"),
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
     }, tags={ "Endpoint Certificates" })
     @ApiResponses(value = { 

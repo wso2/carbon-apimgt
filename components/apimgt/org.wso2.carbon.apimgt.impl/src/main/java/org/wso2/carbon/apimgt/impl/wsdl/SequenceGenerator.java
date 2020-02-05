@@ -43,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -343,8 +344,23 @@ public class SequenceGenerator {
                             isRootComplexType = false;
                         } else {
                             element = doc.createElementNS(null, parameterTreeNode);
+                            element.setAttribute(SOAPToRESTConstants.XMLNS,
+                                    SOAPToRESTConstants.X_WSO2_UNIQUE_NAMESPACE);
                         }
+                        String xPathOfNode = StringUtils.EMPTY;
                         if (doc.getElementsByTagName(element.getTagName()).getLength() > 0) {
+                            xPathOfNode = getXpath(doc.getElementsByTagName(element.getTagName()).item(0));
+                            xPathOfNode = xPathOfNode.replaceAll("/+", ".");
+                            if (xPathOfNode.startsWith(".")) {
+                                xPathOfNode = xPathOfNode.substring(1);
+                            }
+                            if (xPathOfNode.contains(operationId + ".")) {
+                                xPathOfNode = xPathOfNode.replace(operationId + ".", "");
+                            }
+                        }
+
+                        if (doc.getElementsByTagName(element.getTagName()).getLength() > 0 &&
+                                parameter.contains(xPathOfNode)) {
                             prevElement = (Element) doc.getElementsByTagName(element.getTagName()).item(0);
                         } else {
                             if (elemPos == length - 1) {
@@ -387,8 +403,22 @@ public class SequenceGenerator {
                     + stringWriter.toString());
         }
         Map<String, String> paramMap = new HashMap<>();
-        paramMap.put(operationId, stringWriter.toString());
+        paramMap.put(operationId, processPayloadFactXML(stringWriter.toString()));
         return paramMap;
+    }
+
+    private static String getXpath(Node node) {
+        if (node != null) {
+            Node parent = node.getParentNode();
+            if (parent == null && node.getLocalName() != null) {
+                return node.getLocalName();
+            } else if (node.getLocalName() != null) {
+                return getXpath(parent) + SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR + node.getLocalName();
+            } else {
+                return getXpath(parent);
+            }
+        }
+        return SOAPToRESTConstants.EMPTY_STRING;
     }
 
     private static String[] getPropertyAndArgElementsForSequence(Map<String, String> parameterJsonPathMapping,
@@ -495,5 +525,13 @@ public class SequenceGenerator {
             handleException("Error occurred when transforming in sequence xml", e);
         }
         return property + SOAPToRESTConstants.SequenceGen.COMMA + argument;
+    }
+
+    private static String processPayloadFactXML(String xmlPayload) {
+        // When setting namespace as xmlns="", Xerces process it as empty namespace and removes it
+        // Hence following the string replace approach to add xmlns="".
+        // Refer https://issues.apache.org/jira/browse/XERCESJ-1720
+        String processedXMLPayload = xmlPayload.replaceAll(SOAPToRESTConstants.X_WSO2_UNIQUE_NAMESPACE, "");
+        return processedXMLPayload;
     }
 }

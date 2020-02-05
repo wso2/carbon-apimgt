@@ -87,6 +87,9 @@ import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.utils.APIExportUtil;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -96,6 +99,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.util.impl.ExportApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
@@ -3175,25 +3179,29 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param apiDefinition     Swagger definition
      * @param url               Swagger definition URL
      * @param fileInputStream   Swagger definition input file content
-     * @param fileDetail
+     * @param fileDetail        file meta information as Attachment
      * @param ifMatch           If-match header value
      * @return updated swagger document of the API
      */
     @Override
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String url, InputStream fileInputStream,
             Attachment fileDetail, String ifMatch, MessageContext messageContext) {
-
-        // Validate and retrieve the OpenAPI definition
-        Map validationResponseMap = null;
         try {
+            String updatedSwagger;
             //Handle URL and file based definition imports
             if(url != null || fileInputStream != null) {
-                validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, true);
-                APIDefinitionValidationResponse validationResponse = (APIDefinitionValidationResponse) validationResponseMap
-                        .get(RestApiConstants.RETURN_MODEL);
-                apiDefinition = validationResponse.getJsonContent();
+                // Validate and retrieve the OpenAPI definition
+                Map validationResponseMap = validateOpenAPIDefinition(url, fileInputStream,
+                        fileDetail, true);
+                APIDefinitionValidationResponse validationResponse =
+                        (APIDefinitionValidationResponse) validationResponseMap .get(RestApiConstants.RETURN_MODEL);
+                if (!validationResponse.isValid()) {
+                    RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
+                }
+                updatedSwagger = updateSwagger(apiId, validationResponse);
+            } else {
+                updatedSwagger = updateSwagger(apiId, apiDefinition);
             }
-            String updatedSwagger = updateSwagger(apiId, apiDefinition);
             return Response.ok().entity(updatedSwagger).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
@@ -3216,12 +3224,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
-     * update swagger definition of the given api
-     * @param apiId apiid
+     * update swagger definition of the given api. The swagger will be validated before updating.
+     *
+     * @param apiId API Id
      * @param apiDefinition swagger definition
      * @return updated swagger definition
-     * @throws APIManagementException
-     * @throws FaultGatewaysException
+     * @throws APIManagementException when error occurred updating swagger
+     * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
     private String updateSwagger(String apiId, String apiDefinition)
             throws APIManagementException, FaultGatewaysException {
@@ -3230,11 +3239,26 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (!response.isValid()) {
             RestApiUtil.handleBadRequest(response.getErrorItems(), log);
         }
+        return updateSwagger(apiId, response);
+    }
+
+    /**
+     * update swagger definition of the given api
+     *
+     * @param apiId API Id
+     * @param response response of a swagger definition validation call
+     * @return updated swagger definition
+     * @throws APIManagementException when error occurred updating swagger
+     * @throws FaultGatewaysException when error occurred publishing API to the gateway
+     */
+    private String updateSwagger(String apiId, APIDefinitionValidationResponse response)
+            throws APIManagementException, FaultGatewaysException {
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         //this will fail if user does not have access to the API or the API does not exist
         API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIDefinition oasParser = response.getParser();
+        String apiDefinition = response.getJsonContent();
         Set<URITemplate> uriTemplates = null;
         try {
             uriTemplates = oasParser.getURITemplates(apiDefinition);
@@ -4054,6 +4078,46 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
+     * Exports an API from API Manager for a given API using the ApiId. ID. Meta information, API icon, documentation,
+     * WSDL and sequences are exported. This service generates a zipped archive which contains all the above mentioned
+     * resources for a given API.
+     *
+     * @param apiId          UUID of an API
+     * @param name           Name of the API that needs to be exported
+     * @param version        Version of the API that needs to be exported
+     * @param providerName   Provider name of the API that needs to be exported
+     * @param format         Format of output documents. Can be YAML or JSON
+     * @param preserveStatus Preserve API status on export
+     * @return
+     */
+    @Override
+    public Response apisExportGet(String apiId, String name, String version, String providerName, String format,
+                                  Boolean preserveStatus, MessageContext messageContext)
+            throws APIManagementException {
+        ExportApiUtil exportApiUtil = new ExportApiUtil();
+        if (apiId == null) {
+
+            return exportApiUtil.exportApiByParams(name, version, providerName, format, preserveStatus);
+        } else {
+            try {
+                String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+                return exportApiUtil.exportApiById(apiIdentifier, preserveStatus);
+            } catch (APIManagementException e) {
+                if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                } else if (isAuthorizationFailure(e)) {
+                    RestApiUtil.handleAuthorizationFailure(
+                            "Authorization failure while exporting the  API " + apiId, e, log);
+                } else {
+                    RestApiUtil.handleInternalServerError("Error while exporting the API " + apiId, e, log);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Import a GraphQL Schema
      * @param type APIType
      * @param fileInputStream input file
@@ -4271,7 +4335,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     private Map validateOpenAPIDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
            Boolean returnContent) throws APIManagementException {
+        //validate inputs
         handleInvalidParams(fileInputStream, fileDetail, url);
+
         OpenAPIDefinitionValidationResponseDTO responseDTO;
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         if (url != null) {

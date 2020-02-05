@@ -19,6 +19,7 @@
 import React, { Component } from 'react';
 import qs from 'qs';
 import { addLocaleData, IntlProvider } from 'react-intl';
+import { withTheme } from '@material-ui/core/styles';
 import Settings from 'Settings';
 import Tenants from 'AppData/Tenants';
 import SettingsContext from 'AppComponents/Shared/SettingsContext';
@@ -49,7 +50,7 @@ const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
 /**
  * Render protected application paths
  */
-export default class ProtectedApp extends Component {
+class ProtectedApp extends Component {
     static contextType = SettingsContext;
 
     /**
@@ -74,7 +75,18 @@ export default class ProtectedApp extends Component {
      *  Check if data available ,if not get the user info from existing token information
      */
     componentDidMount() {
-        const locale = languageWithoutRegionCode || language;
+        let locale = languageWithoutRegionCode || language;
+        //The above can be overriden by the language switcher
+        const { custom: { languageSwitch: { active: languageSwitchActive } } } = this.props.theme;
+        if(languageSwitchActive){
+            let selectedLanguage = localStorage.getItem('language');
+            if(!selectedLanguage && languages && languages.length > 0){
+                selectedLanguage = languages[0].key;
+            }
+            if(selectedLanguage) {
+                locale = selectedLanguage;
+            }
+        }
         this.loadLocale(locale);
 
         const { location: { search } } = this.props;
@@ -261,3 +273,4 @@ ProtectedApp.propTypes = {
         search: PropTypes.string.isRequired,
     }).isRequired,
 };
+export default withTheme(ProtectedApp);

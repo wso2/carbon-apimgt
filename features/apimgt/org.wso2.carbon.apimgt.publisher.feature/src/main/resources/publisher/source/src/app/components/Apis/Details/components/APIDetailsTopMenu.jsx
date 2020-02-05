@@ -1,9 +1,13 @@
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
-import { FormattedMessage } from 'react-intl';
+
+import Utils from 'AppData/Utils';
+import Alert from 'AppComponents/Shared/Alert';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
+import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
@@ -11,8 +15,10 @@ import { useAppContext } from 'AppComponents/Shared/AppContext';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import GoTo from 'AppComponents/Apis/Details/GoTo/GoTo';
+import API from 'AppData/api';
 import DeleteApiButton from './DeleteApiButton';
 import CreateNewVersionButton from './CreateNewVersionButton';
+
 
 const styles = (theme) => ({
     root: {
@@ -42,6 +48,8 @@ const styles = (theme) => ({
         flexDirection: 'column',
         color: theme.palette.getContrastText(theme.palette.background.paper),
         textAlign: 'center',
+        justifyContent: 'center',
+        height: 70,
     },
     linkText: {
         fontSize: theme.typography.fontSize,
@@ -59,13 +67,53 @@ const styles = (theme) => ({
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
     },
+    downloadApi: {
+        display: 'flex',
+        flexDirection: 'column',
+        textAlign: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        height: 70,
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+    },
+    downloadApiFlex: {
+        display: 'flex',
+        flexDirection: 'column',
+    },
 });
+
 
 const APIDetailsTopMenu = (props) => {
     const {
-        classes, theme, api, isAPIProduct, imageUpdate,
+        classes, theme, api, isAPIProduct, imageUpdate, intl,
     } = props;
     const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
+    /**
+ * The component for advanced endpoint configurations.
+ * @param {string} name The name of the
+ * @param {string} version Version of the API
+ * @param {string} provider Provider of the API
+ * @param {string} format Weather to recive files in YALM of JSON format
+ * @returns {zip} Zpi file containing the API directory.
+ */
+    function exportAPI() {
+        const restApi = new API();
+        return restApi.exportApi(api.id).then((zipFile) => {
+            return Utils.forceDownload(zipFile);
+        }).catch((error) => {
+            if (error.response) {
+                Alert.error(error.response.body.description);
+            } else {
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.components.APIDetailsTopMenu.error',
+                    defaultMessage: 'Something went wrong while downloading the API.',
+                }));
+            }
+            console.error(error);
+        });
+    }
+
+    const isDownlodable = ['API'].includes(api.apiType);
     const { settings, user } = useAppContext();
     let apiType = 'API';
     if (isAPIProduct) {
@@ -135,7 +183,29 @@ const APIDetailsTopMenu = (props) => {
                     </Typography>
                 </a>
             )}
+            {/* Page error banner */}
+            {/* end of Page error banner */}
             {isAPIProduct ? null : <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />}
+            {(isDownlodable) && <VerticalDivider height={70} />}
+            <div className={classes.downloadApi}>
+                {(isDownlodable) && (
+                    <a
+                        onClick={exportAPI}
+                        onKeyDown='null'
+                        className={classes.downloadApiFlex}
+                    >
+                        <div>
+                            <CloudDownloadRounded />
+                        </div>
+                        <Typography variant='caption' align='left'>
+                            <FormattedMessage
+                                id='Apis.Details.APIDetailsTopMenu.download.api'
+                                defaultMessage='Download API'
+                            />
+                        </Typography>
+                    </a>
+                )}
+            </div>
             <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />
         </div>
     );
@@ -149,4 +219,7 @@ APIDetailsTopMenu.propTypes = {
     imageUpdate: PropTypes.number.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(APIDetailsTopMenu);
+
+// export default withStyles(styles, { withTheme: true })(APIDetailsTopMenu);
+
+export default injectIntl(withStyles(styles, { withTheme: true })(APIDetailsTopMenu));

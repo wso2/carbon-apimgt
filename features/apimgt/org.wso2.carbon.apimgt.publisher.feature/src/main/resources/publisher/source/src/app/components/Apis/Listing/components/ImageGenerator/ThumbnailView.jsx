@@ -228,6 +228,7 @@ class ThumbnailView extends Component {
             backgroundIndex: null,
             backgroundIndexUpdate: null,
             uploading: false,
+            imageLoaded: false,
         };
         this.handleClick = this.handleClick.bind(this);
         this.handleClose = this.handleClose.bind(this);
@@ -431,6 +432,8 @@ class ThumbnailView extends Component {
                         this.setState({ thumbnail: url });
                     }
                 }
+            }).finally(() => {
+                this.setState({ imageLoaded: true });
             });
         }
     }
@@ -466,6 +469,7 @@ class ThumbnailView extends Component {
             backgroundIndex,
             backgroundIndexUpdate,
             uploading,
+            imageLoaded,
         } = this.state;
         let { category } = this.state;
         if (!category) category = MaterialIcons.categories[0].name;
@@ -477,8 +481,14 @@ class ThumbnailView extends Component {
             overviewPath = `/apis/${api.apiUUID}/documents/${api.id}/details`;
         }
         let view;
-
-        if (thumbnail) {
+        if (!imageLoaded) {
+            view = (
+                <div className='image-load-frame'>
+                    <div className='image-load-animation1' />
+                    <div className='image-load-animation2' />
+                </div>
+            );
+        } else if (thumbnail) {
             view = <img height={height} width={width} src={thumbnail} alt='API Thumbnail' className={classes.media} />;
         } else {
             view = (

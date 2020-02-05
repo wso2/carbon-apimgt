@@ -803,6 +803,19 @@ public class RestApiUtil {
     }
 
     /**
+     * Logs the error, builds a ForbiddenException with specified details and throws it
+     *
+     * @param description description of the error
+     * @param log Log instance
+     * @throws ForbiddenException
+     */
+    public static void handleAuthorizationFailure(String description, Log log)
+            throws ForbiddenException {
+        ForbiddenException forbiddenException = buildForbiddenException(description);
+        log.error(description);
+        throw forbiddenException;
+    }
+    /**
      * Logs the error, builds a NotFoundException with specified details and throws it
      *
      * @param resource requested resource

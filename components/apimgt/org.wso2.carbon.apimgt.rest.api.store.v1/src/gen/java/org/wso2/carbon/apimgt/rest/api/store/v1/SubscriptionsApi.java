@@ -46,6 +46,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all subscriptions ", notes = "This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of  1. Retrieving applications which are subscibed to a specific API. `GET https://localhost:9443/api/am/store/v1/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`  2. Retrieving APIs which are subscribed by a specific application. `GET https://localhost:9443/api/am/store/v1/subscriptions?applicationId=c43a325c-260b-4302-81cb-768eafaa3aed`  **IMPORTANT:** * It is mandatory to provide either **apiId** or **applicationId**. ", response = SubscriptionListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:sub_manage", description = "Retrieve, Manage subscriptions"),
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
     }, tags={ "Subscriptions",  })
@@ -63,6 +64,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add new subscriptions ", notes = "This operation can be used to add a new subscriptions providing the ids of the APIs and the applications. ", response = SubscriptionDTO.class, responseContainer = "List", authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:sub_manage", description = "Retrieve, Manage subscriptions"),
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
     }, tags={ "Subscriptions",  })
@@ -80,7 +82,8 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add a new subscription ", notes = "This operation can be used to add a new subscription providing the id of the API and the application. ", response = SubscriptionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:sub_manage", description = "Manage subscriptions")
+            @AuthorizationScope(scope = "apim:sub_manage", description = "Retrieve, Manage subscriptions"),
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
     }, tags={ "Subscriptions",  })
     @ApiResponses(value = { 
@@ -98,7 +101,8 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Remove a subscription ", notes = "This operation can be used to remove a subscription. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:sub_manage", description = "Manage subscriptions")
+            @AuthorizationScope(scope = "apim:sub_manage", description = "Retrieve, Manage subscriptions"),
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
     }, tags={ "Subscriptions",  })
     @ApiResponses(value = { 
@@ -116,6 +120,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get details of a subscription ", notes = "This operation can be used to get details of a single subscription. ", response = SubscriptionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:sub_manage", description = "Retrieve, Manage subscriptions"),
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
     }, tags={ "Subscriptions",  })
@@ -133,7 +138,8 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get details of a pending invoice for a monetized subscription with metered billing.", notes = "This operation can be used to get details of a pending invoice for a monetized subscription with metered billing. ", response = APIMonetizationUsageDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:sub_manage", description = "Manage subscriptions")
+            @AuthorizationScope(scope = "apim:sub_manage", description = "Retrieve, Manage subscriptions"),
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
     }, tags={ "API Monetization" })
     @ApiResponses(value = { 

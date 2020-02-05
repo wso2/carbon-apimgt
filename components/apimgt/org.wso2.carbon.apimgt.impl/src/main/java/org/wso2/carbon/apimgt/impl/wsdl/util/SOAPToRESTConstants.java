@@ -31,6 +31,7 @@ public class SOAPToRESTConstants {
     public static final String TYPE_ATTRIBUTE = "type";
     public static final String NAME_ATTRIBUTE = "name";
     public static final String REF_ATTRIBUTE = "ref";
+    public static final String TARGET_NAMESPACE_ATTRIBUTE = "targetNamespace";
     public static final String MAX_OCCURS_ATTRIBUTE = "maxOccurs";
     public static final String UNBOUNDED = "unbounded";
     public static final String METHOD = "method";
@@ -47,6 +48,8 @@ public class SOAPToRESTConstants {
     public static final String ELEMENT_FORM_DEFAULT= "elementFormDefault";
     public static final String QUALIFIED = "qualified";
     public static final String X_NAMESPACE_QUALIFIED = "x-namespace-qualified";
+    public static final String XMLNS = "xmlns";
+    public static final String X_WSO2_UNIQUE_NAMESPACE = "x-wso2-empty-namespace";
 
     public final class Swagger {
         public static final String DEFINITIONS = "definitions";

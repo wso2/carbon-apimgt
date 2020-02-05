@@ -21,7 +21,6 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.AlertSubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SdkGenApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SearchApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SelfSignupApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SettingsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.TagsApi"/>
