@@ -1895,6 +1895,8 @@ public final class APIConstants {
     public static final String RECOMMENDATION_API_CONSUMER_SECRET = "consumerSecret";
     public static final String MAX_RECOMMENDATIONS = "maxRecommendations";
     public static final String APPLY_RECOMMENDATIONS_FOR_ALL_APIS = "applyForAllTenants";
+    public static final String RECOMMENDATION_USERNAME = "userName";
+    public static final String RECOMMENDATION_PASSWORD = "password";
     public static final String ADD_API = "ADD_API";
     public static final String DELETE_API = "DELETE_API";
     public static final String ADD_NEW_APPLICATION = "ADD_NEW_APPLICATION";

@@ -1199,21 +1199,16 @@ public class APIManagerConfiguration {
      * @param element
      */
     private void setRecommendationConfigurations(OMElement element) {
-        OMElement apiRecommendationsConfigurationElement = element
-                .getFirstChildWithName(new QName(APIConstants.API_RECOMMENDATION));
-        if (apiRecommendationsConfigurationElement != null) {
-            OMElement recommendationSeverEndpointElement = apiRecommendationsConfigurationElement
-                    .getFirstChildWithName(new QName(APIConstants.RECOMMENDATION_ENDPOINT));
-            if (recommendationSeverEndpointElement != null) {
-                recommendationEnvironment.setRecommendationServerURL(recommendationSeverEndpointElement.getText());
-            }
+        OMElement recommendationSeverEndpointElement = element.getFirstChildWithName(new QName(APIConstants.RECOMMENDATION_ENDPOINT));
+        if (recommendationSeverEndpointElement != null) {
+            recommendationEnvironment.setRecommendationServerURL(recommendationSeverEndpointElement.getText());
 
-            OMElement oauthEndpointElement = apiRecommendationsConfigurationElement
+            OMElement oauthEndpointElement = element
                     .getFirstChildWithName(new QName(APIConstants.AUTHENTICATION_ENDPOINT));
             if (oauthEndpointElement != null) {
                 recommendationEnvironment.setOauthURL(oauthEndpointElement.getText());
             }
-            OMElement consumerKeyElement = apiRecommendationsConfigurationElement
+            OMElement consumerKeyElement = element
                     .getFirstChildWithName(new QName(APIConstants.RECOMMENDATION_API_CONSUMER_KEY));
             if (consumerKeyElement != null) {
                 if (secretResolver.isInitialized()
@@ -1224,7 +1219,7 @@ public class APIManagerConfiguration {
                     recommendationEnvironment.setConsumerKey(consumerKeyElement.getText());
                 }
             }
-            OMElement consumerSecretElement = apiRecommendationsConfigurationElement
+            OMElement consumerSecretElement = element
                     .getFirstChildWithName(new QName(APIConstants.RECOMMENDATION_API_CONSUMER_SECRET));
             if (consumerSecretElement != null) {
                 if (secretResolver.isInitialized()
@@ -1232,10 +1227,10 @@ public class APIManagerConfiguration {
                     recommendationEnvironment.setConsumerSecret(secretResolver
                             .resolve("APIManager.Recommendations.ConsumerSecret"));
                 } else {
-                    recommendationEnvironment.setConsumerSecret(consumerKeyElement.getText());
+                    recommendationEnvironment.setConsumerSecret(consumerSecretElement.getText());
                 }
             }
-            OMElement applyForAllTenantsElement = apiRecommendationsConfigurationElement
+            OMElement applyForAllTenantsElement = element
                     .getFirstChildWithName(new QName(APIConstants.APPLY_RECOMMENDATIONS_FOR_ALL_APIS));
             if (applyForAllTenantsElement != null) {
                 recommendationEnvironment.setApplyForAllTenants(JavaUtils.isTrueExplicitly(applyForAllTenantsElement
@@ -1243,12 +1238,29 @@ public class APIManagerConfiguration {
             } else {
                 log.debug("Apply For All Tenants Element is not set. Set to default true");
             }
-            OMElement maxRecommendationsElement = apiRecommendationsConfigurationElement
+            OMElement maxRecommendationsElement = element
                     .getFirstChildWithName(new QName(APIConstants.MAX_RECOMMENDATIONS));
             if (maxRecommendationsElement != null) {
                 recommendationEnvironment.setMaxRecommendations(Integer.parseInt(maxRecommendationsElement.getText()));
             } else {
                 log.debug("Max recommendations is not set. Set to default 5");
+            }
+            OMElement userNameElement = element
+                    .getFirstChildWithName(new QName(APIConstants.RECOMMENDATION_USERNAME));
+            if (userNameElement != null) {
+                recommendationEnvironment.setUserName(userNameElement.getText());
+                log.debug("Basic OAuth used for recommendation server");
+            }
+            OMElement passwordElement = element
+                    .getFirstChildWithName(new QName(APIConstants.RECOMMENDATION_PASSWORD));
+            if (passwordElement != null) {
+                if (secretResolver.isInitialized()
+                        && secretResolver.isTokenProtected("APIManager.Recommendations.password")) {
+                    recommendationEnvironment.setPassword(secretResolver
+                            .resolve("APIManager.Recommendations.password"));
+                } else {
+                    recommendationEnvironment.setPassword(passwordElement.getText());
+                }
             }
         }
     }

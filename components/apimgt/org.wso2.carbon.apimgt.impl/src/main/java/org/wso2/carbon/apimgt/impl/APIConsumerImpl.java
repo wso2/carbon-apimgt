@@ -88,6 +88,7 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGeneratorImpl;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
@@ -5811,14 +5812,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (isRecommendationEnabled(tenantDomain)) {
             String recommendationEndpointURL = recommendationEnvironment.getRecommendationServerURL()
                     + APIConstants.RECOMMENDATIONS_GET_RESOURCE;
-
-            String authUrl = recommendationEnvironment.getOauthURL();
-            String consumerKey = recommendationEnvironment.getConsumerKey();
-            String consumerSecret = recommendationEnvironment.getConsumerSecret();
-
             try {
-                String accessToken = ServiceReferenceHolder.getInstance().getAccessTokenGenerator()
-                                .getAccessToken(authUrl, consumerKey, consumerSecret);
                 String userID = apiMgtDAO.getUserID(userName);
                 URL serverURL = new URL(recommendationEndpointURL);
                 int serverPort = serverURL.getPort();
@@ -5826,7 +5820,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                 HttpGet method = new HttpGet(recommendationEndpointURL);
                 HttpClient httpClient = APIUtil.getHttpClient(serverPort, serverProtocol);
-                method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, "Bearer " + accessToken);
+                if (recommendationEnvironment.getOauthURL() != null) {
+                    String accessToken = AccessTokenGeneratorImpl.getInstance().getAccessToken(
+                                    recommendationEnvironment.getOauthURL(),
+                                    recommendationEnvironment.getConsumerKey(),
+                                    recommendationEnvironment.getConsumerSecret());
+                    method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, "Bearer " + accessToken);
+                } else {
+                    byte[] credentials = org.apache.commons.codec.binary.Base64.encodeBase64(
+                            (recommendationEnvironment.getUserName() + ":" + recommendationEnvironment.getPassword())
+                                    .getBytes(StandardCharsets.UTF_8));
+                    method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
+                }
                 method.setHeader(APIConstants.RECOMMENDATIONS_USER_HEADER, userID);
                 method.setHeader(APIConstants.RECOMMENDATIONS_ACCOUNT_HEADER, tenantDomain);
 

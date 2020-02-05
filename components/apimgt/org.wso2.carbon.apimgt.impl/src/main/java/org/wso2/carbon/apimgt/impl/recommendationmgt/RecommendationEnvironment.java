@@ -24,6 +24,8 @@ public class RecommendationEnvironment {
     private String oauthURL;
     private String consumerKey;
     private String consumerSecret;
+    private String userName;
+    private String password;
     private int maxRecommendations = 5;
     private boolean applyForAllTenants = true;
 
@@ -75,6 +77,22 @@ public class RecommendationEnvironment {
 
     public void setApplyForAllTenants(boolean applyForAllTenants) {
         this.applyForAllTenants = applyForAllTenants;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
 
