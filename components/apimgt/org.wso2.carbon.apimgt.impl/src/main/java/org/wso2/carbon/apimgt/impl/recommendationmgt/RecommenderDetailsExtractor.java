@@ -206,16 +206,18 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
     @Override
     public void publishClickedApi(ApiTypeWrapper api, String userName) {
-        String userID = getUserId(userName);
-        String apiName = api.getName();
-        JSONObject obj = new JSONObject();
-        obj.put("user", userID);
-        obj.put("api_name", apiName);
+        if (userName != APIConstants.WSO2_ANONYMOUS_USER) {
+            String userID = getUserId(userName);
+            String apiName = api.getName();
+            JSONObject obj = new JSONObject();
+            obj.put("user", userID);
+            obj.put("api_name", apiName);
 
-        JSONObject payload = new JSONObject();
-        payload.put(APIConstants.ACTION_STRING, APIConstants.ADD_USER_CLICKED_API);
-        payload.put(APIConstants.PAYLOAD_STRING, obj);
-        publishEvent(payload.toString());
+            JSONObject payload = new JSONObject();
+            payload.put(APIConstants.ACTION_STRING, APIConstants.ADD_USER_CLICKED_API);
+            payload.put(APIConstants.PAYLOAD_STRING, obj);
+            publishEvent(payload.toString());
+        }
     }
 
     @Override

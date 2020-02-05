@@ -46,52 +46,49 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
     public Response recommendationsGet(MessageContext messageContext) {
         RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
+        List<JSONObject> recommendedApis = new ArrayList<>();
+        JSONObject responseObj = new JSONObject();
         try {
             String userName = RestApiUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(userName);
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            if(apiConsumer.isRecommendationEnabled(tenantDomain)){
+            if (apiConsumer.isRecommendationEnabled(tenantDomain) && userName != "wso2.anonymous.user") {
+                int maxRecommendations = recommendationEnvironment.getMaxRecommendations();
+                String recommendations = apiConsumer.getApiRecommendations(userName, tenantDomain);
 
-            }
-            int maxRecommendations = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration().getApiRecommendationEnvironment().getMaxRecommendations();
-            String recommendations = apiConsumer.getApiRecommendations(userName, tenantDomain);
+                if (recommendations != null) {
+                    JSONObject jsonResponse = new JSONObject(recommendations);
+                    JSONArray apiList = jsonResponse.getJSONArray("userRecommendations");
+                    String requestedTenant = jsonResponse.getString("requestedTenantDomain");
 
-            if (recommendations != null) {
-                JSONObject jsonResponse = new JSONObject(recommendations);
-                JSONArray apiList = jsonResponse.getJSONArray("userRecommendations");
-                String requestedTenant = jsonResponse.getString("requestedTenantDomain");
-                JSONObject responseObj = new JSONObject();
-                List<JSONObject> recommendedApis = new ArrayList<>();
-
-                for (int i = 0; i < apiList.length(); i++) {
-                    try {
-                        JSONObject apiObj = apiList.getJSONObject(i);
-                        String apiId = apiObj.getString("id");
-                        ApiTypeWrapper apiWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenant);
-                        API api = apiWrapper.getApi();
-                        APIIdentifier apiIdentifier = api.getId();
-                        boolean isApiSubscribed = apiConsumer.isSubscribed(apiIdentifier, userName);
-                        if (!isApiSubscribed && recommendedApis.size() <= maxRecommendations) {
-                            JSONObject apiDetails = new JSONObject();
-                            apiDetails.put("id", apiId);
-                            apiDetails.put("name", apiWrapper.getName());
-                            apiDetails.put("avgRating", api.getRating());
-                            recommendedApis.add(apiDetails);
+                    for (int i = 0; i < apiList.length(); i++) {
+                        try {
+                            JSONObject apiObj = apiList.getJSONObject(i);
+                            String apiId = apiObj.getString("id");
+                            ApiTypeWrapper apiWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenant);
+                            API api = apiWrapper.getApi();
+                            APIIdentifier apiIdentifier = api.getId();
+                            boolean isApiSubscribed = apiConsumer.isSubscribed(apiIdentifier, userName);
+                            if (!isApiSubscribed && recommendedApis.size() <= maxRecommendations) {
+                                JSONObject apiDetails = new JSONObject();
+                                apiDetails.put("id", apiId);
+                                apiDetails.put("name", apiWrapper.getName());
+                                apiDetails.put("avgRating", api.getRating());
+                                recommendedApis.add(apiDetails);
+                            }
+                        } catch (APIManagementException e) {
+                            log.error("Error occurred when retrieving api details for the recommended API", e);
                         }
-                    } catch (APIManagementException e) {
-                        log.error("Error occurred when retrieving api details for the recommended API", e);
                     }
                 }
-                int count = recommendedApis.size();
-                responseObj.put("count", count);
-                responseObj.put("list", recommendedApis);
-                String responseStringObj = String.valueOf(responseObj);
-                return Response.ok().entity(responseStringObj).build();
             }
         } catch (Exception e) {
             log.error("Error occurred when retrieving recommendations through the rest api: ", e);
         }
-        return null;
+        int count = recommendedApis.size();
+        responseObj.put("count", count);
+        responseObj.put("list", recommendedApis);
+        String responseStringObj = String.valueOf(responseObj);
+        return Response.ok().entity(responseStringObj).build();
     }
 }
