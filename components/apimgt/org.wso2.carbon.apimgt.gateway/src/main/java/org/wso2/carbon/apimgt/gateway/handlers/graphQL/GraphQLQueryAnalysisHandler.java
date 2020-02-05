@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 
 public class GraphQLQueryAnalysisHandler extends AbstractHandler {
 
@@ -179,7 +180,12 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
                         }
 
                         // TODO: https://github.com/wso2/carbon-apimgt/issues/8147
-                        errorList.removeIf(s -> s.contains("non-nullable"));
+                        ListIterator<String> iterator = errorList.listIterator();
+                        while (iterator.hasNext()) {
+                            if (iterator.next().contains("non-nullable")) {
+                                iterator.remove();
+                            }
+                        }
 
                         if (errorList.size() == 0) {
                             if (log.isDebugEnabled()) {
@@ -236,7 +242,12 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
                     }
 
                     // TODO: https://github.com/wso2/carbon-apimgt/issues/8147
-                    errorList.removeIf(s -> s.contains("non-nullable"));
+                    ListIterator<String> iterator = errorList.listIterator();
+                    while (iterator.hasNext()) {
+                        if (iterator.next().contains("non-nullable")) {
+                            iterator.remove();
+                        }
+                    }
 
                     if (errorList.size() == 0) {
                         if (log.isDebugEnabled()) {
