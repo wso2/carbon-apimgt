@@ -196,29 +196,38 @@ public class OpenAPIUtils {
             String httpMethod = (String) axis2MessageContext.getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD);
             PathItem path = openAPI.getPaths().get(apiElectedResource);
 
+            ArrayList<String> defaultSecurity =  (ArrayList<String>)openAPI.getSecurity().get(0).
+                    get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
             if (path != null) {
                 switch (httpMethod) {
                     case APIConstants.HTTP_GET:
-                        return (ArrayList<String>) path.getGet().getSecurity().get(0)
-                                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
+                        return (ArrayList<String>) (path.getGet().getSecurity() != null &&
+                                path.getGet().getSecurity().get(0) != null ? path.getGet().getSecurity().get(0).
+                                get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY) : defaultSecurity);
                     case APIConstants.HTTP_POST:
-                        return (ArrayList<String>) path.getPost().getSecurity().get(0)
-                                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
+                        return (ArrayList<String>) (path.getPost().getSecurity() != null &&
+                                path.getPost().getSecurity().get(0) != null ? path.getPost().getSecurity().get(0).
+                                get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY) : defaultSecurity);
                     case APIConstants.HTTP_PUT:
-                        return (ArrayList<String>) path.getPut().getSecurity().get(0)
-                                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
+                        return (ArrayList<String>) (path.getPut().getSecurity() != null &&
+                                path.getPut().getSecurity().get(0) != null ? path.getPut().getSecurity().get(0).
+                                get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY) : defaultSecurity);
                     case APIConstants.HTTP_DELETE:
-                        return (ArrayList<String>) path.getDelete().getSecurity().get(0)
-                                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
+                        return (ArrayList<String>) (path.getDelete().getSecurity() != null &&
+                                path.getDelete().getSecurity().get(0) != null ? path.getDelete().getSecurity().get(0).
+                                get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY) : defaultSecurity);
                     case APIConstants.HTTP_HEAD:
-                        return (ArrayList<String>) path.getHead().getSecurity().get(0)
-                                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
+                        return (ArrayList<String>) (path.getHead().getSecurity() != null &&
+                                path.getHead().getSecurity().get(0) != null ? path.getHead().getSecurity().get(0).
+                                get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY) : defaultSecurity);
                     case APIConstants.HTTP_OPTIONS:
-                        return (ArrayList<String>) path.getOptions().getSecurity().get(0)
-                                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
+                        return (ArrayList<String>) (path.getOptions().getSecurity() != null &&
+                                path.getOptions().getSecurity().get(0) != null ? path.getOptions().getSecurity().get(0).
+                                get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY) : defaultSecurity);
                     case APIConstants.HTTP_PATCH:
-                        return (ArrayList<String>) path.getPatch().getSecurity().get(0)
-                                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
+                        return (ArrayList<String>) (path.getPatch().getSecurity() != null &&
+                                path.getPatch().getSecurity().get(0) != null ? path.getPatch().getSecurity().get(0).
+                                get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY) : defaultSecurity);
                 }
             }
         }

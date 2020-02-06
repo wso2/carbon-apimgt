@@ -340,7 +340,7 @@ public class RestApiPublisherUtils {
      * @return String
      * */
     public static String getSOAPOperation() {
-        return "{\"/*\":{\"post\":{\"parameters\":[{\"schema\":{\"type\":\"string\"},\"description\":\"SOAP request.\","
+        return "{\"/*\":{\"post\":{\"consumes\": [\"text\\/xml\"],\"parameters\":[{\"schema\":{\"type\":\"string\"},\"description\":\"SOAP request.\","
             + "\"name\":\"SOAP Request\",\"required\":true,\"in\":\"body\"},"
                 + "{\"description\":\"SOAPAction header for soap 1.1\",\"name\":\"SOAPAction\",\"type\":\"string\","
                 + "\"required\":false,\"in\":\"header\"}],\"responses\":{\"200\":{\"description\":\"OK\"}}}}}";
