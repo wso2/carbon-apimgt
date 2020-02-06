@@ -20,7 +20,11 @@
     include("/services/constants.jag");
     var appUtils = require("/services/utils.js");
     var app = require("/site/public/theme/settings.js").Settings.app;
-
+    app.context = appUtils.getTenantBaseStoreContext();
+    var tenantDomain;
+    if (appUtils.isPerTenantServiceProviderEnabled()) {
+        tenantDomain = appUtils.getTenantDomain();
+     }
     var log = new Log();
     var cookieToken = request.getCookie("AM_REF_TOKEN_DEFAULT_P2");
     var tokenParam = request.getParameter("refresh_token", "UTF-8")
@@ -40,9 +44,9 @@
 
         var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
         var systemApplicationDAO = new SystemApplicationDTO();
-        var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME);
+        var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME,tenantDomain);
         if (systemApplicationDTO === null) {
-            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME_OLD);
+            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME_OLD,tenantDomain);
         }
         if (systemApplicationDTO == null) {
             log.error("Oauth application details not found for 'devportal'");

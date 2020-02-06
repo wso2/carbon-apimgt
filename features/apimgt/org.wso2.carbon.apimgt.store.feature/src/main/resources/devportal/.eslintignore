@@ -1,3 +1,22 @@
-/public/**
-/node_modules/**
-/source/test/**
+/public/*
+/node_modules/*
+/coverage/*
+# Pleae comment the reason if you are  ignoring a file/directory here
+source/src/app/data/*
+/source/src/app/components/Apis/*
+/source/src/app/components/Applications/*
+/source/src/app/components/Base/*
+/source/src/app/components/LandingPage/*
+/source/src/app/components/Login/*
+/source/src/app/components/Settings/*
+/source/src/app/components/Shared/*
+/source/src/app/components/Logout.jsx
+/source/src/app/components/Base/*
+/source/src/app/AppRouts.jsx
+/source/src/app/LoginDenied.jsx
+/source/src/app/ProtectedApp.jsx
+/source/src/app/TenantListing.jsx
+/source/src/DevPortal.jsx
+/source/Tests/*
+/source/customPolyfill.js
+/source/index.jsx

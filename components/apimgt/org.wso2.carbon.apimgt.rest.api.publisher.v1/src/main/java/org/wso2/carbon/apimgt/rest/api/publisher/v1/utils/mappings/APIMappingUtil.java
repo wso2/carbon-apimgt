@@ -908,15 +908,7 @@ public class APIMappingUtil {
         dto.setCorsConfiguration(apiCorsConfigurationDTO);
 
         if (model.getWsdlUrl() != null) {
-            String wsdlRegistryUri = model.getWsdlUrl().toLowerCase();
-            APIWsdlInfoDTO wsdlInfoDTO = new APIWsdlInfoDTO();
-            if (wsdlRegistryUri.endsWith(APIConstants.ZIP_FILE_EXTENSION)) {
-                wsdlInfoDTO.setType(APIWsdlInfoDTO.TypeEnum.ZIP);
-            } else if (wsdlRegistryUri.endsWith(APIConstants.WSDL_EXTENSION)) {
-                wsdlInfoDTO.setType(APIWsdlInfoDTO.TypeEnum.WSDL);
-            } else {
-                log.warn("Unrecognized WSDL type in WSDL url: " + model.getWsdlUrl());
-            }
+            WSDLInfoDTO wsdlInfoDTO = getWsdlInfoDTO(model);
             dto.setWsdlInfo(wsdlInfoDTO);
         }
         dto.setWsdlUrl(model.getWsdlUrl());
@@ -959,6 +951,28 @@ public class APIMappingUtil {
         dto.setCategories(categoryNameList);
 
         return dto;
+    }
+
+    /**
+     * Retrieves the WSDL info from the API model
+     *
+     * @param model API
+     * @return WSDL info
+     */
+    public static WSDLInfoDTO getWsdlInfoDTO(API model) {
+        if (model.getWsdlUrl() == null) {
+            return null;
+        }
+        String wsdlRegistryUri = model.getWsdlUrl().toLowerCase();
+        WSDLInfoDTO wsdlInfoDTO = new WSDLInfoDTO();
+        if (wsdlRegistryUri.endsWith(APIConstants.ZIP_FILE_EXTENSION)) {
+            wsdlInfoDTO.setType(WSDLInfoDTO.TypeEnum.ZIP);
+        } else if (wsdlRegistryUri.endsWith(APIConstants.WSDL_EXTENSION)) {
+            wsdlInfoDTO.setType(WSDLInfoDTO.TypeEnum.WSDL);
+        } else {
+            log.warn("Unrecognized WSDL type in WSDL url: " + model.getWsdlUrl());
+        }
+        return wsdlInfoDTO;
     }
 
     private static APIDTO.VisibilityEnum mapVisibilityFromAPItoDTO(String visibility) {

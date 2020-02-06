@@ -1,16 +1,16 @@
 <div class="main-content">
-    <h1><a name="Application Scopes"></a>Application Scopes</h1>
+    <h1><a name="Import Export"></a>Import Export</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="applicationsApplicationIdScopesGet"></a>Get scopes of application
-</h4> <code>GET https://apis.wso2.com/api/am/store/v1/applications/{applicationId}/scopes</code>
+            <h4 class="operation-heading"><a name="apisExportGet"></a>Export an API</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1/apis/export</code>
             <p class="marked"></p>
 
-            <p class="marked">Get scopes associated with a particular application based on subscribed APIs
+            <p class="marked">This operation can be used to export the details of a particular API as a zip file.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:subscribe</code>
+                <code>apim:api_publish</code>
+                <code>apim:api_create</code>
 
             <h4 class="section-heading">
                 Examples
@@ -37,20 +37,47 @@
                     <tr>
                         <td class="parameter">
                             
+                            <span class="param-in">Query </span>
                             
-                            <span class="param-in">Path </span>
                             
                             
                         </td>
                         <td class="param-name">
-                            <p>applicationId</p>
+                            <p>apiId</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Application Identifier consisting of the UUID of the Application.
+                            <p class="param-description marked">UUID of the API</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>name</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">API Name
 </p>
                         </td>
                         <td>
@@ -71,19 +98,19 @@
                             
                         </td>
                         <td class="param-name">
-                            <p>filterByUserRoles</p>
+                            <p>version</p>
                             <p class="param-required">
                                 
                                 optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Filter user by roles.
+                            <p class="param-description marked">Version of the API
 </p>
                         </td>
                         <td>
                             <span class="param-type">
-                                Boolean
+                                String
                             </span>
                         </td>
                         <td>
@@ -93,26 +120,87 @@
                     <tr>
                         <td class="parameter">
                             
+                            <span class="param-in">Query </span>
                             
                             
-                            <span class="param-in">Header </span>
                             
                         </td>
                         <td class="param-name">
-                            <p>If-None-Match</p>
+                            <p>providerName</p>
                             <p class="param-required">
                                 
                                 optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
+                            <p class="param-description marked">Provider name of the API
 </p>
                         </td>
                         <td>
                             <span class="param-type">
                                 String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>format</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Format of output documents. Can be YAML or JSON.
+</p>
+                                <p><b>Accepted values: </b></p>
+
+<code>JSON</code>
+
+<code>YAML</code>
+
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>preserveStatus</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Preserve API Status on export
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                Boolean
                             </span>
                         </td>
                         <td>
@@ -139,34 +227,16 @@ variant of the resourec.
                 <tbody>
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. Scope returned. </p></td>
+                        <td class="parameter"><p class="marked">OK. Export Successful. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#ScopeList">ScopeList</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">401</p></td>
-                        <td class="parameter"><p class="marked">Un authorized. The user is not authorized to view the application . </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
+                                    <a href="#!/models#file">file</a>
                             </span>
                         </td>
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested application does not exist. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -174,8 +244,8 @@ variant of the resourec.
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter"><p class="marked">500</p></td>
+                        <td class="parameter"><p class="marked">Internal Server Error. Error in exporting API. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>

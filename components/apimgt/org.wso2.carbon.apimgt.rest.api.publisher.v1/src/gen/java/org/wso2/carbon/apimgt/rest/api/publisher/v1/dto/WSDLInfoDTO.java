@@ -2,12 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
 import javax.validation.constraints.*;
 
-/**
- * WSDL information of the API. This is only available if the API is a SOAP API.
- **/
 
 import io.swagger.annotations.*;
 import java.util.Objects;
@@ -15,9 +11,9 @@ import java.util.Objects;
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
-@ApiModel(description = "WSDL information of the API. This is only available if the API is a SOAP API.")
 
-public class APIWsdlInfoDTO   {
+
+public class WSDLInfoDTO   {
   
 
 @XmlType(name="TypeEnum")
@@ -57,7 +53,7 @@ public enum TypeEnum {
   /**
    * Indicates whether the WSDL is a single WSDL or an archive in ZIP format
    **/
-  public APIWsdlInfoDTO type(TypeEnum type) {
+  public WSDLInfoDTO type(TypeEnum type) {
     this.type = type;
     return this;
   }
@@ -81,8 +77,8 @@ public enum TypeEnum {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIWsdlInfoDTO apIWsdlInfo = (APIWsdlInfoDTO) o;
-    return Objects.equals(type, apIWsdlInfo.type);
+    WSDLInfoDTO wsDLInfo = (WSDLInfoDTO) o;
+    return Objects.equals(type, wsDLInfo.type);
   }
 
   @Override
@@ -93,7 +89,7 @@ public enum TypeEnum {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIWsdlInfoDTO {\n");
+    sb.append("class WSDLInfoDTO {\n");
     
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("}");

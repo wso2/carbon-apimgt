@@ -64,6 +64,11 @@
                 <value>content-type</value>
             </list>
         </property>
+        <property name="exposeHeaders">
+            <list>
+                <value>Content-Disposition</value>
+            </list>
+        </property>
         <property name="allowCredentials" value="true" />
     </bean>
     <cxf:bus>

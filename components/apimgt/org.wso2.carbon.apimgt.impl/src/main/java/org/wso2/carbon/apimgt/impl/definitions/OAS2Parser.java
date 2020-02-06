@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.definitions;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.swagger.models.Contact;
@@ -41,6 +42,7 @@ import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
+import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Yaml;
 import org.apache.commons.collections.CollectionUtils;
@@ -404,7 +406,12 @@ public class OAS2Parser extends APIDefinition {
                     info.getTitle(), info.getVersion(), swagger.getBasePath(), info.getDescription());
             validationResponse.setParser(this);
             if (returnJsonContent) {
-                validationResponse.setJsonContent(OASParserUtil.getSwaggerJsonString(parseAttemptForV2.getSwagger()));
+                if (!apiDefinition.trim().startsWith("{")) { // not a json (it is yaml)
+                    JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition);
+                    validationResponse.setJsonContent(jsonNode.toString());
+                } else {
+                    validationResponse.setJsonContent(apiDefinition);
+                }
             }
         }
         return validationResponse;
@@ -523,10 +530,11 @@ public class OAS2Parser extends APIDefinition {
         if (sandEndpointObj != null) {
             swagger.setVendorExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandEndpointObj);
         }
-        swagger.setVendorExtension(APIConstants.X_WSO2_BASEPATH, api.getContext());
-        if (api.getTransports() != null) {
-            swagger.setVendorExtension(APIConstants.X_WSO2_TRANSPORTS, api.getTransports().split(","));
-        }
+        swagger.setVendorExtension(APIConstants.X_WSO2_TRANSPORTS,
+                OASParserUtil.getTransportSecurity(api.getApiSecurity(), api.getTransports()));
+        swagger.setVendorExtension(APIConstants.SWAGGER_X_WSO2_APP_SECURITY,
+                OASParserUtil.getAppSecurity(api.getApiSecurity()));
+
         return getSwaggerJsonString(swagger);
     }
 

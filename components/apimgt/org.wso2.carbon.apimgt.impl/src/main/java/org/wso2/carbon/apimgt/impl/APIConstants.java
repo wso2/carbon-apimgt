@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -133,6 +134,9 @@ public final class APIConstants {
     //domain mapping app keys
     public static final String API_DOMAIN_MAPPINGS_GATEWAY = "gateway";
     public static final String API_DOMAIN_MAPPINGS_STORE = "store";
+    public static final String API_DOMAIN_MAPPINGS_CONTEXT = "context";
+    public static final String API_DOMAIN_MAPPINGS_LOGIN_CALLBACK = "login";
+    public static final String API_DOMAIN_MAPPINGS_LOGOUT_CALLBACK = "logout";
 
 
     public static final String API_IMAGE_LOCATION = API_APPLICATION_DATA_LOCATION + "/icons";
@@ -312,6 +316,7 @@ public final class APIConstants {
     public static final String API_SECURITY_MUTUAL_SSL_MANDATORY = "mutualssl_mandatory";
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
     public static final String CERTIFICATE_COMMON_NAME = "CN";
+    public static final List<String> APPLICATION_LEVEL_SECURITY = Arrays.asList("basic_auth", "api_key", "oauth2");
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
     public static final String API_OVERVIEW_CACHE_TIMEOUT = "overview_cacheTimeout";
@@ -1002,7 +1007,8 @@ public final class APIConstants {
     }
 
     public static final String EXTENSION_HANDLER_POSITION = "ExtensionHandlerPosition";
-
+    public static final String ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION = "EnablePerTenantServiceProviderCreation";
+    public static final String DISABLE_DEFAULT_APPLICATION_CREATION = "DisableDefaultApplicationCreation";
     public static final String GATEWAY_ENV_TYPE_HYBRID = "hybrid";
     public static final String GATEWAY_ENV_TYPE_PRODUCTION = "production";
     public static final String GATEWAY_ENV_TYPE_SANDBOX = "sandbox";
@@ -1205,6 +1211,10 @@ public final class APIConstants {
     public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
     public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
     public static final String SWAGGER_X_WSO2_SECURITY = "x-wso2-security";
+    public static final String SWAGGER_X_WSO2_APP_SECURITY = "x-wso2-application-security";
+    public static final String WSO2_APP_SECURITY_TYPES = "security-types";
+    public static final String OPTIONAL = "optional";
+    public static final String MANDATORY = "mandatory";
     public static final String SWAGGER_X_WSO2_SCOPES = "x-wso2-scopes";
     public static final String SWAGGER_X_EXAMPLES = "x-examples";
     public static final String SWAGGER_SCOPE_KEY = "key";
