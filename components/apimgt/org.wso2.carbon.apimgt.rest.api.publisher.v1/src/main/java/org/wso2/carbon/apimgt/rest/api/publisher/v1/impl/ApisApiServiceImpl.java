@@ -74,7 +74,6 @@ import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlDepthComplexityStatus;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlDepthInfo;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlLimitationStatus;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -764,7 +763,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Response with complexity details of the GraphQL API
      */
     @Override
-    public Response apisApiIdQueryAnalysisComplexityGet(String apiId, MessageContext messageContext) {
+    public Response apisApiIdGraphqlPoliciesComplexityGet(String apiId, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -795,28 +794,29 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
-     * Add complexity details to an API
+     * Update complexity details of a given API
      *
      * @param apiId          apiId
      * @param body           GraphQLQueryComplexityInfo DTO as request body
      * @param messageContext message context
-     * @return created GraphQLQueryComplexityInfo DTO as response
+     * @return Response
      */
     @Override
-    public Response apisApiIdQueryAnalysisComplexityPost(String apiId, GraphQLQueryComplexityInfoDTO body,
-                                                         MessageContext messageContext) {
+    public Response apisApiIdGraphqlPoliciesComplexityPut(String apiId, GraphQLQueryComplexityInfoDTO body,
+                                                          MessageContext messageContext) {
         try {
             if (StringUtils.isBlank(apiId)) {
                 String errorMessage = "API ID cannot be empty or null.";
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            GraphqlComplexityInfo graphqlComplexityInfo = GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlComplexityInfo(body);
+            GraphqlComplexityInfo graphqlComplexityInfo =
+                    GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlComplexityInfo(body);
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                apiProvider.addComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+                apiProvider.updateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
                 return Response.ok().build();
             } else {
                 throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
@@ -828,10 +828,88 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while adding complexity details for API : " + apiId, e, log);
+                        "Authorization failure while updating complexity details of API : " + apiId, e, log);
             } else {
-                String errorMessage = "Error while adding complexity details for API : " + apiId;
+                String errorMessage = "Error while updating complexity details of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get depth and complexity limitation status
+     *
+     * @param apiId          apiId
+     * @param messageContext message context
+     * @return Response with depth limitation status and complexity limitation status
+     */
+    @Override
+    public Response apisApiIdGraphqlPoliciesConfigurationGet(String apiId, MessageContext messageContext) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                GraphqlDepthComplexityStatus graphqlDepthComplexityStatus = apiProvider.getLimitationStatus(apiIdentifier);
+                GraphQLDepthComplexityStatusDTO graphQLDepthComplexityStatusDTO =
+                        GraphqlQueryAnalysisMappingUtil.fromGraphqlDepthComplexityStatustoDTO(graphqlDepthComplexityStatus);
+                return Response.ok().entity(graphQLDepthComplexityStatusDTO).build();
+            } else {
+                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving limitation status of API : " + apiId, e, log);
+            } else {
+                String msg = "Error while retrieving limitation status of API " + apiId;
+                RestApiUtil.handleInternalServerError(msg, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Update limitation status
+     *
+     * @param apiId          apiId
+     * @param body           GraphQLDepthComplexityStatusDTO DTO as request body
+     * @param messageContext message context
+     * @return Response
+     */
+    @Override
+    public Response apisApiIdGraphqlPoliciesConfigurationPut(String apiId, GraphQLDepthComplexityStatusDTO body,
+                                                             MessageContext messageContext) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            GraphqlDepthComplexityStatus graphqlDepthComplexityStatus =
+                    GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlDepthComplexityStatus(body);
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                apiProvider.updateLimitationStatus(apiIdentifier, graphqlDepthComplexityStatus);
+                return Response.ok().build();
+            } else {
+                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while updating limitation status of API : " + apiId, e, log);
+            } else {
+                String msg = "Error while updating limitation status of API " + apiId;
+                RestApiUtil.handleInternalServerError(msg, e, log);
             }
         }
         return null;
@@ -845,7 +923,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Response with role-depth mappings of the GraphQL API
      */
     @Override
-    public Response apisApiIdQueryAnalysisDepthGet(String apiId, MessageContext messageContext) {
+    public Response apisApiIdGraphqlPoliciesDepthGet(String apiId, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -884,8 +962,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return created GraphQLQueryDepthInfo DTO as response
      */
     @Override
-    public Response apisApiIdQueryAnalysisDepthPost(String apiId, GraphQLQueryDepthInfoDTO body,
-                                                    MessageContext messageContext) {
+    public Response apisApiIdGraphqlPoliciesDepthPost(String apiId, GraphQLQueryDepthInfoDTO body,
+                                                      MessageContext messageContext) {
         try {
             if (StringUtils.isBlank(apiId)) {
                 String errorMessage = "API ID cannot be empty or null.";
@@ -927,8 +1005,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Status of role-depth mapping deletion
      */
     @Override
-    public Response apisApiIdQueryAnalysisDepthRoleDepthMappingIdDelete(String apiId, String roleDepthMappingId,
-                                                                        MessageContext messageContext) {
+    public Response apisApiIdGraphqlPoliciesDepthRoleDepthMappingIdDelete(String apiId, String roleDepthMappingId,
+                                                                          MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -968,8 +1046,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Response with the requested role-depth mapping
      */
     @Override
-    public Response apisApiIdQueryAnalysisDepthRoleDepthMappingIdGet(String apiId, String roleDepthMappingId,
-                                                                     MessageContext messageContext) {
+    public Response apisApiIdGraphqlPoliciesDepthRoleDepthMappingIdGet(String apiId, String roleDepthMappingId,
+                                                                       MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -1010,8 +1088,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Response
      */
     @Override
-    public Response apisApiIdQueryAnalysisDepthRoleDepthMappingIdPut(String apiId, String roleDepthMappingId,
-                                                                     GraphQLQueryDepthInfoDTO body, MessageContext messageContext) {
+    public Response apisApiIdGraphqlPoliciesDepthRoleDepthMappingIdPut(String apiId, String roleDepthMappingId,
+                                                        GraphQLQueryDepthInfoDTO body, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             GraphqlDepthInfo graphqlDepthInfo = GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlDepthInfo(body);
@@ -1035,84 +1113,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 String msg = "Error while updating the role-depth mapping of API : " + apiId
                         + " with uuid : " + roleDepthMappingId;
-                RestApiUtil.handleInternalServerError(msg, e, log);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Get depth and complexity limitation status
-     *
-     * @param apiId          apiId
-     * @param messageContext message context
-     * @return Response with depth limitation status and complexity limitation status
-     */
-    @Override
-    public Response apisApiIdQueryAnalysisEnabledGet(String apiId, MessageContext messageContext) {
-        try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                GraphqlDepthComplexityStatus graphqlDepthComplexityStatus = apiProvider.getLimitationStatus(apiIdentifier);
-                GraphQLDepthComplexityStatusDTO graphQLDepthComplexityStatusDTO =
-                        GraphqlQueryAnalysisMappingUtil.fromGraphqlDepthComplexityStatustoDTO(graphqlDepthComplexityStatus);
-                return Response.ok().entity(graphQLDepthComplexityStatusDTO).build();
-            } else {
-                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
-            }
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving limitation status of API : " + apiId, e, log);
-            } else {
-                String msg = "Error while retrieving limitation status of API " + apiId;
-                RestApiUtil.handleInternalServerError(msg, e, log);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Update limitation status
-     *
-     * @param apiId          apiId
-     * @param body           GraphQLLimitationStatus DTO as request body
-     * @param messageContext message context
-     * @return Response
-     */
-    @Override
-    public Response apisApiIdQueryAnalysisEnabledPut(String apiId, GraphQLLimitationStatusDTO body,
-                                                     MessageContext messageContext) {
-        try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            GraphqlLimitationStatus graphqlLimitationStatus =
-                    GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlLimitationStatus(body);
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                apiProvider.updateLimitationStatus(apiIdentifier, graphqlLimitationStatus);
-                return Response.ok().build();
-            } else {
-                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
-            }
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while updating limitation status of API : " + apiId, e, log);
-            } else {
-                String msg = "Error while updating limitation status of API " + apiId;
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
         }

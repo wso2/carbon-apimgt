@@ -38,7 +38,6 @@ import org.wso2.carbon.apimgt.api.model.Wsdl;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlDepthComplexityStatus;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlDepthInfo;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlLimitationStatus;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.registry.api.Resource;
 
@@ -250,13 +249,14 @@ public interface APIManager {
     GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiId) throws APIManagementException;
 
     /**
-     * Add complexity details given the GraphqlComplexityInfo object
+     * Updates the complexity details given the GraphqlComplexityInfo object
      *
      * @param apiIdentifier         APIIdentifier
      * @param graphqlComplexityInfo GraphqlComplexityInfo object
-     * @throws APIManagementException if failed to add complexity details
+     * @throws APIManagementException if failed to update complexity details
      */
-    void addComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException;
+    void updateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
+            throws APIManagementException;
 
     /**
      * Returns a list of GraphqlDepthInfo objects for a given API ID
@@ -283,7 +283,8 @@ public interface APIManager {
      * @param graphqlDepthInfo GraphqlDepthInfo object
      * @throws APIManagementException if failed to add role-depth mapping
      */
-    void addRoleDepthMapping(APIIdentifier apiIdentifier, GraphqlDepthInfo graphqlDepthInfo) throws APIManagementException;
+    void addRoleDepthMapping(APIIdentifier apiIdentifier, GraphqlDepthInfo graphqlDepthInfo)
+            throws APIManagementException;
 
     /**
      * Updates the role-depth mapping of a given uuid
@@ -314,11 +315,11 @@ public interface APIManager {
     /**
      * Updates the limitation status of the given API
      *
-     * @param apiIdentifier           APIIdentifier
-     * @param graphqlLimitationStatus GraphqlLimitationStatus object
+     * @param apiIdentifier                APIIdentifier
+     * @param graphqlDepthComplexityStatus GraphqlDepthComplexityStatus object
      * @throws APIManagementException if failed to update limitation status of the given API
      */
-    void updateLimitationStatus(APIIdentifier apiIdentifier, GraphqlLimitationStatus graphqlLimitationStatus)
+    void updateLimitationStatus(APIIdentifier apiIdentifier, GraphqlDepthComplexityStatus graphqlDepthComplexityStatus)
             throws APIManagementException;
 
     /**

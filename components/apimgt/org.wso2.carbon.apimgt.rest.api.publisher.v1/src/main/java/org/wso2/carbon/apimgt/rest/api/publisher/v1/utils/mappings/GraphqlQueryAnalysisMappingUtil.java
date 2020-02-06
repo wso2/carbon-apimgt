@@ -136,15 +136,16 @@ public class GraphqlQueryAnalysisMappingUtil {
     }
 
     /**
-     * Converts a GraphQLLimitationStatusDTO object into a GraphqlLimitationStatus object
+     * Converts a GraphQLDepthComplexityStatusDTO object into a GraphqlDepthComplexityStatus object
      *
-     * @param body GraphQLLimitationStatusDTO object
-     * @return a new GraphqlLimitationStatus object corresponding to given GraphQLLimitationStatusDTO object
+     * @param body GraphQLDepthComplexityStatusDTO object
+     * @return a new GraphqlDepthComplexityStatus object corresponding to given GraphQLDepthComplexityStatusDTO object
      */
-    public static GraphqlLimitationStatus fromDTOtoGraphqlLimitationStatus(GraphQLLimitationStatusDTO body) {
-        GraphqlLimitationStatus graphqlLimitationStatus = new GraphqlLimitationStatus();
-        graphqlLimitationStatus.setLimitationType(body.getLimitationType());
-        graphqlLimitationStatus.setEnabled(body.isEnabled());
-        return graphqlLimitationStatus;
+    public static GraphqlDepthComplexityStatus fromDTOtoGraphqlDepthComplexityStatus(
+            GraphQLDepthComplexityStatusDTO body) {
+        GraphqlDepthComplexityStatus graphqlDepthComplexityStatus = new GraphqlDepthComplexityStatus();
+        graphqlDepthComplexityStatus.setDepthEnabled(body.isDepthEnabled());
+        graphqlDepthComplexityStatus.setComplexityEnabled(body.isComplexityEnabled());
+        return graphqlDepthComplexityStatus;
     }
 }

@@ -14278,13 +14278,13 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Add complexity details
+     * Update complexity details
      *
      * @param apiIdentifier         APIIdentifier object to retrieve API ID
      * @param graphqlComplexityInfo GraphqlComplexityDetails object
      * @throws APIManagementException
      */
-    public void addComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
+    public void updateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
             throws APIManagementException {
         String checkEntry = SQLConstants.GET_COMPLEXITY_DETAILS_SQL;
         String addCustomComplexityDetails = SQLConstants.ADD_CUSTOM_COMPLEXITY_DETAILS_SQL;
@@ -14298,7 +14298,7 @@ public class ApiMgtDAO {
                 if (rs.next()) {
                     if (rs.getInt("MAX_COMPLEXITY") == 0) {
                         // Update query analysis table entries and add query complexity table entries
-                        updateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+                        updateComplexityValues(apiIdentifier, graphqlComplexityInfo);
                         try (PreparedStatement ps2 = conn.prepareStatement(addCustomComplexityDetails)) {
                             for (CustomComplexityDetails customComplexity : graphqlComplexityInfo.getList()) {
                                 UUID uuid = UUID.randomUUID();
@@ -14315,7 +14315,7 @@ public class ApiMgtDAO {
                         }
                     } else {
                         // Entries already exists for this API_ID. Hence an update is performed.
-                        updateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+                        updateComplexityValues(apiIdentifier, graphqlComplexityInfo);
                         try (PreparedStatement ps2 = conn.prepareStatement(updateCustomComplexityDetails)) {
                             for (CustomComplexityDetails customComplexity : graphqlComplexityInfo.getList()) {
                                 ps2.setInt(1, customComplexity.getComplexityValue());
@@ -14343,7 +14343,7 @@ public class ApiMgtDAO {
      * @param graphqlComplexityInfo GraphqlComplexityDetails object
      * @throws APIManagementException
      */
-    public void updateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
+    public void updateComplexityValues(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
             throws APIManagementException {
         String query = SQLConstants.UPDATE_COMPLEXITY_DETAILS_SQL;
         try (Connection conn = APIMgtDBUtil.getConnection();
@@ -14557,29 +14557,30 @@ public class ApiMgtDAO {
     /**
      * Updates the depth enabled status or the complexity enabled status
      *
-     * @param apiIdentifier           APIIdentifier object to retrieve API ID
-     * @param graphqlLimitationStatus GraphqlLimitationStatus object
+     * @param apiIdentifier                APIIdentifier object to retrieve API ID
+     * @param graphqlDepthComplexityStatus GraphqlDepthComplexityStatus object
      * @throws APIManagementException
      */
-    public void updateLimitationStatus(APIIdentifier apiIdentifier, GraphqlLimitationStatus graphqlLimitationStatus)
-            throws APIManagementException {
+    public void updateLimitationStatus(APIIdentifier apiIdentifier, GraphqlDepthComplexityStatus
+            graphqlDepthComplexityStatus) throws APIManagementException {
         String updateDepthEnabled = SQLConstants.UPDATE_DEPTH_ENABLED_SQL;
         String updateComplexityEnabled = SQLConstants.UPDATE_COMPLEXITY_ENABLED_SQL;
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
             int apiId = getAPIID(apiIdentifier, conn);
-            if (graphqlLimitationStatus.getLimitationType().equals("depth")) {
-                try (PreparedStatement ps = conn.prepareStatement(updateDepthEnabled)) {
-                    ps.setBoolean(1, graphqlLimitationStatus.getEnabled());
-                    ps.setInt(2, apiId);
-                    ps.executeUpdate();
-                }
-            } else if (graphqlLimitationStatus.getLimitationType().equals("complexity")) {
-                try (PreparedStatement ps = conn.prepareStatement(updateComplexityEnabled)) {
-                    ps.setBoolean(1, graphqlLimitationStatus.getEnabled());
-                    ps.setInt(2, apiId);
-                    ps.executeUpdate();
-                }
+            try (PreparedStatement ps = conn.prepareStatement(updateDepthEnabled)) {
+                ps.setBoolean(1, graphqlDepthComplexityStatus.getDepthEnabled());
+                ps.setInt(2, apiId);
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                handleException("Error while updating depth limitation status of API : " + apiId, e);
+            }
+            try (PreparedStatement ps = conn.prepareStatement(updateComplexityEnabled)) {
+                ps.setBoolean(1, graphqlDepthComplexityStatus.getComplexityEnabled());
+                ps.setInt(2, apiId);
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                handleException("Error while updating complexity limitation status of API : " + apiId, e);
             }
             conn.commit();
         } catch (SQLException e) {
