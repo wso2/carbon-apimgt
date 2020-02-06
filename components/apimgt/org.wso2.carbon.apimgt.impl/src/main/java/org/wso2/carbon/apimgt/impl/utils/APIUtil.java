@@ -210,6 +210,7 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -217,6 +218,7 @@ import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.security.InvalidKeyException;
@@ -8072,6 +8074,24 @@ public final class APIUtil {
 
         }
         return result;
+    }
+
+    /**
+     * This method provides the BigInteger value for the given IP address. This supports both IPv4 and IPv6 address
+     * @param ipAddress ip address
+     * @return BigInteger value for the given ip address. returns 0 for unknown host
+     */
+    public static BigInteger ipToBigInteger(String ipAddress) {
+        InetAddress a;
+        try {
+            a = InetAddress.getByName(ipAddress);
+            byte[] bytes = a.getAddress();
+            return new BigInteger(1, bytes);
+        } catch (UnknownHostException e) {
+            //ignore the error and log it
+            log.error("Error while parsing host Ip " + ipAddress, e);
+        }
+        return BigInteger.ZERO;
     }
 
     public String getFullLifeCycleData(Registry registry) throws XMLStreamException, RegistryException {
