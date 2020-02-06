@@ -165,6 +165,10 @@
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.localentry.stub:${carbon.apimgt.version}
                                 </bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.io.fabric8:kubernetes-client:${org.wso2.orbit.io.fabric8.kubernetes.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.com.squareup.okio:okio:${org.wso2.orbit.com.squareup.okio.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.org.apache.commons:commons-compress:${org.wso2.orbit.org.apache.commons.compress.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.com.squareup.okhttp:okhttp:${org.wso2.orbit.com.squareup.okhttp.version}</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:compatible:${carbon.kernel.feature.version}
