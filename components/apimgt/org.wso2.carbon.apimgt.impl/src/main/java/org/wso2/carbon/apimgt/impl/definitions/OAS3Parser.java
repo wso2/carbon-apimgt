@@ -520,11 +520,10 @@ public class OAS3Parser extends APIDefinition {
             openAPI.addExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandEndpointObj);
         }
         openAPI.addExtension(APIConstants.X_WSO2_BASEPATH, api.getContext());
-        if (api.getTransports() != null) {
-            openAPI.addExtension(APIConstants.X_WSO2_TRANSPORTS, api.getTransports().split(","));
-        }
-        openAPI.addExtension(APIConstants.SWAGGER_X_WSO2_API_SECURITY,
-                OASParserUtil.getAPISecurity(api.getApiSecurity()));
+        openAPI.addExtension(APIConstants.X_WSO2_TRANSPORTS,
+                OASParserUtil.getTransportSecurity(api.getApiSecurity(), api.getTransports()));
+        openAPI.addExtension(APIConstants.SWAGGER_X_WSO2_APP_SECURITY,
+                OASParserUtil.getAppSecurity(api.getApiSecurity()));
         return Json.pretty(openAPI);
     }
 
