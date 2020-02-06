@@ -37,10 +37,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlDepthInfo;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
@@ -105,7 +102,31 @@ public class GraphQLSchemaDefinition {
     }
 
     /**
-     * build schema with scopes and roles
+     * Extract GraphQL Types and Fields from given schema
+     *
+     * @param schema GraphQL Schema
+     * @return list of all types and fields
+     */
+    public List<GraphqlSchemaType> extractGraphQLTypeList(String schema) {
+        List<GraphqlSchemaType> typeList = new ArrayList<>();
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
+        Map<java.lang.String, TypeDefinition> list = typeRegistry.types();
+        for (Map.Entry<String, TypeDefinition> entry : list.entrySet()) {
+            GraphqlSchemaType graphqlSchemaType = new GraphqlSchemaType();
+            List<String> fieldList = new ArrayList<>();
+            graphqlSchemaType.setType(entry.getValue().getName());
+            for (FieldDefinition fieldDef : ((ObjectTypeDefinition) entry.getValue()).getFieldDefinitions()) {
+                fieldList.add(fieldDef.getName());
+            }
+            graphqlSchemaType.setFieldList(fieldList);
+            typeList.add(graphqlSchemaType);
+        }
+        return typeList;
+    }
+
+    /**
+     * build schema with additional info
      *
      * @param api api object
      * @return schemaDefinition

@@ -74,6 +74,7 @@ import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlDepthComplexityStatus;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlDepthInfo;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -832,6 +833,46 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 String errorMessage = "Error while updating complexity details of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get all types and fields of the GraphQL Schema of a given API
+     *
+     * @param apiId          apiId
+     * @param messageContext message context
+     * @return Response with all the types and fields found within the schema definition
+     */
+    @Override
+    public Response apisApiIdGraphqlPoliciesComplexityTypesGet(String apiId, MessageContext messageContext) {
+        GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
+                List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);
+                GraphQLSchemaTypeListDTO graphQLSchemaTypeListDTO =
+                        GraphqlQueryAnalysisMappingUtil.fromGraphqlSchemaTypeListtoDTO(typeList);
+                return Response.ok().entity(graphQLSchemaTypeListDTO).build();
+            } else {
+                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving types and fields of API : " + apiId, e, log);
+            } else {
+                String msg = "Error while retrieving types and fields of the schema of API " + apiId;
+                RestApiUtil.handleInternalServerError(msg, e, log);
             }
         }
         return null;

@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityIn
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
@@ -71,6 +72,7 @@ public interface ApisApiService {
       public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdGraphqlPoliciesComplexityGet(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdGraphqlPoliciesComplexityPut(String apiId, GraphQLQueryComplexityInfoDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdGraphqlPoliciesComplexityTypesGet(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdGraphqlPoliciesConfigurationGet(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdGraphqlPoliciesConfigurationPut(String apiId, GraphQLDepthComplexityStatusDTO body, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdGraphqlPoliciesDepthGet(String apiId, MessageContext messageContext) throws APIManagementException;

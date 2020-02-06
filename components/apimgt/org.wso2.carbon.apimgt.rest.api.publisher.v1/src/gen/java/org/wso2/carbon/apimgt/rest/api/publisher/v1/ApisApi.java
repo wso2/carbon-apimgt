@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityIn
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
@@ -408,6 +409,23 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Bad Request. Complexity detail addition failed. ", response = Void.class) })
     public Response apisApiIdGraphqlPoliciesComplexityPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Role-depth mapping that needs to be added " ,required=true) GraphQLQueryComplexityInfoDTO body) throws APIManagementException{
         return delegate.apisApiIdGraphqlPoliciesComplexityPut(apiId, body, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/graphql-policies/complexity/types")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve types and fields of a GraphQL Schema", notes = "This operation can be used to retrieve all types and fields of the GraphQL Schema by providing the API id. ", response = GraphQLSchemaTypeListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "GraphQL Policies",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Types and fields returned successfully. ", response = GraphQLSchemaTypeListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Retrieving types and fields failed. ", response = Void.class) })
+    public Response apisApiIdGraphqlPoliciesComplexityTypesGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.apisApiIdGraphqlPoliciesComplexityTypesGet(apiId, securityContext);
     }
 
     @GET
