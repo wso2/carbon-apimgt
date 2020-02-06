@@ -3624,8 +3624,8 @@ public final class APIUtil {
                     publisherAccessRoles = new StringBuilder(APIConstants.NULL_USER_ROLE_LIST);
                 }
 
-                if (visibility.equalsIgnoreCase(APIConstants.API_GLOBAL_VISIBILITY)
-                        || visibility.equalsIgnoreCase(APIConstants.API_PRIVATE_VISIBILITY)) {
+                if (APIConstants.API_GLOBAL_VISIBILITY.equalsIgnoreCase(visibility)
+                        || APIConstants.API_PRIVATE_VISIBILITY.equalsIgnoreCase(visibility)) {
                     registryResource.setProperty(APIConstants.STORE_VIEW_ROLES, APIConstants.NULL_USER_ROLE_LIST);
                     publisherAccessRoles = new StringBuilder(APIConstants.NULL_USER_ROLE_LIST); // set publisher
                     // access roles null since store visibility is global. We do not need to add any roles to

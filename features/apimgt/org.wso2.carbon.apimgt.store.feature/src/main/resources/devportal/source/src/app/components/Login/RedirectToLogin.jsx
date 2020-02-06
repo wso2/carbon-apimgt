@@ -24,7 +24,7 @@ const page = Settings.app.context + '/services/configs';
 
 /**
  *
- * Just doing the redirection, If you want to trigger redirection to login page , Import this util method and use.
+ * Just doing the redirection, If you want to trigger redirection to login page , import this util method and use.
  * Note: Don't use this method inside a render method. It will cause to cancel the initial request in Chrome
  * and re-trigger same request
  * Sample usage:
