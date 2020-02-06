@@ -7350,6 +7350,11 @@ definitions:
         description: |
           The number of errors in the API Definition
         example: 20
+      externalApiId:
+        type: string
+        description: |
+          The External API ID
+        example: "fd21f9f7-3674-49cf-8a83-dca401f635de"
 
   #-----------------------------------------------------
   # The API Product List resource

@@ -143,6 +143,7 @@ class APISecurityAudit extends Component {
             report: null,
             overallScore: 0,
             numErrors: 0,
+            externalApiId: null,
             loading: false,
             apiDefinition: null,
         };
@@ -179,6 +180,7 @@ class APISecurityAudit extends Component {
                     report: response.body.report,
                     overallScore: response.body.grade,
                     numErrors: response.body.numErrors,
+                    externalApiId: response.body.externalApiId,
                     loading: false,
                 });
             })
@@ -393,10 +395,11 @@ class APISecurityAudit extends Component {
     render() {
         const { classes } = this.props;
         const {
-            report, overallScore, numErrors, loading, apiDefinition,
+            report, overallScore, numErrors, externalApiId, loading, apiDefinition,
         } = this.state;
 
         const reportObject = JSON.parse(report);
+        const linkToFullReport = 'https://platform.42crunch.com/apis/' + externalApiId + '/security-audit-report';
         if (loading) {
             return (
                 <div>
@@ -663,6 +666,23 @@ class APISecurityAudit extends Component {
                                         <FormattedMessage
                                             id='Apis.Details.APIDefinition.AuditApi.AuditScoreSummary'
                                             defaultMessage='Audit Score and Summary'
+                                        />
+                                    </Typography>
+                                    <Typography variant='body1'>
+                                        <FormattedMessage
+                                            id='Apis.Details.APIDefinition.AuditApi.LinkToFullReport'
+                                            defaultMessage='{linkToFullReportText} {link}'
+                                            values={{
+                                                linkToFullReportText: 'Check out the ',
+                                                link: (
+                                                    <a
+                                                        href={linkToFullReport}
+                                                        target='_blank'
+                                                        rel='noopener noreferrer'
+                                                    >
+                                                        Full Report
+                                                    </a>),
+                                            }}
                                         />
                                     </Typography>
                                     <div className={classes.auditSummaryDiv}>

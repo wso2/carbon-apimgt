@@ -883,6 +883,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         auditReportDTO.setReport(decodedReport);
                         auditReportDTO.setGrade(grade);
                         auditReportDTO.setNumErrors(numErrors);
+                        auditReportDTO.setExternalApiId(auditUuid);
                         return Response.ok().entity(auditReportDTO).build();
                     }
                 }
