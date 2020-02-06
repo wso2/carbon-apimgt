@@ -113,14 +113,16 @@ public class GraphQLSchemaDefinition {
         TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
         Map<java.lang.String, TypeDefinition> list = typeRegistry.types();
         for (Map.Entry<String, TypeDefinition> entry : list.entrySet()) {
-            GraphqlSchemaType graphqlSchemaType = new GraphqlSchemaType();
-            List<String> fieldList = new ArrayList<>();
-            graphqlSchemaType.setType(entry.getValue().getName());
-            for (FieldDefinition fieldDef : ((ObjectTypeDefinition) entry.getValue()).getFieldDefinitions()) {
-                fieldList.add(fieldDef.getName());
+            if (entry.getValue() instanceof ObjectTypeDefinition) {
+                GraphqlSchemaType graphqlSchemaType = new GraphqlSchemaType();
+                List<String> fieldList = new ArrayList<>();
+                graphqlSchemaType.setType(entry.getValue().getName());
+                for (FieldDefinition fieldDef : ((ObjectTypeDefinition) entry.getValue()).getFieldDefinitions()) {
+                    fieldList.add(fieldDef.getName());
+                }
+                graphqlSchemaType.setFieldList(fieldList);
+                typeList.add(graphqlSchemaType);
             }
-            graphqlSchemaType.setFieldList(fieldList);
-            typeList.add(graphqlSchemaType);
         }
         return typeList;
     }
