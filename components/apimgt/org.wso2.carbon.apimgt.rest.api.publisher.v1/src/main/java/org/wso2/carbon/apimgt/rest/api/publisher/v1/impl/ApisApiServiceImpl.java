@@ -2820,6 +2820,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             Attachment fileDetail, String ifMatch, MessageContext messageContext) {
         try {
             String updatedSwagger;
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            boolean isSoapToRestConvertedAPI = SOAPOperationBindingUtils.isSOAPToRESTApi(apiIdentifier.getApiName(),
+                    apiIdentifier.getVersion(), apiIdentifier.getProviderName());
             //Handle URL and file based definition imports
             if(url != null || fileInputStream != null) {
                 // Validate and retrieve the OpenAPI definition
@@ -2833,6 +2837,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 updatedSwagger = updateSwagger(apiId, validationResponse);
             } else {
                 updatedSwagger = updateSwagger(apiId, apiDefinition);
+            }
+            if (isSoapToRestConvertedAPI) {
+                SequenceGenerator.generateSequencesFromSwagger(updatedSwagger, apiIdentifier);
             }
             return Response.ok().entity(updatedSwagger).build();
         } catch (APIManagementException e) {
