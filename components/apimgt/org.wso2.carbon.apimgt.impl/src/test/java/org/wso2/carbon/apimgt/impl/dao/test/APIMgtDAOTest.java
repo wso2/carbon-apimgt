@@ -1219,6 +1219,7 @@ public class APIMgtDAOTest {
         api.setStatus(APIConstants.PUBLISHED);
         api.setAsDefaultVersion(true);
         apiMgtDAO.addAPI(api, -1234);
+        api.setUriTemplates(getUriTemplateSet());
         apiMgtDAO.updateAPI(api, -1234);
         Set<APIStore> apiStoreSet = new HashSet<APIStore>();
         APIStore apiStore = new APIStore();
