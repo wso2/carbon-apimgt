@@ -530,6 +530,7 @@ public class OAS2Parser extends APIDefinition {
         if (sandEndpointObj != null) {
             swagger.setVendorExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandEndpointObj);
         }
+        swagger.setVendorExtension(APIConstants.X_WSO2_BASEPATH, api.getContext());
         swagger.setVendorExtension(APIConstants.X_WSO2_TRANSPORTS,
                 OASParserUtil.getTransportSecurity(api.getApiSecurity(), api.getTransports()));
         swagger.setVendorExtension(APIConstants.SWAGGER_X_WSO2_APP_SECURITY,
